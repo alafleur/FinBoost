@@ -1,0 +1,138 @@
+Absolutely — here's a refreshed Replit landing page prompt that captures your updated value prop, includes a compelling pre-launch hook, and visually suggests how the rewards pool grows with the community:
+
+
+---
+
+Replit Prompt: Pre-Launch Waitlist Landing Page
+
+Page Goal:
+Build a sleek, trustworthy, and modern pre-launch waitlist landing page for a learn-to-earn membership platform designed to help people in financial hardship improve their financial literacy and win monthly cash rewards. The platform relies on collective participation — the more people join, the bigger the monthly rewards pool. This page should capture emails and get users excited to sign up.
+
+
+---
+
+Design Guidelines:
+
+Clean, modern UI with soft tones and strong typography (trustworthy, mission-driven aesthetic)
+
+Use friendly illustrations or infographics rather than photos
+
+Responsive and mobile-friendly
+
+Strong, central call to action: "Join the Waitlist"
+
+Sectioned layout for clear value prop communication
+
+
+
+---
+
+Page Structure & Content:
+
+Hero Section
+
+Headline:
+Win Cash Rewards for Getting Smarter with Money
+
+Subheadline:
+Join a collective of financially motivated members where the more you learn, the better your odds of winning monthly cash bonuses — all funded by the power of the community.
+
+CTA Button:
+[ Join the Waitlist ]
+
+Visual:
+
+Illustrative rewards pool graph: shows an animated or stylized bar/pool that increases in size as more members “join” — suggestive, not literal.
+
+Text overlay:
+“More Members = Bigger Monthly Rewards”
+
+
+
+---
+
+How It Works (4 Steps)
+
+Use icons or simple cards:
+
+1. Become a Member
+Get access to the platform and be part of the rewards pool.
+
+
+2. Learn and Earn Points
+Complete short financial lessons and quizzes to earn points — the more you engage, the more you earn.
+
+
+3. Climb the Leaderboard
+Points boost your chances to win monthly cash rewards. Top performers get the biggest bonuses.
+
+
+4. Show Your Progress
+Use your winnings to repay debt or invest — and upload proof to earn even more points.
+
+
+
+
+---
+
+Why It Works
+
+Headline:
+It’s a Flywheel That Lifts Everyone
+
+Subtext:
+
+More members means a larger monthly rewards pool.
+
+Smarter financial actions increase your odds.
+
+Cash rewards reinforce better habits.
+
+Everyone has a real shot at progress.
+
+
+
+---
+
+Illustration or Infographic Block
+
+“How Rewards Scale With Members”
+Display an infographic showing hypothetical reward pool sizes at different membership levels (e.g., 1,000 members = $5,000 pool; 10,000 members = $50,000 pool, etc.)
+
+
+
+---
+
+FAQ Section
+
+Example questions:
+
+“How do rewards work?”
+
+“What happens to my subscription fee?”
+
+“Is this a lottery?” (Answer: no — it’s merit-based)
+
+“What counts as proof of progress?”
+
+“When does the platform launch?”
+
+
+
+---
+
+Final CTA
+
+Headline:
+Your Financial Progress Starts Here
+Subheadline:
+Join the waitlist and be part of a growing movement to take back financial control — together.
+
+CTA Button:
+[ Get Early Access ]
+
+
+---
+
+Let me know if you’d like me to turn this into actual code or a visual wireframe mockup next.
+
