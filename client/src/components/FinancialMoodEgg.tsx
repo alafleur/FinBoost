@@ -35,7 +35,7 @@ export default function FinancialMoodEgg() {
     },
     {
       emoji: <ThumbsUp className="h-6 w-6" />,
-      text: "You're doing great with your finances!",
+      text: "Take the next step in improving your finances",
       color: "bg-amber-500"
     }
   ];
