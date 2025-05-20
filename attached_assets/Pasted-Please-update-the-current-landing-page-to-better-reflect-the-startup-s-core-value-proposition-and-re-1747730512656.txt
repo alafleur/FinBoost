@@ -1,0 +1,38 @@
+Please update the current landing page to better reflect the startup's core value proposition and reward structure. These changes should make the benefits and mechanics clearer, build trust, and emphasize community-powered financial improvement.
+________________________________________
+🏠 HERO SECTION – Update Copy
+Headline:
+Join the Financial Tribe That Pays You to Get Smarter About Money
+Subheadline:
+The more members who join, the bigger the monthly reward pool. Learn, engage, and earn cash payouts — together.
+Call-to-action button (unchanged):
+[Join the Waitlist]
+________________________________________
+💡 ADD TRUST SIGNALS (Below Hero or in Footer)
+Add a short line that reassures users about transparency and safety:
+•	“More than half of all membership fees go directly back to the community as monthly rewards.”
+•	“We never sell your data. Payouts are transparent and secure.”
+________________________________________
+🛠 HOW IT WORKS – Replace With Updated Content
+Update this section to reflect the new tiered + randomized reward system:
+________________________________________
+🧭 How It Works
+1.	Earn Points
+Complete short tutorials, quizzes, refer friends, or take action like uploading proof of debt repayment. The more you participate, the more points you earn.
+2.	Enter Monthly Tiers
+Every month, members are ranked into 3 tiers based on their point totals. Each tier earns a share of the reward pool — top tier gets the most.
+3.	Win Rewards — Randomly & Fairly
+Half of each tier is selected at random to receive cash rewards. Your points help you qualify — and the more points, the better your tier and payout odds.
+💰 Example: If the reward pool is $100,000, the top third shares $50,000, the middle third shares $35,000, and the bottom third shares $15,000.
+________________________________________
+📈 ADD A SECTION: “Power of the Collective”
+Below "How It Works", insert a new visual section or callout titled:
+💪 The Power of the Collective
+The more members who join, the larger the monthly rewards pool.
+Real people. Real money. Real financial progress.
+Include a simple illustrative graphic or animated chart showing:
+•	Example:
+o	1,000 members → $10,000 rewards pool
+o	5,000 members → $50,000
+o	10,000 members → $100,000
+(These are purely illustrative.)

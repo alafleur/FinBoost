@@ -10,6 +10,7 @@ import SuccessModal from "@/components/SuccessModal";
 import TrustAndSecurity from "@/components/TrustAndSecurity";
 import RewardsExplained from "@/components/RewardsExplained";
 import WhatYouLearn from "@/components/WhatYouLearn";
+import PowerOfCollective from "@/components/PowerOfCollective";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 
@@ -28,6 +29,7 @@ export default function Home() {
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         <RewardsExplained />
         <HowItWorks />
+        <PowerOfCollective />
         <WhatYouLearn />
         <WhyItWorks />
         <TrustAndSecurity />

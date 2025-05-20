@@ -49,10 +49,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
-              Turn Financial Stress Into Financial Progress — <span className="gradient-text">Together</span>
+              Join the Financial Tribe That <span className="gradient-text">Pays You</span> to Get Smarter About Money
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Join a collective of members working to improve their financial lives. Learn, take action, and earn Tribe Points. Each month, members in all tiers are rewarded from a growing pool of cash bonuses — no matter your starting point.
+              The more members who join, the bigger the monthly reward pool. Learn, engage, and earn cash payouts — together.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
@@ -78,7 +78,8 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               </div>
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
-            <p className="text-gray-600 text-sm mt-2">Membership is $19.99/month. Over half of every dollar goes directly back to members as monthly rewards.</p>
+            <p className="text-gray-600 text-sm mt-2">Membership is $19.99/month. More than half of all membership fees go directly back to the community as monthly rewards.</p>
+            <p className="text-gray-600 text-sm mt-1">We never sell your data. Payouts are transparent and secure.</p>
           </div>
           <div className="relative">
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
