@@ -64,19 +64,43 @@ export default function HowRewardsWork() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-primary-50 rounded-lg p-5 text-center">
-            <p className="font-semibold text-lg mb-1">Learn & Earn</p>
-            <p className="text-sm text-gray-600">Each lesson completed increases your points</p>
+          <div className="rounded-xl overflow-hidden shadow-md transform hover:scale-105 transition-transform">
+            <div className="h-24 bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center">
+              <BarChart3 className="h-10 w-10 text-white" />
+            </div>
+            <div className="p-5 bg-white border-t-0 border-x border-b border-gray-200">
+              <p className="font-bold text-lg mb-2 text-primary-700">Learn & Earn</p>
+              <p className="text-gray-600">Each lesson completed increases your points &amp; tier potential</p>
+              <div className="mt-3 flex">
+                <span className="inline-block bg-primary-100 rounded-full px-2 py-1 text-xs font-semibold text-primary-700">+points</span>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-secondary-50 rounded-lg p-5 text-center">
-            <p className="font-semibold text-lg mb-1">Monthly Rewards</p>
-            <p className="text-sm text-gray-600">Cash payouts happen every month</p>
+          <div className="rounded-xl overflow-hidden shadow-md transform hover:scale-105 transition-transform">
+            <div className="h-24 bg-gradient-to-r from-secondary-500 to-secondary-600 flex items-center justify-center">
+              <DollarSign className="h-10 w-10 text-white" />
+            </div>
+            <div className="p-5 bg-white border-t-0 border-x border-b border-gray-200">
+              <p className="font-bold text-lg mb-2 text-secondary-700">Monthly Rewards</p>
+              <p className="text-gray-600">Cash payouts distributed to members every month</p>
+              <div className="mt-3 flex">
+                <span className="inline-block bg-secondary-100 rounded-full px-2 py-1 text-xs font-semibold text-secondary-700">recurring</span>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-accent-50 rounded-lg p-5 text-center">
-            <p className="font-semibold text-lg mb-1">Growing Pool</p>
-            <p className="text-sm text-gray-600">More members = bigger rewards for all</p>
+          <div className="rounded-xl overflow-hidden shadow-md transform hover:scale-105 transition-transform">
+            <div className="h-24 bg-gradient-to-r from-accent-500 to-accent-600 flex items-center justify-center">
+              <Users className="h-10 w-10 text-white" />
+            </div>
+            <div className="p-5 bg-white border-t-0 border-x border-b border-gray-200">
+              <p className="font-bold text-lg mb-2 text-accent-700">Growing Pool</p>
+              <p className="text-gray-600">More members = bigger rewards pool for everyone</p>
+              <div className="mt-3 flex">
+                <span className="inline-block bg-accent-100 rounded-full px-2 py-1 text-xs font-semibold text-accent-700">community</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
