@@ -55,8 +55,8 @@ export default function FinancialMoodEgg() {
   useEffect(() => {
     // Show the Easter egg at random intervals
     const showEasterEgg = () => {
-      // Random time between 30 seconds and 2 minutes
-      const randomTime = Math.floor(Math.random() * (120000 - 30000) + 30000);
+      // Random time between 15 seconds and 30 seconds
+      const randomTime = Math.floor(Math.random() * (30000 - 15000) + 15000);
       
       const timer = setTimeout(() => {
         showRandomMood();
@@ -68,10 +68,12 @@ export default function FinancialMoodEgg() {
       return () => clearTimeout(timer);
     };
     
-    // Initial delay before first appearance (10-20 seconds)
+    // Show immediately after 3 seconds for first appearance
     const initialTimer = setTimeout(() => {
+      showRandomMood();
+      // Then start the random interval appearances
       showEasterEgg();
-    }, Math.floor(Math.random() * (20000 - 10000) + 10000));
+    }, 3000);
     
     return () => clearTimeout(initialTimer);
   }, []);
