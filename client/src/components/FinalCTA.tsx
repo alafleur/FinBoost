@@ -54,8 +54,8 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
         </p>
         
         <div className="max-w-lg mx-auto mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div className="sm:col-span-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-grow">
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -64,12 +64,12 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
                 onChange={(e) => form.setValue("email", e.target.value)}
               />
             </div>
-            <div className="sm:col-span-1">
+            <div className="sm:w-[180px]">
               <button 
                 type="button" 
                 disabled={isPending}
                 onClick={form.handleSubmit(onSubmit)}
-                className="w-full h-[50px] bg-green-500 text-white font-medium px-4 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 whitespace-nowrap text-sm sm:text-base border border-green-600"
+                className="w-full h-[50px] bg-green-500 text-white font-medium px-4 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 text-sm sm:text-base border border-green-600"
               >
                 {isPending ? "Processing..." : "Join the Movement"}
               </button>
