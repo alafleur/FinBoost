@@ -12,25 +12,25 @@ export default function HowItWorks() {
     {
       id: 1,
       title: "1. Become a Member",
-      description: "Get access to the platform and be part of the rewards pool.",
+      description: "$19.99/month (with the majority of fees going back to the community)",
       icon: <User className="h-6 w-6" />,
     },
     {
       id: 2,
-      title: "2. Learn and Earn Points",
-      description: "Complete short financial lessons and quizzes to earn points — the more you engage, the more you earn.",
+      title: "2. Earn Points",
+      description: "Learn, take quizzes, refer others, and show proof of good financial habits (like repaying debt)",
       icon: <CheckCircle className="h-6 w-6" />,
     },
     {
       id: 3,
-      title: "3. Climb the Leaderboard",
-      description: "Points boost your chances to win monthly cash rewards. Top performers get the biggest bonuses.",
+      title: "3. Qualify for Monthly Rewards",
+      description: "The top 50% of members based on points receive cash rewards, distributed by tier",
       icon: <TrendingUp className="h-6 w-6" />,
     },
     {
       id: 4,
-      title: "4. Show Your Progress",
-      description: "Use your winnings to repay debt or invest — and upload proof to earn even more points.",
+      title: "4. Fuel the Collective",
+      description: "Every action you take helps the entire rewards pool grow larger",
       icon: <FileText className="h-6 w-6" />,
     },
   ];

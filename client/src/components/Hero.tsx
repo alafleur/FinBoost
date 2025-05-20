@@ -49,10 +49,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
-              Win Cash Rewards for <span className="gradient-text">Getting Smarter</span> with Money
+              Earn Cash Rewards for <span className="gradient-text">Getting Smarter</span> with Money
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Join a collective of financially motivated members where the more you learn, the better your odds of winning monthly cash bonuses — all funded by the power of the community.
+              Join a powerful collective transforming financial stress into financial progress — and get rewarded for every step forward.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
@@ -78,6 +78,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               </div>
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
+            <p className="text-gray-600 text-sm mt-2">More than half of all membership fees go back to members as monthly cash rewards.</p>
           </div>
           <div className="relative">
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
@@ -86,7 +87,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>1,000 Members</span>
-                    <span className="font-medium">$5,000 Pool</span>
+                    <span className="font-medium">$10,000 Pool</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
                     <div className="reward-pool" style={{ width: "20%" }}></div>
@@ -95,7 +96,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>5,000 Members</span>
-                    <span className="font-medium">$25,000 Pool</span>
+                    <span className="font-medium">$50,000 Pool</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
                     <div className="reward-pool" style={{ width: "50%" }}></div>
@@ -104,7 +105,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>10,000 Members</span>
-                    <span className="font-medium">$50,000 Pool</span>
+                    <span className="font-medium">$100,000 Pool</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
                     <div className="reward-pool" style={{ width: "75%" }}></div>
@@ -113,7 +114,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>25,000+ Members</span>
-                    <span className="font-medium">$125,000+ Pool</span>
+                    <span className="font-medium">$250,000+ Pool</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
                     <div className="reward-pool" style={{ width: "100%" }}></div>
@@ -122,6 +123,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               </div>
               <div className="mt-8 text-center text-sm text-gray-500">
                 <p>The more members join, the larger the monthly rewards pool becomes</p>
+                <p className="mt-2 text-xs font-medium text-gray-600">Based on $19.99 monthly membership fee</p>
               </div>
             </div>
           </div>

@@ -1,0 +1,54 @@
+
+Prompt for Replit (Update Existing Landing Page):
+
+Update the current waitlist landing page with the following refinements to improve clarity, trust, and appeal for financially burdened users:
+
+Core Messaging Updates
+Replace the term “subscription” with “membership” throughout the page.
+
+Emphasize the collective power of the community:
+"The more members who join, the larger the rewards for everyone."
+
+Update the core value prop to reflect a virtuous cycle:
+"Learn smart money habits → Earn points → Qualify for monthly cash rewards → Improve your finances → Repeat."
+
+Hero Section
+Update subheadline:
+“Join a powerful collective transforming financial stress into financial progress — and get rewarded for every step forward.”
+
+Add a short line under the CTA:
+“More than half of all membership fees go back to members as monthly cash rewards.”
+
+Include an illustrative graphic that shows how the monthly rewards pool grows as more people join (e.g., $10k at 1k members, $50k at 5k members, etc.).
+
+How It Works Section (Updated)
+Become a Member – $19.99/month (with the majority of fees going back to the community)
+
+Earn Points – Learn, take quizzes, refer others, and show proof of good financial habits (like repaying debt)
+
+Qualify for Monthly Rewards – The top 50% of members based on points receive cash rewards, distributed by tier
+
+Fuel the Collective – Every action you take helps the entire rewards pool grow larger
+
+Terminology Fixes
+Replace words like “win” or “odds” with:
+“earn rewards,” “qualify for payouts,” or “become eligible.”
+Clarify: This is a merit-based system, not chance-based.
+
+FAQ Enhancements
+Add or update answers to cover:
+
+How rewards are distributed (merit-based to top 50% by points)
+
+Monthly membership cost: $19.99
+
+Time commitment: 5–20 minutes/week
+
+Types of actions that earn points (learning, referrals, uploading proof of debt repayment or savings)
+
+Data privacy: “Your financial data is secure, never sold, and your rewards are transparently calculated.”
+
+Call to Action Update
+Add text below the final CTA:
+“Get in early to help grow the rewards pool and your financial future.”
+
