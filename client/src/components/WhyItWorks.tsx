@@ -1,4 +1,5 @@
-import { Plus, TrendingUp, DollarSign, Users } from "lucide-react";
+import { Plus, TrendingUp, DollarSign, RefreshCw } from "lucide-react";
+import FlywheelGraphic from "./FlywheelGraphic";
 
 interface Feature {
   id: number;
@@ -35,14 +36,6 @@ export default function WhyItWorks() {
       bgColor: "bg-amber-100",
       iconColor: "text-accent-500",
     },
-    {
-      id: 4,
-      title: "Virtuous cycle of financial growth",
-      description: "Learn smart money habits → Earn points → Qualify for rewards → Improve your finances → Repeat.",
-      icon: <Users className="h-5 w-5" />,
-      bgColor: "bg-purple-100",
-      iconColor: "text-purple-500",
-    },
   ];
 
   return (
@@ -65,34 +58,42 @@ export default function WhyItWorks() {
                   </div>
                 </div>
               ))}
+
+              {/* Virtuous cycle feature with special styling */}
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <span className="text-purple-500"><RefreshCw className="h-5 w-5" /></span>
+                </div>
+                <div className="ml-4">
+                  <h3 className="font-heading font-medium text-lg">Virtuous cycle of financial growth</h3>
+                  <p className="text-gray-600 mt-1">Our flywheel model creates a continuous cycle of improvement.</p>
+                </div>
+              </div>
             </div>
           </div>
           
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h3 className="font-heading font-semibold text-xl mb-6 text-center">How Rewards Scale With Members</h3>
-            <div className="h-64 md:h-80 relative overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary-100 text-primary-600 mb-4 animate-pulse">
-                    <DollarSign className="h-16 w-16" />
-                  </div>
-                  <div className="text-2xl font-bold gradient-text">$125,000+</div>
-                  <div className="text-gray-500">Potential Monthly Reward Pool</div>
-                </div>
-              </div>
+            <h3 className="font-heading font-semibold text-xl mb-6 text-center">The Financial Growth Flywheel</h3>
+            
+            {/* Flywheel Graphic */}
+            <FlywheelGraphic />
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">Learn → Earn → Reward → Improve → Repeat</p>
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            
+            <div className="grid grid-cols-3 gap-4 mt-6">
               <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">$5</div>
+                <div className="text-xl font-bold text-primary-600">$19.99</div>
                 <div className="text-sm text-gray-600">Monthly Fee</div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">25,000+</div>
-                <div className="text-sm text-gray-600">Members</div>
+                <div className="text-xl font-bold text-primary-600">50%</div>
+                <div className="text-sm text-gray-600">To Rewards Pool</div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">100%</div>
-                <div className="text-sm text-gray-600">Collective Reward</div>
+                <div className="text-xl font-bold text-primary-600">Merit</div>
+                <div className="text-sm text-gray-600">Based System</div>
               </div>
             </div>
           </div>
