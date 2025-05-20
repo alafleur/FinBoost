@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 import QuizDialog from "@/components/QuizDialog";
+import { BarChart2 } from "lucide-react";
 
 interface HeroProps {
   onSubscribeSuccess: () => void;

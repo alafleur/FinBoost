@@ -159,35 +159,11 @@ export default function QuizDialog() {
     }
   };
   
-  // Character component
+  // Character component - replaced with a more professional design
   const Character = ({ mood = "happy" }: { mood?: "happy" | "thinking" | "excited" }) => {
     return (
-      <div className="w-20 h-20 bg-yellow-400 rounded-full border-4 border-yellow-500 flex items-center justify-center relative">
-        {/* Eyes */}
-        {mood === "happy" && (
-          <>
-            <div className="absolute top-6 left-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            <div className="absolute top-6 right-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            {/* Happy mouth */}
-            <div className="absolute top-12 w-8 h-4 border-b-2 border-gray-800 rounded-full"></div>
-          </>
-        )}
-        {mood === "thinking" && (
-          <>
-            <div className="absolute top-6 left-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            <div className="absolute top-6 right-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            {/* Thinking mouth */}
-            <div className="absolute top-12 w-4 h-1 bg-gray-800 rounded-full"></div>
-          </>
-        )}
-        {mood === "excited" && (
-          <>
-            <div className="absolute top-6 left-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            <div className="absolute top-6 right-6 w-2 h-3 bg-gray-800 rounded-full"></div>
-            {/* Excited mouth */}
-            <div className="absolute top-11 w-6 h-6 border-2 border-gray-800 rounded-full"></div>
-          </>
-        )}
+      <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white">
+        <DollarSign className="h-6 w-6" />
       </div>
     );
   };
@@ -205,8 +181,8 @@ export default function QuizDialog() {
           variant="ghost"
           className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
         >
-          <span className="mr-1 text-xl">🪙</span>
-          Take the Financial Personality Quiz
+          <BarChart2 className="h-4 w-4 mr-1" />
+          Take the Financial Personality Assessment
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-6 bg-white">
@@ -221,28 +197,25 @@ export default function QuizDialog() {
               className="text-center"
             >
               <DialogHeader>
-                <DialogTitle className="text-2xl font-heading">Meet Coiny, Your Financial Guide</DialogTitle>
+                <DialogTitle className="text-2xl font-heading">Financial Personality Assessment</DialogTitle>
               </DialogHeader>
               
               <div className="my-8 flex justify-center">
-                <div className="relative">
-                  <Character mood="happy" />
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
-                    $
-                  </div>
+                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white">
+                  <BarChart2 className="h-8 w-8" />
                 </div>
               </div>
               
               <p className="text-gray-600 mb-8">
-                Take this quick 4-question quiz to discover your financial personality
-                and get a personalized plan for earning rewards!
+                Take this quick 4-question assessment to discover your financial personality
+                and get a personalized plan for maximizing your rewards.
               </p>
               
               <Button 
                 onClick={startQuiz}
                 className="bg-primary-500 hover:bg-primary-600"
               >
-                Start Quiz <ChevronRight className="ml-2 h-4 w-4" />
+                Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>
           )}
@@ -258,11 +231,8 @@ export default function QuizDialog() {
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <DialogTitle className="text-xl font-heading">Question {step + 1} of {questions.length}</DialogTitle>
-                  <div className="relative">
-                    <Character mood={characterMood} />
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                      $
-                    </div>
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white">
+                    <BarChart2 className="h-5 w-5" />
                   </div>
                 </div>
               </DialogHeader>
@@ -280,7 +250,7 @@ export default function QuizDialog() {
                     onClick={() => handleAnswer(questions[step].id, option.id)}
                     className="p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 cursor-pointer transition-all duration-200 flex items-center"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
+                    <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center mr-4 text-primary-600">
                       {option.icon}
                     </div>
                     <span>{option.text}</span>
@@ -303,19 +273,13 @@ export default function QuizDialog() {
               </DialogHeader>
               
               <div className="my-8 flex justify-center">
-                <div className="relative">
-                  <Character mood="excited" />
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
-                    $
-                  </div>
+                <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto`}>
+                  {personaDetails[persona].icon}
                 </div>
               </div>
               
               <div className="mb-6">
-                <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto mb-4`}>
-                  {personaDetails[persona].icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-2">You're {personaDetails[persona].title}!</h3>
+                <h3 className="text-2xl font-bold mb-2">The {personaDetails[persona].title}</h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   {personaDetails[persona].description}
                 </p>
@@ -327,11 +291,19 @@ export default function QuizDialog() {
                   {persona === "careful" && (
                     <>
                       <li className="flex items-start">
-                        <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Focus on completing lesson series for bonus points</span>
                       </li>
                     </>
@@ -340,11 +312,19 @@ export default function QuizDialog() {
                   {persona === "balanced" && (
                     <>
                       <li className="flex items-start">
-                        <span className="bg-purple-100 p-1 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Mix quick daily tips with weekly deeper lessons</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="bg-purple-100 p-1 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Refer 1-2 friends each month for tier boosting points</span>
                       </li>
                     </>
@@ -353,11 +333,19 @@ export default function QuizDialog() {
                   {persona === "growth" && (
                     <>
                       <li className="flex items-start">
-                        <span className="bg-green-100 p-1 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Take advantage of point multipliers by completing streaks</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="bg-green-100 p-1 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5">✓</span>
+                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                         <span>Build your network through referrals for maximum points</span>
                       </li>
                     </>
@@ -370,7 +358,7 @@ export default function QuizDialog() {
                   variant="outline" 
                   onClick={reset}
                 >
-                  Retake Quiz
+                  Retake Assessment
                 </Button>
                 <Button 
                   className="bg-primary-500 hover:bg-primary-600"
