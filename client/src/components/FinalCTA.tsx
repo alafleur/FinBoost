@@ -50,36 +50,29 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
           Join the waitlist and be part of a growing movement to take back financial control — together.
         </p>
         
-        <Form {...form}>
-          <form 
-            onSubmit={form.handleSubmit(onSubmit)} 
-            className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-8"
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="px-4 py-3 rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:ring-2 focus:ring-white/50 focus:outline-none"
-                      {...field}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button 
-              type="submit" 
-              disabled={isPending}
-              className="bg-white text-primary-600 font-medium px-8 py-3 rounded-lg shadow-lg hover:bg-gray-100 transition duration-300 whitespace-nowrap"
-            >
-              {isPending ? "Processing..." : "Get Early Access"}
-            </Button>
-          </form>
-        </Form>
+        <div className="max-w-lg mx-auto mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-7 gap-3">
+            <div className="sm:col-span-5">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full h-[50px] px-4 py-3 rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:ring-2 focus:ring-white/50 focus:outline-none"
+                value={form.watch("email")}
+                onChange={(e) => form.setValue("email", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <button 
+                type="button" 
+                disabled={isPending}
+                onClick={form.handleSubmit(onSubmit)}
+                className="w-full h-[50px] bg-white text-primary-600 font-medium px-4 rounded-lg shadow-lg hover:bg-gray-100 transition duration-300 whitespace-nowrap text-sm sm:text-base"
+              >
+                {isPending ? "Processing..." : "Get Early Access"}
+              </button>
+            </div>
+          </div>
+        </div>
         
         <p className="text-white/60 text-sm">We'll never share your email. Unsubscribe anytime.</p>
       </div>
