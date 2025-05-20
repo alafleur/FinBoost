@@ -49,10 +49,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
-              Join the Financial Tribe That <span className="gradient-text">Pays You</span> to Get Smarter About Money
+              Turn Financial Stress Into Financial Progress — <span className="gradient-text">Together</span>
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              The more members who join, the bigger the monthly reward pool. Learn, engage, and earn cash payouts — together.
+              Join a collective of members working to improve their financial lives. Learn, take action, and earn points. Each month, half of members are rewarded from a growing pool of cash bonuses — no matter your starting point.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
