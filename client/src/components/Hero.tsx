@@ -53,8 +53,11 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
               Turn Financial Stress Into Financial Progress — <span className="gradient-text">Together</span>
             </h1>
-            <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
+            <p className="text-gray-600 text-lg md:text-xl mb-4 max-w-lg">
               Join a collective of members working to improve their financial lives. Learn, take action, and earn points. Each month, half of members are rewarded from a growing pool of cash bonuses — no matter your starting point.
+            </p>
+            <p className="text-primary-600 font-semibold text-lg md:text-xl mb-8 max-w-lg">
+              Level up your finances. Earn monthly cash rewards. Join the movement.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">

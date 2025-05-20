@@ -46,11 +46,11 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
     <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">Your Financial Progress Starts Here</h2>
-        <p className="text-white/80 text-lg mb-6 max-w-2xl mx-auto">
-          Join the waitlist and be part of a growing movement to take back financial control — together.
+        <p className="text-white/90 text-xl mb-4 max-w-2xl mx-auto font-medium">
+          Get smarter with money. Get rewarded. Sign up today and be part of the first payout cycle.
         </p>
-        <p className="text-white/90 text-base mb-8 max-w-2xl mx-auto font-medium">
-          Get in early to help grow the rewards pool and your financial future.
+        <p className="text-white/80 text-base mb-8 max-w-2xl mx-auto">
+          Join the movement now and help build a community that learns and earns together.
         </p>
         
         <div className="max-w-lg mx-auto mb-8">
@@ -71,7 +71,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
                 onClick={form.handleSubmit(onSubmit)}
                 className="w-full h-[50px] bg-green-500 text-white font-medium px-3 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 whitespace-nowrap text-sm sm:text-base border border-green-600"
               >
-                {isPending ? "Processing..." : "Get Access"}
+                {isPending ? "Processing..." : "Join the Movement"}
               </button>
             </div>
           </div>

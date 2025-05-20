@@ -27,14 +27,27 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main>
+        {/* 1. Hero Section */}
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
-        <HowRewardsWork />
+        
+        {/* 2. How It Works */}
         <HowItWorks />
-        <PowerOfCollective />
-        <WhatYouLearn />
+        
+        {/* 3. Example Graphic / Pool Teaser */}
+        <HowRewardsWork />
+        
+        {/* 4. Why Join / Value Prop Blocks */}
         <WhyItWorks />
+        <WhatYouLearn />
+        <PowerOfCollective />
+        
+        {/* 5. Trust and Security */}
         <TrustAndSecurity />
+        
+        {/* 6. FAQs */}
         <FAQ />
+        
+        {/* 7. Join the Waitlist (Repeat CTA) */}
         <FinalCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
       </main>
       <Footer />
