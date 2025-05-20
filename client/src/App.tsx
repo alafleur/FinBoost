@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import FinancialMoodEgg from "@/components/FinancialMoodEgg";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <FinancialMoodEgg />
       </TooltipProvider>
     </QueryClientProvider>
   );
