@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
+import QuizDialog from "@/components/QuizDialog";
 
 interface HeroProps {
   onSubscribeSuccess: () => void;
@@ -75,6 +76,9 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                     {isPending ? "Joining..." : "Join Waitlist"}
                   </button>
                 </div>
+              </div>
+              <div className="mt-4 flex justify-center sm:justify-start">
+                <QuizDialog />
               </div>
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
