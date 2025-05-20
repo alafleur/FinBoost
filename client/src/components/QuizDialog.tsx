@@ -170,13 +170,7 @@ export default function QuizDialog() {
             <DialogTitle className="text-2xl font-heading">Financial Personality Assessment</DialogTitle>
           </DialogHeader>
           
-          <div className="my-8 flex justify-center">
-            <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white">
-              <BarChart2 className="h-8 w-8" />
-            </div>
-          </div>
-          
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mt-4 mb-8">
             Take this quick 4-question assessment to discover your financial personality
             and get a personalized plan for maximizing your rewards.
           </p>
