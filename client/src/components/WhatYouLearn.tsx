@@ -80,7 +80,7 @@ export default function WhatYouLearn() {
             </div>
             
             <p className="mt-8 text-gray-600">
-              <span className="text-accent-500 font-medium">⏱</span> Most lessons take 3–5 minutes and include quick quizzes that help you earn Tribe Points.
+              <span className="text-accent-500 font-medium">⏱</span> Most lessons take 3–5 minutes and include quick quizzes that help you earn points.
             </p>
             
             <div className="mt-8">
@@ -154,7 +154,7 @@ export default function WhatYouLearn() {
                             </div>
                           )}
                           
-                          <p className="text-primary-600 font-medium">+ 5 Tribe Points awarded for quiz completion</p>
+                          <p className="text-primary-600 font-medium">+ 5 points awarded for quiz completion</p>
                           
                           <Button 
                             variant="outline" 
@@ -167,7 +167,7 @@ export default function WhatYouLearn() {
                       )}
                       
                       <div className="text-center text-sm text-gray-500 mt-4">
-                        Earn Tribe Points when you complete real tutorials like this inside the app.
+                        Earn points when you complete real tutorials like this inside the app.
                       </div>
                       
                       <div className="text-center text-xs text-gray-400">

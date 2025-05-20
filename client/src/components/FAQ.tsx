@@ -26,7 +26,7 @@ export default function FAQ() {
     },
     {
       id: "4",
-      question: "What are Tribe Points?",
+      question: "What are points?",
       answer: "Points you earn by learning, referring others, and demonstrating responsible financial steps like paying off debt. These points determine which of the three tiers you're placed in each month."
     },
     {
