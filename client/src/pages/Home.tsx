@@ -12,6 +12,7 @@ import RewardsExplained from "@/components/RewardsExplained";
 import WhatYouLearn from "@/components/WhatYouLearn";
 import PowerOfCollective from "@/components/PowerOfCollective";
 import HowRewardsWork from "@/components/HowRewardsWork";
+import FlywheelGraphic from "@/components/FlywheelGraphic";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 
@@ -29,6 +30,17 @@ export default function Home() {
       <main>
         {/* 1. Hero Section */}
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
+        
+        {/* Financial Growth Flywheel */}
+        <section className="py-12 px-4 bg-gray-50">
+          <div className="container mx-auto max-w-5xl">
+            <div className="text-center mb-8">
+              <h2 className="font-heading font-bold text-3xl">The Virtuous Cycle of Financial Growth</h2>
+              <p className="text-gray-600 mt-3 max-w-2xl mx-auto">Our platform creates a continuous cycle of learning, earning, and improving your financial well-being</p>
+            </div>
+            <FlywheelGraphic />
+          </div>
+        </section>
         
         {/* 2. How It Works */}
         <HowItWorks />
