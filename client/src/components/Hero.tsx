@@ -59,7 +59,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 <form 
                   id="hero-form"
                   onSubmit={form.handleSubmit(onSubmit)} 
-                  className="flex-1 flex flex-col sm:flex-row gap-2"
+                  className="w-full flex flex-col sm:flex-row gap-2"
                 >
                   <FormField
                     control={form.control}
