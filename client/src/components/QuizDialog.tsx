@@ -21,7 +21,6 @@ import {
   RefreshCw 
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface QuizOption {
   id: string;
@@ -44,19 +43,19 @@ export default function QuizDialog() {
   
   const personaDetails = {
     careful: {
-      title: "The Careful Planner",
+      title: "Careful Planner",
       description: "You're methodical about money and prefer stability. Regular learning sessions and steady progress will help you maximize your rewards.",
       icon: <PiggyBank className="h-8 w-8" />,
       color: "bg-blue-500"
     },
     balanced: {
-      title: "The Balanced Achiever",
+      title: "Balanced Achiever",
       description: "You take a well-rounded approach to finances. A mix of learning and community engagement will help you earn consistent rewards.",
       icon: <BarChart2 className="h-8 w-8" />,
       color: "bg-purple-500"
     },
     growth: {
-      title: "The Growth Seeker",
+      title: "Growth Seeker",
       description: "You're motivated by opportunities and growth. Frequent participation and referring others will help you reach top reward tiers.",
       icon: <TrendingUp className="h-8 w-8" />,
       color: "bg-green-500"
@@ -159,20 +158,182 @@ export default function QuizDialog() {
     }
   };
   
-  // Character component - replaced with a more professional design
-  const Character = ({ mood = "happy" }: { mood?: "happy" | "thinking" | "excited" }) => {
-    return (
-      <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white">
-        <DollarSign className="h-6 w-6" />
-      </div>
-    );
-  };
-  
   // Progress percentage
   const progress = step === 0 ? 0 : (step / questions.length) * 100;
   
-  // Character mood
-  const characterMood = persona ? "excited" : step < 2 ? "happy" : "thinking";
+  const renderContent = () => {
+    if (showIntro) {
+      return (
+        <div className="text-center">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-heading">Financial Personality Assessment</DialogTitle>
+          </DialogHeader>
+          
+          <div className="my-8 flex justify-center">
+            <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white">
+              <BarChart2 className="h-8 w-8" />
+            </div>
+          </div>
+          
+          <p className="text-gray-600 mb-8">
+            Take this quick 4-question assessment to discover your financial personality
+            and get a personalized plan for maximizing your rewards.
+          </p>
+          
+          <Button 
+            onClick={startQuiz}
+            className="bg-primary-500 hover:bg-primary-600 text-white"
+          >
+            Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
+    }
+    
+    if (step < questions.length) {
+      return (
+        <div>
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-heading">Question {step + 1} of {questions.length}</DialogTitle>
+              <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white">
+                <BarChart2 className="h-5 w-5" />
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <div className="my-6">
+            <Progress value={progress} className="h-2" />
+          </div>
+          
+          <h4 className="text-xl font-medium mb-6">{questions[step].question}</h4>
+          
+          <div className="space-y-4 mb-6">
+            {questions[step].options.map((option) => (
+              <div 
+                key={option.id}
+                onClick={() => handleAnswer(questions[step].id, option.id)}
+                className="p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 cursor-pointer transition-all duration-200 flex items-center"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center mr-4 text-primary-600">
+                  {option.icon}
+                </div>
+                <span>{option.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    if (persona) {
+      return (
+        <div className="text-center">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-heading">Your Financial Personality</DialogTitle>
+          </DialogHeader>
+          
+          <div className="my-8 flex justify-center">
+            <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto`}>
+              {personaDetails[persona].icon}
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-2">The {personaDetails[persona].title}</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              {personaDetails[persona].description}
+            </p>
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h4 className="font-medium mb-2">Your Recommended Rewards Strategy:</h4>
+            <ul className="text-left space-y-2 text-sm text-gray-600">
+              {persona === "careful" && (
+                <>
+                  <li className="flex items-start">
+                    <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Focus on completing lesson series for bonus points</span>
+                  </li>
+                </>
+              )}
+              
+              {persona === "balanced" && (
+                <>
+                  <li className="flex items-start">
+                    <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Mix quick daily tips with weekly deeper lessons</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Refer 1-2 friends each month for tier boosting points</span>
+                  </li>
+                </>
+              )}
+              
+              {persona === "growth" && (
+                <>
+                  <li className="flex items-start">
+                    <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Take advantage of point multipliers by completing streaks</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <span>Build your network through referrals for maximum points</span>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
+          
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              variant="outline" 
+              onClick={reset}
+            >
+              Retake Assessment
+            </Button>
+            <Button 
+              className="bg-primary-500 hover:bg-primary-600 text-white"
+              onClick={() => handleOpenChange(false)}
+            >
+              Join the Waitlist
+            </Button>
+          </DialogFooter>
+        </div>
+      );
+    }
+    
+    return null;
+  };
   
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -186,190 +347,7 @@ export default function QuizDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] p-6 bg-white">
-        <AnimatePresence mode="wait">
-          {showIntro && (
-            <motion.div
-              key="intro"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-heading">Financial Personality Assessment</DialogTitle>
-              </DialogHeader>
-              
-              <div className="my-8 flex justify-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-white">
-                  <BarChart2 className="h-8 w-8" />
-                </div>
-              </div>
-              
-              <p className="text-gray-600 mb-8">
-                Take this quick 4-question assessment to discover your financial personality
-                and get a personalized plan for maximizing your rewards.
-              </p>
-              
-              <Button 
-                onClick={startQuiz}
-                className="bg-primary-500 hover:bg-primary-600 text-white"
-              >
-                Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </motion.div>
-          )}
-          
-          {!showIntro && step < questions.length && (
-            <motion.div
-              key={`question-${step}`}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-            >
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="text-xl font-heading">Question {step + 1} of {questions.length}</DialogTitle>
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white">
-                    <BarChart2 className="h-5 w-5" />
-                  </div>
-                </div>
-              </DialogHeader>
-              
-              <div className="my-6">
-                <Progress value={progress} className="h-2" />
-              </div>
-              
-              <h4 className="text-xl font-medium mb-6">{questions[step].question}</h4>
-              
-              <div className="space-y-4 mb-6">
-                {questions[step].options.map((option) => (
-                  <div 
-                    key={option.id}
-                    onClick={() => handleAnswer(questions[step].id, option.id)}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 cursor-pointer transition-all duration-200 flex items-center"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center mr-4 text-primary-600">
-                      {option.icon}
-                    </div>
-                    <span>{option.text}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-          
-          {!showIntro && step === questions.length && persona && (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="text-center"
-            >
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-heading">Your Financial Personality</DialogTitle>
-              </DialogHeader>
-              
-              <div className="my-8 flex justify-center">
-                <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto`}>
-                  {personaDetails[persona].icon}
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2">The {personaDetails[persona].title}</h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  {personaDetails[persona].description}
-                </p>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h4 className="font-medium mb-2">Your Recommended Rewards Strategy:</h4>
-                <ul className="text-left space-y-2 text-sm text-gray-600">
-                  {persona === "careful" && (
-                    <>
-                      <li className="flex items-start">
-                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Focus on completing lesson series for bonus points</span>
-                      </li>
-                    </>
-                  )}
-                  
-                  {persona === "balanced" && (
-                    <>
-                      <li className="flex items-start">
-                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Mix quick daily tips with weekly deeper lessons</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Refer 1-2 friends each month for tier boosting points</span>
-                      </li>
-                    </>
-                  )}
-                  
-                  {persona === "growth" && (
-                    <>
-                      <li className="flex items-start">
-                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Take advantage of point multipliers by completing streaks</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span>Build your network through referrals for maximum points</span>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
-              
-              <DialogFooter className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={reset}
-                >
-                  Retake Assessment
-                </Button>
-                <Button 
-                  className="bg-primary-500 hover:bg-primary-600 text-white"
-                  onClick={() => handleOpenChange(false)}
-                >
-                  Join the Waitlist
-                </Button>
-              </DialogFooter>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );
