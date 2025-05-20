@@ -73,13 +73,10 @@ export default function WhyItWorks() {
           </div>
           
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h3 className="font-heading font-semibold text-xl mb-6 text-center">The Financial Growth Flywheel</h3>
+            <h3 className="font-heading font-semibold text-xl mb-6 text-center">The Financial Growth System</h3>
             
-            {/* Flywheel Graphic */}
-            <FlywheelGraphic />
-            
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 text-sm">Learn → Earn → Reward → Improve → Repeat</p>
+            <div className="mt-2 text-center mb-6">
+              <p className="text-gray-600">Our unique approach makes financial progress rewarding and sustainable</p>
             </div>
             
             <div className="grid grid-cols-3 gap-4 mt-6">
