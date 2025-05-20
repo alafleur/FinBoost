@@ -66,9 +66,9 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
                 type="button" 
                 disabled={isPending}
                 onClick={form.handleSubmit(onSubmit)}
-                className="w-full h-[50px] bg-white text-primary-600 font-medium px-4 rounded-lg shadow-lg hover:bg-gray-100 transition duration-300 whitespace-nowrap text-sm sm:text-base"
+                className="w-full h-[50px] bg-green-500 text-white font-medium px-3 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 whitespace-nowrap text-sm sm:text-base border border-green-600"
               >
-                {isPending ? "Processing..." : "Get Early Access"}
+                {isPending ? "Processing..." : "Get Access"}
               </button>
             </div>
           </div>
