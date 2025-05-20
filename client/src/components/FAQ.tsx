@@ -21,31 +21,41 @@ export default function FAQ() {
     },
     {
       id: "3",
-      question: "How are rewards determined?",
-      answer: "The top 50% of members by points earn monthly rewards. Points are earned through completing lessons, taking quizzes, referring friends, and uploading proof of financial actions like debt payoff or investing. The higher your points total, the larger your reward tier."
+      question: "Is this a lottery?",
+      answer: "No — rewards are based on a combination of effort (points) and fairness (random draws within each tier). The system is designed to reward both consistency and improvement, with members in all tiers having opportunities to receive rewards."
     },
     {
       id: "4",
+      question: "What are Tribe Points?",
+      answer: "Points you earn by learning, referring others, and demonstrating responsible financial steps like paying off debt. These points determine which of the three tiers you're placed in each month."
+    },
+    {
+      id: "5",
+      question: "How are the rewards distributed?",
+      answer: "Every month, 50% of each tier's members are randomly selected to receive rewards. Higher tiers receive bigger shares of the pool: Top Tier = 50%, Middle Tier = 35%, and Bottom Tier = 15%."
+    },
+    {
+      id: "6",
+      question: "What if I don't get rewarded one month?",
+      answer: "Your points roll over — increasing your tier and chances next month. Consistent participation will help you climb to higher tiers where both your odds and potential reward amounts are greater."
+    },
+    {
+      id: "7",
+      question: "What do rewards look like?",
+      answer: "Top earners can see hundreds to thousands per month as the collective pool grows. The exact amount depends on your tier, the total membership, and the growing rewards pool."
+    },
+    {
+      id: "8",
       question: "How do I earn points?",
       answer: "Points are earned through four main activities: completing financial lessons, taking knowledge quizzes, referring new members, and uploading proof of positive financial actions (like paying down debt, increasing savings, or investing). Each activity earns different point values."
     },
     {
-      id: "5",
-      question: "What happens to my membership fee?",
-      answer: "More than half of your monthly $19.99 membership fee goes directly into the community rewards pool. This creates a growing pot of money that gets distributed to members each month based on their learning progress and participation. The remainder covers platform operations."
-    },
-    {
-      id: "6",
+      id: "9",
       question: "Is my data safe?",
       answer: "Yes. We never sell your data and use industry-standard encryption to protect all personal information. Any financial documents you share for proof of progress are only used to verify your achievements and calculate rewards. Our reward system is transparent and publicly verifiable."
     },
     {
-      id: "7",
-      question: "What counts as proof of progress?",
-      answer: "Proof of progress includes documentation of debt reduction, savings increases, investment contributions, credit score improvements, or other financial milestones. We accept screenshots of accounts (with sensitive information removed), statements, or other verifiable evidence."
-    },
-    {
-      id: "8",
+      id: "10",
       question: "When does the platform launch?",
       answer: "We're planning to launch soon. Waitlist members will receive early access invitations in waves, with priority given to those who joined earliest. The sooner you join the waitlist, the earlier you can help grow the rewards pool and your financial future."
     }
