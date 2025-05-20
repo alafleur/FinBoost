@@ -7,6 +7,7 @@ import FAQ from "@/components/FAQ";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import SuccessModal from "@/components/SuccessModal";
+import TrustAndSecurity from "@/components/TrustAndSecurity";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 
@@ -25,6 +26,7 @@ export default function Home() {
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         <HowItWorks />
         <WhyItWorks />
+        <TrustAndSecurity />
         <FAQ />
         <FinalCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
       </main>
