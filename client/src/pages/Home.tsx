@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import SuccessModal from "@/components/SuccessModal";
 import TrustAndSecurity from "@/components/TrustAndSecurity";
 import RewardsExplained from "@/components/RewardsExplained";
+import WhatYouLearn from "@/components/WhatYouLearn";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 
@@ -27,6 +28,7 @@ export default function Home() {
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         <RewardsExplained />
         <HowItWorks />
+        <WhatYouLearn />
         <WhyItWorks />
         <TrustAndSecurity />
         <FAQ />
