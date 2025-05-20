@@ -49,10 +49,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
-              Turn financial stress into financial progress — and earn <span className="gradient-text">real cash rewards</span> while you do
+              Turn Financial Stress Into Financial Progress — <span className="gradient-text">Together</span>
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Join a growing collective where more than half of all membership fees go back to members as monthly rewards. Learn smart money habits, earn points, and qualify for cash bonuses — the more members, the bigger the pool.
+              Join a collective of members working to improve their financial lives. Learn, take action, and earn Tribe Points. Each month, members in all tiers are rewarded from a growing pool of cash bonuses — no matter your starting point.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
@@ -78,7 +78,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               </div>
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
-            <p className="text-gray-600 text-sm mt-2">Memberships start at $19.99/month. More than half of all membership fees go back to members as monthly cash rewards.</p>
+            <p className="text-gray-600 text-sm mt-2">Membership is $19.99/month. Over half of every dollar goes directly back to members as monthly rewards.</p>
           </div>
           <div className="relative">
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">

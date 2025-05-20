@@ -1,0 +1,70 @@
+Revise the existing landing page to reflect a hybrid reward model based on tiers and Tribe Points, where:
+•	Users earn points by engaging (e.g. learning, referrals, uploads)
+•	Each month, users are split into 3 tiers based on points
+•	50% of users in each tier are randomly selected to receive cash rewards
+•	More than 50% of all membership fees go back into the monthly rewards pool
+Keep the design sleek, modern, and trustworthy — avoid scammy or overly “lottery” vibes.
+________________________________________
+✅ CHANGES TO IMPLEMENT
+1. 🧠 Updated Hero Section (Top of Page)
+Headline:
+“Turn Financial Stress Into Financial Progress — Together.”
+Subheadline:
+Join a collective of members working to improve their financial lives. Learn, take action, and earn Tribe Points. Each month, members in all tiers are rewarded from a growing pool of cash bonuses — no matter your starting point.
+CTA Button:
+Join the Waitlist
+Small text below CTA:
+Membership is $19.99/month. Over half of every dollar goes directly back to members as monthly rewards.
+________________________________________
+2. 📊 NEW SECTION: “How the Rewards Work”
+Use a simple 3-step visual breakdown of the reward system:
+________________________________________
+💸 How the Rewards Work
+🪙 Earn Points
+Complete tutorials, quizzes, refer others, and upload proof of good financial behavior like debt repayment or investing.
+📊 Climb the Tiers
+Each month, members are placed into 3 tiers (Top / Middle / Bottom) based on their Points.
+🎉 Get Rewarded
+50% of users in every tier are randomly selected to receive cash bonuses. Higher tiers = larger pool shares.
+Pool Distribution:
+•	Top Tier = 50% of rewards pool
+•	Middle Tier = 35%
+•	Bottom Tier = 15%
+Even casual members have a chance. The more you engage, the better your odds and payout size.
+________________________________________
+3. 📈 Add a Graphic: “As We Grow, So Do the Rewards”
+Simple visual showing example growth of the collective pool:
+Members	Monthly Reward Pool
+1,000	~$10,000
+5,000	~$50,000
+10,000	~$100,000+
+Accompany with this note:
+The more members who join, the bigger the monthly pool — and the greater your potential payout.
+________________________________________
+4. 🔄 Update “How It Works” Section (Condensed Version)
+You can simplify the old How It Works section into 4 steps:
+1.	Become a Member
+Join for $19.99/month — over half of your fee goes directly to the collective rewards pool.
+2.	Earn Points
+Learn, refer friends, and show real-life action to boost your standing.
+3.	Get Matched to a Tier
+Every month, you're placed into one of 3 tiers based on points.
+4.	Qualify for Rewards
+Half of each tier gets randomly selected for monthly cash rewards. More points = higher tier = bigger slice.
+________________________________________
+5. 🛡 Add a Trust Banner or Section
+🔐 Secure. Transparent. Community-first.
+Your data is private. Rewards are transparently distributed. This is a movement built for and by people improving their financial lives — together.
+________________________________________
+6. ❓ Update FAQ Section
+Add these new/updated entries:
+•	Is this a lottery?
+No — rewards are based on a combination of effort (points) and fairness (random draws within each tier).
+•	What are Points?
+Points you earn by learning, referring others, and demonstrating responsible financial steps like paying off debt.
+•	How are the rewards distributed?
+Every month, 50% of each tier's members are randomly selected to receive rewards. Higher tiers receive bigger shares.
+•	What if I don’t get rewarded one month?
+Your points roll over — increasing your tier and chances next month.
+•	What do rewards look like?
+Top earners can see hundreds to thousands per month as the collective pool grows.
