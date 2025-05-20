@@ -43,7 +43,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-primary-500 to-primary-700 text-white">
+    <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">Your Financial Progress Starts Here</h2>
         <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
