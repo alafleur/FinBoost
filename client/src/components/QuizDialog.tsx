@@ -213,7 +213,7 @@ export default function QuizDialog() {
               
               <Button 
                 onClick={startQuiz}
-                className="bg-primary-500 hover:bg-primary-600"
+                className="bg-primary-500 hover:bg-primary-600 text-white"
               >
                 Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -361,7 +361,7 @@ export default function QuizDialog() {
                   Retake Assessment
                 </Button>
                 <Button 
-                  className="bg-primary-500 hover:bg-primary-600"
+                  className="bg-primary-500 hover:bg-primary-600 text-white"
                   onClick={() => handleOpenChange(false)}
                 >
                   Join the Waitlist
