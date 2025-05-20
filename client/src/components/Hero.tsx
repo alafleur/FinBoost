@@ -70,7 +70,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                     type="button" 
                     disabled={isPending}
                     onClick={form.handleSubmit(onSubmit)}
-                    className="w-full h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 rounded-lg shadow-md transition duration-300 border border-blue-700"
+                    className="w-full h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 rounded-lg shadow-md transition duration-300 border border-blue-700 whitespace-nowrap text-sm sm:text-base"
                   >
                     {isPending ? "Joining..." : "Join Waitlist"}
                   </button>
