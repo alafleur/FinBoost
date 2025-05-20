@@ -1,0 +1,74 @@
+
+🔧 Edits to Implement on Your Replit Landing Page
+🔁 Hero Section (Top Banner)
+Current:
+“Join the waitlist and be the first to get rewarded for learning.”
+
+Update to:
+Headline:
+💬 "Turn financial stress into financial progress — and earn real cash rewards while you do."
+
+Subheadline:
+🪙 "Join a growing collective where more than half of all membership fees go back to members as monthly rewards. Learn smart money habits, earn points, and qualify for cash bonuses — the more members, the bigger the pool."
+
+CTA Button: Keep “Join the Waitlist”
+Under Button (optional): "Memberships start at $19.99/month."
+
+📊 Add Graphic: Rewards Pool Growth (Illustrative)
+Add a simple chart or dynamic graphic below the hero showing how the collective reward pool grows with users:
+
+1,000 members → $10,000 pool
+
+5,000 members → $50,000 pool
+
+10,000 members → $100,000+
+
+Use a progress bar or vertical ladder with sample rewards tiers.
+
+🧠 “How It Works” Section — Revamp
+Replace current steps with:
+
+Join as a Member
+For $19.99/month, you get access to tools that reward your financial progress — and over half of your fee goes back to the community.
+
+Earn Points
+Complete bite-sized lessons and quizzes, refer friends, and upload proof of financial action like debt payoff or investing.
+
+Qualify for Rewards
+Each month, the top 50% of members by points earn cash rewards — the higher your points, the bigger your tier.
+
+Power the Collective
+More members = a larger rewards pool for all. Help the community grow while growing your financial potential.
+
+💬 Replace “Win” with Merit-Based Language
+Wherever “win” or “chance to win” appears, use:
+
+“Qualify for”
+
+“Earn”
+
+“Receive cash rewards based on merit”
+
+“Get rewarded for real progress”
+
+🔐 Add Trust + Security Note (New Section or Footer)
+Secure & Transparent
+Your financial data stays private. Our reward system is transparent and publicly verifiable. You're in control every step of the way.
+
+📚 Add Example/Testimonials or “What’s Possible” Card
+Even if you’re pre-launch, add a sample like:
+
+“I used my rewards to pay down a credit card and finally got ahead.” — Future You
+
+❓ Expand the FAQ Section
+Be sure to include:
+
+💵 How much does membership cost? → “$19.99/month”
+
+🕒 How much time does it take? → “5–20 minutes/week”
+
+🎯 How are rewards determined? → “Top 50% by points earn monthly rewards”
+
+📈 How do I earn points? → “Learn, refer friends, upload proof of debt repayment/investing”
+
+🔐 Is my data safe? → “Yes. We never sell your data and use industry-standard encryption.”

@@ -1,4 +1,4 @@
-import { User, CheckCircle, TrendingUp, FileText } from "lucide-react";
+import { User, CheckCircle, TrendingUp, Users } from "lucide-react";
 
 interface Step {
   id: number;
@@ -11,27 +11,27 @@ export default function HowItWorks() {
   const steps: Step[] = [
     {
       id: 1,
-      title: "1. Become a Member",
-      description: "$19.99/month (with the majority of fees going back to the community)",
+      title: "Join as a Member",
+      description: "For $19.99/month, you get access to tools that reward your financial progress — and over half of your fee goes back to the community.",
       icon: <User className="h-6 w-6" />,
     },
     {
       id: 2,
-      title: "2. Earn Points",
-      description: "Learn, take quizzes, refer others, and show proof of good financial habits (like repaying debt)",
+      title: "Earn Points",
+      description: "Complete bite-sized lessons and quizzes, refer friends, and upload proof of financial action like debt payoff or investing.",
       icon: <CheckCircle className="h-6 w-6" />,
     },
     {
       id: 3,
-      title: "3. Qualify for Monthly Rewards",
-      description: "The top 50% of members based on points receive cash rewards, distributed by tier",
+      title: "Qualify for Rewards",
+      description: "Each month, the top 50% of members by points earn cash rewards — the higher your points, the bigger your tier.",
       icon: <TrendingUp className="h-6 w-6" />,
     },
     {
       id: 4,
-      title: "4. Fuel the Collective",
-      description: "Every action you take helps the entire rewards pool grow larger",
-      icon: <FileText className="h-6 w-6" />,
+      title: "Power the Collective",
+      description: "More members = a larger rewards pool for all. Help the community grow while growing your financial potential.",
+      icon: <Users className="h-6 w-6" />,
     },
   ];
 
