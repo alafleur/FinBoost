@@ -87,47 +87,21 @@ export default function RewardsExplained() {
           </p>
         </div>
         
-        {/* As We Grow, So Do the Rewards */}
+        {/* Call to Action */}
         <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 md:p-8">
-          <h3 className="font-heading font-semibold text-xl mb-6 text-center">
-            As We Grow, So Do the Rewards
+          <h3 className="font-heading font-semibold text-xl mb-4 text-center">
+            The More We Grow, The More You Earn
           </h3>
           
-          <div className="space-y-6 max-w-2xl mx-auto">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium">1,000 Members</span>
-                <span className="font-medium">~$10,000 Monthly Pool</span>
-              </div>
-              <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                <div className="reward-pool" style={{ width: "20%" }}></div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium">5,000 Members</span>
-                <span className="font-medium">~$50,000 Monthly Pool</span>
-              </div>
-              <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                <div className="reward-pool" style={{ width: "50%" }}></div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium">10,000 Members</span>
-                <span className="font-medium">~$100,000+ Monthly Pool</span>
-              </div>
-              <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                <div className="reward-pool" style={{ width: "100%" }}></div>
-              </div>
-            </div>
-          </div>
-          
-          <p className="text-center text-gray-600 mt-8">
-            The more members who join, the bigger the monthly pool — and the greater your potential payout.
+          <p className="text-center text-gray-600 mb-6 max-w-2xl mx-auto">
+            Join today to get in early. As our community grows, your potential rewards increase along with it.
           </p>
+          
+          <div className="flex justify-center">
+            <a href="#join-waitlist" className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+              Join the Community <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
     </section>
