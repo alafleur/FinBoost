@@ -138,6 +138,7 @@ export default function QuizDialog() {
   };
   
   const startQuiz = () => {
+    console.log("Starting quiz...");
     setShowIntro(false);
   };
   
@@ -180,12 +181,15 @@ export default function QuizDialog() {
             and get a personalized plan for maximizing your rewards.
           </p>
           
-          <Button 
-            onClick={startQuiz}
-            className="bg-primary-500 hover:bg-primary-600 text-white"
+          <button 
+            onClick={() => {
+              console.log("Button clicked");
+              setShowIntro(false);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md transition duration-300"
           >
-            Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
+            Start Assessment <ChevronRight className="ml-2 h-4 w-4 inline" />
+          </button>
         </div>
       );
     }
