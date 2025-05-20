@@ -54,36 +54,37 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
               Join a collective of financially motivated members where the more you learn, the better your odds of winning monthly cash bonuses — all funded by the power of the community.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="max-w-lg">
               <Form {...form}>
                 <form 
                   id="hero-form"
                   onSubmit={form.handleSubmit(onSubmit)} 
-                  className="w-full flex flex-col sm:flex-row gap-2"
                 >
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="Enter your email"
-                            className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none"
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit" 
-                    disabled={isPending}
-                    className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition duration-300 whitespace-nowrap"
-                  >
-                    {isPending ? "Joining..." : "Join the Waitlist"}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="Enter your email"
+                              className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none w-full"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      disabled={isPending}
+                      className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition duration-300 whitespace-nowrap"
+                    >
+                      {isPending ? "Joining..." : "Join the Waitlist"}
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </div>
