@@ -212,25 +212,7 @@ export default function WhatYouLearn() {
                 </Dialog>
               </div>
 
-              <div className="mt-8">
-                <h4 className="font-semibold text-lg mb-4">Sample Lessons:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {sampleLessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className="flex items-center p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow bg-white"
-                    >
-                      <div className={`w-12 h-12 rounded-full ${lesson.color} flex items-center justify-center mr-4`}>
-                        <span className="text-2xl">{lesson.icon}</span>
-                      </div>
-                      <div>
-                        <h3 className={`font-medium ${lesson.textColor}`}>{lesson.title}</h3>
-                        <p className="text-sm text-gray-500">5-minute read • Interactive quiz</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
           
