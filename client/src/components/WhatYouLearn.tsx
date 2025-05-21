@@ -114,8 +114,6 @@ export default function WhatYouLearn() {
             </p>
             
             <div className="mt-12">
-              <h3 className="font-heading font-semibold text-2xl mb-6 text-center">Preview of Lessons</h3>
-
               <div className="flex justify-center mb-8">
                 <Dialog>
                   <DialogTrigger asChild>
