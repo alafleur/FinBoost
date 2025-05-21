@@ -1,0 +1,140 @@
+import React from "react";
+import { motion } from "framer-motion";
+
+export default function MembershipValue() {
+  return (
+    <section className="py-16 px-4 bg-white" id="membership-value">
+      <div className="container mx-auto max-w-6xl">
+        <div className="text-center mb-12">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
+            Your Membership Works Twice as Hard
+          </h2>
+          <p className="text-gray-600 max-w-3xl mx-auto">
+            Just $19.99/month gives you access to financial education AND fuels the monthly rewards pool—putting money back into the hands of the community.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left column - Pie Chart */}
+          <div className="relative">
+            <div className="w-[320px] h-[320px] mx-auto relative">
+              {/* Outer Circle */}
+              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+              
+              {/* 50% Segment - Rewards Pool */}
+              <motion.div 
+                className="absolute inset-0 rounded-full border-8 border-transparent"
+                style={{
+                  borderTopColor: '#3B82F6',    // Blue
+                  borderRightColor: '#3B82F6',  // Blue
+                  transform: 'rotate(0deg)'
+                }}
+                initial={{ opacity: 0, rotate: 0 }}
+                animate={{ opacity: 1, rotate: 180 }}
+                transition={{ duration: 1.2, delay: 0.3 }}
+              ></motion.div>
+              
+              {/* 30% Segment - Education */}
+              <motion.div 
+                className="absolute inset-0 rounded-full border-8 border-transparent"
+                style={{
+                  borderBottomColor: '#10B981',  // Green
+                  borderRightColor: '#10B981',   // Green
+                  transform: 'rotate(180deg)'
+                }}
+                initial={{ opacity: 0, rotate: 180 }}
+                animate={{ opacity: 1, rotate: 288 }}
+                transition={{ duration: 1, delay: 0.6 }}
+              ></motion.div>
+              
+              {/* 20% Segment - Operations */}
+              <motion.div 
+                className="absolute inset-0 rounded-full border-8 border-transparent"
+                style={{
+                  borderBottomColor: '#8B5CF6',   // Purple
+                  borderLeftColor: '#8B5CF6',     // Purple
+                  transform: 'rotate(288deg)'
+                }}
+                initial={{ opacity: 0, rotate: 288 }}
+                animate={{ opacity: 1, rotate: 360 }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+              ></motion.div>
+              
+              {/* Center Content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-white rounded-full w-[240px] h-[240px] flex flex-col items-center justify-center shadow-md">
+                  <p className="text-4xl font-bold text-gray-800">$19.99</p>
+                  <p className="text-gray-500 text-sm">monthly membership</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right column - Breakdown Text */}
+          <div>
+            <h3 className="font-heading font-semibold text-2xl mb-6">Where Your Membership Fee Goes</h3>
+            
+            <div className="space-y-6">
+              {/* 50% - Rewards Pool */}
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-blue-500 rounded-sm"></div>
+                </div>
+                <div>
+                  <p className="font-bold text-xl text-gray-800 flex items-center">
+                    <span className="text-blue-600">50%</span>
+                    <span className="mx-2">–</span>
+                    Rewards Pool
+                  </p>
+                  <p className="text-gray-600">
+                    Distributed monthly to 50% of members based on points.
+                  </p>
+                </div>
+              </div>
+              
+              {/* 30% - Financial Education */}
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-green-500 rounded-sm"></div>
+                </div>
+                <div>
+                  <p className="font-bold text-xl text-gray-800 flex items-center">
+                    <span className="text-green-600">30%</span>
+                    <span className="mx-2">–</span>
+                    Financial Education & Tools
+                  </p>
+                  <p className="text-gray-600">
+                    Access bite-sized lessons, quizzes, and planning resources.
+                  </p>
+                </div>
+              </div>
+              
+              {/* 20% - Platform Operations */}
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-purple-500 rounded-sm"></div>
+                </div>
+                <div>
+                  <p className="font-bold text-xl text-gray-800 flex items-center">
+                    <span className="text-purple-600">20%</span>
+                    <span className="mx-2">–</span>
+                    Platform Operations
+                  </p>
+                  <p className="text-gray-600">
+                    Supports the tech and growth of the community.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-4 border-t border-gray-200">
+              <p className="text-gray-700 font-medium">
+                A membership that benefits everyone. The more we grow, the more we all get rewarded.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -32,6 +32,9 @@ export default function Home() {
         {/* 1. Hero Section */}
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         
+        {/* Membership Value Section */}
+        <MembershipValue />
+        
         {/* Financial Growth Flywheel */}
         <section className="py-12 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
