@@ -21,42 +21,42 @@ export default function MembershipValue() {
               {/* Outer Circle */}
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
               
-              {/* 55% Segment - Rewards Pool */}
+              {/* Blue segment (55%) - Rewards Pool */}
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderTopColor: '#4285F4',    // Brighter Blue from image
-                  borderRightColor: '#4285F4',  // Brighter Blue from image
+                  borderTopColor: '#4285F4',
+                  borderRightColor: '#4285F4',
+                  borderBottomColor: '#4285F4',
                   transform: 'rotate(0deg)'
                 }}
-                initial={{ opacity: 0, rotate: 0 }}
-                animate={{ opacity: 1, rotate: 198 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 1.2, delay: 0.3 }}
               ></motion.div>
               
-              {/* 25% Segment - Education & Platform */}
+              {/* Green segment (25%) - Education & Platform */}
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderBottomColor: '#34A853',  // Brighter Green from image
-                  borderRightColor: '#34A853',   // Brighter Green from image
-                  transform: 'rotate(198deg)'
+                  borderLeftColor: '#34A853',
+                  borderTopColor: '#34A853',
+                  transform: 'rotate(0deg)'
                 }}
-                initial={{ opacity: 0, rotate: 198 }}
-                animate={{ opacity: 1, rotate: 288 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 1, delay: 0.6 }}
               ></motion.div>
               
-              {/* 20% Segment - Operations */}
+              {/* Purple segment (20%) - Operations */}
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderBottomColor: '#A142F4',   // Brighter Purple from image
-                  borderLeftColor: '#A142F4',     // Brighter Purple from image
-                  transform: 'rotate(288deg)'
+                  borderTopColor: '#A142F4',
+                  transform: 'rotate(270deg)'
                 }}
-                initial={{ opacity: 0, rotate: 288 }}
-                animate={{ opacity: 1, rotate: 360 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.9 }}
               ></motion.div>
               
