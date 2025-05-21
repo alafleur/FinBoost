@@ -64,17 +64,6 @@ export default function HowRewardsWork() {
           </div>
         </div>
         
-        <div className="mt-10 bg-gray-50 rounded-lg p-6 border border-gray-100">
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center mr-4">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-gray-800 font-medium">The more you engage—and the more our community grows—the bigger the rewards for everyone.</p>
-            </div>
-          </div>
-        </div>
-        
         <MembershipGrowthChart />
       </div>
     </section>
