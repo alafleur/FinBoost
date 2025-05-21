@@ -8,6 +8,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useSubscribe } from "@/hooks/use-subscribe";
+import { trackEvent } from "@/lib/analytics";
 import { 
   DollarSign, 
   HelpCircle, 
@@ -18,7 +21,8 @@ import {
   PiggyBank, 
   CreditCard,
   Home,
-  RefreshCw 
+  RefreshCw,
+  Mail
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -40,6 +44,10 @@ export default function QuizDialog() {
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [persona, setPersona] = useState<"careful" | "balanced" | "growth" | null>(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const subscribeMutation = useSubscribe();
   
   const personaDetails = {
     careful: {
@@ -135,6 +143,10 @@ export default function QuizDialog() {
     }
     
     setStep(questions.length);
+    // After a short delay, show the email form
+    setTimeout(() => {
+      setShowEmailForm(true);
+    }, 2000);
   };
   
   const startQuiz = () => {
@@ -147,6 +159,31 @@ export default function QuizDialog() {
     setAnswers({});
     setPersona(null);
     setShowIntro(true);
+    setShowEmailForm(false);
+    setEmail("");
+  };
+  
+  const handleSubscribe = () => {
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      return; // Simple validation
+    }
+    
+    setIsSubmitting(true);
+    trackEvent("subscribe_attempt", "personality_assessment");
+    
+    subscribeMutation.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          trackEvent("subscribe_success", "personality_assessment");
+          setIsSubmitting(false);
+          handleOpenChange(false); // Close the dialog
+        },
+        onError: () => {
+          setIsSubmitting(false);
+        }
+      }
+    );
   };
   
   const handleOpenChange = (open: boolean) => {
@@ -231,101 +268,144 @@ export default function QuizDialog() {
             <DialogTitle className="text-2xl font-heading">Your Financial Personality</DialogTitle>
           </DialogHeader>
           
-          <div className="my-8 flex justify-center">
-            <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto`}>
-              {personaDetails[persona].icon}
+          {!showEmailForm ? (
+            <>
+              <div className="my-8 flex justify-center">
+                <div className={`w-16 h-16 ${personaDetails[persona].color} rounded-full flex items-center justify-center text-white mx-auto`}>
+                  {personaDetails[persona].icon}
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold mb-2">The {personaDetails[persona].title}</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  {personaDetails[persona].description}
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                <h4 className="font-medium mb-2">Your Recommended Rewards Strategy:</h4>
+                <ul className="text-left space-y-2 text-sm text-gray-600">
+                  {persona === "careful" && (
+                    <>
+                      <li className="flex items-start">
+                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Focus on completing lesson series for bonus points</span>
+                      </li>
+                    </>
+                  )}
+                  
+                  {persona === "balanced" && (
+                    <>
+                      <li className="flex items-start">
+                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Mix quick daily tips with weekly deeper lessons</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Refer 1-2 friends each month for tier boosting points</span>
+                      </li>
+                    </>
+                  )}
+                  
+                  {persona === "growth" && (
+                    <>
+                      <li className="flex items-start">
+                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Take advantage of point multipliers by completing streaks</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span>Build your network through referrals for maximum points</span>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+              
+              <DialogFooter className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button 
+                  variant="outline" 
+                  onClick={reset}
+                >
+                  Retake Assessment
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="py-6 text-center">
+              <h3 className="text-xl font-bold mb-4">Join the Waitlist to Get Started</h3>
+              <p className="text-gray-600 mb-6">
+                Sign up now to be among the first to use our platform and start earning rewards based on your {personaDetails[persona].title} personality.
+              </p>
+              
+              <div className="max-w-md mx-auto mb-6">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-grow">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 py-6 border-gray-300"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleSubscribe}
+                    disabled={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {isSubmitting ? "Joining..." : "Join the Waitlist"}
+                  </Button>
+                </div>
+              </div>
+              
+              <p className="text-gray-500 text-sm mt-2">
+                We'll never share your email. Unsubscribe anytime.
+              </p>
+              
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <Button 
+                  variant="ghost"
+                  onClick={reset}
+                  className="text-gray-600"
+                >
+                  Retake Assessment
+                </Button>
+              </div>
             </div>
-          </div>
-          
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold mb-2">The {personaDetails[persona].title}</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              {personaDetails[persona].description}
-            </p>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <h4 className="font-medium mb-2">Your Recommended Rewards Strategy:</h4>
-            <ul className="text-left space-y-2 text-sm text-gray-600">
-              {persona === "careful" && (
-                <>
-                  <li className="flex items-start">
-                    <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="bg-blue-100 p-1 w-6 h-6 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Focus on completing lesson series for bonus points</span>
-                  </li>
-                </>
-              )}
-              
-              {persona === "balanced" && (
-                <>
-                  <li className="flex items-start">
-                    <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Mix quick daily tips with weekly deeper lessons</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="bg-purple-100 p-1 w-6 h-6 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Refer 1-2 friends each month for tier boosting points</span>
-                  </li>
-                </>
-              )}
-              
-              {persona === "growth" && (
-                <>
-                  <li className="flex items-start">
-                    <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Take advantage of point multipliers by completing streaks</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="bg-green-100 p-1 w-6 h-6 rounded-full mr-2 text-green-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <span>Build your network through referrals for maximum points</span>
-                  </li>
-                </>
-              )}
-            </ul>
-          </div>
-          
-          <DialogFooter className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button 
-              variant="outline" 
-              onClick={reset}
-            >
-              Retake Assessment
-            </Button>
-            <Button 
-              className="bg-primary-500 hover:bg-primary-600 text-white"
-              onClick={() => handleOpenChange(false)}
-            >
-              Join the Waitlist
-            </Button>
-          </DialogFooter>
+          )}
         </div>
       );
     }
