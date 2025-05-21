@@ -1,4 +1,5 @@
 import { DollarSign, BarChart3, TrendingUp, Users } from "lucide-react";
+import MembershipGrowthChart from "./MembershipGrowthChart";
 
 export default function HowRewardsWork() {
   return (
@@ -73,6 +74,8 @@ export default function HowRewardsWork() {
             </div>
           </div>
         </div>
+        
+        <MembershipGrowthChart />
       </div>
     </section>
   );
