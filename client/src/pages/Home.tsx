@@ -16,6 +16,7 @@ import FlywheelGraphic from "@/components/FlywheelGraphic";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 import FlywheelFeatures from "@/components/FlywheelFeatures";
+import MembershipValue from "@/components/MembershipValue";
 
 export default function Home() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
