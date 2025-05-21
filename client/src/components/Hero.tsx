@@ -122,8 +122,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p className="text-gray-600">Join a community that grows together</p>
                 <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
-                <div className="mt-3">
-                  <QuizDialog />
+                <div className="mt-4 flex justify-center">
+                  <div className="transform hover:scale-105 transition-transform">
+                    <QuizDialog />
+                  </div>
                 </div>
               </div>
             </div>
