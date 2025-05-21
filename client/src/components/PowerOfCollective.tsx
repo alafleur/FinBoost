@@ -1,6 +1,5 @@
 import { Users } from "lucide-react";
 import { motion } from "framer-motion";
-import RewardSteps from "./RewardSteps";
 
 export default function PowerOfCollective() {
   // No tiers needed anymore since we removed the reward pool growth section
@@ -19,9 +18,6 @@ export default function PowerOfCollective() {
           </p>
         </div>
 
-        <div className="mt-6">
-          <RewardSteps />
-        </div>
       </div>
     </section>
   );
