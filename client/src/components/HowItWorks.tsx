@@ -53,8 +53,8 @@ export default function HowItWorks() {
         </div>
 
         {/* Key Points Summary */}
-        <div className="mt-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-8 max-w-4xl mx-auto border border-blue-100">
-          <h3 className="text-2xl font-bold text-center mb-8 text-gray-800 flex items-center justify-center">
+        <div className="mt-2 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 max-w-4xl mx-auto border border-blue-100">
+          <h3 className="text-2xl font-bold text-center mb-4 text-gray-800 flex items-center justify-center">
             <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Key Reward System Facts</span>
           </h3>
           
