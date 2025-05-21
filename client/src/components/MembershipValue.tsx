@@ -63,7 +63,7 @@ export default function MembershipValue() {
               {/* Center Content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-white rounded-full w-[240px] h-[240px] flex flex-col items-center justify-center shadow-md">
-                  <p className="text-4xl font-bold text-gray-800">$19.99</p>
+                  <p className="text-4xl font-bold text-gray-800">$20</p>
                   <p className="text-gray-500 text-sm">monthly membership</p>
                 </div>
               </div>

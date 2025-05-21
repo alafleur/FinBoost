@@ -12,7 +12,7 @@ export default function FAQ() {
     {
       id: "1",
       question: "How much does membership cost?",
-      answer: "$19.99/month. This gives you access to all learning tools, the ability to earn points, and eligibility for monthly cash rewards. Over half of all membership fees go directly back to members through the rewards pool."
+      answer: "$20/month. This gives you access to all learning tools, the ability to earn points, and eligibility for monthly cash rewards. Over half of all membership fees go directly back to members through the rewards pool."
     },
     {
       id: "2",

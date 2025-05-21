@@ -83,7 +83,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               </div>
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
-            <p className="text-gray-600 text-sm mt-2">Membership is $19.99/month. More than half of all membership fees go directly back to the community as monthly rewards.</p>
+            <p className="text-gray-600 text-sm mt-2">Membership is $20/month. More than half of all membership fees go directly back to the community as monthly rewards.</p>
             <p className="text-gray-600 text-sm mt-1">We never sell your data. Payouts are transparent and secure.</p>
           </div>
           <div className="relative">

@@ -71,7 +71,7 @@ export default function MembershipGrowthChart() {
         
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>The more members join, the larger the monthly rewards pool becomes</p>
-          <p className="mt-2 text-xs font-medium text-gray-600">Based on $19.99 monthly membership fee</p>
+          <p className="mt-2 text-xs font-medium text-gray-600">Based on $20 monthly membership fee</p>
         </div>
       </div>
       
