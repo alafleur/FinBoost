@@ -25,8 +25,8 @@ export default function MembershipValue() {
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderTopColor: '#3B82F6',    // Blue
-                  borderRightColor: '#3B82F6',  // Blue
+                  borderTopColor: '#4285F4',    // Brighter Blue from image
+                  borderRightColor: '#4285F4',  // Brighter Blue from image
                   transform: 'rotate(0deg)'
                 }}
                 initial={{ opacity: 0, rotate: 0 }}
@@ -38,8 +38,8 @@ export default function MembershipValue() {
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderBottomColor: '#10B981',  // Green
-                  borderRightColor: '#10B981',   // Green
+                  borderBottomColor: '#34A853',  // Brighter Green from image
+                  borderRightColor: '#34A853',   // Brighter Green from image
                   transform: 'rotate(198deg)'
                 }}
                 initial={{ opacity: 0, rotate: 198 }}
@@ -51,8 +51,8 @@ export default function MembershipValue() {
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
-                  borderBottomColor: '#8B5CF6',   // Purple
-                  borderLeftColor: '#8B5CF6',     // Purple
+                  borderBottomColor: '#A142F4',   // Brighter Purple from image
+                  borderLeftColor: '#A142F4',     // Brighter Purple from image
                   transform: 'rotate(288deg)'
                 }}
                 initial={{ opacity: 0, rotate: 288 }}
@@ -77,12 +77,12 @@ export default function MembershipValue() {
             <div className="space-y-6">
               {/* 55% - Rewards Pool */}
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-blue-500 rounded-sm"></div>
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#E8F0FE] flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-[#4285F4] rounded-sm"></div>
                 </div>
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-blue-600">55%</span>
+                    <span className="text-[#4285F4]">55%</span>
                     <span className="mx-2">→</span>
                     Rewards Pool
                   </p>
@@ -94,12 +94,12 @@ export default function MembershipValue() {
               
               {/* 25% - Education & Platform */}
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-green-500 rounded-sm"></div>
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#E6F4EA] flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-[#34A853] rounded-sm"></div>
                 </div>
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-green-600">25%</span>
+                    <span className="text-[#34A853]">25%</span>
                     <span className="mx-2">→</span>
                     Education & Platform
                   </p>
@@ -111,12 +111,12 @@ export default function MembershipValue() {
               
               {/* 20% - Platform Operations */}
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-purple-500 rounded-sm"></div>
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#F3E8FD] flex items-center justify-center mr-4">
+                  <div className="w-6 h-6 bg-[#A142F4] rounded-sm"></div>
                 </div>
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-purple-600">20%</span>
+                    <span className="text-[#A142F4]">20%</span>
                     <span className="mx-2">→</span>
                     Operations
                   </p>
