@@ -117,7 +117,6 @@ export default function Home() {
         
         {/* 4. Why Join / Value Prop Blocks */}
         <WhatYouLearn />
-        <PowerOfCollective />
         
         {/* 5. Trust and Security */}
         <TrustAndSecurity />
