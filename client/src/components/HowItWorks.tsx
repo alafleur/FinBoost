@@ -79,40 +79,45 @@ export default function HowItWorks() {
         </div>
         
         {/* Key Points Summary */}
-        <div className="mt-10 bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
-          <h3 className="text-xl font-semibold text-center mb-6">Key Reward System Facts</h3>
+        <div className="mt-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-8 max-w-4xl mx-auto border border-blue-100">
+          <h3 className="text-2xl font-bold text-center mb-8 text-gray-800 flex items-center justify-center">
+            <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Key Reward System Facts</span>
+          </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="grid grid-cols-1 gap-8">
+            <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-primary-500">
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div>
-                <p className="font-semibold text-lg text-gray-800">Member fees directly power the rewards pool</p>
+              <div className="ml-6">
+                <p className="font-bold text-xl text-gray-800">Member fees directly power the rewards pool</p>
+                <p className="text-gray-600 mt-1">Every membership contributes to growing the community reward system</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-secondary-500">
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <div>
-                <p className="font-semibold text-lg text-gray-800">50% of members receive monthly cash rewards</p>
+              <div className="ml-6">
+                <p className="font-bold text-xl text-gray-800">50% of members receive monthly cash rewards</p>
+                <p className="text-gray-600 mt-1">Half of all members get a share of the rewards each month</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-accent-100 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-accent-500">
+              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-accent-500 to-accent-600 rounded-full flex items-center justify-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                 </svg>
               </div>
-              <div>
-                <p className="font-semibold text-lg text-gray-800">Top rewards can reach thousands in larger pools</p>
+              <div className="ml-6">
+                <p className="font-bold text-xl text-gray-800">Top rewards can reach thousands in larger pools</p>
+                <p className="text-gray-600 mt-1">As our community grows, so does the potential for significant rewards</p>
               </div>
             </div>
           </div>
