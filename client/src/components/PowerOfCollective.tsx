@@ -19,55 +19,7 @@ export default function PowerOfCollective() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h3 className="font-heading font-semibold text-2xl mb-6">Growing Together</h3>
-            <p className="text-gray-600 mb-8">
-              Every new member who joins increases the potential rewards for everyone. As our community grows, 
-              the financial impact increases exponentially.
-            </p>
-            
-            <div className="mb-8">
-              <p className="text-lg font-medium mb-4">How it works:</p>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-1 mr-3">
-                    <span className="text-green-600 text-sm font-bold">1</span>
-                  </div>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Members contribute:</span> Everyone pays the same monthly fee ($19.99)
-                  </p>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mt-1 mr-3">
-                    <span className="text-blue-600 text-sm font-bold">2</span>
-                  </div>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Rewards pool forms:</span> Over half of all fees go directly into the monthly rewards pool
-                  </p>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mt-1 mr-3">
-                    <span className="text-purple-600 text-sm font-bold">3</span>
-                  </div>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Distributed by tiers:</span> The pool is distributed to members based on their tier and random selection
-                  </p>
-                </li>
-              </ul>
-            </div>
-            
-            <div className="flex items-center">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mr-4">
-                <Users className="h-6 w-6" />
-              </div>
-              <p className="text-gray-600 text-sm">
-                <span className="block text-lg font-medium text-gray-800">Community-Powered Finance</span>
-                Your success helps others, and their success helps you
-              </p>
-            </div>
-          </div>
-          
+        <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
             <div className="flex items-center justify-center">
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center mb-6">
