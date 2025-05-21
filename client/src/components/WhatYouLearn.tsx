@@ -120,7 +120,7 @@ export default function WhatYouLearn() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="gap-2">
-                      <span>Preview a Lesson Quiz</span>
+                      <span>Preview a Lesson</span>
                       <BookOpen className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
@@ -212,31 +212,8 @@ export default function WhatYouLearn() {
                 </Dialog>
               </div>
 
-              <div className="border rounded-xl shadow-md mb-8">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b px-6 py-4 rounded-t-xl">
-                  <h4 className="font-bold text-xl">Debt Avalanche vs. Debt Snowball</h4>
-                  <p className="text-gray-600 text-sm">
-                    A preview of the lessons you'll get as a member
-                  </p>
-                </div>
-                <div className="p-6">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium text-lg mb-3">The Two Main Debt Repayment Strategies</h4>
-                    <p className="text-gray-600 mb-3">
-                      <strong>Debt Avalanche:</strong> Pay minimum payments on all debts, then use extra money to pay off the highest interest rate debt first. This saves you the most money mathematically.
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Debt Snowball:</strong> Pay minimum payments on all debts, then use extra money to pay off the smallest balance first, regardless of interest rate. This gives you quick wins for motivation.
-                    </p>
-                  </div>
-                  <div className="mt-5 text-center">
-                    <p className="text-sm text-gray-500">Try the interactive lesson quiz to earn 5 points!</p>
-                  </div>
-                </div>
-              </div>
-              
               <div className="mt-8">
-                <h4 className="font-semibold text-lg mb-4">More Lessons:</h4>
+                <h4 className="font-semibold text-lg mb-4">Sample Lessons:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {sampleLessons.map((lesson) => (
                     <div
