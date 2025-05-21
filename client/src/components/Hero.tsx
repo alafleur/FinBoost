@@ -51,13 +51,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
-              Turn Financial Stress Into Financial Progress — <span className="gradient-text">Together</span>
+              Break the cycle. <span className="gradient-text">Build together.</span>
             </h1>
-            <p className="text-gray-600 text-lg md:text-xl mb-4 max-w-lg">
-              Join a collective of members working to improve their financial lives. Learn, take action, and earn points. Each month, half of members are rewarded from a growing pool of cash bonuses — no matter your starting point.
-            </p>
-            <p className="text-primary-600 font-semibold text-lg md:text-xl mb-8 max-w-lg">
-              Level up your finances. Earn monthly cash rewards. Join the movement.
+            <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
+              Earn monthly cash rewards while leveling up your money smarts—with the power of the collective behind you.
             </p>
             <div className="max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
@@ -77,7 +74,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                     onClick={form.handleSubmit(onSubmit)}
                     className="w-full h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 rounded-lg shadow-md transition duration-300 border border-blue-700 whitespace-nowrap text-sm sm:text-base"
                   >
-                    {isPending ? "Joining..." : "Join Waitlist"}
+                    {isPending ? "Joining..." : "Join the Waitlist"}
                   </button>
                 </div>
               </div>

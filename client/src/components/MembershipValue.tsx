@@ -7,10 +7,10 @@ export default function MembershipValue() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Your Membership Works Twice as Hard
+            Your Membership Fuels the Collective
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            Just $19.99/month gives you access to financial education AND fuels the monthly rewards pool—putting money back into the hands of the community.
+            More than half of every membership fee goes back into monthly rewards for members like you.
           </p>
         </div>
         
@@ -21,7 +21,7 @@ export default function MembershipValue() {
               {/* Outer Circle */}
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
               
-              {/* 50% Segment - Rewards Pool */}
+              {/* 55% Segment - Rewards Pool */}
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
@@ -30,19 +30,19 @@ export default function MembershipValue() {
                   transform: 'rotate(0deg)'
                 }}
                 initial={{ opacity: 0, rotate: 0 }}
-                animate={{ opacity: 1, rotate: 180 }}
+                animate={{ opacity: 1, rotate: 198 }}
                 transition={{ duration: 1.2, delay: 0.3 }}
               ></motion.div>
               
-              {/* 30% Segment - Education */}
+              {/* 25% Segment - Education & Platform */}
               <motion.div 
                 className="absolute inset-0 rounded-full border-8 border-transparent"
                 style={{
                   borderBottomColor: '#10B981',  // Green
                   borderRightColor: '#10B981',   // Green
-                  transform: 'rotate(180deg)'
+                  transform: 'rotate(198deg)'
                 }}
-                initial={{ opacity: 0, rotate: 180 }}
+                initial={{ opacity: 0, rotate: 198 }}
                 animate={{ opacity: 1, rotate: 288 }}
                 transition={{ duration: 1, delay: 0.6 }}
               ></motion.div>
@@ -75,15 +75,15 @@ export default function MembershipValue() {
             <h3 className="font-heading font-semibold text-2xl mb-6">Where Your Membership Fee Goes</h3>
             
             <div className="space-y-6">
-              {/* 50% - Rewards Pool */}
+              {/* 55% - Rewards Pool */}
               <div className="flex items-start">
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mr-4">
                   <div className="w-6 h-6 bg-blue-500 rounded-sm"></div>
                 </div>
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-blue-600">50%</span>
-                    <span className="mx-2">–</span>
+                    <span className="text-blue-600">55%</span>
+                    <span className="mx-2">→</span>
                     Rewards Pool
                   </p>
                   <p className="text-gray-600">
@@ -92,16 +92,16 @@ export default function MembershipValue() {
                 </div>
               </div>
               
-              {/* 30% - Financial Education */}
+              {/* 25% - Education & Platform */}
               <div className="flex items-start">
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mr-4">
                   <div className="w-6 h-6 bg-green-500 rounded-sm"></div>
                 </div>
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-green-600">30%</span>
-                    <span className="mx-2">–</span>
-                    Financial Education & Tools
+                    <span className="text-green-600">25%</span>
+                    <span className="mx-2">→</span>
+                    Education & Platform
                   </p>
                   <p className="text-gray-600">
                     Access bite-sized lessons, quizzes, and planning resources.
@@ -117,8 +117,8 @@ export default function MembershipValue() {
                 <div>
                   <p className="font-bold text-xl text-gray-800 flex items-center">
                     <span className="text-purple-600">20%</span>
-                    <span className="mx-2">–</span>
-                    Platform Operations
+                    <span className="mx-2">→</span>
+                    Operations
                   </p>
                   <p className="text-gray-600">
                     Supports the tech and growth of the community.

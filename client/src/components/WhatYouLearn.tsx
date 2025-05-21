@@ -7,6 +7,7 @@ import {
   BookOpen, 
   ArrowRight 
 } from 'lucide-react';
+import LessonsPreviewModal from './LessonsPreviewModal';
 import {
   Dialog,
   DialogContent,
