@@ -3,23 +3,7 @@ import { motion } from "framer-motion";
 import RewardSteps from "./RewardSteps";
 
 export default function PowerOfCollective() {
-  const tiers = [
-    {
-      members: '1,000',
-      pool: '$10,000',
-      width: '25%'
-    },
-    {
-      members: '5,000',
-      pool: '$50,000',
-      width: '50%'
-    },
-    {
-      members: '10,000',
-      pool: '$100,000+',
-      width: '100%'
-    }
-  ];
+  // No tiers needed anymore since we removed the reward pool growth section
 
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-white to-gray-50" id="power-of-collective">
@@ -85,40 +69,15 @@ export default function PowerOfCollective() {
           </div>
           
           <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
-            <h3 className="font-heading font-semibold text-xl mb-8 text-center">Reward Pool Growth</h3>
-            
-            <div className="space-y-8">
-              {tiers.map((tier, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-2">
-                    <div>
-                      <span className="text-xl md:text-2xl font-bold">{tier.members}</span>
-                      <span className="text-gray-500 ml-2">members</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xl md:text-2xl font-bold gradient-text">{tier.pool}</span>
-                      <span className="text-gray-500 ml-2">rewards pool</span>
-                    </div>
-                  </div>
-                  <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary-500 to-primary-600"
-                      style={{ width: '0%' }}
-                      animate={{ width: tier.width }}
-                      transition={{ 
-                        duration: 1.5,
-                        delay: index * 0.3,
-                        ease: "easeOut"
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center mb-6">
+                <Users className="h-10 w-10 text-white" />
+              </div>
             </div>
-            
-            <div className="mt-8 text-center text-gray-500 text-sm">
-              These figures are illustrative and based on a portion of membership fees going to the rewards pool.
-            </div>
+            <h3 className="font-heading font-semibold text-xl mb-4 text-center">Join a Community That Grows Together</h3>
+            <p className="text-gray-600 text-center">
+              Our members support each other's financial journeys through shared knowledge, accountability, and a rewards system that benefits everyone.
+            </p>
           </div>
         </div>
         
