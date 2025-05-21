@@ -1,4 +1,4 @@
-import { Plus, TrendingUp, DollarSign, RefreshCw } from "lucide-react";
+import { Users, Shield, Award, Target } from "lucide-react";
 import FlywheelGraphic from "./FlywheelGraphic";
 
 interface Feature {
@@ -14,25 +14,25 @@ export default function WhyItWorks() {
   const features: Feature[] = [
     {
       id: 1,
-      title: "More members means a larger monthly rewards pool",
-      description: "The more members who join, the larger the rewards for everyone.",
-      icon: <Plus className="h-5 w-5" />,
-      bgColor: "bg-green-100",
-      iconColor: "text-secondary-500",
+      title: "Community-powered progress",
+      description: "Learn alongside others who share your financial goals and challenges.",
+      icon: <Users className="h-5 w-5" />,
+      bgColor: "bg-purple-100",
+      iconColor: "text-purple-600",
     },
     {
       id: 2,
-      title: "Merit-based rewards system for everyone",
-      description: "The top 50% of members by points are guaranteed monthly cash rewards.",
-      icon: <TrendingUp className="h-5 w-5" />,
+      title: "Accountability that works",
+      description: "Stay motivated with a system that rewards consistent participation.",
+      icon: <Target className="h-5 w-5" />,
       bgColor: "bg-blue-100",
       iconColor: "text-primary-500",
     },
     {
       id: 3,
-      title: "Cash rewards reinforce better habits",
-      description: "Real financial incentives help you stay committed to your money goals.",
-      icon: <DollarSign className="h-5 w-5" />,
+      title: "Real-world financial improvement",
+      description: "Apply what you learn to see actual improvement in your financial situation.",
+      icon: <Award className="h-5 w-5" />,
       bgColor: "bg-amber-100",
       iconColor: "text-accent-500",
     },
@@ -43,8 +43,8 @@ export default function WhyItWorks() {
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">How Our Reward System Benefits Everyone</h2>
-            <p className="text-gray-600 mb-8">Our platform creates a positive feedback loop where everyone benefits from collective growth.</p>
+            <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">Why Our Approach Is Different</h2>
+            <p className="text-gray-600 mb-8">We combine community support, accountability, and real-world application to create lasting financial change.</p>
             
             <div className="space-y-6">
               {features.map((feature) => (
@@ -62,24 +62,35 @@ export default function WhyItWorks() {
           </div>
           
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <h3 className="font-heading font-semibold text-xl mb-6 text-center">The Financial Growth System</h3>
+            <h3 className="font-heading font-semibold text-xl mb-6 text-center">Membership Benefits</h3>
             
             <div className="mt-2 text-center mb-6">
-              <p className="text-gray-600">Our unique approach makes financial progress rewarding and sustainable</p>
+              <p className="text-gray-600">A simple, transparent system designed for your financial success</p>
             </div>
             
-            <div className="grid grid-cols-3 gap-4 mt-6">
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">$19.99</div>
-                <div className="text-sm text-gray-600">Monthly Fee</div>
+            <div className="grid grid-cols-1 gap-4 mt-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <Shield className="h-5 w-5 text-primary-600 mr-2" />
+                  <div className="font-semibold">Expert-Curated Content</div>
+                </div>
+                <p className="text-sm text-gray-600">Access financial education designed by industry experts</p>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">50%</div>
-                <div className="text-sm text-gray-600">To Rewards Pool</div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <Users className="h-5 w-5 text-primary-600 mr-2" />
+                  <div className="font-semibold">Supportive Community</div>
+                </div>
+                <p className="text-sm text-gray-600">Connect with others on the same financial journey</p>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-primary-600">Merit</div>
-                <div className="text-sm text-gray-600">Based System</div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <Award className="h-5 w-5 text-primary-600 mr-2" />
+                  <div className="font-semibold">Monthly Cash Rewards</div>
+                </div>
+                <p className="text-sm text-gray-600">Earn real money as you learn and participate</p>
               </div>
             </div>
           </div>
