@@ -122,12 +122,6 @@ export default function MembershipValue() {
                 </div>
               </div>
             </div>
-            
-            <div className="mt-8 pt-4 border-t border-gray-200">
-              <p className="text-gray-700 font-medium">
-                A membership that benefits everyone. The more we grow, the more we all get rewarded.
-              </p>
-            </div>
           </div>
         </div>
       </div>
