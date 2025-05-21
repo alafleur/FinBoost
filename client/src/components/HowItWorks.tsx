@@ -35,6 +35,7 @@ export default function HowItWorks() {
         <div className="text-center mb-16">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">🧭 How It Works</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">Our platform makes financial education rewarding through a simple three-step process</p>
+          <p className="text-lg font-medium text-primary-600 mt-4"><span className="font-bold">Break the cycle. Build together.</span> — A new approach to financial wellness.</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
