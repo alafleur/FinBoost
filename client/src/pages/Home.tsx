@@ -15,6 +15,7 @@ import HowRewardsWork from "@/components/HowRewardsWork";
 import FlywheelGraphic from "@/components/FlywheelGraphic";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
+import { Plus, RefreshCw } from "lucide-react";
 
 export default function Home() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -33,12 +34,43 @@ export default function Home() {
         
         {/* Financial Growth Flywheel */}
         <section className="py-12 px-4 bg-gray-50">
-          <div className="container mx-auto max-w-5xl">
-            <div className="text-center mb-8">
-              <h2 className="font-heading font-bold text-3xl">The Virtuous Cycle of Financial Growth</h2>
-              <p className="text-gray-600 mt-3 max-w-2xl mx-auto">Our platform creates a continuous cycle of learning, earning, and improving your financial well-being</p>
+          <div className="container mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">It's a Flywheel That Lifts Everyone</h2>
+                <p className="text-gray-600 mb-8">Our platform creates a positive feedback loop where everyone benefits from collective growth.</p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <span className="text-secondary-500"><Plus className="h-5 w-5" /></span>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="font-heading font-medium text-lg">More members means a larger monthly rewards pool</h3>
+                      <p className="text-gray-600 mt-1">The more members who join, the larger the rewards for everyone.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                      <span className="text-purple-500"><RefreshCw className="h-5 w-5" /></span>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="font-heading font-medium text-lg">Virtuous cycle of financial growth</h3>
+                      <p className="text-gray-600 mt-1">Our flywheel model creates a continuous cycle of improvement.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-center mb-5">
+                  <h3 className="font-heading font-semibold text-xl mb-3">The Virtuous Cycle of Financial Growth</h3>
+                  <p className="text-gray-600 text-sm">Learn → Earn → Reward → Improve → Repeat</p>
+                </div>
+                <FlywheelGraphic />
+              </div>
             </div>
-            <FlywheelGraphic />
           </div>
         </section>
         
