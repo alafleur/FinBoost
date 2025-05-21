@@ -79,19 +79,19 @@ export default function HowItWorks() {
         </div>
         
         {/* Key Points Summary Card */}
-        <div className="mt-10 bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl shadow-lg p-6 max-w-4xl mx-auto text-white">
+        <div className="mt-10 bg-white border border-primary-200 rounded-xl shadow-lg p-6 max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center border-r border-primary-500 pr-4 last:border-r-0">
-              <div className="text-3xl font-bold mb-2">50%</div>
-              <p className="text-primary-100">of member fees go directly to the rewards pool</p>
+            <div className="text-center border-r border-gray-200 pr-4 last:border-r-0">
+              <div className="text-3xl font-bold mb-2 text-primary-600">50%</div>
+              <p className="text-gray-700">of member fees go directly to the rewards pool</p>
             </div>
-            <div className="text-center border-r border-primary-500 pr-4 last:border-r-0">
-              <div className="text-3xl font-bold mb-2">50%</div>
-              <p className="text-primary-100">of members receive monthly cash rewards</p>
+            <div className="text-center border-r border-gray-200 pr-4 last:border-r-0">
+              <div className="text-3xl font-bold mb-2 text-primary-600">50%</div>
+              <p className="text-gray-700">of members receive monthly cash rewards</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold mb-2">$1,000+</div>
-              <p className="text-primary-100">top rewards can reach thousands in larger pools</p>
+              <div className="text-3xl font-bold mb-2 text-primary-600">$1,000+</div>
+              <p className="text-gray-700">top rewards can reach thousands in larger pools</p>
             </div>
           </div>
         </div>
