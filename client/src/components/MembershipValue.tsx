@@ -21,44 +21,40 @@ export default function MembershipValue() {
               {/* Outer Circle */}
               <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
               
-              {/* Blue segment (55%) - Rewards Pool */}
-              <motion.div 
-                className="absolute inset-0 rounded-full border-8 border-transparent"
-                style={{
-                  borderTopColor: '#4285F4',
-                  borderRightColor: '#4285F4',
-                  borderBottomColor: '#4285F4',
-                  transform: 'rotate(0deg)'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2, delay: 0.3 }}
-              ></motion.div>
-              
-              {/* Green segment (25%) - Education & Platform */}
-              <motion.div 
-                className="absolute inset-0 rounded-full border-8 border-transparent"
-                style={{
-                  borderLeftColor: '#34A853',
-                  borderTopColor: '#34A853',
-                  transform: 'rotate(0deg)'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 0.6 }}
-              ></motion.div>
-              
-              {/* Purple segment (20%) - Operations */}
-              <motion.div 
-                className="absolute inset-0 rounded-full border-8 border-transparent"
-                style={{
-                  borderTopColor: '#A142F4',
-                  transform: 'rotate(270deg)'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.9 }}
-              ></motion.div>
+              {/* Create a real pie chart using SVG instead of borders */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="white" stroke="#f1f1f1" strokeWidth="4"/>
+                
+                {/* Blue segment (55%) - Rewards Pool */}
+                <motion.path
+                  d="M50,50 L50,2 A48,48 0 0,1 96,50 A48,48 0 0,1 50,98 L50,50 Z"
+                  fill="#4285F4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                />
+                
+                {/* Green segment (25%) - Education & Platform */}
+                <motion.path
+                  d="M50,50 L50,98 A48,48 0 0,1 2,50 L50,50 Z"
+                  fill="#34A853"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                />
+                
+                {/* Purple segment (20%) - Operations */}
+                <motion.path
+                  d="M50,50 L2,50 A48,48 0 0,1 50,2 L50,50 Z"
+                  fill="#A142F4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                />
+                
+                {/* White center circle */}
+                <circle cx="50" cy="50" r="36" fill="white" stroke="#f8f8f8" strokeWidth="1"/>
+              </svg>
               
               {/* Center Content */}
               <div className="absolute inset-0 flex items-center justify-center">
