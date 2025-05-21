@@ -15,7 +15,7 @@ import HowRewardsWork from "@/components/HowRewardsWork";
 import FlywheelGraphic from "@/components/FlywheelGraphic";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import FlywheelFeatures from "@/components/FlywheelFeatures";
 
 export default function Home() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -35,15 +35,20 @@ export default function Home() {
         {/* Financial Growth Flywheel */}
         <section className="py-12 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-8">
+              <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">It's a Flywheel That Lifts Everyone</h2>
+              <p className="text-gray-600 mx-auto max-w-3xl">Our platform creates a positive feedback loop where everyone benefits from collective growth.</p>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">It's a Flywheel That Lifts Everyone</h2>
-                <p className="text-gray-600 mb-8">Our platform creates a positive feedback loop where everyone benefits from collective growth.</p>
-                
                 <div className="space-y-6">
+                  {/* Feature 1 */}
                   <div className="flex items-start">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <span className="text-secondary-500"><Plus className="h-5 w-5" /></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
                     </div>
                     <div className="ml-4">
                       <h3 className="font-heading font-medium text-lg">More members means a larger monthly rewards pool</h3>
@@ -51,13 +56,29 @@ export default function Home() {
                     </div>
                   </div>
                   
+                  {/* Feature 2 */}
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                      <span className="text-purple-500"><RefreshCw className="h-5 w-5" /></span>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
                     </div>
                     <div className="ml-4">
-                      <h3 className="font-heading font-medium text-lg">Virtuous cycle of financial growth</h3>
-                      <p className="text-gray-600 mt-1">Our flywheel model creates a continuous cycle of improvement.</p>
+                      <h3 className="font-heading font-medium text-lg">Merit-based rewards system for everyone</h3>
+                      <p className="text-gray-600 mt-1">The top 50% of members by points are guaranteed monthly cash rewards.</p>
+                    </div>
+                  </div>
+                  
+                  {/* Feature 3 */}
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="font-heading font-medium text-lg">Cash rewards reinforce better habits</h3>
+                      <p className="text-gray-600 mt-1">Real financial incentives help you stay committed to your money goals.</p>
                     </div>
                   </div>
                 </div>
