@@ -7,7 +7,7 @@ export default function HowRewardsWork() {
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-10">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            <span className="text-primary-500">💪</span> The Power of the Collective
+            <span className="text-primary-500">💪</span> Strength in Numbers
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
             The more members who join, the larger the monthly rewards pool.
