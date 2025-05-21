@@ -115,7 +115,6 @@ export default function Home() {
         <HowRewardsWork />
         
         {/* 4. Why Join / Value Prop Blocks */}
-        <WhyItWorks />
         <WhatYouLearn />
         <PowerOfCollective />
         
