@@ -34,11 +34,11 @@ export default function Home() {
         {/* 1. Hero Section */}
         <Hero onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         
-        {/* 2. Membership Value Section */}
-        <MembershipValue />
-        
-        {/* 3. How It Works */}
+        {/* 2. How It Works */}
         <HowItWorks />
+        
+        {/* 3. Membership Value Section */}
+        <MembershipValue />
         
         {/* 4. The Rewards Pool / Power of the Collective */}
         <HowRewardsWork />
