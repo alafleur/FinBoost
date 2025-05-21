@@ -43,7 +43,20 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="space-y-6">
-                  {/* Feature 1 */}
+                  {/* Feature 1 - Learn */}
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="font-heading font-medium text-lg">Learn and grow with expert-led content</h3>
+                      <p className="text-gray-600 mt-1">Enhance your financial knowledge with interactive lessons and practical exercises.</p>
+                    </div>
+                  </div>
+                  
+                  {/* Feature 2 - More members */}
                   <div className="flex items-start">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,7 +69,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  {/* Feature 2 */}
+                  {/* Feature 3 - Merit-based */}
                   <div className="flex items-start">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,7 +82,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  {/* Feature 3 */}
+                  {/* Feature 4 - Cash rewards */}
                   <div className="flex items-start">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
