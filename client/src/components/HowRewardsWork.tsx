@@ -7,10 +7,12 @@ export default function HowRewardsWork() {
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-10">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            <span className="text-accent-500">💸</span> How Rewards Work
+            <span className="text-primary-500">💪</span> The Power of the Collective
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            Each month, more than half of all membership fees go back to members through our collective rewards pool.
+            The more members who join, the larger the monthly rewards pool.
+            <br />
+            <span className="font-medium">Real people. Real money. Real financial progress.</span>
           </p>
         </div>
         
