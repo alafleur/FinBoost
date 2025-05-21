@@ -1,5 +1,6 @@
 import { Users } from "lucide-react";
 import { motion } from "framer-motion";
+import RewardSteps from "./RewardSteps";
 
 export default function PowerOfCollective() {
   const tiers = [
@@ -119,6 +120,11 @@ export default function PowerOfCollective() {
               These figures are illustrative and based on a portion of membership fees going to the rewards pool.
             </div>
           </div>
+        </div>
+        
+        <div className="mt-16">
+          <h3 className="text-2xl font-semibold text-center mb-8">How Our Reward System Works</h3>
+          <RewardSteps />
         </div>
       </div>
     </section>
