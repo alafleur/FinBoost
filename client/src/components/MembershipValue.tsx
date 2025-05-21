@@ -16,28 +16,49 @@ export default function MembershipValue() {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left column - Pie Chart */}
-          <div className="flex justify-center">
-            <div className="relative w-80 h-80">
-              {/* Colored segments */}
-              <div className="absolute inset-0 overflow-hidden rounded-full border-[12px] border-gray-100">
-                <div className="w-full h-full relative">
-                  {/* Blue segment (55%) */}
-                  <div className="absolute top-0 right-0 bottom-0 left-0 bg-[#4285F4] rounded-full" 
-                       style={{ clipPath: 'polygon(50% 50%, 100% 0%, 100% 100%, 50% 100%)' }}></div>
-                  
-                  {/* Green segment (25%) */}
-                  <div className="absolute top-0 right-0 bottom-0 left-0 bg-[#34A853] rounded-full" 
-                       style={{ clipPath: 'polygon(50% 50%, 50% 100%, 0% 100%, 0% 50%)' }}></div>
-                  
-                  {/* Purple segment (20%) */}
-                  <div className="absolute top-0 right-0 bottom-0 left-0 bg-[#A142F4] rounded-full" 
-                       style={{ clipPath: 'polygon(50% 50%, 0% 50%, 0% 0%, 50% 0%)' }}></div>
-                </div>
-              </div>
+          <div className="relative">
+            <div className="w-[320px] h-[320px] mx-auto relative">
+              {/* Outer Circle */}
+              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+              
+              {/* Create a real pie chart using SVG instead of borders */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="white" stroke="#f1f1f1" strokeWidth="4"/>
+                
+                {/* Blue segment (55%) - Rewards Pool */}
+                <motion.path
+                  d="M50,50 L50,2 A48,48 0 0,1 96,50 A48,48 0 0,1 50,98 L50,50 Z"
+                  fill="#4285F4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                />
+                
+                {/* Green segment (25%) - Education & Platform */}
+                <motion.path
+                  d="M50,50 L50,98 A48,48 0 0,1 2,50 L50,50 Z"
+                  fill="#34A853"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                />
+                
+                {/* Purple segment (20%) - Operations */}
+                <motion.path
+                  d="M50,50 L2,50 A48,48 0 0,1 50,2 L50,50 Z"
+                  fill="#A142F4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                />
+                
+                {/* White center circle */}
+                <circle cx="50" cy="50" r="36" fill="white" stroke="#f8f8f8" strokeWidth="1"/>
+              </svg>
               
               {/* Center Content */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white rounded-full w-52 h-52 flex flex-col items-center justify-center shadow-sm">
+                <div className="bg-white rounded-full w-[240px] h-[240px] flex flex-col items-center justify-center shadow-md">
                   <p className="text-4xl font-bold text-gray-800">$20</p>
                   <p className="text-gray-500 text-sm">monthly membership</p>
                 </div>
