@@ -18,22 +18,8 @@ export default function PowerOfCollective() {
             <span className="font-medium">Real people. Real money. Real financial progress.</span>
           </p>
         </div>
-        
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
-            <div className="flex items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center mb-6">
-                <Users className="h-10 w-10 text-white" />
-              </div>
-            </div>
-            <h3 className="font-heading font-semibold text-xl mb-4 text-center">Join a Community That Grows Together</h3>
-            <p className="text-gray-600 text-center">
-              Our members support each other's financial journeys through shared knowledge, accountability, and a rewards system that benefits everyone.
-            </p>
-          </div>
-        </div>
-        
-        <div className="mt-16">
+
+        <div className="mt-6">
           <h3 className="text-2xl font-semibold text-center mb-8">How Our Reward System Works</h3>
           <RewardSteps />
         </div>
