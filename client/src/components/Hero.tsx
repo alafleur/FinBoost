@@ -78,9 +78,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                   </button>
                 </div>
               </div>
-              <div className="mt-4 flex justify-center sm:justify-start">
-                <QuizDialog />
-              </div>
+
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
           </div>
@@ -124,6 +122,9 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p className="text-gray-600">Join a community that grows together</p>
                 <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
+                <div className="mt-3">
+                  <QuizDialog />
+                </div>
               </div>
             </div>
           </div>
