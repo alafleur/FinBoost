@@ -18,12 +18,10 @@ export default function MembershipValue() {
           {/* Left column - Pie Chart */}
           <div className="relative">
             <div className="w-[320px] h-[320px] mx-auto relative">
-              {/* Outer Circle */}
-              <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
-              
               {/* Create a real pie chart using SVG instead of borders */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="48" fill="white" stroke="#f1f1f1" strokeWidth="4"/>
+                <circle cx="50" cy="50" r="50" fill="#f1f1f1" />
+                <circle cx="50" cy="50" r="48" fill="white" />
                 
                 {/* Blue segment (55%) - Rewards Pool */}
                 <motion.path
