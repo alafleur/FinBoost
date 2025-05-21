@@ -38,6 +38,7 @@ export default function Home() {
             <div className="text-center mb-8">
               <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">It's a Flywheel That Lifts Everyone</h2>
               <p className="text-gray-600 mx-auto max-w-3xl">Our platform creates a positive feedback loop where everyone benefits from collective growth.</p>
+              <p className="text-lg font-medium text-primary-600 mt-3">Fair and merit-based rewards system for everyone</p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
