@@ -51,7 +51,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div className="ml-4">
-                      <h3 className="font-heading font-medium text-lg">Learn and grow with expert-led content</h3>
+                      <h3 className="font-heading font-medium text-lg">Learn and grow your financial know-how with easily digestible content</h3>
                       <p className="text-gray-600 mt-1">Enhance your financial knowledge with interactive lessons and practical exercises.</p>
                     </div>
                   </div>
