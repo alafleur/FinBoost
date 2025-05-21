@@ -116,89 +116,121 @@ export default function WhatYouLearn() {
             <div className="mt-12">
               <h3 className="font-heading font-semibold text-2xl mb-6 text-center">Preview of Lessons</h3>
 
-              <div className="border rounded-xl shadow-md mb-12">
+              <div className="flex justify-center mb-8">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <span>Preview a Lesson Quiz</span>
+                      <BookOpen className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold">Debt Avalanche vs. Debt Snowball</DialogTitle>
+                      <DialogDescription>
+                        A preview of the lessons you'll get as a member
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-6">
+                      <div className="space-y-6">
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <h4 className="font-medium text-lg mb-3">The Two Main Debt Repayment Strategies</h4>
+                          <p className="text-gray-600 mb-3">
+                            <strong>Debt Avalanche:</strong> Pay minimum payments on all debts, then use extra money to pay off the highest interest rate debt first. This saves you the most money mathematically.
+                          </p>
+                          <p className="text-gray-600">
+                            <strong>Debt Snowball:</strong> Pay minimum payments on all debts, then use extra money to pay off the smallest balance first, regardless of interest rate. This gives you quick wins for motivation.
+                          </p>
+                        </div>
+                        
+                        {!showResult ? (
+                          <div className="border rounded-lg p-4">
+                            <h4 className="font-medium text-lg mb-4">Quick Quiz</h4>
+                            <p className="mb-4">Which debt repayment method would save you the most money over time?</p>
+                            
+                            <RadioGroup value={selectedAnswer || ""} onValueChange={setSelectedAnswer}>
+                              <div className="flex items-center space-x-2 mb-3">
+                                <RadioGroupItem value="avalanche" id="avalanche" />
+                                <Label htmlFor="avalanche">Debt Avalanche</Label>
+                              </div>
+                              <div className="flex items-center space-x-2 mb-3">
+                                <RadioGroupItem value="snowball" id="snowball" />
+                                <Label htmlFor="snowball">Debt Snowball</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="both" id="both" />
+                                <Label htmlFor="both">They save the same amount</Label>
+                              </div>
+                            </RadioGroup>
+                            
+                            <Button 
+                              className="mt-4"
+                              onClick={() => setShowResult(true)}
+                              disabled={!selectedAnswer}
+                            >
+                              Check Answer
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border rounded-lg p-4">
+                            <h4 className="font-medium text-lg mb-3">Answer:</h4>
+                            
+                            {selectedAnswer === "avalanche" ? (
+                              <div className="p-3 bg-green-50 border border-green-200 rounded text-green-800 mb-4">
+                                <p className="font-medium">Correct! 🎉</p>
+                                <p>The Debt Avalanche method (focusing on highest interest rates first) will save you the most money over time.</p>
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 mb-4">
+                                <p className="font-medium">Not quite!</p>
+                                <p>The Debt Avalanche method (focusing on highest interest rates first) will save you the most money over time.</p>
+                              </div>
+                            )}
+                            
+                            <p className="text-primary-600 font-medium">+ 5 points awarded for quiz completion</p>
+                            
+                            <Button 
+                              variant="outline" 
+                              className="mt-4"
+                              onClick={resetQuiz}
+                            >
+                              Try Again
+                            </Button>
+                          </div>
+                        )}
+                        
+                        <div className="text-center text-sm text-gray-500 mt-4">
+                          Earn points when you complete real tutorials like this inside the app.
+                        </div>
+                        
+                        <div className="text-center text-xs text-gray-400">
+                          📚 More modules coming soon
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="border rounded-xl shadow-md mb-8">
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b px-6 py-4 rounded-t-xl">
                   <h4 className="font-bold text-xl">Debt Avalanche vs. Debt Snowball</h4>
                   <p className="text-gray-600 text-sm">
                     A preview of the lessons you'll get as a member
                   </p>
                 </div>
-
                 <div className="p-6">
-                  <div className="space-y-6">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-lg mb-3">The Two Main Debt Repayment Strategies</h4>
-                      <p className="text-gray-600 mb-3">
-                        <strong>Debt Avalanche:</strong> Pay minimum payments on all debts, then use extra money to pay off the highest interest rate debt first. This saves you the most money mathematically.
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Debt Snowball:</strong> Pay minimum payments on all debts, then use extra money to pay off the smallest balance first, regardless of interest rate. This gives you quick wins for motivation.
-                      </p>
-                    </div>
-                    
-                    {!showResult ? (
-                      <div className="border rounded-lg p-4">
-                        <h4 className="font-medium text-lg mb-4">Quick Quiz</h4>
-                        <p className="mb-4">Which debt repayment method would save you the most money over time?</p>
-                        
-                        <RadioGroup value={selectedAnswer || ""} onValueChange={setSelectedAnswer}>
-                          <div className="flex items-center space-x-2 mb-3">
-                            <RadioGroupItem value="avalanche" id="avalanche" />
-                            <Label htmlFor="avalanche">Debt Avalanche</Label>
-                          </div>
-                          <div className="flex items-center space-x-2 mb-3">
-                            <RadioGroupItem value="snowball" id="snowball" />
-                            <Label htmlFor="snowball">Debt Snowball</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="both" id="both" />
-                            <Label htmlFor="both">They save the same amount</Label>
-                          </div>
-                        </RadioGroup>
-                        
-                        <Button 
-                          className="mt-4"
-                          onClick={() => setShowResult(true)}
-                          disabled={!selectedAnswer}
-                        >
-                          Check Answer
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="border rounded-lg p-4">
-                        <h4 className="font-medium text-lg mb-3">Answer:</h4>
-                        
-                        {selectedAnswer === "avalanche" ? (
-                          <div className="p-3 bg-green-50 border border-green-200 rounded text-green-800 mb-4">
-                            <p className="font-medium">Correct! 🎉</p>
-                            <p>The Debt Avalanche method (focusing on highest interest rates first) will save you the most money over time.</p>
-                          </div>
-                        ) : (
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 mb-4">
-                            <p className="font-medium">Not quite!</p>
-                            <p>The Debt Avalanche method (focusing on highest interest rates first) will save you the most money over time.</p>
-                          </div>
-                        )}
-                        
-                        <p className="text-primary-600 font-medium">+ 5 points awarded for quiz completion</p>
-                        
-                        <Button 
-                          variant="outline" 
-                          className="mt-4"
-                          onClick={resetQuiz}
-                        >
-                          Try Again
-                        </Button>
-                      </div>
-                    )}
-                    
-                    <div className="text-center text-sm text-gray-500">
-                      Earn points when you complete real tutorials like this inside the app.
-                    </div>
-                    
-                    <div className="text-center text-xs text-gray-400">
-                      📚 More modules coming soon
-                    </div>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-lg mb-3">The Two Main Debt Repayment Strategies</h4>
+                    <p className="text-gray-600 mb-3">
+                      <strong>Debt Avalanche:</strong> Pay minimum payments on all debts, then use extra money to pay off the highest interest rate debt first. This saves you the most money mathematically.
+                    </p>
+                    <p className="text-gray-600">
+                      <strong>Debt Snowball:</strong> Pay minimum payments on all debts, then use extra money to pay off the smallest balance first, regardless of interest rate. This gives you quick wins for motivation.
+                    </p>
+                  </div>
+                  <div className="mt-5 text-center">
+                    <p className="text-sm text-gray-500">Try the interactive lesson quiz to earn 5 points!</p>
                   </div>
                 </div>
               </div>
