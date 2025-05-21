@@ -20,7 +20,6 @@ export default function PowerOfCollective() {
         </div>
 
         <div className="mt-6">
-          <h3 className="text-2xl font-semibold text-center mb-8">How Our Reward System Works</h3>
           <RewardSteps />
         </div>
       </div>
