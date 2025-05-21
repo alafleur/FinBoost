@@ -91,48 +91,44 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
           </div>
           <div className="relative">
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-              <h3 className="font-heading font-semibold text-lg mb-6 text-center">More Members = Bigger Monthly Rewards</h3>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>1,000 Members</span>
-                    <span className="font-medium">$10,000 Pool</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                    <div className="reward-pool" style={{ width: "20%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>5,000 Members</span>
-                    <span className="font-medium">$50,000 Pool</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                    <div className="reward-pool" style={{ width: "50%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>10,000 Members</span>
-                    <span className="font-medium">$100,000 Pool</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                    <div className="reward-pool" style={{ width: "75%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>25,000+ Members</span>
-                    <span className="font-medium">$250,000+ Pool</span>
-                  </div>
-                  <div className="bg-gray-200 rounded-full h-[30px] w-full overflow-hidden">
-                    <div className="reward-pool" style={{ width: "100%" }}></div>
-                  </div>
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center">
+                  <BarChart2 className="h-10 w-10 text-white" />
                 </div>
               </div>
-              <div className="mt-8 text-center text-sm text-gray-500">
-                <p>The more members join, the larger the monthly rewards pool becomes</p>
-                <p className="mt-2 text-xs font-medium text-gray-600">Based on $19.99 monthly membership fee</p>
+              
+              <h3 className="font-heading font-semibold text-xl mb-4 text-center">Financial Progress Made Simple</h3>
+              
+              <ul className="space-y-4 mt-6">
+                <li className="flex items-center">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-700">Learn essential financial skills</p>
+                </li>
+                <li className="flex items-center">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-700">Take action and earn points</p>
+                </li>
+                <li className="flex items-center">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-700">Receive cash rewards monthly</p>
+                </li>
+              </ul>
+              
+              <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+                <p className="text-gray-600">Join a community that grows together</p>
+                <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
               </div>
             </div>
           </div>
