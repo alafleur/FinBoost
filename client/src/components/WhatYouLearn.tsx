@@ -84,7 +84,9 @@ export default function WhatYouLearn() {
               <span className="text-accent-500 font-medium">⏱</span> Most lessons take 3–5 minutes and include quick quizzes that help you earn points.
             </p>
             
-            <div className="mt-8">
+            <div className="mt-8 flex items-center gap-4">
+              <LessonsPreviewModal />
+              
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="gap-2">
