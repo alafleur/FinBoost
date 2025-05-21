@@ -51,33 +51,7 @@ export default function HowItWorks() {
             </div>
           ))}
         </div>
-        
-        <div className="mt-12 bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm max-w-3xl mx-auto">
-          <p className="text-center text-lg font-medium flex items-center justify-center gap-2 mb-4">
-            <span className="text-accent-500">💰</span> Example Reward Distribution
-          </p>
-          <p className="text-gray-600 mb-6 text-center">
-            If the reward pool is $100,000, the top third shares $50,000, the middle third shares $35,000, and the bottom third shares $15,000.
-          </p>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-primary-50 p-4 rounded-lg text-center">
-              <p className="font-semibold text-lg">Top Tier</p>
-              <p className="text-primary-600 font-bold text-xl">$50,000</p>
-              <p className="text-sm text-gray-600">50% of pool</p>
-            </div>
-            <div className="bg-secondary-50 p-4 rounded-lg text-center">
-              <p className="font-semibold text-lg">Middle Tier</p>
-              <p className="text-secondary-600 font-bold text-xl">$35,000</p>
-              <p className="text-sm text-gray-600">35% of pool</p>
-            </div>
-            <div className="bg-accent-50 p-4 rounded-lg text-center">
-              <p className="font-semibold text-lg">Bottom Tier</p>
-              <p className="text-accent-600 font-bold text-xl">$15,000</p>
-              <p className="text-sm text-gray-600">15% of pool</p>
-            </div>
-          </div>
-        </div>
-        
+
         {/* Key Points Summary */}
         <div className="mt-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-8 max-w-4xl mx-auto border border-blue-100">
           <h3 className="text-2xl font-bold text-center mb-8 text-gray-800 flex items-center justify-center">
