@@ -15,6 +15,11 @@ export interface IStorage {
   getSubscribersCount(): Promise<number>;
 }
 
+import fs from 'fs/promises';
+import path from 'path';
+
+const STORAGE_FILE = 'subscribers.json';
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private subscribers: Map<number, Subscriber>;
@@ -26,6 +31,27 @@ export class MemStorage implements IStorage {
     this.subscribers = new Map();
     this.currentUserId = 1;
     this.currentSubscriberId = 1;
+    this.loadFromFile();
+  }
+
+  private async loadFromFile() {
+    try {
+      const data = await fs.readFile(STORAGE_FILE, 'utf-8');
+      const json = JSON.parse(data);
+      this.subscribers = new Map(Object.entries(json.subscribers));
+      this.currentSubscriberId = json.currentSubscriberId;
+    } catch (error) {
+      // File doesn't exist yet, start fresh
+      this.saveToFile();
+    }
+  }
+
+  private async saveToFile() {
+    const data = {
+      subscribers: Object.fromEntries(this.subscribers),
+      currentSubscriberId: this.currentSubscriberId
+    };
+    await fs.writeFile(STORAGE_FILE, JSON.stringify(data, null, 2));
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -54,6 +80,7 @@ export class MemStorage implements IStorage {
       createdAt: now.toISOString() 
     };
     this.subscribers.set(id, subscriber);
+    await this.saveToFile();
     return subscriber;
   }
   
