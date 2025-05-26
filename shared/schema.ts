@@ -36,8 +36,14 @@ export const userPointsHistory = pgTable("user_points_history", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   points: integer("points").notNull(),
-  action: text("action").notNull(), // 'tutorial_complete', 'quiz_complete', 'proof_upload', 'referral'
+  action: text("action").notNull(), // 'lesson_complete', 'quiz_complete', 'debt_payment', 'investment', 'savings_upload', 'referral_signup', 'budget_upload', 'emergency_fund', 'credit_score_improvement', 'financial_goal_achieved'
   description: text("description").notNull(),
+  relatedId: integer("related_id"), // Can reference lesson, quiz, or other entity
+  status: text("status").default("pending").notNull(), // 'pending', 'approved', 'rejected' for proof uploads
+  proofUrl: text("proof_url"), // For uploaded evidence
+  reviewedBy: integer("reviewed_by").references(() => users.id), // Admin who reviewed
+  reviewedAt: timestamp("reviewed_at"),
+  metadata: text("metadata"), // JSON string for additional data
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

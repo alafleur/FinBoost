@@ -255,39 +255,214 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok" });
   });
 
-  // Update user points endpoint
-  apiRouter.post("/user/points", authenticateToken, async (req, res) => {
+  // Award points for educational activities (lesson, quiz completion)
+  apiRouter.post("/points/award", authenticateToken, async (req, res) => {
     try {
-      const { points, action, lessonId } = req.body;
+      const { actionId, relatedId, metadata } = req.body;
       const userId = req.user!.id;
 
-      if (!points || !action) {
-        return res.status(400).json({ message: "Points and action are required" });
+      if (!actionId) {
+        return res.status(400).json({ message: "Action ID is required" });
       }
 
-      const user = await storage.getUserById(userId);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      // Import here to avoid circular dependency
+      const { POINTS_CONFIG, getPointsForAction } = await import("@shared/pointsConfig");
+      
+      const actionConfig = POINTS_CONFIG[actionId];
+      if (!actionConfig) {
+        return res.status(400).json({ message: "Invalid action ID" });
       }
 
-      const newTotalPoints = (user.totalPoints || 0) + points;
-      const newCurrentMonthPoints = (user.currentMonthPoints || 0) + points;
+      if (actionConfig.requiresProof) {
+        return res.status(400).json({ message: "This action requires proof upload" });
+      }
 
-      // Update user points
-      await storage.updateUserPoints(userId, newTotalPoints, newCurrentMonthPoints);
+      const points = getPointsForAction(actionId);
+      const description = `${actionConfig.name}${relatedId ? ` (ID: ${relatedId})` : ''}`;
+
+      const historyEntry = await storage.awardPoints(userId, actionId, points, description, {
+        relatedId,
+        ...metadata
+      });
 
       // Get updated user data
       const updatedUser = await storage.getUserById(userId);
 
       res.json({ 
-        message: "Points updated successfully", 
+        success: true,
+        message: `Earned ${points} points for ${actionConfig.name}!`, 
+        points: points,
         totalPoints: updatedUser?.totalPoints,
-        currentMonthPoints: updatedUser?.currentMonthPoints
+        currentMonthPoints: updatedUser?.currentMonthPoints,
+        tier: updatedUser?.tier,
+        historyId: historyEntry.id
       });
     } catch (error) {
-      console.error("Points update error:", error);
-      res.status(500).json({ message: "Failed to update points" });
+      console.error("Points award error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to award points" });
+      }
+    }
+  });
+
+  // Submit proof for points
+  apiRouter.post("/points/submit-proof", authenticateToken, async (req, res) => {
+    try {
+      const { actionId, proofUrl, description, metadata } = req.body;
+      const userId = req.user!.id;
+
+      if (!actionId || !proofUrl) {
+        return res.status(400).json({ message: "Action ID and proof URL are required" });
+      }
+
+      // Import here to avoid circular dependency
+      const { POINTS_CONFIG, getPointsForAction } = await import("@shared/pointsConfig");
+      
+      const actionConfig = POINTS_CONFIG[actionId];
+      if (!actionConfig) {
+        return res.status(400).json({ message: "Invalid action ID" });
+      }
+
+      if (!actionConfig.requiresProof) {
+        return res.status(400).json({ message: "This action does not require proof" });
+      }
+
+      const points = getPointsForAction(actionId);
+      const fullDescription = description || `${actionConfig.name} - Pending Review`;
+
+      const historyEntry = await storage.awardPointsWithProof(
+        userId, 
+        actionId, 
+        points, 
+        fullDescription, 
+        proofUrl, 
+        metadata
+      );
+
+      res.json({ 
+        success: true,
+        message: `Proof submitted for ${actionConfig.name}! Points will be awarded after review.`, 
+        pendingPoints: points,
+        historyId: historyEntry.id,
+        status: 'pending'
+      });
+    } catch (error) {
+      console.error("Proof submission error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to submit proof" });
+      }
+    }
+  });
+
+  // Get user's points history
+  apiRouter.get("/points/history", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const history = await storage.getUserPointsHistory(userId);
+
+      res.json({ 
+        success: true,
+        history: history.map(entry => ({
+          id: entry.id,
+          points: entry.points,
+          action: entry.action,
+          description: entry.description,
+          status: entry.status,
+          createdAt: entry.createdAt,
+          reviewedAt: entry.reviewedAt,
+          metadata: entry.metadata ? JSON.parse(entry.metadata) : null
+        }))
+      });
+    } catch (error) {
+      console.error("Points history error:", error);
+      res.status(500).json({ message: "Failed to fetch points history" });
+    }
+  });
+
+  // Get available point actions
+  apiRouter.get("/points/actions", authenticateToken, async (req, res) => {
+    try {
+      // Import here to avoid circular dependency
+      const { POINTS_CONFIG } = await import("@shared/pointsConfig");
+      
+      res.json({ 
+        success: true,
+        actions: Object.values(POINTS_CONFIG)
+      });
+    } catch (error) {
+      console.error("Points actions error:", error);
+      res.status(500).json({ message: "Failed to fetch point actions" });
+    }
+  });
+
+  // Admin: Get pending proof uploads
+  apiRouter.get("/admin/points/pending", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const pendingUploads = await storage.getPendingProofUploads();
+
+      res.json({ 
+        success: true,
+        pending: pendingUploads
+      });
+    } catch (error) {
+      console.error("Pending uploads error:", error);
+      res.status(500).json({ message: "Failed to fetch pending uploads" });
+    }
+  });
+
+  // Admin: Approve proof upload
+  apiRouter.post("/admin/points/approve/:historyId", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const historyId = parseInt(req.params.historyId);
+      const reviewerId = req.user!.id;
+
+      await storage.approveProofUpload(historyId, reviewerId);
+
+      res.json({ 
+        success: true,
+        message: "Proof approved and points awarded" 
+      });
+    } catch (error) {
+      console.error("Approve proof error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to approve proof" });
+      }
+    }
+  });
+
+  // Admin: Reject proof upload
+  apiRouter.post("/admin/points/reject/:historyId", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const historyId = parseInt(req.params.historyId);
+      const reviewerId = req.user!.id;
+      const { reason } = req.body;
+
+      if (!reason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+
+      await storage.rejectProofUpload(historyId, reviewerId, reason);
+
+      res.json({ 
+        success: true,
+        message: "Proof rejected" 
+      });
+    } catch (error) {
+      console.error("Reject proof error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to reject proof" });
+      }
     }
   });
 
