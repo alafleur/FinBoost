@@ -1,5 +1,5 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, } from "@shared/schema";
-import type { UserPointsHistory } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards } from "@shared/schema";
+import type { UserPointsHistory, MonthlyReward, UserMonthlyReward } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc } from "drizzle-orm";
 import { db } from "./db";
@@ -39,6 +39,13 @@ export interface IStorage {
     //Leaderboard Methods
     getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>>;
     getUserRank(userId: number, period: 'monthly' | 'allTime'): Promise<{rank: number, points: number, tier: string} | null>;
+
+    // Monthly Rewards Methods
+    createMonthlyReward(month: string, totalRewardPool: number, config?: Partial<{goldRewardPercentage: number, silverRewardPercentage: number, bronzeRewardPercentage: number, pointDeductionPercentage: number}>): Promise<MonthlyReward>;
+    distributeMonthlyRewards(monthlyRewardId: number): Promise<void>;
+    getUserMonthlyRewardsHistory(userId: number): Promise<UserMonthlyReward[]>;
+    getMonthlyRewardsSummary(): Promise<MonthlyReward[]>;
+    rolloverUserPoints(userId: number, fromMonth: string): Promise<void>;
 }
 
 import fs from 'fs/promises';
@@ -394,6 +401,183 @@ export class MemStorage implements IStorage {
       console.error("Error fetching user rank:", error);
       throw error;
     }
+  }
+
+  // Monthly Rewards Implementation
+  async createMonthlyReward(
+    month: string, 
+    totalRewardPool: number, 
+    config?: Partial<{goldRewardPercentage: number, silverRewardPercentage: number, bronzeRewardPercentage: number, pointDeductionPercentage: number}>
+  ): Promise<MonthlyReward> {
+    // Get tier counts for this month
+    const tierCounts = await db.select({
+      tier: users.tier,
+      count: sql<number>`count(*)`
+    }).from(users)
+    .where(eq(users.isActive, true))
+    .groupBy(users.tier);
+
+    const goldCount = tierCounts.find(t => t.tier === 'gold')?.count || 0;
+    const silverCount = tierCounts.find(t => t.tier === 'silver')?.count || 0;
+    const bronzeCount = tierCounts.find(t => t.tier === 'bronze')?.count || 0;
+
+    const [monthlyReward] = await db.insert(monthlyRewards).values({
+      month,
+      totalRewardPool,
+      totalParticipants: goldCount + silverCount + bronzeCount,
+      goldTierParticipants: goldCount,
+      silverTierParticipants: silverCount,
+      bronzeTierParticipants: bronzeCount,
+      goldRewardPercentage: config?.goldRewardPercentage || 50,
+      silverRewardPercentage: config?.silverRewardPercentage || 30,
+      bronzeRewardPercentage: config?.bronzeRewardPercentage || 20,
+      pointDeductionPercentage: config?.pointDeductionPercentage || 75,
+    }).returning();
+
+    return monthlyReward;
+  }
+
+  async distributeMonthlyRewards(monthlyRewardId: number): Promise<void> {
+    const monthlyReward = await db.select()
+      .from(monthlyRewards)
+      .where(eq(monthlyRewards.id, monthlyRewardId))
+      .limit(1);
+
+    if (!monthlyReward[0]) {
+      throw new Error('Monthly reward not found');
+    }
+
+    const reward = monthlyReward[0];
+
+    // Calculate reward amounts per tier
+    const goldRewardPool = Math.floor(reward.totalRewardPool * reward.goldRewardPercentage / 100);
+    const silverRewardPool = Math.floor(reward.totalRewardPool * reward.silverRewardPercentage / 100);
+    const bronzeRewardPool = Math.floor(reward.totalRewardPool * reward.bronzeRewardPercentage / 100);
+
+    const goldRewardPerPerson = reward.goldTierParticipants > 0 ? Math.floor(goldRewardPool / reward.goldTierParticipants) : 0;
+    const silverRewardPerPerson = reward.silverTierParticipants > 0 ? Math.floor(silverRewardPool / reward.silverTierParticipants) : 0;
+    const bronzeRewardPerPerson = reward.bronzeTierParticipants > 0 ? Math.floor(bronzeRewardPool / reward.bronzeTierParticipants) : 0;
+
+    // Get all active users with their current points
+    const activeUsers = await db.select()
+      .from(users)
+      .where(eq(users.isActive, true));
+
+    // Process each user
+    for (const user of activeUsers) {
+      let rewardAmount = 0;
+      let isWinner = false;
+
+      // Determine reward based on tier
+      switch (user.tier) {
+        case 'gold':
+          rewardAmount = goldRewardPerPerson;
+          isWinner = goldRewardPerPerson > 0;
+          break;
+        case 'silver':
+          rewardAmount = silverRewardPerPerson;
+          isWinner = silverRewardPerPerson > 0;
+          break;
+        case 'bronze':
+          rewardAmount = bronzeRewardPerPerson;
+          isWinner = bronzeRewardPerPerson > 0;
+          break;
+      }
+
+      // Calculate point deduction for winners
+      const pointsDeducted = isWinner && rewardAmount > 0 
+        ? Math.floor(user.currentMonthPoints * reward.pointDeductionPercentage / 100)
+        : 0;
+
+      const pointsRolledOver = user.currentMonthPoints - pointsDeducted;
+
+      // Create user monthly reward record
+      await db.insert(userMonthlyRewards).values({
+        userId: user.id,
+        monthlyRewardId: monthlyRewardId,
+        tier: user.tier,
+        pointsAtDistribution: user.currentMonthPoints,
+        rewardAmount,
+        pointsDeducted,
+        pointsRolledOver,
+        isWinner,
+      });
+
+      // Update user's points (reset monthly points, keep total)
+      await db.update(users)
+        .set({
+          currentMonthPoints: pointsRolledOver,
+          tier: await this.calculateUserTier(pointsRolledOver),
+        })
+        .where(eq(users.id, user.id));
+
+      // Record points adjustment in history
+      if (pointsDeducted > 0) {
+        await db.insert(userPointsHistory).values({
+          userId: user.id,
+          points: -pointsDeducted,
+          action: 'monthly_reward_deduction',
+          description: `Monthly reward distribution - ${reward.pointDeductionPercentage}% point deduction ($${(rewardAmount / 100).toFixed(2)} reward)`,
+          status: 'approved',
+          metadata: JSON.stringify({
+            monthlyRewardId,
+            rewardAmount,
+            tier: user.tier
+          }),
+        });
+      }
+
+      if (pointsRolledOver > 0) {
+        await db.insert(userPointsHistory).values({
+          userId: user.id,
+          points: 0,
+          action: 'monthly_rollover',
+          description: `Monthly rollover - ${pointsRolledOver} points carried forward`,
+          status: 'approved',
+          metadata: JSON.stringify({
+            monthlyRewardId,
+            rolledOverPoints: pointsRolledOver,
+            tier: user.tier
+          }),
+        });
+      }
+    }
+
+    // Mark reward as distributed
+    await db.update(monthlyRewards)
+      .set({
+        status: 'distributed',
+        distributedAt: new Date(),
+      })
+      .where(eq(monthlyRewards.id, monthlyRewardId));
+  }
+
+  async getUserMonthlyRewardsHistory(userId: number): Promise<UserMonthlyReward[]> {
+    return await db.select()
+      .from(userMonthlyRewards)
+      .where(eq(userMonthlyRewards.userId, userId))
+      .orderBy(desc(userMonthlyRewards.createdAt));
+  }
+
+  async getMonthlyRewardsSummary(): Promise<MonthlyReward[]> {
+    return await db.select()
+      .from(monthlyRewards)
+      .orderBy(desc(monthlyRewards.createdAt));
+  }
+
+  async rolloverUserPoints(userId: number, fromMonth: string): Promise<void> {
+    // This method can be used for manual rollover adjustments if needed
+    const user = await this.getUserById(userId);
+    if (!user) throw new Error('User not found');
+
+    await db.insert(userPointsHistory).values({
+      userId,
+      points: 0,
+      action: 'manual_rollover',
+      description: `Manual rollover from ${fromMonth}`,
+      status: 'approved',
+      metadata: JSON.stringify({ fromMonth, currentPoints: user.currentMonthPoints }),
+    });
   }
 }
 

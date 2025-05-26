@@ -73,6 +73,38 @@ export const userProgress = pgTable("user_progress", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Monthly Rewards Tracking
+export const monthlyRewards = pgTable("monthly_rewards", {
+  id: serial("id").primaryKey(),
+  month: text("month").notNull(), // Format: "2024-01"
+  totalRewardPool: integer("total_reward_pool").notNull(),
+  totalParticipants: integer("total_participants").notNull(),
+  goldTierParticipants: integer("gold_tier_participants").default(0).notNull(),
+  silverTierParticipants: integer("silver_tier_participants").default(0).notNull(),
+  bronzeTierParticipants: integer("bronze_tier_participants").default(0).notNull(),
+  goldRewardPercentage: integer("gold_reward_percentage").default(50).notNull(),
+  silverRewardPercentage: integer("silver_reward_percentage").default(30).notNull(),
+  bronzeRewardPercentage: integer("bronze_reward_percentage").default(20).notNull(),
+  pointDeductionPercentage: integer("point_deduction_percentage").default(75).notNull(), // How much of winner's points are deducted
+  status: text("status").default("pending").notNull(), // 'pending', 'distributed', 'cancelled'
+  distributedAt: timestamp("distributed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User Monthly Rewards History
+export const userMonthlyRewards = pgTable("user_monthly_rewards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  monthlyRewardId: integer("monthly_reward_id").references(() => monthlyRewards.id).notNull(),
+  tier: text("tier").notNull(), // 'bronze', 'silver', 'gold'
+  pointsAtDistribution: integer("points_at_distribution").notNull(),
+  rewardAmount: integer("reward_amount").default(0).notNull(), // In cents
+  pointsDeducted: integer("points_deducted").default(0).notNull(),
+  pointsRolledOver: integer("points_rolled_over").notNull(),
+  isWinner: boolean("is_winner").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   username: true,
@@ -92,3 +124,5 @@ export type User = typeof users.$inferSelect;
 export type UserPointsHistory = typeof userPointsHistory.$inferSelect;
 export type LearningModule = typeof learningModules.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
+export type MonthlyReward = typeof monthlyRewards.$inferSelect;
+export type UserMonthlyReward = typeof userMonthlyRewards.$inferSelect;

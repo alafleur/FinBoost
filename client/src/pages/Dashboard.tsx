@@ -20,6 +20,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import PointsActions from '@/components/PointsActions';
 import Leaderboard from '@/components/Leaderboard';
+import PointsHistory from '../components/PointsHistory';
 
 interface User {
   id: number;
@@ -308,7 +309,7 @@ export default function Dashboard() {
               <CardTitle>Points History</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">Your detailed points history will appear here.</p>
+              <PointsHistory />
             </CardContent>
           </Card>
         </TabsContent>

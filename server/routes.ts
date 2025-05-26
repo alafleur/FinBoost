@@ -500,6 +500,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's monthly rewards history
+  apiRouter.get("/rewards/history", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const history = await storage.getUserMonthlyRewardsHistory(userId);
+
+      res.json({ 
+        success: true,
+        history: history.map(entry => ({
+          id: entry.id,
+          month: entry.monthlyRewardId,
+          tier: entry.tier,
+          pointsAtDistribution: entry.pointsAtDistribution,
+          rewardAmount: entry.rewardAmount,
+          pointsDeducted: entry.pointsDeducted,
+          pointsRolledOver: entry.pointsRolledOver,
+          isWinner: entry.isWinner,
+          createdAt: entry.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Monthly rewards history error:", error);
+      res.status(500).json({ message: "Failed to fetch monthly rewards history" });
+    }
+  });
+
+  // Admin: Create monthly reward
+  apiRouter.post("/admin/rewards/create", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { month, totalRewardPool, config } = req.body;
+
+      if (!month || !totalRewardPool) {
+        return res.status(400).json({ message: "Month and total reward pool are required" });
+      }
+
+      const monthlyReward = await storage.createMonthlyReward(month, totalRewardPool, config);
+
+      res.json({ 
+        success: true,
+        message: "Monthly reward created successfully",
+        monthlyReward
+      });
+    } catch (error) {
+      console.error("Create monthly reward error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create monthly reward" });
+      }
+    }
+  });
+
+  // Admin: Distribute monthly rewards
+  apiRouter.post("/admin/rewards/distribute/:monthlyRewardId", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const monthlyRewardId = parseInt(req.params.monthlyRewardId);
+
+      await storage.distributeMonthlyRewards(monthlyRewardId);
+
+      res.json({ 
+        success: true,
+        message: "Monthly rewards distributed successfully"
+      });
+    } catch (error) {
+      console.error("Distribute monthly rewards error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to distribute monthly rewards" });
+      }
+    }
+  });
+
+  // Admin: Get monthly rewards summary
+  apiRouter.get("/admin/rewards/summary", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const summary = await storage.getMonthlyRewardsSummary();
+
+      res.json({ 
+        success: true,
+        summary
+      });
+    } catch (error) {
+      console.error("Monthly rewards summary error:", error);
+      res.status(500).json({ message: "Failed to fetch monthly rewards summary" });
+    }
+  });
+
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
 
