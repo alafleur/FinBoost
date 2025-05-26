@@ -522,8 +522,7 @@ export default function Lesson() {
                         </Button>
                       )}
                     </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
               </Card>
             )}
           </div>

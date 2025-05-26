@@ -25,7 +25,7 @@ export interface IStorage {
     updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void>;
     getUserPointsHistory(userId: number): Promise<UserPointsHistory[]>;
     updateLastLogin(userId: number): Promise<void>;
-    
+
     // Enhanced Points System Methods
     awardPoints(userId: number, actionId: string, points: number, description: string, metadata?: any): Promise<UserPointsHistory>;
     awardPointsWithProof(userId: number, actionId: string, points: number, description: string, proofUrl: string, metadata?: any): Promise<UserPointsHistory>;
@@ -35,6 +35,10 @@ export interface IStorage {
     approveProofUpload(historyId: number, reviewerId: number): Promise<void>;
     rejectProofUpload(historyId: number, reviewerId: number, reason: string): Promise<void>;
     calculateUserTier(currentMonthPoints: number): Promise<string>;
+
+    //Leaderboard Methods
+    getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>>;
+    getUserRank(userId: number, period: 'monthly' | 'allTime'): Promise<{rank: number, points: number, tier: string} | null>;
 }
 
 import fs from 'fs/promises';
@@ -48,6 +52,7 @@ export class MemStorage implements IStorage {
   private subscribers: Map<number, Subscriber>;
   currentUserId: number;
   currentSubscriberId: number;
+  db: any;
 
   constructor() {
     this.users = new Map();
@@ -204,7 +209,7 @@ export class MemStorage implements IStorage {
       const newTotalPoints = (user.totalPoints || 0) + points;
       const newCurrentMonthPoints = (user.currentMonthPoints || 0) + points;
       const newTier = await this.calculateUserTier(newCurrentMonthPoints);
-      
+
       await db.update(users)
         .set({ 
           totalPoints: newTotalPoints, 
@@ -249,7 +254,7 @@ export class MemStorage implements IStorage {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const count = await db.select({ count: sql<number>`count(*)` })
       .from(userPointsHistory)
       .where(
@@ -310,7 +315,7 @@ export class MemStorage implements IStorage {
       const newTotalPoints = (user.totalPoints || 0) + entry.points;
       const newCurrentMonthPoints = (user.currentMonthPoints || 0) + entry.points;
       const newTier = await this.calculateUserTier(newCurrentMonthPoints);
-      
+
       await db.update(users)
         .set({ 
           totalPoints: newTotalPoints, 
@@ -339,6 +344,56 @@ export class MemStorage implements IStorage {
     if (currentMonthPoints >= 500) return 'gold';
     if (currentMonthPoints >= 250) return 'silver';
     return 'bronze';
+  }
+
+  async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
+    try {
+      const pointsColumn = period === 'monthly' ? 'currentMonthPoints' : 'totalPoints';
+
+      const query = await db.select({
+        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`,
+        userId: users.id,
+        username: users.username,
+        points: users[pointsColumn],
+        tier: users.tier
+      }).from(users)
+      .where(eq(users.isActive, true))
+      .orderBy(desc(users[pointsColumn]))
+      .limit(limit);
+
+      return query as Array<{rank: number, userId: number, username: string, points: number, tier: string}>;
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      throw error;
+    }
+  }
+
+  async getUserRank(userId: number, period: 'monthly' | 'allTime'): Promise<{rank: number, points: number, tier: string} | null> {
+    try {
+      const pointsColumn = period === 'monthly' ? 'currentMonthPoints' : 'totalPoints';
+
+      const subquery = db.select({
+        id: users.id,
+        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`,
+        points: users[pointsColumn],
+        tier: users.tier
+      }).from(users)
+      .where(eq(users.isActive, true))
+      .as('ranked_users');
+
+      const query = await db.select({
+        rank: subquery.rank,
+        points: subquery.points,
+        tier: subquery.tier
+      }).from(subquery)
+      .where(eq(subquery.id, userId));
+
+      const result = query[0] as {rank: number, points: number, tier: string} | null;
+      return result;
+    } catch (error) {
+      console.error("Error fetching user rank:", error);
+      throw error;
+    }
   }
 }
 

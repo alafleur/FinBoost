@@ -466,6 +466,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get leaderboard data
+  apiRouter.get("/leaderboard", authenticateToken, async (req, res) => {
+    try {
+      const { period = 'monthly', limit = 20 } = req.query;
+      const currentUserId = req.user!.id;
+
+      const leaderboard = await storage.getLeaderboard(
+        period as 'monthly' | 'allTime',
+        parseInt(limit as string)
+      );
+
+      const userRank = await storage.getUserRank(currentUserId, period as 'monthly' | 'allTime');
+
+      res.json({ 
+        success: true,
+        leaderboard: leaderboard.map(entry => ({
+          rank: entry.rank,
+          username: entry.username,
+          points: entry.points,
+          tier: entry.tier,
+          isCurrentUser: entry.userId === currentUserId
+        })),
+        currentUser: {
+          rank: userRank?.rank || null,
+          points: userRank?.points || 0,
+          tier: userRank?.tier || 'bronze'
+        }
+      });
+    } catch (error) {
+      console.error("Leaderboard error:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
 

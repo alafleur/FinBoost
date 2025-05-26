@@ -19,6 +19,7 @@ import {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import PointsActions from '@/components/PointsActions';
+import Leaderboard from '@/components/Leaderboard';
 
 interface User {
   id: number;
@@ -216,9 +217,10 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="earn-points">Earn Points</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
           <TabsTrigger value="history">Activity</TabsTrigger>
         </TabsList>
 
@@ -294,6 +296,10 @@ export default function Dashboard() {
 
         <TabsContent value="earn-points">
           <PointsActions />
+        </TabsContent>
+
+        <TabsContent value="leaderboard">
+          <Leaderboard />
         </TabsContent>
 
         <TabsContent value="history">
