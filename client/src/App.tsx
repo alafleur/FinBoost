@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Auth from "@/pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
+import Lesson from "./pages/Lesson";
 import FinancialMoodEgg from "@/components/FinancialMoodEgg";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/education" component={Education} />
+      <Route path="/lesson/:id" component={Lesson} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

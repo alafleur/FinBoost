@@ -21,7 +21,7 @@ const authenticateToken = async (req: Request, res: Response, next: any) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
     const user = await storage.getUserById(decoded.userId);
-    
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid token' });
     }
@@ -45,13 +45,13 @@ declare global {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create API routes
   const apiRouter = express.Router();
-  
+
   // Subscribe to waitlist endpoint
   apiRouter.post("/subscribe", async (req: Request, res: Response) => {
     try {
       // Validate the request body
       const result = insertSubscriberSchema.safeParse(req.body);
-      
+
       if (!result.success) {
         const validationError = fromZodError(result.error);
         return res.status(400).json({ 
@@ -59,22 +59,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: validationError.message 
         });
       }
-      
+
       const { email } = result.data;
-      
+
       // Check if email already exists
       const existingSubscriber = await storage.getSubscriberByEmail(email);
-      
+
       if (existingSubscriber) {
         return res.status(200).json({ 
           success: true,
           message: "You're already on the waitlist!" 
         });
       }
-      
+
       // Create new subscriber
       await storage.createSubscriber({ email });
-      
+
       return res.status(201).json({ 
         success: true,
         message: "Successfully joined the waitlist!" 
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get all subscribers (for admin purposes, would require auth in production)
   apiRouter.get("/subscribers", async (_req: Request, res: Response) => {
     try {
@@ -100,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get subscriber count 
   apiRouter.get("/subscribers/count", async (_req: Request, res: Response) => {
     try {
@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/auth/register", async (req: Request, res: Response) => {
     try {
       const result = insertUserSchema.safeParse(req.body);
-      
+
       if (!result.success) {
         const validationError = fromZodError(result.error);
         return res.status(400).json({ 
@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userData = result.data;
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
@@ -140,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create user
       const user = await storage.createUser(userData);
-      
+
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -172,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     try {
       const result = loginUserSchema.safeParse(req.body);
-      
+
       if (!result.success) {
         const validationError = fromZodError(result.error);
         return res.status(400).json({ 
@@ -182,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { email, password } = result.data;
-      
+
       // Validate credentials
       const user = await storage.validatePassword(email, password);
       if (!user) {
@@ -247,6 +247,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "An error occurred while fetching user profile." 
       });
+    }
+  });
+
+  // Health check endpoint
+  apiRouter.get("/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  // Update user points endpoint
+  apiRouter.post("/user/points", authenticateToken, async (req, res) => {
+    try {
+      const { points, action, lessonId } = req.body;
+      const userId = req.user!.id;
+
+      if (!points || !action) {
+        return res.status(400).json({ message: "Points and action are required" });
+      }
+
+      const user = await storage.getUserById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const newTotalPoints = (user.totalPoints || 0) + points;
+      const newCurrentMonthPoints = (user.currentMonthPoints || 0) + points;
+
+      // Update user points
+      await storage.updateUserPoints(userId, newTotalPoints, newCurrentMonthPoints);
+
+      // Get updated user data
+      const updatedUser = await storage.getUserById(userId);
+
+      res.json({ 
+        message: "Points updated successfully", 
+        totalPoints: updatedUser?.totalPoints,
+        currentMonthPoints: updatedUser?.currentMonthPoints
+      });
+    } catch (error) {
+      console.error("Points update error:", error);
+      res.status(500).json({ message: "Failed to update points" });
     }
   });
 
