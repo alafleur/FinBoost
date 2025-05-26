@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import PointsActions from '@/components/PointsActions';
 import Leaderboard from '@/components/Leaderboard';
 import PointsHistory from '../components/PointsHistory';
+import ReferralSystem from '../components/ReferralSystem';
 
 interface User {
   id: number;
@@ -218,9 +219,10 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="earn-points">Earn Points</TabsTrigger>
+          <TabsTrigger value="referrals">Referrals</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
           <TabsTrigger value="history">Activity</TabsTrigger>
         </TabsList>
@@ -285,7 +287,11 @@ export default function Dashboard() {
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Proof
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => document.querySelector('[value="referrals"]')?.click()}
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Refer Friends
                   </Button>
@@ -297,6 +303,10 @@ export default function Dashboard() {
 
         <TabsContent value="earn-points">
           <PointsActions />
+        </TabsContent>
+
+        <TabsContent value="referrals">
+          <ReferralSystem />
         </TabsContent>
 
         <TabsContent value="leaderboard">

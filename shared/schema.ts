@@ -27,6 +27,7 @@ export const users = pgTable("users", {
   totalPoints: integer("total_points").default(0).notNull(),
   currentMonthPoints: integer("current_month_points").default(0).notNull(),
   tier: text("tier").default("bronze").notNull(), // bronze, silver, gold
+  referredBy: text("referred_by"), // Referral code used when signing up
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -105,6 +106,29 @@ export const userMonthlyRewards = pgTable("user_monthly_rewards", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Referral System
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  referrerUserId: integer("referrer_user_id").references(() => users.id).notNull(),
+  referredUserId: integer("referred_user_id").references(() => users.id).notNull(),
+  referralCode: text("referral_code").notNull(),
+  status: text("status").default("pending").notNull(), // 'pending', 'completed', 'expired'
+  pointsAwarded: integer("points_awarded").default(0).notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User Referral Codes
+export const userReferralCodes = pgTable("user_referral_codes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  referralCode: text("referral_code").notNull().unique(),
+  totalReferrals: integer("total_referrals").default(0).notNull(),
+  totalPointsEarned: integer("total_points_earned").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   username: true,
@@ -126,3 +150,5 @@ export type LearningModule = typeof learningModules.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type MonthlyReward = typeof monthlyRewards.$inferSelect;
 export type UserMonthlyReward = typeof userMonthlyRewards.$inferSelect;
+export type Referral = typeof referrals.$inferSelect;
+export type UserReferralCode = typeof userReferralCodes.$inferSelect;

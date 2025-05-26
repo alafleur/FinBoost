@@ -119,7 +119,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Registration
   apiRouter.post("/auth/register", async (req: Request, res: Response) => {
     try {
-      const result = insertUserSchema.safeParse(req.body);
+      const { referralCode, ...userBody } = req.body;
+      const result = insertUserSchema.safeParse(userBody);
 
       if (!result.success) {
         const validationError = fromZodError(result.error);
@@ -140,8 +141,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create user
-      const user = await storage.createUser(userData);
+      // Validate referral code if provided
+      if (referralCode) {
+        const validation = await storage.validateReferralCode(referralCode);
+        if (!validation.isValid) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid referral code"
+          });
+        }
+      }
+
+      // Create user with referral code
+      const user = await storage.createUser({ ...userData, referralCode });
 
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
@@ -625,6 +637,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Monthly rewards summary error:", error);
       res.status(500).json({ message: "Failed to fetch monthly rewards summary" });
+    }
+  });
+
+  // Referral System Routes
+
+  // Get user's referral code and stats
+  apiRouter.get("/referrals/my-code", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      let referralCode = await storage.getUserReferralCode(userId);
+      if (!referralCode) {
+        referralCode = await storage.createUserReferralCode(userId);
+      }
+
+      const stats = await storage.getReferralStats(userId);
+
+      res.json({
+        success: true,
+        referralCode: referralCode.referralCode,
+        stats
+      });
+    } catch (error) {
+      console.error("Get referral code error:", error);
+      res.status(500).json({ message: "Failed to fetch referral code" });
+    }
+  });
+
+  // Get user's referral history
+  apiRouter.get("/referrals/history", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const referrals = await storage.getUserReferrals(userId);
+
+      res.json({
+        success: true,
+        referrals: referrals.map(({ referral, referredUser }) => ({
+          id: referral.id,
+          referredUser: {
+            username: referredUser.username,
+            email: referredUser.email,
+            joinedAt: referredUser.joinedAt
+          },
+          status: referral.status,
+          pointsAwarded: referral.pointsAwarded,
+          completedAt: referral.completedAt,
+          createdAt: referral.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Get referral history error:", error);
+      res.status(500).json({ message: "Failed to fetch referral history" });
+    }
+  });
+
+  // Validate referral code
+  apiRouter.post("/referrals/validate", async (req, res) => {
+    try {
+      const { referralCode } = req.body;
+
+      if (!referralCode) {
+        return res.status(400).json({ message: "Referral code is required" });
+      }
+
+      const validation = await storage.validateReferralCode(referralCode);
+
+      res.json({
+        success: true,
+        isValid: validation.isValid
+      });
+    } catch (error) {
+      console.error("Validate referral code error:", error);
+      res.status(500).json({ message: "Failed to validate referral code" });
+    }
+  });
+
+  // Admin: Get referral statistics
+  apiRouter.get("/admin/referrals/stats", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const stats = await storage.getAdminReferralStats();
+
+      res.json({
+        success: true,
+        stats
+      });
+    } catch (error) {
+      console.error("Admin referral stats error:", error);
+      res.status(500).json({ message: "Failed to fetch referral statistics" });
     }
   });
 

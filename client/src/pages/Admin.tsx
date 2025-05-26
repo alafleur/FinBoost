@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +28,9 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  Trophy,
+  X
 } from 'lucide-react';
 
 interface LearningModule {
@@ -84,12 +85,12 @@ export default function Admin() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // State for modules
   const [modules, setModules] = useState<LearningModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<LearningModule | null>(null);
   const [isEditingModule, setIsEditingModule] = useState(false);
-  
+
   // State for module form
   const [moduleForm, setModuleForm] = useState({
     title: '',
@@ -112,11 +113,16 @@ export default function Admin() {
   });
 
   // Admin stats
-  const [stats, setStats] = useState<AdminStats>({
+  const [stats, setStats] = useState({
     totalModules: 0,
-    totalCompletions: 0,
     totalUsers: 0,
+    totalCompletions: 0,
     avgCompletionRate: 0
+  });
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    totalReferrers: 0,
+    topReferrers: []
   });
 
   // State for proof review
@@ -150,7 +156,7 @@ export default function Admin() {
 
     try {
       const parsedUser = JSON.parse(userData);
-      
+
       // Check if user is admin (you'd implement proper role checking)
       if (parsedUser.email !== 'admin@finboost.com') {
         toast({
@@ -165,6 +171,7 @@ export default function Admin() {
       setUser(parsedUser);
       loadAdminData();
       loadPendingProofs();
+      fetchReferralStats();
       setLoading(false);
     } catch (error) {
       console.error('Error loading admin data:', error);
@@ -362,7 +369,7 @@ export default function Admin() {
           title: "Proof Approved! ✅",
           description: "Points have been awarded to the user."
         });
-        
+
         // Remove from pending list
         setPendingProofs(pendingProofs.filter(p => p.id !== proofId));
       } else {
@@ -409,7 +416,7 @@ export default function Admin() {
           title: "Proof Rejected",
           description: "User has been notified of the rejection."
         });
-        
+
         // Remove from pending list
         setPendingProofs(pendingProofs.filter(p => p.id !== proofId));
         setReviewingProof(null);
@@ -442,6 +449,22 @@ export default function Admin() {
       'budget_creation': 'Budget Creation'
     };
     return actionNames[actionId] || actionId;
+  };
+
+  const fetchReferralStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/referrals/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReferralStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Error fetching referral stats:', error);
+    }
   };
 
   if (loading) {
@@ -535,6 +558,46 @@ export default function Admin() {
               </Card>
             </div>
 
+             {/* Referral Stats */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
+                  <Users className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{referralStats.totalReferrals}</div>
+                  <p className="text-xs text-muted-foreground">All-time referrals</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Referrers</CardTitle>
+                  <Users className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{referralStats.totalReferrers}</div>
+                  <p className="text-xs text-muted-foreground">Users who made referrals</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Top Referrer</CardTitle>
+                  <Trophy className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {referralStats.topReferrers.length > 0 ? referralStats.topReferrers[0].referralCount : 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {referralStats.topReferrers.length > 0 ? referralStats.topReferrers[0].username : 'No referrals yet'}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
@@ -583,7 +646,7 @@ export default function Admin() {
                       Add educational content that helps users learn financial concepts and earn points.
                     </DialogDescription>
                   </DialogHeader>
-                  
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -854,6 +917,7 @@ export default function Admin() {
                                   {optIndex === question.correctAnswer && ' ✓'}
                                 </p>
                               ))}
+```python
                             </div>
                             <p className="text-xs text-gray-600"><strong>Explanation:</strong> {question.explanation}</p>
                           </div>
@@ -976,7 +1040,7 @@ export default function Admin() {
                           <Label className="font-medium">Description:</Label>
                           <p className="text-sm text-gray-700 mt-1">{proof.description}</p>
                         </div>
-                        
+
                         <div>
                           <Label className="font-medium">Proof Document:</Label>
                           <div className="mt-2 border rounded-lg p-4 bg-gray-50">
@@ -1055,7 +1119,7 @@ export default function Admin() {
                       const categoryModules = modules.filter(m => m.category === category.value);
                       const totalCompletions = categoryModules.reduce((sum, m) => sum + (m.completions || 0), 0);
                       const avgCompletions = categoryModules.length > 0 ? totalCompletions / categoryModules.length : 0;
-                      
+
                       return (
                         <div key={category.value}>
                           <div className="flex justify-between text-sm mb-1">

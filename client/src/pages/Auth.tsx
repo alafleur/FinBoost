@@ -1,11 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, Eye, EyeOff } from "lucide-react";
+import { DollarSign, Eye, EyeOff, Gift } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +17,7 @@ interface RegisterForm {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  referralCode?: string;
 }
 
 interface LoginForm {
@@ -27,11 +27,25 @@ interface LoginForm {
 
 export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
   const registerForm = useForm<RegisterForm>();
   const loginForm = useForm<LoginForm>();
+
+  useEffect(() => {
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      toast({
+        title: "Referral Code Detected!",
+        description: `You'll get bonus points when you sign up with code: ${refCode}`,
+      });
+    }
+  }, [toast]);
 
   const registerMutation = useMutation({
     mutationFn: async (data: Omit<RegisterForm, 'confirmPassword'>) => {
@@ -42,12 +56,12 @@ export default function Auth() {
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Registration failed');
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -77,12 +91,12 @@ export default function Auth() {
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Login failed');
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -114,6 +128,11 @@ export default function Auth() {
     }
 
     const { confirmPassword, ...registerData } = data;
+
+    // Add referral code to registration data if present
+    if (referralCode) {
+      registerData.referralCode = referralCode;
+    }
     registerMutation.mutate(registerData);
   };
 
@@ -146,7 +165,7 @@ export default function Auth() {
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Sign Up</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                   <div className="space-y-2">
@@ -158,7 +177,7 @@ export default function Auth() {
                       {...loginForm.register("email", { required: true })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
                     <div className="relative">
@@ -183,7 +202,7 @@ export default function Auth() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <Button
                     type="submit"
                     className="w-full"
@@ -193,7 +212,7 @@ export default function Auth() {
                   </Button>
                 </form>
               </TabsContent>
-              
+
               <TabsContent value="register" className="space-y-4">
                 <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -214,7 +233,7 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
                     <Input
@@ -224,7 +243,7 @@ export default function Auth() {
                       {...registerForm.register("email", { required: true })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="username">Username</Label>
                     <Input
@@ -233,7 +252,7 @@ export default function Auth() {
                       {...registerForm.register("username", { required: true })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Password</Label>
                     <Input
@@ -243,7 +262,7 @@ export default function Auth() {
                       {...registerForm.register("password", { required: true, minLength: 6 })}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm Password</Label>
                     <Input
@@ -253,7 +272,26 @@ export default function Auth() {
                       {...registerForm.register("confirmPassword", { required: true })}
                     />
                   </div>
-                  
+
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode" className="flex items-center space-x-2">
+                      <Gift className="h-4 w-4" />
+                      <span>Referral Code (Optional)</span>
+                    </Label>
+                    <Input
+                      id="referralCode"
+                      type="text"
+                      placeholder="Enter referral code"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value)}
+                      className={referralCode ? "border-green-300 bg-green-50" : ""}
+                      {...registerForm.register("referralCode")}
+                    />
+                    {referralCode && (
+                      <p className="text-sm text-green-600">🎉 You'll earn bonus points with this referral!</p>
+                    )}
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full"
