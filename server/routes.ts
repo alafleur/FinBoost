@@ -5,6 +5,8 @@ import { insertSubscriberSchema, insertUserSchema, loginUserSchema } from "@shar
 import { fromZodError } from "zod-validation-error";
 import jwt from "jsonwebtoken";
 import type { User } from "@shared/schema";
+import { upload, deleteFile, getFileUrl } from "./fileUpload";
+import path from "path";
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -255,6 +257,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok" });
   });
 
+  // Serve uploaded files
+  apiRouter.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
   // Award points for educational activities (lesson, quiz completion)
   apiRouter.post("/points/award", authenticateToken, async (req, res) => {
     try {
@@ -304,6 +309,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to award points" });
       }
+    }
+  });
+
+  // Upload proof file
+  apiRouter.post("/upload/proof", authenticateToken, upload.single('proofFile'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileUrl = getFileUrl(req.file.filename);
+
+      res.json({
+        success: true,
+        message: "File uploaded successfully",
+        fileUrl,
+        fileName: req.file.originalname,
+        fileSize: req.file.size
+      });
+    } catch (error) {
+      console.error("File upload error:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 

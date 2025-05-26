@@ -1,13 +1,24 @@
-
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Upload, CheckCircle, Clock, X } from 'lucide-react';
+import { 
+  Upload, 
+  CheckCircle, 
+  Clock, 
+  DollarSign, 
+  TrendingUp,
+  CreditCard,
+  PiggyBank,
+  Target,
+  Users,
+  Award,
+  X
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import FileUpload from './FileUpload';
 
 interface PointAction {
   id: string;
@@ -40,7 +51,7 @@ export default function PointsActions() {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setActions(data.actions.filter((action: PointAction) => action.requiresProof));
@@ -68,12 +79,12 @@ export default function PointsActions() {
     }
 
     setSubmitting(true);
-    
+
     try {
       // In a real app, you'd upload the file to cloud storage first
       // For now, we'll simulate with a placeholder URL
       const proofUrl = `uploaded/${proofFile.name}`;
-      
+
       const token = localStorage.getItem('token');
       const response = await fetch('/api/points/submit-proof', {
         method: 'POST',
@@ -98,7 +109,7 @@ export default function PointsActions() {
           title: "Proof Submitted! 📋",
           description: data.message,
         });
-        
+
         // Reset form
         setSelectedAction(null);
         setProofFile(null);
@@ -180,13 +191,7 @@ export default function PointsActions() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="proof-file">Upload Proof Document/Image</Label>
-              <Input
-                id="proof-file"
-                type="file"
-                accept="image/*,.pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                className="mt-1"
-              />
+              <FileUpload setProofFile={setProofFile}/>
               <p className="text-xs text-gray-500 mt-1">
                 Accepted formats: Images, PDF, Word documents
               </p>
