@@ -1,9 +1,9 @@
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
   Trophy, 
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import PointsActions from '@/components/PointsActions';
 
 interface User {
   id: number;
@@ -38,7 +39,7 @@ export default function Dashboard() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
+
     if (!token || !userData) {
       setLocation('/auth');
       return;
@@ -213,59 +214,99 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/education')}>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5 text-blue-500" />
-                <span>Financial Education Hub</span>
-              </CardTitle>
-              <CardDescription>
-                Complete tutorials and quizzes to earn points
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full">
-                Start Learning
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Dashboard Content */}
+        <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="earn-points">Earn Points</TabsTrigger>
+          <TabsTrigger value="history">Activity</TabsTrigger>
+        </TabsList>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/upload')}>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Upload className="h-5 w-5 text-green-500" />
-                <span>Upload Proof</span>
-              </CardTitle>
-              <CardDescription>
-                Submit proof of financial actions for bonus points
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" variant="outline">
-                Upload Evidence
-              </Button>
-            </CardContent>
-          </Card>
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium">Completed Emergency Fund lesson</p>
+                          <p className="text-sm text-gray-600">2 hours ago</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">+25 points</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Award className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">Passed Budgeting Basics quiz</p>
+                          <p className="text-sm text-gray-600">1 day ago</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">+15 points</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Users className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium">Referred a friend</p>
+                          <p className="text-sm text-gray-600">3 days ago</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">+100 points</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => setLocation('/education')}
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Continue Learning
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => setLocation('/upload')}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Proof
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Users className="h-4 w-4 mr-2" />
+                    Refer Friends
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/rewards')}>
+        <TabsContent value="earn-points">
+          <PointsActions />
+        </TabsContent>
+
+        <TabsContent value="history">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                <span>Rewards & Pool</span>
-              </CardTitle>
-              <CardDescription>
-                View reward tiers and current pool status
-              </CardDescription>
+              <CardTitle>Points History</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">
-                View Rewards
-              </Button>
+              <p className="text-gray-600">Your detailed points history will appear here.</p>
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
   );

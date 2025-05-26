@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
@@ -50,7 +49,7 @@ const lessonData: { [key: string]: Lesson } = {
     content: `
       <h2>What is an Emergency Fund?</h2>
       <p>An emergency fund is money you set aside specifically for unexpected expenses or financial emergencies. Think of it as your financial safety net.</p>
-      
+
       <h3>Why You Need One</h3>
       <ul>
         <li><strong>Unexpected expenses:</strong> Car repairs, medical bills, or home maintenance</li>
@@ -122,12 +121,14 @@ const lessonData: { [key: string]: Lesson } = {
 
 export default function Lesson() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [lesson, setLesson] = useState<Lesson | null>(null);
   const [currentStep, setCurrentStep] = useState<'content' | 'quiz'>('content');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [hasEarnedLessonPoints, setHasEarnedLessonPoints] = useState(false);
+  const [hasEarnedQuizPoints, setHasEarnedQuizPoints] = useState(false);
+  const { toast } = useToast();
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
 
@@ -135,7 +136,7 @@ export default function Lesson() {
     // Get lesson ID from URL params (you'd implement this based on your routing)
     const lessonId = window.location.pathname.split('/lesson/')[1] || '1';
     const lessonData1 = lessonData[lessonId];
-    
+
     if (lessonData1) {
       setLesson(lessonData1);
     } else {
@@ -167,7 +168,7 @@ export default function Lesson() {
     const correctAnswers = selectedAnswers.filter((answer, index) => 
       answer === lesson!.quiz[index].correctAnswer
     ).length;
-    
+
     const finalScore = Math.round((correctAnswers / lesson!.quiz.length) * 100);
     setScore(finalScore);
     setShowResults(true);
@@ -179,7 +180,7 @@ export default function Lesson() {
         title: "🎉 Lesson Completed!",
         description: `You earned ${lesson!.points} points! Great job!`,
       });
-      
+
       // Here you would update the user's points in the database
       updateUserPoints(lesson!.points);
     }
@@ -239,6 +240,63 @@ export default function Lesson() {
 
   const currentQuestion = lesson.quiz[currentQuestionIndex];
   const isAnswerSelected = selectedAnswers[currentQuestionIndex] !== undefined;
+
+  const awardPoints = async (actionId: string, relatedId?: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          actionId,
+          relatedId,
+          metadata: { lessonId: 'emergency-fund' }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Points Earned! 🎉",
+          description: data.message,
+        });
+        return data;
+      }
+    } catch (error) {
+      console.error('Failed to award points:', error);
+    }
+  };
+
+  const handleNextStep = async () => {
+    if (!hasEarnedLessonPoints) {
+      await awardPoints('lesson_complete', 'emergency-fund');
+      setHasEarnedLessonPoints(true);
+    }
+    setCurrentStep('quiz');
+  };
+
+  const handleSubmitQuiz = async () => {
+    setShowResults(true);
+
+    // Award points for quiz completion if passed
+    const score = calculateScore();
+    if (score >= 70 && !hasEarnedQuizPoints) {
+      await awardPoints('quiz_complete', 'emergency-fund-quiz');
+      setHasEarnedQuizPoints(true);
+    }
+  };
+
+  const calculateScore = () => {
+      const correctAnswers = selectedAnswers.filter((answer, index) =>
+          answer === lesson!.quiz[index].correctAnswer
+      ).length;
+      return Math.round((correctAnswers / lesson!.quiz.length) * 100);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -403,17 +461,22 @@ export default function Lesson() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {score >= 70 && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                        <p className="font-medium text-green-800">
-                          🎉 You earned {lesson.points} points!
-                        </p>
-                        <p className="text-sm text-green-600 mt-1">
-                          Great job completing this lesson!
-                        </p>
-                      </div>
-                    )}
+                <p className="text-green-600 mb-4">🎉 Great job! You scored {score}%</p>
+                      {score >= 70 ? (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <p className="text-green-800 font-medium">Congratulations! You passed the quiz.</p>
+                          <p className="text-green-600 text-sm mt-1">You've successfully completed this lesson.</p>
+                          <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-blue-800 font-medium">🎁 Points Earned!</p>
+                            <p className="text-blue-600 text-sm">Lesson completion: +10 points | Quiz completion: +15 points</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <p className="text-orange-800 font-medium">Keep practicing!</p>
+                          <p className="text-orange-600 text-sm mt-1">You need 70% or higher to pass. Review the lesson and try again.</p>
+                        </div>
+                      )}
 
                     {/* Show correct answers */}
                     <div className="space-y-3">

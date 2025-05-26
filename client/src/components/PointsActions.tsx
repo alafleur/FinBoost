@@ -1,0 +1,240 @@
+
+import { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Upload, CheckCircle, Clock, X } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+
+interface PointAction {
+  id: string;
+  name: string;
+  basePoints: number;
+  requiresProof: boolean;
+  category: string;
+  description: string;
+  maxDaily?: number;
+  maxTotal?: number;
+}
+
+export default function PointsActions() {
+  const [actions, setActions] = useState<PointAction[]>([]);
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchActions();
+  }, []);
+
+  const fetchActions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/points/actions', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setActions(data.actions.filter((action: PointAction) => action.requiresProof));
+      }
+    } catch (error) {
+      console.error('Failed to fetch actions:', error);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProofFile(file);
+    }
+  };
+
+  const submitProof = async () => {
+    if (!selectedAction || !proofFile || !description.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please select an action, upload proof, and add a description.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+      // In a real app, you'd upload the file to cloud storage first
+      // For now, we'll simulate with a placeholder URL
+      const proofUrl = `uploaded/${proofFile.name}`;
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/points/submit-proof', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          actionId: selectedAction,
+          proofUrl,
+          description,
+          metadata: {
+            fileName: proofFile.name,
+            fileSize: proofFile.size
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Proof Submitted! 📋",
+          description: data.message,
+        });
+        
+        // Reset form
+        setSelectedAction(null);
+        setProofFile(null);
+        setDescription('');
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Submission Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to submit proof:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit proof. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'action': return 'bg-green-100 text-green-800';
+      case 'achievement': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-blue-100 text-blue-800';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Earn Points for Financial Actions</h2>
+        <p className="text-gray-600 mb-6">Upload proof of your financial progress to earn points!</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {actions.map((action) => (
+          <Card 
+            key={action.id} 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedAction === action.id ? 'ring-2 ring-blue-500' : ''
+            }`}
+            onClick={() => setSelectedAction(action.id)}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{action.name}</CardTitle>
+                <Badge className={getCategoryColor(action.category)}>
+                  {action.basePoints} pts
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-3">{action.description}</p>
+              {(action.maxDaily || action.maxTotal) && (
+                <div className="text-xs text-gray-500">
+                  {action.maxDaily && <span>Max {action.maxDaily}/day</span>}
+                  {action.maxDaily && action.maxTotal && <span> • </span>}
+                  {action.maxTotal && <span>Max {action.maxTotal} total</span>}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {selectedAction && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Submit Proof for {actions.find(a => a.id === selectedAction)?.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="proof-file">Upload Proof Document/Image</Label>
+              <Input
+                id="proof-file"
+                type="file"
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileUpload}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Accepted formats: Images, PDF, Word documents
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Provide details about your financial action (e.g., 'Paid $500 toward credit card debt', 'Invested $200 in my 401k')"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                onClick={submitProof}
+                disabled={submitting || !proofFile || !description.trim()}
+                className="flex-1"
+              >
+                {submitting ? (
+                  <>
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Submit for Review
+                  </>
+                )}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedAction(null);
+                  setProofFile(null);
+                  setDescription('');
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
