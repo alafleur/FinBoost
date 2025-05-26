@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Auth from "@/pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
+import FinancialMoodEgg from "@/components/FinancialMoodEgg";
 
 function Router() {
   return (
