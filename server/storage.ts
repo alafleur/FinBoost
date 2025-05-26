@@ -77,9 +77,11 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      password: hashedPassword,
+    }).returning();
     return user;
   }
 
@@ -108,27 +110,18 @@ export class MemStorage implements IStorage {
 
   async getSubscribersCount(): Promise<number> {
     return this.subscribers.size;
-  },
+  }
 
   // User Authentication Methods
-  async createUser(userData: InsertUser): Promise<User> {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const [user] = await db.insert(users).values({
-      ...userData,
-      password: hashedPassword,
-    }).returning();
-    return user;
-  },
-
   async getUserByEmail(email: string): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || null;
-  },
+  }
 
   async getUserById(id: number): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || null;
-  },
+  }
 
   async validatePassword(email: string, password: string): Promise<User | null> {
     const user = await this.getUserByEmail(email);
@@ -136,7 +129,7 @@ export class MemStorage implements IStorage {
 
     const isValid = await bcrypt.compare(password, user.password);
     return isValid ? user : null;
-  },
+  }
 
   async updateUserPoints(userId: number, points: number, action: string, description: string): Promise<void> {
     await db.transaction(async (tx) => {
@@ -156,14 +149,14 @@ export class MemStorage implements IStorage {
         description,
       });
     });
-  },
+  }
 
   async getUserPointsHistory(userId: number): Promise<UserPointsHistory[]> {
     return await db.select()
       .from(userPointsHistory)
       .where(eq(userPointsHistory.userId, userId))
       .orderBy(desc(userPointsHistory.createdAt));
-  },
+  }
 
   async updateLastLogin(userId: number): Promise<void> {
     await db.update(users)
