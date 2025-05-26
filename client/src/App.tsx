@@ -5,12 +5,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import Auth from "@/pages/Auth";
+import Dashboard from "@/pages/Dashboard";
 import FinancialMoodEgg from "@/components/FinancialMoodEgg";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/auth" component={Auth} />
+      <Route path="/dashboard" component={Dashboard} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
