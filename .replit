@@ -15,7 +15,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Start Server"
+runButton = "Start FinBoost"
 
 [[workflows.workflow]]
 name = "Project"
@@ -46,6 +46,15 @@ args = "npm run dev"
 
 [[workflows.workflow]]
 name = "Start Server"
+author = 42749501
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Start FinBoost"
 author = 42749501
 mode = "sequential"
 
