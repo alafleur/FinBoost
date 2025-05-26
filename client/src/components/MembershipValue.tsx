@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { BookOpen, Gift } from "lucide-react";
 
 export default function MembershipValue() {
   return (
@@ -7,48 +8,37 @@ export default function MembershipValue() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Your Membership Fuels the Collective
+            Where Your Membership Fee Goes
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            More than half of every membership fee goes back into monthly rewards for members like you.
+            You're not just paying for a service — you're fueling a collective system designed to help everyone thrive financially.
           </p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left column - Pie Chart */}
+          {/* Left column - Simplified Pie Chart */}
           <div className="relative">
             <div className="w-[320px] h-[320px] mx-auto relative">
-
-              
-              {/* Create a real pie chart using SVG instead of borders */}
+              {/* Create a simplified pie chart with just 2 segments */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="48" fill="white"/>
                 
-                {/* Blue segment (55%) - Rewards Pool */}
+                {/* Blue segment (55%) - Collective Rewards Pool */}
                 <motion.path
-                  d="M50,50 L50,2 A48,48 0 0,1 96,50 A48,48 0 0,1 50,98 L50,50 Z"
+                  d="M50,50 L50,2 A48,48 0 1,1 89.4,78.2 L50,50 Z"
                   fill="#4285F4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 />
                 
-                {/* Green segment (25%) - Education & Platform */}
+                {/* Green segment (45%) - Financial Education & Platform Operations */}
                 <motion.path
-                  d="M50,50 L50,98 A48,48 0 0,1 2,50 L50,50 Z"
+                  d="M50,50 L89.4,78.2 A48,48 0 0,1 50,2 L50,50 Z"
                   fill="#34A853"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
-                />
-                
-                {/* Purple segment (20%) - Operations */}
-                <motion.path
-                  d="M50,50 L2,50 A48,48 0 0,1 50,2 L50,50 Z"
-                  fill="#A142F4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
                 />
                 
                 {/* White center circle */}
@@ -63,63 +53,68 @@ export default function MembershipValue() {
                 </div>
               </div>
             </div>
+            
+            {/* Breakdown below pie chart */}
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 bg-[#4285F4] rounded-sm mr-3"></div>
+                <span className="text-lg font-medium">55% → Collective Rewards Pool</span>
+              </div>
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 bg-[#34A853] rounded-sm mr-3"></div>
+                <span className="text-lg font-medium">45% → Financial Education & Platform Operations</span>
+              </div>
+            </div>
           </div>
           
-          {/* Right column - Breakdown Text */}
+          {/* Right column - What You Get */}
           <div>
-            <h3 className="font-heading font-semibold text-2xl mb-6">Where Your Membership Fee Goes</h3>
+            <h3 className="font-heading font-semibold text-2xl mb-6">What You Get in Return</h3>
             
             <div className="space-y-6">
-              {/* 55% - Rewards Pool */}
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#E8F0FE] flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-[#4285F4] rounded-sm"></div>
+              {/* Learn Card */}
+              <motion.div 
+                className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                    <BookOpen className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xl text-gray-800 mb-2 flex items-center">
+                      📘 Learn
+                    </h4>
+                    <p className="text-gray-700">
+                      Access to high-quality, bite-sized financial education that fits into your busy life.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-[#4285F4]">55%</span>
-                    <span className="mx-2">→</span>
-                    Rewards Pool
-                  </p>
-                  <p className="text-gray-600">
-                    Distributed monthly to 50% of members based on points.
-                  </p>
-                </div>
-              </div>
+              </motion.div>
               
-              {/* 25% - Education & Platform */}
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#E6F4EA] flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-[#34A853] rounded-sm"></div>
+              {/* Earn Card */}
+              <motion.div 
+                className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-xl p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                    <Gift className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xl text-gray-800 mb-2 flex items-center">
+                      🎁 Earn
+                    </h4>
+                    <p className="text-gray-700">
+                      Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-[#34A853]">25%</span>
-                    <span className="mx-2">→</span>
-                    Education & Platform
-                  </p>
-                  <p className="text-gray-600">
-                    Access bite-sized lessons, quizzes, and planning resources.
-                  </p>
-                </div>
-              </div>
-              
-              {/* 20% - Platform Operations */}
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[#F3E8FD] flex items-center justify-center mr-4">
-                  <div className="w-6 h-6 bg-[#A142F4] rounded-sm"></div>
-                </div>
-                <div>
-                  <p className="font-bold text-xl text-gray-800 flex items-center">
-                    <span className="text-[#A142F4]">20%</span>
-                    <span className="mx-2">→</span>
-                    Operations
-                  </p>
-                  <p className="text-gray-600">
-                    Supports the tech and growth of the community.
-                  </p>
-                </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

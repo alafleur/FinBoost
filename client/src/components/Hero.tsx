@@ -22,7 +22,7 @@ type SubscribeFormValues = z.infer<typeof subscribeSchema>;
 
 export default function Hero({ onSubscribeSuccess }: HeroProps) {
   const { mutate: subscribe, isPending } = useSubscribe();
-  const [memberCount] = useState("2,500+");
+  const [memberCount] = useState("5,000+");
   
   const form = useForm<SubscribeFormValues>({
     resolver: zodResolver(subscribeSchema),
