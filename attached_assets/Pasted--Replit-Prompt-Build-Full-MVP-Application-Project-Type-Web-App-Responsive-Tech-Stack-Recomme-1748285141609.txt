@@ -1,0 +1,110 @@
+🛠️ Replit Prompt: Build Full MVP Application
+Project Type: Web App (Responsive)
+
+Tech Stack Recommendation:
+
+Frontend: React with TailwindCSS
+
+Backend: Node.js or Python (Flask/FastAPI)
+
+Database: PostgreSQL or Firebase
+
+Auth: Firebase Auth or Auth0
+
+🎯 Core Product Description:
+Create a full-stack pre-launch web application for a membership-based financial wellness platform. The platform rewards users for completing financial education tutorials, submitting proof of financial responsibility (e.g. debt repayment), and referring others — all contributing to a collective monthly rewards pool.
+
+✅ Key Features to Build
+1. User Onboarding
+Sign-up/Login with email or Google
+
+Onboarding flow: choose financial goal → short walkthrough of how rewards, tiers, and points work
+
+2. Main Dashboard
+Show current point total and current month tier
+
+Visual progress bar toward goal (e.g. "20 points to reach next tier")
+
+Quick actions: complete a lesson, refer a friend, upload proof
+
+3. Financial Education Hub
+Modules page with interactive tutorials (5–10 initially, short format)
+
+Quizzes to unlock points
+
+Module tracking (completion status, points earned per lesson)
+
+4. Points Tracker
+Table view of actions taken + points earned
+
+Filters: by category (learning, referrals, proof)
+
+Monthly status (carryover, deduction, or neutral if not selected)
+
+5. Proof of Action Uploads
+Upload interface (image, PDF, or screenshot) + optional description
+
+Review queue (for manual or automated verification)
+
+Points awarded automatically or after approval
+
+6. Rewards Page
+Display estimated pool size
+
+Show reward tiers (Top 1/3 = 50%, Mid 1/3 = 35%, Bottom 1/3 = 15%)
+
+Explain reward logic:
+
+Random draws within each tier
+
+50% of members receive rewards
+
+Top payouts can reach thousands of dollars
+
+Show user’s reward history and current eligibility
+
+7. Referral Program
+Shareable referral link
+
+Track referral count and status (joined + active)
+
+Award points per referral
+
+8. Community Impact Section
+Simple animation showing growth of rewards pool
+
+Message: “More members = larger rewards for all”
+
+Show a community stat or testimonial teaser
+
+9. Pricing & Membership Info
+Transparent pricing page: e.g., “$19.99/month — your membership gives you access to learning tools + contributes to the rewards pool”
+
+Graphic showing how funds are split: education, rewards, platform operations
+
+10. Account Settings
+Basic profile settings, email/password
+
+Billing info
+
+Notifications toggle (email, SMS reminders)
+
+Delete account / export data
+
+🔒 Admin / CMS Features
+Add/edit education modules and quizzes
+
+Review and manage proof uploads
+
+Adjust point values or rules
+
+Monthly reward draw system: randomizer tool within tiers
+
+Data dashboard for user engagement + points analytics
+
+✨ Design Notes:
+Modern, clean UI with bright, energetic tones (but trustworthy)
+
+Soft animations (progress bar, pool growth, etc.)
+
+Gamified but accessible UX — like Duolingo for money
