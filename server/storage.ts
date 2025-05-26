@@ -289,10 +289,33 @@ export class MemStorage implements IStorage {
   }
 
   async getPendingProofUploads(): Promise<UserPointsHistory[]> {
-    return await db.select()
+    const result = await db.select({
+      id: userPointsHistory.id,
+      userId: userPointsHistory.userId,
+      action: userPointsHistory.action,
+      points: userPointsHistory.points,
+      description: userPointsHistory.description,
+      proofUrl: userPointsHistory.proofUrl,
+      status: userPointsHistory.status,
+      createdAt: userPointsHistory.createdAt,
+      reviewedAt: userPointsHistory.reviewedAt,
+      reviewedBy: userPointsHistory.reviewedBy,
+      metadata: userPointsHistory.metadata,
+      username: users.username,
+      email: users.email
+    })
       .from(userPointsHistory)
+      .leftJoin(users, eq(userPointsHistory.userId, users.id))
       .where(eq(userPointsHistory.status, 'pending'))
       .orderBy(desc(userPointsHistory.createdAt));
+
+    return result.map(row => ({
+      ...row,
+      user: {
+        username: row.username,
+        email: row.email
+      }
+    })) as any;
   }
 
   async approveProofUpload(historyId: number, reviewerId: number): Promise<void> {

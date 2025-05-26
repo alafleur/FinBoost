@@ -63,6 +63,21 @@ interface AdminStats {
   avgCompletionRate: number;
 }
 
+interface PendingProof {
+  id: number;
+  userId: number;
+  action: string;
+  points: number;
+  description: string;
+  proofUrl: string;
+  createdAt: string;
+  metadata?: any;
+  user?: {
+    username: string;
+    email: string;
+  };
+}
+
 export default function Admin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -104,6 +119,11 @@ export default function Admin() {
     avgCompletionRate: 0
   });
 
+  // State for proof review
+  const [pendingProofs, setPendingProofs] = useState<PendingProof[]>([]);
+  const [reviewingProof, setReviewingProof] = useState<PendingProof | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
   const categories = [
     { value: 'budgeting', label: 'Budgeting' },
     { value: 'credit', label: 'Credit' },
@@ -144,12 +164,31 @@ export default function Admin() {
 
       setUser(parsedUser);
       loadAdminData();
+      loadPendingProofs();
       setLoading(false);
     } catch (error) {
       console.error('Error loading admin data:', error);
       setLocation('/auth');
     }
   }, [setLocation, toast]);
+
+  const loadPendingProofs = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/points/pending', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPendingProofs(data.pending);
+      }
+    } catch (error) {
+      console.error('Failed to load pending proofs:', error);
+    }
+  };
 
   const loadAdminData = async () => {
     // Sample data - replace with API calls
@@ -308,6 +347,103 @@ export default function Admin() {
     });
   };
 
+  const handleApproveProof = async (proofId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/points/approve/${proofId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Proof Approved! ✅",
+          description: "Points have been awarded to the user."
+        });
+        
+        // Remove from pending list
+        setPendingProofs(pendingProofs.filter(p => p.id !== proofId));
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Approval Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to approve proof:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve proof. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRejectProof = async (proofId: number, reason: string) => {
+    if (!reason.trim()) {
+      toast({
+        title: "Rejection Reason Required",
+        description: "Please provide a reason for rejection.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/points/reject/${proofId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ reason })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Proof Rejected",
+          description: "User has been notified of the rejection."
+        });
+        
+        // Remove from pending list
+        setPendingProofs(pendingProofs.filter(p => p.id !== proofId));
+        setReviewingProof(null);
+        setRejectionReason('');
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Rejection Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to reject proof:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject proof. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getActionName = (actionId: string) => {
+    const actionNames: Record<string, string> = {
+      'debt_payment': 'Debt Payment',
+      'investment': 'Investment',
+      'emergency_fund': 'Emergency Fund Contribution',
+      'referral_signup': 'Referral Sign-up',
+      'savings_milestone': 'Savings Milestone',
+      'budget_creation': 'Budget Creation'
+    };
+    return actionNames[actionId] || actionId;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -343,10 +479,11 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
+            <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -412,6 +549,10 @@ export default function Admin() {
                   <Button onClick={() => setActiveTab("quiz")} variant="outline" className="flex items-center gap-2">
                     <Target className="h-4 w-4" />
                     Create Quiz
+                  </Button>
+                  <Button onClick={() => setActiveTab("proofs")} variant="outline" className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Review Proofs ({pendingProofs.length})
                   </Button>
                   <Button onClick={() => setActiveTab("analytics")} variant="outline" className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
@@ -725,6 +866,155 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+          </TabsContent>
+
+          {/* Proof Review Tab */}
+          <TabsContent value="proofs" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Proof Review</h2>
+                <p className="text-gray-600">Review and approve user-submitted proofs for financial actions</p>
+              </div>
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
+                {pendingProofs.length} Pending
+              </Badge>
+            </div>
+
+            {pendingProofs.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">All Caught Up!</h3>
+                  <p className="text-gray-600 text-center">No pending proof submissions to review at this time.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={loadPendingProofs}
+                    className="mt-4"
+                  >
+                    Refresh
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {pendingProofs.map((proof) => (
+                  <Card key={proof.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            {getActionName(proof.action)}
+                            <Badge className="bg-blue-100 text-blue-700">
+                              {proof.points} pts
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription>
+                            Submitted by {proof.user?.username || `User ${proof.userId}`} • {new Date(proof.createdAt).toLocaleDateString()}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleApproveProof(proof.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => setReviewingProof(proof)}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Reject Proof Submission</DialogTitle>
+                                <DialogDescription>
+                                  Please provide a reason for rejecting this proof. The user will be notified.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Textarea
+                                  value={rejectionReason}
+                                  onChange={(e) => setRejectionReason(e.target.value)}
+                                  placeholder="e.g., Image is unclear, amount not visible, document appears to be edited..."
+                                  rows={3}
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => {
+                                      setReviewingProof(null);
+                                      setRejectionReason('');
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    variant="destructive"
+                                    onClick={() => handleRejectProof(proof.id, rejectionReason)}
+                                  >
+                                    Reject Proof
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="font-medium">Description:</Label>
+                          <p className="text-sm text-gray-700 mt-1">{proof.description}</p>
+                        </div>
+                        
+                        <div>
+                          <Label className="font-medium">Proof Document:</Label>
+                          <div className="mt-2 border rounded-lg p-4 bg-gray-50">
+                            <div className="flex items-center gap-3">
+                              <Upload className="h-8 w-8 text-gray-400" />
+                              <div>
+                                <p className="text-sm font-medium">Uploaded Proof</p>
+                                <p className="text-xs text-gray-500">
+                                  {proof.metadata?.fileName || 'Document'} • {proof.metadata?.fileSize ? `${(proof.metadata.fileSize / (1024 * 1024)).toFixed(2)} MB` : 'Unknown size'}
+                                </p>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(proof.proofUrl, '_blank')}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {proof.metadata && (
+                          <div>
+                            <Label className="font-medium">Additional Details:</Label>
+                            <div className="mt-1 text-sm text-gray-600">
+                              <pre className="bg-gray-50 p-2 rounded text-xs overflow-auto">
+                                {JSON.stringify(proof.metadata, null, 2)}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
           </TabsContent>
 

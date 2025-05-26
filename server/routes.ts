@@ -434,7 +434,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true,
-        pending: pendingUploads
+        pending: pendingUploads.map(upload => ({
+          id: upload.id,
+          userId: upload.userId,
+          action: upload.action,
+          points: upload.points,
+          description: upload.description,
+          proofUrl: upload.proofUrl,
+          createdAt: upload.createdAt,
+          metadata: upload.metadata ? JSON.parse(upload.metadata) : null,
+          user: (upload as any).user
+        }))
       });
     } catch (error) {
       console.error("Pending uploads error:", error);
