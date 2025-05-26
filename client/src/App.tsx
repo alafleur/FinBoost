@@ -9,6 +9,7 @@ import Auth from "@/pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
+import Admin from "./pages/Admin";
 import FinancialMoodEgg from "@/components/FinancialMoodEgg";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/education" component={Education} />
       <Route path="/lesson/:id" component={Lesson} />
+      <Route path="/admin" component={Admin} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
