@@ -836,6 +836,218 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get all users with pagination and filtering
+  apiRouter.get("/admin/users", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { page = 1, limit = 50, search, status, tier } = req.query;
+      
+      const users = await storage.getAdminUsers({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        search: search as string,
+        status: status as string,
+        tier: tier as string
+      });
+
+      res.json({
+        success: true,
+        users: users.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isActive: user.isActive,
+          totalPoints: user.totalPoints,
+          currentMonthPoints: user.currentMonthPoints,
+          tier: user.tier,
+          joinedAt: user.joinedAt,
+          lastLoginAt: user.lastLoginAt
+        }))
+      });
+    } catch (error) {
+      console.error("Admin users error:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin: Bulk user actions
+  apiRouter.post("/admin/users/bulk-action", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { action, userIds } = req.body;
+
+      if (!action || !userIds || !Array.isArray(userIds)) {
+        return res.status(400).json({ message: "Action and user IDs are required" });
+      }
+
+      let result;
+      switch (action) {
+        case 'activate':
+          result = await storage.bulkUpdateUsers(userIds, { isActive: true });
+          break;
+        case 'deactivate':
+          result = await storage.bulkUpdateUsers(userIds, { isActive: false });
+          break;
+        case 'reset_password':
+          result = await storage.bulkResetPasswords(userIds);
+          break;
+        case 'export':
+          result = await storage.exportUserData(userIds);
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid action" });
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully applied ${action} to ${userIds.length} user(s)`,
+        result
+      });
+    } catch (error) {
+      console.error("Bulk user action error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to execute bulk action" });
+      }
+    }
+  });
+
+  // Admin: Get analytics data
+  apiRouter.get("/admin/analytics", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { period = '30d' } = req.query;
+      
+      const analytics = await storage.getAdminAnalytics(period as string);
+
+      res.json({
+        success: true,
+        analytics: {
+          userGrowth: analytics.userGrowth || [],
+          pointsDistribution: analytics.pointsDistribution || [],
+          recentActivity: analytics.recentActivity || [],
+          systemHealth: {
+            activeUsers: analytics.activeUsers || 0,
+            totalPointsAwarded: analytics.totalPointsAwarded || 0,
+            avgSessionDuration: analytics.avgSessionDuration || 0,
+            errorRate: analytics.errorRate || 0
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Admin analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
+  // Admin: Get system settings
+  apiRouter.get("/admin/settings", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const settings = await storage.getSystemSettings();
+
+      res.json({
+        success: true,
+        settings: settings || {
+          maintenanceMode: false,
+          registrationEnabled: true,
+          pointsMultiplier: 1.0,
+          maxDailyPoints: 500,
+          tierRequirements: {
+            bronze: 0,
+            silver: 500,
+            gold: 2000
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Admin settings error:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
+  // Admin: Update system settings
+  apiRouter.put("/admin/settings", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { settings } = req.body;
+
+      if (!settings) {
+        return res.status(400).json({ message: "Settings object is required" });
+      }
+
+      await storage.updateSystemSettings(settings);
+
+      res.json({
+        success: true,
+        message: "System settings updated successfully"
+      });
+    } catch (error) {
+      console.error("Update settings error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to update system settings" });
+      }
+    }
+  });
+
+  // Admin: Get user details with full history
+  apiRouter.get("/admin/users/:userId", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const userId = parseInt(req.params.userId);
+      
+      const userDetails = await storage.getUserDetailsForAdmin(userId);
+
+      if (!userDetails) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        success: true,
+        user: userDetails
+      });
+    } catch (error) {
+      console.error("Get user details error:", error);
+      res.status(500).json({ message: "Failed to fetch user details" });
+    }
+  });
+
+  // Admin: Export system data
+  apiRouter.get("/admin/export/:type", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      const { type } = req.params;
+      const { format = 'csv' } = req.query;
+
+      let data;
+      switch (type) {
+        case 'users':
+          data = await storage.exportUsers(format as string);
+          break;
+        case 'points':
+          data = await storage.exportPointsHistory(format as string);
+          break;
+        case 'analytics':
+          data = await storage.exportAnalytics(format as string);
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid export type" });
+      }
+
+      res.setHeader('Content-Type', format === 'csv' ? 'text/csv' : 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}_export.${format}"`);
+      res.send(data);
+    } catch (error) {
+      console.error("Export data error:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
 

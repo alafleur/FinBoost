@@ -85,6 +85,33 @@ export default function Admin() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Enhanced state for user management
+  const [users, setUsers] = useState([]);
+  const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [bulkAction, setBulkAction] = useState("");
+  
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState({
+    userGrowth: [],
+    pointsDistribution: [],
+    recentActivity: [],
+    systemHealth: {}
+  });
+  
+  // System settings state
+  const [systemSettings, setSystemSettings] = useState({
+    maintenanceMode: false,
+    registrationEnabled: true,
+    pointsMultiplier: 1.0,
+    maxDailyPoints: 500,
+    tierRequirements: {
+      bronze: 0,
+      silver: 500,
+      gold: 2000
+    }
+  });
 
   // State for modules
   const [modules, setModules] = useState<LearningModule[]>([]);
@@ -198,6 +225,15 @@ export default function Admin() {
   };
 
   const loadAdminData = async () => {
+    try {
+      // Load users data
+      await loadUsersData();
+      await loadAnalyticsData();
+      await loadSystemSettings();
+    } catch (error) {
+      console.error('Failed to load admin data:', error);
+    }
+
     // Sample data - replace with API calls
     const sampleModules: LearningModule[] = [
       {
@@ -451,6 +487,119 @@ export default function Admin() {
     return actionNames[actionId] || actionId;
   };
 
+  const loadUsersData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users);
+      }
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
+  const loadAnalyticsData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/analytics', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAnalyticsData(data.analytics);
+      }
+    } catch (error) {
+      console.error('Error loading analytics:', error);
+    }
+  };
+
+  const loadSystemSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSystemSettings(data.settings);
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const handleUserAction = async (action: string, userIds: number[]) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/users/bulk-action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action, userIds })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Action Completed",
+          description: `Successfully applied ${action} to ${userIds.length} user(s)`
+        });
+        await loadUsersData();
+        setSelectedUsers([]);
+      } else {
+        throw new Error('Failed to execute action');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to execute bulk action",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ settings: systemSettings })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Settings Updated",
+          description: "System settings have been successfully updated"
+        });
+      } else {
+        throw new Error('Failed to update settings');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update system settings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
   const fetchReferralStats = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -502,13 +651,175 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+
+          {/* Users Management Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">User Management</h2>
+                <p className="text-gray-600">Manage user accounts, permissions, and activities</p>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search users..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="w-64"
+                />
+                <Button onClick={loadUsersData} variant="outline">
+                  Refresh
+                </Button>
+              </div>
+            </div>
+
+            {/* Bulk Actions */}
+            {selectedUsers.length > 0 && (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">
+                      {selectedUsers.length} user(s) selected
+                    </span>
+                    <div className="flex gap-2">
+                      <Select value={bulkAction} onValueChange={setBulkAction}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Select action..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="activate">Activate Users</SelectItem>
+                          <SelectItem value="deactivate">Deactivate Users</SelectItem>
+                          <SelectItem value="reset_password">Reset Passwords</SelectItem>
+                          <SelectItem value="export">Export Data</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        onClick={() => handleUserAction(bulkAction, selectedUsers)}
+                        disabled={!bulkAction}
+                      >
+                        Apply
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setSelectedUsers([])}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Users Table */}
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
+                        <input
+                          type="checkbox"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedUsers(filteredUsers.map(u => u.id));
+                            } else {
+                              setSelectedUsers([]);
+                            }
+                          }}
+                          checked={filteredUsers.length > 0 && selectedUsers.length === filteredUsers.length}
+                        />
+                      </TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Points</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(user.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedUsers([...selectedUsers, user.id]);
+                              } else {
+                                setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{user.username}</p>
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{user.totalPoints}</p>
+                            <p className="text-sm text-gray-500">
+                              {user.currentMonthPoints} this month
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={
+                            user.tier === 'gold' ? 'bg-yellow-100 text-yellow-700' :
+                            user.tier === 'silver' ? 'bg-gray-100 text-gray-700' :
+                            'bg-orange-100 text-orange-700'
+                          }>
+                            {user.tier}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={user.isActive ? "default" : "secondary"}>
+                            {user.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(user.joinedAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          {user.lastLoginAt 
+                            ? new Date(user.lastLoginAt).toLocaleDateString()
+                            : 'Never'
+                          }
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-3 w-3 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -1084,7 +1395,128 @@ export default function Admin() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
+              <div className="flex gap-2">
+                <Select defaultValue="7d">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" onClick={loadAnalyticsData}>
+                  Refresh
+                </Button>
+              </div>
+            </div>
+
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                  <Activity className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsData.systemHealth?.activeUsers || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    +12% from last week
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Points Awarded</CardTitle>
+                  <Star className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsData.systemHealth?.totalPointsAwarded || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    This month
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+                  <Clock className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{pendingProofs.length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Proof submissions
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">System Health</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">99.9%</div>
+                  <p className="text-xs text-muted-foreground">
+                    Uptime
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* User Growth Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Growth</CardTitle>
+                  <CardDescription>New user registrations over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center border-2 border-dashed rounded-lg">
+                    <div className="text-center">
+                      <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">User growth chart would go here</p>
+                      <p className="text-xs text-gray-400">Integration with chart library needed</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Points Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Points Distribution</CardTitle>
+                  <CardDescription>How points are earned across categories</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Education</span>
+                      <span className="text-sm font-medium">45%</span>
+                    </div>
+                    <Progress value={45} className="h-2" />
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Financial Actions</span>
+                      <span className="text-sm font-medium">35%</span>
+                    </div>
+                    <Progress value={35} className="h-2" />
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Referrals</span>
+                      <span className="text-sm font-medium">20%</span>
+                    </div>
+                    <Progress value={20} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Popular Modules */}
               <Card>
                 <CardHeader>
                   <CardTitle>Popular Modules</CardTitle>
@@ -1108,28 +1540,211 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
+              {/* Recent Activity */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Category Performance</CardTitle>
-                  <CardDescription>Completion rates by category</CardDescription>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>Latest system events and user actions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {categories.map((category) => {
-                      const categoryModules = modules.filter(m => m.category === category.value);
-                      const totalCompletions = categoryModules.reduce((sum, m) => sum + (m.completions || 0), 0);
-                      const avgCompletions = categoryModules.length > 0 ? totalCompletions / categoryModules.length : 0;
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">New user registered</p>
+                        <p className="text-xs text-gray-500">2 minutes ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-blue-50 rounded">
+                      <Upload className="h-4 w-4 text-blue-500" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Proof submitted for review</p>
+                        <p className="text-xs text-gray-500">5 minutes ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-yellow-50 rounded">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">User earned 25 points</p>
+                        <p className="text-xs text-gray-500">8 minutes ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-                      return (
-                        <div key={category.value}>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>{category.label}</span>
-                            <span>{Math.round(avgCompletions)} avg</span>
-                          </div>
-                          <Progress value={Math.min((avgCompletions / 200) * 100, 100)} className="h-2" />
-                        </div>
-                      );
-                    })}
+          {/* System Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">System Settings</h2>
+                <p className="text-gray-600">Configure application settings and parameters</p>
+              </div>
+              <Button onClick={handleUpdateSettings} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                Save Settings
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* General Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>General Settings</CardTitle>
+                  <CardDescription>Basic application configuration</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Maintenance Mode</Label>
+                      <p className="text-sm text-gray-500">Disable access for non-admin users</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={systemSettings.maintenanceMode}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        maintenanceMode: e.target.checked
+                      })}
+                      className="toggle"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">User Registration</Label>
+                      <p className="text-sm text-gray-500">Allow new users to register</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={systemSettings.registrationEnabled}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        registrationEnabled: e.target.checked
+                      })}
+                      className="toggle"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Points Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Points Configuration</CardTitle>
+                  <CardDescription>Configure point system parameters</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Points Multiplier</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={systemSettings.pointsMultiplier}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        pointsMultiplier: parseFloat(e.target.value)
+                      })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Global multiplier for all point awards</p>
+                  </div>
+
+                  <div>
+                    <Label>Max Daily Points</Label>
+                    <Input
+                      type="number"
+                      value={systemSettings.maxDailyPoints}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        maxDailyPoints: parseInt(e.target.value)
+                      })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Maximum points a user can earn per day</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tier Requirements */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tier Requirements</CardTitle>
+                  <CardDescription>Set point thresholds for user tiers</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Bronze Tier</Label>
+                    <Input
+                      type="number"
+                      value={systemSettings.tierRequirements.bronze}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        tierRequirements: {
+                          ...systemSettings.tierRequirements,
+                          bronze: parseInt(e.target.value)
+                        }
+                      })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Silver Tier</Label>
+                    <Input
+                      type="number"
+                      value={systemSettings.tierRequirements.silver}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        tierRequirements: {
+                          ...systemSettings.tierRequirements,
+                          silver: parseInt(e.target.value)
+                        }
+                      })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Gold Tier</Label>
+                    <Input
+                      type="number"
+                      value={systemSettings.tierRequirements.gold}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        tierRequirements: {
+                          ...systemSettings.tierRequirements,
+                          gold: parseInt(e.target.value)
+                        }
+                      })}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                  <CardDescription>Current system information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">Database</span>
+                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">File Storage</span>
+                    <Badge className="bg-green-100 text-green-700">Operational</Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">Email Service</span>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                    <span className="text-sm font-medium">Version</span>
+                    <Badge variant="outline">v1.0.0</Badge>
                   </div>
                 </CardContent>
               </Card>

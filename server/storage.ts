@@ -56,6 +56,19 @@ export interface IStorage {
     getReferralStats(userId: number): Promise<{totalReferrals: number, completedReferrals: number, pendingReferrals: number, totalPointsEarned: number}>;
     updateReferralStatus(referralId: number, status: 'completed' | 'expired'): Promise<void>;
     getAdminReferralStats(): Promise<{totalReferrals: number, totalReferrers: number, topReferrers: Array<{username: string, referralCount: number, pointsEarned: number}>}>;
+
+    // Enhanced Admin Methods
+    getAdminUsers(filters: {page: number, limit: number, search?: string, status?: string, tier?: string}): Promise<User[]>;
+    bulkUpdateUsers(userIds: number[], updates: Partial<User>): Promise<void>;
+    bulkResetPasswords(userIds: number[]): Promise<void>;
+    exportUserData(userIds: number[]): Promise<any>;
+    getAdminAnalytics(period: string): Promise<any>;
+    getSystemSettings(): Promise<any>;
+    updateSystemSettings(settings: any): Promise<void>;
+    getUserDetailsForAdmin(userId: number): Promise<any>;
+    exportUsers(format: string): Promise<string>;
+    exportPointsHistory(format: string): Promise<string>;
+    exportAnalytics(format: string): Promise<string>;
 }
 
 import fs from 'fs/promises';
