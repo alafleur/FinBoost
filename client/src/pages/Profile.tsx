@@ -268,15 +268,7 @@ export default function Profile() {
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarContent>
-                    {user.profilePicture ? (
-                      <img src={user.profilePicture} alt="Profile" className="rounded-full" />
-                    ) : (
-                      <div className="w-full h-full bg-primary-100 flex items-center justify-center">
-                        <User className="h-8 w-8 text-primary-600" />
-                      </div>
-                    )}
-                  </AvatarContent>
+                  <AvatarImage src={user.profilePicture} alt="Profile" />
                   <AvatarFallback>
                     {user.firstName?.[0]}{user.lastName?.[0]}
                   </AvatarFallback>

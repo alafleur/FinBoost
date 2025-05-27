@@ -11,6 +11,7 @@ import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import FinancialMoodEgg from "./components/FinancialMoodEgg";
 
 function Router() {
   return (
