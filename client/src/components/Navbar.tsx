@@ -18,7 +18,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center space-x-3">
           <Button 
-            className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition duration-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg shadow-md transition duration-300 border-2 border-blue-600"
             onClick={scrollToForm}
           >
             Join Waitlist
