@@ -7,9 +7,14 @@ import jwt from "jsonwebtoken";
 import type { User } from "@shared/schema";
 import { upload, deleteFile, getFileUrl } from "./fileUpload";
 import path from "path";
+import { OAuth2Client } from "google-auth-library";
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+
+// Google OAuth client setup
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "your-google-client-id";
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Authentication middleware
 const authenticateToken = async (req: Request, res: Response, next: any) => {
@@ -178,6 +183,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         success: false,
         message: "An error occurred during registration." 
+      });
+    }
+  });
+
+  // Google OAuth verification function
+  async function verifyGoogleToken(token: string) {
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      return payload;
+    } catch (error) {
+      console.error('Error verifying Google token:', error);
+      return null;
+    }
+  }
+
+  // Google OAuth Login/Register
+  apiRouter.post("/auth/google", async (req: Request, res: Response) => {
+    try {
+      const { credential, referralCode } = req.body;
+
+      if (!credential) {
+        return res.status(400).json({
+          success: false,
+          message: "Google credential is required"
+        });
+      }
+
+      const googleUser = await verifyGoogleToken(credential);
+      if (!googleUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Google token"
+        });
+      }
+
+      const { email, given_name, family_name, sub: googleId } = googleUser;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email not provided by Google"
+        });
+      }
+
+      // Check if user exists
+      let user = await storage.getUserByEmail(email);
+
+      if (!user) {
+        // Create new user
+        const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 4);
+        
+        // Validate referral code if provided
+        if (referralCode) {
+          const validation = await storage.validateReferralCode(referralCode);
+          if (!validation.isValid) {
+            return res.status(400).json({
+              success: false,
+              message: "Invalid referral code"
+            });
+          }
+        }
+
+        user = await storage.createUser({
+          email,
+          username,
+          password: 'google_oauth_' + googleId, // Placeholder password for OAuth users
+          firstName: given_name || '',
+          lastName: family_name || '',
+          referralCode
+        });
+      }
+
+      // Update last login
+      await storage.updateLastLogin(user.id);
+
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+
+      return res.status(200).json({
+        success: true,
+        message: user ? "Login successful" : "Account created and logged in successfully",
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          totalPoints: user.totalPoints,
+          currentMonthPoints: user.currentMonthPoints,
+          tier: user.tier
+        }
+      });
+    } catch (error) {
+      console.error("Error in Google OAuth endpoint:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred during Google authentication."
       });
     }
   });
