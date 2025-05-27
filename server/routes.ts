@@ -359,7 +359,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentMonthPoints: user.currentMonthPoints,
           tier: user.tier,
           joinedAt: user.joinedAt,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          bio: user.bio,
+          location: user.location,
+          occupation: user.occupation,
+          financialGoals: user.financialGoals
         }
       });
     } catch (error) {
@@ -367,6 +371,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         success: false,
         message: "An error occurred while fetching user profile." 
+      });
+    }
+  });
+
+  // Update user profile (protected route)
+  apiRouter.put("/profile/update", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const { firstName, lastName, bio, location, occupation, financialGoals } = req.body;
+
+      await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        bio,
+        location,
+        occupation,
+        financialGoals
+      });
+
+      const updatedUser = await storage.getUserById(userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        user: {
+          id: updatedUser!.id,
+          email: updatedUser!.email,
+          username: updatedUser!.username,
+          firstName: updatedUser!.firstName,
+          lastName: updatedUser!.lastName,
+          totalPoints: updatedUser!.totalPoints,
+          currentMonthPoints: updatedUser!.currentMonthPoints,
+          tier: updatedUser!.tier,
+          joinedAt: updatedUser!.joinedAt,
+          lastLoginAt: updatedUser!.lastLoginAt,
+          bio: updatedUser!.bio,
+          location: updatedUser!.location,
+          occupation: updatedUser!.occupation,
+          financialGoals: updatedUser!.financialGoals
+        }
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update profile"
       });
     }
   });

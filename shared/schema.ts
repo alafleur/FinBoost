@@ -26,7 +26,14 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true).notNull(),
   totalPoints: integer("total_points").default(0).notNull(),
   currentMonthPoints: integer("current_month_points").default(0).notNull(),
-  tier: text("tier").default("bronze").notNull(), // bronze, silver, gold
+  tier: text("tier").default("bronze").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at"),
+  bio: text("bio"),
+  location: text("location"),
+  occupation: text("occupation"),
+  financialGoals: text("financial_goals"),
   referredBy: text("referred_by"), // Referral code used when signing up
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),

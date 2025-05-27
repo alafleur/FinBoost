@@ -25,6 +25,7 @@ export interface IStorage {
     updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void>;
     getUserPointsHistory(userId: number): Promise<UserPointsHistory[]>;
     updateLastLogin(userId: number): Promise<void>;
+    updateUserProfile(userId: number, profileData: Partial<{firstName: string, lastName: string, bio: string, location: string, occupation: string, financialGoals: string}>): Promise<void>;
 
     // Enhanced Points System Methods
     awardPoints(userId: number, actionId: string, points: number, description: string, metadata?: any): Promise<UserPointsHistory>;
@@ -221,6 +222,12 @@ export class MemStorage implements IStorage {
   async updateLastLogin(userId: number): Promise<void> {
     await db.update(users)
       .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserProfile(userId: number, profileData: Partial<{firstName: string, lastName: string, bio: string, location: string, occupation: string, financialGoals: string}>): Promise<void> {
+    await db.update(users)
+      .set(profileData)
       .where(eq(users.id, userId));
   }
 

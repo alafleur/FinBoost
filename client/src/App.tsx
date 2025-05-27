@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
-import FinancialMoodEgg from "@/components/FinancialMoodEgg";
+import Profile from "./pages/Profile";
 
 function Router() {
   return (
@@ -20,6 +20,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/education" component={Education} />
       <Route path="/lesson/:id" component={Lesson} />
+      <Route path="/profile" component={Profile} />
       <Route path="/admin" component={Admin} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

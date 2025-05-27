@@ -111,6 +111,9 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user.firstName || user.username}</p>
               </div>
+              <Button variant="outline" onClick={() => setLocation('/profile')}>
+                Profile
+              </Button>
               <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
