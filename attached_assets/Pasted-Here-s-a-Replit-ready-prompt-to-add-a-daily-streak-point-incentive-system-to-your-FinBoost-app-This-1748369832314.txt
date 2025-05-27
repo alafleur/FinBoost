@@ -1,0 +1,76 @@
+Here’s a Replit-ready prompt to add a daily streak point incentive system to your FinBoost app. This will guide the developer to implement logic, UI components, and database updates to track and reward user streaks:
+
+🛠️ Replit Prompt: Daily Streak Point Incentive System
+Objective: Add a daily streak system to FinBoost that rewards users with bonus points for logging in and completing a lesson or quiz each day. Users should see their current streak and be notified of bonuses.
+
+⚙️ Functional Requirements
+1. Streak Tracking
+
+Track the number of consecutive days a user completes a learning activity.
+
+Reset the streak if a user misses a day.
+
+Store in the database: currentStreak, lastActivityDate, longestStreak.
+
+2. Bonus Points System
+
+Reward bonus XP based on streak:
+
+Day 1: +0 XP (just starting)
+
+Day 2-4: +5 XP/day
+
+Day 5-6: +10 XP/day
+
+Day 7+: +15 XP/day
+
+XP bonus should be added when a user completes a lesson or quiz.
+
+3. Frontend Display
+
+Add a streak tracker widget to the dashboard (e.g., fire emoji 🔥 with number of days).
+
+Show tooltips or text like:
+
+“🔥 3-day streak! Keep it up for more rewards.”
+
+“You earned +10 XP for maintaining your streak!”
+
+On missed day: “Your streak reset. Start again tomorrow!”
+
+4. Notification System
+
+Show a toast/popup after each learning activity: “Streak updated! +10 XP bonus added.”
+
+Optional: Daily push/email notification to remind user to log in.
+
+💾 Database Schema Updates
+User Model (extend existing schema):
+
+ts
+Copy
+Edit
+streak: {
+  current: number,
+  longest: number,
+  lastActivityDate: string, // ISO format
+}
+🧪 Logic Suggestions (Backend)
+Run a check on lessonCompletion or quizCompletion:
+
+If last activity was yesterday, increment streak.
+
+If today is first activity of the day, give streak reward.
+
+If more than 1 day missed, reset streak to 1.
+
+Update current, longest, and lastActivityDate.
+
+✅ Deliverables
+Backend logic for tracking and awarding streaks
+
+Updated user dashboard with streak display
+
+XP reward mechanism tied to streak level
+
+Notifications/alerts for users
