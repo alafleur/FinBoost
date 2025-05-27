@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -222,7 +223,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Dashboard Content */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="earn-points">Earn Points</TabsTrigger>
@@ -239,7 +240,7 @@ export default function Dashboard() {
                   <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PointsSummary user={user} />
+                  <PointsSummary user={user} onNavigateToPoints={() => setActiveTab("earn-points")} />
                 </CardContent>
               </Card>
             </div>
