@@ -977,8 +977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        ```tool_code
-      users: users.map(user => ({
+        users: users.map(user => ({
           id: user.id,
           username: user.username,
           email: user.email,
