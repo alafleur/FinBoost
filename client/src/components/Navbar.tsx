@@ -18,14 +18,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center space-x-3">
           <Button 
-            variant="ghost"
-            className="text-gray-600 hover:text-gray-900 hidden sm:block"
-            onClick={() => window.location.href = '/auth'}
-          >
-            Login
-          </Button>
-          <Button 
-            className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition duration-300 hidden sm:block"
+            className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-5 py-2 rounded-lg shadow-sm transition duration-300"
             onClick={scrollToForm}
           >
             Join Waitlist
