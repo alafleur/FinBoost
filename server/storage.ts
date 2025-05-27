@@ -192,24 +192,13 @@ export class MemStorage implements IStorage {
     return isValid ? user : null;
   }
 
-  async updateUserPoints(userId: number, points: number, action: string, description: string): Promise<void> {
-    await db.transaction(async (tx) => {
-      // Update user points
-      await tx.update(users)
-        .set({
-          totalPoints: sql`total_points + ${points}`,
-          currentMonthPoints: sql`current_month_points + ${points}`,
-        })
-        .where(eq(users.id, userId));
-
-      // Record points history
-      await tx.insert(userPointsHistory).values({
-        userId,
-        points,
-        action,
-        description,
-      });
-    });
+  async updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void> {
+    await db.update(users)
+      .set({
+        totalPoints,
+        currentMonthPoints,
+      })
+      .where(eq(users.id, userId));
   }
 
   async getUserPointsHistory(userId: number): Promise<UserPointsHistory[]> {

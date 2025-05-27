@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import PointsActions from '@/components/PointsActions';
+import PointsManagement from '@/components/PointsManagement';
 import Leaderboard from '@/components/Leaderboard';
 import PointsHistory from '../components/PointsHistory';
 import ReferralSystem from '../components/ReferralSystem';
@@ -305,7 +305,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="earn-points">
-          <PointsActions />
+          <PointsManagement />
         </TabsContent>
 
         <TabsContent value="referrals">

@@ -595,6 +595,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Validate if user can earn points for specific action
+  apiRouter.get("/points/validate/:actionId", authenticateToken, async (req, res) => {
+    try {
+      const { actionId } = req.params;
+      const userId = req.user!.id;
+
+      // Import here to avoid circular dependency
+      const { POINTS_CONFIG } = await import("@shared/pointsConfig");
+      
+      const actionConfig = POINTS_CONFIG[actionId];
+      if (!actionConfig) {
+        return res.status(400).json({ message: "Invalid action ID" });
+      }
+
+      const validation: any = {
+        canEarn: true,
+        dailyUsage: 0,
+        totalUsage: 0
+      };
+
+      // Check daily limit
+      if (actionConfig.maxDaily) {
+        const canEarnDaily = await storage.checkDailyActionLimit(userId, actionId);
+        if (!canEarnDaily) {
+          validation.canEarn = false;
+          validation.reason = `Daily limit of ${actionConfig.maxDaily} reached for this action`;
+        }
+
+        // Get daily usage count
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dailyCount = await db.select({ count: sql<number>`count(*)` })
+          .from(userPointsHistory)
+          .where(
+            eq(userPointsHistory.userId, userId) &&
+            eq(userPointsHistory.action, actionId) &&
+            sql`${userPointsHistory.createdAt} >= ${today}`
+          );
+
+        validation.dailyUsage = dailyCount[0]?.count || 0;
+        validation.dailyLimit = actionConfig.maxDaily;
+      }
+
+      // Check total limit
+      if (actionConfig.maxTotal) {
+        const canEarnTotal = await storage.checkTotalActionLimit(userId, actionId);
+        if (!canEarnTotal) {
+          validation.canEarn = false;
+          validation.reason = `Lifetime limit of ${actionConfig.maxTotal} reached for this action`;
+        }
+
+        // Get total usage count
+        const totalCount = await db.select({ count: sql<number>`count(*)` })
+          .from(userPointsHistory)
+          .where(
+            eq(userPointsHistory.userId, userId) &&
+            eq(userPointsHistory.action, actionId) &&
+            eq(userPointsHistory.status, 'approved')
+          );
+
+        validation.totalUsage = totalCount[0]?.count || 0;
+        validation.totalLimit = actionConfig.maxTotal;
+      }
+
+      res.json({
+        success: true,
+        validation
+      });
+    } catch (error) {
+      console.error("Points validation error:", error);
+      res.status(500).json({ message: "Failed to validate action" });
+    }
+  });
+
   // Admin: Get pending proof uploads
   apiRouter.get("/admin/points/pending", authenticateToken, async (req, res) => {
     try {
