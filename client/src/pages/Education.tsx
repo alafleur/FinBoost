@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { useLocation } from 'wouter';
+import { educationContent, getCategories, getLessonsByCategory } from '../data/educationContent';
 import { 
   BookOpen, 
-  Trophy, 
   Clock, 
-  Star,
+  Star, 
+  Trophy,
   Target,
+  CheckCircle,
+  Play,
+  Award,
+  TrendingUp,
+  DollarSign,
   CreditCard,
   PiggyBank,
-  TrendingUp,
-  Calculator,
-  Home,
-  Briefcase,
-  CheckCircle,
-  Lock
-} from "lucide-react";
-import { useLocation } from "wouter";
+  Calculator
+} from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -63,7 +64,11 @@ export default function Education() {
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeTab, setActiveTab] = useState('overview');
   const [, setLocation] = useLocation();
+
+  const categories = getCategories();
+  const allLessons = Object.values(educationContent);
   const { toast } = useToast();
 
   // Sample data - this will be replaced with API calls later
@@ -169,15 +174,7 @@ export default function Education() {
     }
   ];
 
-  const categories = [
-    { id: "all", name: "All Lessons", icon: BookOpen, color: "text-gray-600" },
-    { id: "budgeting", name: "Budgeting", icon: Calculator, color: "text-blue-600" },
-    { id: "credit", name: "Credit", icon: CreditCard, color: "text-green-600" },
-    { id: "debt", name: "Debt Management", icon: Target, color: "text-red-600" },
-    { id: "saving", name: "Saving", icon: PiggyBank, color: "text-purple-600" },
-    { id: "investing", name: "Investing", icon: TrendingUp, color: "text-amber-600" },
-    { id: "career", name: "Career & Income", icon: Briefcase, color: "text-indigo-600" }
-  ];
+  
 
   useEffect(() => {
     const token = localStorage.getItem('token');

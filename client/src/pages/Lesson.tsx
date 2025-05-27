@@ -25,7 +25,7 @@ interface QuizQuestion {
 }
 
 interface Lesson {
-  id: number;
+  id: number | string;
   title: string;
   category: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
@@ -36,88 +36,7 @@ interface Lesson {
   completed: boolean;
 }
 
-// Mock lesson data - this would come from your backend
-const lessonData: { [key: string]: Lesson } = {
-  '1': {
-    id: 1,
-    title: "Emergency Fund Basics",
-    category: "Saving",
-    difficulty: "Beginner",
-    timeEstimate: "10 min",
-    points: 50,
-    completed: false,
-    content: `
-      <h2>What is an Emergency Fund?</h2>
-      <p>An emergency fund is money you set aside specifically for unexpected expenses or financial emergencies. Think of it as your financial safety net.</p>
-
-      <h3>Why You Need One</h3>
-      <ul>
-        <li><strong>Unexpected expenses:</strong> Car repairs, medical bills, or home maintenance</li>
-        <li><strong>Job loss:</strong> Provides income replacement while you find new work</li>
-        <li><strong>Peace of mind:</strong> Reduces stress and anxiety about money</li>
-        <li><strong>Avoid debt:</strong> Prevents you from relying on credit cards or loans</li>
-      </ul>
-
-      <h3>How Much Should You Save?</h3>
-      <p>Financial experts recommend saving 3-6 months' worth of living expenses. Start small:</p>
-      <ol>
-        <li><strong>Starter goal:</strong> $500-$1,000</li>
-        <li><strong>Intermediate goal:</strong> 1 month of expenses</li>
-        <li><strong>Full goal:</strong> 3-6 months of expenses</li>
-      </ol>
-
-      <h3>Where to Keep Your Emergency Fund</h3>
-      <p>Your emergency fund should be easily accessible but separate from your daily spending money:</p>
-      <ul>
-        <li>High-yield savings account</li>
-        <li>Money market account</li>
-        <li>Short-term certificate of deposit (CD)</li>
-      </ul>
-
-      <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-        <strong>💡 Pro Tip:</strong> Set up automatic transfers to build your emergency fund gradually. Even $25 per week adds up to $1,300 per year!
-      </div>
-    `,
-    quiz: [
-      {
-        id: 1,
-        question: "What is the primary purpose of an emergency fund?",
-        options: [
-          "To invest in the stock market",
-          "To cover unexpected expenses and financial emergencies",
-          "To buy luxury items",
-          "To pay for vacation expenses"
-        ],
-        correctAnswer: 1,
-        explanation: "An emergency fund is specifically designed to cover unexpected expenses like medical bills, car repairs, or job loss, providing financial security."
-      },
-      {
-        id: 2,
-        question: "How much should you ideally have in your emergency fund?",
-        options: [
-          "1 week of expenses",
-          "1 month of expenses",
-          "3-6 months of expenses",
-          "1 year of expenses"
-        ],
-        correctAnswer: 2,
-        explanation: "Most financial experts recommend 3-6 months of living expenses, though you can start with smaller goals like $500-$1,000."
-      },
-      {
-        id: 3,
-        question: "Where is the best place to keep your emergency fund?",
-        options: [
-          "Under your mattress",
-          "In your checking account with daily expenses",
-          "In a high-yield savings account",
-          "Invested in stocks"
-        ],
-        correctAnswer: 2,
-        explanation: "A high-yield savings account provides easy access while keeping the money separate from daily spending and earning interest."
-      }
-    ]
-  }
-};
+import { educationContent } from '../data/educationContent';
 
 export default function Lesson() {
   const [, setLocation] = useLocation();
@@ -133,12 +52,16 @@ export default function Lesson() {
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    // Get lesson ID from URL params (you'd implement this based on your routing)
-    const lessonId = window.location.pathname.split('/lesson/')[1] || '1';
-    const lessonData1 = lessonData[lessonId];
+    // Get lesson ID from URL params
+    const lessonId = window.location.pathname.split('/lesson/')[1] || 'emergency-fund';
+    const lessonData1 = educationContent[lessonId];
 
     if (lessonData1) {
-      setLesson(lessonData1);
+      setLesson({
+        ...lessonData1,
+        id: parseInt(lessonId.replace(/\D/g, '')) || 1,
+        timeEstimate: lessonData1.estimatedTime
+      });
     } else {
       setLocation('/education');
     }
