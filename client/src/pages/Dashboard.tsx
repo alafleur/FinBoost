@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import PointsSummary from "@/components/PointsSummary";
 import PointsManagement from '@/components/PointsManagement';
 import Leaderboard from '@/components/Leaderboard';
 import PointsHistory from '../components/PointsHistory';
@@ -238,38 +239,7 @@ export default function Dashboard() {
                   <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <BookOpen className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="font-medium">Completed Emergency Fund lesson</p>
-                          <p className="text-sm text-gray-600">2 hours ago</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">+25 points</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Award className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="font-medium">Passed Budgeting Basics quiz</p>
-                          <p className="text-sm text-gray-600">1 day ago</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">+15 points</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Users className="h-5 w-5 text-purple-600" />
-                        <div>
-                          <p className="font-medium">Referred a friend</p>
-                          <p className="text-sm text-gray-600">3 days ago</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">+100 points</Badge>
-                    </div>
-                  </div>
+                  <PointsSummary user={user} />
                 </CardContent>
               </Card>
             </div>
