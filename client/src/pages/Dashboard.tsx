@@ -19,10 +19,10 @@ import {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import PointsSummary from "@/components/PointsSummary";
-import PointsManagement from '@/components/PointsManagement';
-import Leaderboard from '@/components/Leaderboard';
-import PointsHistory from '../components/PointsHistory';
-import ReferralSystem from '../components/ReferralSystem';
+import PointsHistory from "@/components/PointsHistory";
+import Leaderboard from "@/components/Leaderboard";
+import ReferralSystem from "@/components/ReferralSystem";
+import StreakDisplay from "@/components/StreakDisplay";
 
 interface User {
   id: number;
@@ -33,6 +33,8 @@ interface User {
   totalPoints: number;
   currentMonthPoints: number;
   tier: string;
+  currentStreak?: number;
+  longestStreak?: number;
 }
 
 export default function Dashboard() {
@@ -234,16 +236,17 @@ export default function Dashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PointsSummary user={user} onNavigateToPoints={() => setActiveTab("earn-points")} />
-                </CardContent>
-              </Card>
-            </div>
+          <div className="lg:col-span-2 space-y-6">
+            <StreakDisplay 
+              currentStreak={user.currentStreak || 0}
+              longestStreak={user.longestStreak || 0}
+            />
+            <PointsSummary 
+              totalPoints={user.totalPoints} 
+              monthlyPoints={user.currentMonthPoints}
+              tier={user.tier}
+            />
+</div>
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>

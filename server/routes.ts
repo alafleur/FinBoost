@@ -237,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         // Create new user
         const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 4);
-        
+
         // Validate referral code if provided
         if (referralCode) {
           const validation = await storage.validateReferralCode(referralCode);
@@ -441,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import here to avoid circular dependency
       const { POINTS_CONFIG, getPointsForAction } = await import("@shared/pointsConfig");
-      
+
       const actionConfig = POINTS_CONFIG[actionId];
       if (!actionConfig) {
         return res.status(400).json({ message: "Invalid action ID" });
@@ -515,7 +515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import here to avoid circular dependency
       const { POINTS_CONFIG, getPointsForAction } = await import("@shared/pointsConfig");
-      
+
       const actionConfig = POINTS_CONFIG[actionId];
       if (!actionConfig) {
         return res.status(400).json({ message: "Invalid action ID" });
@@ -584,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Import here to avoid circular dependency
       const { POINTS_CONFIG } = await import("@shared/pointsConfig");
-      
+
       res.json({ 
         success: true,
         actions: Object.values(POINTS_CONFIG)
@@ -603,7 +603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import here to avoid circular dependency
       const { POINTS_CONFIG } = await import("@shared/pointsConfig");
-      
+
       const actionConfig = POINTS_CONFIG[actionId];
       if (!actionConfig) {
         return res.status(400).json({ message: "Invalid action ID" });
@@ -626,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get daily usage count
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const dailyCount = await db.select({ count: sql<number>`count(*)` })
           .from(userPointsHistory)
           .where(
@@ -878,7 +878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/referrals/my-code", authenticateToken, async (req, res) => {
     try {
       const userId = req.user!.id;
-      
+
       let referralCode = await storage.getUserReferralCode(userId);
       if (!referralCode) {
         referralCode = await storage.createUserReferralCode(userId);
@@ -966,7 +966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TODO: Add admin role check here
       const { page = 1, limit = 50, search, status, tier } = req.query;
-      
+
       const users = await storage.getAdminUsers({
         page: parseInt(page as string),
         limit: parseInt(limit as string),
@@ -977,7 +977,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        users: users.map(user => ({
+        ```tool_code
+      users: users.map(user => ({
           id: user.id,
           username: user.username,
           email: user.email,
@@ -1045,7 +1046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TODO: Add admin role check here
       const { period = '30d' } = req.query;
-      
+
       const analytics = await storage.getAdminAnalytics(period as string);
 
       res.json({
@@ -1125,7 +1126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TODO: Add admin role check here
       const userId = parseInt(req.params.userId);
-      
+
       const userDetails = await storage.getUserDetailsForAdmin(userId);
 
       if (!userDetails) {
@@ -1170,6 +1171,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Export data error:", error);
       res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
+  // Mark lesson as complete
+  app.post("/api/lessons/:id/complete", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const userId = req.user!.id;
+
+      const result = await storage.markLessonComplete(userId, moduleId);
+
+      res.json({ 
+        success: true, 
+        message: "Lesson completed successfully",
+        pointsEarned: result.pointsEarned,
+        streakBonus: result.streakBonus,
+        newStreak: result.newStreak
+      });
+    } catch (error: any) {
+      console.error('Error completing lesson:', error);
+      res.status(400).json({ success: false, message: error.message });
     }
   });
 

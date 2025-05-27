@@ -70,6 +70,12 @@ export interface IStorage {
     exportUsers(format: string): Promise<string>;
     exportPointsHistory(format: string): Promise<string>;
     exportAnalytics(format: string): Promise<string>;
+
+    // Streak Methods
+    updateUserStreak(userId: number): Promise<{ newStreak: number; bonusPoints: number }>;
+
+    // Lesson Completion
+    markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
 }
 
 import fs from 'fs/promises';
@@ -113,8 +119,63 @@ export class MemStorage implements IStorage {
     await fs.writeFile(STORAGE_FILE, JSON.stringify(data, null, 2));
   }
 
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async updateUserStreak(userId: number): Promise<{ newStreak: number; bonusPoints: number }> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const lastActivityDate = user.lastActivityDate;
+
+    let newStreak = 1;
+    let bonusPoints = 0;
+
+    if (lastActivityDate) {
+      const lastDate = new Date(lastActivityDate);
+      const todayDate = new Date(today);
+      const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        // Consecutive day - increment streak
+        newStreak = user.currentStreak + 1;
+      } else if (diffDays === 0) {
+        // Same day - don't update streak but still give bonus for existing streak
+        newStreak = user.currentStreak;
+      } else {
+        // Missed days - reset streak
+        newStreak = 1;
+      }
+    }
+
+    // Calculate bonus points
+    bonusPoints = this.calculateStreakBonus(newStreak);
+
+    // Update user record
+    const longestStreak = Math.max(user.longestStreak, newStreak);
+
+    await db.update(users)
+      .set({
+        currentStreak: newStreak,
+        longestStreak,
+        lastActivityDate: today,
+        totalPoints: user.totalPoints + bonusPoints,
+        currentMonthPoints: user.currentMonthPoints + bonusPoints,
+      })
+      .where(eq(users.id, userId));
+
+    return { newStreak, bonusPoints };
+  }
+
+  private calculateStreakBonus(streakDays: number): number {
+    if (streakDays < 2) return 0;
+    if (streakDays >= 2 && streakDays <= 4) return 5;
+    if (streakDays >= 5 && streakDays <= 6) return 10;
+    return 15; // 7+ days
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -687,7 +748,7 @@ export class MemStorage implements IStorage {
 
   async processReferralSignup(referredUserId: number, referralCode: string): Promise<void> {
     const validation = await this.validateReferralCode(referralCode);
-    
+
     if (!validation.isValid || !validation.referrerUserId) {
       throw new Error('Invalid referral code');
     }
@@ -707,7 +768,7 @@ export class MemStorage implements IStorage {
 
     // Award initial signup points to referrer
     const signupPoints = POINTS_CONFIG.referral_signup.points;
-    
+
     await this.awardPoints(
       validation.referrerUserId,
       'referral_signup',
@@ -768,7 +829,7 @@ export class MemStorage implements IStorage {
       },
       referredUser: {
         username: row.username || 'Unknown',
-        email: row.email || 'Unknown',
+        email: row.email|| 'Unknown',
         joinedAt: row.joinedAt || new Date(),
       },
     })) as any;
@@ -776,7 +837,7 @@ export class MemStorage implements IStorage {
 
   async getReferralStats(userId: number): Promise<{totalReferrals: number, completedReferrals: number, pendingReferrals: number, totalPointsEarned: number}> {
     const referralCode = await this.getUserReferralCode(userId);
-    
+
     if (!referralCode) {
       return { totalReferrals: 0, completedReferrals: 0, pendingReferrals: 0, totalPointsEarned: 0 };
     }
@@ -836,6 +897,65 @@ export class MemStorage implements IStorage {
         pointsEarned: row.pointsEarned,
       })),
     };
+  }
+
+  async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }> {
+    // Check if already completed
+    const existingProgress = await db.select()
+      .from(userProgress)
+      .where(sql`${userProgress.userId} = ${userId} AND ${userProgress.moduleId} = ${moduleId}`)
+      .limit(1);
+
+    if (existingProgress.length > 0 && existingProgress[0].completed) {
+      throw new Error('Lesson already completed');
+    }
+
+    const module = await db.select().from(learningModules).where(eq(learningModules.id, moduleId)).limit(1);
+    if (module.length === 0) {
+      throw new Error('Module not found');
+    }
+
+    const pointsEarned = module[0].pointsReward;
+
+    // Update streak and get bonus points
+    const { newStreak, bonusPoints } = await this.updateUserStreak(userId);
+
+    // Update or create progress record
+    if (existingProgress.length > 0) {
+      await db.update(userProgress)
+        .set({
+          completed: true,
+          pointsEarned,
+          completedAt: new Date(),
+        })
+        .where(eq(userProgress.id, existingProgress[0].id));
+    } else {
+      await db.insert(userProgress).values({
+        userId,
+        moduleId,
+        completed: true,
+        pointsEarned,
+        completedAt: new Date(),
+      });
+    }
+
+    // Update user points (base points only, streak bonus already added in updateUserStreak)
+    await db.update(users)
+      .set({
+        totalPoints: sql`${users.totalPoints} + ${pointsEarned}`,
+        currentMonthPoints: sql`${users.currentMonthPoints} + ${pointsEarned}`,
+      })
+      .where(eq(users.id, userId));
+
+    // Record points history for lesson completion
+    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: ${module[0].title}`, moduleId);
+
+    // Record streak bonus in history if any
+    if (bonusPoints > 0) {
+      await this.awardPoints(userId, 'streak_bonus', bonusPoints, `${newStreak}-day streak bonus`);
+    }
+
+    return { pointsEarned, streakBonus: bonusPoints, newStreak };
   }
 }
 

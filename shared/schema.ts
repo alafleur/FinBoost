@@ -35,6 +35,9 @@ export const users = pgTable("users", {
   occupation: text("occupation"),
   financialGoals: text("financial_goals"),
   referredBy: text("referred_by"), // Referral code used when signing up
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  lastActivityDate: text("last_activity_date"), // ISO date string
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });

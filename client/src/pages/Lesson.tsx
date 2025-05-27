@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ import {
   Trophy,
   Target
 } from 'lucide-react';
+import StreakNotification from "@/components/StreakNotification";
 
 interface QuizQuestion {
   id: number;
@@ -50,6 +51,11 @@ export default function Lesson() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
+  const [streakNotification, setStreakNotification] = useState<{
+    pointsEarned: number;
+    streakBonus: number;
+    newStreak: number;
+  } | null>(null);
 
   useEffect(() => {
     // Get lesson ID from URL params

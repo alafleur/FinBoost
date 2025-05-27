@@ -1,4 +1,3 @@
-
 export interface PointsAction {
   id: string;
   name: string;
@@ -28,7 +27,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     category: 'education',
     description: 'Successfully complete a financial quiz'
   },
-  
+
   // Financial Action Proofs
   debt_payment: {
     id: 'debt_payment',
@@ -84,7 +83,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     category: 'achievement',
     description: 'Upload proof of credit score improvement'
   },
-  
+
   // Social Actions
   referral_signup: {
     id: 'referral_signup',
@@ -94,7 +93,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     category: 'social',
     description: 'Referred user completes signup and first lesson'
   },
-  
+
   // Future expandable actions
   financial_goal_achieved: {
     id: 'financial_goal_achieved',
@@ -103,7 +102,14 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     requiresProof: true,
     category: 'achievement',
     description: 'Upload proof of achieving a set financial goal'
-  }
+  },
+
+  // Streak bonuses
+  streak_bonus: {
+    days_2_4: 5,    // Days 2-4: +5 XP
+    days_5_6: 10,   // Days 5-6: +10 XP
+    days_7_plus: 15 // Day 7+: +15 XP
+  },
 };
 
 // Helper function to get points for an action
@@ -116,4 +122,11 @@ export function getPointsForAction(actionId: string, multiplier: number = 1): nu
 export function actionRequiresProof(actionId: string): boolean {
   const action = POINTS_CONFIG[actionId];
   return action?.requiresProof || false;
+}
+
+export function calculateStreakBonus(streakDays: number): number {
+  if (streakDays < 2) return 0;
+  if (streakDays >= 2 && streakDays <= 4) return POINTS_CONFIG.streak_bonus.days_2_4;
+  if (streakDays >= 5 && streakDays <= 6) return POINTS_CONFIG.streak_bonus.days_5_6;
+  return POINTS_CONFIG.streak_bonus.days_7_plus; // 7+ days
 }
