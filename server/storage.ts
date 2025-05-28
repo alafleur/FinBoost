@@ -268,10 +268,8 @@ export class MemStorage implements IStorage {
   }
 
   async getUserPointsHistory(userId: number): Promise<UserPointsHistory[]> {
-    return await db.select()
-      .from(userPointsHistory)
-      .where(eq(userPointsHistory.userId, userId))
-      .orderBy(desc(userPointsHistory.createdAt));
+    const history = this.pointsHistory.get(userId) || [];
+    return history.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async updateLastLogin(userId: number): Promise<void> {
