@@ -719,7 +719,7 @@ export class MemStorage implements IStorage {
   // Referral System Implementation
   async createUserReferralCode(userId: number): Promise<UserReferralCode> {
     // Generate unique referral code
-    const user = await this.getUserById(userId);
+    const user = this.users.get(userId);
     if (!user) throw new Error('User not found');
 
     const referralCode = `${user.username.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;

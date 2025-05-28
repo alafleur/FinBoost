@@ -9,6 +9,9 @@ import { upload, deleteFile, getFileUrl } from "./fileUpload";
 import path from "path";
 import { OAuth2Client } from "google-auth-library";
 import { stripeService } from "./stripe";
+import bcrypt from "bcryptjs";
+import { db } from "./db";
+import { users } from "@shared/schema";
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -147,23 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create user directly in database bypassing storage issues
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      const [user] = await db.insert(users).values({
-        ...userData,
-        password: hashedPassword,
-        isActive: true,
-        totalPoints: 0,
-        currentMonthPoints: 0,
-        tier: 'Bronze',
-        currentStreak: 0,
-        longestStreak: 0,
-        joinedAt: new Date(),
-        lastLoginAt: null
-      }).returning();
-      
-      // Store in memory storage manually
-      storage.users.set(user.id, user);
+      // Create user 
+      const user = await storage.createUser(userData);
 
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
