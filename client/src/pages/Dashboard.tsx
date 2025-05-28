@@ -196,33 +196,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Tier Progress */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Award className="h-5 w-5" />
-              <span>Tier Progress</span>
-            </CardTitle>
-            <CardDescription>
-              Your progress toward the next tier this month
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="capitalize">{user.tier} Tier</span>
-                <span>{user.currentMonthPoints}/{getNextTierPoints()} points</span>
-              </div>
-              <Progress value={progressToNextTier} className="h-3" />
-              <p className="text-sm text-gray-600">
-                {progressToNextTier >= 100 
-                  ? "🎉 Congratulations! You've reached the next tier!" 
-                  : `${getNextTierPoints() - user.currentMonthPoints} more points to reach the next tier`
-                }
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
