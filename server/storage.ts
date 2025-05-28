@@ -199,17 +199,7 @@ export class MemStorage implements IStorage {
     // Store in memory storage
     this.users.set(user.id, user);
 
-    // Skip referral code creation for now to fix registration
-    // TODO: Fix referral system later
-
-    // Process referral if provided
-    if (insertUser.referralCode) {
-      try {
-        await this.processReferralSignup(user.id, insertUser.referralCode);
-      } catch (error) {
-        console.error('Failed to process referral signup:', error);
-      }
-    }
+    // Skip all referral processing to fix registration
 
     return user;
   }
