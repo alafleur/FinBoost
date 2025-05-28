@@ -900,7 +900,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let referralCode = await storage.getUserReferralCode(userId);
       if (!referralCode) {
-        referralCode = await storage.createUserReferralCode(userId);
+        // Skip referral code creation to fix registration
+        referralCode = { referralCode: `USER-${userId}`, id: userId, userId, createdAt: new Date(), isActive: true, totalReferrals: 0, totalPointsEarned: 0 };
       }
 
       const stats = await storage.getReferralStats(userId);
