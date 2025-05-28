@@ -348,8 +348,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
+      console.log("=== DEBUG: Getting user data for ID:", userId);
+      
       // Get fresh user data from storage to ensure we have latest points
       const user = await storage.getUserById(userId);
+      
+      console.log("=== DEBUG: User data retrieved:", {
+        id: user?.id,
+        totalPoints: user?.totalPoints,
+        currentMonthPoints: user?.currentMonthPoints,
+        tier: user?.tier
+      });
       
       if (!user) {
         return res.status(404).json({ 
