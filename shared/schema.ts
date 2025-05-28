@@ -27,9 +27,6 @@ export const users = pgTable("users", {
   totalPoints: integer("total_points").default(0).notNull(),
   currentMonthPoints: integer("current_month_points").default(0).notNull(),
   tier: text("tier").default("bronze").notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
-  joinedAt: timestamp("joined_at").defaultNow().notNull(),
-  lastLoginAt: timestamp("last_login_at"),
   bio: text("bio"),
   location: text("location"),
   occupation: text("occupation"),
@@ -38,6 +35,18 @@ export const users = pgTable("users", {
   currentStreak: integer("current_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   lastActivityDate: text("last_activity_date"), // ISO date string
+  
+  // Stripe Payment Fields
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status").default("inactive"), // active, inactive, past_due, canceled
+  nextBillingDate: timestamp("next_billing_date"),
+  
+  // Stripe Connect Fields for Payouts
+  stripeConnectAccountId: text("stripe_connect_account_id"),
+  connectOnboardingComplete: boolean("connect_onboarding_complete").default(false),
+  payoutEligible: boolean("payout_eligible").default(false),
+  
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -139,6 +148,36 @@ export const userReferralCodes = pgTable("user_referral_codes", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Stripe Payments
+export const stripePayments = pgTable("stripe_payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripePaymentIntentId: text("stripe_payment_intent_id").notNull(),
+  stripeInvoiceId: text("stripe_invoice_id"),
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: text("currency").default("usd").notNull(), // usd, cad
+  status: text("status").notNull(), // succeeded, pending, failed
+  paymentType: text("payment_type").notNull(), // subscription, one_time
+  metadata: text("metadata"), // JSON for additional data
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Stripe Payouts (Rewards)
+export const stripePayouts = pgTable("stripe_payouts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripePayoutId: text("stripe_payout_id"),
+  stripeTransferId: text("stripe_transfer_id"),
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: text("currency").default("usd").notNull(), // usd, cad
+  status: text("status").notNull(), // pending, paid, failed
+  reason: text("reason").notNull(), // monthly_reward, bonus, achievement
+  pointsUsed: integer("points_used").default(0),
+  adminNotes: text("admin_notes"),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   username: true,
@@ -162,3 +201,5 @@ export type MonthlyReward = typeof monthlyRewards.$inferSelect;
 export type UserMonthlyReward = typeof userMonthlyRewards.$inferSelect;
 export type Referral = typeof referrals.$inferSelect;
 export type UserReferralCode = typeof userReferralCodes.$inferSelect;
+export type StripePayment = typeof stripePayments.$inferSelect;
+export type StripePayout = typeof stripePayouts.$inferSelect;
