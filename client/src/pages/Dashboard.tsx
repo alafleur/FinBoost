@@ -42,6 +42,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -68,6 +69,192 @@ export default function Dashboard() {
       description: "See you next time!",
     });
     setLocation('/');
+  };
+
+  // Handler functions for the learning activities
+  const handleDailyLogin = async () => {
+    setIsLoading(true);
+    try {
+      // Award daily login points
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          actionId: 'daily-login',
+          points: 5,
+          description: 'Daily login bonus'
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Points Earned!",
+          description: "You earned 5 points for logging in today!",
+        });
+        // Refresh user data to show updated points
+        window.location.reload();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to award points. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleShareProgress = async () => {
+    setIsLoading(true);
+    try {
+      // Create a shareable message
+      const shareText = `I'm learning financial literacy with FinBoost! Join me on this journey to financial freedom. 💰📈`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: 'FinBoost - Financial Learning Journey',
+          text: shareText,
+          url: window.location.origin
+        });
+      } else {
+        // Fallback to copying to clipboard
+        await navigator.clipboard.writeText(`${shareText} ${window.location.origin}`);
+        toast({
+          title: "Link Copied!",
+          description: "Share link copied to clipboard. Paste it on social media to earn points!",
+        });
+      }
+
+      // Award sharing points
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          actionId: 'share-progress',
+          points: 10,
+          description: 'Shared learning progress'
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Points Earned!",
+          description: "You earned 10 points for sharing your progress!",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to share progress. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartLesson = async (lessonId: string) => {
+    setIsLoading(true);
+    try {
+      // Navigate to lesson page or open lesson modal
+      toast({
+        title: "Lesson Starting!",
+        description: "Opening your learning module...",
+      });
+      
+      // For now, award points immediately (in a real app, this would happen after lesson completion)
+      const pointsMap: { [key: string]: number } = {
+        'budgeting-basics': 25,
+        'emergency-fund': 30,
+        'investment-basics': 35,
+        'credit-management': 30,
+        'retirement-planning': 40,
+        'tax-optimization': 35
+      };
+
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          actionId: `lesson-${lessonId}`,
+          points: pointsMap[lessonId] || 25,
+          description: `Completed lesson: ${lessonId.replace('-', ' ')}`
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Lesson Completed!",
+          description: `You earned ${pointsMap[lessonId] || 25} points for completing this lesson!`,
+        });
+        // Refresh to show updated points
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start lesson. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWeeklyChallenge = async (challengeId: string) => {
+    setIsLoading(true);
+    try {
+      toast({
+        title: "Challenge Started!",
+        description: "Your weekly challenge has begun. Complete it to earn bonus points!",
+      });
+
+      const pointsMap: { [key: string]: number } = {
+        'budget-tracker': 50,
+        'savings-goal': 75
+      };
+
+      // For demo purposes, award points immediately
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          actionId: `challenge-${challengeId}`,
+          points: pointsMap[challengeId] || 50,
+          description: `Completed weekly challenge: ${challengeId.replace('-', ' ')}`
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Challenge Completed!",
+          description: `Amazing! You earned ${pointsMap[challengeId] || 50} points for completing this challenge!`,
+        });
+        // Refresh to show updated points
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start challenge. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!user) {
@@ -234,14 +421,172 @@ export default function Dashboard() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold">Earn Points</h2>
             <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold">Daily Login</h3>
-                <p className="text-sm text-gray-600">5 points per day</p>
+            
+            {/* Daily Actions */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Daily Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Daily Login</h4>
+                    <span className="text-sm text-green-600 font-medium">+5 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Log in daily to maintain your streak</p>
+                  <Button 
+                    onClick={() => handleDailyLogin()}
+                    disabled={isLoading || user?.lastLoginDate === new Date().toDateString()}
+                    className="w-full"
+                  >
+                    {user?.lastLoginDate === new Date().toDateString() ? "✓ Completed Today" : "Claim Points"}
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Share Progress</h4>
+                    <span className="text-sm text-green-600 font-medium">+10 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Share your learning journey on social media</p>
+                  <Button 
+                    onClick={() => handleShareProgress()}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Share & Earn
+                  </Button>
+                </div>
               </div>
-              <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold">Complete Lessons</h3>
-                <p className="text-sm text-gray-600">10-50 points per lesson</p>
+            </div>
+
+            {/* Learning Modules */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Learning Modules</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Budgeting Basics</h4>
+                    <span className="text-sm text-green-600 font-medium">+25 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Learn the fundamentals of creating and managing a budget</p>
+                  <Button 
+                    onClick={() => handleStartLesson('budgeting-basics')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Emergency Fund</h4>
+                    <span className="text-sm text-green-600 font-medium">+30 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Build a safety net for unexpected expenses</p>
+                  <Button 
+                    onClick={() => handleStartLesson('emergency-fund')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Investment Basics</h4>
+                    <span className="text-sm text-green-600 font-medium">+35 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Introduction to stocks, bonds, and investment strategies</p>
+                  <Button 
+                    onClick={() => handleStartLesson('investment-basics')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Credit Management</h4>
+                    <span className="text-sm text-green-600 font-medium">+30 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Understanding credit scores and debt management</p>
+                  <Button 
+                    onClick={() => handleStartLesson('credit-management')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Retirement Planning</h4>
+                    <span className="text-sm text-green-600 font-medium">+40 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Plan for your financial future with retirement strategies</p>
+                  <Button 
+                    onClick={() => handleStartLesson('retirement-planning')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold">Tax Optimization</h4>
+                    <span className="text-sm text-green-600 font-medium">+35 points</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Maximize your tax savings and understand deductions</p>
+                  <Button 
+                    onClick={() => handleStartLesson('tax-optimization')}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Start Lesson
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly Challenges */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Weekly Challenges</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg border-purple-200 bg-purple-50 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-purple-800">Budget Tracker Challenge</h4>
+                    <span className="text-sm text-purple-600 font-medium">+50 points</span>
+                  </div>
+                  <p className="text-sm text-purple-700 mb-3">Track your expenses for 7 days and submit a summary</p>
+                  <Button 
+                    onClick={() => handleWeeklyChallenge('budget-tracker')}
+                    disabled={isLoading}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                  >
+                    Start Challenge
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg border-blue-200 bg-blue-50 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-blue-800">Savings Goal Challenge</h4>
+                    <span className="text-sm text-blue-600 font-medium">+75 points</span>
+                  </div>
+                  <p className="text-sm text-blue-700 mb-3">Set and achieve a weekly savings target</p>
+                  <Button 
+                    onClick={() => handleWeeklyChallenge('savings-goal')}
+                    disabled={isLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    Start Challenge
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
