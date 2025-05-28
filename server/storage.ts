@@ -240,12 +240,16 @@ export class MemStorage implements IStorage {
 
   // User Authentication Methods
   async getUserByEmail(email: string): Promise<User | null> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || null;
+    for (const user of this.users.values()) {
+      if (user.email === email) {
+        return user;
+      }
+    }
+    return null;
   }
 
   async getUserById(id: number): Promise<User | null> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const user = this.users.get(id);
     return user || null;
   }
 
