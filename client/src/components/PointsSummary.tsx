@@ -92,6 +92,11 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     }
   };
 
+  // Safety check for user data
+  if (!user || typeof user.currentMonthPoints === 'undefined') {
+    return <div>Loading user data...</div>;
+  }
+
   const progressToNextTier = Math.min((user.currentMonthPoints / getNextTierPoints()) * 100, 100);
   const pointsNeeded = Math.max(0, getNextTierPoints() - user.currentMonthPoints);
 

@@ -242,9 +242,7 @@ export default function Dashboard() {
               longestStreak={user.longestStreak || 0}
             />
             <PointsSummary 
-              totalPoints={user.totalPoints} 
-              monthlyPoints={user.currentMonthPoints}
-              tier={user.tier}
+              user={user}
             />
 </div>
             <div className="lg:col-span-1">
