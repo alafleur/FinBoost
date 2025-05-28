@@ -279,7 +279,20 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="earn-points">
-          <PointsManagement />
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Earn Points</h2>
+            <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold">Daily Login</h3>
+                <p className="text-sm text-gray-600">5 points per day</p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold">Complete Lessons</h3>
+                <p className="text-sm text-gray-600">10-50 points per lesson</p>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="referrals">
