@@ -796,7 +796,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserReferrals(userId: number): Promise<Array<{referral: Referral, referredUser: {username: string, email: string, joinedAt: Date}}>> {
-    const referrals = await db.select({
+    const referralsList = await db.select({
       // Referral fields
       id: referrals.id,
       referrerUserId: referrals.referrerUserId,
@@ -816,7 +816,7 @@ export class MemStorage implements IStorage {
       .where(eq(referrals.referrerUserId, userId))
       .orderBy(desc(referrals.createdAt));
 
-    return referrals.map(row => ({
+    return referralsList.map(row => ({
       referral: {
         id: row.id,
         referrerUserId: row.referrerUserId,
