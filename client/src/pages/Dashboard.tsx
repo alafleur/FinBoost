@@ -80,6 +80,8 @@ export default function Dashboard() {
               title: "Welcome back!",
               description: "You earned 5 points for logging in today!",
             });
+            // Refresh the page to show updated points
+            setTimeout(() => window.location.reload(), 1000);
           }
         }).catch(error => {
           console.log('Daily login points already awarded or error occurred');
