@@ -198,6 +198,11 @@ export default function Dashboard() {
 
 
 
+        {/* Tier Progress - Always Visible */}
+        <div className="mb-6">
+          <PointsSummary user={user} />
+        </div>
+
         {/* Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
@@ -214,9 +219,6 @@ export default function Dashboard() {
             <StreakDisplay 
               currentStreak={user.currentStreak || 0}
               longestStreak={user.longestStreak || 0}
-            />
-            <PointsSummary 
-              user={user}
             />
 </div>
             <div className="lg:col-span-1">
