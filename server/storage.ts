@@ -725,7 +725,9 @@ export class MemStorage implements IStorage {
       userId,
       referralCode,
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
+      totalReferrals: 0,
+      totalPointsEarned: 0
     };
   }
 

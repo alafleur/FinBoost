@@ -247,8 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username,
           password: 'google_oauth_' + googleId, // Placeholder password for OAuth users
           firstName: given_name || '',
-          lastName: family_name || '',
-          referralCode
+          lastName: family_name || ''
         });
       }
 
