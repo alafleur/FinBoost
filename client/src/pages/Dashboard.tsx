@@ -175,7 +175,10 @@ export default function Dashboard() {
 
         {/* Tier Progress - Always Visible */}
         <div className="mb-6">
-          <PointsSummary user={user} />
+          <PointsSummary 
+            user={user} 
+            onNavigateToPoints={() => setActiveTab("earn-points")}
+          />
         </div>
 
         {/* Dashboard Content */}
