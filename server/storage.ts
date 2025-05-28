@@ -188,12 +188,11 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async createUser(insertUser: InsertUser & {referralCode?: string}): Promise<User> {
+  async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const [user] = await db.insert(users).values({
       ...insertUser,
       password: hashedPassword,
-      referredBy: insertUser.referralCode || null,
     }).returning();
 
     // Store in memory storage

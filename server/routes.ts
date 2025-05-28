@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Registration
   apiRouter.post("/auth/register", async (req: Request, res: Response) => {
     try {
-      const { referralCode, ...userBody } = req.body;
+      const userBody = req.body;
       const result = insertUserSchema.safeParse(userBody);
 
       if (!result.success) {
@@ -147,19 +147,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate referral code if provided
-      if (referralCode) {
-        const validation = await storage.validateReferralCode(referralCode);
-        if (!validation.isValid) {
-          return res.status(400).json({
-            success: false,
-            message: "Invalid referral code"
-          });
-        }
-      }
-
-      // Create user with referral code
-      const user = await storage.createUser({ ...userData, referralCode });
+      // Create user 
+      const user = await storage.createUser(userData);
 
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
