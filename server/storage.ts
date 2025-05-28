@@ -336,6 +336,15 @@ export class MemStorage implements IStorage {
 
       console.log("=== DEBUG POINTS: Updated user points from", oldPoints, "to", newTotalPoints);
 
+      // Update database
+      await db.update(users)
+        .set({
+          totalPoints: newTotalPoints,
+          currentMonthPoints: newCurrentMonthPoints,
+          tier: newTier
+        })
+        .where(eq(users.id, userId));
+
       // Save to file
       await this.saveToFile();
     } else {
