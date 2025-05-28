@@ -55,11 +55,41 @@ export default function Dashboard() {
 
     try {
       setUser(JSON.parse(userData));
+      
+      // Automatically award daily login points
+      const today = new Date().toDateString();
+      const lastLogin = localStorage.getItem('lastLoginDate');
+      
+      if (lastLogin !== today) {
+        // Award daily login points automatically
+        fetch('/api/points/award', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            actionId: 'daily-login',
+            points: 5,
+            description: 'Daily login bonus'
+          })
+        }).then(response => {
+          if (response.ok) {
+            localStorage.setItem('lastLoginDate', today);
+            toast({
+              title: "Welcome back!",
+              description: "You earned 5 points for logging in today!",
+            });
+          }
+        }).catch(error => {
+          console.log('Daily login points already awarded or error occurred');
+        });
+      }
     } catch (error) {
       console.error('Error parsing user data:', error);
       setLocation('/auth');
     }
-  }, [setLocation]);
+  }, [setLocation, toast]);
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -72,41 +102,6 @@ export default function Dashboard() {
   };
 
   // Handler functions for the learning activities
-  const handleDailyLogin = async () => {
-    setIsLoading(true);
-    try {
-      // Award daily login points
-      const response = await fetch('/api/points/award', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          actionId: 'daily-login',
-          points: 5,
-          description: 'Daily login bonus'
-        })
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Points Earned!",
-          description: "You earned 5 points for logging in today!",
-        });
-        // Refresh user data to show updated points
-        window.location.reload();
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to award points. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleShareProgress = async () => {
     setIsLoading(true);
@@ -422,23 +417,17 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold">Earn Points</h2>
             <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
             
-            {/* Daily Actions */}
+            {/* Daily Progress Tracker */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Daily Actions</h3>
+              <h3 className="text-lg font-semibold">Daily Progress</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <div className="p-4 border rounded-lg bg-green-50 border-green-200">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Daily Login</h4>
-                    <span className="text-sm text-green-600 font-medium">+5 points</span>
+                    <h4 className="font-semibold text-green-800">Daily Login Streak</h4>
+                    <span className="text-sm text-green-600 font-medium">✓ Active</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">Log in daily to maintain your streak</p>
-                  <Button 
-                    onClick={() => handleDailyLogin()}
-                    disabled={isLoading || user?.lastLoginDate === new Date().toDateString()}
-                    className="w-full"
-                  >
-                    {user?.lastLoginDate === new Date().toDateString() ? "✓ Completed Today" : "Claim Points"}
-                  </Button>
+                  <p className="text-sm text-green-700 mb-2">You're maintaining your daily streak!</p>
+                  <div className="text-xs text-green-600">+5 points earned automatically today</div>
                 </div>
 
                 <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
