@@ -10,6 +10,26 @@ export interface PointsAction {
 }
 
 export const POINTS_CONFIG: Record<string, PointsAction> = {
+  // Daily Actions
+  'daily-login': {
+    id: 'daily-login',
+    name: 'Daily Login',
+    basePoints: 5,
+    maxDaily: 1, // Can only earn once per day
+    requiresProof: false,
+    category: 'action',
+    description: 'Daily login bonus for maintaining streak'
+  },
+  'share-progress': {
+    id: 'share-progress',
+    name: 'Share Progress',
+    basePoints: 10,
+    maxDaily: 3, // Can share up to 3 times per day
+    requiresProof: false,
+    category: 'social',
+    description: 'Share learning progress on social media'
+  },
+  
   // Education Actions
   lesson_complete: {
     id: 'lesson_complete',
@@ -18,6 +38,76 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     requiresProof: false,
     category: 'education',
     description: 'Complete a financial education lesson'
+  },
+  'lesson-budgeting-basics': {
+    id: 'lesson-budgeting-basics',
+    name: 'Budgeting Basics',
+    basePoints: 25,
+    maxTotal: 1, // Can only complete once
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Budgeting Basics lesson'
+  },
+  'lesson-emergency-fund': {
+    id: 'lesson-emergency-fund',
+    name: 'Emergency Fund',
+    basePoints: 30,
+    maxTotal: 1,
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Emergency Fund lesson'
+  },
+  'lesson-investment-basics': {
+    id: 'lesson-investment-basics',
+    name: 'Investment Basics',
+    basePoints: 35,
+    maxTotal: 1,
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Investment Basics lesson'
+  },
+  'lesson-credit-management': {
+    id: 'lesson-credit-management',
+    name: 'Credit Management',
+    basePoints: 30,
+    maxTotal: 1,
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Credit Management lesson'
+  },
+  'lesson-retirement-planning': {
+    id: 'lesson-retirement-planning',
+    name: 'Retirement Planning',
+    basePoints: 40,
+    maxTotal: 1,
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Retirement Planning lesson'
+  },
+  'lesson-tax-optimization': {
+    id: 'lesson-tax-optimization',
+    name: 'Tax Optimization',
+    basePoints: 35,
+    maxTotal: 1,
+    requiresProof: false,
+    category: 'education',
+    description: 'Complete the Tax Optimization lesson'
+  },
+  'challenge-budget-tracker': {
+    id: 'challenge-budget-tracker',
+    name: 'Budget Tracker Challenge',
+    basePoints: 50,
+    requiresProof: false,
+    category: 'achievement',
+    description: 'Complete the weekly budget tracking challenge'
+  },
+  'challenge-savings-goal': {
+    id: 'challenge-savings-goal',
+    name: 'Savings Goal Challenge',
+    basePoints: 75,
+    requiresProof: false,
+    category: 'achievement',
+    description: 'Complete the weekly savings goal challenge'
   },
   quiz_complete: {
     id: 'quiz_complete',
