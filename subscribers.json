@@ -1,4 +1,10 @@
 {
-  "subscribers": {},
-  "currentSubscriberId": 1
+  "subscribers": {
+    "1": {
+      "email": "test1@example.com",
+      "id": 1,
+      "createdAt": "2025-05-28T20:01:15.627Z"
+    }
+  },
+  "currentSubscriberId": 2
 }
