@@ -76,10 +76,10 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
   const getNextTierPoints = () => {
     switch (user.tier) {
-      case 'bronze': return 250;
-      case 'silver': return 500;
-      case 'gold': return 1000;
-      default: return 250;
+      case 'bronze': return 100;
+      case 'silver': return 250;
+      case 'gold': return 500;
+      default: return 100;
     }
   };
 
