@@ -3,7 +3,7 @@ import { DollarSign } from "lucide-react";
 
 export default function Navbar() {
   const scrollToForm = () => {
-    const heroForm = document.querySelector("#hero-form");
+    const heroForm = document.querySelector("#waitlist-signup-form");
     if (heroForm) {
       heroForm.scrollIntoView({ behavior: "smooth" });
     }

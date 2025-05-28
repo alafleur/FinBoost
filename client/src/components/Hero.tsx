@@ -56,7 +56,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
               Earn monthly cash rewards while leveling up your money smarts—with the power of the collective behind you.
             </p>
-            <div className="max-w-lg" id="hero-form">
+            <div className="max-w-lg" id="waitlist-signup-form">
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
                 <div className="sm:col-span-5">
                   <input
