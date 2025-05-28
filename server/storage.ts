@@ -196,8 +196,15 @@ export class MemStorage implements IStorage {
       referredBy: insertUser.referralCode || null,
     }).returning();
 
+    // Store in memory storage
+    this.users.set(user.id, user);
+
     // Create referral code for new user
-    await this.createUserReferralCode(user.id);
+    try {
+      await this.createUserReferralCode(user.id);
+    } catch (error) {
+      console.error('Failed to create referral code:', error);
+    }
 
     // Process referral if provided
     if (insertUser.referralCode) {
@@ -254,11 +261,17 @@ export class MemStorage implements IStorage {
   }
 
   async validatePassword(email: string, password: string): Promise<User | null> {
-    const user = await this.getUserByEmail(email);
-    if (!user) return null;
+    // Check database first
+    const [dbUser] = await db.select().from(users).where(eq(users.email, email));
+    if (!dbUser) return null;
 
-    const isValid = await bcrypt.compare(password, user.password);
-    return isValid ? user : null;
+    const isValid = await bcrypt.compare(password, dbUser.password);
+    if (isValid) {
+      // Store in memory and return
+      this.users.set(dbUser.id, dbUser);
+      return dbUser;
+    }
+    return null;
   }
 
   async updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void> {
