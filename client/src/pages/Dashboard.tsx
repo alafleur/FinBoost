@@ -46,15 +46,35 @@ export default function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
 
-    if (!token || !userData) {
+    if (!token) {
       setLocation('/auth');
       return;
     }
 
+    // Fetch fresh user data from server instead of using cached localStorage data
+    fetch('/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        setUser(data.user);
+        // Update localStorage with fresh data
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } else {
+        setLocation('/auth');
+        return;
+      }
+    })
+    .catch(() => {
+      setLocation('/auth');
+      return;
+    });
+
     try {
-      setUser(JSON.parse(userData));
       
       // Automatically award daily login points
       const today = new Date().toDateString();
