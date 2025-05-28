@@ -138,12 +138,44 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             </Badge>
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>To {getNextTierName()}</span>
-              <span>{pointsNeeded} points needed</span>
+          {/* All Tiers Display */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-1">
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 0 ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Bronze</span>
+                <span className="text-xs text-gray-500">0</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 100 ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Silver</span>
+                <span className="text-xs text-gray-500">100</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 250 ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Gold</span>
+                <span className="text-xs text-gray-500">250</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 500 ? 'bg-purple-500' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Platinum</span>
+                <span className="text-xs text-gray-500">500</span>
+              </div>
             </div>
-            <Progress value={progressToNextTier} className="h-2" />
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-orange-600 via-gray-400 via-yellow-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((user.currentMonthPoints / 500) * 100, 100)}%` }}
+              ></div>
+            </div>
+            
+            {/* Current Status */}
+            <div className="text-center text-xs text-gray-500">
+              {user.currentMonthPoints} points this month
+              {pointsNeeded > 0 && ` • ${pointsNeeded} to ${getNextTierName()}`}
+            </div>
           </div>
         </CardContent>
       </Card>
