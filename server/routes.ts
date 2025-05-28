@@ -353,11 +353,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get fresh user data from storage to ensure we have latest points
       const user = await storage.getUserById(userId);
       
+      // Force recalculate user points from history
+      const userHistory = await storage.getUserPointsHistory(userId);
+      const totalPointsFromHistory = userHistory.filter(h => h.status === 'approved').reduce((sum, h) => sum + h.points, 0);
+      
+      if (user.totalPoints !== totalPointsFromHistory) {
+        console.log("=== DEBUG: Points mismatch! User shows", user.totalPoints, "but history shows", totalPointsFromHistory);
+        // Update user with correct points
+        user.totalPoints = totalPointsFromHistory;
+        user.currentMonthPoints = totalPointsFromHistory; // Simplified for now
+      }
+
       console.log("=== DEBUG: User data retrieved:", {
         id: user?.id,
         totalPoints: user?.totalPoints,
         currentMonthPoints: user?.currentMonthPoints,
-        tier: user?.tier
+        tier: user?.tier,
+        historyTotal: totalPointsFromHistory
       });
       
       if (!user) {

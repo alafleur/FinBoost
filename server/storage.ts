@@ -325,8 +325,10 @@ export class MemStorage implements IStorage {
 
     // Update user points in memory
     const user = this.users.get(userId);
+    console.log("=== DEBUG POINTS: Updating user", userId, "found user:", !!user);
     if (user) {
-      const newTotalPoints = (user.totalPoints || 0) + points;
+      const oldPoints = user.totalPoints || 0;
+      const newTotalPoints = oldPoints + points;
       const newCurrentMonthPoints = (user.currentMonthPoints || 0) + points;
       const newTier = await this.calculateUserTier(newCurrentMonthPoints);
 
@@ -334,8 +336,12 @@ export class MemStorage implements IStorage {
       user.currentMonthPoints = newCurrentMonthPoints;
       user.tier = newTier;
 
+      console.log("=== DEBUG POINTS: Updated user points from", oldPoints, "to", newTotalPoints);
+
       // Save to file
       await this.saveToFile();
+    } else {
+      console.log("=== DEBUG POINTS: User not found in memory storage for ID:", userId);
     }
 
     return historyEntry;
