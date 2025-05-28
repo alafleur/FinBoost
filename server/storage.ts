@@ -370,30 +370,27 @@ export class MemStorage implements IStorage {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const count = await db.select({ count: sql<number>`count(*)` })
-      .from(userPointsHistory)
-      .where(
-        eq(userPointsHistory.userId, userId) &&
-        eq(userPointsHistory.action, actionId) &&
-        sql`${userPointsHistory.createdAt} >= ${today}`
-      );
+    const userHistory = this.pointsHistory.get(userId) || [];
+    const todayCount = userHistory.filter(entry => 
+      entry.action === actionId && 
+      entry.createdAt >= today &&
+      entry.status === 'approved'
+    ).length;
 
-    return (count[0]?.count || 0) < actionConfig.maxDaily;
+    return todayCount < actionConfig.maxDaily;
   }
 
   async checkTotalActionLimit(userId: number, actionId: string): Promise<boolean> {
     const actionConfig = POINTS_CONFIG[actionId];
     if (!actionConfig?.maxTotal) return true;
 
-    const count = await db.select({ count: sql<number>`count(*)` })
-      .from(userPointsHistory)
-      .where(
-        eq(userPointsHistory.userId, userId) &&
-        eq(userPointsHistory.action, actionId) &&
-        eq(userPointsHistory.status, 'approved')
-      );
+    const userHistory = this.pointsHistory.get(userId) || [];
+    const totalCount = userHistory.filter(entry => 
+      entry.action === actionId && 
+      entry.status === 'approved'
+    ).length;
 
-    return (count[0]?.count || 0) < actionConfig.maxTotal;
+    return totalCount < actionConfig.maxTotal;
   }
 
   async getPendingProofUploads(): Promise<UserPointsHistory[]> {
