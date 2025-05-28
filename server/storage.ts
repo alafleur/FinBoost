@@ -87,6 +87,8 @@ const STORAGE_FILE = 'subscribers.json';
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private subscribers: Map<number, Subscriber>;
+  private pointsHistory: Map<number, UserPointsHistory[]>;
+  private pointsHistoryCounter: number;
   currentUserId: number;
   currentSubscriberId: number;
   db: any;
@@ -94,6 +96,8 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.subscribers = new Map();
+    this.pointsHistory = new Map();
+    this.pointsHistoryCounter = 1;
     this.currentUserId = 1;
     this.currentSubscriberId = 1;
     this.loadFromFile();
@@ -254,12 +258,13 @@ export class MemStorage implements IStorage {
   }
 
   async updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void> {
-    await db.update(users)
-      .set({
-        totalPoints,
-        currentMonthPoints,
-      })
-      .where(eq(users.id, userId));
+    const user = this.users.get(userId);
+    if (user) {
+      user.totalPoints = totalPoints;
+      user.currentMonthPoints = currentMonthPoints;
+      user.tier = await this.calculateUserTier(currentMonthPoints);
+      await this.saveToFile();
+    }
   }
 
   async getUserPointsHistory(userId: number): Promise<UserPointsHistory[]> {
@@ -295,29 +300,40 @@ export class MemStorage implements IStorage {
     }
 
     // Create points history entry
-    const [historyEntry] = await db.insert(userPointsHistory).values({
+    const historyEntry: UserPointsHistory = {
+      id: this.pointsHistoryCounter++,
       userId,
       points,
       action: actionId,
       description,
       status: 'approved',
       metadata: metadata ? JSON.stringify(metadata) : null,
-    }).returning();
+      createdAt: new Date(),
+      reviewedAt: null,
+      reviewedBy: null,
+      relatedId: null,
+      proofUrl: null
+    };
 
-    // Update user points
-    const user = await this.getUserById(userId);
+    // Add to points history
+    if (!this.pointsHistory.has(userId)) {
+      this.pointsHistory.set(userId, []);
+    }
+    this.pointsHistory.get(userId)!.push(historyEntry);
+
+    // Update user points in memory
+    const user = this.users.get(userId);
     if (user) {
       const newTotalPoints = (user.totalPoints || 0) + points;
       const newCurrentMonthPoints = (user.currentMonthPoints || 0) + points;
       const newTier = await this.calculateUserTier(newCurrentMonthPoints);
 
-      await db.update(users)
-        .set({ 
-          totalPoints: newTotalPoints, 
-          currentMonthPoints: newCurrentMonthPoints,
-          tier: newTier
-        })
-        .where(eq(users.id, userId));
+      user.totalPoints = newTotalPoints;
+      user.currentMonthPoints = newCurrentMonthPoints;
+      user.tier = newTier;
+
+      // Save to file
+      await this.saveToFile();
     }
 
     return historyEntry;
