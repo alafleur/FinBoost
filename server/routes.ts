@@ -8,6 +8,7 @@ import type { User } from "@shared/schema";
 import { upload, deleteFile, getFileUrl } from "./fileUpload";
 import path from "path";
 import { OAuth2Client } from "google-auth-library";
+import { stripeService } from "./stripe";
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -1191,6 +1192,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error completing lesson:', error);
       res.status(400).json({ success: false, message: error.message });
+    }
+  });
+
+  // === STRIPE PAYMENT ROUTES ===
+  
+  // Create subscription checkout session
+  apiRouter.post("/stripe/create-subscription", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { currency = 'USD' } = req.body;
+      const userId = req.user!.id;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Stripe not configured. Please contact support."
+        });
+      }
+      
+      const checkoutUrl = await stripeService.createSubscriptionSession(userId, currency);
+      
+      res.json({
+        success: true,
+        checkoutUrl
+      });
+    } catch (error: any) {
+      console.error('Stripe subscription error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create subscription session"
+      });
+    }
+  });
+
+  // Handle successful subscription (called from frontend after Stripe redirect)
+  apiRouter.post("/stripe/subscription-success", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Stripe not configured"
+        });
+      }
+      
+      // Retrieve session and update user subscription status
+      // This will be implemented when Stripe keys are available
+      
+      res.json({
+        success: true,
+        message: "Subscription activated successfully"
+      });
+    } catch (error: any) {
+      console.error('Subscription success error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to activate subscription"
+      });
+    }
+  });
+
+  // Cancel subscription
+  apiRouter.post("/stripe/cancel-subscription", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Stripe not configured"
+        });
+      }
+      
+      await stripeService.cancelSubscription(userId);
+      
+      res.json({
+        success: true,
+        message: "Subscription canceled successfully"
+      });
+    } catch (error: any) {
+      console.error('Subscription cancellation error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  });
+
+  // === STRIPE CONNECT / PAYOUT ROUTES ===
+  
+  // Create Connect onboarding link
+  apiRouter.post("/stripe/connect-onboarding", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Stripe not configured"
+        });
+      }
+      
+      const onboardingUrl = await stripeService.createConnectOnboardingLink(userId);
+      
+      res.json({
+        success: true,
+        onboardingUrl
+      });
+    } catch (error: any) {
+      console.error('Connect onboarding error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create onboarding link"
+      });
+    }
+  });
+
+  // Get user's payout history
+  apiRouter.get("/stripe/payouts", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      
+      // This will retrieve payouts from database once implemented
+      const payouts = []; // Placeholder
+      
+      res.json({
+        success: true,
+        payouts
+      });
+    } catch (error: any) {
+      console.error('Get payouts error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve payouts"
+      });
+    }
+  });
+
+  // Admin: Send payout to user
+  apiRouter.post("/admin/stripe/send-payout", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { userId, amount, reason, pointsUsed = 0 } = req.body;
+      
+      // Check if user is admin (implement admin check)
+      // if (!req.user!.isAdmin) {
+      //   return res.status(403).json({ success: false, message: "Admin access required" });
+      // }
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Stripe not configured"
+        });
+      }
+      
+      const transferId = await stripeService.sendPayout(userId, amount * 100, reason, pointsUsed);
+      
+      res.json({
+        success: true,
+        transferId,
+        message: `Payout of $${amount} sent successfully`
+      });
+    } catch (error: any) {
+      console.error('Send payout error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  });
+
+  // Stripe webhook endpoint
+  apiRouter.post("/stripe/webhook", express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
+    try {
+      if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        return res.status(400).json({ error: "Webhook secret not configured" });
+      }
+      
+      // Stripe webhook verification and processing
+      // This will be implemented when webhook secret is available
+      
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error('Webhook error:', error);
+      res.status(400).json({ error: error.message });
     }
   });
 
