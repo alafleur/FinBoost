@@ -147,8 +147,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create user 
-      const user = await storage.createUser(userData);
+      // Create user directly in database bypassing storage issues
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const [user] = await db.insert(users).values({
+        ...userData,
+        password: hashedPassword,
+        isActive: true,
+        totalPoints: 0,
+        currentMonthPoints: 0,
+        tier: 'Bronze',
+        currentStreak: 0,
+        longestStreak: 0,
+        joinedAt: new Date(),
+        lastLoginAt: null
+      }).returning();
+      
+      // Store in memory storage manually
+      storage.users.set(user.id, user);
 
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
