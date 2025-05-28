@@ -344,33 +344,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync points from history (emergency fix)
+  apiRouter.post("/points/sync", authenticateToken, async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const user = await storage.getUserById(userId);
+    const userHistory = await storage.getUserPointsHistory(userId);
+    const totalPoints = userHistory.filter(h => h.status === 'approved').reduce((sum, h) => sum + h.points, 0);
+    
+    if (user) {
+      user.totalPoints = totalPoints;
+      user.currentMonthPoints = totalPoints;
+      user.tier = await storage.calculateUserTier(totalPoints);
+      await storage.updateUserPoints(userId, totalPoints, totalPoints);
+    }
+    
+    return res.json({ success: true, points: totalPoints });
+  });
+
   // Get current user profile (protected route)
   apiRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
-      console.log("=== DEBUG: Getting user data for ID:", userId);
-      
-      // Get fresh user data from storage to ensure we have latest points
       const user = await storage.getUserById(userId);
-      
-      // Force recalculate user points from history
-      const userHistory = await storage.getUserPointsHistory(userId);
-      const totalPointsFromHistory = userHistory.filter(h => h.status === 'approved').reduce((sum, h) => sum + h.points, 0);
-      
-      if (user.totalPoints !== totalPointsFromHistory) {
-        console.log("=== DEBUG: Points mismatch! User shows", user.totalPoints, "but history shows", totalPointsFromHistory);
-        // Update user with correct points
-        user.totalPoints = totalPointsFromHistory;
-        user.currentMonthPoints = totalPointsFromHistory; // Simplified for now
-      }
-
-      console.log("=== DEBUG: User data retrieved:", {
-        id: user?.id,
-        totalPoints: user?.totalPoints,
-        currentMonthPoints: user?.currentMonthPoints,
-        tier: user?.tier,
-        historyTotal: totalPointsFromHistory
-      });
       
       if (!user) {
         return res.status(404).json({ 
