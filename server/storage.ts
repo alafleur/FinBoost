@@ -199,12 +199,8 @@ export class MemStorage implements IStorage {
     // Store in memory storage
     this.users.set(user.id, user);
 
-    // Create referral code for new user
-    try {
-      await this.createUserReferralCode(user.id);
-    } catch (error) {
-      console.error('Failed to create referral code:', error);
-    }
+    // Skip referral code creation for now to fix registration
+    // TODO: Fix referral system later
 
     // Process referral if provided
     if (insertUser.referralCode) {
