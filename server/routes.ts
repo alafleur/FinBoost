@@ -347,7 +347,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user profile (protected route)
   apiRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
-      const user = req.user!;
+      const userId = req.user!.id;
+      // Get fresh user data from storage to ensure we have latest points
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: "User not found" 
+        });
+      }
+
       return res.status(200).json({ 
         success: true,
         user: {
