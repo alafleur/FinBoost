@@ -178,6 +178,16 @@ export const stripePayouts = pgTable("stripe_payouts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Password Reset Tokens
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   username: true,
@@ -189,6 +199,15 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const loginUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string(),
+  newPassword: z.string().min(6),
 });
 
 export type User = typeof users.$inferSelect;
@@ -224,3 +243,4 @@ export type Referral = typeof referrals.$inferSelect;
 export type UserReferralCode = typeof userReferralCodes.$inferSelect;
 export type StripePayment = typeof stripePayments.$inferSelect;
 export type StripePayout = typeof stripePayouts.$inferSelect;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

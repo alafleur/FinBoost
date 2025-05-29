@@ -1,8 +1,9 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and } from "drizzle-orm";
+import { eq, sql, desc, and, lt } from "drizzle-orm";
 import { db } from "./db";
+import crypto from "crypto";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -76,6 +77,13 @@ export interface IStorage {
 
     // Lesson Completion
     markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
+
+    // === PASSWORD RESET METHODS ===
+    
+    createPasswordResetToken(userId: number): Promise<string>;
+    validatePasswordResetToken(token: string): Promise<{isValid: boolean, userId?: number}>;
+    resetUserPassword(token: string, newPassword: string): Promise<boolean>;
+    cleanupExpiredTokens(): Promise<void>;
 
     // === SUPPORT REQUEST METHODS ===
 
@@ -1150,6 +1158,82 @@ export class MemStorage implements IStorage {
     }
 
     return { pointsEarned, streakBonus: bonusPoints, newStreak };
+  }
+
+  // === PASSWORD RESET METHODS ===
+
+  async createPasswordResetToken(userId: number): Promise<string> {
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Token expires in 1 hour
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    // Invalidate any existing tokens for this user
+    await db.update(passwordResetTokens)
+      .set({ isUsed: true })
+      .where(eq(passwordResetTokens.userId, userId));
+
+    // Create new token
+    await db.insert(passwordResetTokens).values({
+      userId,
+      token,
+      expiresAt,
+    });
+
+    return token;
+  }
+
+  async validatePasswordResetToken(token: string): Promise<{isValid: boolean, userId?: number}> {
+    const [resetToken] = await db.select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token))
+      .limit(1);
+
+    if (!resetToken) {
+      return { isValid: false };
+    }
+
+    const now = new Date();
+    
+    // Check if token is expired or already used
+    if (resetToken.expiresAt < now || resetToken.isUsed) {
+      return { isValid: false };
+    }
+
+    return { isValid: true, userId: resetToken.userId };
+  }
+
+  async resetUserPassword(token: string, newPassword: string): Promise<boolean> {
+    const validation = await this.validatePasswordResetToken(token);
+    
+    if (!validation.isValid || !validation.userId) {
+      return false;
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user password
+    await db.update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, validation.userId));
+
+    // Mark token as used
+    await db.update(passwordResetTokens)
+      .set({ isUsed: true })
+      .where(eq(passwordResetTokens.token, token));
+
+    return true;
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    const now = new Date();
+    
+    await db.update(passwordResetTokens)
+      .set({ isUsed: true })
+      .where(lt(passwordResetTokens.expiresAt, now));
   }
 }
 

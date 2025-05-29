@@ -1,7 +1,7 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSubscriberSchema, insertUserSchema, loginUserSchema } from "@shared/schema";
+import { insertSubscriberSchema, insertUserSchema, loginUserSchema, forgotPasswordSchema, resetPasswordSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import jwt from "jsonwebtoken";
 import type { User } from "@shared/schema";
@@ -331,6 +331,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         success: false,
         message: "An error occurred during login." 
+      });
+    }
+  });
+
+  // Forgot Password - Request Reset
+  apiRouter.post("/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const result = forgotPasswordSchema.safeParse(req.body);
+
+      if (!result.success) {
+        const validationError = fromZodError(result.error);
+        return res.status(400).json({ 
+          success: false,
+          message: validationError.message 
+        });
+      }
+
+      const { email } = result.data;
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      // but only send email if user exists
+      if (user) {
+        try {
+          const resetToken = await storage.createPasswordResetToken(user.id);
+          
+          // In a real app, you'd send an email here
+          // For now, we'll log the reset URL (in development only)
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Password reset link for ${email}: ${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`);
+          }
+          
+          // TODO: Implement email sending service
+          // await emailService.sendPasswordResetEmail(email, resetToken);
+        } catch (error) {
+          console.error("Error creating password reset token:", error);
+        }
+      }
+
+      return res.status(200).json({ 
+        success: true,
+        message: "If an account with that email exists, a password reset link has been sent." 
+      });
+    } catch (error) {
+      console.error("Error in forgot password endpoint:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "An error occurred while processing your request." 
+      });
+    }
+  });
+
+  // Reset Password - Submit New Password
+  apiRouter.post("/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const result = resetPasswordSchema.safeParse(req.body);
+
+      if (!result.success) {
+        const validationError = fromZodError(result.error);
+        return res.status(400).json({ 
+          success: false,
+          message: validationError.message 
+        });
+      }
+
+      const { token, newPassword } = result.data;
+
+      const success = await storage.resetUserPassword(token, newPassword);
+
+      if (!success) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Invalid or expired reset token." 
+        });
+      }
+
+      // Clean up expired tokens
+      await storage.cleanupExpiredTokens();
+
+      return res.status(200).json({ 
+        success: true,
+        message: "Password has been reset successfully. You can now login with your new password." 
+      });
+    } catch (error) {
+      console.error("Error in reset password endpoint:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "An error occurred while resetting your password." 
+      });
+    }
+  });
+
+  // Validate Reset Token
+  apiRouter.post("/auth/validate-reset-token", async (req: Request, res: Response) => {
+    try {
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Reset token is required." 
+        });
+      }
+
+      const validation = await storage.validatePasswordResetToken(token);
+
+      return res.status(200).json({ 
+        success: true,
+        isValid: validation.isValid
+      });
+    } catch (error) {
+      console.error("Error validating reset token:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "An error occurred while validating the token." 
       });
     }
   });

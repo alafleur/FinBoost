@@ -13,6 +13,8 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import FinancialMoodEgg from "./components/FinancialMoodEgg";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function Router() {
   return (
@@ -24,8 +26,8 @@ function Router() {
       <Route path="/lesson/:id" component={Lesson} />
       <Route path="/profile" component={Profile} />
       <Route path="/support" component={Support} />
-      <Route path="/admin" component={Admin} />
-      {/* Fallback to 404 */}
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -8,7 +8,7 @@ import { DollarSign, Eye, EyeOff, Gift } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 interface RegisterForm {
   email: string;
@@ -282,6 +282,14 @@ export default function Auth() {
                     {loginMutation.isPending ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
+
+                <div className="text-center">
+                  <Link href="/forgot-password">
+                    <Button variant="ghost" className="text-sm text-gray-600 hover:text-primary-600">
+                      Forgot your password?
+                    </Button>
+                  </Link>
+                </div>
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
