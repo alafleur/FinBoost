@@ -1,0 +1,67 @@
+Here's a detailed frontend and backend prompt for implementing customer service functionality in your FinBoost app using Replit:
+
+🔧 Prompt for Replit: Implement Customer Support Functionality (Frontend + Backend)
+📘 Overview:
+Implement a full-stack customer support system that allows users to submit inquiries, which are saved to a backend endpoint for admin review. The system should be accessible via a /support page and designed for responsiveness and usability.
+
+🖥️ Frontend Requirements
+Support Page: /support
+
+Create a page with a form that includes the following fields:
+
+Full Name (text, required)
+
+Email Address (text, required, validate email format)
+
+Category (dropdown: General Inquiry, Billing, Technical Issue, Feedback)
+
+Message (textarea, required, minimum 20 characters)
+
+(Optional) File Upload (image or PDF, optional)
+
+Functionality:
+
+Form validation with error messaging for incomplete or invalid entries.
+
+On submission, send a POST request to /api/support with form data as JSON.
+
+Show success message (e.g., "Thank you! We’ve received your request.")
+
+Use Tailwind CSS or existing UI style for form elements and layout.
+
+🗂️ Backend Requirements
+Route: POST /api/support
+
+Accept JSON payload with the form data: name, email, category, message (and file if applicable).
+
+Validate fields (basic backend validation).
+
+Save the data to a mock database:
+
+Option 1: Append to a JSON file (supportMessages.json)
+
+Option 2: Use in-memory array if persistence is not needed
+
+Log the request to the console for verification.
+
+Route: GET /api/support (for future admin access)
+
+Return a list of submitted support messages (mock admin view)
+
+📂 Example Data Format
+json
+Copy
+Edit
+{
+  "name": "Alex Johnson",
+  "email": "alex@example.com",
+  "category": "Technical Issue",
+  "message": "I’m having trouble accessing my dashboard.",
+  "timestamp": "2025-05-29T19:05:00Z"
+}
+🧩 Additional Suggestions (Optional for Enhancement)
+Add CAPTCHA to prevent spam.
+
+Connect to an email service like SendGrid or Mailgun to email admins a copy.
+
+Include a “Need Help?” button floating on all pages linking to /support.
