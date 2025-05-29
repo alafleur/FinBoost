@@ -11,6 +11,7 @@ import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Support from "./pages/Support";
 import FinancialMoodEgg from "./components/FinancialMoodEgg";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/education" component={Education} />
       <Route path="/lesson/:id" component={Lesson} />
       <Route path="/profile" component={Profile} />
+      <Route path="/support" component={Support} />
       <Route path="/admin" component={Admin} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

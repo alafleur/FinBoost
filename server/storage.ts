@@ -1,7 +1,7 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, and } from "drizzle-orm";
 import { db } from "./db";
 
 // modify the interface with any CRUD methods
@@ -76,6 +76,38 @@ export interface IStorage {
 
     // Lesson Completion
     markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
+
+    // === SUPPORT REQUEST METHODS ===
+
+    createSupportRequest(data: {
+      userId?: number | null;
+      name: string;
+      email: string;
+      category: string;
+      message: string;
+      hasAttachment?: boolean;
+      fileName?: string | null;
+    }): Promise<SupportRequest>;
+    getSupportRequests(options: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      category?: string;
+    }): Promise<SupportRequest[]>;
+    getSupportRequestById(requestId: number): Promise<SupportRequest | null>;
+    updateSupportRequest(requestId: number, updates: {
+      status?: string;
+      priority?: string;
+      response?: string;
+      resolvedAt?: Date | null;
+    }): Promise<void>;
+    getSupportRequestStats(): Promise<{
+      total: number;
+      pending: number;
+      inProgress: number;
+      resolved: number;
+      closed: number;
+    }>;
 }
 
 import fs from 'fs/promises';
@@ -811,7 +843,8 @@ export class MemStorage implements IStorage {
       .where(eq(referrals.id, referral.id));
   }
 
-  async getUserReferrals(userId: number): Promise<Array<{referral: Referral, referredUser: {username: string, email: string, joinedAt: Date}}>> {
+  async getUserReferrals(userId: number): Promise<Array<{referral: Referral, referredUser: {username: string, email: string, joinedAt:```text
+Date}}>> {
     const referralsList = await db.select({
       // Referral fields
       id: referrals.id,
@@ -913,6 +946,152 @@ export class MemStorage implements IStorage {
         pointsEarned: row.pointsEarned,
       })),
     };
+  }
+
+  async getUserDetailsForAdmin(userId: number): Promise<any> {
+    // Implementation would depend on your specific requirements
+    return null;
+  }
+
+  async exportUsers(format: string): Promise<string> {
+    // Implementation would depend on your specific requirements
+    return "";
+  }
+
+  async exportPointsHistory(format: string): Promise<string> {
+    // Implementation would depend on your specific requirements
+    return "";
+  }
+
+  async exportAnalytics(format: string): Promise<string> {
+    // Implementation would depend on your specific requirements
+    return "";
+  }
+
+  // === SUPPORT REQUEST METHODS ===
+
+  async createSupportRequest(data: {
+    userId?: number | null;
+    name: string;
+    email: string;
+    category: string;
+    message: string;
+    hasAttachment?: boolean;
+    fileName?: string | null;
+  }): Promise<SupportRequest> {
+    const [supportRequest] = await db.insert(supportRequests).values({
+      userId: data.userId,
+      name: data.name,
+      email: data.email,
+      category: data.category,
+      message: data.message,
+      hasAttachment: data.hasAttachment || false,
+      fileName: data.fileName,
+      status: 'pending',
+      priority: 'normal'
+    }).returning();
+
+    return supportRequest;
+  }
+
+  async getSupportRequests(options: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+  }): Promise<SupportRequest[]> {
+    const { page = 1, limit = 50, status, category } = options;
+    const offset = (page - 1) * limit;
+
+    let query = db.select().from(supportRequests);
+
+    // Add filters
+    const conditions = [];
+    if (status) {
+      conditions.push(eq(supportRequests.status, status));
+    }
+    if (category) {
+      conditions.push(eq(supportRequests.category, category));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    const requests = await query
+      .orderBy(desc(supportRequests.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return requests;
+  }
+
+  async getSupportRequestById(requestId: number): Promise<SupportRequest | null> {
+    const [request] = await db.select()
+      .from(supportRequests)
+      .where(eq(supportRequests.id, requestId))
+      .limit(1);
+
+    return request || null;
+  }
+
+  async updateSupportRequest(requestId: number, updates: {
+    status?: string;
+    priority?: string;
+    response?: string;
+    resolvedAt?: Date | null;
+  }): Promise<void> {
+    const updateData: any = {
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    await db.update(supportRequests)
+      .set(updateData)
+      .where(eq(supportRequests.id, requestId));
+  }
+
+  async getSupportRequestStats(): Promise<{
+    total: number;
+    pending: number;
+    inProgress: number;
+    resolved: number;
+    closed: number;
+  }> {
+    const stats = await db.select({
+      status: supportRequests.status,
+      count: sql<number>`count(*)`
+    })
+    .from(supportRequests)
+    .groupBy(supportRequests.status);
+
+    const result = {
+      total: 0,
+      pending: 0,
+      inProgress: 0,
+      resolved: 0,
+      closed: 0
+    };
+
+    stats.forEach(stat => {
+      result.total += stat.count;
+      switch (stat.status) {
+        case 'pending':
+          result.pending = stat.count;
+          break;
+        case 'in_progress':
+          result.inProgress = stat.count;
+          break;
+        case 'resolved':
+          result.resolved = stat.count;
+          break;
+        case 'closed':
+          result.closed = stat.count;
+          break;
+      }
+    });
+
+    return result;
   }
 
   async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }> {

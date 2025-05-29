@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -35,18 +35,18 @@ export const users = pgTable("users", {
   currentStreak: integer("current_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   lastActivityDate: text("last_activity_date"), // ISO date string
-  
+
   // Stripe Payment Fields
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status").default("inactive"), // active, inactive, past_due, canceled
   nextBillingDate: timestamp("next_billing_date"),
-  
+
   // Stripe Connect Fields for Payouts
   stripeConnectAccountId: text("stripe_connect_account_id"),
   connectOnboardingComplete: boolean("connect_onboarding_complete").default(false),
   payoutEligible: boolean("payout_eligible").default(false),
-  
+
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -191,9 +191,29 @@ export const loginUserSchema = z.object({
   password: z.string().min(6),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type LoginUser = z.infer<typeof loginUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+// Support Requests table
+export const supportRequests = pgTable("support_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(),
+  message: text("message").notNull(),
+  status: varchar("status", { length: 50 }).default("pending").notNull(),
+  priority: varchar("priority", { length: 50 }).default("normal"),
+  hasAttachment: boolean("has_attachment").default(false),
+  fileName: varchar("file_name", { length: 255 }),
+  response: text("response"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at")
+});
+
+export type SupportRequest = typeof supportRequests.$inferSelect;
+export type InsertSupportRequest = typeof supportRequests.$inferInsert;
 export type UserPointsHistory = typeof userPointsHistory.$inferSelect;
 export type LearningModule = typeof learningModules.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;

@@ -1192,6 +1192,227 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === CUSTOMER SUPPORT ROUTES ===
+
+  // Submit support request
+  apiRouter.post("/support", async (req: Request, res: Response) => {
+    try {
+      const { name, email, category, message, hasAttachment, fileName } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !category || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "All required fields must be provided"
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid email address"
+        });
+      }
+
+      // Validate message length
+      if (message.trim().length < 20) {
+        return res.status(400).json({
+          success: false,
+          message: "Message must be at least 20 characters long"
+        });
+      }
+
+      // Validate category
+      const validCategories = ['general', 'billing', 'technical', 'feedback'];
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category selected"
+        });
+      }
+
+      // Get user ID if authenticated
+      let userId = null;
+      const authHeader = req.headers['authorization'];
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.split(' ')[1];
+          const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+          userId = decoded.userId;
+        } catch (error) {
+          // User not authenticated, but that's okay for support requests
+        }
+      }
+
+      const supportRequest = await storage.createSupportRequest({
+        userId,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        category,
+        message: message.trim(),
+        hasAttachment: hasAttachment || false,
+        fileName: fileName || null
+      });
+
+      console.log('New support request:', {
+        id: supportRequest.id,
+        name,
+        email,
+        category,
+        userId
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Support request submitted successfully",
+        requestId: supportRequest.id
+      });
+    } catch (error) {
+      console.error("Support request error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to submit support request"
+      });
+    }
+  });
+
+  // Admin: Get all support requests
+  apiRouter.get("/admin/support", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      // TODO: Add admin role check here
+      const { page = 1, limit = 50, status, category } = req.query;
+      
+      const supportRequests = await storage.getSupportRequests({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        status: status as string,
+        category: category as string
+      });
+
+      res.json({
+        success: true,
+        requests: supportRequests.map(request => ({
+          id: request.id,
+          name: request.name,
+          email: request.email,
+          category: request.category,
+          message: request.message,
+          status: request.status,
+          priority: request.priority,
+          hasAttachment: request.hasAttachment,
+          fileName: request.fileName,
+          createdAt: request.createdAt,
+          updatedAt: request.updatedAt,
+          resolvedAt: request.resolvedAt,
+          userId: request.userId,
+          user: (request as any).user // If joined with user data
+        }))
+      });
+    } catch (error) {
+      console.error("Get support requests error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch support requests"
+      });
+    }
+  });
+
+  // Admin: Update support request status
+  apiRouter.put("/admin/support/:requestId", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      // TODO: Add admin role check here
+      const requestId = parseInt(req.params.requestId);
+      const { status, priority, response } = req.body;
+      const adminId = req.user!.id;
+
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          message: "Status is required"
+        });
+      }
+
+      const validStatuses = ['pending', 'in_progress', 'resolved', 'closed'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status"
+        });
+      }
+
+      await storage.updateSupportRequest(requestId, {
+        status,
+        priority,
+        response,
+        resolvedAt: status === 'resolved' ? new Date() : null
+      });
+
+      res.json({
+        success: true,
+        message: "Support request updated successfully"
+      });
+    } catch (error) {
+      console.error("Update support request error:", error);
+      if (error instanceof Error) {
+        res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to update support request"
+        });
+      }
+    }
+  });
+
+  // Admin: Get support request by ID
+  apiRouter.get("/admin/support/:requestId", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      // TODO: Add admin role check here
+      const requestId = parseInt(req.params.requestId);
+      
+      const supportRequest = await storage.getSupportRequestById(requestId);
+      
+      if (!supportRequest) {
+        return res.status(404).json({
+          success: false,
+          message: "Support request not found"
+        });
+      }
+
+      res.json({
+        success: true,
+        request: {
+          id: supportRequest.id,
+          name: supportRequest.name,
+          email: supportRequest.email,
+          category: supportRequest.category,
+          message: supportRequest.message,
+          status: supportRequest.status,
+          priority: supportRequest.priority,
+          hasAttachment: supportRequest.hasAttachment,
+          fileName: supportRequest.fileName,
+          response: supportRequest.response,
+          createdAt: supportRequest.createdAt,
+          updatedAt: supportRequest.updatedAt,
+          resolvedAt: supportRequest.resolvedAt,
+          userId: supportRequest.userId,
+          user: (supportRequest as any).user
+        }
+      });
+    } catch (error) {
+      console.error("Get support request error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch support request"
+      });
+    }
+  });
+
   // Mark lesson as complete
   app.post("/api/lessons/:id/complete", authenticateToken, async (req: Request, res: Response) => {
     try {
