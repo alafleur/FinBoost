@@ -185,7 +185,7 @@ export default function Admin() {
       const parsedUser = JSON.parse(userData);
 
       // Check if user is admin (you'd implement proper role checking)
-      if (parsedUser.email !== 'admin@finboost.com') {
+      if (parsedUser.email !== 'lafleur.andrew@gmail.com') {
         toast({
           title: "Access Denied",
           description: "Admin access required",
