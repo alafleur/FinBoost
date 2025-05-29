@@ -12,7 +12,7 @@ import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
-import FinancialMoodEgg from "./components/FinancialMoodEgg";
+
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -39,7 +39,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
-        <FinancialMoodEgg />
+
       </TooltipProvider>
     </QueryClientProvider>
   );
