@@ -1,55 +1,61 @@
 
-const { db } = require('./server/db');
-const { users, userPointsHistory, userProgress, userReferralCodes, referrals, userMonthlyRewards, passwordResetTokens } = require('./shared/schema');
-const { eq } = require('drizzle-orm');
+const { Pool } = require('@neondatabase/serverless');
 
-async function deleteUser(email) {
+async function deleteUser() {
+  if (!process.env.DATABASE_URL) {
+    console.error('DATABASE_URL not found in environment variables');
+    return;
+  }
+
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  
   try {
-    console.log(`Looking for user with email: ${email}`);
+    console.log('Connecting to database...');
     
-    // First, get the user to find their ID
-    const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    // First, find the user
+    const userResult = await pool.query(
+      'SELECT id FROM users WHERE email = $1',
+      ['lafleur.andrew@gmail.com']
+    );
     
-    if (user.length === 0) {
-      console.log('User not found');
+    if (userResult.rows.length === 0) {
+      console.log('User with email lafleur.andrew@gmail.com not found');
       return;
     }
     
-    const userId = user[0].id;
+    const userId = userResult.rows[0].id;
     console.log(`Found user with ID: ${userId}`);
     
-    // Delete related records first (foreign key constraints)
+    // Delete all related records first
     console.log('Deleting user points history...');
-    await db.delete(userPointsHistory).where(eq(userPointsHistory.userId, userId));
+    await pool.query('DELETE FROM user_points_history WHERE user_id = $1', [userId]);
     
     console.log('Deleting user progress...');
-    await db.delete(userProgress).where(eq(userProgress.userId, userId));
+    await pool.query('DELETE FROM user_progress WHERE user_id = $1', [userId]);
     
     console.log('Deleting user referral codes...');
-    await db.delete(userReferralCodes).where(eq(userReferralCodes.userId, userId));
+    await pool.query('DELETE FROM user_referral_codes WHERE user_id = $1', [userId]);
     
-    console.log('Deleting referrals where user was referrer...');
-    await db.delete(referrals).where(eq(referrals.referrerUserId, userId));
-    
-    console.log('Deleting referrals where user was referred...');
-    await db.delete(referrals).where(eq(referrals.referredUserId, userId));
+    console.log('Deleting referrals...');
+    await pool.query('DELETE FROM referrals WHERE referrer_user_id = $1 OR referred_user_id = $1', [userId]);
     
     console.log('Deleting user monthly rewards...');
-    await db.delete(userMonthlyRewards).where(eq(userMonthlyRewards.userId, userId));
+    await pool.query('DELETE FROM user_monthly_rewards WHERE user_id = $1', [userId]);
     
     console.log('Deleting password reset tokens...');
-    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+    await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
     
-    // Finally, delete the user
+    // Finally delete the user
     console.log('Deleting user...');
-    await db.delete(users).where(eq(users.id, userId));
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
     
-    console.log(`Successfully deleted user: ${email}`);
+    console.log(`Successfully deleted user: lafleur.andrew@gmail.com`);
     
   } catch (error) {
-    console.error('Error deleting user:', error);
+    console.error('Error deleting user:', error.message);
+  } finally {
+    await pool.end();
   }
 }
 
-// Delete the specific user
-deleteUser('lafleur.andrew@gmail.com');
+deleteUser();
