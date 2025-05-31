@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -153,7 +152,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
               {getTierDisplayName(user.tier)}
             </Badge>
           </div>
-          
+
           {/* All Tiers Display */}
           <div className="space-y-3">
             <div className="flex justify-between items-center">
@@ -173,7 +172,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
                 <span className="text-xs text-gray-500">{tierThresholds.tier3}</span>
               </div>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
@@ -181,7 +180,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
                 style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>
-            
+
             {/* Current Status */}
             <div className="text-center text-xs text-gray-500">
               {user.currentMonthPoints} points this month
@@ -191,7 +190,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         </CardContent>
       </Card>
 
-      
+
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
