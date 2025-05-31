@@ -93,7 +93,7 @@ export default function Lesson() {
     }
   };
 
-  const finishQuiz = () => {
+  const finishQuiz = async () => {
     const correctAnswers = selectedAnswers.filter((answer, index) => 
       answer === lesson!.quiz[index].correctAnswer
     ).length;
@@ -105,41 +105,80 @@ export default function Lesson() {
 
     // Award points if score is 70% or higher
     if (finalScore >= 70) {
-      toast({
-        title: "🎉 Lesson Completed!",
-        description: `You earned ${lesson!.points} points! Great job!`,
-      });
+      try {
+        // Award quiz completion points
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/points/award', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            actionId: 'quiz_complete',
+            relatedId: lesson!.id.toString(),
+            metadata: { lessonId: lesson!.id, score: finalScore }
+          })
+        });
 
-      // Here you would update the user's points in the database
-      updateUserPoints(lesson!.points);
-    }
-  };
+        if (response.ok) {
+          const result = await response.json();
+          
+          // Update completed lessons in localStorage
+          const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+          if (!completedLessons.includes(lesson!.id.toString())) {
+            completedLessons.push(lesson!.id.toString());
+            localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+          }
 
-  const updateUserPoints = async (points: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/points', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ points, action: 'lesson_completed', lessonId: lesson!.id })
-      });
-
-      if (response.ok) {
-        // Update local user data
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        userData.totalPoints = (userData.totalPoints || 0) + points;
-        userData.currentMonthPoints = (userData.currentMonthPoints || 0) + points;
-        localStorage.setItem('user', JSON.stringify(userData));
+          toast({
+            title: "🎉 Lesson Completed!",
+            description: `You earned ${result.points} points! Great job!`,
+          });
+        }
+      } catch (error) {
+        console.error('Error awarding points:', error);
+        toast({
+          title: "Lesson completed but error awarding points",
+          description: "Please refresh the page to see updated progress.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      console.error('Error updating points:', error);
     }
   };
 
-  const startQuiz = () => {
+  
+
+  const startQuiz = async () => {
+    // Award points for reading the lesson content
+    if (!hasEarnedLessonPoints) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/points/award', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            actionId: 'lesson_complete',
+            relatedId: lesson!.id.toString(),
+            metadata: { lessonId: lesson!.id }
+          })
+        });
+
+        if (response.ok) {
+          setHasEarnedLessonPoints(true);
+          toast({
+            title: "Points Earned! 📚",
+            description: "You earned points for reading the lesson!",
+          });
+        }
+      } catch (error) {
+        console.error('Error awarding lesson points:', error);
+      }
+    }
+
     setCurrentStep('quiz');
     setCurrentQuestionIndex(0);
     setSelectedAnswers([]);

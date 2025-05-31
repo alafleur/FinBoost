@@ -1124,6 +1124,14 @@ export class MemStorage implements IStorage {
     return result;
   }
 
+  async getUserProgress(userId: number) {
+    const progress = await db.select()
+      .from(userProgress)
+      .where(eq(userProgress.userId, userId));
+    
+    return progress;
+  }
+
   async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
     // Check if already completed
     const existingProgress = await db.select()

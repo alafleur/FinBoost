@@ -40,7 +40,33 @@ export default function Education() {
     // Load completed lessons from localStorage or API
     const completed = JSON.parse(localStorage.getItem('completedLessons') || '[]');
     setCompletedLessons(completed);
+    
+    // Also fetch from API to ensure sync
+    fetchCompletedLessons();
   }, []);
+
+  const fetchCompletedLessons = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/user/progress', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const completedIds = result.progress
+          .filter((p: any) => p.completed)
+          .map((p: any) => p.moduleId.toString());
+        
+        setCompletedLessons(completedIds);
+        localStorage.setItem('completedLessons', JSON.stringify(completedIds));
+      }
+    } catch (error) {
+      console.error('Error fetching completed lessons:', error);
+    }
+  };
 
   const modules: Module[] = [
     {
@@ -166,12 +192,12 @@ export default function Education() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">
-                    {completedLessons.reduce((total, lessonId) => {
-                      const lesson = modules.find(m => m.id === lessonId);
-                      return total + (lesson?.pointsReward || 0);
-                    }, 0)}
+                    {(() => {
+                      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                      return userData.totalPoints || 0;
+                    })()}
                   </div>
-                  <div className="text-sm text-gray-600">Points Earned</div>
+                  <div className="text-sm text-gray-600">Total Points</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600">

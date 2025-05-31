@@ -487,6 +487,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's learning progress
+  apiRouter.get("/user/progress", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const progress = await storage.getUserProgress(userId);
+      
+      return res.status(200).json({ 
+        success: true,
+        progress
+      });
+    } catch (error) {
+      console.error("Error fetching user progress:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "An error occurred while fetching progress." 
+      });
+    }
+  });
+
   // Get current user profile (protected route)
   apiRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
