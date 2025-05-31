@@ -52,9 +52,20 @@ export default function Education() {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Map numeric module IDs back to lesson string IDs
+        const moduleToLessonMap: { [key: number]: string } = {
+          1: 'emergency-fund',
+          2: 'budgeting-basics', 
+          3: 'investment-basics',
+          4: 'credit-management',
+          5: 'retirement-planning',
+          6: 'tax-optimization'
+        };
+        
         const completedIds = result.progress
           .filter((p: any) => p.completed)
-          .map((p: any) => p.moduleId.toString());
+          .map((p: any) => moduleToLessonMap[p.moduleId] || p.moduleId.toString());
         
         setCompletedLessons(completedIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedIds));

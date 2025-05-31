@@ -1129,7 +1129,10 @@ export class MemStorage implements IStorage {
       .from(userProgress)
       .where(eq(userProgress.userId, userId));
     
-    return progress;
+    return progress.map(p => ({
+      ...p,
+      completed: !!p.completed
+    }));
   }
 
   async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
@@ -1143,12 +1146,8 @@ export class MemStorage implements IStorage {
       throw new Error('Lesson already completed');
     }
 
-    const module = await db.select().from(learningModules).where(eq(learningModules.id, moduleId)).limit(1);
-    if (module.length === 0) {
-      throw new Error('Module not found');
-    }
-
-    const pointsEarned = module[0].pointsReward;
+    // Use static points for lesson completion since we're using educationContent.ts
+    const pointsEarned = 25; // Standard points for completing a lesson
 
     // Update streak and get bonus points
     const { newStreak, bonusPoints } = await this.updateUserStreak(userId);
@@ -1181,7 +1180,7 @@ export class MemStorage implements IStorage {
       .where(eq(users.id, userId));
 
     // Record points history for lesson completion
-    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: ${module[0].title}`, moduleId);
+    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: Module ${moduleId}`, { moduleId });
 
     // Record streak bonus in history if any
     if (bonusPoints > 0) {

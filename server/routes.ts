@@ -1570,9 +1570,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mark lesson as complete
   apiRouter.post("/lessons/:id/complete", authenticateToken, async (req: Request, res: Response) => {
     try {
-      const moduleId = parseInt(req.params.id);
+      const lessonId = req.params.id;
       const userId = req.user!.id;
 
+      // Convert lesson string ID to numeric ID for storage
+      // Map common lesson IDs to numbers
+      const lessonIdMap: { [key: string]: number } = {
+        'emergency-fund': 1,
+        'budgeting-basics': 2,
+        'investment-basics': 3,
+        'credit-management': 4,
+        'retirement-planning': 5,
+        'tax-optimization': 6
+      };
+
+      const moduleId = lessonIdMap[lessonId] || parseInt(lessonId) || 1;
+      
       const result = await storage.markLessonComplete(userId, moduleId);
 
       res.json({ 
