@@ -543,7 +543,7 @@ export class MemStorage implements IStorage {
       const pointsColumn = period === 'monthly' ? 'currentMonthPoints' : 'totalPoints';
 
       const query = await db.select({
-        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`,
+        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`.as('rank'),
         userId: users.id,
         username: users.username,
         points: users[pointsColumn],
@@ -566,7 +566,7 @@ export class MemStorage implements IStorage {
 
       const subquery = db.select({
         id: users.id,
-        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`,
+        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`.as('rank'),
         points: users[pointsColumn],
         tier: users.tier
       }).from(users)
