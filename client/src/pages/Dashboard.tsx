@@ -182,55 +182,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleStartLesson = async (lessonId: string) => {
-    setIsLoading(true);
-    try {
-      // Navigate to lesson page or open lesson modal
-      toast({
-        title: "Lesson Starting!",
-        description: "Opening your learning module...",
-      });
-
-      // For now, award points immediately (in a real app, this would happen after lesson completion)
-      const pointsMap: { [key: string]: number } = {
-        'budgeting-basics': 25,
-        'emergency-fund': 30,
-        'investment-basics': 35,
-        'credit-management': 30,
-        'retirement-planning': 40,
-        'tax-optimization': 35
-      };
-
-      const response = await fetch('/api/points/award', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          actionId: `lesson-${lessonId}`,
-          points: pointsMap[lessonId] || 25,
-          description: `Completed lesson: ${lessonId.replace('-', ' ')}`
-        })
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Lesson Completed!",
-          description: `You earned ${pointsMap[lessonId] || 25} points for completing this lesson!`,
-        });
-        // Refresh to show updated points
-        setTimeout(() => window.location.reload(), 1500);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to start lesson. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleStartLesson = (lessonId: string) => {
+    // Navigate to the lesson page
+    setLocation(`/lesson/${lessonId}`);
   };
 
   const fetchUserData = async () => {
@@ -581,7 +535,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Learn the fundamentals of creating and managing a budget</p>
                   <Button 
                     onClick={() => handleStartLesson('budgeting-basics')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
@@ -596,7 +549,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Build a safety net for unexpected expenses</p>
                   <Button 
                     onClick={() => handleStartLesson('emergency-fund')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
@@ -611,7 +563,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Introduction to stocks, bonds, and investment strategies</p>
                   <Button 
                     onClick={() => handleStartLesson('investment-basics')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
@@ -626,7 +577,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Understanding credit scores and debt management</p>
                   <Button 
                     onClick={() => handleStartLesson('credit-management')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
@@ -641,7 +591,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Plan for your financial future with retirement strategies</p>
                   <Button 
                     onClick={() => handleStartLesson('retirement-planning')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
@@ -656,7 +605,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-3">Maximize your tax savings and understand deductions</p>
                   <Button 
                     onClick={() => handleStartLesson('tax-optimization')}
-                    disabled={isLoading}
                     className="w-full"
                   >
                     Start Lesson
