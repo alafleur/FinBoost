@@ -37,11 +37,7 @@ export default function Education() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   useEffect(() => {
-    // Load completed lessons from localStorage or API
-    const completed = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-    setCompletedLessons(completed);
-    
-    // Also fetch from API to ensure sync
+    // Fetch from API first to ensure sync
     fetchCompletedLessons();
   }, []);
 
@@ -197,7 +193,7 @@ export default function Education() {
                       return userData.totalPoints || 0;
                     })()}
                   </div>
-                  <div className="text-sm text-gray-600">Total Points</div>
+                  <div className="text-sm text-gray-600">Points Earned</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600">

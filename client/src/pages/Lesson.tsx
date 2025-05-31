@@ -106,40 +106,51 @@ export default function Lesson() {
     // Award points if score is 70% or higher
     if (finalScore >= 70) {
       try {
-        // Award quiz completion points
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/points/award', {
+        
+        // Mark lesson as complete in database
+        const completionResponse = await fetch(`/api/lessons/${lesson!.id}/complete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            actionId: 'quiz_complete',
-            relatedId: lesson!.id.toString(),
-            metadata: { lessonId: lesson!.id, score: finalScore }
-          })
+          }
         });
 
-        if (response.ok) {
-          const result = await response.json();
+        if (completionResponse.ok) {
+          const completionResult = await completionResponse.json();
           
           // Update completed lessons in localStorage
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-          if (!completedLessons.includes(lesson!.id.toString())) {
-            completedLessons.push(lesson!.id.toString());
+          const lessonIdStr = lesson!.id.toString();
+          if (!completedLessons.includes(lessonIdStr)) {
+            completedLessons.push(lessonIdStr);
             localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
           }
 
+          // Update user data in localStorage with new points
+          const userData = JSON.parse(localStorage.getItem('user') || '{}');
+          userData.totalPoints = (userData.totalPoints || 0) + completionResult.pointsEarned + completionResult.streakBonus;
+          localStorage.setItem('user', JSON.stringify(userData));
+
           toast({
             title: "🎉 Lesson Completed!",
-            description: `You earned ${result.points} points! Great job!`,
+            description: `You earned ${completionResult.pointsEarned} points! ${completionResult.streakBonus > 0 ? `Plus ${completionResult.streakBonus} streak bonus!` : ''}`,
           });
+
+          // Show streak notification if there's a bonus
+          if (completionResult.streakBonus > 0) {
+            setStreakNotification({
+              pointsEarned: completionResult.pointsEarned,
+              streakBonus: completionResult.streakBonus,
+              newStreak: completionResult.newStreak
+            });
+          }
         }
       } catch (error) {
-        console.error('Error awarding points:', error);
+        console.error('Error completing lesson:', error);
         toast({
-          title: "Lesson completed but error awarding points",
+          title: "Lesson completed but error updating progress",
           description: "Please refresh the page to see updated progress.",
           variant: "destructive",
         });

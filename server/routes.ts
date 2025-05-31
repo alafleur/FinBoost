@@ -1568,7 +1568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mark lesson as complete
-  app.post("/api/lessons/:id/complete", authenticateToken, async (req: Request, res: Response) => {
+  apiRouter.post("/lessons/:id/complete", authenticateToken, async (req: Request, res: Response) => {
     try {
       const moduleId = parseInt(req.params.id);
       const userId = req.user!.id;
