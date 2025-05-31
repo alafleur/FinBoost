@@ -106,8 +106,8 @@ export default function PointsHistory() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'gold': return 'bg-yellow-500';
-      case 'silver': return 'bg-gray-400';
+      case 'tier3': return 'bg-yellow-500';
+      case 'tier2': return 'bg-gray-400';
       default: return 'bg-orange-600';
     }
   };

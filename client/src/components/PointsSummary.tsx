@@ -28,7 +28,7 @@ interface PointsSummaryProps {
 export default function PointsSummary({ user, onNavigateToPoints }: PointsSummaryProps) {
   const [recentActivity, setRecentActivity] = useState([]);
   const [nextActions, setNextActions] = useState([]);
-  const [tierThresholds, setTierThresholds] = useState({ bronze: 0, silver: 250, gold: 500 });
+  const [tierThresholds, setTierThresholds] = useState({ tier1: 0, tier2: 250, tier3: 500 });
 
   useEffect(() => {
     fetchQuickData();
@@ -76,27 +76,27 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'gold': return 'bg-yellow-500';
-      case 'silver': return 'bg-gray-400';
+      case 'tier3': return 'bg-yellow-500';
+      case 'tier2': return 'bg-gray-400';
       default: return 'bg-orange-600';
     }
   };
 
   const getNextTierPoints = () => {
     switch (user.tier) {
-      case 'bronze': return tierThresholds.silver;
-      case 'silver': return tierThresholds.gold;
-      case 'gold': return tierThresholds.gold; // Already at max tier
-      default: return tierThresholds.silver;
+      case 'tier1': return tierThresholds.tier2;
+      case 'tier2': return tierThresholds.tier3;
+      case 'tier3': return tierThresholds.tier3; // Already at max tier
+      default: return tierThresholds.tier2;
     }
   };
 
   const getNextTierName = () => {
     switch (user.tier) {
-      case 'bronze': return 'Silver';
-      case 'silver': return 'Gold';
-      case 'gold': return 'Gold'; // Already at max tier
-      default: return 'Silver';
+      case 'tier1': return 'Tier 2';
+      case 'tier2': return 'Tier 3';
+      case 'tier3': return 'Tier 3'; // Already at max tier
+      default: return 'Tier 2';
     }
   };
 
@@ -151,18 +151,18 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
                 <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 0 ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Bronze</span>
+                <span className="text-xs font-medium">Tier 1</span>
                 <span className="text-xs text-gray-500">0</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.silver ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Silver</span>
-                <span className="text-xs text-gray-500">{tierThresholds.silver}</span>
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.tier2 ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 2</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier2}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.gold ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Gold</span>
-                <span className="text-xs text-gray-500">{tierThresholds.gold}</span>
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.tier3 ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 3</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier3}</span>
               </div>
             </div>
             
@@ -170,7 +170,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="bg-gradient-to-r from-orange-600 via-gray-400 to-yellow-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.gold, 1)) * 100, 100)}%` }}
+                style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>
             

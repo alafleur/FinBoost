@@ -78,8 +78,8 @@ export default function Profile() {
   });
 
   const tierConfig: Record<string, TierInfo> = {
-    bronze: {
-      name: 'Bronze',
+    tier1: {
+      name: 'Tier 1',
       threshold: 0,
       color: 'from-orange-400 to-orange-600',
       icon: Medal,
@@ -90,39 +90,39 @@ export default function Profile() {
         'Basic achievement badges'
       ],
       nextTier: {
-        name: 'Silver',
+        name: 'Tier 2',
         threshold: 250,
         pointsNeeded: 250
       }
     },
-    silver: {
-      name: 'Silver',
+    tier2: {
+      name: 'Tier 2',
       threshold: 250,
       color: 'from-gray-400 to-gray-600',
       icon: Trophy,
       benefits: [
-        'All Bronze benefits',
+        'All Tier 1 benefits',
         'Advanced lesson modules',
         'Priority community support',
-        'Silver tier exclusive content',
+        'Tier 2 exclusive content',
         'Enhanced monthly rewards'
       ],
       nextTier: {
-        name: 'Gold',
+        name: 'Tier 3',
         threshold: 500,
         pointsNeeded: 500
       }
     },
-    gold: {
-      name: 'Gold',
+    tier3: {
+      name: 'Tier 3',
       threshold: 500,
       color: 'from-yellow-400 to-yellow-600',
       icon: Crown,
       benefits: [
-        'All Silver benefits',
+        'All Tier 2 benefits',
         'Premium lesson content',
         'Personal finance coaching calls',
-        'Gold tier exclusive webinars',
+        'Tier 3 exclusive webinars',
         'Maximum monthly reward potential',
         'Early access to new features'
       ]

@@ -543,7 +543,7 @@ export class MemStorage implements IStorage {
       currentMonthPoints: users.currentMonthPoints
     }).from(users);
 
-    if (allUsers.length === 0) return 'bronze';
+    if (allUsers.length === 0) return 'tier1';
 
     // Sort points in ascending order
     const sortedPoints = allUsers.map(u => u.currentMonthPoints).sort((a, b) => a - b);
@@ -556,9 +556,9 @@ export class MemStorage implements IStorage {
     const silverThreshold = sortedPoints[p66Index] || 0;
 
     // Determine tier based on percentiles
-    if (points >= silverThreshold) return 'gold';
-    if (points >= bronzeThreshold) return 'silver';
-    return 'bronze';
+    if (points >= silverThreshold) return 'tier3';
+    if (points >= bronzeThreshold) return 'tier2';
+    return 'tier1';
   }
 
   async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
@@ -625,9 +625,9 @@ export class MemStorage implements IStorage {
     .where(eq(users.isActive, true))
     .groupBy(users.tier);
 
-    const goldCount = tierCounts.find(t => t.tier === 'gold')?.count || 0;
-    const silverCount = tierCounts.find(t => t.tier === 'silver')?.count || 0;
-    const bronzeCount = tierCounts.find(t => t.tier === 'bronze')?.count || 0;
+    const goldCount = tierCounts.find(t => t.tier === 'tier3')?.count || 0;
+    const silverCount = tierCounts.find(t => t.tier === 'tier2')?.count || 0;
+    const bronzeCount = tierCounts.find(t => t.tier === 'tier1')?.count || 0;
 
     const [monthlyReward] = await db.insert(monthlyRewards).values({
       month,
@@ -678,15 +678,15 @@ export class MemStorage implements IStorage {
 
       // Determine reward based on tier
       switch (user.tier) {
-        case 'gold':
+        case 'tier3':
           rewardAmount = goldRewardPerPerson;
           isWinner = goldRewardPerPerson > 0;
           break;
-        case 'silver':
+        case 'tier2':
           rewardAmount = silverRewardPerPerson;
           isWinner = silverRewardPerPerson > 0;
           break;
-        case 'bronze':
+        case 'tier1':
           rewardAmount = bronzeRewardPerPerson;
           isWinner = bronzeRewardPerPerson > 0;
           break;
@@ -838,7 +838,6 @@ export class MemStorage implements IStorage {
     }
 
     // Create referral record
-```text
     const [referral] = await db.insert(referrals).values({
       referrerUserId: validation.referrerUserId,
       referredUserId,
@@ -1260,14 +1259,14 @@ export class MemStorage implements IStorage {
       .where(lt(passwordResetTokens.expiresAt, now));
   }
 
-  async getTierThresholds(): Promise<{ bronze: number, silver: number, gold: number }> {
+  async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
     // Get all users' current month points to calculate percentiles
     const allUsers = await db.select({
       currentMonthPoints: users.currentMonthPoints
     }).from(users);
 
     if (allUsers.length === 0) {
-      return { bronze: 0, silver: 0, gold: 0 };
+      return { tier1: 0, tier2: 0, tier3: 0 };
     }
 
     // Sort points in ascending order
@@ -1278,9 +1277,9 @@ export class MemStorage implements IStorage {
     const p66Index = Math.floor(sortedPoints.length * 0.66);
 
     return {
-      bronze: 0, // Bronze always starts at 0
-      silver: sortedPoints[p33Index] || 0,
-      gold: sortedPoints[p66Index] || 0
+      tier1: 0, // Tier 1 always starts at 0
+      tier2: sortedPoints[p33Index] || 0,
+      tier3: sortedPoints[p66Index] || 0
     };
   }
 }
