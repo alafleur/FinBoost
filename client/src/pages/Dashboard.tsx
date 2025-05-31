@@ -228,51 +228,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleWeeklyChallenge = async (challengeId: string) => {
-    setIsLoading(true);
-    try {
-      toast({
-        title: "Challenge Started!",
-        description: "Your weekly challenge has begun. Complete it to earn bonus points!",
-      });
-
-      const pointsMap: { [key: string]: number } = {
-        'budget-tracker': 50,
-        'savings-goal': 75
-      };
-
-      // For demo purposes, award points immediately
-      const response = await fetch('/api/points/award', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          actionId: `challenge-${challengeId}`,
-          points: pointsMap[challengeId] || 50,
-          description: `Completed weekly challenge: ${challengeId.replace('-', ' ')}`
-        })
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Challenge Completed!",
-          description: `Amazing! You earned ${pointsMap[challengeId] || 50} points for completing this challenge!`,
-        });
-        // Refresh to show updated points
-        setTimeout(() => window.location.reload(), 1500);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to start challenge. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  
 
   if (!user) {
     return (
@@ -568,41 +524,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Weekly Challenges */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Weekly Challenges</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg border-purple-200 bg-purple-50 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-purple-800">Budget Tracker Challenge</h4>
-                    <span className="text-sm text-purple-600 font-medium">+50 points</span>
-                  </div>
-                  <p className="text-sm text-purple-700 mb-3">Track your expenses for 7 days and submit a summary</p>
-                  <Button 
-                    onClick={() => handleWeeklyChallenge('budget-tracker')}
-                    disabled={isLoading}
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                  >
-                    Start Challenge
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg border-blue-200 bg-blue-50 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-blue-800">Savings Goal Challenge</h4>
-                    <span className="text-sm text-blue-600 font-medium">+75 points</span>
-                  </div>
-                  <p className="text-sm text-blue-700 mb-3">Set and achieve a weekly savings target</p>
-                  <Button 
-                    onClick={() => handleWeeklyChallenge('savings-goal')}
-                    disabled={isLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    Start Challenge
-                  </Button>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </TabsContent>
 
