@@ -14,7 +14,9 @@ import {
   DollarSign,
   Award,
   Target,
-  Activity
+  Activity,
+  Crown,
+  Medal
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +47,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [tierThresholds, setTierThresholds] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -290,7 +293,6 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchUserData();
     fetchLeaderboard();
     fetchTierThresholds();
   }, []);
@@ -665,50 +667,53 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Dashboard Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="referrals">Referrals</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="history">Activity</TabsTrigger>
-        </TabsList>
+        {/* Dashboard Content - Only show tabs on mobile */}
+        {isMobile ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="referrals">Referrals</TabsTrigger>
+              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+              <TabsTrigger value="history">Activity</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+            <TabsContent value="overview" className="space-y-6">
+              <div className="space-y-6">
+                <StreakDisplay 
+                  currentStreak={user.currentStreak || 0}
+                  longestStreak={user.longestStreak || 0}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="referrals">
+              <ReferralSystem />
+            </TabsContent>
+
+            <TabsContent value="leaderboard">
+              <Leaderboard />
+            </TabsContent>
+
+            <TabsContent value="history">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Points History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PointsHistory />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          /* Desktop: Show overview content directly */
+          <div className="space-y-6">
             <StreakDisplay 
               currentStreak={user.currentStreak || 0}
               longestStreak={user.longestStreak || 0}
             />
-</div>
-            <div className="lg:col-span-1">
-              {/* Space for future widgets or keep minimal */}
-            </div>
           </div>
-        </TabsContent>
-
-
-
-        <TabsContent value="referrals">
-          <ReferralSystem />
-        </TabsContent>
-
-        <TabsContent value="leaderboard">
-          <Leaderboard />
-        </TabsContent>
-
-        <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>Points History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PointsHistory />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        )}
       </div>
           </div>
         </div>
