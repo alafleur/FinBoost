@@ -251,10 +251,10 @@ export default function Dashboard() {
 
   const getNextTierPoints = () => {
     switch (user.tier) {
-      case 'bronze': return 100;
-      case 'silver': return 250;
-      case 'gold': return 500;
-      default: return 100;
+      case 'bronze': return 250; // Bronze to Gold is 250 points
+      case 'silver': return 500; // Silver to Gold is 500 points
+      case 'gold': return 500; // Already at max tier
+      default: return 250;
     }
   };
 

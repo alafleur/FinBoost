@@ -76,19 +76,19 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
   const getNextTierPoints = () => {
     switch (user.tier) {
-      case 'bronze': return 100;
-      case 'silver': return 250;
-      case 'gold': return 500;
-      default: return 100;
+      case 'bronze': return 250; // Bronze to Gold is 250 points
+      case 'silver': return 500; // Silver to Gold is 500 points  
+      case 'gold': return 500; // Already at max tier
+      default: return 250;
     }
   };
 
   const getNextTierName = () => {
     switch (user.tier) {
-      case 'bronze': return 'Silver';
+      case 'bronze': return 'Gold'; // Bronze goes directly to Gold
       case 'silver': return 'Gold';
       case 'gold': return 'Platinum';
-      default: return 'Silver';
+      default: return 'Gold';
     }
   };
 
