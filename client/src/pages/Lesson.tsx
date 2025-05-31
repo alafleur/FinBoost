@@ -327,23 +327,27 @@ export default function Lesson() {
                         <button
                           key={index}
                           onClick={() => handleAnswerSelect(index)}
-                          className={`w-full p-4 text-left rounded-lg border-2 transition-colors ${
+                          className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
                             selectedAnswers[currentQuestionIndex] === index
-                              ? 'border-primary-500 bg-primary-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-blue-500 bg-blue-50 shadow-md'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                               selectedAnswers[currentQuestionIndex] === index
-                                ? 'border-primary-500 bg-primary-500'
+                                ? 'border-blue-500 bg-blue-500'
                                 : 'border-gray-300'
                             }`}>
                               {selectedAnswers[currentQuestionIndex] === index && (
-                                <div className="w-2 h-2 bg-white rounded-full" />
+                                <div className="w-2.5 h-2.5 bg-white rounded-full" />
                               )}
                             </div>
-                            <span>{option}</span>
+                            <span className={`${
+                              selectedAnswers[currentQuestionIndex] === index
+                                ? 'text-blue-900 font-medium'
+                                : 'text-gray-700'
+                            }`}>{option}</span>
                           </div>
                         </button>
                       ))}
