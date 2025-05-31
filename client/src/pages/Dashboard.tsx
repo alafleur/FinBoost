@@ -38,11 +38,13 @@ interface User {
 }
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useIsMobile();
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState(null);
+  const [tierThresholds, setTierThresholds] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -75,11 +77,11 @@ export default function Dashboard() {
     });
 
     try {
-      
+
       // Automatically award daily login points
       const today = new Date().toDateString();
       const lastLogin = localStorage.getItem('lastLoginDate');
-      
+
       if (lastLogin !== today) {
         // Award daily login points automatically
         fetch('/api/points/award', {
@@ -130,7 +132,7 @@ export default function Dashboard() {
     try {
       // Create a shareable message
       const shareText = `I'm learning financial literacy with FinBoost! Join me on this journey to financial freedom. 💰📈`;
-      
+
       if (navigator.share) {
         await navigator.share({
           title: 'FinBoost - Financial Learning Journey',
@@ -185,7 +187,7 @@ export default function Dashboard() {
         title: "Lesson Starting!",
         description: "Opening your learning module...",
       });
-      
+
       // For now, award points immediately (in a real app, this would happen after lesson completion)
       const pointsMap: { [key: string]: number } = {
         'budgeting-basics': 25,
@@ -228,15 +230,185 @@ export default function Dashboard() {
     }
   };
 
-  
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+      if (response.ok) {
+        const result = await response.json();
+        setUser(result.user);
+      } else {
+        setLocation('/auth');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setLocation('/auth');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/leaderboard?period=monthly&limit=20', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setLeaderboardData(result);
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    }
+  };
+
+  const fetchTierThresholds = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/tiers/thresholds', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setTierThresholds(result.thresholds);
+      }
+    } catch (error) {
+      console.error('Error fetching tier thresholds:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchLeaderboard();
+    fetchTierThresholds();
+  }, []);
+
+  const LeaderboardSidebar = () => (
+    <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Leaderboard</h3>
+          <p className="text-sm text-gray-600">Top 20 this month</p>
         </div>
+
+        {/* Tier Thresholds Visual */}
+        {tierThresholds && (
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Current Tier Thresholds</h4>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span>Tier 1</span>
+                </div>
+                <span className="font-medium">0+ pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                  <span>Tier 2</span>
+                </div>
+                <span className="font-medium">{tierThresholds.tier2}+ pts</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span>Tier 3</span>
+                </div>
+                <span className="font-medium">{tierThresholds.tier3}+ pts</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Top 20 Users */}
+        {leaderboardData && (
+          <div className="space-y-1">
+            {leaderboardData.leaderboard.map((entry) => (
+              <div
+                key={entry.rank}
+                className={`flex items-center justify-between p-3 rounded-lg text-sm transition-colors ${
+                  entry.isCurrentUser 
+                    ? 'bg-primary-50 border border-primary-200' 
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-center w-6 h-6">
+                    {entry.rank === 1 && <Crown className="h-4 w-4 text-yellow-500" />}
+                    {entry.rank === 2 && <Medal className="h-4 w-4 text-gray-400" />}
+                    {entry.rank === 3 && <Award className="h-4 w-4 text-orange-600" />}
+                    {entry.rank > 3 && (
+                      <span className="text-xs font-medium text-gray-500">#{entry.rank}</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-medium ${entry.isCurrentUser ? 'text-primary-700' : 'text-gray-900'}`}>
+                      {entry.username}
+                      {entry.isCurrentUser && <span className="ml-1 text-xs text-primary-500">(You)</span>}
+                    </p>
+                    <p className="text-xs text-gray-500">{entry.points} pts</p>
+                  </div>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-xs ${
+                    entry.tier === 'tier3' ? 'bg-yellow-100 text-yellow-700' :
+                    entry.tier === 'tier2' ? 'bg-gray-100 text-gray-700' :
+                    'bg-orange-100 text-orange-700'
+                  }`}
+                >
+                  {entry.tier === 'tier3' ? 'Tier 3' : 
+                   entry.tier === 'tier2' ? 'Tier 2' : 'Tier 1'}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Your Position (if not in top 20) */}
+        {leaderboardData && leaderboardData.currentUser.rank && leaderboardData.currentUser.rank > 20 && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-center w-6 h-6">
+                    <span className="text-xs font-medium text-primary-600">#{leaderboardData.currentUser.rank}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-primary-700">Your Position</p>
+                    <p className="text-xs text-primary-600">{leaderboardData.currentUser.points} pts</p>
+                  </div>
+                </div>
+                <Badge className="bg-primary-100 text-primary-700 text-xs">
+                  {leaderboardData.currentUser.tier === 'tier3' ? 'Tier 3' : 
+                   leaderboardData.currentUser.tier === 'tier2' ? 'Tier 2' : 'Tier 1'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -261,6 +433,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div className="flex">
+        {/* Main Content */}
+        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -360,7 +536,7 @@ export default function Dashboard() {
                 Upload Proof
               </Button>
             </div>
-            
+
             {/* Daily Progress Tracker */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Daily Progress</h3>
@@ -512,7 +688,7 @@ export default function Dashboard() {
           </div>
         </TabsContent>
 
-        
+
 
         <TabsContent value="referrals">
           <ReferralSystem />
@@ -534,6 +710,40 @@ export default function Dashboard() {
         </TabsContent>
       </Tabs>
       </div>
+          </div>
+        </div>
+
+        {/* Desktop Leaderboard Sidebar */}
+        {!isMobile && (
+          <div className="fixed right-0 top-0 h-full">
+            <LeaderboardSidebar />
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+// Custom hook to determine if the screen is mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // You can adjust the breakpoint as needed
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+
+    // Clean up the event listener on unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return isMobile;
 }
