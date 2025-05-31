@@ -1674,45 +1674,45 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label>Bronze Tier</Label>
+                    <Label>Tier 1</Label>
                     <Input
                       type="number"
-                      value={systemSettings.tierRequirements.bronze}
+                      value={systemSettings.tierRequirements.tier1}
                       onChange={(e) => setSystemSettings({
                         ...systemSettings,
                         tierRequirements: {
                           ...systemSettings.tierRequirements,
-                          bronze: parseInt(e.target.value)
+                          tier1: parseInt(e.target.value)
                         }
                       })}
                     />
                   </div>
 
                   <div>
-                    <Label>Silver Tier</Label>
+                    <Label>Tier 2</Label>
                     <Input
                       type="number"
-                      value={systemSettings.tierRequirements.silver}
+                      value={systemSettings.tierRequirements.tier2}
                       onChange={(e) => setSystemSettings({
                         ...systemSettings,
                         tierRequirements: {
                           ...systemSettings.tierRequirements,
-                          silver: parseInt(e.target.value)
+                          tier2: parseInt(e.target.value)
                         }
                       })}
                     />
                   </div>
 
                   <div>
-                    <Label>Gold Tier</Label>
+                    <Label>Tier 3</Label>
                     <Input
                       type="number"
-                      value={systemSettings.tierRequirements.gold}
+                      value={systemSettings.tierRequirements.tier3}
                       onChange={(e) => setSystemSettings({
                         ...systemSettings,
                         tierRequirements: {
                           ...systemSettings.tierRequirements,
-                          gold: parseInt(e.target.value)
+                          tier3: parseInt(e.target.value)
                         }
                       })}
                     />

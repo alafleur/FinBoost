@@ -110,7 +110,7 @@ export default function Profile() {
       nextTier: {
         name: 'Tier 3',
         threshold: 500,
-        pointsNeeded: 500
+        pointsNeeded: 250
       }
     },
     tier3: {
@@ -204,7 +204,7 @@ export default function Profile() {
   };
 
   const getCurrentTierInfo = (): TierInfo => {
-    return tierConfig[user?.tier || 'bronze'];
+    return tierConfig[user?.tier || 'tier1'];
   };
 
   const getProgressToNextTier = (): number => {
@@ -212,8 +212,14 @@ export default function Profile() {
     const currentTier = getCurrentTierInfo();
     if (!currentTier.nextTier) return 100;
     
-    const progress = (user.currentMonthPoints / currentTier.nextTier.threshold) * 100;
-    return Math.min(progress, 100);
+    // Calculate progress from current tier threshold to next tier threshold
+    const currentThreshold = currentTier.threshold;
+    const nextThreshold = currentTier.nextTier.threshold;
+    const pointsInCurrentTier = user.currentMonthPoints - currentThreshold;
+    const pointsNeededForNextTier = nextThreshold - currentThreshold;
+    
+    const progress = (pointsInCurrentTier / pointsNeededForNextTier) * 100;
+    return Math.max(0, Math.min(progress, 100));
   };
 
   const getPointsToNextTier = (): number => {
