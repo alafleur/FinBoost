@@ -301,34 +301,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
         </Card>
       )}
 
-       <div className="space-y-3">
-          {quickWinActions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => handleActionClick(action.id)}
-              disabled={awardingPoints === action.id}
-              className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  {awardingPoints === action.id ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  ) : (
-                    <Zap className="h-4 w-4 text-blue-600" />
-                  )}
-                </div>
-                <div className="text-left">
-                  <h4 className="font-medium text-gray-900">{action.name}</h4>
-                  <p className="text-sm text-gray-600">{action.description}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-blue-600">+{action.points}</div>
-                <div className="text-xs text-gray-500">points</div>
-              </div>
-            </button>
-          ))}
-        </div>
+       
     </div>
   );
 }
