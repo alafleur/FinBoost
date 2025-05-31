@@ -89,21 +89,32 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     }
   };
 
-  const getNextTierPoints = () => {
+  const getNextTierInfo = () => {
     switch (user.tier) {
-      case 'tier1': return tierThresholds.tier2;
-      case 'tier2': return tierThresholds.tier3;
-      case 'tier3': return tierThresholds.tier3; // Already at max tier
-      default: return tierThresholds.tier2;
-    }
-  };
-
-  const getNextTierName = () => {
-    switch (user.tier) {
-      case 'tier1': return 'Tier 2';
-      case 'tier2': return 'Tier 3';
-      case 'tier3': return 'Tier 3'; // Already at max tier
-      default: return 'Tier 2';
+      case 'tier1': 
+        return { 
+          points: tierThresholds.tier2, 
+          name: 'Tier 2',
+          isMaxTier: false 
+        };
+      case 'tier2': 
+        return { 
+          points: tierThresholds.tier3, 
+          name: 'Tier 3',
+          isMaxTier: false 
+        };
+      case 'tier3': 
+        return { 
+          points: tierThresholds.tier3, 
+          name: 'Tier 3',
+          isMaxTier: true 
+        };
+      default: 
+        return { 
+          points: tierThresholds.tier2, 
+          name: 'Tier 2',
+          isMaxTier: false 
+        };
     }
   };
 
@@ -112,8 +123,13 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     return <div>Loading user data...</div>;
   }
 
-  const progressToNextTier = Math.min((user.currentMonthPoints / getNextTierPoints()) * 100, 100);
-  const pointsNeeded = Math.max(0, getNextTierPoints() - user.currentMonthPoints);
+  const nextTierInfo = getNextTierInfo();
+  const progressToNextTier = nextTierInfo.isMaxTier 
+    ? 100 
+    : Math.min((user.currentMonthPoints / nextTierInfo.points) * 100, 100);
+  const pointsNeeded = nextTierInfo.isMaxTier 
+    ? 0 
+    : Math.max(0, nextTierInfo.points - user.currentMonthPoints);
 
   return (
     <div className="space-y-4">
@@ -184,7 +200,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             {/* Current Status */}
             <div className="text-center text-xs text-gray-500">
               {user.currentMonthPoints} points this month
-              {pointsNeeded > 0 && ` • ${pointsNeeded} to ${getNextTierName()}`}
+              {nextTierInfo.isMaxTier ? ' • Maximum tier reached!' : pointsNeeded > 0 && ` • ${pointsNeeded} to ${nextTierInfo.name}`}
             </div>
           </div>
         </CardContent>

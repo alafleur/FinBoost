@@ -243,22 +243,21 @@ export default function Dashboard() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'gold': return 'bg-yellow-500';
-      case 'silver': return 'bg-gray-400';
+      case 'tier3': return 'bg-yellow-500';
+      case 'tier2': return 'bg-gray-400';
       default: return 'bg-orange-600';
     }
   };
 
-  const getNextTierPoints = () => {
-    switch (user.tier) {
-      case 'bronze': return 250; // Bronze to Gold is 250 points
-      case 'silver': return 500; // Silver to Gold is 500 points
-      case 'gold': return 500; // Already at max tier
-      default: return 250;
+  const getTierDisplayName = (tier: string) => {
+    switch (tier) {
+      case 'tier3': return 'Tier 3';
+      case 'tier2': return 'Tier 2';
+      default: return 'Tier 1';
     }
   };
 
-  const progressToNextTier = Math.min((user.currentMonthPoints / getNextTierPoints()) * 100, 100);
+  // Tier progress is now handled by PointsSummary component with dynamic thresholds
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -311,7 +310,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="flex items-center space-x-2">
                 <Badge className={`${getTierColor(user.tier)} text-white capitalize`}>
-                  {user.tier}
+                  {getTierDisplayName(user.tier)}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -326,9 +325,9 @@ export default function Dashboard() {
               <Target className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{getNextTierPoints() - user.currentMonthPoints}</div>
+              <div className="text-2xl font-bold">Dynamic</div>
               <p className="text-xs text-muted-foreground">
-                Points needed
+                Based on monthly rankings
               </p>
             </CardContent>
           </Card>
