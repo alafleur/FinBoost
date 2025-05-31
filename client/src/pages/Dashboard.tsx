@@ -507,36 +507,7 @@ export default function Dashboard() {
             />
 </div>
             <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full" 
-                    onClick={() => setLocation('/education')}
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Continue Learning
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setActiveTab("referrals")}
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Refer Friends
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setActiveTab("leaderboard")}
-                  >
-                    <Trophy className="h-4 w-4 mr-2" />
-                    View Leaderboard
-                  </Button>
-                </CardContent>
-              </Card>
+              {/* Space for future widgets or keep minimal */}
             </div>
           </div>
         </TabsContent>
