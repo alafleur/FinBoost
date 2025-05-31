@@ -24,6 +24,325 @@ export interface Lesson {
 
 export const educationContent: { [key: string]: Lesson } = {
   // BUDGETING CATEGORY
+  'budgeting-basics': {
+    id: 'budgeting-basics',
+    title: 'Budgeting Basics',
+    category: 'Budgeting',
+    difficulty: 'Beginner',
+    points: 25,
+    estimatedTime: '15 min',
+    completed: false,
+    content: `
+      <h2>Master Your Money with Budgeting Basics</h2>
+      
+      <p>Creating your first budget is the foundation of financial success. Learn how to track your income and expenses to take control of your money.</p>
+      
+      <h3>Why Budget?</h3>
+      <ul>
+        <li>Know where your money goes</li>
+        <li>Avoid overspending</li>
+        <li>Save for your goals</li>
+        <li>Reduce financial stress</li>
+      </ul>
+      
+      <h3>The 50/30/20 Rule</h3>
+      <p><strong>50% - Needs:</strong> Essential expenses like rent, utilities, groceries</p>
+      <p><strong>30% - Wants:</strong> Entertainment, dining out, hobbies</p>
+      <p><strong>20% - Savings:</strong> Emergency fund, retirement, debt payments</p>
+      
+      <h3>Getting Started</h3>
+      <p>1. Track your income for one month</p>
+      <p>2. List all your expenses</p>
+      <p>3. Categorize needs vs wants</p>
+      <p>4. Adjust spending to fit the 50/30/20 rule</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What percentage of your income should go to needs according to the 50/30/20 rule?",
+        options: ["30%", "50%", "20%", "40%"],
+        correctAnswer: 1,
+        explanation: "According to the 50/30/20 rule, 50% should go to essential needs like housing, utilities, and groceries."
+      },
+      {
+        id: 2,
+        question: "Which of these is considered a 'want' rather than a 'need'?",
+        options: ["Rent payment", "Grocery bills", "Streaming subscriptions", "Insurance premiums"],
+        correctAnswer: 2,
+        explanation: "Streaming subscriptions are entertainment expenses and fall under the 'wants' category."
+      }
+    ]
+  },
+  
+  'emergency-fund': {
+    id: 'emergency-fund',
+    title: 'Emergency Fund',
+    category: 'Savings',
+    difficulty: 'Beginner',
+    points: 30,
+    estimatedTime: '12 min',
+    completed: false,
+    content: `
+      <h2>Build Your Financial Safety Net</h2>
+      
+      <p>An emergency fund is money set aside specifically for unexpected expenses or financial emergencies.</p>
+      
+      <h3>Why You Need an Emergency Fund</h3>
+      <ul>
+        <li>Avoid going into debt for unexpected expenses</li>
+        <li>Reduce financial stress and anxiety</li>
+        <li>Maintain financial stability during job loss</li>
+        <li>Handle medical emergencies without borrowing</li>
+      </ul>
+      
+      <h3>How Much to Save</h3>
+      <p><strong>Starter Goal:</strong> $1,000 for small emergencies</p>
+      <p><strong>Full Goal:</strong> 3-6 months of living expenses</p>
+      
+      <h3>Where to Keep Your Emergency Fund</h3>
+      <ul>
+        <li>High-yield savings account</li>
+        <li>Money market account</li>
+        <li>Short-term CDs</li>
+      </ul>
+      
+      <p>Keep it separate from your checking account but easily accessible!</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is the recommended starter emergency fund amount?",
+        options: ["$500", "$1,000", "$5,000", "$10,000"],
+        correctAnswer: 1,
+        explanation: "A starter emergency fund of $1,000 covers most small unexpected expenses and prevents you from going into debt."
+      },
+      {
+        id: 2,
+        question: "How many months of expenses should a full emergency fund cover?",
+        options: ["1-2 months", "3-6 months", "12 months", "24 months"],
+        correctAnswer: 1,
+        explanation: "A full emergency fund should cover 3-6 months of living expenses to handle major financial emergencies."
+      }
+    ]
+  },
+  
+  'investment-basics': {
+    id: 'investment-basics',
+    title: 'Investment Basics',
+    category: 'Investing',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '20 min',
+    completed: false,
+    content: `
+      <h2>Start Your Investment Journey</h2>
+      
+      <p>Investing helps your money grow over time through the power of compound interest.</p>
+      
+      <h3>Types of Investments</h3>
+      <p><strong>Stocks:</strong> Ownership shares in companies</p>
+      <p><strong>Bonds:</strong> Loans to companies or governments</p>
+      <p><strong>Mutual Funds:</strong> Diversified investment pools</p>
+      <p><strong>ETFs:</strong> Exchange-traded funds with low fees</p>
+      
+      <h3>Investment Principles</h3>
+      <ul>
+        <li>Start early - time is your biggest advantage</li>
+        <li>Diversify - don't put all eggs in one basket</li>
+        <li>Invest regularly - dollar-cost averaging</li>
+        <li>Keep fees low - they compound negatively</li>
+        <li>Stay consistent - don't panic sell</li>
+      </ul>
+      
+      <h3>Getting Started</h3>
+      <p>1. Pay off high-interest debt first</p>
+      <p>2. Build your emergency fund</p>
+      <p>3. Start with low-cost index funds</p>
+      <p>4. Increase contributions over time</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is the most important factor for investment success?",
+        options: ["Picking individual stocks", "Timing the market", "Starting early", "Following tips"],
+        correctAnswer: 2,
+        explanation: "Starting early gives you the most time for compound growth, which is the most powerful factor in building wealth."
+      },
+      {
+        id: 2,
+        question: "What should you do before investing?",
+        options: ["Buy individual stocks", "Pay off high-interest debt", "Wait for market crashes", "Invest everything at once"],
+        correctAnswer: 1,
+        explanation: "Pay off high-interest debt first, as the guaranteed 'return' of eliminating debt often exceeds potential investment returns."
+      }
+    ]
+  },
+  
+  'credit-management': {
+    id: 'credit-management',
+    title: 'Credit Management',
+    category: 'Credit',
+    difficulty: 'Beginner',
+    points: 30,
+    estimatedTime: '18 min',
+    completed: false,
+    content: `
+      <h2>Master Your Credit Score</h2>
+      
+      <p>Your credit score affects your ability to borrow money and the interest rates you'll pay.</p>
+      
+      <h3>What Affects Your Credit Score</h3>
+      <p><strong>Payment History (35%):</strong> Pay all bills on time</p>
+      <p><strong>Credit Utilization (30%):</strong> Keep balances low</p>
+      <p><strong>Length of Credit History (15%):</strong> Keep old accounts open</p>
+      <p><strong>Credit Mix (10%):</strong> Different types of credit</p>
+      <p><strong>New Credit (10%):</strong> Limit new applications</p>
+      
+      <h3>Credit Score Ranges</h3>
+      <ul>
+        <li>800-850: Excellent</li>
+        <li>740-799: Very Good</li>
+        <li>670-739: Good</li>
+        <li>580-669: Fair</li>
+        <li>300-579: Poor</li>
+      </ul>
+      
+      <h3>Improving Your Credit</h3>
+      <p>1. Pay all bills on time, every time</p>
+      <p>2. Keep credit utilization below 30%</p>
+      <p>3. Don't close old credit cards</p>
+      <p>4. Check your credit report regularly</p>
+      <p>5. Dispute any errors you find</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What has the biggest impact on your credit score?",
+        options: ["Credit utilization", "Payment history", "Length of credit history", "Credit mix"],
+        correctAnswer: 1,
+        explanation: "Payment history makes up 35% of your credit score and is the most important factor."
+      },
+      {
+        id: 2,
+        question: "What credit utilization ratio should you aim for?",
+        options: ["Below 10%", "Below 30%", "Below 50%", "Below 70%"],
+        correctAnswer: 1,
+        explanation: "Keep your credit utilization below 30% for a good score, but below 10% is even better."
+      }
+    ]
+  },
+  
+  'retirement-planning': {
+    id: 'retirement-planning',
+    title: 'Retirement Planning',
+    category: 'Planning',
+    difficulty: 'Intermediate',
+    points: 40,
+    estimatedTime: '25 min',
+    completed: false,
+    content: `
+      <h2>Plan for Your Future</h2>
+      
+      <p>Retirement planning ensures you can maintain your lifestyle when you stop working.</p>
+      
+      <h3>Retirement Account Types</h3>
+      <p><strong>401(k):</strong> Employer-sponsored, often with matching</p>
+      <p><strong>Traditional IRA:</strong> Tax-deductible contributions, taxed in retirement</p>
+      <p><strong>Roth IRA:</strong> After-tax contributions, tax-free in retirement</p>
+      <p><strong>SEP-IRA:</strong> For self-employed individuals</p>
+      
+      <h3>The Power of Employer Matching</h3>
+      <p>If your employer offers 401(k) matching, contribute enough to get the full match - it's free money!</p>
+      
+      <h3>How Much to Save</h3>
+      <ul>
+        <li>Start with at least 10% of income</li>
+        <li>Increase by 1% each year</li>
+        <li>Aim for 15-20% total retirement savings</li>
+        <li>Use catch-up contributions if over 50</li>
+      </ul>
+      
+      <h3>Investment Strategy</h3>
+      <p>1. Start aggressive when young (more stocks)</p>
+      <p>2. Gradually shift to conservative (more bonds)</p>
+      <p>3. Use target-date funds for simplicity</p>
+      <p>4. Rebalance annually</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What should be your first priority in retirement planning?",
+        options: ["Maxing out IRA contributions", "Getting full employer 401(k) match", "Buying individual stocks", "Opening a Roth IRA"],
+        correctAnswer: 1,
+        explanation: "Getting the full employer match is free money and should be your first priority."
+      },
+      {
+        id: 2,
+        question: "What percentage of income should you aim to save for retirement?",
+        options: ["5%", "10%", "15-20%", "30%"],
+        correctAnswer: 2,
+        explanation: "Financial experts recommend saving 15-20% of your income for retirement to maintain your lifestyle."
+      }
+    ]
+  },
+  
+  'tax-optimization': {
+    id: 'tax-optimization',
+    title: 'Tax Optimization',
+    category: 'Taxes',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '22 min',
+    completed: false,
+    content: `
+      <h2>Maximize Your Tax Savings</h2>
+      
+      <p>Understanding taxes helps you keep more of your hard-earned money.</p>
+      
+      <h3>Tax-Advantaged Accounts</h3>
+      <p><strong>401(k) and Traditional IRA:</strong> Reduce current year taxes</p>
+      <p><strong>Roth IRA and Roth 401(k):</strong> Tax-free growth and withdrawals</p>
+      <p><strong>HSA:</strong> Triple tax advantage for medical expenses</p>
+      <p><strong>529 Plans:</strong> Tax-free growth for education expenses</p>
+      
+      <h3>Common Tax Deductions</h3>
+      <ul>
+        <li>Mortgage interest</li>
+        <li>State and local taxes</li>
+        <li>Charitable contributions</li>
+        <li>Medical expenses (over 7.5% of AGI)</li>
+        <li>Student loan interest</li>
+      </ul>
+      
+      <h3>Tax Credits vs Deductions</h3>
+      <p><strong>Tax Credits:</strong> Dollar-for-dollar reduction in taxes owed</p>
+      <p><strong>Tax Deductions:</strong> Reduce your taxable income</p>
+      
+      <h3>Tax Planning Strategies</h3>
+      <p>1. Contribute to tax-advantaged accounts</p>
+      <p>2. Consider Roth conversions in low-income years</p>
+      <p>3. Harvest tax losses in investment accounts</p>
+      <p>4. Time charitable giving strategically</p>
+      <p>5. Keep detailed records</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "Which account offers a triple tax advantage?",
+        options: ["Traditional IRA", "Roth IRA", "401(k)", "HSA"],
+        correctAnswer: 3,
+        explanation: "HSAs offer tax-deductible contributions, tax-free growth, and tax-free withdrawals for qualified medical expenses."
+      },
+      {
+        id: 2,
+        question: "What's the difference between a tax credit and tax deduction?",
+        options: ["They're the same thing", "Credits reduce taxable income, deductions reduce taxes owed", "Credits reduce taxes owed, deductions reduce taxable income", "Credits are only for businesses"],
+        correctAnswer: 2,
+        explanation: "Tax credits provide a dollar-for-dollar reduction in taxes owed, while deductions reduce your taxable income."
+      }
+    ]
+  },
+  
   'budgeting-101': {
     id: 'budgeting-101',
     title: 'Your First Budget: The 50/30/20 Rule Explained',
