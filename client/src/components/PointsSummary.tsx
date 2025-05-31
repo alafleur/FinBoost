@@ -28,6 +28,7 @@ interface PointsSummaryProps {
 export default function PointsSummary({ user, onNavigateToPoints }: PointsSummaryProps) {
   const [recentActivity, setRecentActivity] = useState([]);
   const [nextActions, setNextActions] = useState([]);
+  const [tierThresholds, setTierThresholds] = useState({ bronze: 0, silver: 250, gold: 500 });
 
   useEffect(() => {
     fetchQuickData();
@@ -37,6 +38,13 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
+
+      // Fetch tier thresholds
+      const thresholdsResponse = await fetch('/api/tiers/thresholds');
+      if (thresholdsResponse.ok) {
+        const thresholdsData = await thresholdsResponse.json();
+        setTierThresholds(thresholdsData.thresholds);
+      }
 
       // Fetch recent activity (last 3 entries)
       const historyResponse = await fetch('/api/points/history?limit=3', {
@@ -76,19 +84,19 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
   const getNextTierPoints = () => {
     switch (user.tier) {
-      case 'bronze': return 250; // Bronze to Gold is 250 points
-      case 'silver': return 500; // Silver to Gold is 500 points  
-      case 'gold': return 500; // Already at max tier
-      default: return 250;
+      case 'bronze': return tierThresholds.silver;
+      case 'silver': return tierThresholds.gold;
+      case 'gold': return tierThresholds.gold; // Already at max tier
+      default: return tierThresholds.silver;
     }
   };
 
   const getNextTierName = () => {
     switch (user.tier) {
-      case 'bronze': return 'Gold'; // Bronze goes directly to Gold
+      case 'bronze': return 'Silver';
       case 'silver': return 'Gold';
-      case 'gold': return 'Platinum';
-      default: return 'Gold';
+      case 'gold': return 'Gold'; // Already at max tier
+      default: return 'Silver';
     }
   };
 
@@ -147,27 +155,22 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
                 <span className="text-xs text-gray-500">0</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 100 ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.silver ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Silver</span>
-                <span className="text-xs text-gray-500">100</span>
+                <span className="text-xs text-gray-500">{tierThresholds.silver}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 250 ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.gold ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Gold</span>
-                <span className="text-xs text-gray-500">250</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 500 ? 'bg-purple-500' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Platinum</span>
-                <span className="text-xs text-gray-500">500</span>
+                <span className="text-xs text-gray-500">{tierThresholds.gold}</span>
               </div>
             </div>
             
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-orange-600 via-gray-400 via-yellow-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min((user.currentMonthPoints / 500) * 100, 100)}%` }}
+                className="bg-gradient-to-r from-orange-600 via-gray-400 to-yellow-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.gold, 1)) * 100, 100)}%` }}
               ></div>
             </div>
             

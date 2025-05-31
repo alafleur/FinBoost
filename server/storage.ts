@@ -79,7 +79,7 @@ export interface IStorage {
     markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
 
     // === PASSWORD RESET METHODS ===
-    
+
     createPasswordResetToken(userId: number): Promise<string>;
     validatePasswordResetToken(token: string): Promise<{isValid: boolean, userId?: number}>;
     resetUserPassword(token: string, newPassword: string): Promise<boolean>;
@@ -116,6 +116,8 @@ export interface IStorage {
       resolved: number;
       closed: number;
     }>;
+
+    getTierThresholds(): Promise<{ bronze: number, silver: number, gold: number }>;
 }
 
 import fs from 'fs/promises';
@@ -300,13 +302,16 @@ export class MemStorage implements IStorage {
   }
 
   async updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.totalPoints = totalPoints;
-      user.currentMonthPoints = currentMonthPoints;
-      user.tier = await this.calculateUserTier(currentMonthPoints);
-      await this.saveToFile();
-    }
+    const tier = await this.calculateUserTier(currentMonthPoints);
+
+    await db.update(users)
+      .set({ 
+        totalPoints, 
+        currentMonthPoints, 
+        tier,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   async getUserPointsHistory(userId: number): Promise<UserPointsHistory[]> {
@@ -532,9 +537,27 @@ export class MemStorage implements IStorage {
       .where(eq(userPointsHistory.id, historyId));
   }
 
-  async calculateUserTier(currentMonthPoints: number): Promise<string> {
-    if (currentMonthPoints >= 500) return 'gold';
-    if (currentMonthPoints >= 250) return 'silver';
+  async calculateUserTier(points: number): Promise<string> {
+    // Get all users' current month points to calculate percentiles
+    const allUsers = await db.select({
+      currentMonthPoints: users.currentMonthPoints
+    }).from(users);
+
+    if (allUsers.length === 0) return 'bronze';
+
+    // Sort points in ascending order
+    const sortedPoints = allUsers.map(u => u.currentMonthPoints).sort((a, b) => a - b);
+
+    // Calculate percentile thresholds
+    const p33Index = Math.floor(sortedPoints.length * 0.33);
+    const p66Index = Math.floor(sortedPoints.length * 0.66);
+
+    const bronzeThreshold = sortedPoints[p33Index] || 0;
+    const silverThreshold = sortedPoints[p66Index] || 0;
+
+    // Determine tier based on percentiles
+    if (points >= silverThreshold) return 'gold';
+    if (points >= bronzeThreshold) return 'silver';
     return 'bronze';
   }
 
@@ -815,6 +838,7 @@ export class MemStorage implements IStorage {
     }
 
     // Create referral record
+```text
     const [referral] = await db.insert(referrals).values({
       referrerUserId: validation.referrerUserId,
       referredUserId,
@@ -1165,7 +1189,7 @@ export class MemStorage implements IStorage {
   async createPasswordResetToken(userId: number): Promise<string> {
     // Generate a secure random token
     const token = crypto.randomBytes(32).toString('hex');
-    
+
     // Token expires in 1 hour
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1);
@@ -1196,7 +1220,7 @@ export class MemStorage implements IStorage {
     }
 
     const now = new Date();
-    
+
     // Check if token is expired or already used
     if (resetToken.expiresAt < now || resetToken.isUsed) {
       return { isValid: false };
@@ -1207,7 +1231,7 @@ export class MemStorage implements IStorage {
 
   async resetUserPassword(token: string, newPassword: string): Promise<boolean> {
     const validation = await this.validatePasswordResetToken(token);
-    
+
     if (!validation.isValid || !validation.userId) {
       return false;
     }
@@ -1230,10 +1254,34 @@ export class MemStorage implements IStorage {
 
   async cleanupExpiredTokens(): Promise<void> {
     const now = new Date();
-    
+
     await db.update(passwordResetTokens)
       .set({ isUsed: true })
       .where(lt(passwordResetTokens.expiresAt, now));
+  }
+
+  async getTierThresholds(): Promise<{ bronze: number, silver: number, gold: number }> {
+    // Get all users' current month points to calculate percentiles
+    const allUsers = await db.select({
+      currentMonthPoints: users.currentMonthPoints
+    }).from(users);
+
+    if (allUsers.length === 0) {
+      return { bronze: 0, silver: 0, gold: 0 };
+    }
+
+    // Sort points in ascending order
+    const sortedPoints = allUsers.map(u => u.currentMonthPoints).sort((a, b) => a - b);
+
+    // Calculate percentile thresholds
+    const p33Index = Math.floor(sortedPoints.length * 0.33);
+    const p66Index = Math.floor(sortedPoints.length * 0.66);
+
+    return {
+      bronze: 0, // Bronze always starts at 0
+      silver: sortedPoints[p33Index] || 0,
+      gold: sortedPoints[p66Index] || 0
+    };
   }
 }
 

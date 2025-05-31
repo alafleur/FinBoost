@@ -469,6 +469,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json({ success: true, points: totalPoints });
   });
 
+  // Get current tier thresholds
+  apiRouter.get("/tiers/thresholds", async (req: Request, res: Response) => {
+    try {
+      const thresholds = await storage.getTierThresholds();
+      
+      return res.status(200).json({ 
+        success: true,
+        thresholds
+      });
+    } catch (error) {
+      console.error("Error fetching tier thresholds:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "An error occurred while fetching tier thresholds." 
+      });
+    }
+  });
+
   // Get current user profile (protected route)
   apiRouter.get("/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
