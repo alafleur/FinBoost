@@ -180,35 +180,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center space-x-2">
-            <Zap className="h-4 w-4 text-blue-500" />
-            <span>Quick Wins</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {nextActions.map((action: any) => (
-            <div key={action.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium">{action.name}</span>
-              <Badge variant="secondary" className="text-xs">
-                +{action.basePoints}
-              </Badge>
-            </div>
-          ))}
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full mt-3"
-            onClick={onNavigateToPoints}
-          >
-            View All Actions
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </Button>
-        </CardContent>
-      </Card>
+      
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
