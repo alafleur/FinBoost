@@ -15,7 +15,8 @@ import {
   Target,
   Users,
   Award,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FileUpload from './FileUpload';
@@ -29,15 +30,22 @@ interface PointAction {
   description: string;
   maxDaily?: number;
   maxTotal?: number;
+  points?: number;
 }
 
-export default function PointsActions() {
+interface PointsActionsProps {
+  onPointsEarned?: (points: number) => void;
+  quickWinActions: PointAction[];
+}
+
+export default function PointsActions({ onPointsEarned, quickWinActions }: PointsActionsProps) {
   const [actions, setActions] = useState<PointAction[]>([]);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const [awardingPoints, setAwardingPoints] = useState<string | null>(null);
 
   useEffect(() => {
     fetchActions();
@@ -142,6 +150,58 @@ export default function PointsActions() {
     }
   };
 
+    const handleActionClick = async (actionId: string) => {
+    if (awardingPoints) return; // Prevent multiple clicks
+
+    setAwardingPoints(actionId);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          actionId,
+          metadata: { source: 'quick_wins' }
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Points Earned!",
+          description: data.message,
+        });
+
+        if (onPointsEarned) {
+          onPointsEarned(data.points);
+        }
+
+        // Refresh actions to update limits
+        await fetchActions();
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to award points",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error awarding points:', error);
+      toast({
+        title: "Error",
+        description: "Failed to award points",
+        variant: "destructive"
+      });
+    } finally {
+      setAwardingPoints(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -240,6 +300,35 @@ export default function PointsActions() {
           </CardContent>
         </Card>
       )}
+
+       <div className="space-y-3">
+          {quickWinActions.map((action) => (
+            <button
+              key={action.id}
+              onClick={() => handleActionClick(action.id)}
+              disabled={awardingPoints === action.id}
+              className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  {awardingPoints === action.id ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  ) : (
+                    <Zap className="h-4 w-4 text-blue-600" />
+                  )}
+                </div>
+                <div className="text-left">
+                  <h4 className="font-medium text-gray-900">{action.name}</h4>
+                  <p className="text-sm text-gray-600">{action.description}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold text-blue-600">+{action.points}</div>
+                <div className="text-xs text-gray-500">points</div>
+              </div>
+            </button>
+          ))}
+        </div>
     </div>
   );
 }
