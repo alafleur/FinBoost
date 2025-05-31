@@ -255,27 +255,16 @@ export default function PointsManagement() {
   const getTierProgress = () => {
     if (!user) return 0;
     
-    const tierThresholds = {
-      bronze: 250,
-      silver: 500,
-      gold: 1000
-    };
-
-    let nextTierPoints = 0;
-    switch (user.tier) {
-      case 'bronze':
-        nextTierPoints = tierThresholds.silver;
-        break;
-      case 'silver':
-        nextTierPoints = tierThresholds.gold;
-        break;
-      case 'gold':
-        return 100; // Already at max tier
-      default:
-        nextTierPoints = tierThresholds.bronze;
-    }
-
-    return Math.min((user.currentMonthPoints / nextTierPoints) * 100, 100);
+    // This will be dynamic based on actual tier thresholds from the server
+    // For now, we'll use a simple calculation
+    const currentPoints = user.currentMonthPoints || 0;
+    
+    // If already at tier3, show 100%
+    if (user.tier === 'tier3') return 100;
+    
+    // For demonstration, we'll use a simple progress calculation
+    // In reality, this should use the actual tier thresholds from the API
+    return Math.min((currentPoints / 500) * 100, 100);
   };
 
   const groupActionsByCategory = () => {

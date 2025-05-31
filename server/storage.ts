@@ -76,7 +76,7 @@ export interface IStorage {
     updateUserStreak(userId: number): Promise<{ newStreak: number; bonusPoints: number }>;
 
     // Lesson Completion
-    markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
+    markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak }>;
 
     // === PASSWORD RESET METHODS ===
 
@@ -117,7 +117,7 @@ export interface IStorage {
       closed: number;
     }>;
 
-    getTierThresholds(): Promise<{ bronze: number, silver: number, gold: number }>;
+    getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }>;
 }
 
 import fs from 'fs/promises';
@@ -1124,7 +1124,7 @@ export class MemStorage implements IStorage {
     return result;
   }
 
-  async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }> {
+  async markLessonComplete(userId: number, moduleId: number): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
     // Check if already completed
     const existingProgress = await db.select()
       .from(userProgress)
@@ -1269,17 +1269,25 @@ export class MemStorage implements IStorage {
       return { tier1: 0, tier2: 0, tier3: 0 };
     }
 
-    // Sort points in ascending order
-    const sortedPoints = allUsers.map(u => u.currentMonthPoints).sort((a, b) => a - b);
+    // Sort points in ascending order and filter out zero/null values for better distribution
+    const validPoints = allUsers
+      .map(u => u.currentMonthPoints || 0)
+      .filter(p => p > 0)
+      .sort((a, b) => a - b);
+
+    // If no valid points exist, use default thresholds
+    if (validPoints.length === 0) {
+      return { tier1: 0, tier2: 0, tier3: 0 };
+    }
 
     // Calculate percentile thresholds
-    const p33Index = Math.floor(sortedPoints.length * 0.33);
-    const p66Index = Math.floor(sortedPoints.length * 0.66);
+    const p33Index = Math.floor(validPoints.length * 0.33);
+    const p66Index = Math.floor(validPoints.length * 0.66);
 
     return {
       tier1: 0, // Tier 1 always starts at 0
-      tier2: sortedPoints[p33Index] || 0,
-      tier3: sortedPoints[p66Index] || 0
+      tier2: validPoints[p33Index] || 0,
+      tier3: validPoints[p66Index] || 0
     };
   }
 }

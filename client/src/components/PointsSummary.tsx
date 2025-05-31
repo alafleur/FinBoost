@@ -82,6 +82,14 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     }
   };
 
+  const getTierDisplayName = (tier: string) => {
+    switch (tier) {
+      case 'tier3': return 'Tier 3';
+      case 'tier2': return 'Tier 2';
+      default: return 'Tier 1';
+    }
+  };
+
   const getNextTierPoints = () => {
     switch (user.tier) {
       case 'tier1': return tierThresholds.tier2;
@@ -142,7 +150,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
               <span className="text-sm font-medium">Tier Progress</span>
             </div>
             <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
-              {user.tier.toUpperCase()}
+              {getTierDisplayName(user.tier)}
             </Badge>
           </div>
           
@@ -150,17 +158,17 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= 0 ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' || user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 1</span>
                 <span className="text-xs text-gray-500">0</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.tier2 ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 2</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier2}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.currentMonthPoints >= tierThresholds.tier3 ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 3</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier3}</span>
               </div>
