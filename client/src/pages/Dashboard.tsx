@@ -339,63 +339,27 @@ export default function Dashboard() {
         <div className="mb-6">
           <PointsSummary 
             user={user} 
-            onNavigateToPoints={() => setActiveTab("earn-points")}
+            onNavigateToPoints={() => {}}
           />
         </div>
 
-        {/* Dashboard Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="earn-points">Earn Points</TabsTrigger>
-          <TabsTrigger value="referrals">Referrals</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="history">Activity</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <StreakDisplay 
-              currentStreak={user.currentStreak || 0}
-              longestStreak={user.longestStreak || 0}
-            />
-</div>
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full" 
-                    onClick={() => setLocation('/education')}
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Continue Learning
-                  </Button>
-                  <Button variant="outline" className="w-full" onClick={() => setLocation('/upload')}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Proof
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => document.querySelector('[value="referrals"]')?.click()}
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Refer Friends
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="earn-points">
+        {/* Earn Points Section - Prominently Displayed */}
+        <div className="mb-8">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Earn Points</h2>
-            <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Earn Points</h2>
+                <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setLocation('/upload')}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Proof
+              </Button>
+            </div>
             
             {/* Daily Progress Tracker */}
             <div className="space-y-4">
@@ -522,10 +486,62 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            
+        {/* Dashboard Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="referrals">Referrals</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+          <TabsTrigger value="history">Activity</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <StreakDisplay 
+              currentStreak={user.currentStreak || 0}
+              longestStreak={user.longestStreak || 0}
+            />
+</div>
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => setLocation('/education')}
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Continue Learning
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setActiveTab("referrals")}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Refer Friends
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setActiveTab("leaderboard")}
+                  >
+                    <Trophy className="h-4 w-4 mr-2" />
+                    View Leaderboard
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
+
+        
 
         <TabsContent value="referrals">
           <ReferralSystem />
