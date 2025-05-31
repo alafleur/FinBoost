@@ -450,7 +450,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm text-gray-600">Welcome back,</p>
-                <p className="font-semibold">{user.firstName || user.username}</p>
+                <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
               <Button variant="outline" onClick={() => setLocation('/support')}>
                 Support
@@ -487,8 +487,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                <Badge className={`${getTierColor(user.tier)} text-white capitalize`}>
-                  {getTierDisplayName(user.tier)}
+                <Badge className={`${getTierColor(user?.tier)} text-white capitalize`}>
+                  {getTierDisplayName(user?.tier)}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -680,8 +680,8 @@ export default function Dashboard() {
             <TabsContent value="overview" className="space-y-6">
               <div className="space-y-6">
                 <StreakDisplay 
-                  currentStreak={user.currentStreak || 0}
-                  longestStreak={user.longestStreak || 0}
+                  currentStreak={user?.currentStreak || 0}
+                  longestStreak={user?.longestStreak || 0}
                 />
               </div>
             </TabsContent>
@@ -709,8 +709,8 @@ export default function Dashboard() {
           /* Desktop: Show overview content directly */
           <div className="space-y-6">
             <StreakDisplay 
-              currentStreak={user.currentStreak || 0}
-              longestStreak={user.longestStreak || 0}
+              currentStreak={user?.currentStreak || 0}
+              longestStreak={user?.longestStreak || 0}
             />
           </div>
         )}
