@@ -108,8 +108,9 @@ export default function Lesson() {
       try {
         const token = localStorage.getItem('token');
         
-        // Mark lesson as complete in database
-        const completionResponse = await fetch(`/api/lessons/${lesson!.id}/complete`, {
+        // Mark lesson as complete in database using the actual lesson string ID from URL
+        const actualLessonId = window.location.pathname.split('/lesson/')[1];
+        const completionResponse = await fetch(`/api/lessons/${actualLessonId}/complete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

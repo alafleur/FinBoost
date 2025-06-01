@@ -1613,18 +1613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const lessonId = req.params.id;
       const userId = req.user!.id;
 
-      // Convert lesson string ID to numeric ID for storage
-      // Map common lesson IDs to numbers
-      const lessonIdMap: { [key: string]: number } = {
-        'emergency-fund': 1,
-        'budgeting-basics': 2,
-        'investment-basics': 3,
-        'credit-management': 4,
-        'retirement-planning': 5,
-        'tax-optimization': 6
-      };
-
-      const moduleId = lessonIdMap[lessonId] || parseInt(lessonId) || 1;
+      console.log(`Completing lesson: ${lessonId} for user ${userId}`);
 
       const result = await storage.markLessonComplete(userId, lessonId);
 
