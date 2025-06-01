@@ -505,7 +505,7 @@ export default function Dashboard() {
                 {Object.values(educationContent).slice(0, isMobile ? 3 : 6).map((lesson) => {
                   const description = lesson.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
                   const shortDescription = description.length > (isMobile ? 60 : 80) ? description.substring(0, isMobile ? 60 : 80) + '...' : description;
-                  
+
                   return (
                     <div key={lesson.id} className="p-3 sm:p-4 border rounded-lg hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-2">
