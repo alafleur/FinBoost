@@ -325,32 +325,32 @@ export default function Dashboard() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <Card>
+              <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                  <Trophy className="h-4 w-4 text-orange-500" />
+                  <CardTitle className="text-sm font-medium text-orange-800">Monthly Tier</CardTitle>
+                  <Trophy className="h-4 w-4 text-orange-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={`${getTierColor(user?.tier)} text-white capitalize`}>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Badge className={`${getTierColor(user?.tier)} text-white capitalize text-lg px-3 py-1`}>
                       {getTierDisplayName(user?.tier)}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Monthly standing
+                  <p className="text-xs text-orange-700">
+                    Current monthly standing
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-green-200 bg-gradient-to-r from-green-50 to-green-100">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                  <Star className="h-4 w-4 text-yellow-500" />
+                  <CardTitle className="text-sm font-medium text-green-800">Monthly Points</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    +{user?.currentMonthPoints || 0} this month
+                  <div className="text-2xl font-bold text-green-800">{user?.currentMonthPoints || 0}</div>
+                  <p className="text-xs text-green-700">
+                    Earned this month • Total: {user?.totalPoints || 0}
                   </p>
                 </CardContent>
               </Card>
