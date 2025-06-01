@@ -312,10 +312,6 @@ export default function Education() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-4">
                               <div className="flex items-center space-x-1">
-                                
-                                <span className="text-sm text-gray-600">{module.estimatedTime}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
                                 <Star className="h-4 w-4 text-yellow-500" />
                                 <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
                               </div>
