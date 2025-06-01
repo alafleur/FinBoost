@@ -7,39 +7,47 @@ export function AdditiveLogo({ className = "h-8 w-8" }: { className?: string }) 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Dollar sign base with integrated A shape */}
+      {/* Central vertical line of dollar sign */}
       <path 
-        d="M12 2v20" 
+        d="M12 1v22" 
+        stroke="currentColor" 
+        strokeWidth="2.5" 
+        strokeLinecap="round"
+      />
+      
+      {/* Top S curve - modified to create A shape */}
+      <path 
+        d="M16 8c0-3-2-5-4-5s-4 2-4 5c0 2 1 3 2.5 3.5" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="none"
+      />
+      
+      {/* Bottom S curve */}
+      <path 
+        d="M8 16c0 3 2 5 4 5s4-2 4-5c0-2-1-3-2.5-3.5" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="none"
+      />
+      
+      {/* A crossbar integrated into design */}
+      <path 
+        d="M9 11h6" 
         stroke="currentColor" 
         strokeWidth="2" 
         strokeLinecap="round"
       />
       
-      {/* Top curve of dollar sign */}
+      {/* A triangle top accent */}
       <path 
-        d="M8 7c0-2.5 1.8-4 4-4s4 1.5 4 4-1.8 4-4 4H8" 
+        d="M10 6l2-3 2 3" 
         stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-        fill="none"
-      />
-      
-      {/* Bottom curve of dollar sign */}
-      <path 
-        d="M8 17c0 2.5 1.8 4 4 4s4-1.5 4-4-1.8-4-4-4H8" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-        fill="none"
-      />
-      
-      {/* Letter A integrated into the center */}
-      <path 
-        d="M9.5 14.5l2.5-6 2.5 6M10.5 12.5h3" 
-        stroke="currentColor" 
-        strokeWidth="2" 
+        strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round"
         fill="none"
