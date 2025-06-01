@@ -74,10 +74,10 @@ export default function Dashboard() {
     
     return (
       <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto">
-        <div className="p-6 space-y-6" style={{ paddingTop: '2rem' }}>
+        <div className="p-6 space-y-6" style={{ paddingTop: '1.5rem' }}>
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-            <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
+            <h3 className="font-heading font-bold text-lg mb-4 text-gray-800 mt-1">Tier Thresholds</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
@@ -428,7 +428,43 @@ export default function Dashboard() {
                   <ReferralSystem />
                 </TabsContent>
 
-                <TabsContent value="leaderboard">
+                <TabsContent value="leaderboard" className="space-y-4">
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                    <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
+                    <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
+                        <span className="text-yellow-700 font-semibold">Tier 3</span>
+                        <span className="text-yellow-600">{tierThresholds?.tier3 || 150}+ pts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
+                        <span className="text-slate-700 font-semibold">Tier 2</span>
+                        <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
+                        <span className="text-orange-700 font-semibold">Tier 1</span>
+                        <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
+                      </div>
+                    </div>
+                    {user && (
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-semibold text-blue-800">Your Status</span>
+                          <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
+                            {getTierDisplayName(user.tier)}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-blue-700">Total Points:</span>
+                          <span className="text-xs font-bold text-blue-800">{user.totalPoints}</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-blue-700">This Month:</span>
+                          <span className="text-xs font-medium text-blue-800">{user.currentMonthPoints}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <Leaderboard />
                 </TabsContent>
 
