@@ -204,11 +204,6 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Earn Points for Financial Actions</h2>
-        <p className="text-gray-600 mb-6">Upload proof of your financial progress to earn points!</p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {actions.map((action) => (
           <Card 
