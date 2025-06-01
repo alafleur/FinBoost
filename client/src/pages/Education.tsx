@@ -90,18 +90,23 @@ export default function Education() {
     }
   };
 
-  // Convert educationContent to modules format
-  const modules: Module[] = Object.values(educationContent).map(lesson => ({
-    id: lesson.id,
-    title: lesson.title,
-    description: lesson.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...', // Strip HTML and truncate
-    category: lesson.category,
-    difficulty: lesson.difficulty,
-    estimatedTime: lesson.estimatedTime,
-    pointsReward: lesson.points,
-    icon: getCategoryIcon(lesson.category),
-    completed: completedLessons.includes(lesson.id)
-  }));
+  // Convert educationContent to modules format - ensure all lessons are included
+  const modules: Module[] = Object.values(educationContent).map(lesson => {
+    const description = lesson.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    return {
+      id: lesson.id,
+      title: lesson.title,
+      description: description.length > 120 ? description.substring(0, 120) + '...' : description,
+      category: lesson.category,
+      difficulty: lesson.difficulty,
+      estimatedTime: lesson.estimatedTime,
+      pointsReward: lesson.points,
+      icon: getCategoryIcon(lesson.category),
+      completed: completedLessons.includes(lesson.id)
+    };
+  });
+
+  console.log('Total modules loaded:', modules.length); // Debug log
 
   // Get all unique categories from educationContent
   const allCategories = [...new Set(Object.values(educationContent).map(lesson => lesson.category))];
@@ -175,21 +180,28 @@ export default function Education() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600">
-                    {Math.round((completedLessons.length / modules.length) * 100)}%
+                    {modules.length > 0 ? Math.round((completedLessons.length / modules.length) * 100) : 0}%
                   </div>
-                  <div className="text-sm text-gray-600">Course Progress</div>
+                  <div className="text-sm text-gray-600">Course Progress ({completedLessons.length}/{modules.length})</div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Debug Info */}
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-700">
+            <strong>Debug:</strong> Found {modules.length} total lessons across {allCategories.length} categories: {allCategories.join(', ')}
+          </p>
+        </div>
+
         {/* Learning Modules */}
         <Tabs defaultValue="All" className="w-full">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-7 mb-6">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-7 mb-6 overflow-x-auto">
             {categories.map((category) => (
-              <TabsTrigger key={category} value={category}>
-                {category}
+              <TabsTrigger key={category} value={category} className="whitespace-nowrap">
+                {category} ({category === 'All' ? modules.length : modules.filter(m => m.category === category).length})
               </TabsTrigger>
             ))}
           </TabsList>
