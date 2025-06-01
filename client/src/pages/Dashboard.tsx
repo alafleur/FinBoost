@@ -73,7 +73,7 @@ export default function Dashboard() {
     if (!leaderboardData) return null;
     
     return (
-      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6 pt-4">
+      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6 pt-6">
         <div className="space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
