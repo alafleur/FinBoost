@@ -125,9 +125,6 @@ export default function Dashboard() {
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
-                      {index === 0 && <Crown className="h-4 w-4 text-yellow-500" />}
-                      {index === 1 && <Medal className="h-4 w-4 text-gray-400" />}
-                      {index === 2 && <Medal className="h-4 w-4 text-orange-500" />}
                     </div>
                     <span className="text-sm font-medium truncate">{entry.username}</span>
                   </div>
