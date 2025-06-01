@@ -27,6 +27,23 @@ import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
 import { educationContent } from "@/data/educationContent";
 
+// Custom hook to determine if the screen is mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+}
+
 interface User {
   id: number;
   email: string;
@@ -384,9 +401,8 @@ export default function Dashboard() {
         {/* Main Content */}
         <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
           <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-
-      {/* Welcome Section */}
-        <div className="mb-6 sm:mb-8">
+            {/* Welcome Section */}
+            <div className="mb-6 sm:mb-8">
           <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
             Welcome to your FinBoost Dashboard! 🚀
           </h2>
@@ -589,9 +605,6 @@ export default function Dashboard() {
             />
           </div>
         )}
-      </div>
-          </div>
-        </div>
 
         {/* Desktop Leaderboard Sidebar */}
         {!isMobile && (
@@ -602,28 +615,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
-
-// Custom hook to determine if the screen is mobile
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // You can adjust the breakpoint as needed
-    };
-
-    // Set initial value
-    handleResize();
-
-    // Listen for window resize events
-    window.addEventListener('resize', handleResize);
-
-    // Clean up the event listener on unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  return isMobile;
 }
