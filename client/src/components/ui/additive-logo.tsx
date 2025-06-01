@@ -7,19 +7,39 @@ export function AdditiveLogo({ className = "h-8 w-8" }: { className?: string }) 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Dollar sign base */}
+      {/* Dollar sign base with integrated A shape */}
       <path 
-        d="M12 2v20M8.5 8.5C8.5 6.5 10 5 12 5s3.5 1.5 3.5 3.5-1.5 3.5-3.5 3.5H8.5m0 3h3.5c2 0 3.5 1.5 3.5 3.5S14 19 12 19s-3.5-1.5-3.5-3.5" 
+        d="M12 2v20" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round"
+      />
+      
+      {/* Top curve of dollar sign */}
+      <path 
+        d="M8 7c0-2.5 1.8-4 4-4s4 1.5 4 4-1.8 4-4 4H8" 
         stroke="currentColor" 
         strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round"
+        fill="none"
       />
-      {/* Letter A overlay */}
+      
+      {/* Bottom curve of dollar sign */}
       <path 
-        d="M9 16l1.5-4 1.5 4m-2.5-1.5h2" 
+        d="M8 17c0 2.5 1.8 4 4 4s4-1.5 4-4-1.8-4-4-4H8" 
         stroke="currentColor" 
-        strokeWidth="1.5" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        fill="none"
+      />
+      
+      {/* Letter A integrated into the center */}
+      <path 
+        d="M9.5 14.5l2.5-6 2.5 6M10.5 12.5h3" 
+        stroke="currentColor" 
+        strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round"
         fill="none"
