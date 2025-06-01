@@ -65,7 +65,7 @@ export default function Lesson() {
     if (lessonData1) {
       setLesson({
         ...lessonData1,
-        id: parseInt(lessonId.replace(/\D/g, '')) || 1,
+        id: lessonId, // Keep the string ID, don't convert to number
         timeEstimate: lessonData1.estimatedTime
       });
     } else {
@@ -108,9 +108,8 @@ export default function Lesson() {
       try {
         const token = localStorage.getItem('token');
         
-        // Mark lesson as complete in database using the actual lesson string ID from URL
-        const actualLessonId = window.location.pathname.split('/lesson/')[1];
-        const completionResponse = await fetch(`/api/lessons/${actualLessonId}/complete`, {
+        // Mark lesson as complete in database using the lesson ID
+        const completionResponse = await fetch(`/api/lessons/${lesson!.id}/complete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -121,14 +120,13 @@ export default function Lesson() {
         if (completionResponse.ok) {
           const completionResult = await completionResponse.json();
           
-          // Update completed lessons in localStorage with the actual lesson string ID
+          // Update completed lessons in localStorage
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-          const actualLessonId = window.location.pathname.split('/lesson/')[1]; // Get the actual string ID from URL
           
-          console.log('Lesson completed successfully:', actualLessonId, completionResult);
+          console.log('Lesson completed successfully:', lesson!.id, completionResult);
           
-          if (!completedLessons.includes(actualLessonId)) {
-            completedLessons.push(actualLessonId);
+          if (!completedLessons.includes(lesson!.id)) {
+            completedLessons.push(lesson!.id);
             localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
             console.log('Updated completed lessons in localStorage:', completedLessons);
           }
