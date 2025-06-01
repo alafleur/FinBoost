@@ -73,8 +73,8 @@ export default function Dashboard() {
     if (!leaderboardData) return null;
     
     return (
-      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6 pt-6">
-        <div className="space-y-6">
+      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto">
+        <div className="p-6 pt-8 space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
             <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
