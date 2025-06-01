@@ -1,4 +1,3 @@
-
 // FinBoost Education System - Complete Content Database
 // 25+ Tutorials and Quizzes across all categories
 
@@ -34,9 +33,9 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Master Your Money with Budgeting Basics</h2>
-      
+
       <p>Creating your first budget is the foundation of financial success. Learn how to track your income and expenses to take control of your money.</p>
-      
+
       <h3>Why Budget?</h3>
       <ul>
         <li>Know where your money goes</li>
@@ -44,12 +43,12 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Save for your goals</li>
         <li>Reduce financial stress</li>
       </ul>
-      
+
       <h3>The 50/30/20 Rule</h3>
       <p><strong>50% - Needs:</strong> Essential expenses like rent, utilities, groceries</p>
       <p><strong>30% - Wants:</strong> Entertainment, dining out, hobbies</p>
       <p><strong>20% - Savings:</strong> Emergency fund, retirement, debt payments</p>
-      
+
       <h3>Getting Started</h3>
       <p>1. Track your income for one month</p>
       <p>2. List all your expenses</p>
@@ -73,7 +72,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'emergency-fund': {
     id: 'emergency-fund',
     title: 'Emergency Fund',
@@ -84,9 +83,9 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Build Your Financial Safety Net</h2>
-      
+
       <p>An emergency fund is money set aside specifically for unexpected expenses or financial emergencies.</p>
-      
+
       <h3>Why You Need an Emergency Fund</h3>
       <ul>
         <li>Avoid going into debt for unexpected expenses</li>
@@ -94,18 +93,18 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Maintain financial stability during job loss</li>
         <li>Handle medical emergencies without borrowing</li>
       </ul>
-      
+
       <h3>How Much to Save</h3>
       <p><strong>Starter Goal:</strong> $1,000 for small emergencies</p>
       <p><strong>Full Goal:</strong> 3-6 months of living expenses</p>
-      
+
       <h3>Where to Keep Your Emergency Fund</h3>
       <ul>
         <li>High-yield savings account</li>
         <li>Money market account</li>
         <li>Short-term CDs</li>
       </ul>
-      
+
       <p>Keep it separate from your checking account but easily accessible!</p>
     `,
     quiz: [
@@ -125,7 +124,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'investment-basics': {
     id: 'investment-basics',
     title: 'Investment Basics',
@@ -136,15 +135,15 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Start Your Investment Journey</h2>
-      
+
       <p>Investing helps your money grow over time through the power of compound interest.</p>
-      
+
       <h3>Types of Investments</h3>
       <p><strong>Stocks:</strong> Ownership shares in companies</p>
       <p><strong>Bonds:</strong> Loans to companies or governments</p>
       <p><strong>Mutual Funds:</strong> Diversified investment pools</p>
       <p><strong>ETFs:</strong> Exchange-traded funds with low fees</p>
-      
+
       <h3>Investment Principles</h3>
       <ul>
         <li>Start early - time is your biggest advantage</li>
@@ -153,7 +152,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Keep fees low - they compound negatively</li>
         <li>Stay consistent - don't panic sell</li>
       </ul>
-      
+
       <h3>Getting Started</h3>
       <p>1. Pay off high-interest debt first</p>
       <p>2. Build your emergency fund</p>
@@ -177,7 +176,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'credit-management': {
     id: 'credit-management',
     title: 'Credit Management',
@@ -188,16 +187,16 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Master Your Credit Score</h2>
-      
+
       <p>Your credit score affects your ability to borrow money and the interest rates you'll pay.</p>
-      
+
       <h3>What Affects Your Credit Score</h3>
       <p><strong>Payment History (35%):</strong> Pay all bills on time</p>
       <p><strong>Credit Utilization (30%):</strong> Keep balances low</p>
       <p><strong>Length of Credit History (15%):</strong> Keep old accounts open</p>
       <p><strong>Credit Mix (10%):</strong> Different types of credit</p>
       <p><strong>New Credit (10%):</strong> Limit new applications</p>
-      
+
       <h3>Credit Score Ranges</h3>
       <ul>
         <li>800-850: Excellent</li>
@@ -206,7 +205,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>580-669: Fair</li>
         <li>300-579: Poor</li>
       </ul>
-      
+
       <h3>Improving Your Credit</h3>
       <p>1. Pay all bills on time, every time</p>
       <p>2. Keep credit utilization below 30%</p>
@@ -231,7 +230,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'retirement-planning': {
     id: 'retirement-planning',
     title: 'Retirement Planning',
@@ -242,18 +241,18 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Plan for Your Future</h2>
-      
+
       <p>Retirement planning ensures you can maintain your lifestyle when you stop working.</p>
-      
+
       <h3>Retirement Account Types</h3>
       <p><strong>401(k):</strong> Employer-sponsored, often with matching</p>
       <p><strong>Traditional IRA:</strong> Tax-deductible contributions, taxed in retirement</p>
       <p><strong>Roth IRA:</strong> After-tax contributions, tax-free in retirement</p>
       <p><strong>SEP-IRA:</strong> For self-employed individuals</p>
-      
+
       <h3>The Power of Employer Matching</h3>
       <p>If your employer offers 401(k) matching, contribute enough to get the full match - it's free money!</p>
-      
+
       <h3>How Much to Save</h3>
       <ul>
         <li>Start with at least 10% of income</li>
@@ -261,7 +260,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Aim for 15-20% total retirement savings</li>
         <li>Use catch-up contributions if over 50</li>
       </ul>
-      
+
       <h3>Investment Strategy</h3>
       <p>1. Start aggressive when young (more stocks)</p>
       <p>2. Gradually shift to conservative (more bonds)</p>
@@ -285,7 +284,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'tax-optimization': {
     id: 'tax-optimization',
     title: 'Tax Optimization',
@@ -296,15 +295,15 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Maximize Your Tax Savings</h2>
-      
+
       <p>Understanding taxes helps you keep more of your hard-earned money.</p>
-      
+
       <h3>Tax-Advantaged Accounts</h3>
       <p><strong>401(k) and Traditional IRA:</strong> Reduce current year taxes</p>
       <p><strong>Roth IRA and Roth 401(k):</strong> Tax-free growth and withdrawals</p>
       <p><strong>HSA:</strong> Triple tax advantage for medical expenses</p>
       <p><strong>529 Plans:</strong> Tax-free growth for education expenses</p>
-      
+
       <h3>Common Tax Deductions</h3>
       <ul>
         <li>Mortgage interest</li>
@@ -313,11 +312,11 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Medical expenses (over 7.5% of AGI)</li>
         <li>Student loan interest</li>
       </ul>
-      
+
       <h3>Tax Credits vs Deductions</h3>
       <p><strong>Tax Credits:</strong> Dollar-for-dollar reduction in taxes owed</p>
       <p><strong>Tax Deductions:</strong> Reduce your taxable income</p>
-      
+
       <h3>Tax Planning Strategies</h3>
       <p>1. Contribute to tax-advantaged accounts</p>
       <p>2. Consider Roth conversions in low-income years</p>
@@ -342,7 +341,7 @@ export const educationContent: { [key: string]: Lesson } = {
       }
     ]
   },
-  
+
   'budgeting-101': {
     id: 'budgeting-101',
     title: 'Your First Budget: The 50/30/20 Rule Explained',
@@ -353,15 +352,15 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Master Your Money with the 50/30/20 Rule</h2>
-      
+
       <p>Creating your first budget doesn't have to be overwhelming. The 50/30/20 rule is a simple, proven framework that helps millions of people take control of their finances.</p>
-      
+
       <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #3b82f6;">
         <strong>💡 Pro Tip:</strong> This rule works for any income level - whether you make $30,000 or $300,000 per year!
       </div>
-      
+
       <h3>How the 50/30/20 Rule Works</h3>
-      
+
       <p><strong>50% - Needs (Essential Expenses)</strong></p>
       <ul>
         <li>Rent or mortgage payments</li>
@@ -371,7 +370,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Insurance premiums</li>
         <li>Minimum debt payments</li>
       </ul>
-      
+
       <p><strong>30% - Wants (Lifestyle Expenses)</strong></p>
       <ul>
         <li>Dining out and entertainment</li>
@@ -380,7 +379,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Shopping for non-essentials</li>
         <li>Gym memberships</li>
       </ul>
-      
+
       <p><strong>20% - Savings and Debt Repayment</strong></p>
       <ul>
         <li>Emergency fund contributions</li>
@@ -388,35 +387,35 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Extra debt payments beyond minimums</li>
         <li>Short-term savings goals</li>
       </ul>
-      
+
       <h3>Step-by-Step Implementation</h3>
-      
+
       <p><strong>Step 1: Calculate Your After-Tax Income</strong><br>
       Use your monthly take-home pay after taxes and deductions. If your income varies, use an average of the last 3 months.</p>
-      
+
       <p><strong>Step 2: Track Your Current Spending</strong><br>
       For one week, write down every expense. Use your bank statements to categorize where your money currently goes.</p>
-      
+
       <p><strong>Step 3: Apply the Percentages</strong><br>
       If you take home $4,000/month:
       • Needs: $2,000 (50%)
       • Wants: $1,200 (30%)
       • Savings: $800 (20%)</p>
-      
+
       <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #ef4444;">
         <strong>⚠️ Reality Check:</strong> If your needs exceed 50%, focus on reducing housing costs or finding additional income before cutting wants entirely.
       </div>
-      
+
       <h3>Making Adjustments</h3>
-      
+
       <p>The 50/30/20 rule is a starting point, not a rigid law. Adjust based on your situation:</p>
-      
+
       <ul>
         <li><strong>High debt:</strong> Consider 50/20/30 to accelerate debt payoff</li>
         <li><strong>Low income:</strong> Start with 60/20/20 and work toward the ideal</li>
         <li><strong>High earner:</strong> Try 45/25/30 to maximize savings</li>
       </ul>
-      
+
       <p>Remember: The best budget is one you'll actually follow. Start simple and refine as you go!</p>
     `,
     quiz: [
@@ -461,20 +460,20 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Zero-Based Budgeting: Maximum Control Over Your Money</h2>
-      
+
       <p>Zero-based budgeting is a powerful method where you assign every dollar of income to a specific category before you spend it. The goal is simple: Income minus expenses equals zero.</p>
-      
+
       <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #3b82f6;">
         <strong>💡 Key Concept:</strong> "Zero-based" doesn't mean you have zero dollars left - it means every dollar has been intentionally allocated!
       </div>
-      
+
       <h3>How Zero-Based Budgeting Works</h3>
-      
+
       <p>Unlike percentage-based budgets, zero-based budgeting requires you to justify every expense from scratch each month. Here's the process:</p>
-      
+
       <p><strong>1. Start with Your Income</strong><br>
       Use your total monthly take-home pay as your starting number.</p>
-      
+
       <p><strong>2. List All Fixed Expenses</strong><br>
       These are the same every month:
       • Rent/mortgage
@@ -482,14 +481,14 @@ export const educationContent: { [key: string]: Lesson } = {
       • Insurance premiums
       • Minimum debt payments
       • Subscription services</p>
-      
+
       <p><strong>3. Estimate Variable Expenses</strong><br>
       These change monthly but are necessary:
       • Groceries
       • Utilities
       • Gas
       • Phone bill</p>
-      
+
       <p><strong>4. Assign Remaining Funds</strong><br>
       Every leftover dollar gets a specific job:
       • Emergency fund
@@ -497,9 +496,9 @@ export const educationContent: { [key: string]: Lesson } = {
       • Savings goals
       • Entertainment
       • Dining out</p>
-      
+
       <h3>Example: $4,500 Monthly Income</h3>
-      
+
       <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
         <p><strong>Fixed Expenses: $2,800</strong></p>
         <ul>
@@ -511,7 +510,7 @@ export const educationContent: { [key: string]: Lesson } = {
           <li>Gym: $30</li>
           <li>Streaming: $40</li>
         </ul>
-        
+
         <p><strong>Variable Expenses: $800</strong></p>
         <ul>
           <li>Groceries: $400</li>
@@ -520,7 +519,7 @@ export const educationContent: { [key: string]: Lesson } = {
           <li>Personal care: $80</li>
           <li>Miscellaneous: $50</li>
         </ul>
-        
+
         <p><strong>Remaining: $900</strong></p>
         <ul>
           <li>Emergency fund: $300</li>
@@ -529,34 +528,34 @@ export const educationContent: { [key: string]: Lesson } = {
           <li>Dining out: $150</li>
           <li>Entertainment: $100</li>
         </ul>
-        
+
         <p><strong>Total Allocated: $4,500 ✓</strong></p>
       </div>
-      
+
       <h3>Benefits of Zero-Based Budgeting</h3>
-      
+
       <ul>
         <li><strong>Intentional spending:</strong> Every purchase aligns with your priorities</li>
         <li><strong>Prevents lifestyle inflation:</strong> No "leftover" money to spend carelessly</li>
         <li><strong>Accelerates goals:</strong> Surplus automatically goes toward objectives</li>
         <li><strong>Increases awareness:</strong> You know exactly where every dollar goes</li>
       </ul>
-      
+
       <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #ef4444;">
         <strong>⚠️ Common Mistake:</strong> Don't forget to budget for irregular expenses like car maintenance, gifts, and annual fees!
       </div>
-      
+
       <h3>Monthly Review Process</h3>
-      
+
       <p>Zero-based budgeting requires monthly attention:</p>
-      
+
       <ol>
         <li><strong>Track actual spending</strong> against your budget</li>
         <li><strong>Identify variances</strong> and understand why they occurred</li>
         <li><strong>Adjust next month's allocations</strong> based on what you learned</li>
         <li><strong>Reallocate unused funds</strong> to high-priority goals</li>
       </ol>
-      
+
       <p>This method works best for people who want maximum control over their finances and are willing to spend time planning each month.</p>
     `,
     quiz: [
@@ -595,17 +594,17 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Building Credit from Zero: Your Complete Roadmap</h2>
-      
+
       <p>Building credit from scratch might seem daunting, but with the right strategy, you can establish a solid credit foundation in 6-12 months. Here's your complete roadmap.</p>
-      
+
       <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #3b82f6;">
         <strong>💡 Did You Know:</strong> 1 in 5 Americans have no credit history at all - you're not alone in starting from zero!
       </div>
-      
+
       <h3>Understanding Credit Basics</h3>
-      
+
       <p>Your credit score is a three-digit number (300-850) that represents your creditworthiness. It's calculated based on five factors:</p>
-      
+
       <ul>
         <li><strong>Payment History (35%)</strong> - Do you pay on time?</li>
         <li><strong>Credit Utilization (30%)</strong> - How much credit are you using?</li>
@@ -613,11 +612,11 @@ export const educationContent: { [key: string]: Lesson } = {
         <li><strong>Credit Mix (10%)</strong> - Variety of credit types</li>
         <li><strong>New Credit (10%)</strong> - Recent credit applications</li>
       </ul>
-      
+
       <h3>Step 1: Get Your First Credit Card</h3>
-      
+
       <p>With no credit history, you'll likely need to start with one of these options:</p>
-      
+
       <p><strong>Secured Credit Cards</strong> (Recommended for beginners)</p>
       <ul>
         <li>Requires a cash deposit (usually $200-500)</li>
@@ -625,27 +624,27 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Reports to all three credit bureaus</li>
         <li>Can graduate to unsecured after 6-12 months</li>
       </ul>
-      
+
       <p><strong>Student Credit Cards</strong></p>
       <ul>
         <li>Designed for college students</li>
         <li>Lower approval requirements</li>
         <li>Often include educational resources</li>
       </ul>
-      
+
       <p><strong>Authorized User Status</strong></p>
       <ul>
         <li>Ask family member to add you to their card</li>
         <li>Their payment history affects your credit</li>
         <li>Choose someone with excellent credit habits</li>
       </ul>
-      
+
       <h3>Step 2: Use Your Credit Responsibly</h3>
-      
+
       <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #ef4444;">
         <strong>⚠️ Golden Rules:</strong> Keep utilization under 30% (ideally under 10%) and NEVER miss a payment!
       </div>
-      
+
       <p><strong>Smart Usage Strategies:</strong></p>
       <ul>
         <li>Use the card for small, regular purchases (gas, groceries)</li>
@@ -653,34 +652,34 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Set up automatic payments to avoid missed payments</li>
         <li>Keep the card active with occasional small purchases</li>
       </ul>
-      
+
       <h3>Step 3: Monitor Your Progress</h3>
-      
+
       <p>Track your credit building with free resources:</p>
       <ul>
         <li><strong>Credit Karma</strong> - Free credit scores and monitoring</li>
         <li><strong>annualcreditreport.com</strong> - Free annual credit reports</li>
         <li><strong>Your bank's app</strong> - Many offer free credit score tracking</li>
       </ul>
-      
+
       <h3>Timeline Expectations</h3>
-      
+
       <ul>
         <li><strong>Month 1-3:</strong> Apply for and receive your first credit card</li>
         <li><strong>Month 3-6:</strong> Establish payment history, see first credit score</li>
         <li><strong>Month 6-12:</strong> Score improves to 650-700 range with responsible use</li>
         <li><strong>Month 12+:</strong> Eligible for better credit cards and rates</li>
       </ul>
-      
+
       <h3>Common Mistakes to Avoid</h3>
-      
+
       <ul>
         <li><strong>Closing your first card:</strong> Keep it open to maintain credit history length</li>
         <li><strong>Applying for multiple cards quickly:</strong> This can hurt your score</li>
         <li><strong>Using credit for purchases you can't afford:</strong> Only spend what you can pay off</li>
         <li><strong>Ignoring your credit report:</strong> Check for errors regularly</li>
       </ul>
-      
+
       <p>Building credit is a marathon, not a sprint. Stay patient, consistent, and responsible - your future self will thank you!</p>
     `,
     quiz: [
@@ -715,8 +714,8 @@ export const educationContent: { [key: string]: Lesson } = {
     ]
   },
 
-  'emergency-fund': {
-    id: 'emergency-fund',
+  'emergency-fund-basics': {
+    id: 'emergency-fund-basics',
     title: 'Emergency Fund Basics: Your Financial Safety Net',
     category: 'Saving',
     difficulty: 'Beginner',
@@ -805,15 +804,15 @@ export const educationContent: { [key: string]: Lesson } = {
     completed: false,
     content: `
       <h2>Debt Snowball vs. Avalanche: The Ultimate Showdown</h2>
-      
+
       <p>Both the debt snowball and debt avalanche methods can help you become debt-free, but they work very differently. Let's explore both strategies and help you choose the right one for your situation.</p>
-      
+
       <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #3b82f6;">
         <strong>💡 Key Insight:</strong> The best debt payoff strategy is the one you'll actually stick with long-term!
       </div>
-      
+
       <h3>The Debt Snowball Method</h3>
-      
+
       <p><strong>How It Works:</strong></p>
       <ol>
         <li>List all debts from smallest to largest balance</li>
@@ -822,9 +821,9 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Once smallest debt is paid off, roll that payment to the next smallest</li>
         <li>Repeat until all debts are eliminated</li>
       </ol>
-      
+
       <h3>The Debt Avalanche Method</h3>
-      
+
       <p><strong>How It Works:</strong></p>
       <ol>
         <li>List all debts from highest to lowest interest rate</li>
@@ -833,13 +832,13 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Once highest rate debt is paid off, move to the next highest</li>
         <li>Continue until debt-free</li>
       </ol>
-      
+
       <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #ef4444;">
         <strong>⚠️ Reality Check:</strong> The avalanche method typically saves only $50-200 compared to snowball for average debt loads.
       </div>
-      
+
       <h3>Which Method Should You Choose?</h3>
-      
+
       <p><strong>Choose Debt Snowball If:</strong></p>
       <ul>
         <li>You need motivation and quick wins</li>
@@ -847,7 +846,7 @@ export const educationContent: { [key: string]: Lesson } = {
         <li>Your interest rates are relatively similar</li>
         <li>You have many small debts</li>
       </ul>
-      
+
       <p><strong>Choose Debt Avalanche If:</strong></p>
       <ul>
         <li>You're highly motivated by math and logic</li>
@@ -971,6 +970,336 @@ export const educationContent: { [key: string]: Lesson } = {
         options: ["Individual stocks", "Target-date funds", "Cryptocurrency", "Real estate"],
         correctAnswer: 1,
         explanation: "Target-date funds automatically diversify and adjust your investments based on your retirement timeline, making them perfect for beginners who want a 'set it and forget it' approach."
+      }
+    ]
+  },
+  'emergency-fund-detailed': {
+    id: 'emergency-fund-detailed',
+    title: 'Building a Detailed Emergency Fund',
+    category: 'Saving',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '15 minutes',
+    completed: false,
+    content: `
+      <h2>Detailed Guide to Building Your Emergency Fund</h2>
+      <p>A comprehensive guide to building and managing a robust emergency fund for long-term financial security.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is a key consideration when building an emergency fund?",
+        options: ["Liquidity", "High returns", "Tax benefits", "Low risk"],
+        correctAnswer: 0,
+        explanation: "Liquidity is crucial for an emergency fund, ensuring quick access to funds when needed."
+      }
+    ]
+  },
+  'financial-goal-setting': {
+    id: 'financial-goal-setting',
+    title: 'Setting SMART Financial Goals',
+    category: 'Planning',
+    difficulty: 'Beginner',
+    points: 20,
+    estimatedTime: '10 minutes',
+    completed: false,
+    content: `
+      <h2>How to Set and Achieve Your Financial Goals</h2>
+      <p>Learn the SMART framework to set and achieve your financial goals effectively.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What does SMART stand for in financial goal setting?",
+        options: ["Simple, Measurable, Achievable, Relevant, Time-bound", "Specific, Measurable, Achievable, Relevant, Time-bound", "Strategic, Measurable, Actionable, Realistic, Timely", "Simple, Manageable, Attainable, Realistic, Trackable"],
+        correctAnswer: 1,
+        explanation: "SMART stands for Specific, Measurable, Achievable, Relevant, Time-bound, which are the key elements of effective goal setting."
+      }
+    ]
+  },
+  'understanding-credit-scores': {
+    id: 'understanding-credit-scores',
+    title: 'Understanding Credit Scores: A Comprehensive Guide',
+    category: 'Credit',
+    difficulty: 'Intermediate',
+    points: 30,
+    estimatedTime: '15 minutes',
+    completed: false,
+    content: `
+      <h2>A Deep Dive into Credit Scores</h2>
+      <p>A detailed guide on understanding credit scores, factors affecting them, and how to improve them.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "Which factor has the highest impact on your credit score?",
+        options: ["Payment history", "Credit utilization", "Length of credit history", "Credit mix"],
+        correctAnswer: 0,
+        explanation: "Payment history has the highest impact, accounting for 35% of your credit score."
+      }
+    ]
+  },
+  'estate-planning-basics': {
+    id: 'estate-planning-basics',
+    title: 'Estate Planning Basics',
+    category: 'Planning',
+    difficulty: 'Advanced',
+    points: 45,
+    estimatedTime: '20 minutes',
+    completed: false,
+    content: `
+      <h2>Introduction to Estate Planning</h2>
+      <p>Learn the basics of estate planning to protect your assets and ensure your wishes are followed.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is the primary purpose of estate planning?",
+        options: ["To minimize taxes", "To distribute assets after death", "To avoid probate", "To maximize investment returns"],
+        correctAnswer: 1,
+        explanation: "The primary purpose is to ensure your assets are distributed according to your wishes after your death."
+      }
+    ]
+  },
+  'insurance-essentials': {
+    id: 'insurance-essentials',
+    title: 'Insurance Essentials: Protecting Your Assets',
+    category: 'Insurance',
+    difficulty: 'Beginner',
+    points: 25,
+    estimatedTime: '12 minutes',
+    completed: false,
+    content: `
+      <h2>Key Insurance Types You Should Know</h2>
+      <p>Learn about essential insurance types, including health, auto, home, and life insurance.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "Which type of insurance protects your home from damage?",
+        options: ["Health insurance", "Auto insurance", "Home insurance", "Life insurance"],
+        correctAnswer: 2,
+        explanation: "Home insurance protects your home from various damages, such as fire, storms, and theft."
+      }
+    ]
+  },
+  'managing-student-loans': {
+    id: 'managing-student-loans',
+    title: 'Managing Student Loans Effectively',
+    category: 'Debt',
+    difficulty: 'Intermediate',
+    points: 30,
+    estimatedTime: '15 minutes',
+    completed: false,
+    content: `
+      <h2>Strategies for Managing and Paying Off Student Loans</h2>
+      <p>Learn effective strategies for managing your student loans, including refinancing, consolidation, and repayment plans.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is refinancing student loans?",
+        options: ["Combining multiple loans into one", "Lowering the interest rate on your loan", "Deferring loan payments", "Forgiving loan debt"],
+        correctAnswer: 1,
+        explanation: "Refinancing involves replacing existing loans with a new loan, often to secure a lower interest rate."
+      }
+    ]
+  },
+  'saving-for-retirement': {
+    id: 'saving-for-retirement',
+    title: 'Saving Early for Retirement',
+    category: 'Saving',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '18 minutes',
+    completed: false,
+    content: `
+      <h2>Why Saving Early for Retirement Matters</h2>
+      <p>Understand the importance of starting to save for retirement early and the impact of compound interest.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is the key benefit of starting to save for retirement early?",
+        options: ["Higher initial investment", "More time for compound interest to work", "Lower tax rates", "Guaranteed investment returns"],
+        correctAnswer: 1,
+        explanation: "Starting early allows more time for compound interest to grow your savings significantly."
+      }
+    ]
+  },
+  'understanding-taxes': {
+    id: 'understanding-taxes',
+    title: 'Understanding US Taxes: A Beginner\'s Guide',
+    category: 'Taxes',
+    difficulty: 'Beginner',
+    points: 20,
+    estimatedTime: '10 minutes',
+    completed: false,
+    content: `
+      <h2>Introduction to US Taxes</h2>
+      <p>A simple guide to understanding the basics of the US tax system, including income tax, deductions, and credits.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is a tax deduction?",
+        options: ["A direct reduction in taxes owed", "A reduction in taxable income", "A tax credit", "A tax refund"],
+        correctAnswer: 1,
+        explanation: "A tax deduction reduces your taxable income, which in turn reduces the amount of taxes you owe."
+      }
+    ]
+  },
+  'advanced-investment-strategies': {
+    id: 'advanced-investment-strategies',
+    title: 'Advanced Investment Strategies',
+    category: 'Investing',
+    difficulty: 'Advanced',
+    points: 50,
+    estimatedTime: '25 minutes',
+    completed: false,
+    content: `
+      <h2>Exploring Advanced Investment Techniques</h2>
+      <p>Learn about advanced investment strategies, including options trading, real estate, and alternative investments.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is options trading?",
+        options: ["Buying and selling stocks", "Trading contracts that give the right to buy or sell an asset at a specific price", "Investing in mutual funds", "Trading bonds"],
+        correctAnswer: 1,
+        explanation: "Options trading involves contracts that give the buyer the right, but not the obligation, to buy or sell an underlying asset at a predetermined price before a specified date."
+      }
+    ]
+  },
+  'charitable-giving-strategies': {
+    id: 'charitable-giving-strategies',
+    title: 'Effective Charitable Giving Strategies',
+    category: 'Taxes',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '15 minutes',
+    completed: false,
+    content: `
+      <h2>Maximize Your Impact with Strategic Charitable Giving</h2>
+      <p>Learn how to maximize your charitable impact while optimizing your tax benefits through strategic giving.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is a donor-advised fund?",
+        options: ["A savings account for charitable donations", "An investment account for charitable giving that offers immediate tax benefits", "A fund managed by the government", "A type of scholarship"],
+        correctAnswer: 1,
+        explanation: "A donor-advised fund is an investment account for charitable giving that offers immediate tax benefits and allows you to distribute funds to charities over time."
+      }
+    ]
+  },
+  'home-buying-process': {
+    id: 'home-buying-process',
+    title: 'The Home Buying Process: A Step-by-Step Guide',
+    category: 'Planning',
+    difficulty: 'Intermediate',
+    points: 40,
+    estimatedTime: '20 minutes',
+    completed: false,
+    content: `
+      <h2>Navigating the Home Buying Journey</h2>
+      <p>A detailed guide to navigating the home buying process, from pre-approval to closing.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is pre-approval in the home buying process?",
+        options: ["A final loan approval", "An estimate of how much you can borrow", "A home inspection", "An appraisal"],
+        correctAnswer: 1,
+        explanation: "Pre-approval is an estimate from a lender of how much you can borrow, based on your financial information."
+      }
+    ]
+  },
+  'retirement-income-planning': {
+    id: 'retirement-income-planning',
+    title: 'Retirement Income Planning',
+    category: 'Planning',
+    difficulty: 'Advanced',
+    points: 50,
+    estimatedTime: '25 minutes',
+    completed: false,
+    content: `
+      <h2>Strategies for Generating Income in Retirement</h2>
+      <p>Learn strategies for generating a sustainable income stream in retirement, including withdrawals, annuities, and Social Security optimization.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is an annuity?",
+        options: ["A type of stock", "A contract that provides a guaranteed income stream", "A retirement savings account", "A type of bond"],
+        correctAnswer: 1,
+        explanation: "An annuity is a contract with an insurance company that provides a guaranteed stream of income in retirement, in exchange for a lump sum or series of payments."
+      }
+    ]
+  },
+  'tax-efficient-investing': {
+    id: 'tax-efficient-investing',
+    title: 'Tax-Efficient Investing Strategies',
+    category: 'Taxes',
+    difficulty: 'Intermediate',
+    points: 40,
+    estimatedTime: '20 minutes',
+    completed: false,
+    content: `
+      <h2>Minimize Taxes on Your Investments</h2>
+      <p>Learn how to minimize taxes on your investments through tax-advantaged accounts and tax-efficient strategies.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is a tax-loss harvesting?",
+        options: ["Selling investments at a loss to offset capital gains", "Avoiding paying taxes on investments", "Investing in tax-exempt bonds", "Donating investments to charity"],
+        correctAnswer: 0,
+        explanation: "Tax-loss harvesting involves selling investments at a loss to offset capital gains, reducing your overall tax liability."
+      }
+    ]
+  },
+  'understanding-cryptocurrency': {
+    id: 'understanding-cryptocurrency',
+    title: 'Understanding Cryptocurrency',
+    category: 'Investing',
+    difficulty: 'Advanced',
+    points: 45,
+    estimatedTime: '22 minutes',
+    completed: false,
+    content: `
+      <h2>Introduction to Cryptocurrency</h2>
+      <p>A comprehensive guide to understanding the basics of cryptocurrency, including blockchain technology, Bitcoin, and Ethereum.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is blockchain technology?",
+        options: ["A type of cryptocurrency", "A decentralized ledger that records transactions", "A government-regulated financial system", "A type of computer hardware"],
+        correctAnswer: 1,
+        explanation: "Blockchain is a decentralized, digital ledger that records transactions across many computers. It is used to secure and verify transactions without a central authority."
+      }
+    ]
+  },
+  'credit-card-rewards': {
+    id: 'credit-card-rewards',
+    title: 'Maximizing Credit Card Rewards',
+    category: 'Credit',
+    difficulty: 'Intermediate',
+    points: 35,
+    estimatedTime: '18 minutes',
+    completed: false,
+    content: `
+      <h2>Strategies for Earning and Using Credit Card Rewards</h2>
+      <p>Learn how to maximize your credit card rewards, including cashback, points, and miles, to get the most value from your spending.</p>
+    `,
+    quiz: [
+      {
+        id: 1,
+        question: "What is the best way to maximize credit card rewards?",
+        options: ["Spending more money", "Choosing a card that aligns with your spending habits", "Paying only the minimum balance", "Applying for multiple credit cards"],
+        correctAnswer: 1,
+        explanation: "The best way to maximize rewards is to choose a credit card that aligns with your spending habits, such as a card that offers bonus rewards on groceries if you spend a lot on groceries."
       }
     ]
   }
