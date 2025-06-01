@@ -540,27 +540,15 @@ export class MemStorage implements IStorage {
   }
 
   async calculateUserTier(points: number): Promise<string> {
-    // Get all users' current month points to calculate percentiles
-    const allUsers = await db.select({
-      currentMonthPoints: users.currentMonthPoints
-    }).from(users);
+    const thresholds = await this.getTierThresholds();
 
-    if (allUsers.length === 0) return 'tier1';
-
-    // Sort points in ascending order
-    const sortedPoints = allUsers.map(u => u.currentMonthPoints).sort((a, b) => a - b);
-
-    // Calculate percentile thresholds
-    const p33Index = Math.floor(sortedPoints.length * 0.33);
-    const p66Index = Math.floor(sortedPoints.length * 0.66);
-
-    const bronzeThreshold = sortedPoints[p33Index] || 0;
-    const silverThreshold = sortedPoints[p66Index] || 0;
-
-    // Determine tier based on percentiles
-    if (points >= silverThreshold) return 'tier3';
-    if (points >= bronzeThreshold) return 'tier2';
-    return 'tier1';
+    if (points >= thresholds.tier3) {
+      return 'tier3';
+    } else if (points >= thresholds.tier2) {
+      return 'tier2';
+    } else {
+      return 'tier1';
+    }
   }
 
   async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
@@ -858,7 +846,7 @@ export class MemStorage implements IStorage {
       { referralId: referral.id, referredUserId }
     );
 
-    // Update referral code stats
+    // Update referralcode stats
     await db.update(userReferralCodes)
       .set({
         totalReferrals: sql`total_referrals + 1`,
@@ -1178,7 +1166,7 @@ export class MemStorage implements IStorage {
       'charitable-giving-strategies': 25,
       'home-buying-process': 26,
       'retirement-income-planning': 27,
-      
+
       // Add missing lesson IDs that appear in educationContent
       'emergency-fund-detailed': 28,
       'budgeting-basics-detailed': 29,

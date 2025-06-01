@@ -81,15 +81,15 @@ export default function Dashboard() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center">
                 <span className="text-orange-600 font-medium">Tier 1</span>
-                <span className="text-gray-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '0'} pts</span>
+                <span className="text-gray-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-blue-600 font-medium">Tier 2</span>
-                <span className="text-gray-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '0'} pts</span>
+                <span className="text-gray-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-purple-600 font-medium">Tier 3</span>
-                <span className="text-gray-600">{tierThresholds?.tier3 || 0}+ pts</span>
+                <span className="text-gray-600">{tierThresholds?.tier3 || 150}+ pts</span>
               </div>
             </div>
             {user && (
