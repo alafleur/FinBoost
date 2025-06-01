@@ -84,9 +84,9 @@ export default function Dashboard() {
                 <span className="text-orange-700 font-semibold">Tier 1</span>
                 <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
-                <span className="text-slate-700 font-semibold">Tier 2</span>
-                <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
+              <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <span className="text-gray-700 font-semibold">Tier 2</span>
+                <span className="text-gray-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
               <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
                 <span className="text-yellow-700 font-semibold">Tier 3</span>
