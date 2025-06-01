@@ -1121,7 +1121,10 @@ export class MemStorage implements IStorage {
         WHERE user_id = ${userId}
       `);
 
-      return progress.rows.map((p: any) => ({
+      // Handle different response formats
+      const rows = progress.rows || progress || [];
+      
+      return rows.map((p: any) => ({
         id: p.id,
         userId: p.user_id,
         moduleId: p.module_id,
@@ -1205,7 +1208,8 @@ export class MemStorage implements IStorage {
       LIMIT 1
     `);
 
-    if (existingProgress.rows.length > 0 && existingProgress.rows[0].completed) {
+    const existingRows = existingProgress.rows || existingProgress || [];
+    if (existingRows.length > 0 && existingRows[0].completed) {
       throw new Error('Lesson already completed');
     }
 
@@ -1218,7 +1222,7 @@ export class MemStorage implements IStorage {
     // Create a simple completion record without foreign key constraint
     // We'll store the lesson completion in localStorage and use a simple tracking table
     try {
-      if (existingProgress.rows.length > 0) {
+      if (existingRows.length > 0) {
         await db.execute(sql`
           UPDATE user_progress 
           SET completed = true, points_earned = ${pointsEarned}, completed_at = NOW()
