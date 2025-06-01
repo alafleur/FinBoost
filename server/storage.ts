@@ -1196,7 +1196,7 @@ export class MemStorage implements IStorage {
     }
 
     // Use static points for lesson completion
-    const pointsEarned = 25;
+    const pointsEarned = 20;
 
     // Update streak and get bonus points
     const { newStreak, bonusPoints } = await this.updateUserStreak(userId);
