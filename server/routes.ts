@@ -1630,6 +1630,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check user's lesson completion status
+  apiRouter.get("/debug/user/:userId/lessons", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Get user progress from database
+      const progress = await storage.getUserProgress(userId);
+      
+      // Get points history for lessons
+      const pointsHistory = await storage.getUserPointsHistory(userId);
+      const lessonCompletions = pointsHistory.filter(h => h.action === 'lesson_complete');
+
+      res.json({
+        success: true,
+        userId,
+        progressEntries: progress,
+        lessonCompletions,
+        totalLessonsCompleted: progress.filter(p => p.completed).length
+      });
+    } catch (error: any) {
+      console.error('Debug lesson check error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // === STRIPE PAYMENT ROUTES ===
 
   // Create subscription checkout session

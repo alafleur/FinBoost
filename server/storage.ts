@@ -1137,7 +1137,7 @@ export class MemStorage implements IStorage {
   }
 
   async markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
-    // Create a simple mapping of lesson string IDs to numbers for database storage
+    // Create a complete mapping of lesson string IDs to numbers for database storage
     const lessonIdMap: { [key: string]: number } = {
       'budgeting-basics': 1,
       'emergency-fund': 2,
@@ -1166,14 +1166,28 @@ export class MemStorage implements IStorage {
       'charitable-giving-strategies': 25,
       'home-buying-process': 26,
       'retirement-income-planning': 27,
-
-      // Add missing lesson IDs that appear in educationContent
+      // Additional mappings for all education content
       'emergency-fund-detailed': 28,
       'budgeting-basics-detailed': 29,
       'investment-basics-detailed': 30,
       'credit-management-detailed': 31,
       'retirement-planning-detailed': 32,
-      'tax-optimization-detailed': 33
+      'tax-optimization-detailed': 33,
+      'building-emergency-fund': 34,
+      'debt-consolidation': 35,
+      'credit-repair': 36,
+      'mortgage-basics': 37,
+      'side-hustle-income': 38,
+      'financial-apps-tools': 39,
+      'compound-interest': 40,
+      'risk-management': 41,
+      'tax-deductions': 42,
+      'retirement-withdrawal': 43,
+      'healthcare-costs': 44,
+      'education-funding': 45,
+      'financial-planning': 46,
+      'investment-psychology': 47,
+      'wealth-building': 48
     };
 
     console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
