@@ -86,8 +86,9 @@ export default function Leaderboard() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'gold': return 'bg-yellow-500 text-white';
-      case 'silver': return 'bg-gray-400 text-white';
+      case 'tier3': return 'bg-yellow-500 text-white';
+      case 'tier2': return 'bg-slate-500 text-white';
+      case 'tier1':
       default: return 'bg-orange-600 text-white';
     }
   };

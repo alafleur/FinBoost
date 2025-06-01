@@ -84,9 +84,9 @@ export default function Dashboard() {
                 <span className="text-orange-700 font-semibold">Tier 1</span>
                 <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                <span className="text-gray-700 font-semibold">Tier 2</span>
-                <span className="text-gray-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
+              <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
+                <span className="text-slate-700 font-semibold">Tier 2</span>
+                <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
               <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
                 <span className="text-yellow-700 font-semibold">Tier 3</span>
@@ -226,13 +226,11 @@ export default function Dashboard() {
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
-      case 'platinum':
-        return 'bg-gradient-to-r from-gray-200 to-gray-400';
-      case 'gold':
-        return 'bg-gradient-to-r from-yellow-300 to-yellow-500';
-      case 'silver':
-        return 'bg-gradient-to-r from-gray-300 to-gray-500';
-      case 'bronze':
+      case 'tier3':
+        return 'bg-gradient-to-r from-yellow-400 to-yellow-600';
+      case 'tier2':
+        return 'bg-gradient-to-r from-slate-400 to-slate-600';
+      case 'tier1':
       default:
         return 'bg-gradient-to-r from-orange-400 to-orange-600';
     }
