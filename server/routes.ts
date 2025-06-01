@@ -1625,7 +1625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const moduleId = lessonIdMap[lessonId] || parseInt(lessonId) || 1;
 
-      const result = await storage.markLessonComplete(userId, moduleId);
+      const result = await storage.markLessonComplete(userId, lessonId);
 
       res.json({ 
         success: true, 
