@@ -25,6 +25,7 @@ import PointsHistory from "@/components/PointsHistory";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
+import PointsActions from "@/components/PointsActions";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -401,11 +402,12 @@ export default function Dashboard() {
             {/* Dashboard Content - Only show tabs on mobile */}
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-auto">
-                  <TabsTrigger value="overview" className="text-xs px-2 py-2">Overview</TabsTrigger>
-                  <TabsTrigger value="referrals" className="text-xs px-2 py-2">Referrals</TabsTrigger>
-                  <TabsTrigger value="leaderboard" className="text-xs px-2 py-2">Board</TabsTrigger>
-                  <TabsTrigger value="history" className="text-xs px-2 py-2">Activity</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-5 h-auto">
+                  <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
+                  <TabsTrigger value="earn" className="text-xs px-1 py-2">Earn</TabsTrigger>
+                  <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
+                  <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
+                  <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -415,6 +417,13 @@ export default function Dashboard() {
                       longestStreak={user?.longestStreak || 0}
                     />
                   </div>
+                </TabsContent>
+
+                <TabsContent value="earn">
+                  <PointsActions 
+                    onPointsEarned={fetchUserData}
+                    quickWinActions={[]}
+                  />
                 </TabsContent>
 
                 <TabsContent value="referrals">
@@ -443,6 +452,25 @@ export default function Dashboard() {
                   currentStreak={user?.currentStreak || 0}
                   longestStreak={user?.longestStreak || 0}
                 />
+                
+                {/* Points Earning Actions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Upload className="h-5 w-5" />
+                      <span>Earn Points for Financial Actions</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Upload proof of your financial progress to earn points and climb the leaderboard!
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <PointsActions 
+                      onPointsEarned={fetchUserData}
+                      quickWinActions={[]}
+                    />
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
