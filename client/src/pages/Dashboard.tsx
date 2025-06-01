@@ -77,14 +77,14 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-            <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier System</h3>
+            <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier Thresholds</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
                 <span className="text-orange-700 font-semibold">Tier 1</span>
                 <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-slate-100 rounded">
+              <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
                 <span className="text-slate-700 font-semibold">Tier 2</span>
                 <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
