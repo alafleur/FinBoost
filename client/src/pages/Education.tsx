@@ -52,7 +52,7 @@ export default function Education() {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         // Map numeric module IDs back to lesson string IDs
         const moduleToLessonMap: { [key: number]: string } = {
           1: 'emergency-fund',
@@ -62,11 +62,11 @@ export default function Education() {
           5: 'retirement-planning',
           6: 'tax-optimization'
         };
-        
+
         const completedIds = result.progress
           .filter((p: any) => p.completed)
           .map((p: any) => moduleToLessonMap[p.moduleId] || p.moduleId.toString());
-        
+
         setCompletedLessons(completedIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedIds));
       }
@@ -75,70 +75,37 @@ export default function Education() {
     }
   };
 
-  const modules: Module[] = [
-    {
-      id: 'budgeting-basics',
-      title: 'Budgeting Basics',
-      description: 'Learn the fundamentals of creating and managing a budget',
-      category: 'Budgeting',
-      difficulty: 'Beginner',
-      estimatedTime: '15 min',
-      pointsReward: 25,
-      icon: Calculator,
-    },
-    {
-      id: 'emergency-fund',
-      title: 'Emergency Fund',
-      description: 'Build a safety net for unexpected expenses',
-      category: 'Savings',
-      difficulty: 'Beginner',
-      estimatedTime: '12 min',
-      pointsReward: 30,
-      icon: Shield,
-    },
-    {
-      id: 'investment-basics',
-      title: 'Investment Basics',
-      description: 'Introduction to stocks, bonds, and investment strategies',
-      category: 'Investing',
-      difficulty: 'Intermediate',
-      estimatedTime: '20 min',
-      pointsReward: 35,
-      icon: TrendingUp,
-    },
-    {
-      id: 'credit-management',
-      title: 'Credit Management',
-      description: 'Understanding credit scores and debt management',
-      category: 'Credit',
-      difficulty: 'Beginner',
-      estimatedTime: '18 min',
-      pointsReward: 30,
-      icon: CreditCard,
-    },
-    {
-      id: 'retirement-planning',
-      title: 'Retirement Planning',
-      description: 'Plan for your financial future with retirement strategies',
-      category: 'Planning',
-      difficulty: 'Intermediate',
-      estimatedTime: '25 min',
-      pointsReward: 40,
-      icon: Target,
-    },
-    {
-      id: 'tax-optimization',
-      title: 'Tax Optimization',
-      description: 'Maximize your tax savings and understand deductions',
-      category: 'Taxes',
-      difficulty: 'Intermediate',
-      estimatedTime: '22 min',
-      pointsReward: 35,
-      icon: PiggyBank,
-    },
-  ];
+  // Get icon for category
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'budgeting': return Calculator;
+      case 'savings': case 'saving': return PiggyBank;
+      case 'investing': return TrendingUp;
+      case 'credit': return CreditCard;
+      case 'planning': return Target;
+      case 'taxes': return Calculator;
+      case 'debt': return CreditCard;
+      case 'insurance': return Shield;
+      default: return BookOpen;
+    }
+  };
 
-  const categories = ['All', 'Budgeting', 'Savings', 'Investing', 'Credit', 'Planning', 'Taxes'];
+  // Convert educationContent to modules format
+  const modules: Module[] = Object.values(educationContent).map(lesson => ({
+    id: lesson.id,
+    title: lesson.title,
+    description: lesson.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...', // Strip HTML and truncate
+    category: lesson.category,
+    difficulty: lesson.difficulty,
+    estimatedTime: lesson.estimatedTime,
+    pointsReward: lesson.points,
+    icon: getCategoryIcon(lesson.category),
+    completed: completedLessons.includes(lesson.id)
+  }));
+
+  // Get all unique categories from educationContent
+  const allCategories = [...new Set(Object.values(educationContent).map(lesson => lesson.category))];
+  const categories = ['All', ...allCategories.sort()];
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
