@@ -337,7 +337,7 @@ export default function Dashboard() {
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                  Continue Learning
+                  Lessons
                 </h3>
                 <Badge variant="secondary" className="w-fit">
                   {completedLessonIds.length} of {Object.keys(educationContent).length} completed
