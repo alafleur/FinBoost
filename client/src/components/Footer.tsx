@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <DollarSign className="h-8 w-8 text-primary-400" />
-              <span className="font-heading font-bold text-xl text-white">FinBoost</span>
+              <span className="font-heading font-bold text-xl text-white">Additive</span>
             </div>
             <p className="mb-4">Financial education that rewards your progress</p>
             <div className="flex space-x-4">
@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-700 mt-12 pt-6 text-sm text-center">
-          <p>© {new Date().getFullYear()} FinBoost. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Additive. All rights reserved.</p>
         </div>
       </div>
     </footer>

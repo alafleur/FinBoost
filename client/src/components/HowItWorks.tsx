@@ -37,7 +37,7 @@ export default function HowItWorks() {
           <p className="text-gray-600 max-w-2xl mx-auto">Our platform makes financial education rewarding through a simple three-step process</p>
           <p className="text-lg font-medium text-primary-600 mt-4"><span className="font-bold">Break the cycle. Build together.</span> A new approach to financial wellness.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step) => (
             <div 
@@ -58,7 +58,7 @@ export default function HowItWorks() {
           <h3 className="text-2xl font-bold text-center mb-4 text-gray-800 flex items-center justify-center">
             <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">Key Reward System Facts</span>
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-8">
             <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-primary-500">
               <div className="flex-shrink-0 w-16 h-16 bg-white border-2 border-primary-500 rounded-full flex items-center justify-center shadow-md">
@@ -71,7 +71,7 @@ export default function HowItWorks() {
                 <p className="text-gray-600 mt-1">Every membership contributes to growing the community reward system</p>
               </div>
             </div>
-            
+
             <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-secondary-500">
               <div className="flex-shrink-0 w-16 h-16 bg-white border-2 border-secondary-500 rounded-full flex items-center justify-center shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -83,7 +83,7 @@ export default function HowItWorks() {
                 <p className="text-gray-600 mt-1">Half of all members get a share of the rewards each month</p>
               </div>
             </div>
-            
+
             <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-accent-500">
               <div className="flex-shrink-0 w-16 h-16 bg-white border-2 border-accent-500 rounded-full flex items-center justify-center shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-accent-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

@@ -17,7 +17,7 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <DollarSign className="h-8 w-8 text-primary-600" />
-          <span className="font-heading font-bold text-xl text-dark-800">FinBoost</span>
+          <span className="font-heading font-bold text-xl text-dark-800">Additive</span>
         </div>
         <div className="flex items-center space-x-3">
           <a 

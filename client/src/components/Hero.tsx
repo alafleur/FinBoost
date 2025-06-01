@@ -23,7 +23,7 @@ type SubscribeFormValues = z.infer<typeof subscribeSchema>;
 export default function Hero({ onSubscribeSuccess }: HeroProps) {
   const { mutate: subscribe, isPending } = useSubscribe();
   const [memberCount] = useState("5,000+");
-  
+
   const form = useForm<SubscribeFormValues>({
     resolver: zodResolver(subscribeSchema),
     defaultValues: {
@@ -89,9 +89,9 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                   <BarChart2 className="h-10 w-10 text-white" />
                 </div>
               </div>
-              
+
               <h3 className="font-heading font-semibold text-xl mb-4 text-center">Financial Progress Made Simple</h3>
-              
+
               <ul className="space-y-4 mt-6">
                 <li className="flex items-center">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -118,7 +118,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                   <p className="ml-3 text-gray-700">Receive cash rewards monthly</p>
                 </li>
               </ul>
-              
+
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p className="text-gray-600">Join a community that grows together</p>
                 <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
