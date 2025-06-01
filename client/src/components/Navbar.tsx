@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { DollarSign } from "lucide-react";
+import { AdditiveLogo } from "@/components/ui/additive-logo";
 
 export default function Navbar() {
   const scrollToForm = () => {
@@ -16,7 +16,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm px-4 py-4 fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <DollarSign className="h-8 w-8 text-primary-600" />
+          <AdditiveLogo className="h-8 w-8 text-primary-600" />
           <span className="font-heading font-bold text-xl text-dark-800">Additive</span>
         </div>
         <div className="flex items-center space-x-3">

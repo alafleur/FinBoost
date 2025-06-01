@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { AdditiveLogo } from "@/components/ui/additive-logo";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -158,8 +159,8 @@ export default function ResetPassword() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <DollarSign className="h-10 w-10 text-primary-600" />
-            <span className="font-heading font-bold text-2xl text-dark-800">FinBoost</span>
+            <AdditiveLogo className="h-10 w-10 text-primary-600" />
+            <span className="font-heading font-bold text-2xl text-dark-800">Additive</span>
           </div>
           <p className="text-gray-600">Set your new password</p>
         </div>

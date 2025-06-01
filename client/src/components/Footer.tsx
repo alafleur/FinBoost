@@ -1,4 +1,4 @@
-import { DollarSign } from "lucide-react";
+import { AdditiveLogo } from "@/components/ui/additive-logo";
 import { FaTwitter, FaFacebook, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <DollarSign className="h-8 w-8 text-primary-400" />
+              <AdditiveLogo className="h-8 w-8 text-primary-400" />
               <span className="font-heading font-bold text-xl text-white">Additive</span>
             </div>
             <p className="mb-4">Financial education that rewards your progress</p>
