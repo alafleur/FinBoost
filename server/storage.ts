@@ -3,6 +3,8 @@ import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, Use
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt } from "drizzle-orm";
 import { db } from "./db";
+import { users } from "@shared/schema";
+import { sql, eq, and, gte, lt } from "drizzle-orm";
 import crypto from "crypto";
 
 // modify the interface with any CRUD methods
@@ -407,7 +409,7 @@ export class MemStorage implements IStorage {
         throw new Error(`Daily limit reached for action: ${actionId}`);
       }
       if (actionConfig.maxTotal && !(await this.checkTotalActionLimit(userId, actionId))) {
-        throw new Error(`Daily limit reached for action: ${actionId}`);
+        throw new Error(`Total limit reached for action: ${actionId}`);
       }
     }
 

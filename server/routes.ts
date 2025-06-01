@@ -153,9 +153,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user 
       const user = await storage.createUser(userData);
 
-      // Award daily login points for new user
+      // Award daily login points (check daily limit first)
       try {
-        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus - Welcome!');
+        const canEarnDaily = await storage.checkDailyActionLimit(user.id, 'daily-login');
+        if (canEarnDaily) {
+          await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus - Welcome!');
+        }
       } catch (error) {
         console.log('Daily login points already awarded or error:', error);
       }
@@ -264,9 +267,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last login
       await storage.updateLastLogin(user.id);
 
-      // Award daily login points
+      // Award daily login points (check daily limit first)
       try {
-        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+        const canEarnDaily = await storage.checkDailyActionLimit(user.id, 'daily-login');
+        if (canEarnDaily) {
+          await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+        }
       } catch (error) {
         console.log('Daily login points already awarded or error:', error);
       }
@@ -328,9 +334,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last login
       await storage.updateLastLogin(user.id);
 
-      // Award daily login points
+      // Award daily login points (check daily limit first)
       try {
-        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+        const canEarnDaily = await storage.checkDailyActionLimit(user.id, 'daily-login');
+        if (canEarnDaily) {
+          await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+        }
       } catch (error) {
         console.log('Daily login points already awarded or error:', error);
       }
@@ -382,19 +391,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user exists
       const user = await storage.getUserByEmail(email);
-      
+
       // Always return success to prevent email enumeration
       // but only send email if user exists
       if (user) {
         try {
           const resetToken = await storage.createPasswordResetToken(user.id);
-          
+
           // In a real app, you'd send an email here
           // For now, we'll log the reset URL (in development only)
           if (process.env.NODE_ENV === 'development') {
             console.log(`Password reset link for ${email}: ${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`);
           }
-          
+
           // TODO: Implement email sending service
           // await emailService.sendPasswordResetEmail(email, resetToken);
         } catch (error) {
@@ -488,14 +497,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const user = await storage.getUserById(userId);
     const userHistory = await storage.getUserPointsHistory(userId);
     const totalPoints = userHistory.filter(h => h.status === 'approved').reduce((sum, h) => sum + h.points, 0);
-    
+
     if (user) {
       user.totalPoints = totalPoints;
       user.currentMonthPoints = totalPoints;
       user.tier = await storage.calculateUserTier(totalPoints);
       await storage.updateUserPoints(userId, totalPoints, totalPoints);
     }
-    
+
     return res.json({ success: true, points: totalPoints });
   });
 
@@ -503,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/tiers/thresholds", async (req: Request, res: Response) => {
     try {
       const thresholds = await storage.getTierThresholds();
-      
+
       return res.status(200).json({ 
         success: true,
         thresholds
@@ -522,7 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user!.id;
       const progress = await storage.getUserProgress(userId);
-      
+
       return res.status(200).json({ 
         success: true,
         progress
@@ -541,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user!.id;
       const user = await storage.getUserById(userId);
-      
+
       if (!user) {
         return res.status(404).json({ 
           success: false,
@@ -1382,7 +1391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/support", async (req: Request, res: Response) => {
     try {
       const { name, email, category, message, hasAttachment, fileName } = req.body;
-      
+
       // Validate required fields
       if (!name || !email || !category || !message) {
         return res.status(400).json({
@@ -1467,7 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TODO: Add admin role check here
       const { page = 1, limit = 50, status, category } = req.query;
-      
+
       const supportRequests = await storage.getSupportRequests({
         page: parseInt(page as string),
         limit: parseInt(limit as string),
@@ -1558,9 +1567,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // TODO: Add admin role check here
       const requestId = parseInt(req.params.requestId);
-      
+
       const supportRequest = await storage.getSupportRequestById(requestId);
-      
+
       if (!supportRequest) {
         return res.status(404).json({
           success: false,
@@ -1615,7 +1624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const moduleId = lessonIdMap[lessonId] || parseInt(lessonId) || 1;
-      
+
       const result = await storage.markLessonComplete(userId, moduleId);
 
       res.json({ 
@@ -1632,22 +1641,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // === STRIPE PAYMENT ROUTES ===
-  
+
   // Create subscription checkout session
   apiRouter.post("/stripe/create-subscription", authenticateToken, async (req: Request, res: Response) => {
     try {
       const { currency = 'USD' } = req.body;
       const userId = req.user!.id;
-      
+
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({
           success: false,
           message: "Stripe not configured. Please contact support."
         });
       }
-      
+
       const checkoutUrl = await stripeService.createSubscriptionSession(userId, currency);
-      
+
       res.json({
         success: true,
         checkoutUrl
@@ -1665,17 +1674,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/stripe/subscription-success", authenticateToken, async (req: Request, res: Response) => {
     try {
       const { sessionId } = req.body;
-      
+
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({
           success: false,
           message: "Stripe not configured"
         });
       }
-      
+
       // Retrieve session and update user subscription status
       // This will be implemented when Stripe keys are available
-      
+
       res.json({
         success: true,
         message: "Subscription activated successfully"
@@ -1693,16 +1702,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/stripe/cancel-subscription", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
-      
+
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({
           success: false,
           message: "Stripe not configured"
         });
       }
-      
+
       await stripeService.cancelSubscription(userId);
-      
+
       res.json({
         success: true,
         message: "Subscription canceled successfully"
@@ -1717,21 +1726,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // === STRIPE CONNECT / PAYOUT ROUTES ===
-  
+
   // Create Connect onboarding link
   apiRouter.post("/stripe/connect-onboarding", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
-      
+
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({
           success: false,
           message: "Stripe not configured"
         });
       }
-      
+
       const onboardingUrl = await stripeService.createConnectOnboardingLink(userId);
-      
+
       res.json({
         success: true,
         onboardingUrl
@@ -1749,10 +1758,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/stripe/payouts", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
-      
+
       // This will retrieve payouts from database once implemented
       const payouts = []; // Placeholder
-      
+
       res.json({
         success: true,
         payouts
@@ -1770,21 +1779,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/admin/stripe/send-payout", authenticateToken, async (req: Request, res: Response) => {
     try {
       const { userId, amount, reason, pointsUsed = 0 } = req.body;
-      
+
       // Check if user is admin (implement admin check)
       // if (!req.user!.isAdmin) {
       //   return res.status(403).json({ success: false, message: "Admin access required" });
       // }
-      
+
       if (!process.env.STRIPE_SECRET_KEY) {
         return res.status(503).json({
           success: false,
           message: "Stripe not configured"
         });
       }
-      
+
       const transferId = await stripeService.sendPayout(userId, amount * 100, reason, pointsUsed);
-      
+
       res.json({
         success: true,
         transferId,
@@ -1805,10 +1814,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!process.env.STRIPE_WEBHOOK_SECRET) {
         return res.status(400).json({ error: "Webhook secret not configured" });
       }
-      
+
       // Stripe webhook verification and processing
       // This will be implemented when webhook secret is available
-      
+
       res.json({ received: true });
     } catch (error: any) {
       console.error('Webhook error:', error);
