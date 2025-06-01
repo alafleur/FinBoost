@@ -300,10 +300,7 @@ export default function Lesson() {
                 <Badge className={getDifficultyColor(lesson.difficulty)}>
                   {lesson.difficulty}
                 </Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {lesson.timeEstimate}
-                </Badge>
+                
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Star className="h-3 w-3" />
                   {lesson.points} points

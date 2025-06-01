@@ -39,24 +39,24 @@ export default function Education() {
   useEffect(() => {
     // Fetch from API first to ensure sync
     fetchCompletedLessons();
-    
+
     // Listen for storage changes to refresh when lessons are completed
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'completedLessons') {
         fetchCompletedLessons();
       }
     };
-    
+
     // Refresh when page becomes visible (user returns from lesson)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         fetchCompletedLessons();
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -104,7 +104,7 @@ export default function Education() {
           25: 'charitable-giving-strategies',
           26: 'home-buying-process',
           27: 'retirement-income-planning',
-          
+
           // Add missing lesson IDs that appear in educationContent
           28: 'emergency-fund-detailed',
           29: 'budgeting-basics-detailed',
@@ -312,7 +312,7 @@ export default function Education() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-4">
                               <div className="flex items-center space-x-1">
-                                <Clock className="h-4 w-4 text-gray-500" />
+                                
                                 <span className="text-sm text-gray-600">{module.estimatedTime}</span>
                               </div>
                               <div className="flex items-center space-x-1">
