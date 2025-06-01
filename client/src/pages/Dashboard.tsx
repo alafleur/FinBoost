@@ -76,23 +76,19 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-            <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier Thresholds</h3>
+            <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier System</h3>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center">
-                <span className="text-orange-600 font-medium">Bronze</span>
+                <span className="text-orange-600 font-medium">Tier 1</span>
                 <span className="text-gray-600">0 - 99 pts</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 font-medium">Silver</span>
+                <span className="text-blue-600 font-medium">Tier 2</span>
                 <span className="text-gray-600">100 - 249 pts</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-yellow-600 font-medium">Gold</span>
-                <span className="text-gray-600">250 - 499 pts</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-purple-600 font-medium">Platinum</span>
-                <span className="text-gray-600">500+ pts</span>
+                <span className="text-purple-600 font-medium">Tier 3</span>
+                <span className="text-gray-600">250+ pts</span>
               </div>
             </div>
             {user && (
