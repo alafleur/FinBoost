@@ -353,30 +353,26 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Main Content */}
-        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-8 w-8 text-primary-600" />
-              <h1 className="font-heading font-bold text-2xl text-dark-800">FinBoost</h1>
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" />
+              <h1 className="font-heading font-bold text-lg sm:text-2xl text-dark-800">FinBoost</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
-              <Button variant="outline" onClick={() => setLocation('/support')}>
+              <Button variant="outline" size={isMobile ? "sm" : "default"} onClick={() => setLocation('/support')}>
                 Support
               </Button>
-              <Button variant="outline" onClick={() => setLocation('/profile')}>
-                Profile
+              <Button variant="outline" size={isMobile ? "sm" : "default"} onClick={() => setLocation('/profile')}>
+                {isMobile ? "Profile" : "Profile"}
               </Button>
-              <Button variant="outline" onClick={logout}>
+              <Button variant="outline" size={isMobile ? "sm" : "default"} onClick={logout}>
                 Logout
               </Button>
             </div>
@@ -384,20 +380,23 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="font-heading font-bold text-3xl mb-2">
+      <div className="flex">
+        {/* Main Content */}
+        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+
+      {/* Welcome Section */}
+        <div className="mb-6 sm:mb-8">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
             Welcome to your FinBoost Dashboard! 🚀
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Track your progress, earn points, and win monthly rewards for building better financial habits.
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
@@ -440,17 +439,18 @@ export default function Dashboard() {
         </div>
 
         {/* Earn Points Section - Prominently Displayed */}
-        <div className="mb-8">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Earn Points</h2>
-                <p className="text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
+                <h2 className="text-xl sm:text-2xl font-bold">Earn Points</h2>
+                <p className="text-sm sm:text-base text-gray-600">Complete activities to earn points and climb the leaderboard!</p>
               </div>
               <Button 
                 variant="outline" 
                 onClick={() => setLocation('/upload')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full sm:w-auto"
+                size={isMobile ? "sm" : "default"}
               >
                 <Upload className="h-4 w-4" />
                 Upload Proof
@@ -459,27 +459,28 @@ export default function Dashboard() {
 
             {/* Daily Progress Tracker */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Daily Progress</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg bg-green-50 border-green-200">
+              <h3 className="text-base sm:text-lg font-semibold">Daily Progress</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-3 sm:p-4 border rounded-lg bg-green-50 border-green-200">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-green-800">Daily Login Streak</h4>
-                    <span className="text-sm text-green-600 font-medium">✓ Active</span>
+                    <h4 className="text-sm sm:text-base font-semibold text-green-800">Daily Login Streak</h4>
+                    <span className="text-xs sm:text-sm text-green-600 font-medium">✓ Active</span>
                   </div>
-                  <p className="text-sm text-green-700 mb-2">You're maintaining your daily streak!</p>
+                  <p className="text-xs sm:text-sm text-green-700 mb-2">You're maintaining your daily streak!</p>
                   <div className="text-xs text-green-600">+5 points earned automatically today</div>
                 </div>
 
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <div className="p-3 sm:p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Share Progress</h4>
-                    <span className="text-sm text-green-600 font-medium">+10 points</span>
+                    <h4 className="text-sm sm:text-base font-semibold">Share Progress</h4>
+                    <span className="text-xs sm:text-sm text-green-600 font-medium">+10 points</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">Share your learning journey on social media</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3">Share your learning journey on social media</p>
                   <Button 
                     onClick={() => handleShareProgress()}
                     disabled={isLoading}
                     className="w-full"
+                    size={isMobile ? "sm" : "default"}
                   >
                     Share & Earn
                   </Button>
@@ -489,31 +490,33 @@ export default function Dashboard() {
 
             {/* Learning Modules */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Learning Modules</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h3 className="text-base sm:text-lg font-semibold">Learning Modules</h3>
                 <Button 
                   variant="outline" 
                   onClick={() => setLocation('/education')}
-                  className="text-sm"
+                  className="text-xs sm:text-sm w-full sm:w-auto"
+                  size={isMobile ? "sm" : "default"}
                 >
                   View All ({Object.keys(educationContent).length})
                 </Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.values(educationContent).slice(0, 6).map((lesson) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.values(educationContent).slice(0, isMobile ? 3 : 6).map((lesson) => {
                   const description = lesson.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-                  const shortDescription = description.length > 80 ? description.substring(0, 80) + '...' : description;
+                  const shortDescription = description.length > (isMobile ? 60 : 80) ? description.substring(0, isMobile ? 60 : 80) + '...' : description;
                   
                   return (
-                    <div key={lesson.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                    <div key={lesson.id} className="p-3 sm:p-4 border rounded-lg hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold">{lesson.title}</h4>
-                        <span className="text-sm text-green-600 font-medium">+{lesson.points} points</span>
+                        <h4 className="text-sm sm:text-base font-semibold flex-1 mr-2">{lesson.title}</h4>
+                        <span className="text-xs sm:text-sm text-green-600 font-medium whitespace-nowrap">+{lesson.points} pts</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">{shortDescription}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-3">{shortDescription}</p>
                       <Button 
                         onClick={() => handleStartLesson(lesson.id)}
                         className="w-full"
+                        size={isMobile ? "sm" : "default"}
                       >
                         Start Lesson
                       </Button>
@@ -522,13 +525,14 @@ export default function Dashboard() {
                 })}
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">
-                  Showing 6 of {Object.keys(educationContent).length} available lessons
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                  Showing {isMobile ? 3 : 6} of {Object.keys(educationContent).length} available lessons
                 </p>
                 <Button 
                   variant="outline" 
                   onClick={() => setLocation('/education')}
-                  className="w-full md:w-auto"
+                  className="w-full sm:w-auto"
+                  size={isMobile ? "sm" : "default"}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
                   View All Learning Modules
@@ -541,11 +545,11 @@ export default function Dashboard() {
         {/* Dashboard Content - Only show tabs on mobile */}
         {isMobile ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="referrals">Referrals</TabsTrigger>
-              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-              <TabsTrigger value="history">Activity</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 h-auto">
+              <TabsTrigger value="overview" className="text-xs px-2 py-2">Overview</TabsTrigger>
+              <TabsTrigger value="referrals" className="text-xs px-2 py-2">Referrals</TabsTrigger>
+              <TabsTrigger value="leaderboard" className="text-xs px-2 py-2">Board</TabsTrigger>
+              <TabsTrigger value="history" className="text-xs px-2 py-2">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
