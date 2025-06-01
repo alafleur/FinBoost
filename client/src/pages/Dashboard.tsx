@@ -337,7 +337,7 @@ export default function Dashboard() {
                     </Badge>
                   </div>
                   <p className="text-xs text-orange-700">
-                    Current monthly standing
+                    Lifetime points: {user?.totalPoints || 0}
                   </p>
                 </CardContent>
               </Card>
@@ -350,13 +350,11 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="text-2xl font-bold text-green-800">{user?.currentMonthPoints || 0}</div>
                   <p className="text-xs text-green-700">
-                    Earned this month • Total: {user?.totalPoints || 0}
+                    Lifetime points: {user?.totalPoints || 0}
                   </p>
                 </CardContent>
               </Card>
             </div>
-
-            <PointsSummary user={user as User} />
 
             {/* Learning Modules Preview */}
             <div className="mb-6 sm:mb-8">
