@@ -407,7 +407,7 @@ export class MemStorage implements IStorage {
         throw new Error(`Daily limit reached for action: ${actionId}`);
       }
       if (actionConfig.maxTotal && !(await this.checkTotalActionLimit(userId, actionId))) {
-        throw new Error(`Total limit reached for action: ${actionId}`);
+        throw new Error(`Daily limit reached for action: ${actionId}`);
       }
     }
 
@@ -1130,7 +1130,7 @@ export class MemStorage implements IStorage {
         SELECT * FROM user_progress 
         WHERE user_id = ${userId}
       `);
-      
+
       return progress.rows.map((p: any) => ({
         id: p.id,
         userId: p.user_id,

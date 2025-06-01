@@ -79,44 +79,7 @@ export default function Dashboard() {
       return;
     });
 
-    try {
-
-      // Automatically award daily login points
-      const today = new Date().toDateString();
-      const lastLogin = localStorage.getItem('lastLoginDate');
-
-      if (lastLogin !== today) {
-        // Award daily login points automatically
-        fetch('/api/points/award', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            actionId: 'daily-login',
-            points: 5,
-            description: 'Daily login bonus'
-          })
-        }).then(response => {
-          if (response.ok) {
-            localStorage.setItem('lastLoginDate', today);
-            toast({
-              title: "Welcome back!",
-              description: "You earned 5 points for logging in today!",
-            });
-            // Refresh the page to show updated points
-            setTimeout(() => window.location.reload(), 1000);
-          }
-        }).catch(error => {
-          console.log('Daily login points already awarded or error occurred');
-        });
-      }
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      setLocation('/auth');
-    }
-  }, [setLocation, toast]);
+  }, [setLocation]);
 
   const logout = () => {
     localStorage.removeItem('token');

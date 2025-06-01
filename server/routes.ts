@@ -153,6 +153,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user 
       const user = await storage.createUser(userData);
 
+      // Award daily login points for new user
+      try {
+        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus - Welcome!');
+      } catch (error) {
+        console.log('Daily login points already awarded or error:', error);
+      }
+
+      // Get updated user data after points award
+      const updatedUser = await storage.getUserById(user.id);
+
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -161,14 +171,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "User registered successfully",
         token,
         user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          totalPoints: user.totalPoints,
-          currentMonthPoints: user.currentMonthPoints,
-          tier: user.tier
+          id: updatedUser!.id,
+          email: updatedUser!.email,
+          username: updatedUser!.username,
+          firstName: updatedUser!.firstName,
+          lastName: updatedUser!.lastName,
+          totalPoints: updatedUser!.totalPoints,
+          currentMonthPoints: updatedUser!.currentMonthPoints,
+          tier: updatedUser!.tier
         }
       });
     } catch (error) {
@@ -254,6 +264,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last login
       await storage.updateLastLogin(user.id);
 
+      // Award daily login points
+      try {
+        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+      } catch (error) {
+        console.log('Daily login points already awarded or error:', error);
+      }
+
+      // Get updated user data after points award
+      const updatedUser = await storage.getUserById(user.id);
+
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -262,14 +282,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: user ? "Login successful" : "Account created and logged in successfully",
         token,
         user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          totalPoints: user.totalPoints,
-          currentMonthPoints: user.currentMonthPoints,
-          tier: user.tier
+          id: updatedUser!.id,
+          email: updatedUser!.email,
+          username: updatedUser!.username,
+          firstName: updatedUser!.firstName,
+          lastName: updatedUser!.lastName,
+          totalPoints: updatedUser!.totalPoints,
+          currentMonthPoints: updatedUser!.currentMonthPoints,
+          tier: updatedUser!.tier
         }
       });
     } catch (error) {
@@ -308,6 +328,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last login
       await storage.updateLastLogin(user.id);
 
+      // Award daily login points
+      try {
+        await storage.awardPoints(user.id, 'daily-login', 5, 'Daily login bonus');
+      } catch (error) {
+        console.log('Daily login points already awarded or error:', error);
+      }
+
+      // Get updated user data after points award
+      const updatedUser = await storage.getUserById(user.id);
+
       // Generate JWT token
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -316,14 +346,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Login successful",
         token,
         user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          totalPoints: user.totalPoints,
-          currentMonthPoints: user.currentMonthPoints,
-          tier: user.tier
+          id: updatedUser!.id,
+          email: updatedUser!.email,
+          username: updatedUser!.username,
+          firstName: updatedUser!.firstName,
+          lastName: updatedUser!.lastName,
+          totalPoints: updatedUser!.totalPoints,
+          currentMonthPoints: updatedUser!.currentMonthPoints,
+          tier: updatedUser!.tier
         }
       });
     } catch (error) {
