@@ -130,7 +130,7 @@ export default function Dashboard() {
                     </div>
                     <span className="text-sm font-medium truncate">{entry.username}</span>
                   </div>
-                  <span className="text-xs font-semibold text-gray-700">{entry.totalPoints} pts</span>
+                  <span className="text-xs font-semibold text-gray-700">{entry.points} pts</span>
                 </div>
               ))}
             </div>
@@ -142,7 +142,7 @@ export default function Dashboard() {
                     <span className="text-xs font-medium text-blue-600 w-6">#{leaderboardData.currentUser.rank}</span>
                     <span className="text-sm font-semibold text-blue-800">{leaderboardData.currentUser.username} (You)</span>
                   </div>
-                  <span className="text-xs font-bold text-blue-800">{leaderboardData.currentUser.totalPoints} pts</span>
+                  <span className="text-xs font-bold text-blue-800">{leaderboardData.currentUser.points} pts</span>
                 </div>
               </div>
             )}
