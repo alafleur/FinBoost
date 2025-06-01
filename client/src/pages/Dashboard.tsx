@@ -149,10 +149,15 @@ export default function Dashboard() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+        const data = await response.json();
+        setUser(data.user);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -161,7 +166,12 @@ export default function Dashboard() {
 
   const fetchLeaderboardData = async () => {
     try {
-      const response = await fetch('/api/leaderboard');
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/leaderboard', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setLeaderboardData(data);
@@ -185,11 +195,16 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
-      const response = await fetch('/api/user/progress');
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/user/progress', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
         const data = await response.json();
-        console.log('Raw progress data:', data);
-        setLessonProgress(data);
+        console.log('Raw progress data:', data.progress);
+        setLessonProgress(data.progress);
       }
     } catch (error) {
       console.error('Error fetching lesson progress:', error);
