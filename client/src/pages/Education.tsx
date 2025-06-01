@@ -39,6 +39,28 @@ export default function Education() {
   useEffect(() => {
     // Fetch from API first to ensure sync
     fetchCompletedLessons();
+    
+    // Listen for storage changes to refresh when lessons are completed
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'completedLessons') {
+        fetchCompletedLessons();
+      }
+    };
+    
+    // Refresh when page becomes visible (user returns from lesson)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchCompletedLessons();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const fetchCompletedLessons = async () => {

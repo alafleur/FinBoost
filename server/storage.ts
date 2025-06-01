@@ -1182,7 +1182,11 @@ export class MemStorage implements IStorage {
 
     console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
 
-    const moduleId = lessonIdMap[lessonId] || 999; // Default fallback
+    const moduleId = lessonIdMap[lessonId];
+    if (!moduleId) {
+      console.error(`Unknown lesson ID: ${lessonId}. Available IDs:`, Object.keys(lessonIdMap));
+      throw new Error(`Unknown lesson ID: ${lessonId}`);
+    }
 
     // Check if already completed using raw SQL
     const existingProgress = await db.execute(sql`

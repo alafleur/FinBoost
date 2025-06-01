@@ -12,6 +12,8 @@ import { stripeService } from "./stripe";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { users } from "@shared/schema";
+import { sql, eq } from "drizzle-orm";
+import { userPointsHistory } from "./db/schema";
 
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";

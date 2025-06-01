@@ -123,9 +123,13 @@ export default function Lesson() {
           // Update completed lessons in localStorage with the actual lesson string ID
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
           const actualLessonId = window.location.pathname.split('/lesson/')[1]; // Get the actual string ID from URL
+          
+          console.log('Lesson completed successfully:', actualLessonId, completionResult);
+          
           if (!completedLessons.includes(actualLessonId)) {
             completedLessons.push(actualLessonId);
             localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+            console.log('Updated completed lessons in localStorage:', completedLessons);
           }
 
           // Update user data in localStorage with new points
