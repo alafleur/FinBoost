@@ -78,31 +78,35 @@ export default function Dashboard() {
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
             <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier System</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-orange-600 font-medium">Tier 1</span>
-                <span className="text-gray-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
+                <span className="text-orange-700 font-semibold">Tier 1</span>
+                <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-blue-600 font-medium">Tier 2</span>
+              <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <span className="text-gray-700 font-semibold">Tier 2</span>
                 <span className="text-gray-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-purple-600 font-medium">Tier 3</span>
-                <span className="text-gray-600">{tierThresholds?.tier3 || 150}+ pts</span>
+              <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
+                <span className="text-yellow-700 font-semibold">Tier 3</span>
+                <span className="text-yellow-600">{tierThresholds?.tier3 || 150}+ pts</span>
               </div>
             </div>
             {user && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-800">Your Tier:</span>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-blue-800">Your Status</span>
                   <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
                     {getTierDisplayName(user.tier)}
                   </Badge>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-blue-700">Total Points:</span>
+                  <span className="text-xs font-bold text-blue-800">{user.totalPoints}</span>
+                </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-gray-600">Points:</span>
-                  <span className="text-xs font-medium">{user.totalPoints}</span>
+                  <span className="text-xs text-blue-700">This Month:</span>
+                  <span className="text-xs font-medium text-blue-800">{user.currentMonthPoints}</span>
                 </div>
               </div>
             )}
@@ -128,43 +132,31 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Silver Tier</h3>
-            <div className="space-y-2">
-              {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
-                <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{entry.username}</span>
-                  <span className="text-xs text-gray-500">{entry.totalPoints}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
             <h3 className="font-heading font-bold text-lg mb-4">Full Leaderboard</h3>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
-                <div key={entry.id} className={`flex items-center justify-between p-2 rounded ${
+                <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
                   leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
-                    ? 'bg-blue-50 border border-blue-200' 
-                    : 'bg-gray-50'
+                    ? 'bg-blue-100 border border-blue-300' 
+                    : 'bg-gray-50 hover:bg-gray-100'
                 }`}>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500 w-6">#{index + 1}</span>
-                    <span className="text-sm">{entry.username}</span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
+                    <span className="text-sm font-medium truncate">{entry.username}</span>
                   </div>
-                  <span className="text-xs text-gray-500">{entry.totalPoints}</span>
+                  <span className="text-xs font-semibold text-gray-700">{entry.totalPoints} pts</span>
                 </div>
               ))}
             </div>
             
             {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
               <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500 w-6">#{leaderboardData.currentUser.rank}</span>
-                    <span className="text-sm font-medium">{leaderboardData.currentUser.username} (You)</span>
+                <div className="flex items-center justify-between p-3 bg-blue-100 border border-blue-300 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-medium text-blue-600 w-6">#{leaderboardData.currentUser.rank}</span>
+                    <span className="text-sm font-semibold text-blue-800">{leaderboardData.currentUser.username} (You)</span>
                   </div>
-                  <span className="text-xs text-gray-500">{leaderboardData.currentUser.totalPoints}</span>
+                  <span className="text-xs font-bold text-blue-800">{leaderboardData.currentUser.totalPoints} pts</span>
                 </div>
               </div>
             )}
