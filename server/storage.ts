@@ -1180,6 +1180,8 @@ export class MemStorage implements IStorage {
       'retirement-income-planning': 27
     };
 
+    console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
+
     const moduleId = lessonIdMap[lessonId] || 999; // Default fallback
 
     // Check if already completed using raw SQL

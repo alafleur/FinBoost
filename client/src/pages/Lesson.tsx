@@ -120,11 +120,11 @@ export default function Lesson() {
         if (completionResponse.ok) {
           const completionResult = await completionResponse.json();
           
-          // Update completed lessons in localStorage
+          // Update completed lessons in localStorage with the actual lesson string ID
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-          const lessonIdStr = lesson!.id.toString();
-          if (!completedLessons.includes(lessonIdStr)) {
-            completedLessons.push(lessonIdStr);
+          const actualLessonId = window.location.pathname.split('/lesson/')[1]; // Get the actual string ID from URL
+          if (!completedLessons.includes(actualLessonId)) {
+            completedLessons.push(actualLessonId);
             localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
           }
 

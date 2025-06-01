@@ -56,7 +56,7 @@ export default function Education() {
         // Map numeric module IDs back to lesson string IDs
         const moduleToLessonMap: { [key: number]: string } = {
           1: 'budgeting-basics',
-          2: 'emergency-fund',
+          2: 'emergency-fund', 
           3: 'investment-basics',
           4: 'credit-management',
           5: 'retirement-planning',
@@ -88,11 +88,19 @@ export default function Education() {
           .filter((p: any) => p.completed)
           .map((p: any) => moduleToLessonMap[p.moduleId] || p.moduleId.toString());
 
+        console.log('Fetched completed lesson IDs:', completedIds); // Debug log
+        console.log('Raw progress data:', result.progress); // Debug log
+
         setCompletedLessons(completedIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedIds));
       }
     } catch (error) {
       console.error('Error fetching completed lessons:', error);
+      // Fallback to localStorage if API fails
+      const storedCompleted = localStorage.getItem('completedLessons');
+      if (storedCompleted) {
+        setCompletedLessons(JSON.parse(storedCompleted));
+      }
     }
   };
 
@@ -286,8 +294,12 @@ export default function Education() {
                               {module.difficulty}
                             </Badge>
                           </div>
-                          <Button className="w-full" variant={isCompleted ? "outline" : "default"}>
-                            {isCompleted ? "Review Lesson" : "Start Lesson"}
+                          <Button 
+                            className="w-full" 
+                            variant={isCompleted ? "outline" : "default"}
+                            disabled={false}
+                          >
+                            {isCompleted ? "✓ Completed" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>
