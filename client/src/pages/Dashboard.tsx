@@ -74,6 +74,43 @@ export default function Dashboard() {
     return (
       <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6">
         <div className="space-y-6">
+          {/* Tier Progress Summary */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+            <h3 className="font-heading font-bold text-sm mb-3 text-gray-800">Tier Thresholds</h3>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-orange-600 font-medium">Bronze</span>
+                <span className="text-gray-600">0 - 99 pts</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-medium">Silver</span>
+                <span className="text-gray-600">100 - 249 pts</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-yellow-600 font-medium">Gold</span>
+                <span className="text-gray-600">250 - 499 pts</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-purple-600 font-medium">Platinum</span>
+                <span className="text-gray-600">500+ pts</span>
+              </div>
+            </div>
+            {user && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-800">Your Tier:</span>
+                  <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
+                    {getTierDisplayName(user.tier)}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-gray-600">Points:</span>
+                  <span className="text-xs font-medium">{user.totalPoints}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
             <div className="space-y-3">
