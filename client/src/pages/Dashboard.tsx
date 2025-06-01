@@ -114,7 +114,7 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
+            <h3 className="font-heading font-bold text-lg mb-4">Leaderboard</h3>
             <div className="space-y-1">
               {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
                 <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
