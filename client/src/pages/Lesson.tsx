@@ -211,14 +211,7 @@ export default function Lesson() {
     );
   }
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  
 
   const currentQuestion = lesson.quiz[currentQuestionIndex];
   const isAnswerSelected = selectedAnswers[currentQuestionIndex] !== undefined;
@@ -297,10 +290,6 @@ export default function Lesson() {
             </Button>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <Badge className={getDifficultyColor(lesson.difficulty)}>
-                  {lesson.difficulty}
-                </Badge>
-                
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Star className="h-3 w-3" />
                   {lesson.points} points

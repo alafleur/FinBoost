@@ -28,7 +28,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Budgeting Basics',
     category: 'Budgeting',
     difficulty: 'Beginner',
-    points: 25,
+    points: 20,
     estimatedTime: '15 min',
     completed: false,
     content: `
@@ -78,7 +78,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Emergency Fund',
     category: 'Savings',
     difficulty: 'Beginner',
-    points: 30,
+    points: 20,
     estimatedTime: '12 min',
     completed: false,
     content: `
@@ -130,7 +130,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Investment Basics',
     category: 'Investing',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '20 min',
     completed: false,
     content: `
@@ -182,7 +182,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Credit Management',
     category: 'Credit',
     difficulty: 'Beginner',
-    points: 30,
+    points: 20,
     estimatedTime: '18 min',
     completed: false,
     content: `
@@ -236,7 +236,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Retirement Planning',
     category: 'Planning',
     difficulty: 'Intermediate',
-    points: 40,
+    points: 20,
     estimatedTime: '25 min',
     completed: false,
     content: `
@@ -290,7 +290,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Tax Optimization',
     category: 'Taxes',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '22 min',
     completed: false,
     content: `
@@ -347,7 +347,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Your First Budget: The 50/30/20 Rule Explained',
     category: 'Budgeting',
     difficulty: 'Beginner',
-    points: 15,
+    points: 20,
     estimatedTime: '8 minutes',
     completed: false,
     content: `
@@ -455,7 +455,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Zero-Based Budgeting: Give Every Dollar a Job',
     category: 'Budgeting',
     difficulty: 'Intermediate',
-    points: 25,
+    points: 20,
     estimatedTime: '12 minutes',
     completed: false,
     content: `
@@ -589,7 +589,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Building Credit from Zero: Step-by-Step Guide',
     category: 'Credit',
     difficulty: 'Beginner',
-    points: 15,
+    points: 20,
     estimatedTime: '10 minutes',
     completed: false,
     content: `
@@ -799,7 +799,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Debt Snowball vs. Avalanche: Which Strategy Wins?',
     category: 'Debt',
     difficulty: 'Intermediate',
-    points: 25,
+    points: 20,
     estimatedTime: '12 minutes',
     completed: false,
     content: `
@@ -885,7 +885,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Investment Basics for Beginners',
     category: 'Investing',
     difficulty: 'Beginner',
-    points: 30,
+    points: 20,
     estimatedTime: '12 minutes',
     completed: false,
     content: `
@@ -978,7 +978,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Building a Detailed Emergency Fund',
     category: 'Saving',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '15 minutes',
     completed: false,
     content: `
@@ -1022,7 +1022,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Understanding Credit Scores: A Comprehensive Guide',
     category: 'Credit',
     difficulty: 'Intermediate',
-    points: 30,
+    points: 20,
     estimatedTime: '15 minutes',
     completed: false,
     content: `
@@ -1044,7 +1044,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Estate Planning Basics',
     category: 'Planning',
     difficulty: 'Advanced',
-    points: 45,
+    points: 20,
     estimatedTime: '20 minutes',
     completed: false,
     content: `
@@ -1066,7 +1066,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Insurance Essentials: Protecting Your Assets',
     category: 'Insurance',
     difficulty: 'Beginner',
-    points: 25,
+    points: 20,
     estimatedTime: '12 minutes',
     completed: false,
     content: `
@@ -1088,7 +1088,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Managing Student Loans Effectively',
     category: 'Debt',
     difficulty: 'Intermediate',
-    points: 30,
+    points: 20,
     estimatedTime: '15 minutes',
     completed: false,
     content: `
@@ -1110,7 +1110,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Saving Early for Retirement',
     category: 'Saving',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '18 minutes',
     completed: false,
     content: `
@@ -1154,7 +1154,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Advanced Investment Strategies',
     category: 'Investing',
     difficulty: 'Advanced',
-    points: 50,
+    points: 20,
     estimatedTime: '25 minutes',
     completed: false,
     content: `
@@ -1176,7 +1176,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Effective Charitable Giving Strategies',
     category: 'Taxes',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '15 minutes',
     completed: false,
     content: `
@@ -1198,7 +1198,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'The Home Buying Process: A Step-by-Step Guide',
     category: 'Planning',
     difficulty: 'Intermediate',
-    points: 40,
+    points: 20,
     estimatedTime: '20 minutes',
     completed: false,
     content: `
@@ -1220,7 +1220,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Retirement Income Planning',
     category: 'Planning',
     difficulty: 'Advanced',
-    points: 50,
+    points: 20,
     estimatedTime: '25 minutes',
     completed: false,
     content: `
@@ -1242,7 +1242,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Tax-Efficient Investing Strategies',
     category: 'Taxes',
     difficulty: 'Intermediate',
-    points: 40,
+    points: 20,
     estimatedTime: '20 minutes',
     completed: false,
     content: `
@@ -1264,7 +1264,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Understanding Cryptocurrency',
     category: 'Investing',
     difficulty: 'Advanced',
-    points: 45,
+    points: 20,
     estimatedTime: '22 minutes',
     completed: false,
     content: `
@@ -1286,7 +1286,7 @@ export const educationContent: { [key: string]: Lesson } = {
     title: 'Maximizing Credit Card Rewards',
     category: 'Credit',
     difficulty: 'Intermediate',
-    points: 35,
+    points: 20,
     estimatedTime: '18 minutes',
     completed: false,
     content: `

@@ -171,14 +171,7 @@ export default function Education() {
   const allCategories = [...new Set(Object.values(educationContent).map(lesson => lesson.category))];
   const categories = ['All', ...allCategories.sort()];
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  
 
   const getIconComponent = (IconComponent: any) => {
     return <IconComponent className="h-5 w-5 text-gray-600" />;
@@ -316,9 +309,7 @@ export default function Education() {
                                 <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
                               </div>
                             </div>
-                            <Badge className={getDifficultyColor(module.difficulty)}>
-                              {module.difficulty}
-                            </Badge>
+                            
                           </div>
                           <Button 
                             className="w-full" 
