@@ -94,12 +94,7 @@ export default function Leaderboard() {
   };
 
   const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1: return <Crown className="h-5 w-5 text-yellow-500" />;
-      case 2: return <Medal className="h-5 w-5 text-gray-400" />;
-      case 3: return <Award className="h-5 w-5 text-orange-600" />;
-      default: return <span className="text-sm font-semibold text-gray-600">#{rank}</span>;
-    }
+    return <span className="text-sm font-semibold text-gray-600">#{rank}</span>;
   };
 
   const renderLeaderboard = (data: LeaderboardData | null) => {
