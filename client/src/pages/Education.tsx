@@ -103,7 +103,15 @@ export default function Education() {
           24: 'managing-student-loans',
           25: 'charitable-giving-strategies',
           26: 'home-buying-process',
-          27: 'retirement-income-planning'
+          27: 'retirement-income-planning',
+          
+          // Add missing lesson IDs that appear in educationContent
+          28: 'emergency-fund-detailed',
+          29: 'budgeting-basics-detailed',
+          30: 'investment-basics-detailed',
+          31: 'credit-management-detailed',
+          32: 'retirement-planning-detailed',
+          33: 'tax-optimization-detailed'
         };
 
         const completedIds = result.progress

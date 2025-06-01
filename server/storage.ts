@@ -1177,7 +1177,15 @@ export class MemStorage implements IStorage {
       'managing-student-loans': 24,
       'charitable-giving-strategies': 25,
       'home-buying-process': 26,
-      'retirement-income-planning': 27
+      'retirement-income-planning': 27,
+      
+      // Add missing lesson IDs that appear in educationContent
+      'emergency-fund-detailed': 28,
+      'budgeting-basics-detailed': 29,
+      'investment-basics-detailed': 30,
+      'credit-management-detailed': 31,
+      'retirement-planning-detailed': 32,
+      'tax-optimization-detailed': 33
     };
 
     console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
