@@ -25,6 +25,7 @@ import PointsHistory from "@/components/PointsHistory";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
+import { educationContent } from "@/data/educationContent";
 
 interface User {
   id: number;
@@ -488,91 +489,50 @@ export default function Dashboard() {
 
             {/* Learning Modules */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Learning Modules</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Learning Modules</h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setLocation('/education')}
+                  className="text-sm"
+                >
+                  View All ({Object.keys(educationContent).length})
+                </Button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Budgeting Basics</h4>
-                    <span className="text-sm text-green-600 font-medium">+25 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Learn the fundamentals of creating and managing a budget</p>
-                  <Button 
-                    onClick={() => handleStartLesson('budgeting-basics')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Emergency Fund</h4>
-                    <span className="text-sm text-green-600 font-medium">+30 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Build a safety net for unexpected expenses</p>
-                  <Button 
-                    onClick={() => handleStartLesson('emergency-fund')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Investment Basics</h4>
-                    <span className="text-sm text-green-600 font-medium">+35 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Introduction to stocks, bonds, and investment strategies</p>
-                  <Button 
-                    onClick={() => handleStartLesson('investment-basics')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Credit Management</h4>
-                    <span className="text-sm text-green-600 font-medium">+30 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Understanding credit scores and debt management</p>
-                  <Button 
-                    onClick={() => handleStartLesson('credit-management')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Retirement Planning</h4>
-                    <span className="text-sm text-green-600 font-medium">+40 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Plan for your financial future with retirement strategies</p>
-                  <Button 
-                    onClick={() => handleStartLesson('retirement-planning')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
-
-                <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">Tax Optimization</h4>
-                    <span className="text-sm text-green-600 font-medium">+35 points</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Maximize your tax savings and understand deductions</p>
-                  <Button 
-                    onClick={() => handleStartLesson('tax-optimization')}
-                    className="w-full"
-                  >
-                    Start Lesson
-                  </Button>
-                </div>
+                {Object.values(educationContent).slice(0, 6).map((lesson) => {
+                  const description = lesson.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+                  const shortDescription = description.length > 80 ? description.substring(0, 80) + '...' : description;
+                  
+                  return (
+                    <div key={lesson.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-semibold">{lesson.title}</h4>
+                        <span className="text-sm text-green-600 font-medium">+{lesson.points} points</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{shortDescription}</p>
+                      <Button 
+                        onClick={() => handleStartLesson(lesson.id)}
+                        className="w-full"
+                      >
+                        Start Lesson
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-2">
+                  Showing 6 of {Object.keys(educationContent).length} available lessons
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setLocation('/education')}
+                  className="w-full md:w-auto"
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  View All Learning Modules
+                </Button>
               </div>
             </div>
           </div>
