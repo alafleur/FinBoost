@@ -72,7 +72,7 @@ export default function Dashboard() {
     if (!leaderboardData) return null;
     
     return (
-      <div className="w-80 bg-white border-l border-gray-200 h-full overflow-y-auto p-6">
+      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6">
         <div className="space-y-6">
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
@@ -275,10 +275,10 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex min-h-screen">
         {/* Main Content */}
-        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className={`flex-1 ${!isMobile ? 'pr-80' : ''}`}>
+          <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             {/* Welcome Section */}
             <div className="mb-6 sm:mb-8">
               <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
@@ -440,7 +440,7 @@ export default function Dashboard() {
 
         {/* Desktop Leaderboard Sidebar */}
         {!isMobile && (
-          <div className="fixed right-0 top-0 h-full">
+          <div className="fixed right-0 top-16 bottom-0 w-80">
             <LeaderboardSidebar />
           </div>
         )}
