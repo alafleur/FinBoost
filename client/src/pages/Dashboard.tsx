@@ -73,7 +73,7 @@ export default function Dashboard() {
     if (!leaderboardData) return null;
     
     return (
-      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6">
+      <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto p-6 pt-4">
         <div className="space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
@@ -84,7 +84,7 @@ export default function Dashboard() {
                 <span className="text-orange-700 font-semibold">Tier 1</span>
                 <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
+              <div className="flex justify-between items-center p-2 bg-slate-100 rounded">
                 <span className="text-slate-700 font-semibold">Tier 2</span>
                 <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
               </div>
