@@ -114,25 +114,6 @@ export default function Dashboard() {
 
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
-            <div className="space-y-3">
-              {leaderboardData.tier2?.slice(0, 3).map((entry: any, index: number) => (
-                <div key={entry.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="flex-shrink-0">
-                    {index === 0 && <Crown className="h-5 w-5 text-yellow-500" />}
-                    {index === 1 && <Medal className="h-5 w-5 text-gray-400" />}
-                    {index === 2 && <Medal className="h-5 w-5 text-orange-500" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{entry.username}</p>
-                    <p className="text-xs text-gray-500">{entry.totalPoints} points</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Full Leaderboard</h3>
             <div className="space-y-1">
               {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
                 <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
@@ -141,7 +122,12 @@ export default function Dashboard() {
                     : 'bg-gray-50 hover:bg-gray-100'
                 }`}>
                   <div className="flex items-center space-x-3">
-                    <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
+                      {index === 0 && <Crown className="h-4 w-4 text-yellow-500" />}
+                      {index === 1 && <Medal className="h-4 w-4 text-gray-400" />}
+                      {index === 2 && <Medal className="h-4 w-4 text-orange-500" />}
+                    </div>
                     <span className="text-sm font-medium truncate">{entry.username}</span>
                   </div>
                   <span className="text-xs font-semibold text-gray-700">{entry.totalPoints} pts</span>
