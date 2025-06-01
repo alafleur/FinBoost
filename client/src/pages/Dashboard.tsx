@@ -71,7 +71,7 @@ export default function Dashboard() {
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
-    
+
     return (
       <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto">
         <div className="p-6 space-y-6" style={{ paddingTop: '1.5rem' }}>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            
+
             {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <div className="flex items-center justify-between p-3 bg-blue-100 border border-blue-300 rounded-lg">
@@ -226,7 +226,7 @@ export default function Dashboard() {
       case 'tier3':
         return 'bg-gradient-to-r from-yellow-400 to-yellow-600';
       case 'tier2':
-        return 'bg-gradient-to-r from-slate-400 to-slate-600';
+        return 'bg-gradient-to-r from-slate-400 toslate-600';
       case 'tier1':
       default:
         return 'bg-gradient-to-r from-orange-400 to-orange-600';
@@ -483,7 +483,7 @@ export default function Dashboard() {
                   currentStreak={user?.currentStreak || 0}
                   longestStreak={user?.longestStreak || 0}
                 />
-                
+
                 {/* Points Earning Actions */}
                 <Card>
                   <CardHeader>
