@@ -77,7 +77,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Tier Progress Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-            <h3 className="font-heading font-bold text-sm mb-2 text-gray-800">Tier Thresholds</h3>
+            <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
