@@ -325,6 +325,68 @@ export default function Dashboard() {
               </p>
             </div>
 
+            {/* Monthly Reward Pool */}
+            <div className="mb-6 sm:mb-8">
+              <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-purple-900 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                    Monthly Reward Pool
+                  </CardTitle>
+                  <p className="text-sm text-purple-700">
+                    Community funds distributed monthly based on participation and achievement
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Total Pool */}
+                    <div className="bg-white/60 rounded-lg p-4 border border-purple-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-purple-800 mb-1">Total Pool</h4>
+                        <div className="text-2xl font-bold text-purple-900">$11,000</div>
+                        <p className="text-xs text-purple-600 mt-1">55% of monthly fees</p>
+                      </div>
+                    </div>
+
+                    {/* Tier 3 Pool */}
+                    <div className="bg-gradient-to-br from-orange-100 to-yellow-100 rounded-lg p-4 border border-orange-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 3 Pool</h4>
+                        <div className="text-xl font-bold text-orange-900">$5,500</div>
+                        <p className="text-xs text-orange-600 mt-1">Top 33% performers</p>
+                      </div>
+                    </div>
+
+                    {/* Tier 2 Pool */}
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 2 Pool</h4>
+                        <div className="text-xl font-bold text-orange-900">$3,300</div>
+                        <p className="text-xs text-orange-600 mt-1">Middle 33% performers</p>
+                      </div>
+                    </div>
+
+                    {/* Tier 1 Pool */}
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 1 Pool</h4>
+                        <div className="text-xl font-bold text-orange-900">$2,200</div>
+                        <p className="text-xs text-orange-600 mt-1">Bottom 33% performers</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800 text-center">
+                      <span className="font-semibold">Next payout:</span> End of month • Based on 1,000 active members at $20/month
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
