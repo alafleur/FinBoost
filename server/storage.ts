@@ -19,6 +19,7 @@ export interface IStorage {
   getAllSubscribers(): Promise<Subscriber[]>;
   getSubscribersCount(): Promise<number>;
   getUserCount(): Promise<number>;
+  getDistributionSettings(): Promise<{[key: string]: string}>;
 
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;

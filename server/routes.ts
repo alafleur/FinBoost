@@ -568,6 +568,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get next reward distribution date with countdown
+  apiRouter.get("/pool/next-distribution", async (req: Request, res: Response) => {
+    try {
+      // Get admin settings for distribution
+      const settings = await storage.getDistributionSettings();
+      
+      // Calculate next distribution date based on settings
+      const nextDistribution = calculateNextDistributionDate(settings);
+      const now = new Date();
+      const timeRemaining = nextDistribution.getTime() - now.getTime();
+      
+      // Calculate days, hours, minutes remaining
+      const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
+      return res.status(200).json({
+        success: true,
+        distribution: {
+          nextDate: nextDistribution.toISOString(),
+          timeRemaining: {
+            days: Math.max(0, days),
+            hours: Math.max(0, hours),
+            minutes: Math.max(0, minutes),
+            totalMs: Math.max(0, timeRemaining)
+          },
+          settings
+        }
+      });
+    } catch (error) {
+      console.error("Error calculating next distribution:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error calculating next distribution"
+      });
+    }
+  });
+
   // Get user's learning progress
   apiRouter.get("/user/progress", authenticateToken, async (req: Request, res: Response) => {
     try {

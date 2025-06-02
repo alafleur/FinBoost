@@ -188,6 +188,25 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Reward Distribution Settings
+export const rewardDistributionSettings = pgTable("reward_distribution_settings", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Setting name
+  value: text("value").notNull(), // Setting value
+  description: text("description"), // Setting description
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
+export const insertRewardDistributionSettingSchema = createInsertSchema(rewardDistributionSettings).pick({
+  name: true,
+  value: true,
+  description: true,
+});
+
+export type RewardDistributionSetting = typeof rewardDistributionSettings.$inferSelect;
+export type InsertRewardDistributionSetting = z.infer<typeof insertRewardDistributionSettingSchema>;
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   username: true,
