@@ -1,10 +1,8 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and, lt } from "drizzle-orm";
+import { eq, sql, desc, and, lt, gte } from "drizzle-orm";
 import { db } from "./db";
-import { users } from "@shared/schema";
-import { sql, eq, and, gte, lt } from "drizzle-orm";
 import crypto from "crypto";
 
 // modify the interface with any CRUD methods
@@ -20,6 +18,7 @@ export interface IStorage {
   getSubscriberByEmail(email: string): Promise<Subscriber | undefined>;
   getAllSubscribers(): Promise<Subscriber[]>;
   getSubscribersCount(): Promise<number>;
+  getUserCount(): Promise<number>;
 
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
@@ -272,6 +271,11 @@ export class MemStorage implements IStorage {
 
   async getSubscribersCount(): Promise<number> {
     return this.subscribers.size;
+  }
+
+  async getUserCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return result[0].count;
   }
 
   // User Authentication Methods

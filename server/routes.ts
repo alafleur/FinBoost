@@ -527,6 +527,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get monthly pool calculation
+  apiRouter.get("/pool/monthly", async (req: Request, res: Response) => {
+    try {
+      // Get total active users count
+      const totalUsers = await storage.getUserCount();
+      
+      // Monthly membership fee
+      const monthlyFee = 20;
+      
+      // Calculate total monthly revenue
+      const totalRevenue = totalUsers * monthlyFee;
+      
+      // 55% goes to reward pool, 45% to education costs
+      const totalPool = totalRevenue * 0.55;
+      
+      // Pool distribution: Tier 3 (50%), Tier 2 (30%), Tier 1 (20%)
+      const tier3Pool = totalPool * 0.50;
+      const tier2Pool = totalPool * 0.30;
+      const tier1Pool = totalPool * 0.20;
+
+      return res.status(200).json({
+        success: true,
+        pool: {
+          totalUsers,
+          totalRevenue,
+          totalPool: Math.round(totalPool),
+          tier3Pool: Math.round(tier3Pool),
+          tier2Pool: Math.round(tier2Pool),
+          tier1Pool: Math.round(tier1Pool),
+          monthlyFee
+        }
+      });
+    } catch (error) {
+      console.error("Error calculating monthly pool:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error calculating monthly pool"
+      });
+    }
+  });
+
   // Get user's learning progress
   apiRouter.get("/user/progress", authenticateToken, async (req: Request, res: Response) => {
     try {
