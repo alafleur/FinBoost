@@ -17,6 +17,57 @@ import { sql, eq } from "drizzle-orm";
 // JWT Secret (in production, use environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
+// Helper function to calculate next distribution date
+function calculateNextDistributionDate(settings: {[key: string]: string}): Date {
+  const now = new Date();
+  const delayDays = parseInt(settings.distributionDelayDays || "7");
+  
+  let accumulationEndDate: Date;
+  
+  switch (settings.accumulationPeriodEnd) {
+    case "last_day_of_month":
+      // Last day of current month
+      accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      break;
+    case "last_thursday":
+      // Last Thursday of current month
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const lastThursday = new Date(lastDay);
+      lastThursday.setDate(lastDay.getDate() - ((lastDay.getDay() + 3) % 7));
+      accumulationEndDate = lastThursday;
+      break;
+    case "15th":
+      // 15th of current month
+      accumulationEndDate = new Date(now.getFullYear(), now.getMonth(), 15);
+      if (accumulationEndDate < now) {
+        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
+      }
+      break;
+    default:
+      // Default to last day of month
+      accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+  
+  // If accumulation period has passed, move to next period
+  if (accumulationEndDate < now) {
+    switch (settings.accumulationPeriodEnd) {
+      case "last_day_of_month":
+        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+        break;
+      case "15th":
+        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
+        break;
+      // Add more cases as needed
+    }
+  }
+  
+  // Add distribution delay
+  const distributionDate = new Date(accumulationEndDate);
+  distributionDate.setDate(distributionDate.getDate() + delayDays);
+  
+  return distributionDate;
+}
+
 // Google OAuth client setup
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "your-google-client-id";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);

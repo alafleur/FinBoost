@@ -1372,6 +1372,16 @@ export class MemStorage implements IStorage {
       tier3: validPoints[p66Index] || 0
     };
   }
+
+  async getDistributionSettings(): Promise<{[key: string]: string}> {
+    // Default settings for reward distribution
+    return {
+      accumulationPeriodEnd: "last_day_of_month", // Options: last_day_of_month, last_thursday, 15th, etc.
+      distributionDelayDays: "7", // Days after accumulation period ends
+      accumulationPeriodType: "monthly", // monthly, weekly, custom
+      timezone: "UTC"
+    };
+  }
 }
 
 export const storage = new MemStorage();

@@ -69,6 +69,11 @@ export default function Dashboard() {
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
   const [poolData, setPoolData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [distributionInfo, setDistributionInfo] = useState<{
+    nextDate: string;
+    timeRemaining: { days: number; hours: number; minutes: number; totalMs: number };
+    settings: { [key: string]: string };
+  } | null>(null);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -232,6 +237,20 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching pool data:', error);
+    }
+  };
+
+  const fetchDistributionInfo = async () => {
+    try {
+      const response = await fetch('/api/pool/next-distribution');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setDistributionInfo(data.distribution);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching distribution info:', error);
     }
   };
 
