@@ -67,6 +67,7 @@ export default function Dashboard() {
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
   const [tierThresholds, setTierThresholds] = useState<any>(null);
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
+  const [poolData, setPoolData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
   const LeaderboardSidebar = () => {
@@ -155,6 +156,7 @@ export default function Dashboard() {
     fetchLeaderboardData();
     fetchTierThresholds();
     fetchLessonProgress();
+    fetchPoolData();
   }, []);
 
   const fetchUserData = async () => {
@@ -218,6 +220,18 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching lesson progress:', error);
+    }
+  };
+
+  const fetchPoolData = async () => {
+    try {
+      const response = await fetch('/api/pool/monthly');
+      if (response.ok) {
+        const data = await response.json();
+        setPoolData(data.pool);
+      }
+    } catch (error) {
+      console.error('Error fetching pool data:', error);
     }
   };
 
@@ -345,7 +359,9 @@ export default function Dashboard() {
                     <div className="bg-white/60 rounded-lg p-4 border border-purple-200">
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-purple-800 mb-1">Total Pool</h4>
-                        <div className="text-2xl font-bold text-purple-900">$11,000</div>
+                        <div className="text-2xl font-bold text-purple-900">
+                          ${poolData ? poolData.totalPool.toLocaleString() : '0'}
+                        </div>
                         <p className="text-xs text-purple-600 mt-1">55% of monthly fees</p>
                       </div>
                     </div>
@@ -354,7 +370,9 @@ export default function Dashboard() {
                     <div className="bg-gradient-to-br from-orange-100 to-yellow-100 rounded-lg p-4 border border-orange-200">
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 3 Pool</h4>
-                        <div className="text-xl font-bold text-orange-900">$5,500</div>
+                        <div className="text-xl font-bold text-orange-900">
+                          ${poolData ? poolData.tier3Pool.toLocaleString() : '0'}
+                        </div>
                         <p className="text-xs text-orange-600 mt-1">Top 33% performers</p>
                       </div>
                     </div>
@@ -363,7 +381,9 @@ export default function Dashboard() {
                     <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 2 Pool</h4>
-                        <div className="text-xl font-bold text-orange-900">$3,300</div>
+                        <div className="text-xl font-bold text-orange-900">
+                          ${poolData ? poolData.tier2Pool.toLocaleString() : '0'}
+                        </div>
                         <p className="text-xs text-orange-600 mt-1">Middle 33% performers</p>
                       </div>
                     </div>
@@ -372,7 +392,9 @@ export default function Dashboard() {
                     <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 1 Pool</h4>
-                        <div className="text-xl font-bold text-orange-900">$2,200</div>
+                        <div className="text-xl font-bold text-orange-900">
+                          ${poolData ? poolData.tier1Pool.toLocaleString() : '0'}
+                        </div>
                         <p className="text-xs text-orange-600 mt-1">Bottom 33% performers</p>
                       </div>
                     </div>
@@ -380,7 +402,7 @@ export default function Dashboard() {
                   
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-800 text-center">
-                      <span className="font-semibold">Next payout:</span> End of month • Based on 1,000 active members at $20/month
+                      <span className="font-semibold">Next payout:</span> End of month • Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
                     </p>
                   </div>
                 </CardContent>
