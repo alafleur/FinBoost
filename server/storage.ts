@@ -1377,7 +1377,7 @@ export class MemStorage implements IStorage {
     // Default settings for reward distribution
     return {
       accumulationPeriodEnd: "last_day_of_month", // Options: last_day_of_month, last_thursday, 15th, etc.
-      distributionDelayDays: "7", // Days after accumulation period ends
+      distributionDelayDays: "1", // Days after accumulation period ends
       accumulationPeriodType: "monthly", // monthly, weekly, custom
       timezone: "UTC"
     };
