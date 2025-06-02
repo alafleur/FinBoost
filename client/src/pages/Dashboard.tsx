@@ -162,7 +162,19 @@ export default function Dashboard() {
     fetchTierThresholds();
     fetchLessonProgress();
     fetchPoolData();
+    fetchDistributionInfo();
   }, []);
+
+  // Update countdown timer every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (distributionInfo) {
+        fetchDistributionInfo();
+      }
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [distributionInfo]);
 
   const fetchUserData = async () => {
     try {
@@ -420,9 +432,34 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-800 text-center">
-                      <span className="font-semibold">Next payout:</span> End of month • Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
-                    </p>
+                    {distributionInfo ? (
+                      <div className="text-center">
+                        <div className="text-sm text-blue-800 mb-2">
+                          <span className="font-semibold">Next payout:</span> {new Date(distributionInfo.nextDate).toLocaleDateString()}
+                        </div>
+                        <div className="flex justify-center items-center gap-4 text-xs">
+                          <div className="bg-blue-100 px-2 py-1 rounded">
+                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.days}</span>
+                            <span className="text-blue-700 ml-1">days</span>
+                          </div>
+                          <div className="bg-blue-100 px-2 py-1 rounded">
+                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.hours}</span>
+                            <span className="text-blue-700 ml-1">hrs</span>
+                          </div>
+                          <div className="bg-blue-100 px-2 py-1 rounded">
+                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.minutes}</span>
+                            <span className="text-blue-700 ml-1">min</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-blue-600 mt-2">
+                          Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-blue-800 text-center">
+                        <span className="font-semibold">Next payout:</span> End of month • Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
