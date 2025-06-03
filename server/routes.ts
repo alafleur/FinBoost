@@ -1772,12 +1772,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pointsHistory = await storage.getUserPointsHistory(userId);
       const lessonCompletions = pointsHistory.filter(h => h.action === 'lesson_complete');
 
+      // Create lesson mapping for debugging
+      const lessonIdMap: { [key: number]: string } = {
+        1: 'budgeting-basics',
+        2: 'emergency-fund',
+        3: 'investment-basics',
+        4: 'credit-management',
+        5: 'retirement-planning',
+        6: 'tax-optimization',
+        7: 'credit-basics',
+        8: 'understanding-credit-scores',
+        9: 'debt-snowball-vs-avalanche',
+        10: 'smart-expense-cutting',
+        11: 'zero-based-budgeting',
+        12: 'envelope-budgeting',
+        13: 'high-yield-savings',
+        14: 'cd-laddering',
+        15: 'sinking-funds',
+        16: 'roth-vs-traditional-ira',
+        17: 'index-fund-investing',
+        18: 'asset-allocation',
+        19: 'dollar-cost-averaging',
+        20: 'options-trading-basics',
+        21: 'smart-goal-setting',
+        22: 'estate-planning-basics',
+        23: 'insurance-essentials',
+        24: 'managing-student-loans',
+        25: 'charitable-giving-strategies',
+        26: 'home-buying-process',
+        27: 'retirement-income-planning',
+        28: 'emergency-fund-detailed',
+        29: 'budgeting-basics-detailed',
+        30: 'investment-basics-detailed',
+        31: 'credit-management-detailed',
+        32: 'retirement-planning-detailed',
+        33: 'tax-optimization-detailed',
+        34: 'building-emergency-fund',
+        35: 'debt-consolidation'
+      };
+
+      const mappedCompletions = progress
+        .filter(p => p.completed)
+        .map(p => ({
+          moduleId: p.moduleId,
+          lessonKey: lessonIdMap[p.moduleId] || `unknown-${p.moduleId}`,
+          completedAt: p.completedAt,
+          pointsEarned: p.pointsEarned
+        }));
+
       res.json({
         success: true,
         userId,
         progressEntries: progress,
         lessonCompletions,
-        totalLessonsCompleted: progress.filter(p => p.completed).length
+        mappedCompletions,
+        totalLessonsCompleted: progress.filter(p => p.completed).length,
+        lessonMapping: lessonIdMap
       });
     } catch (error: any) {
       console.error('Debug lesson check error:', error);

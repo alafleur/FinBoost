@@ -75,10 +75,10 @@ export default function Education() {
       if (response.ok) {
         const result = await response.json();
 
-        // Map numeric module IDs back to lesson string IDs
+        // Map database module IDs back to lesson string IDs - complete mapping from storage system
         const moduleToLessonMap: { [key: number]: string } = {
           1: 'budgeting-basics',
-          2: 'emergency-fund', 
+          2: 'emergency-fund',
           3: 'investment-basics',
           4: 'credit-management',
           5: 'retirement-planning',
@@ -104,14 +104,14 @@ export default function Education() {
           25: 'charitable-giving-strategies',
           26: 'home-buying-process',
           27: 'retirement-income-planning',
-
-          // Add missing lesson IDs that appear in educationContent
           28: 'emergency-fund-detailed',
           29: 'budgeting-basics-detailed',
           30: 'investment-basics-detailed',
           31: 'credit-management-detailed',
           32: 'retirement-planning-detailed',
-          33: 'tax-optimization-detailed'
+          33: 'tax-optimization-detailed',
+          34: 'building-emergency-fund',
+          35: 'debt-consolidation'
         };
 
         const completedIds = result.progress
@@ -171,7 +171,7 @@ export default function Education() {
   const allCategories = [...new Set(Object.values(educationContent).map(lesson => lesson.category))];
   const categories = ['All', ...allCategories.sort()];
 
-  
+
 
   const getIconComponent = (IconComponent: any) => {
     return <IconComponent className="h-5 w-5 text-gray-600" />;
@@ -309,7 +309,7 @@ export default function Education() {
                                 <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
                               </div>
                             </div>
-                            
+
                           </div>
                           <Button 
                             className="w-full" 
