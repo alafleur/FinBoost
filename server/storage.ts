@@ -1237,14 +1237,10 @@ export class MemStorage implements IStorage {
           WHERE user_id = ${userId} AND module_id = ${moduleId}
         `);
       } else {
-        // Insert new progress record with proper handling
+        // Insert new progress record - check if exists first to avoid conflicts
         await db.execute(sql`
           INSERT INTO user_progress (user_id, module_id, completed, points_earned, completed_at, created_at)
           VALUES (${userId}, ${moduleId}, true, ${pointsEarned}, NOW(), NOW())
-          ON CONFLICT (user_id, module_id) DO UPDATE SET
-            completed = true,
-            points_earned = ${pointsEarned},
-            completed_at = NOW()
         `);
       }
       console.log(`Successfully recorded lesson completion for user ${userId}, lesson ${lessonId}, moduleId ${moduleId}`);
