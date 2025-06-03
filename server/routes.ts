@@ -1833,7 +1833,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lessonCompletions,
         mappedCompletions,
         totalLessonsCompleted: progress.filter(p => p.completed).length,
-        lessonMapping: lessonIdMap
+        lessonMapping: lessonIdMap,
+        pointsHistoryCount: lessonCompletions.length
       });
     } catch (error: any) {
       console.error('Debug lesson check error:', error);

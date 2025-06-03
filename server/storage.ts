@@ -1121,16 +1121,17 @@ export class MemStorage implements IStorage {
 
   async getUserProgress(userId: number) {
     try {
+      // Get all progress records for the user, not just completed ones
       const progress = await db.execute(sql`
         SELECT * FROM user_progress 
-        WHERE user_id = ${userId} AND completed = true
+        WHERE user_id = ${userId}
         ORDER BY completed_at DESC
       `);
 
       // Handle different response formats
       const rows = progress.rows || progress || [];
       
-      console.log(`User ${userId} progress query returned ${rows.length} completed lessons`);
+      console.log(`User ${userId} progress query returned ${rows.length} total lessons, ${rows.filter((r: any) => r.completed).length} completed`);
       
       return rows.map((p: any) => ({
         id: p.id,

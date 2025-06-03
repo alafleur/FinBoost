@@ -83,17 +83,52 @@ export default function Education() {
         console.log('Raw progress data:', progressData.progress);
         console.log('Completed count from API:', progressData.completedCount);
 
-        // Create lesson ID mapping for completed lessons
+        // Create proper lesson ID mapping for completed lessons
+        const lessonIdMap: { [key: number]: string } = {
+          1: 'budgeting-basics',
+          2: 'emergency-fund',
+          3: 'investment-basics',
+          4: 'credit-management',
+          5: 'retirement-planning',
+          6: 'tax-optimization',
+          7: 'credit-basics',
+          8: 'understanding-credit-scores',
+          9: 'debt-snowball-vs-avalanche',
+          10: 'smart-expense-cutting',
+          11: 'zero-based-budgeting',
+          12: 'envelope-budgeting',
+          13: 'high-yield-savings',
+          14: 'cd-laddering',
+          15: 'sinking-funds',
+          16: 'roth-vs-traditional-ira',
+          17: 'index-fund-investing',
+          18: 'asset-allocation',
+          19: 'dollar-cost-averaging',
+          20: 'options-trading-basics',
+          21: 'smart-goal-setting',
+          22: 'estate-planning-basics',
+          23: 'insurance-essentials',
+          24: 'managing-student-loans',
+          25: 'charitable-giving-strategies',
+          26: 'home-buying-process',
+          27: 'retirement-income-planning',
+          28: 'emergency-fund-detailed',
+          29: 'budgeting-basics-detailed',
+          30: 'investment-basics-detailed',
+          31: 'credit-management-detailed',
+          32: 'retirement-planning-detailed',
+          33: 'tax-optimization-detailed',
+          34: 'building-emergency-fund',
+          35: 'debt-consolidation'
+        };
+
         const completedLessonIds = progressData.progress
           .filter((p: any) => p.completed)
-          .map((p: any) => {
-            // Map module ID to lesson string ID
-            const lessonKey = Object.keys(lessonContent).find(key => educationContent[key].moduleId === p.moduleId);
-            return lessonKey;
-          })
+          .map((p: any) => lessonIdMap[p.moduleId])
           .filter(Boolean);
 
         console.log('Fetched completed lesson IDs:', completedLessonIds);
+        console.log('Completed count from progress:', progressData.progress.filter((p: any) => p.completed).length);
         setCompletedLessons(completedLessonIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedLessonIds));
       }

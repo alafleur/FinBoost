@@ -282,51 +282,48 @@ export default function Dashboard() {
     return tier || 'Bronze';
   };
 
-  // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = lessonProgress
-    .filter(progress => progress.completed) // Only include completed lessons
-    .map(progress => {
-      // Map numeric module IDs back to lesson string IDs - complete mapping from storage system
-      const moduleToLessonMap: { [key: number]: string } = {
-        1: 'budgeting-basics',
-        2: 'emergency-fund',
-        3: 'investment-basics',
-        4: 'credit-management',
-        5: 'retirement-planning',
-        6: 'tax-optimization',
-        7: 'credit-basics',
-        8: 'understanding-credit-scores',
-        9: 'debt-snowball-vs-avalanche',
-        10: 'smart-expense-cutting',
-        11: 'zero-based-budgeting',
-        12: 'envelope-budgeting',
-        13: 'high-yield-savings',
-        14: 'cd-laddering',
-        15: 'sinking-funds',
-        16: 'roth-vs-traditional-ira',
-        17: 'index-fund-investing',
-        18: 'asset-allocation',
-        19: 'dollar-cost-averaging',
-        20: 'options-trading-basics',
-        21: 'smart-goal-setting',
-        22: 'estate-planning-basics',
-        23: 'insurance-essentials',
-        24: 'managing-student-loans',
-        25: 'charitable-giving-strategies',
-        26: 'home-buying-process',
-        27: 'retirement-income-planning',
-        28: 'emergency-fund-detailed',
-        29: 'budgeting-basics-detailed',
-        30: 'investment-basics-detailed',
-        31: 'credit-management-detailed',
-        32: 'retirement-planning-detailed',
-        33: 'tax-optimization-detailed',
-        34: 'building-emergency-fund',
-        35: 'debt-consolidation'
-      };
+  // Get the completed lesson IDs from lessonProgress with complete mapping
+  const moduleToLessonMap: { [key: number]: string } = {
+    1: 'budgeting-basics',
+    2: 'emergency-fund',
+    3: 'investment-basics',
+    4: 'credit-management',
+    5: 'retirement-planning',
+    6: 'tax-optimization',
+    7: 'credit-basics',
+    8: 'understanding-credit-scores',
+    9: 'debt-snowball-vs-avalanche',
+    10: 'smart-expense-cutting',
+    11: 'zero-based-budgeting',
+    12: 'envelope-budgeting',
+    13: 'high-yield-savings',
+    14: 'cd-laddering',
+    15: 'sinking-funds',
+    16: 'roth-vs-traditional-ira',
+    17: 'index-fund-investing',
+    18: 'asset-allocation',
+    19: 'dollar-cost-averaging',
+    20: 'options-trading-basics',
+    21: 'smart-goal-setting',
+    22: 'estate-planning-basics',
+    23: 'insurance-essentials',
+    24: 'managing-student-loans',
+    25: 'charitable-giving-strategies',
+    26: 'home-buying-process',
+    27: 'retirement-income-planning',
+    28: 'emergency-fund-detailed',
+    29: 'budgeting-basics-detailed',
+    30: 'investment-basics-detailed',
+    31: 'credit-management-detailed',
+    32: 'retirement-planning-detailed',
+    33: 'tax-optimization-detailed',
+    34: 'building-emergency-fund',
+    35: 'debt-consolidation'
+  };
 
-      return moduleToLessonMap[progress.moduleId] || progress.moduleId.toString();
-    });
+  const completedLessonIds = lessonProgress
+    .filter(progress => progress.completed)
+    .map(progress => moduleToLessonMap[progress.moduleId] || progress.moduleId.toString());
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
   console.log('Total modules loaded:', Object.keys(educationContent).length);
@@ -440,7 +437,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     {distributionInfo ? (
                       <div className="text-center">
