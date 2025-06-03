@@ -663,9 +663,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id;
       const progress = await storage.getUserProgress(userId);
 
+      // Count completed lessons
+      const completedCount = progress.filter(p => p.completed).length;
+
+      console.log(`User ${userId} has ${completedCount} completed lessons from progress data`);
+
       return res.status(200).json({ 
         success: true,
-        progress
+        progress,
+        completedCount
       });
     } catch (error) {
       console.error("Error fetching user progress:", error);

@@ -1123,18 +1123,21 @@ export class MemStorage implements IStorage {
     try {
       const progress = await db.execute(sql`
         SELECT * FROM user_progress 
-        WHERE user_id = ${userId}
+        WHERE user_id = ${userId} AND completed = true
+        ORDER BY completed_at DESC
       `);
 
       // Handle different response formats
       const rows = progress.rows || progress || [];
+      
+      console.log(`User ${userId} progress query returned ${rows.length} completed lessons`);
       
       return rows.map((p: any) => ({
         id: p.id,
         userId: p.user_id,
         moduleId: p.module_id,
         completed: !!p.completed,
-        pointsEarned: p.points_earned,
+        pointsEarned: p.points_earned || 0,
         completedAt: p.completed_at,
         createdAt: p.created_at
       }));

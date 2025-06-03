@@ -34,7 +34,11 @@ interface Module {
 
 export default function Education() {
   const [, setLocation] = useLocation();
+  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [availablePoints, setAvailablePoints] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch from API first to ensure sync
@@ -66,63 +70,32 @@ export default function Education() {
   const fetchCompletedLessons = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/progress', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      // Fetch user progress
+      const progressResponse = await fetch('/api/user/progress', {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      if (response.ok) {
-        const result = await response.json();
+      if (progressResponse.ok) {
+        const progressData = await progressResponse.json();
+        setUserProgress(progressData.progress);
+        setCompletedCount(progressData.completedCount || 0);
 
-        // Map database module IDs back to lesson string IDs - complete mapping from storage system
-        const moduleToLessonMap: { [key: number]: string } = {
-          1: 'budgeting-basics',
-          2: 'emergency-fund',
-          3: 'investment-basics',
-          4: 'credit-management',
-          5: 'retirement-planning',
-          6: 'tax-optimization',
-          7: 'credit-basics',
-          8: 'understanding-credit-scores',
-          9: 'debt-snowball-vs-avalanche',
-          10: 'smart-expense-cutting',
-          11: 'zero-based-budgeting',
-          12: 'envelope-budgeting',
-          13: 'high-yield-savings',
-          14: 'cd-laddering',
-          15: 'sinking-funds',
-          16: 'roth-vs-traditional-ira',
-          17: 'index-fund-investing',
-          18: 'asset-allocation',
-          19: 'dollar-cost-averaging',
-          20: 'options-trading-basics',
-          21: 'smart-goal-setting',
-          22: 'estate-planning-basics',
-          23: 'insurance-essentials',
-          24: 'managing-student-loans',
-          25: 'charitable-giving-strategies',
-          26: 'home-buying-process',
-          27: 'retirement-income-planning',
-          28: 'emergency-fund-detailed',
-          29: 'budgeting-basics-detailed',
-          30: 'investment-basics-detailed',
-          31: 'credit-management-detailed',
-          32: 'retirement-planning-detailed',
-          33: 'tax-optimization-detailed',
-          34: 'building-emergency-fund',
-          35: 'debt-consolidation'
-        };
+        console.log('Raw progress data:', progressData.progress);
+        console.log('Completed count from API:', progressData.completedCount);
 
-        const completedIds = result.progress
+        // Create lesson ID mapping for completed lessons
+        const completedLessonIds = progressData.progress
           .filter((p: any) => p.completed)
-          .map((p: any) => moduleToLessonMap[p.moduleId] || p.moduleId.toString());
+          .map((p: any) => {
+            // Map module ID to lesson string ID
+            const lessonKey = Object.keys(lessonContent).find(key => educationContent[key].moduleId === p.moduleId);
+            return lessonKey;
+          })
+          .filter(Boolean);
 
-        console.log('Fetched completed lesson IDs:', completedIds); // Debug log
-        console.log('Raw progress data:', result.progress); // Debug log
-
-        setCompletedLessons(completedIds);
-        localStorage.setItem('completedLessons', JSON.stringify(completedIds));
+        console.log('Fetched completed lesson IDs:', completedLessonIds);
+        setCompletedLessons(completedLessonIds);
+        localStorage.setItem('completedLessons', JSON.stringify(completedLessonIds));
       }
     } catch (error) {
       console.error('Error fetching completed lessons:', error);
@@ -217,7 +190,7 @@ export default function Education() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary-600">
-                    {completedLessons.length}
+                    {completedCount}
                   </div>
                   <div className="text-sm text-gray-600">Lessons Completed</div>
                 </div>
