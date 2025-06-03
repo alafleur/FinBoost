@@ -1835,6 +1835,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Backfill lesson completions from points history
+  apiRouter.post("/admin/backfill-lesson-progress", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "User ID is required"
+        });
+      }
+
+      // Get all lesson completion points from user's history
+      const pointsHistory = await storage.getUserPointsHistory(userId);
+      const lessonCompletions = pointsHistory.filter(h => 
+        h.action === 'lesson_complete' && 
+        h.status === 'approved' &&
+        h.metadata
+      );
+
+      console.log(`Found ${lessonCompletions.length} lesson completions in points history for user ${userId}`);
+
+      // Lesson ID mapping for backfill
+      const lessonIdMap: { [key: string]: number } = {
+        'budgeting-basics': 1,
+        'emergency-fund': 2,
+        'investment-basics': 3,
+        'credit-management': 4,
+        'retirement-planning': 5,
+        'tax-optimization': 6,
+        'credit-basics': 7,
+        'understanding-credit-scores': 8,
+        'debt-snowball-vs-avalanche': 9,
+        'smart-expense-cutting': 10,
+        'zero-based-budgeting': 11,
+        'envelope-budgeting': 12,
+        'high-yield-savings': 13,
+        'cd-laddering': 14,
+        'sinking-funds': 15,
+        'roth-vs-traditional-ira': 16,
+        'index-fund-investing': 17,
+        'asset-allocation': 18,
+        'dollar-cost-averaging': 19,
+        'options-trading-basics': 20,
+        'smart-goal-setting': 21,
+        'estate-planning-basics': 22,
+        'insurance-essentials': 23,
+        'managing-student-loans': 24,
+        'charitable-giving-strategies': 25,
+        'home-buying-process': 26,
+        'retirement-income-planning': 27,
+        'emergency-fund-detailed': 28,
+        'budgeting-basics-detailed': 29,
+        'investment-basics-detailed': 30,
+        'credit-management-detailed': 31,
+        'retirement-planning-detailed': 32,
+        'tax-optimization-detailed': 33,
+        'building-emergency-fund': 34,
+        'debt-consolidation': 35,
+        'credit-repair': 36,
+        'mortgage-basics': 37,
+        'side-hustle-income': 38,
+        'financial-apps-tools': 39,
+        'compound-interest': 40,
+        'risk-management': 41,
+        'tax-deductions': 42,
+        'retirement-withdrawal': 43,
+        'healthcare-costs': 44,
+        'education-funding': 45,
+        'financial-planning': 46,
+        'investment-psychology': 47,
+        'wealth-building': 48
+      };
+
+      let backfilledCount = 0;
+
+      for (const completion of lessonCompletions) {
+        try {
+          const metadata = JSON.parse(completion.metadata || '{}');
+          let moduleId = metadata.moduleId;
+          let lessonId = metadata.lessonId;
+
+          // If we have lessonId in metadata, use it to get moduleId
+          if (lessonId && lessonIdMap[lessonId]) {
+            moduleId = lessonIdMap[lessonId];
+          }
+
+          if (moduleId) {
+            // Check if progress record already exists
+            const existingProgress = await db.execute(sql`
+              SELECT * FROM user_progress 
+              WHERE user_id = ${userId} AND module_id = ${moduleId}
+              LIMIT 1
+            `);
+
+            const existingRows = existingProgress.rows || existingProgress || [];
+            
+            if (existingRows.length === 0) {
+              // Insert new progress record
+              await db.execute(sql`
+                INSERT INTO user_progress (user_id, module_id, completed, points_earned, completed_at, created_at)
+                VALUES (${userId}, ${moduleId}, true, ${completion.points}, ${completion.createdAt}, ${completion.createdAt})
+                ON CONFLICT (user_id, module_id) DO UPDATE SET
+                  completed = true,
+                  points_earned = ${completion.points},
+                  completed_at = ${completion.createdAt}
+              `);
+              backfilledCount++;
+              console.log(`Backfilled lesson completion: user ${userId}, module ${moduleId}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error backfilling lesson completion:', error);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Backfilled ${backfilledCount} lesson completions for user ${userId}`,
+        backfilledCount
+      });
+    } catch (error: any) {
+      console.error('Backfill error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to backfill lesson progress"
+      });
+    }
+  });
+
   // === STRIPE PAYMENT ROUTES ===
 
   // Create subscription checkout session

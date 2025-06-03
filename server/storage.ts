@@ -1224,8 +1224,7 @@ export class MemStorage implements IStorage {
     // Update streak and get bonus points
     const { newStreak, bonusPoints } = await this.updateUserStreak(userId);
 
-    // Create a simple completion record without foreign key constraint
-    // We'll store the lesson completion in localStorage and use a simple tracking table
+    // Create a proper completion record in the database
     try {
       if (existingRows.length > 0) {
         await db.execute(sql`
@@ -1234,16 +1233,20 @@ export class MemStorage implements IStorage {
           WHERE user_id = ${userId} AND module_id = ${moduleId}
         `);
       } else {
-        // Insert without foreign key constraint by using raw SQL
+        // Insert new progress record with proper handling
         await db.execute(sql`
           INSERT INTO user_progress (user_id, module_id, completed, points_earned, completed_at, created_at)
           VALUES (${userId}, ${moduleId}, true, ${pointsEarned}, NOW(), NOW())
-          ON CONFLICT DO NOTHING
+          ON CONFLICT (user_id, module_id) DO UPDATE SET
+            completed = true,
+            points_earned = ${pointsEarned},
+            completed_at = NOW()
         `);
       }
+      console.log(`Successfully recorded lesson completion for user ${userId}, lesson ${lessonId}, moduleId ${moduleId}`);
     } catch (error) {
-      // If database insertion fails, we'll track completion in memory for now
-      console.log('Database completion tracking failed, using memory storage');
+      console.error('Database completion tracking failed:', error);
+      // Continue with points award even if database tracking fails
     }
 
     // Update user points (base points only, streak bonus already added in updateUserStreak)
@@ -1255,7 +1258,7 @@ export class MemStorage implements IStorage {
       .where(eq(users.id, userId));
 
     // Record points history for lesson completion
-    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: Module ${moduleId}`, { moduleId });
+    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: ${lessonId}`, { moduleId, lessonId });
 
     // Record streak bonus in history if any
     if (bonusPoints > 0) {
