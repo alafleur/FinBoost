@@ -107,7 +107,7 @@ export default function Lesson() {
     if (finalScore >= 70) {
       try {
         const token = localStorage.getItem('token');
-        
+
         // Mark lesson as complete in database using the lesson ID
         const completionResponse = await fetch(`/api/lessons/${lesson!.id}/complete`, {
           method: 'POST',
@@ -119,12 +119,12 @@ export default function Lesson() {
 
         if (completionResponse.ok) {
           const completionResult = await completionResponse.json();
-          
+
           // Update completed lessons in localStorage
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-          
+
           console.log('Lesson completed successfully:', lesson!.id, completionResult);
-          
+
           if (!completedLessons.includes(lesson!.id)) {
             completedLessons.push(lesson!.id);
             localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
@@ -149,6 +149,39 @@ export default function Lesson() {
               newStreak: completionResult.newStreak
             });
           }
+        } else {
+          // Handle specific error messages from the server
+          try {
+            const errorResult = await completionResponse.json();
+            const errorMessage = errorResult.message || 'Failed to complete lesson';
+
+            console.log('Lesson completion error:', errorMessage);
+
+            toast({
+              title: "⚠️ Lesson Already Completed",
+              description: errorMessage,
+              variant: "destructive",
+            });
+
+            // If lesson is already completed, update the UI state
+            if (errorMessage.includes('already completed')) {
+              setLesson(prevLesson => prevLesson ? { ...prevLesson, completed: true } : null);
+
+              // Also update localStorage to reflect completion
+              const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+              if (!completedLessons.includes(lesson!.id)) {
+                completedLessons.push(lesson!.id);
+                localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+              }
+            }
+          } catch (parseError) {
+            console.error('Error parsing completion response:', parseError);
+            toast({
+              title: "Error",
+              description: "Failed to complete lesson - please try again",
+              variant: "destructive",
+            });
+          }
         }
       } catch (error) {
         console.error('Error completing lesson:', error);
@@ -161,7 +194,7 @@ export default function Lesson() {
     }
   };
 
-  
+
 
   const startQuiz = async () => {
     // Award points for reading the lesson content
@@ -211,7 +244,7 @@ export default function Lesson() {
     );
   }
 
-  
+
 
   const currentQuestion = lesson.quiz[currentQuestionIndex];
   const isAnswerSelected = selectedAnswers[currentQuestionIndex] !== undefined;
