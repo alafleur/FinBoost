@@ -1053,6 +1053,39 @@ export class MemStorage implements IStorage {
   }
 
   async getSystemSettings(): Promise<any> {
+    // Try to get settings from database
+    try {
+      const settingsResult = await db.execute(sql`
+        SELECT settings_data FROM system_settings WHERE id = 1
+      `);
+
+      if (settingsResult.rows && settingsResult.rows.length > 0) {
+        const settings = JSON.parse(settingsResult.rows[0].settings_data);
+        return {
+          maintenanceMode: false,
+          registrationEnabled: true,
+          pointsMultiplier: 1.0,
+          maxDailyPoints: 500,
+          tierRequirements: {
+            bronze: 0,
+            silver: 500,
+            gold: 2000
+          },
+          monthlySettings: {
+            cycleStartDay: 1,
+            cycleStartTime: "00:00",
+            distributionDay: 5,
+            distributionTime: "12:00",
+            timezone: "UTC",
+            distributionDelayDays: 3
+          },
+          ...settings
+        };
+      }
+    } catch (error) {
+      console.log('No system settings table or data found, using defaults');
+    }
+
     return {
       maintenanceMode: false,
       registrationEnabled: true,
@@ -1062,13 +1095,43 @@ export class MemStorage implements IStorage {
         bronze: 0,
         silver: 500,
         gold: 2000
+      },
+      monthlySettings: {
+        cycleStartDay: 1,
+        cycleStartTime: "00:00",
+        distributionDay: 5,
+        distributionTime: "12:00",
+        timezone: "UTC",
+        distributionDelayDays: 3
       }
     };
   }
 
   async updateSystemSettings(settings: any): Promise<void> {
-    // For now, just log the settings update
-    console.log('System settings updated:', settings);
+    try {
+      // Ensure system_settings table exists
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS system_settings (
+          id INTEGER PRIMARY KEY,
+          settings_data TEXT NOT NULL,
+          updated_at TIMESTAMP NOT NULL
+        )
+      `);
+
+      // Save to database
+      await db.execute(sql`
+        INSERT INTO system_settings (id, settings_data, updated_at)
+        VALUES (1, ${JSON.stringify(settings)}, ${new Date().toISOString()})
+        ON CONFLICT (id) DO UPDATE SET
+          settings_data = ${JSON.stringify(settings)},
+          updated_at = ${new Date().toISOString()}
+      `);
+
+      console.log('System settings updated:', settings);
+    } catch (error) {
+      console.error('Error updating system settings:', error);
+      throw error;
+    }
   }
 
   async bulkUpdateUsers(userIds: number[], updates: Partial<User>): Promise<void> {

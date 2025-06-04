@@ -18,52 +18,50 @@ import { sql, eq } from "drizzle-orm";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 // Helper function to calculate next distribution date
-function calculateNextDistributionDate(settings: {[key: string]: string}): Date {
+function calculateNextDistributionDate(settings: {[key: string]: string | any}): Date {
   const now = new Date();
-  const delayDays = parseInt(settings.distributionDelayDays || "7");
+  
+  // Get monthly settings from system settings
+  const monthlySettings = settings.monthlySettings || {
+    cycleStartDay: 1,
+    distributionDay: 5,
+    distributionDelayDays: 3,
+    cycleStartTime: "00:00",
+    distributionTime: "12:00",
+    timezone: "UTC"
+  };
 
-  let accumulationEndDate: Date;
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const currentDay = now.getDate();
 
-  switch (settings.accumulationPeriodEnd) {
-    case "last_day_of_month":
-      // Last day of current month
-      accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      break;
-    case "last_thursday":
-      // Last Thursday of current month
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const lastThursday = new Date(lastDay);
-      lastThursday.setDate(lastDay.getDate() - ((lastDay.getDay() + 3) % 7));
-      accumulationEndDate = lastThursday;
-      break;
-    case "15th":
-      // 15th of current month
-      accumulationEndDate = new Date(now.getFullYear(), now.getMonth(), 15);
-      if (accumulationEndDate < now) {
-        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
-      }
-      break;
-    default:
-      // Default to last day of month
-      accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  // Calculate cycle end date (day before next cycle starts)
+  let nextCycleStartMonth = currentMonth + 1;
+  let nextCycleStartYear = currentYear;
+  
+  if (nextCycleStartMonth > 11) {
+    nextCycleStartMonth = 0;
+    nextCycleStartYear++;
   }
 
-  // If accumulation period has passed, move to next period
-  if (accumulationEndDate < now) {
-    switch (settings.accumulationPeriodEnd) {
-      case "last_day_of_month":
-        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-        break;
-      case "15th":
-        accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
-        break;
-      // Add more cases as needed
-    }
-  }
+  // Get the actual cycle start day, ensuring it exists in the month
+  const daysInNextMonth = new Date(nextCycleStartYear, nextCycleStartMonth + 1, 0).getDate();
+  const actualCycleStartDay = Math.min(monthlySettings.cycleStartDay, daysInNextMonth);
 
-  // Add distribution delay
-  const distributionDate = new Date(accumulationEndDate);
-  distributionDate.setDate(distributionDate.getDate() + delayDays);
+  // Create next cycle start date
+  const nextCycleStart = new Date(nextCycleStartYear, nextCycleStartMonth, actualCycleStartDay);
+  
+  // Parse start time
+  const [startHour, startMinute] = monthlySettings.cycleStartTime.split(':').map(Number);
+  nextCycleStart.setHours(startHour, startMinute, 0, 0);
+
+  // Calculate distribution date
+  const distributionDate = new Date(nextCycleStart);
+  distributionDate.setDate(distributionDate.getDate() + (monthlySettings.distributionDelayDays || 3));
+
+  // If distribution date would be in the next month, adjust accordingly
+  const [distHour, distMinute] = monthlySettings.distributionTime.split(':').map(Number);
+  distributionDate.setHours(distHour, distMinute, 0, 0);
 
   return distributionDate;
 }
@@ -642,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/pool/next-distribution", async (req: Request, res: Response) => {
     try {
       // Get admin settings for distribution
-      const settings = await storage.getDistributionSettings();
+      const settings = await storage.getSystemSettings();
 
       // Calculate next distribution date based on settings
       const nextDistribution = calculateNextDistributionDate(settings);
@@ -654,17 +652,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
 
+      // Calculate current cycle info
+      const monthlySettings = settings.monthlySettings || {
+        cycleStartDay: 1,
+        distributionDay: 5,
+        distributionDelayDays: 3
+      };
+
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const currentCycleStart = new Date(currentYear, currentMonth, monthlySettings.cycleStartDay);
+      
       return res.status(200).json({
         success: true,
         distribution: {
           nextDate: nextDistribution.toISOString(),
+          currentCycleStart: currentCycleStart.toISOString(),
           timeRemaining: {
             days: Math.max(0, days),
             hours: Math.max(0, hours),
             minutes: Math.max(0, minutes),
             totalMs: Math.max(0, timeRemaining)
           },
-          settings
+          settings: monthlySettings
         }
       });
     } catch (error) {
@@ -1471,6 +1481,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bronze: 0,
             silver: 500,
             gold: 2000
+          },
+          monthlySettings: {
+            cycleStartDay: 1, // Day of month when new cycle starts (1-31)
+            cycleStartTime: "00:00", // Time when cycle starts (HH:MM)
+            distributionDay: 5, // Day of month when rewards are distributed (1-31)
+            distributionTime: "12:00", // Time when distribution happens (HH:MM)
+            timezone: "UTC", // Timezone for calculations
+            distributionDelayDays: 3 // Days after cycle end before distribution
           }
         }
       });
