@@ -10,10 +10,10 @@ export function AdditiveLogo({
   size = 'md'
 }: AdditiveLogoProps) {
   const sizeClasses = {
-    sm: 'h-12',
-    md: 'h-16', 
-    lg: 'h-20',
-    xl: 'h-24'
+    sm: 'h-16',
+    md: 'h-20', 
+    lg: 'h-24',
+    xl: 'h-32'
   };
 
   return (
