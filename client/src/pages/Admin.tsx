@@ -32,7 +32,8 @@ import {
   TrendingUp,
   Trophy,
   X,
-  Activity
+  Activity,
+  Lock
 } from 'lucide-react';
 
 interface LearningModule {
@@ -340,14 +341,15 @@ export default function Admin() {
       });
       if (response.ok) {
         const data = await response.json();
-        setRewardsConfig(data.config);
+        setCurrentRewardsConfig(data.config);
+        setNextRewardsConfig(data.config);
       }
     } catch (error) {
       console.error('Failed to load rewards config:', error);
     }
   };
 
-  const saveRewardsConfig = async () => {
+  const saveNextRewardsConfig = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/admin/rewards/config', {
@@ -356,13 +358,13 @@ export default function Admin() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ config: rewardsConfig })
+        body: JSON.stringify({ config: nextRewardsConfig })
       });
 
       if (response.ok) {
         toast({
-          title: "Rewards Configuration Updated",
-          description: "Settings will take effect at the next distribution"
+          title: "Next Month Configuration Saved",
+          description: "Settings will take effect after lock-in"
         });
       } else {
         throw new Error('Failed to save configuration');
@@ -371,6 +373,47 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to save rewards configuration",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const canLockIn = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    
+    // Can lock in if we're configuring next month and it's before the 25th
+    return nextRewardsConfig.month === (currentMonth % 12) + 1 && 
+           nextRewardsConfig.year === (currentMonth === 12 ? currentYear + 1 : currentYear) &&
+           today.getDate() <= 25;
+  };
+
+  const lockInNextMonth = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/rewards/lock-in', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nextRewardsConfig)
+      });
+
+      if (response.ok) {
+        setCurrentRewardsConfig({ ...nextRewardsConfig });
+        toast({
+          title: "Configuration Locked In",
+          description: `Settings locked for ${new Date(0, nextRewardsConfig.month-1).toLocaleString('default', { month: 'long' })}`
+        });
+      } else {
+        throw new Error('Failed to lock in configuration');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to lock in configuration",
         variant: "destructive"
       });
     }
@@ -1960,31 +2003,31 @@ export default function Admin() {
                   <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <h4 className="font-semibold">Tier 1 (Top {rewardsConfig.tierPercentiles.tier1}%)</h4>
+                      <h4 className="font-semibold">Tier 1 (Top {currentRewardsConfig.tierPercentiles.tier1}%)</h4>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Users in tier:</span>
-                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100)}</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Monthly fees:</span>
-                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * 20}</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * 20}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Pool allocation:</span>
-                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100))}</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100))}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Winners ({rewardsConfig.winnerPercentages.tier1}%):</span>
-                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100)}</span>
+                        <span>Winners ({currentRewardsConfig.winnerPercentages.tier1}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * currentRewardsConfig.winnerPercentages.tier1) / 100)}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
                         <span className="font-medium">Avg reward:</span>
                         <span className="font-mono font-bold">
                           ${Math.round(
-                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100)) /
-                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100))
+                            (((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * currentRewardsConfig.winnerPercentages.tier1) / 100))
                           )}
                         </span>
                       </div>
@@ -2160,13 +2203,54 @@ export default function Admin() {
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold">Rewards Configuration</h2>
-                <p className="text-gray-600">Configure pool allocation, tier settings, and distribution rules</p>
+                <p className="text-gray-600">Configure settings for {new Date(0, nextRewardsConfig.month-1).toLocaleString('default', { month: 'long' })} {nextRewardsConfig.year}</p>
               </div>
-              <Button onClick={saveRewardsConfig} className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Save Configuration
-              </Button>
+              <div className="flex items-center gap-3">
+                {canLockIn() && (
+                  <Button onClick={lockInNextMonth} variant="outline" className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    Lock In for Next Month
+                  </Button>
+                )}
+                <Button onClick={saveNextRewardsConfig} className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Save Configuration
+                </Button>
+              </div>
             </div>
+
+            {/* Preview Statistics for Next Month */}
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="text-blue-800">Next Month Preview</CardTitle>
+                <CardDescription className="text-blue-600">How these settings will affect {new Date(0, nextRewardsConfig.month-1).toLocaleString('default', { month: 'long' })} rewards</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-blue-800">${Math.round((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100)}</div>
+                    <div className="text-sm text-blue-600">Monthly Rewards Pool</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-green-800">
+                      {Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier1) / 100) * nextRewardsConfig.winnerPercentages.tier1) / 100) +
+                       Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100) +
+                       Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100)}
+                    </div>
+                    <div className="text-sm text-green-600">Total Winners</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-orange-800">
+                      ${Math.round(
+                        (((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier1 / 100)) /
+                        Math.max(1, Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier1) / 100) * nextRewardsConfig.winnerPercentages.tier1) / 100))
+                      )}
+                    </div>
+                    <div className="text-sm text-orange-600">Avg Tier 1 Reward</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Pool Configuration */}
@@ -2183,9 +2267,9 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.poolPercentage}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.poolPercentage}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           poolPercentage: parseInt(e.target.value) || 0
                         })}
                         className="w-20"
