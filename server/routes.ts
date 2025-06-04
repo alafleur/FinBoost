@@ -171,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", async (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user || req.user.email !== 'lafleur.andrew@gmail.com') {
+      if (!(req as any).isAuthenticated() || !(req as any).user || (req as any).user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
       
@@ -184,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/modules", async (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user || req.user.email !== 'lafleur.andrew@gmail.com') {
+      if (!(req as any).isAuthenticated() || !(req as any).user || (req as any).user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
       
