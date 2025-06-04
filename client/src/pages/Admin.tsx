@@ -314,14 +314,10 @@ export default function Admin() {
   // CRUD Handlers for Modules
   const handleCreateModule = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch('/api/admin/modules', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(moduleForm)
       });
@@ -358,14 +354,10 @@ export default function Admin() {
 
   const handleUpdateModule = async (moduleId: number, updateData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch(`/api/admin/modules/${moduleId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updateData)
       });
@@ -391,14 +383,8 @@ export default function Admin() {
 
   const handleDeleteModule = async (moduleId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch(`/api/admin/modules/${moduleId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -422,14 +408,10 @@ export default function Admin() {
   // CRUD Handlers for Users
   const handleCreateUser = async (userData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
       });
@@ -455,14 +437,10 @@ export default function Admin() {
 
   const handleUpdateUser = async (userId: number, updateData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updateData)
       });
@@ -488,14 +466,8 @@ export default function Admin() {
 
   const handleDeleteUser = async (userId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       });
 
       if (response.ok) {

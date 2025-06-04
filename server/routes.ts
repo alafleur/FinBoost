@@ -190,16 +190,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin module management routes
   app.post("/api/admin/modules", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const moduleData = req.body;
       const module = await storage.createModule(moduleData);
       res.json({ success: true, module });
