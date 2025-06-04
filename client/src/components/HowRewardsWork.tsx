@@ -66,7 +66,7 @@ export default function HowRewardsWork() {
           </div>
         </div>
 
-        
+
 
         <MembershipGrowthChart />
       </div>
