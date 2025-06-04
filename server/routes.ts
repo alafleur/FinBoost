@@ -2425,36 +2425,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
 
-  // Middleware to check authentication
-  const requireAuth = (req: Request, res: Response, next: any) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-    next();
-  };
-
-  // Middleware to check admin role
-  const requireAdmin = (req: Request, res: Response, next: any) => {
-    // Assuming req.user is populated by authenticateToken middleware
-    if (!req.user || req.user.email !== 'admin@example.com') { // replace admin email
-      return res.status(403).json({ message: 'Admin access required' });
-    }
-    next();
-  };
-
-  // Admin analytics endpoint
-  app.get("/api/admin/analytics", requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const analytics = await storage.getAdminAnalytics('30d');
-      res.json({ success: true, analytics });
-    } catch (error) {
-      console.error('Analytics error:', error);
-      res.status(500).json({ success: false, message: "Failed to load analytics" });
-    }
-  });
+  
 
   // Preview rewards winners with random selection
-  app.post("/api/admin/rewards/preview-winners", requireAuth, requireAdmin, async (req, res) => {
+  apiRouter.post("/admin/rewards/preview-winners", authenticateToken, async (req, res) => {
     try {
       const { payoutConfig, rewardsConfig, winnerConfiguration } = req.body;
 
@@ -2570,7 +2544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Execute monthly rewards distribution
-  app.post("/api/admin/rewards/execute-distribution", requireAuth, requireAdmin, async (req, res) => {
+  apiRouter.post("/admin/rewards/execute-distribution", authenticateToken, async (req, res) => {
     try {
       const { payoutConfig, rewardsConfig, winners } = req.body;
 
