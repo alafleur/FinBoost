@@ -2277,7 +2277,7 @@ export default function Admin() {
                       <span className="text-sm text-gray-600">% of membership fees</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Currently: {rewardsConfig.poolPercentage}% to rewards, {100 - rewardsConfig.poolPercentage}% to education
+                      Currently: {nextRewardsConfig.poolPercentage}% to rewards, {100 - nextRewardsConfig.poolPercentage}% to education
                     </p>
                   </div>
 
@@ -2294,7 +2294,7 @@ export default function Admin() {
                       </div>
                       <div className="flex justify-between border-t pt-1">
                         <span>Rewards pool:</span>
-                        <span className="font-mono font-bold">${Math.round((12 * 20 * rewardsConfig.poolPercentage) / 100)}</span>
+                        <span className="font-mono font-bold">${Math.round((12 * 20 * nextRewardsConfig.poolPercentage) / 100)}</span>
                       </div>
                     </div>
                   </div>
@@ -2315,11 +2315,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.tierAllocations.tier1}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierAllocations.tier1}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierAllocations: {
-                            ...rewardsConfig.tierAllocations,
+                            ...nextRewardsConfig.tierAllocations,
                             tier1: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2336,11 +2336,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.tierAllocations.tier2}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierAllocations.tier2}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierAllocations: {
-                            ...rewardsConfig.tierAllocations,
+                            ...nextRewardsConfig.tierAllocations,
                             tier2: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2357,11 +2357,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.tierAllocations.tier3}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierAllocations.tier3}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierAllocations: {
-                            ...rewardsConfig.tierAllocations,
+                            ...nextRewardsConfig.tierAllocations,
                             tier3: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2375,11 +2375,11 @@ export default function Admin() {
                     <div className="flex justify-between font-medium">
                       <span>Total allocation:</span>
                       <span className={
-                        (rewardsConfig.tierAllocations.tier1 + rewardsConfig.tierAllocations.tier2 + rewardsConfig.tierAllocations.tier3) === 100 
+                        (nextRewardsConfig.tierAllocations.tier1 + nextRewardsConfig.tierAllocations.tier2 + nextRewardsConfig.tierAllocations.tier3) === 100 
                         ? "text-green-600" 
                         : "text-red-600"
                       }>
-                        {rewardsConfig.tierAllocations.tier1 + rewardsConfig.tierAllocations.tier2 + rewardsConfig.tierAllocations.tier3}%
+                        {nextRewardsConfig.tierAllocations.tier1 + nextRewardsConfig.tierAllocations.tier2 + nextRewardsConfig.tierAllocations.tier3}%
                       </span>
                     </div>
                   </div>
@@ -2472,11 +2472,11 @@ export default function Admin() {
                         type="number"
                         min="1"
                         max="99"
-                        value={rewardsConfig.tierPercentiles.tier1}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierPercentiles.tier1}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierPercentiles: {
-                            ...rewardsConfig.tierPercentiles,
+                            ...nextRewardsConfig.tierPercentiles,
                             tier1: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2493,11 +2493,11 @@ export default function Admin() {
                         type="number"
                         min="1"
                         max="99"
-                        value={rewardsConfig.tierPercentiles.tier2}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierPercentiles.tier2}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierPercentiles: {
-                            ...rewardsConfig.tierPercentiles,
+                            ...nextRewardsConfig.tierPercentiles,
                             tier2: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2514,11 +2514,11 @@ export default function Admin() {
                         type="number"
                         min="1"
                         max="99"
-                        value={rewardsConfig.tierPercentiles.tier3}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.tierPercentiles.tier3}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           tierPercentiles: {
-                            ...rewardsConfig.tierPercentiles,
+                            ...nextRewardsConfig.tierPercentiles,
                             tier3: parseInt(e.target.value) || 0
                           }
                         })}
