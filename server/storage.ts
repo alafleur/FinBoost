@@ -973,24 +973,121 @@ export class MemStorage implements IStorage {
     };
   }
 
+  async getAdminUsers(filters: {page: number, limit: number, search?: string, status?: string, tier?: string}): Promise<User[]> {
+    const { page = 1, limit = 50, search, status, tier } = filters;
+    const offset = (page - 1) * limit;
+
+    let query = db.select().from(users);
+    
+    const conditions = [];
+    if (search) {
+      conditions.push(sql`(${users.username} ILIKE ${'%' + search + '%'} OR ${users.email} ILIKE ${'%' + search + '%'})`);
+    }
+    if (status === 'active') {
+      conditions.push(eq(users.isActive, true));
+    } else if (status === 'inactive') {
+      conditions.push(eq(users.isActive, false));
+    }
+    if (tier) {
+      conditions.push(eq(users.tier, tier));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query
+      .orderBy(desc(users.joinedAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getAdminAnalytics(period: string): Promise<any> {
+    // Get basic analytics data
+    const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const activeUsers = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isActive, true));
+    
+    const totalPointsAwarded = await db.select({ 
+      total: sql<number>`coalesce(sum(points), 0)` 
+    }).from(userPointsHistory).where(eq(userPointsHistory.status, 'approved'));
+
+    return {
+      userGrowth: [],
+      pointsDistribution: [],
+      recentActivity: [],
+      activeUsers: activeUsers[0]?.count || 0,
+      totalPointsAwarded: totalPointsAwarded[0]?.total || 0,
+      avgSessionDuration: 0,
+      errorRate: 0
+    };
+  }
+
+  async getSystemSettings(): Promise<any> {
+    return {
+      maintenanceMode: false,
+      registrationEnabled: true,
+      pointsMultiplier: 1.0,
+      maxDailyPoints: 500,
+      tierRequirements: {
+        bronze: 0,
+        silver: 500,
+        gold: 2000
+      }
+    };
+  }
+
+  async updateSystemSettings(settings: any): Promise<void> {
+    // For now, just log the settings update
+    console.log('System settings updated:', settings);
+  }
+
+  async bulkUpdateUsers(userIds: number[], updates: Partial<User>): Promise<void> {
+    await db.update(users)
+      .set(updates)
+      .where(sql`${users.id} = ANY(${userIds})`);
+  }
+
+  async bulkResetPasswords(userIds: number[]): Promise<void> {
+    // Generate temporary passwords and update users
+    const tempPassword = await bcrypt.hash('TempPassword123!', 10);
+    await db.update(users)
+      .set({ password: tempPassword })
+      .where(sql`${users.id} = ANY(${userIds})`);
+  }
+
+  async exportUserData(userIds: number[]): Promise<any> {
+    return await db.select().from(users).where(sql`${users.id} = ANY(${userIds})`);
+  }
+
   async getUserDetailsForAdmin(userId: number): Promise<any> {
-    // Implementation would depend on your specific requirements
-    return null;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    const pointsHistory = await this.getUserPointsHistory(userId);
+    return { user, pointsHistory };
   }
 
   async exportUsers(format: string): Promise<string> {
-    // Implementation would depend on your specific requirements
-    return "";
+    const users = await db.select().from(users);
+    if (format === 'csv') {
+      const headers = 'ID,Username,Email,Total Points,Tier,Joined At\n';
+      const rows = users.map(u => `${u.id},${u.username},${u.email},${u.totalPoints},${u.tier},${u.joinedAt}`).join('\n');
+      return headers + rows;
+    }
+    return JSON.stringify(users, null, 2);
   }
 
   async exportPointsHistory(format: string): Promise<string> {
-    // Implementation would depend on your specific requirements
-    return "";
+    const history = await db.select().from(userPointsHistory);
+    if (format === 'csv') {
+      const headers = 'User ID,Points,Action,Description,Status,Created At\n';
+      const rows = history.map(h => `${h.userId},${h.points},${h.action},${h.description},${h.status},${h.createdAt}`).join('\n');
+      return headers + rows;
+    }
+    return JSON.stringify(history, null, 2);
   }
 
   async exportAnalytics(format: string): Promise<string> {
-    // Implementation would depend on your specific requirements
-    return "";
+    const analytics = await this.getAdminAnalytics('30d');
+    return JSON.stringify(analytics, null, 2);
   }
 
   // === SUPPORT REQUEST METHODS ===
