@@ -200,16 +200,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/modules/:id", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const moduleId = parseInt(req.params.id);
       const moduleData = req.body;
       const module = await storage.updateModule(moduleId, moduleData);
@@ -221,16 +211,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/modules/:id", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const moduleId = parseInt(req.params.id);
       await storage.deleteModule(moduleId);
       res.json({ success: true, message: "Module deleted successfully" });
@@ -242,16 +222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin user management routes
   app.post("/api/admin/users", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const userData = req.body;
       const newUser = await storage.createUser(userData);
       res.json({ success: true, user: newUser });
@@ -262,16 +232,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/users/:id", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const userId = parseInt(req.params.id);
       const userData = req.body;
       const updatedUser = await storage.updateUser(userId, userData);
@@ -283,16 +243,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/users/:id", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const userId = parseInt(req.params.id);
       await storage.deleteUser(userId);
       res.json({ success: true, message: "User deleted successfully" });
