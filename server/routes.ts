@@ -578,6 +578,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Recalculate all user tiers
+  apiRouter.post("/admin/tiers/recalculate", authenticateToken, async (req, res) => {
+    try {
+      // TODO: Add admin role check here
+      await storage.recalculateAllUserTiers();
+      
+      const thresholds = await storage.getTierThresholds();
+      
+      res.json({ 
+        success: true, 
+        message: "All user tiers recalculated successfully",
+        thresholds 
+      });
+    } catch (error) {
+      console.error("Tier recalculation error:", error);
+      res.status(500).json({ message: "Failed to recalculate user tiers" });
+    }
+  });
+
   // Get monthly pool calculation
   apiRouter.get("/pool/monthly", async (req: Request, res: Response) => {
     try {

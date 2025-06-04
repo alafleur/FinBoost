@@ -556,6 +556,36 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async recalculateAllUserTiers(): Promise<void> {
+    console.log("Starting tier recalculation for all users...");
+    
+    // Get all active users
+    const allUsers = await db.select().from(users).where(eq(users.isActive, true));
+    
+    console.log(`Recalculating tiers for ${allUsers.length} users`);
+    
+    // Update each user's tier based on their current points
+    for (const user of allUsers) {
+      const newTier = await this.calculateUserTier(user.currentMonthPoints || 0);
+      
+      if (user.tier !== newTier) {
+        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentMonthPoints} points)`);
+        
+        await db.update(users)
+          .set({ 
+            tier: newTier,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, user.id));
+          
+        // Update memory cache
+        this.users.set(user.id, { ...user, tier: newTier });
+      }
+    }
+    
+    console.log("Tier recalculation completed");
+  }
+
   async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
     try {
       const pointsColumn = period === 'monthly' ? 'currentMonthPoints' : 'totalPoints';
@@ -1442,35 +1472,39 @@ export class MemStorage implements IStorage {
   }
 
   async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
-    // Get all users' current month points to calculate percentiles
+    // Get all active users' current month points to calculate percentiles
     const allUsers = await db.select({
       currentMonthPoints: users.currentMonthPoints
-    }).from(users);
+    }).from(users)
+    .where(eq(users.isActive, true));
 
     if (allUsers.length === 0) {
       return { tier1: 0, tier2: 0, tier3: 0 };
     }
 
-    // Sort points in ascending order and filter out zero/null values for better distribution
-    const validPoints = allUsers
+    // Sort points in ascending order - include ALL users including those with 0 points
+    const allPoints = allUsers
       .map(u => u.currentMonthPoints || 0)
-      .filter(p => p > 0)
       .sort((a, b) => a - b);
 
-    // If no valid points exist, use default thresholds
-    if (validPoints.length === 0) {
-      return { tier1: 0, tier2: 0, tier3: 0 };
-    }
+    console.log(`Calculating tier thresholds for ${allPoints.length} users. Points range: ${allPoints[0]} to ${allPoints[allPoints.length - 1]}`);
 
-    // Calculate percentile thresholds
-    const p33Index = Math.floor(validPoints.length * 0.33);
-    const p66Index = Math.floor(validPoints.length * 0.66);
+    // Calculate percentile thresholds based on ALL users
+    // Tier 3 = top 33% (67th percentile and above)
+    // Tier 2 = middle 33% (34th to 66th percentile) 
+    // Tier 1 = bottom 33% (0 to 33rd percentile)
+    const tier2Index = Math.floor(allPoints.length * 0.33);
+    const tier3Index = Math.floor(allPoints.length * 0.67);
 
-    return {
+    const thresholds = {
       tier1: 0, // Tier 1 always starts at 0
-      tier2: validPoints[p33Index] || 0,
-      tier3: validPoints[p66Index] || 0
+      tier2: allPoints[tier2Index] || 0,
+      tier3: allPoints[tier3Index] || 0
     };
+
+    console.log(`Calculated thresholds: Tier 1: ${thresholds.tier1}, Tier 2: ${thresholds.tier2}, Tier 3: ${thresholds.tier3}`);
+
+    return thresholds;
   }
 
   async createUserMonthlyReward(data: {
