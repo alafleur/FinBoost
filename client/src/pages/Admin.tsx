@@ -779,14 +779,15 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="rewards">Rewards</TabsTrigger>
+            <TabsTrigger value="rewards-overview">Rewards Overview</TabsTrigger>
+            <TabsTrigger value="rewards-config">Rewards Config</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -1864,17 +1865,13 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          {/* Rewards Management Tab */}
-          <TabsContent value="rewards" className="space-y-6">
+          {/* Rewards Overview Tab */}
+          <TabsContent value="rewards-overview" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold">Rewards Management</h2>
-                <p className="text-gray-600">Configure pool allocation, tier settings, and distribution rules</p>
+                <h2 className="text-2xl font-bold">Rewards Overview</h2>
+                <p className="text-gray-600">Current month reward statistics and distribution analysis</p>
               </div>
-              <Button onClick={saveRewardsConfig} className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Save Configuration
-              </Button>
             </div>
 
             {/* Rewards Overview Statistics */}
@@ -2125,6 +2122,20 @@ export default function Admin() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Rewards Configuration Tab */}
+          <TabsContent value="rewards-config" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Rewards Configuration</h2>
+                <p className="text-gray-600">Configure pool allocation, tier settings, and distribution rules</p>
+              </div>
+              <Button onClick={saveRewardsConfig} className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Save Configuration
+              </Button>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Pool Configuration */}
