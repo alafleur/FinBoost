@@ -2038,31 +2038,31 @@ export default function Admin() {
                   <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <h4 className="font-semibold">Tier 2 (Middle {rewardsConfig.tierPercentiles.tier2}%)</h4>
+                      <h4 className="font-semibold">Tier 2 (Middle {nextRewardsConfig.tierPercentiles.tier2}%)</h4>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Users in tier:</span>
-                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100)}</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Monthly fees:</span>
-                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * 20}</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * 20}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Pool allocation:</span>
-                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100))}</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier2 / 100))}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Winners ({rewardsConfig.winnerPercentages.tier2}%):</span>
-                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100)}</span>
+                        <span>Winners ({nextRewardsConfig.winnerPercentages.tier2}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100)}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
                         <span className="font-medium">Avg reward:</span>
                         <span className="font-mono font-bold">
                           ${Math.round(
-                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100)) /
-                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100))
+                            (((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier2 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100))
                           )}
                         </span>
                       </div>
@@ -2073,31 +2073,31 @@ export default function Admin() {
                   <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-4 rounded-lg border">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-3 h-3 bg-amber-600 rounded-full"></div>
-                      <h4 className="font-semibold">Tier 3 (Bottom {rewardsConfig.tierPercentiles.tier3}%)</h4>
+                      <h4 className="font-semibold">Tier 3 (Bottom {nextRewardsConfig.tierPercentiles.tier3}%)</h4>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Users in tier:</span>
-                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100)}</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Monthly fees:</span>
-                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * 20}</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * 20}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Pool allocation:</span>
-                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100))}</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier3 / 100))}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Winners ({rewardsConfig.winnerPercentages.tier3}%):</span>
-                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)}</span>
+                        <span>Winners ({nextRewardsConfig.winnerPercentages.tier3}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100)}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
                         <span className="font-medium">Avg reward:</span>
                         <span className="font-mono font-bold">
                           ${Math.round(
-                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100)) /
-                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100))
+                            (((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier3 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100))
                           )}
                         </span>
                       </div>
@@ -2121,34 +2121,34 @@ export default function Admin() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Tier 1 Winners:</span>
                         <span className="font-mono font-bold text-green-700">
-                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100)} users
+                          {Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier1) / 100) * nextRewardsConfig.winnerPercentages.tier1) / 100)} users
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Tier 2 Winners:</span>
                         <span className="font-mono font-bold text-green-700">
-                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100)} users
+                          {Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100)} users
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Tier 3 Winners:</span>
                         <span className="font-mono font-bold text-green-700">
-                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)} users
+                          {Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100)} users
                         </span>
                       </div>
                       <div className="border-t pt-2 mt-2">
                         <div className="flex justify-between items-center">
                           <span className="font-semibold">Total Winners:</span>
                           <span className="font-mono font-bold text-xl text-green-800">
-                            {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100) +
-                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100) +
-                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)} users
+                            {Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier1) / 100) * nextRewardsConfig.winnerPercentages.tier1) / 100) +
+                             Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100) +
+                             Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100)} users
                           </span>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {(((Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100) +
-                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100) +
-                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)) / stats.totalUsers) * 100).toFixed(1)}% of all users
+                          {(((Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier1) / 100) * nextRewardsConfig.winnerPercentages.tier1) / 100) +
+                             Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier2) / 100) * nextRewardsConfig.winnerPercentages.tier2) / 100) +
+                             Math.round((Math.round((stats.totalUsers * nextRewardsConfig.tierPercentiles.tier3) / 100) * nextRewardsConfig.winnerPercentages.tier3) / 100)) / stats.totalUsers) * 100).toFixed(1)}% of all users
                         </div>
                       </div>
                     </div>
@@ -2165,12 +2165,12 @@ export default function Admin() {
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full" 
-                            style={{ width: `${rewardsConfig.poolPercentage}%` }}
+                            style={{ width: `${nextRewardsConfig.poolPercentage}%` }}
                           ></div>
                         </div>
                         <div className="flex justify-between text-xs">
-                          <span className="text-orange-600">Rewards: ${Math.round((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100)} ({rewardsConfig.poolPercentage}%)</span>
-                          <span className="text-blue-600">Education: ${Math.round((stats.totalUsers * 20 * (100 - rewardsConfig.poolPercentage)) / 100)} ({100 - rewardsConfig.poolPercentage}%)</span>
+                          <span className="text-orange-600">Rewards: ${Math.round((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100)} ({nextRewardsConfig.poolPercentage}%)</span>
+                          <span className="text-blue-600">Education: ${Math.round((stats.totalUsers * 20 * (100 - nextRewardsConfig.poolPercentage)) / 100)} ({100 - nextRewardsConfig.poolPercentage}%)</span>
                         </div>
                       </div>
                     </div>
@@ -2532,11 +2532,11 @@ export default function Admin() {
                     <div className="flex justify-between font-medium">
                       <span>Total coverage:</span>
                       <span className={
-                        (rewardsConfig.tierPercentiles.tier1 + rewardsConfig.tierPercentiles.tier2 + rewardsConfig.tierPercentiles.tier3) === 100 
+                        (nextRewardsConfig.tierPercentiles.tier1 + nextRewardsConfig.tierPercentiles.tier2 + nextRewardsConfig.tierPercentiles.tier3) === 100 
                         ? "text-green-600" 
                         : "text-red-600"
                       }>
-                        {rewardsConfig.tierPercentiles.tier1 + rewardsConfig.tierPercentiles.tier2 + rewardsConfig.tierPercentiles.tier3}%
+                        {nextRewardsConfig.tierPercentiles.tier1 + nextRewardsConfig.tierPercentiles.tier2 + nextRewardsConfig.tierPercentiles.tier3}%
                       </span>
                     </div>
                   </div>
@@ -2545,15 +2545,15 @@ export default function Admin() {
                     <h4 className="font-medium text-sm mb-2">Current Tier Thresholds</h4>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span>Tier 1 (Top {rewardsConfig.tierPercentiles.tier1}%):</span>
+                        <span>Tier 1 (Top {nextRewardsConfig.tierPercentiles.tier1}%):</span>
                         <span className="font-mono">{tierThresholds.tier1}+ points</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tier 2 (Middle {rewardsConfig.tierPercentiles.tier2}%):</span>
+                        <span>Tier 2 (Middle {nextRewardsConfig.tierPercentiles.tier2}%):</span>
                         <span className="font-mono">{tierThresholds.tier2}+ points</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tier 3 (Bottom {rewardsConfig.tierPercentiles.tier3}%):</span>
+                        <span>Tier 3 (Bottom {nextRewardsConfig.tierPercentiles.tier3}%):</span>
                         <span className="font-mono">{tierThresholds.tier3}+ points</span>
                       </div>
                     </div>
