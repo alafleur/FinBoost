@@ -226,4 +226,6 @@ export default function Admin() {
   // State for dynamic winner configuration (spreadsheet-style)
   const [winnerConfiguration, setWinnerConfiguration] = useState({
     tier1: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>,
-    tier2: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
+    tier2: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>,
+    tier3: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
+  });
