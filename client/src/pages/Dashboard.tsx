@@ -218,7 +218,7 @@ export default function Dashboard() {
       const response = await fetch('/api/tiers/thresholds');
       if (response.ok) {
         const data = await response.json();
-        setTierThresholds(data);
+        setTierThresholds(data.thresholds);
       }
     } catch (error) {
       console.error('Error fetching tier thresholds:', error);
