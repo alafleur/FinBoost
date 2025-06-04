@@ -66,21 +66,7 @@ export default function HowRewardsWork() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {[
-          { tier: "Tier 1", description: "Everyone wins, even beginners", number: 1 },
-          { tier: "Tier 2", description: "Consistent earners get steady rewards", number: 2 },
-          { tier: "Tier 3", description: "Top performers get the biggest share", number: 3 }
-        ].map((tier, index) => (
-          <div key={index} className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-blue-200 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-md">
-              <span className="text-white font-bold">{tier.number}</span>
-            </div>
-            <h3 className="font-bold text-xl mb-4 text-blue-900">{tier.tier}</h3>
-            <p className="text-sm text-blue-700">{tier.description}</p>
-          </div>
-        ))}
-      </div>
+        
 
         <MembershipGrowthChart />
       </div>
