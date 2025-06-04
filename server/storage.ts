@@ -24,11 +24,14 @@ export interface IStorage {
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
     getUserById(id: number): Promise<User | null>;
-    validatePassword(email: string, password: string): Promise<User | null>;
+    validateUser(email: string, password: string): Promise<User | null>;
     updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void>;
     getUserPointsHistory(userId: number): Promise<UserPointsHistory[]>;
     updateLastLogin(userId: number): Promise<void>;
+    updateUserLastLogin(userId: number): Promise<void>;
     updateUserProfile(userId: number, profileData: Partial<{firstName: string, lastName: string, bio: string, location: string, occupation: string, financialGoals: string}>): Promise<void>;
+    generateToken(userId: number): Promise<string>;
+    getUserByToken(token: string): Promise<User | null>;
 
     // Enhanced Points System Methods
     awardPoints(userId: number, actionId: string, points: number, description: string, metadata?: any): Promise<UserPointsHistory>;
@@ -1618,6 +1621,243 @@ export class MemStorage implements IStorage {
       timezone: "UTC"
     };
   }
+
+  // Authentication methods
+  async validateUser(email: string, password: string): Promise<User | null> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      if (!user) return null;
+      
+      const isValid = await bcrypt.compare(password, user.password);
+      return isValid ? user : null;
+    } catch (error) {
+      console.error('Error validating user:', error);
+      return null;
+    }
+  }
+
+  async updateUserLastLogin(userId: number): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error updating last login:', error);
+    }
+  }
+
+  async generateToken(userId: number): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    // Store token in memory for this session
+    this.tokens.set(token, { userId, createdAt: new Date() });
+    return token;
+  }
+
+  async getUserByToken(token: string): Promise<User | null> {
+    try {
+      const tokenData = this.tokens.get(token);
+      if (!tokenData) return null;
+      
+      // Check if token is expired (24 hours)
+      const tokenAge = Date.now() - tokenData.createdAt.getTime();
+      if (tokenAge > 24 * 60 * 60 * 1000) {
+        this.tokens.delete(token);
+        return null;
+      }
+      
+      return await this.getUser(tokenData.userId) || null;
+    } catch (error) {
+      console.error('Error getting user by token:', error);
+      return null;
+    }
+  }
+
+  // Admin methods
+  async getAdminAnalytics(): Promise<any> {
+    try {
+      const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const activeUsers = await db.select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(sql`last_login > NOW() - INTERVAL '30 days'`);
+      
+      return {
+        totalUsers: totalUsers[0]?.count || 0,
+        activeUsers: activeUsers[0]?.count || 0,
+        totalModules: this.modules.size,
+        totalCompletions: 0,
+        avgCompletionRate: 0,
+        userGrowth: [],
+        pointsDistribution: [],
+        recentActivity: [],
+        systemHealth: {}
+      };
+    } catch (error) {
+      console.error('Error getting admin analytics:', error);
+      return {
+        totalUsers: 0,
+        activeUsers: 0,
+        totalModules: 0,
+        totalCompletions: 0,
+        avgCompletionRate: 0,
+        userGrowth: [],
+        pointsDistribution: [],
+        recentActivity: [],
+        systemHealth: {}
+      };
+    }
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      return allUsers;
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      return [];
+    }
+  }
+
+  async getAllModules(): Promise<any[]> {
+    try {
+      const modules = await db.select().from(learningModules).orderBy(learningModules.order);
+      return modules;
+    } catch (error) {
+      console.error('Error getting all modules:', error);
+      return Array.from(this.modules.values());
+    }
+  }
+
+  async getMonthlyPool(): Promise<any> {
+    try {
+      const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const userCount = totalUsers[0]?.count || 0;
+      
+      const monthlyRevenue = userCount * 20; // $20 per user
+      const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
+      
+      return {
+        totalUsers: userCount.toString(),
+        monthlyRevenue: monthlyRevenue.toString(),
+        totalPool,
+        tier1Pool: Math.round(totalPool * 0.5), // 50%
+        tier2Pool: Math.round(totalPool * 0.3), // 30%
+        tier3Pool: Math.round(totalPool * 0.2), // 20%
+        lastUpdated: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error getting monthly pool:', error);
+      return {
+        totalUsers: "0",
+        monthlyRevenue: "0",
+        totalPool: 0,
+        tier1Pool: 0,
+        tier2Pool: 0,
+        tier3Pool: 0,
+        lastUpdated: new Date().toISOString()
+      };
+    }
+  }
+
+  async getNextDistribution(): Promise<any> {
+    return {
+      nextDate: "2024-07-01",
+      daysRemaining: 15,
+      estimatedPool: 1000
+    };
+  }
+
+  async getTierThresholds(): Promise<any> {
+    try {
+      const allUsers = await db.select({ points: users.currentMonthPoints }).from(users);
+      const points = allUsers.map(u => u.points || 0).sort((a, b) => a - b);
+      
+      if (points.length === 0) {
+        return { tier1: 0, tier2: 0, tier3: 0 };
+      }
+      
+      // Calculate 33rd and 66th percentiles
+      const tier2Index = Math.floor(points.length * 0.33);
+      const tier3Index = Math.floor(points.length * 0.66);
+      
+      return {
+        tier1: 0,
+        tier2: points[tier2Index] || 0,
+        tier3: points[tier3Index] || 0
+      };
+    } catch (error) {
+      console.error('Error calculating tier thresholds:', error);
+      return { tier1: 0, tier2: 28, tier3: 64 };
+    }
+  }
+
+  async getLeaderboard(): Promise<any[]> {
+    try {
+      const leaderboard = await db.select({
+        userId: users.id,
+        username: users.username,
+        points: users.currentMonthPoints,
+        tier: users.tier
+      })
+      .from(users)
+      .orderBy(desc(users.currentMonthPoints))
+      .limit(50);
+      
+      return leaderboard.map((user, index) => ({
+        rank: (index + 1).toString(),
+        userId: user.userId,
+        username: user.username,
+        points: user.points || 0,
+        tier: user.tier || 'tier1'
+      }));
+    } catch (error) {
+      console.error('Error getting leaderboard:', error);
+      return [];
+    }
+  }
+
+  async getUserProgress(userId: number): Promise<any[]> {
+    try {
+      const progress = await db.select()
+        .from(userProgress)
+        .where(eq(userProgress.userId, userId));
+      return progress;
+    } catch (error) {
+      console.error('Error getting user progress:', error);
+      return [];
+    }
+  }
+
+  async getPointActions(): Promise<any[]> {
+    return [
+      {
+        id: "daily-login",
+        name: "Daily Login",
+        points: 5,
+        maxDaily: 1,
+        maxTotal: null,
+        category: "engagement"
+      },
+      {
+        id: "lesson-completion",
+        name: "Complete Lesson",
+        points: 20,
+        maxDaily: 5,
+        maxTotal: null,
+        category: "learning"
+      },
+      {
+        id: "quiz-perfect",
+        name: "Perfect Quiz Score",
+        points: 10,
+        maxDaily: 3,
+        maxTotal: null,
+        category: "learning"
+      }
+    ];
+  }
+
+  // Add tokens storage
+  private tokens = new Map<string, { userId: number; createdAt: Date }>();
 }
 
 export const storage = new MemStorage();

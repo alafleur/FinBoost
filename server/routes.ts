@@ -39,7 +39,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         message: "Login successful", 
-        user: { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin },
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email, 
+          isAdmin: user.email === 'lafleur.andrew@gmail.com' // Admin check by email
+        },
         token 
       });
     } catch (error: any) {
@@ -65,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id, 
           username: user.username, 
           email: user.email, 
-          points: user.points,
+          points: user.currentMonthPoints || 0,
           tier: user.tier,
-          isAdmin: user.isAdmin 
+          isAdmin: user.email === 'lafleur.andrew@gmail.com'
         } 
       });
     } catch (error: any) {
@@ -153,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.getUserByToken(token);
-      if (!user || !user.isAdmin) {
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
       
