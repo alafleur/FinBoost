@@ -645,7 +645,7 @@ export default function Admin() {
                   <CardTitle>Total Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                  <div className="text-2xl font-bold">{users.length}</div>
                 </CardContent>
               </Card>
 
@@ -654,7 +654,7 @@ export default function Admin() {
                   <CardTitle>Active Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeUsers}</div>
+                  <div className="text-2xl font-bold">{users.filter((u: any) => u.isActive).length}</div>
                 </CardContent>
               </Card>
 
@@ -843,13 +843,34 @@ export default function Admin() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setShowUserDialog(true);
+                                  }}
+                                >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingUser(user);
+                                    setShowEditUserDialog(true);
+                                  }}
+                                >
                                   <Edit className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setShowUserSettingsDialog(true);
+                                  }}
+                                >
                                   <Settings className="w-4 h-4" />
                                 </Button>
                               </div>
