@@ -114,6 +114,13 @@ export default function Admin() {
     }
   });
 
+  // Tier thresholds state (dynamic percentile-based)
+  const [tierThresholds, setTierThresholds] = useState({
+    tier1: 0,
+    tier2: 0,
+    tier3: 0
+  });
+
   // State for modules
   const [modules, setModules] = useState<LearningModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<LearningModule | null>(null);
@@ -233,6 +240,7 @@ export default function Admin() {
       await loadSystemSettings();
       await loadModulesData();
       await loadRealStats();
+      await loadTierThresholds();
     } catch (error) {
       console.error('Failed to load admin data:', error);
     }
@@ -257,6 +265,22 @@ export default function Admin() {
     } catch (error) {
       console.error('Error loading modules:', error);
       setModules([]);
+    }
+  };
+
+  const loadTierThresholds = async () => {
+    try {
+      const response = await fetch('/api/tiers/thresholds');
+      if (response.ok) {
+        const data = await response.json();
+        setTierThresholds({
+          tier1: data.thresholds.tier1,
+          tier2: data.thresholds.tier2,
+          tier3: data.thresholds.tier3
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load tier thresholds:', error);
     }
   };
 
@@ -1708,52 +1732,36 @@ export default function Admin() {
               <Card>
                 <CardHeader>
                   <CardTitle>Tier Requirements</CardTitle>
-                  <CardDescription>Set point thresholds for user tiers</CardDescription>
+                  <CardDescription>Dynamic percentile-based point thresholds for user tiers</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Tier 1</Label>
-                    <Input
-                      type="number"
-                      value={systemSettings.tierRequirements.tier1}
-                      onChange={(e) => setSystemSettings({
-                        ...systemSettings,
-                        tierRequirements: {
-                          ...systemSettings.tierRequirements,
-                          tier1: parseInt(e.target.value)
-                        }
-                      })}
-                    />
-                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Tier thresholds are automatically calculated based on user point percentiles and update monthly.
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label className="text-sm font-medium">Tier 1 (Top 33%)</Label>
+                        <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
+                          {tierThresholds.tier1} points
+                        </span>
+                      </div>
 
-                  <div>
-                    <Label>Tier 2</Label>
-                    <Input
-                      type="number"
-                      value={systemSettings.tierRequirements.tier2}
-                      onChange={(e) => setSystemSettings({
-                        ...systemSettings,
-                        tierRequirements: {
-                          ...systemSettings.tierRequirements,
-                          tier2: parseInt(e.target.value)
-                        }
-                      })}
-                    />
-                  </div>
+                      <div className="flex justify-between items-center">
+                        <Label className="text-sm font-medium">Tier 2 (Middle 33%)</Label>
+                        <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
+                          {tierThresholds.tier2} points
+                        </span>
+                      </div>
 
-                  <div>
-                    <Label>Tier 3</Label>
-                    <Input
-                      type="number"
-                      value={systemSettings.tierRequirements.tier3}
-                      onChange={(e) => setSystemSettings({
-                        ...systemSettings,
-                        tierRequirements: {
-                          ...systemSettings.tierRequirements,
-                          tier3: parseInt(e.target.value)
-                        }
-                      })}
-                    />
+                      <div className="flex justify-between items-center">
+                        <Label className="text-sm font-medium">Tier 3 (Bottom 33%)</Label>
+                        <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
+                          {tierThresholds.tier3} points
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
