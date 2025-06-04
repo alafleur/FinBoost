@@ -1680,10 +1680,12 @@ export class MemStorage implements IStorage {
         .from(users)
         .where(sql`last_login_at > NOW() - INTERVAL '30 days'`);
       
+      const moduleCount = await db.select({ count: sql<number>`count(*)` }).from(learningModules);
+      
       return {
         totalUsers: totalUsers[0]?.count || 0,
         activeUsers: activeUsers[0]?.count || 0,
-        totalModules: this.modules.size,
+        totalModules: moduleCount[0]?.count || 0,
         totalCompletions: 0,
         avgCompletionRate: 0,
         userGrowth: [],
@@ -1723,7 +1725,7 @@ export class MemStorage implements IStorage {
       return modules;
     } catch (error) {
       console.error('Error getting all modules:', error);
-      return Array.from(this.modules.values());
+      return [];
     }
   }
 
