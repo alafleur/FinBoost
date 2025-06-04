@@ -14,7 +14,7 @@ export default function MembershipValue() {
             You're not just paying for a service — you're fueling a collective system designed to help everyone thrive financially.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left column - Simplified Pie Chart */}
           <div className="relative">
@@ -39,7 +39,7 @@ export default function MembershipValue() {
                 </motion.div>
               </div>
             </div>
-            
+
             {/* Breakdown below pie chart */}
             <div className="mt-8 space-y-4">
               <div className="flex items-center justify-center">
@@ -52,11 +52,11 @@ export default function MembershipValue() {
               </div>
             </div>
           </div>
-          
+
           {/* Right column - What You Get */}
           <div>
             <h3 className="font-heading font-semibold text-2xl mb-6">What You Get in Return</h3>
-            
+
             <div className="space-y-6">
               {/* Learn Card */}
               <motion.div 
@@ -79,7 +79,7 @@ export default function MembershipValue() {
                   </div>
                 </div>
               </motion.div>
-              
+
               {/* Earn Card */}
               <motion.div 
                 className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-xl p-6"

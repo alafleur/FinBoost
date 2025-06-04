@@ -20,7 +20,7 @@ type SubscribeFormValues = z.infer<typeof subscribeSchema>;
 
 export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
   const { mutate: subscribe, isPending } = useSubscribe();
-  
+
   const form = useForm<SubscribeFormValues>({
     resolver: zodResolver(subscribeSchema),
     defaultValues: {
@@ -43,7 +43,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+    <section className="py-20 px-4 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">Your Financial Progress Starts Here</h2>
         <p className="text-white/90 text-xl mb-4 max-w-2xl mx-auto font-medium">
@@ -52,7 +52,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
         <p className="text-white/80 text-base mb-8 max-w-2xl mx-auto">
           Join the movement now and help build a community that learns and earns together.
         </p>
-        
+
         <div className="max-w-lg mx-auto mb-8">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-grow">
@@ -76,7 +76,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
             </div>
           </div>
         </div>
-        
+
         <p className="text-white/60 text-sm">We'll never share your email. Unsubscribe anytime.</p>
       </div>
     </section>
