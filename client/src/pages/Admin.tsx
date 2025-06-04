@@ -1177,18 +1177,18 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-11">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="modules">Modules</TabsTrigger>
-            <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
-            <TabsTrigger value="proofs">Proof Review</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="current-rewards">Current Rewards</TabsTrigger>
-            <TabsTrigger value="rewards-config">Rewards Config</TabsTrigger>
-            <TabsTrigger value="rewards-payout">Rewards Payout</TabsTrigger>
-            <TabsTrigger value="cycle-management">Cycle Management</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto scrollbar-hide">
+            <TabsTrigger value="overview" className="whitespace-nowrap px-3 py-2 text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="users" className="whitespace-nowrap px-3 py-2 text-sm">Users</TabsTrigger>
+            <TabsTrigger value="modules" className="whitespace-nowrap px-3 py-2 text-sm">Modules</TabsTrigger>
+            <TabsTrigger value="quiz" className="whitespace-nowrap px-3 py-2 text-sm">Quiz Builder</TabsTrigger>
+            <TabsTrigger value="proofs" className="whitespace-nowrap px-3 py-2 text-sm">Proof Review</TabsTrigger>
+            <TabsTrigger value="analytics" className="whitespace-nowrap px-3 py-2 text-sm">Analytics</TabsTrigger>
+            <TabsTrigger value="current-rewards" className="whitespace-nowrap px-3 py-2 text-sm">Current Rewards</TabsTrigger>
+            <TabsTrigger value="rewards-config" className="whitespace-nowrap px-3 py-2 text-sm">Rewards Config</TabsTrigger>
+            <TabsTrigger value="rewards-payout" className="whitespace-nowrap px-3 py-2 text-sm">Rewards Payout</TabsTrigger>
+            <TabsTrigger value="cycle-management" className="whitespace-nowrap px-3 py-2 text-sm">Cycle Management</TabsTrigger>
+            <TabsTrigger value="settings" className="whitespace-nowrap px-3 py-2 text-sm">Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Management Tab */}
