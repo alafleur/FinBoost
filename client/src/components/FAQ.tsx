@@ -77,7 +77,7 @@ export default function FAQ() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-white" id="faq">
+    <section className="py-20 px-4 bg-gradient-to-r from-blue-300/8 via-purple-200/6 to-indigo-300/10" id="faq">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-16">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">Frequently Asked Questions</h2>

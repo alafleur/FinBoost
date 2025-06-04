@@ -46,7 +46,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
   };
 
   return (
-    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-b from-white via-blue-50/30 to-blue-100/50">
+    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-br from-blue-400/20 via-purple-400/15 to-blue-500/25">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
