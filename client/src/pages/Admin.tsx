@@ -437,61 +437,406 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>Manage user accounts and permissions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    Total Users: {users.length}
+            <div className="space-y-6">
+              {/* User Statistics Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{users.length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      +12% from last month
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                    <Activity className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{users.filter((u: any) => u.isActive).length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {Math.round((users.filter((u: any) => u.isActive).length / users.length) * 100)}% active rate
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Tier 3 Users</CardTitle>
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {users.filter((u: any) => u.tier === 'tier3').length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Top performers
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Points</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {Math.round(users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0) / (users.length || 1))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Per user average
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* User Management Table */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>User Accounts</CardTitle>
+                      <CardDescription>
+                        Manage user accounts, permissions, and activity
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input placeholder="Search users..." className="w-64" />
+                      <Button>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add User
+                      </Button>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    {users.slice(0, 10).map((user: any) => (
-                      <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                        <div>
-                          <div className="font-medium">{user.username}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Points</TableHead>
+                          <TableHead>Tier</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.slice(0, 20).map((user: any) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    {user.username?.charAt(0)?.toUpperCase() || 'U'}
+                                  </div>
+                                  <div>
+                                    <div>{user.username}</div>
+                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{user.totalPoints || 0}</div>
+                                <div className="text-sm text-gray-500">
+                                  {user.currentMonthPoints || 0} this month
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                user.tier === 'tier3' ? 'default' :
+                                user.tier === 'tier2' ? 'secondary' : 'outline'
+                              }>
+                                {user.tier?.replace('tier', 'Tier ') || 'Tier 1'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={user.isActive ? "default" : "secondary"}>
+                                {user.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Settings className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* User Analytics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tier Distribution</CardTitle>
+                    <CardDescription>User distribution across performance tiers</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {['tier1', 'tier2', 'tier3'].map((tier) => {
+                        const count = users.filter((u: any) => u.tier === tier).length;
+                        const percentage = Math.round((count / users.length) * 100);
+                        return (
+                          <div key={tier} className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium">{tier.replace('tier', 'Tier ')}</span>
+                              <span>{count} users ({percentage}%)</span>
+                            </div>
+                            <Progress value={percentage} className="h-2" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>Latest user registrations and logins</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {users.slice(0, 5).map((user: any) => (
+                        <div key={user.id} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                              {user.username?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium">{user.username}</div>
+                              <div className="text-xs text-gray-500">
+                                {user.totalPoints || 0} points
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-500">
+                              {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A'}
+                            </div>
+                          </div>
                         </div>
-                        <Badge variant={user.isActive ? "default" : "secondary"}>
-                          {user.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="content">
-            <Card>
-              <CardHeader>
-                <CardTitle>Content Management</CardTitle>
-                <CardDescription>Manage learning modules and content</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    Total Modules: {modules.length}
+            <div className="space-y-6">
+              {/* Content Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Modules</CardTitle>
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{modules.length}</div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Modules</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{modules.filter((m: any) => m.isActive).length}</div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                    <Target className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {[...new Set(modules.map((m: any) => m.category))].length}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Points</CardTitle>
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {Math.round(modules.reduce((sum: number, m: any) => sum + (m.pointsReward || 0), 0) / (modules.length || 1))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Module Management Table */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Learning Modules</CardTitle>
+                      <CardDescription>
+                        Manage educational content and point rewards
+                      </CardDescription>
+                    </div>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Module
+                    </Button>
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    {modules.slice(0, 5).map((module: any) => (
-                      <div key={module.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                        <div>
-                          <div className="font-medium">{module.title}</div>
-                          <div className="text-sm text-gray-500">{module.category}</div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Difficulty</TableHead>
+                          <TableHead>Points</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {modules.map((module: any) => (
+                          <TableRow key={module.id}>
+                            <TableCell className="font-medium">
+                              <div>
+                                <div>{module.title}</div>
+                                <div className="text-sm text-gray-500 truncate max-w-xs">
+                                  {module.description}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{module.category}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                module.difficulty === 'beginner' ? 'default' :
+                                module.difficulty === 'intermediate' ? 'secondary' : 'destructive'
+                              }>
+                                {module.difficulty}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{module.pointsReward}</TableCell>
+                            <TableCell>{module.estimatedMinutes}min</TableCell>
+                            <TableCell>
+                              <Badge variant={module.isActive ? "default" : "secondary"}>
+                                {module.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Content Analytics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Content Performance</CardTitle>
+                    <CardDescription>Module completion rates and engagement</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {modules.slice(0, 5).map((module: any) => (
+                        <div key={module.id} className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">{module.title}</div>
+                            <div className="text-xs text-gray-500">{module.category}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">85%</div>
+                            <div className="text-xs text-gray-500">completion</div>
+                          </div>
                         </div>
-                        <Badge variant={module.isActive ? "default" : "secondary"}>
-                          {module.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Category Distribution</CardTitle>
+                    <CardDescription>Content breakdown by category</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[...new Set(modules.map((m: any) => m.category))].map((category: string) => {
+                        const count = modules.filter((m: any) => m.category === category).length;
+                        const percentage = Math.round((count / modules.length) * 100);
+                        return (
+                          <div key={category} className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium">{category}</span>
+                              <span>{count} modules ({percentage}%)</span>
+                            </div>
+                            <Progress value={percentage} className="h-2" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="rewards">
@@ -737,56 +1082,579 @@ export default function Admin() {
 
           <TabsContent value="points">
             <div className="space-y-6">
-              {/* Points Analytics */}
+              {/* Points Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0).toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Across all users
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {users.reduce((sum: number, u: any) => sum + (u.currentMonthPoints || 0), 0).toLocaleString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Current month activity
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Point Actions</CardTitle>
+                    <Activity className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">47</div>
+                    <p className="text-xs text-muted-foreground">
+                      Available activities
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Per User</CardTitle>
+                    <Target className="h-4 w-4 text-purple-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {Math.round(users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0) / (users.length || 1))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Points per user
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Point Distribution & Top Earners */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Points by Tier</CardTitle>
+                    <CardDescription>Point distribution across user tiers</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {['tier3', 'tier2', 'tier1'].map((tier) => {
+                        const tierUsers = users.filter((u: any) => u.tier === tier);
+                        const totalPoints = tierUsers.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0);
+                        const avgPoints = tierUsers.length > 0 ? Math.round(totalPoints / tierUsers.length) : 0;
+                        const allPoints = users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0);
+                        return (
+                          <div key={tier} className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium">{tier.replace('tier', 'Tier ')}</span>
+                              <span>{totalPoints.toLocaleString()} total ({avgPoints} avg)</span>
+                            </div>
+                            <Progress value={allPoints > 0 ? (totalPoints / allPoints) * 100 : 0} className="h-2" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top Earners</CardTitle>
+                    <CardDescription>Users with highest point totals</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {users
+                        .sort((a: any, b: any) => (b.totalPoints || 0) - (a.totalPoints || 0))
+                        .slice(0, 5)
+                        .map((user: any, index: number) => (
+                          <div key={user.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium">{user.username}</div>
+                                <div className="text-xs text-gray-500">{user.tier?.replace('tier', 'Tier ') || 'Tier 1'}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold">{(user.totalPoints || 0).toLocaleString()}</div>
+                              <div className="text-xs text-gray-500">{user.currentMonthPoints || 0} this month</div>
+                            </div>
+                          </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Point Actions Management */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Points Analytics</CardTitle>
-                  <CardDescription>Overview of point distribution and activity</CardDescription>
+                  <CardTitle>Point Actions & Rewards</CardTitle>
+                  <CardDescription>Manage available point-earning activities</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <div className="text-sm font-medium text-blue-800">Total Points Awarded</div>
-                      <div className="text-2xl font-bold text-blue-900">
-                        {users.reduce((sum: number, user: any) => sum + (user.points || 0), 0)}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Daily Login</span>
+                        <Badge variant="default">5 pts</Badge>
                       </div>
+                      <div className="text-xs text-gray-500">Base daily activity reward</div>
                     </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <div className="text-sm font-medium text-green-800">Average Points</div>
-                      <div className="text-2xl font-bold text-green-900">
-                        {users.length > 0 ? Math.round(users.reduce((sum: number, user: any) => sum + (user.points || 0), 0) / users.length) : 0}
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Module Completion</span>
+                        <Badge variant="default">10-50 pts</Badge>
                       </div>
+                      <div className="text-xs text-gray-500">Variable by difficulty</div>
                     </div>
-                    <div className="p-4 bg-orange-50 rounded-lg">
-                      <div className="text-sm font-medium text-orange-800">Tier 3 Users</div>
-                      <div className="text-2xl font-bold text-orange-900">
-                        {users.filter((user: any) => (user.points || 0) >= tierThresholds.tier3).length}
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Quiz Perfect Score</span>
+                        <Badge variant="default">15 pts</Badge>
                       </div>
+                      <div className="text-xs text-gray-500">100% quiz completion</div>
                     </div>
-                    <div className="p-4 bg-purple-50 rounded-lg">
-                      <div className="text-sm font-medium text-purple-800">Active Today</div>
-                      <div className="text-2xl font-bold text-purple-900">
-                        {users.filter((user: any) => user.lastActive && new Date(user.lastActive).toDateString() === new Date().toDateString()).length}
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Streak Bonus</span>
+                        <Badge variant="secondary">2-10 pts</Badge>
                       </div>
+                      <div className="text-xs text-gray-500">Consecutive day multiplier</div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Referral Signup</span>
+                        <Badge variant="default">25 pts</Badge>
+                      </div>
+                      <div className="text-xs text-gray-500">Friend joins platform</div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Community Activity</span>
+                        <Badge variant="outline">1-5 pts</Badge>
+                      </div>
+                      <div className="text-xs text-gray-500">Forum participation</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Manual Point Management */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Award Points</CardTitle>
+                    <CardDescription>Grant bonus points to users</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="awardUser">Select User</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose user" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.slice(0, 10).map((user: any) => (
+                              <SelectItem key={user.id} value={user.id.toString()}>
+                                {user.username} ({user.totalPoints || 0} points)
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="awardAmount">Points to Award</Label>
+                        <Input
+                          id="awardAmount"
+                          type="number"
+                          min="1"
+                          placeholder="Enter amount"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="awardReason">Reason</Label>
+                        <Textarea
+                          id="awardReason"
+                          placeholder="Reason for awarding points..."
+                          rows={3}
+                        />
+                      </div>
+                      <Button className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Award Points
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Point Activity</CardTitle>
+                    <CardDescription>Latest point transactions and changes</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${
+                              index % 2 === 0 ? 'bg-green-500' : 'bg-blue-500'
+                            }`}>
+                              {index % 2 === 0 ? '+' : '✓'}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium">
+                                {index % 2 === 0 ? 'Points Awarded' : 'Module Completed'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                User {users[index]?.username || 'Unknown'} • 2 hours ago
+                              </div>
+                            </div>
+                          </div>
+                          <Badge variant={index % 2 === 0 ? "default" : "secondary"}>
+                            +{index % 2 === 0 ? '25' : '15'} pts
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="support">
-            <Card>
-              <CardHeader>
-                <CardTitle>Support Center</CardTitle>
-                <CardDescription>Manage user support and system health</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  Support management features coming soon
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              {/* Support Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">23</div>
+                    <p className="text-xs text-muted-foreground">
+                      Awaiting response
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Resolved Today</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">8</div>
+                    <p className="text-xs text-muted-foreground">
+                      +2 from yesterday
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Response</CardTitle>
+                    <Clock className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">2.4h</div>
+                    <p className="text-xs text-muted-foreground">
+                      Response time
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">4.8</div>
+                    <p className="text-xs text-muted-foreground">
+                      Out of 5.0
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Support Tickets Management */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Support Tickets</CardTitle>
+                      <CardDescription>
+                        Manage user support requests and system issues
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input placeholder="Search tickets..." className="w-64" />
+                      <Button>
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Ticket
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Ticket ID</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[...Array(8)].map((_, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-mono text-sm">
+                              #{1000 + index}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                  {users[index]?.username?.charAt(0)?.toUpperCase() || 'U'}
+                                </div>
+                                <span className="text-sm">{users[index]?.username || 'User'}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-sm">
+                                  {index % 3 === 0 ? 'Login Issues' : 
+                                   index % 3 === 1 ? 'Points Not Updating' : 'Module Content Error'}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate max-w-xs">
+                                  {index % 3 === 0 ? 'Cannot access account after password reset' : 
+                                   index % 3 === 1 ? 'Completed lesson but points not added' : 'Video not loading in lesson 5'}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                index % 3 === 0 ? 'destructive' :
+                                index % 3 === 1 ? 'default' : 'secondary'
+                              }>
+                                {index % 3 === 0 ? 'High' : index % 3 === 1 ? 'Medium' : 'Low'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                index % 2 === 0 ? 'default' : 'secondary'
+                              }>
+                                {index % 2 === 0 ? 'Open' : 'In Progress'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {new Date(Date.now() - (index * 2 * 60 * 60 * 1000)).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Health & Support Analytics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System Health</CardTitle>
+                    <CardDescription>Current system status and performance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">Database</span>
+                        </div>
+                        <Badge variant="default">Healthy</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">API Services</span>
+                        </div>
+                        <Badge variant="default">Operational</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <span className="text-sm">Payment Processing</span>
+                        </div>
+                        <Badge variant="secondary">Slow</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">Content Delivery</span>
+                        </div>
+                        <Badge variant="default">Optimal</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">User Authentication</span>
+                        </div>
+                        <Badge variant="default">Active</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Common Issues</CardTitle>
+                    <CardDescription>Most frequent support categories</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { category: 'Login & Account', count: 12, percentage: 35 },
+                        { category: 'Points & Rewards', count: 8, percentage: 25 },
+                        { category: 'Payment Issues', count: 6, percentage: 18 },
+                        { category: 'Content Problems', count: 5, percentage: 15 },
+                        { category: 'Technical Bugs', count: 3, percentage: 7 }
+                      ].map((issue, index) => (
+                        <div key={index} className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">{issue.category}</span>
+                            <span>{issue.count} tickets ({issue.percentage}%)</span>
+                          </div>
+                          <Progress value={issue.percentage} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions & Knowledge Base */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quick Actions</CardTitle>
+                    <CardDescription>Common administrative tasks</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button variant="outline" className="justify-start h-auto p-4">
+                        <div className="text-left">
+                          <div className="font-medium text-sm">Reset Password</div>
+                          <div className="text-xs text-gray-500">For user accounts</div>
+                        </div>
+                      </Button>
+                      
+                      <Button variant="outline" className="justify-start h-auto p-4">
+                        <div className="text-left">
+                          <div className="font-medium text-sm">Unlock Account</div>
+                          <div className="text-xs text-gray-500">Remove restrictions</div>
+                        </div>
+                      </Button>
+                      
+                      <Button variant="outline" className="justify-start h-auto p-4">
+                        <div className="text-left">
+                          <div className="font-medium text-sm">Refund Payment</div>
+                          <div className="text-xs text-gray-500">Process refunds</div>
+                        </div>
+                      </Button>
+                      
+                      <Button variant="outline" className="justify-start h-auto p-4">
+                        <div className="text-left">
+                          <div className="font-medium text-sm">Clear Cache</div>
+                          <div className="text-xs text-gray-500">System maintenance</div>
+                        </div>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>Latest support interactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[...Array(4)].map((_, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${
+                              index % 2 === 0 ? 'bg-green-500' : 'bg-blue-500'
+                            }`}>
+                              {index % 2 === 0 ? '✓' : '💬'}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium">
+                                {index % 2 === 0 ? 'Ticket Resolved' : 'New Response'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Ticket #{1000 + index} • {index + 1} hour ago
+                              </div>
+                            </div>
+                          </div>
+                          <Badge variant={index % 2 === 0 ? "default" : "secondary"}>
+                            {index % 2 === 0 ? 'Closed' : 'Active'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="settings">
