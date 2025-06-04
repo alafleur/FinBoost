@@ -1877,6 +1877,255 @@ export default function Admin() {
               </Button>
             </div>
 
+            {/* Rewards Overview Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{stats.totalUsers}</div>
+                    <div className="text-sm text-gray-600">Total Users</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">${stats.totalUsers * 20}</div>
+                    <div className="text-sm text-gray-600">Monthly Revenue</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${Math.round((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100)}
+                    </div>
+                    <div className="text-sm text-gray-600">Monthly Rewards Pool</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      ${Math.round((stats.totalUsers * 20 * (100 - rewardsConfig.poolPercentage)) / 100)}
+                    </div>
+                    <div className="text-sm text-gray-600">Education Fund</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tier Distribution Statistics */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Tier Distribution Analysis</CardTitle>
+                <CardDescription>Current user distribution and reward allocation by tier</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Tier 1 Stats */}
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <h4 className="font-semibold">Tier 1 (Top {rewardsConfig.tierPercentiles.tier1}%)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Users in tier:</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Monthly fees:</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * 20}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pool allocation:</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100))}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Winners ({rewardsConfig.winnerPercentages.tier1}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="font-medium">Avg reward:</span>
+                        <span className="font-mono font-bold">
+                          ${Math.round(
+                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100))
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 2 Stats */}
+                  <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <h4 className="font-semibold">Tier 2 (Middle {rewardsConfig.tierPercentiles.tier2}%)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Users in tier:</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Monthly fees:</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * 20}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pool allocation:</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100))}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Winners ({rewardsConfig.winnerPercentages.tier2}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="font-medium">Avg reward:</span>
+                        <span className="font-mono font-bold">
+                          ${Math.round(
+                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100))
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 3 Stats */}
+                  <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-4 rounded-lg border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-amber-600 rounded-full"></div>
+                      <h4 className="font-semibold">Tier 3 (Bottom {rewardsConfig.tierPercentiles.tier3}%)</h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Users in tier:</span>
+                        <span className="font-mono">{Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Monthly fees:</span>
+                        <span className="font-mono">${Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * 20}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pool allocation:</span>
+                        <span className="font-mono">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100))}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Winners ({rewardsConfig.winnerPercentages.tier3}%):</span>
+                        <span className="font-mono">{Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="font-medium">Avg reward:</span>
+                        <span className="font-mono font-bold">
+                          ${Math.round(
+                            (((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100)) /
+                            Math.max(1, Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100))
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Distribution Summary */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Monthly Distribution Summary</CardTitle>
+                <CardDescription>Total reward distribution breakdown for the current month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-lg">Total Winners This Month</h4>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Tier 1 Winners:</span>
+                        <span className="font-mono font-bold text-green-700">
+                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100)} users
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Tier 2 Winners:</span>
+                        <span className="font-mono font-bold text-green-700">
+                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100)} users
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Tier 3 Winners:</span>
+                        <span className="font-mono font-bold text-green-700">
+                          {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)} users
+                        </span>
+                      </div>
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold">Total Winners:</span>
+                          <span className="font-mono font-bold text-xl text-green-800">
+                            {Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100) +
+                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100) +
+                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)} users
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {(((Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier1) / 100) * rewardsConfig.winnerPercentages.tier1) / 100) +
+                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier2) / 100) * rewardsConfig.winnerPercentages.tier2) / 100) +
+                             Math.round((Math.round((stats.totalUsers * rewardsConfig.tierPercentiles.tier3) / 100) * rewardsConfig.winnerPercentages.tier3) / 100)) / stats.totalUsers) * 100).toFixed(1)}% of all users
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-lg">Pool Distribution</h4>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Total Revenue:</span>
+                          <span className="font-mono font-bold">${stats.totalUsers * 20}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full" 
+                            style={{ width: `${rewardsConfig.poolPercentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-orange-600">Rewards: ${Math.round((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100)} ({rewardsConfig.poolPercentage}%)</span>
+                          <span className="text-blue-600">Education: ${Math.round((stats.totalUsers * 20 * (100 - rewardsConfig.poolPercentage)) / 100)} ({100 - rewardsConfig.poolPercentage}%)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border">
+                      <h5 className="font-medium mb-2">Tier Allocations</h5>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Tier 1 ({rewardsConfig.tierAllocations.tier1}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100))}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Tier 2 ({rewardsConfig.tierAllocations.tier2}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100))}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Tier 3 ({rewardsConfig.tierAllocations.tier3}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100))}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Pool Configuration */}
               <Card>
