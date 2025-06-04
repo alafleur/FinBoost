@@ -648,7 +648,6 @@ export default function Dashboard() {
                           <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
-                            <span className="text-xs text-gray-500">{lesson.estimatedTime}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <Badge variant="outline" className="text-xs">
@@ -688,7 +687,7 @@ export default function Dashboard() {
                           {nextLesson[1].title}
                         </Button>
                         <span className="text-xs text-blue-600">
-                          ({nextLesson[1].points} points • {nextLesson[1].estimatedTime})
+                          ({nextLesson[1].points} points)
                         </span>
                       </div>
                     );
