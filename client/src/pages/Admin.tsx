@@ -1077,6 +1077,282 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Next Month Configuration (Editable) */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        Next Month Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Configure settings for {new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="default">Editable</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Pool Settings</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="nextPoolPercentage">Pool Percentage</Label>
+                          <Input
+                            id="nextPoolPercentage"
+                            type="number"
+                            min="1"
+                            max="100"
+                            defaultValue={55}
+                            className="mt-1"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">% of total revenue for rewards</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label htmlFor="nextTier3">Tier 3 %</Label>
+                            <Input
+                              id="nextTier3"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={50}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="nextTier2">Tier 2 %</Label>
+                            <Input
+                              id="nextTier2"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={30}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="nextTier1">Tier 1 %</Label>
+                            <Input
+                              id="nextTier1"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={20}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Winner Selection</h4>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label htmlFor="nextWinnerTier3">Tier 3 Winners %</Label>
+                            <Input
+                              id="nextWinnerTier3"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={10}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="nextWinnerTier2">Tier 2 Winners %</Label>
+                            <Input
+                              id="nextWinnerTier2"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={15}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="nextWinnerTier1">Tier 1 Winners %</Label>
+                            <Input
+                              id="nextWinnerTier1"
+                              type="number"
+                              min="1"
+                              max="100"
+                              defaultValue={20}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="deductionMethod">Point Deduction Method</Label>
+                          <Select defaultValue="proportional">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="proportional">Proportional (Recommended)</SelectItem>
+                              <SelectItem value="fixed">Fixed Percentage</SelectItem>
+                              <SelectItem value="none">No Deduction</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <Button variant="outline">Reset to Default</Button>
+                    <Button>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Configuration
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Winner Selection & Distribution System */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="w-5 h-5" />
+                    Monthly Winner Selection
+                  </CardTitle>
+                  <CardDescription>
+                    Select winners and distribute monthly rewards
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {['tier3', 'tier2', 'tier1'].map((tier) => {
+                        const tierUsers = users.filter((u: any) => u.tier === tier);
+                        const tierName = tier.replace('tier', 'Tier ');
+                        const tierPool = poolData?.[`${tier}Pool` as keyof typeof poolData] || 0;
+                        
+                        return (
+                          <div key={tier} className="space-y-4">
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium">{tierName}</h4>
+                                <Badge variant={tier === 'tier3' ? 'default' : tier === 'tier2' ? 'secondary' : 'outline'}>
+                                  {tierUsers.length} users
+                                </Badge>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span>Pool Amount:</span>
+                                  <span className="font-mono">${tierPool}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Winners (10%):</span>
+                                  <span className="font-mono">{Math.ceil(tierUsers.length * 0.1)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Per Winner:</span>
+                                  <span className="font-mono">
+                                    ${tierUsers.length > 0 ? Math.floor(tierPool / Math.ceil(tierUsers.length * 0.1)) : 0}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-4">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full"
+                                >
+                                  <Upload className="w-4 h-4 mr-2" />
+                                  Select Winners
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Distribution Process</h4>
+                      <div className="text-sm text-blue-800 space-y-1">
+                        <div>1. Winners selected based on highest points within each tier</div>
+                        <div>2. Proportional point deduction applied to winners automatically</div>
+                        <div>3. Rewards distributed via Stripe to user payment methods</div>
+                        <div>4. Non-winners keep all points and roll over to next month</div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-3">
+                      <Button variant="outline">Preview Distribution</Button>
+                      <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+                        Execute Monthly Distribution
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Distribution History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribution History</CardTitle>
+                  <CardDescription>Previous monthly reward distributions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Month</TableHead>
+                          <TableHead>Total Pool</TableHead>
+                          <TableHead>Winners</TableHead>
+                          <TableHead>Avg Reward</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[...Array(6)].map((_, index) => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() - index - 1);
+                          return (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                              </TableCell>
+                              <TableCell>${(2240 - index * 100).toLocaleString()}</TableCell>
+                              <TableCell>{28 - index}</TableCell>
+                              <TableCell>${Math.floor((2240 - index * 100) / (28 - index))}</TableCell>
+                              <TableCell>
+                                <Badge variant="default">Distributed</Badge>
+                              </TableCell>
+                              <TableCell>
+                                {new Date(date.getTime() + 32 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm">
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm">
+                                    <Upload className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
