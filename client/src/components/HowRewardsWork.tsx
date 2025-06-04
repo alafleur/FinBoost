@@ -68,16 +68,12 @@ export default function HowRewardsWork() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[
-          { tier: "Tier 3", percentage: "60%", color: "bg-gradient-to-r from-yellow-400 to-yellow-600", description: "Top performers get the biggest share" },
-          { tier: "Tier 2", percentage: "30%", color: "bg-gradient-to-r from-slate-400 to-slate-600", description: "Consistent earners get steady rewards" },
-          { tier: "Tier 1", percentage: "10%", color: "bg-gradient-to-r from-orange-400 to-orange-600", description: "Everyone wins, even beginners" }
+          { tier: "Tier 3", color: "bg-gradient-to-r from-yellow-400 to-yellow-600", description: "Top performers get the biggest share" },
+          { tier: "Tier 2", color: "bg-gradient-to-r from-slate-400 to-slate-600", description: "Consistent earners get steady rewards" },
+          { tier: "Tier 1", color: "bg-gradient-to-r from-orange-400 to-orange-600", description: "Everyone wins, even beginners" }
         ].map((tier, index) => (
           <div key={index} className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-blue-200 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className={`w-12 h-12 ${tier.color} rounded-full mx-auto mb-4 flex items-center justify-center shadow-md`}>
-              <span className="text-white font-bold">{index + 1}</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2 text-blue-900">{tier.tier}</h3>
-            <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">{tier.percentage}</p>
+            <h3 className="font-bold text-xl mb-4 text-blue-900">{tier.tier}</h3>
             <p className="text-sm text-blue-700">{tier.description}</p>
           </div>
         ))}
