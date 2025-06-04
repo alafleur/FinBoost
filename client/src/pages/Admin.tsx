@@ -230,6 +230,18 @@ export default function Admin() {
     tier3: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
   });
 
+  // State for cycle management
+  const [cycleSettings, setCycleSettings] = useState({
+    cycleStartDay: 1,
+    distributionDay: 5,
+    distributionDelayDays: 3,
+    cycleStartTime: "00:00",
+    distributionTime: "12:00",
+    timezone: "UTC",
+    rewardsAnnouncementDay: 3,
+    rewardsAnnouncementTime: "10:00"
+  });
+
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [csvImportData, setCsvImportData] = useState('');
   const [winnerPreview, setWinnerPreview] = useState([]);
@@ -793,6 +805,14 @@ export default function Admin() {
       if (response.ok) {
         const data = await response.json();
         setSystemSettings(data.settings);
+        
+        // Load cycle settings if they exist
+        if (data.settings.monthlySettings) {
+          setCycleSettings({
+            ...cycleSettings,
+            ...data.settings.monthlySettings
+          });
+        }
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -839,7 +859,12 @@ export default function Admin() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ settings: systemSettings })
+        body: JSON.stringify({ 
+          settings: {
+            ...systemSettings,
+            monthlySettings: cycleSettings
+          }
+        })
       });
 
       if (response.ok) {
@@ -1138,7 +1163,7 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-11">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
@@ -1148,6 +1173,7 @@ export default function Admin() {
             <TabsTrigger value="current-rewards">Current Rewards</TabsTrigger>
             <TabsTrigger value="rewards-config">Rewards Config</TabsTrigger>
             <TabsTrigger value="rewards-payout">Rewards Payout</TabsTrigger>
+            <TabsTrigger value="cycle-management">Cycle Management</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -3514,6 +3540,245 @@ export default function Admin() {
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
                       Thresholds update automatically based on user point distribution
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Cycle Management Tab */}
+          <TabsContent value="cycle-management" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Monthly Cycle Management</h2>
+                <p className="text-gray-600">Configure monthly cycle dates and reward distribution timing</p>
+              </div>
+              <Button onClick={handleUpdateSettings} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                Save Cycle Settings
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Cycle Start Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-500" />
+                    Monthly Cycle Start
+                  </CardTitle>
+                  <CardDescription>Configure when each monthly cycle begins</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Cycle Start Day of Month</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="28"
+                      value={cycleSettings.cycleStartDay}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        cycleStartDay: parseInt(e.target.value) || 1
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Day of the month when the new cycle starts (1-28)
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Cycle Start Time</Label>
+                    <Input
+                      type="time"
+                      value={cycleSettings.cycleStartTime}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        cycleStartTime: e.target.value
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Time when the cycle officially starts
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Timezone</Label>
+                    <Select value={cycleSettings.timezone} onValueChange={(value) => setCycleSettings({
+                      ...cycleSettings,
+                      timezone: value
+                    })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="EST">EST (Eastern)</SelectItem>
+                        <SelectItem value="CST">CST (Central)</SelectItem>
+                        <SelectItem value="MST">MST (Mountain)</SelectItem>
+                        <SelectItem value="PST">PST (Pacific)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Rewards Announcement Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-yellow-500" />
+                    Rewards Announcement
+                  </CardTitle>
+                  <CardDescription>When to announce and preview monthly rewards</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Announcement Day</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={cycleSettings.rewardsAnnouncementDay}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        rewardsAnnouncementDay: parseInt(e.target.value) || 3
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Day of month to announce upcoming rewards (relative to cycle start)
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Announcement Time</Label>
+                    <Input
+                      type="time"
+                      value={cycleSettings.rewardsAnnouncementTime}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        rewardsAnnouncementTime: e.target.value
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Time to send announcement notifications
+                    </p>
+                  </div>
+
+                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-800">
+                      📢 Announcements will include tier thresholds, pool size, and winner percentages
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Distribution Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-green-500" />
+                    Rewards Distribution
+                  </CardTitle>
+                  <CardDescription>Configure when monthly rewards are distributed</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Distribution Delay (Days)</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={cycleSettings.distributionDelayDays}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        distributionDelayDays: parseInt(e.target.value) || 3
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Days after cycle end to execute distribution
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Distribution Time</Label>
+                    <Input
+                      type="time"
+                      value={cycleSettings.distributionTime}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        distributionTime: e.target.value
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Time when rewards are automatically distributed
+                    </p>
+                  </div>
+
+                  <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800">
+                      💰 Distribution includes winner selection, point deduction, and Stripe payouts
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Timeline Preview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-purple-500" />
+                    Timeline Preview
+                  </CardTitle>
+                  <CardDescription>Preview of monthly cycle timeline with current settings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                      <div>
+                        <div className="font-medium text-blue-800">Cycle Start</div>
+                        <div className="text-sm text-blue-600">Day {cycleSettings.cycleStartDay} at {cycleSettings.cycleStartTime}</div>
+                      </div>
+                      <div className="text-xs text-blue-500">Month begins</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                      <div>
+                        <div className="font-medium text-yellow-800">Rewards Announcement</div>
+                        <div className="text-sm text-yellow-600">Day {cycleSettings.rewardsAnnouncementDay} at {cycleSettings.rewardsAnnouncementTime}</div>
+                      </div>
+                      <div className="text-xs text-yellow-500">Preview sent</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded border-l-4 border-red-400">
+                      <div>
+                        <div className="font-medium text-red-800">Cycle End</div>
+                        <div className="text-sm text-red-600">Next month Day {cycleSettings.cycleStartDay - 1}</div>
+                      </div>
+                      <div className="text-xs text-red-500">Points locked</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded border-l-4 border-green-400">
+                      <div>
+                        <div className="font-medium text-green-800">Distribution</div>
+                        <div className="text-sm text-green-600">
+                          +{cycleSettings.distributionDelayDays} days at {cycleSettings.distributionTime}
+                        </div>
+                      </div>
+                      <div className="text-xs text-green-500">Payouts sent</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-gray-50 rounded">
+                    <p className="text-xs text-gray-600">
+                      ⏰ All times are in {cycleSettings.timezone}
                     </p>
                   </div>
                 </CardContent>
