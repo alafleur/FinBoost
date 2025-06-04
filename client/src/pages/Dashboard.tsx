@@ -91,15 +91,15 @@ export default function Dashboard() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
                 <span className="text-orange-700 font-semibold">Tier 3</span>
-                <span className="text-orange-600">{tierThresholds?.tier3 || 150}+ pts</span>
+                <span className="text-orange-600">{tierThresholds?.tier3 || 0}+ pts</span>
               </div>
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
                 <span className="text-orange-700 font-semibold">Tier 2</span>
-                <span className="text-orange-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
+                <span className="text-orange-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
               </div>
               <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
                 <span className="text-orange-700 font-semibold">Tier 1</span>
-                <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
+                <span className="text-orange-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
               </div>
             </div>
             {user && (
@@ -733,15 +733,15 @@ export default function Dashboard() {
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
                         <span className="text-yellow-700 font-semibold">Tier 3</span>
-                        <span className="text-yellow-600">{tierThresholds?.tier3 || 150}+ pts</span>
+                        <span className="text-yellow-600">{tierThresholds?.tier3 || 0}+ pts</span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
                         <span className="text-slate-700 font-semibold">Tier 2</span>
-                        <span className="text-slate-600">{tierThresholds?.tier2 || 50} - {tierThresholds?.tier3 > 0 ? tierThresholds.tier3 - 1 : '149'} pts</span>
+                        <span className="text-slate-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
                         <span className="text-orange-700 font-semibold">Tier 1</span>
-                        <span className="text-orange-600">0 - {tierThresholds?.tier2 > 0 ? tierThresholds.tier2 - 1 : '49'} pts</span>
+                        <span className="text-orange-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
                       </div>
                     </div>
                     {user && (
