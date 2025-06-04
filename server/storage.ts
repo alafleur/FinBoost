@@ -1593,6 +1593,22 @@ export class MemStorage implements IStorage {
       .where(eq(monthlyRewards.id, monthlyRewardId));
   }
 
+  async getTotalRewardsReceived(userId: number): Promise<number> {
+    try {
+      const result = await db.execute(sql`
+        SELECT COALESCE(SUM(reward_amount), 0) as total_rewards
+        FROM user_monthly_rewards 
+        WHERE user_id = ${userId} AND is_winner = true
+      `);
+      
+      const totalCents = result.rows?.[0]?.total_rewards || result[0]?.total_rewards || 0;
+      return Math.floor(totalCents / 100); // Convert cents to dollars
+    } catch (error) {
+      console.error('Error fetching total rewards:', error);
+      return 0;
+    }
+  }
+
   async getDistributionSettings(): Promise<{[key: string]: string}> {
     // Default settings for reward distribution
     return {

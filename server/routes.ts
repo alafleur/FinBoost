@@ -714,6 +714,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get total rewards received
+      const totalRewards = await storage.getTotalRewardsReceived(userId);
+
       return res.status(200).json({ 
         success: true,
         user: {
@@ -725,6 +728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalPoints: user.totalPoints,
           currentMonthPoints: user.currentMonthPoints,
           tier: user.tier,
+          totalRewards: totalRewards,
           joinedAt: user.joinedAt,
           lastLoginAt: user.lastLoginAt,
           bio: user.bio,
@@ -1343,9 +1347,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tier: tier as string
       });
 
-      res.json({
-        success: true,
-        users: users.map(user => ({
+      // Get total rewards for each user
+      const usersWithRewards = await Promise.all(users.map(async (user) => {
+        const totalRewards = await storage.getTotalRewardsReceived(user.id);
+        return {
           id: user.id,
           username: user.username,
           email: user.email,
@@ -1355,9 +1360,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalPoints: user.totalPoints,
           currentMonthPoints: user.currentMonthPoints,
           tier: user.tier,
+          totalRewards: totalRewards,
           joinedAt: user.joinedAt,
           lastLoginAt: user.lastLoginAt
-        }))
+        };
+      }));
+
+      res.json({
+        success: true,
+        users: usersWithRewards
       });
     } catch (error) {
       console.error("Admin users error:", error);
@@ -2574,46 +2585,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
 
-      // Process each winner
-      for (const winner of winners) {
-        // Award the monetary reward and deduct points
-        const user = await storage.getUserById(winner.userId);
-        if (!user) continue;
+      // Calculate the dollar-to-point ratio for proportional deductions
+      // Get all winners' data to calculate averages
+      const allWinners = winners.filter((w: any) => w.rewardAmount > 0);
+      
+      if (allWinners.length > 0) {
+        // Calculate average reward amount (in dollars)
+        const totalRewardDollars = allWinners.reduce((sum: number, w: any) => sum + (w.rewardAmount / 100), 0);
+        const averageRewardAmount = totalRewardDollars / allWinners.length;
+        
+        // Calculate average points among winners
+        const totalWinnerPoints = allWinners.reduce((sum: number, w: any) => sum + w.points, 0);
+        const averagePoints = totalWinnerPoints / allWinners.length;
+        
+        // Calculate the ratio: dollars per point
+        const dollarPerPointRatio = averagePoints > 0 ? averageRewardAmount / averagePoints : 0;
+        
+        console.log(`Monthly distribution ratios: avgReward=$${averageRewardAmount.toFixed(2)}, avgPoints=${averagePoints.toFixed(2)}, ratio=$${dollarPerPointRatio.toFixed(4)}/point`);
+        
+        // Process each winner with proportional point deduction
+        for (const winner of winners) {
+          const user = await storage.getUserById(winner.userId);
+          if (!user) continue;
 
-        // Calculate point deduction (75% of their monthly points)
-        const pointsDeducted = Math.floor(user.currentMonthPoints * 0.75);
-        const pointsRolledOver = user.currentMonthPoints - pointsDeducted;
+          // Calculate proportional point deduction: winner_reward_amount * ratio
+          const winnerRewardDollars = winner.rewardAmount / 100;
+          const pointsDeducted = dollarPerPointRatio > 0 ? Math.floor(winnerRewardDollars / dollarPerPointRatio) : 0;
+          const pointsRolledOver = Math.max(0, user.currentMonthPoints - pointsDeducted);
 
-        // Create user monthly reward record
-        await storage.createUserMonthlyReward({
-          userId: winner.userId,
-          monthlyRewardId: monthlyReward.id,
-          tier: winner.tier,
-          pointsAtDistribution: user.currentMonthPoints,
-          rewardAmount: winner.rewardAmount,
-          pointsDeducted,
-          pointsRolledOver,
-          isWinner: true
-        });
+          // Create user monthly reward record
+          await storage.createUserMonthlyReward({
+            userId: winner.userId,
+            monthlyRewardId: monthlyReward.id,
+            tier: winner.tier,
+            pointsAtDistribution: user.currentMonthPoints,
+            rewardAmount: winner.rewardAmount,
+            pointsDeducted,
+            pointsRolledOver,
+            isWinner: true
+          });
 
-        // Update user points
-        await storage.updateUserPoints(
-          winner.userId,
-          user.totalPoints,
-          pointsRolledOver
-        );
+          // Update user points
+          await storage.updateUserPoints(
+            winner.userId,
+            user.totalPoints,
+            pointsRolledOver
+          );
 
-        // Record point deduction in history
-        await storage.awardPoints(
-          winner.userId,
-          'monthly_reward_deduction',
-          -pointsDeducted,
-          `Monthly reward distribution - 75% point deduction ($${(winner.rewardAmount / 100).toFixed(2)} reward)`,
-          { monthlyRewardId: monthlyReward.id, rewardAmount: winner.rewardAmount, tier: winner.tier }
-        );
+          // Record point deduction in history
+          await storage.awardPoints(
+            winner.userId,
+            'monthly_reward_deduction',
+            -pointsDeducted,
+            `Monthly reward distribution - ${pointsDeducted} points deducted for $${winnerRewardDollars.toFixed(2)} reward (ratio: $${dollarPerPointRatio.toFixed(4)}/point)`,
+            { 
+              monthlyRewardId: monthlyReward.id, 
+              rewardAmount: winner.rewardAmount, 
+              tier: winner.tier,
+              dollarPerPointRatio: dollarPerPointRatio,
+              averageRewardAmount: averageRewardAmount,
+              averagePoints: averagePoints
+            }
+          );
 
-        // TODO: Initiate Stripe payout to user's connected account
-        // This would integrate with Stripe Connect for actual payouts
+          // TODO: Initiate Stripe payout to user's connected account
+          // This would integrate with Stripe Connect for actual payouts
+        }
       }
 
       // Process non-winners (point rollover without deduction)
