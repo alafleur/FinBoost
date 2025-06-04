@@ -26,6 +26,7 @@ function Router() {
       <Route path="/lesson/:id" component={Lesson} />
       <Route path="/profile" component={Profile} />
       <Route path="/support" component={Support} />
+      <Route path="/admin" component={Admin} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
