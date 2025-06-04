@@ -1487,6 +1487,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get rewards configuration
+  apiRouter.get("/admin/rewards/config", authenticateToken, async (req, res) => {
+    try {
+      // Get rewards configuration from database or return defaults
+      const defaultConfig = {
+        poolPercentage: 55,
+        tierAllocations: {
+          tier1: 50,
+          tier2: 30,
+          tier3: 20
+        },
+        winnerPercentages: {
+          tier1: 50,
+          tier2: 50,
+          tier3: 50
+        },
+        tierPercentiles: {
+          tier1: 33,
+          tier2: 33,
+          tier3: 34
+        }
+      };
+
+      // Try to get from database, fallback to defaults
+      try {
+        const configResult = await db.execute(sql`
+          SELECT config_data FROM rewards_config WHERE id = 1
+        `);
+
+        let config = defaultConfig;
+        if (configResult[0]?.config_data) {
+          config = JSON.parse(configResult[0].config_data);
+        }
+
+        res.json({
+          success: true,
+          config
+        });
+      } catch (dbError) {
+        // Table might not exist yet, return defaults
+        res.json({
+          success: true,
+          config: defaultConfig
+        });
+      }
+    } catch (error) {
+      console.error("Admin rewards config error:", error);
+      res.status(500).json({ message: "Failed to fetch rewards configuration" });
+    }
+  });
+
+  // Admin: Update rewards configuration
+  apiRouter.put("/admin/rewards/config", authenticateToken, async (req, res) => {
+    try {
+      const { config } = req.body;
+
+      // Validate configuration
+      if (!config || typeof config !== 'object') {
+        return res.status(400).json({ message: "Invalid configuration data" });
+      }
+
+      // Ensure rewards_config table exists
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS rewards_config (
+          id INTEGER PRIMARY KEY,
+          config_data TEXT NOT NULL,
+          updated_at TIMESTAMP NOT NULL
+        )
+      `);
+
+      // Save to database
+      await db.execute(sql`
+        INSERT INTO rewards_config (id, config_data, updated_at)
+        VALUES (1, ${JSON.stringify(config)}, ${new Date().toISOString()})
+        ON CONFLICT (id) DO UPDATE SET
+          config_data = ${JSON.stringify(config)},
+          updated_at = ${new Date().toISOString()}
+      `);
+
+      res.json({
+        success: true,
+        message: "Rewards configuration updated successfully",
+        config
+      });
+    } catch (error) {
+      console.error("Admin rewards config update error:", error);
+      res.status(500).json({ message: "Failed to update rewards configuration" });
+    }
+  });
+
   // Admin: Get user details with full history
   apiRouter.get("/admin/users/:userId", authenticateToken, async (req, res) => {
     try {

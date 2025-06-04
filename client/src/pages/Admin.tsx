@@ -262,6 +262,7 @@ export default function Admin() {
       await loadModulesData();
       await loadRealStats();
       await loadTierThresholds();
+      await loadRewardsConfig();
     } catch (error) {
       console.error('Failed to load admin data:', error);
     }
@@ -1870,7 +1871,7 @@ export default function Admin() {
                 <h2 className="text-2xl font-bold">Rewards Management</h2>
                 <p className="text-gray-600">Configure pool allocation, tier settings, and distribution rules</p>
               </div>
-              <Button onClick={() => {/* Save rewards config */}} className="flex items-center gap-2">
+              <Button onClick={saveRewardsConfig} className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 Save Configuration
               </Button>
@@ -2197,7 +2198,7 @@ export default function Admin() {
                 <h2 className="text-2xl font-bold">System Settings</h2>
                 <p className="text-gray-600">Configure system-wide settings and preferences</p>
               </div>
-              <Button onClick={handleSaveSettings} className="flex items-center gap-2">
+              <Button onClick={handleUpdateSettings} className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 Save Settings
               </Button>
