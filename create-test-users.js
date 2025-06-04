@@ -1,149 +1,124 @@
+import { pool } from './server/db.js';
+import bcrypt from 'bcryptjs';
 
-const bcrypt = require('bcryptjs');
+// Realistic first and last names for test users
+const firstNames = [
+  'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth',
+  'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica', 'Thomas', 'Sarah', 'Christopher', 'Karen',
+  'Charles', 'Nancy', 'Daniel', 'Lisa', 'Matthew', 'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra',
+  'Donald', 'Donna', 'Steven', 'Carol', 'Paul', 'Ruth', 'Andrew', 'Sharon', 'Joshua', 'Michelle',
+  'Kenneth', 'Laura', 'Kevin', 'Sarah', 'Brian', 'Kimberly', 'George', 'Deborah', 'Timothy', 'Dorothy',
+  'Ronald', 'Lisa', 'Jason', 'Nancy', 'Edward', 'Karen', 'Jeffrey', 'Betty', 'Ryan', 'Helen',
+  'Jacob', 'Sandra', 'Gary', 'Donna', 'Nicholas', 'Carol', 'Eric', 'Ruth', 'Jonathan', 'Sharon',
+  'Stephen', 'Michelle', 'Larry', 'Laura', 'Justin', 'Sarah', 'Scott', 'Kimberly', 'Brandon', 'Deborah'
+];
+
+const lastNames = [
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+  'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+  'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+  'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts',
+  'Gomez', 'Phillips', 'Evans', 'Turner', 'Diaz', 'Parker', 'Cruz', 'Edwards', 'Collins', 'Reyes',
+  'Stewart', 'Morris', 'Morales', 'Murphy', 'Cook', 'Rogers', 'Gutierrez', 'Ortiz', 'Morgan', 'Cooper',
+  'Peterson', 'Bailey', 'Reed', 'Kelly', 'Howard', 'Ramos', 'Kim', 'Cox', 'Ward', 'Richardson'
+];
+
+function generateRandomUser(index) {
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}${index}`;
+  const email = `${username}@testuser.com`;
+  
+  // Generate realistic points (0-500 range with normal distribution)
+  const basePoints = Math.floor(Math.random() * 500);
+  const currentMonthPoints = Math.floor(Math.random() * 100);
+  const totalPoints = basePoints + currentMonthPoints;
+  
+  // Determine tier based on points (rough distribution)
+  let tier = 1; // Default to tier 1
+  if (totalPoints >= 150) tier = 3;
+  else if (totalPoints >= 50) tier = 2;
+  
+  // Generate streaks
+  const currentStreak = Math.floor(Math.random() * 30);
+  const longestStreak = Math.max(currentStreak, Math.floor(Math.random() * 50));
+  
+  return {
+    username,
+    email,
+    firstName,
+    lastName,
+    password: 'testpass123', // Simple password for test users
+    totalPoints,
+    currentMonthPoints,
+    tier,
+    currentStreak,
+    longestStreak
+  };
+}
 
 async function createTestUsers() {
-  const { db } = require('./server/db');
-  const { users } = require('./shared/schema');
-  
-  // Helper function to generate random data
-  const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  
-  const firstNames = [
-    'Alice', 'Bob', 'Carol', 'David', 'Emma', 'Frank', 'Grace', 'Henry', 'Isabella', 'Jack',
-    'Katherine', 'Liam', 'Maya', 'Noah', 'Olivia', 'Peter', 'Quinn', 'Rachel', 'Samuel', 'Taylor',
-    'Uma', 'Victor', 'Wendy', 'Xavier', 'Yara', 'Zachary', 'Aria', 'Blake', 'Chloe', 'Dylan',
-    'Ethan', 'Fiona', 'Gabriel', 'Hannah', 'Ian', 'Julia', 'Kevin', 'Luna', 'Mason', 'Nora',
-    'Owen', 'Penelope', 'Quincy', 'Ruby', 'Sebastian', 'Tessa', 'Ulysses', 'Violet', 'William', 'Zoe'
-  ];
-  
-  const lastNames = [
-    'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
-    'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
-    'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
-    'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
-    'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'
-  ];
-  
-  const occupations = [
-    'Software Engineer', 'Teacher', 'Nurse', 'Accountant', 'Marketing Manager', 'Sales Representative',
-    'Data Scientist', 'Mechanic', 'Chef', 'Lawyer', 'Doctor', 'Financial Advisor', 'Graphic Designer',
-    'Police Officer', 'Firefighter', 'Pharmacist', 'Dentist', 'Architect', 'Electrician', 'Plumber',
-    'Real Estate Agent', 'Photographer', 'Writer', 'Journalist', 'Student', 'Retired', 'Consultant',
-    'Project Manager', 'HR Manager', 'Operations Manager', 'Business Analyst', 'Web Developer',
-    'Social Worker', 'Therapist', 'Veterinarian', 'Pilot', 'Construction Worker', 'Farmer', 'Scientist'
-  ];
-  
-  const locations = [
-    'Toronto, ON', 'Vancouver, BC', 'Montreal, QC', 'Calgary, AB', 'Edmonton, AB', 'Ottawa, ON',
-    'Winnipeg, MB', 'Quebec City, QC', 'Hamilton, ON', 'Kitchener, ON', 'London, ON', 'Halifax, NS',
-    'Victoria, BC', 'Windsor, ON', 'Oshawa, ON', 'Saskatoon, SK', 'Regina, SK', 'Sherbrooke, QC',
-    'St. John\'s, NL', 'Barrie, ON', 'Kelowna, BC', 'Abbotsford, BC', 'Greater Sudbury, ON',
-    'Kingston, ON', 'Saguenay, QC', 'Trois-Rivières, QC', 'Guelph, ON', 'Cambridge, ON',
-    'Whitby, ON', 'Ajax, ON', 'Langley, BC', 'Saanich, BC', 'Milton, ON', 'Coquitlam, BC',
-    'Richmond, BC', 'Richmond Hill, ON', 'Oakville, ON', 'Burlington, ON', 'Markham, ON'
-  ];
-  
-  const bios = [
-    'Just starting my financial journey', 'Learning to invest better', 'Financial planning enthusiast',
-    'Saving for retirement', 'Building my emergency fund', 'Paying off debt', 'Investing in my future',
-    'Learning about personal finance', 'On a mission to financial freedom', 'Consistent daily learner',
-    'Helping others with their finances', 'Building wealth slowly', 'Teaching my kids about money',
-    'Planning for early retirement', 'Real estate investor', 'Stock market enthusiast',
-    'Budgeting expert', 'Side hustle entrepreneur', 'Crypto curious', 'Value investor',
-    'Living below my means', 'Building passive income', 'Financial literacy advocate',
-    'Debt-free journey', 'First-time homebuyer', 'College savings planner'
-  ];
-
-  const hashedPassword = await bcrypt.hash('password123', 10);
-  const testUsers = [];
-  
-  // Generate 100 users
-  for (let i = 1; i <= 100; i++) {
-    const firstName = getRandomElement(firstNames);
-    const lastName = getRandomElement(lastNames);
-    const username = `${firstName.toLowerCase()}_${lastName.toLowerCase()}${i}`;
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@test.com`;
-    
-    // Distribute users across tiers with realistic proportions
-    let tier, totalPoints, currentMonthPoints;
-    const tierRand = Math.random();
-    
-    if (tierRand < 0.6) { // 60% Bronze
-      tier = 'tier1';
-      totalPoints = getRandomInt(0, 999);
-      currentMonthPoints = getRandomInt(0, Math.min(500, totalPoints));
-    } else if (tierRand < 0.85) { // 25% Silver  
-      tier = 'tier2';
-      totalPoints = getRandomInt(1000, 2999);
-      currentMonthPoints = getRandomInt(300, 1500);
-    } else { // 15% Gold
-      tier = 'tier3';
-      totalPoints = getRandomInt(3000, 8000);
-      currentMonthPoints = getRandomInt(800, 3000);
-    }
-    
-    const currentStreak = getRandomInt(0, 50);
-    const longestStreak = Math.max(currentStreak, getRandomInt(currentStreak, currentStreak + 30));
-    
-    const joinDaysAgo = getRandomInt(1, 365);
-    const lastLoginDaysAgo = getRandomInt(0, 7);
-    
-    testUsers.push({
-      email,
-      username,
-      firstName,
-      lastName,
-      totalPoints,
-      currentMonthPoints,
-      tier,
-      currentStreak,
-      longestStreak,
-      bio: getRandomElement(bios),
-      location: getRandomElement(locations),
-      occupation: getRandomElement(occupations),
-      password: hashedPassword,
-      isActive: true,
-      joinedAt: new Date(Date.now() - joinDaysAgo * 24 * 60 * 60 * 1000),
-      lastLoginAt: new Date(Date.now() - lastLoginDaysAgo * 24 * 60 * 60 * 1000),
-      lastActivityDate: new Date(Date.now() - getRandomInt(0, 3) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    });
-  }
-  
   try {
-    let createdCount = 0;
-    let skippedCount = 0;
+    console.log('Creating 100 test users...');
     
-    for (const userData of testUsers) {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash('testpass123', saltRounds);
+    
+    for (let i = 1; i <= 100; i++) {
+      const user = generateRandomUser(i);
+      
       try {
-        const [user] = await db.insert(users).values(userData).returning();
-        console.log(`✅ Created user ${createdCount + 1}: ${user.email} (${user.tier}, ${user.totalPoints} points)`);
-        createdCount++;
-      } catch (error) {
-        if (error.message.includes('duplicate key') || error.message.includes('UNIQUE constraint')) {
-          console.log(`⚠️  Skipped duplicate: ${userData.email}`);
-          skippedCount++;
-        } else {
-          console.error(`❌ Error creating ${userData.email}:`, error.message);
+        await pool.query(`
+          INSERT INTO users (
+            username, email, password_hash, first_name, last_name, 
+            total_points, current_month_points, tier, current_streak, longest_streak
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `, [
+          user.username,
+          user.email,
+          hashedPassword,
+          user.firstName,
+          user.lastName,
+          user.totalPoints,
+          user.currentMonthPoints,
+          user.tier,
+          user.currentStreak,
+          user.longestStreak
+        ]);
+        
+        if (i % 10 === 0) {
+          console.log(`Created ${i} users...`);
         }
+      } catch (error) {
+        console.log(`Skipping user ${user.username} (likely already exists)`);
       }
     }
     
-    console.log(`\n🎉 User creation complete!`);
-    console.log(`✅ Created: ${createdCount} users`);
-    console.log(`⚠️  Skipped: ${skippedCount} duplicates`);
-    console.log(`\nLogin credentials for all users:`);
-    console.log(`Password: password123`);
-    console.log(`\nTier distribution:`);
-    console.log(`- Bronze (tier1): ~60 users`);
-    console.log(`- Silver (tier2): ~25 users`);  
-    console.log(`- Gold (tier3): ~15 users`);
+    console.log('Successfully created test users!');
+    
+    // Show summary
+    const result = await pool.query('SELECT COUNT(*) as total FROM users');
+    console.log(`Total users in database: ${result.rows[0].total}`);
+    
+    // Show tier distribution
+    const tierStats = await pool.query(`
+      SELECT tier, COUNT(*) as count 
+      FROM users 
+      GROUP BY tier 
+      ORDER BY tier
+    `);
+    
+    console.log('\nTier distribution:');
+    tierStats.rows.forEach(row => {
+      console.log(`Tier ${row.tier}: ${row.count} users`);
+    });
     
   } catch (error) {
-    console.error('❌ Unexpected error:', error.message);
+    console.error('Error creating test users:', error);
+  } finally {
+    await pool.end();
   }
-  
-  process.exit(0);
 }
 
 createTestUsers();
