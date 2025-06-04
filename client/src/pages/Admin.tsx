@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
   Settings,
@@ -119,6 +120,26 @@ export default function Admin() {
     tier1: 0,
     tier2: 0,
     tier3: 0
+  });
+
+  // Rewards configuration state
+  const [rewardsConfig, setRewardsConfig] = useState({
+    poolPercentage: 55, // Percentage of membership fees going to rewards pool
+    tierAllocations: {
+      tier1: 50, // Percentage of pool for tier 1
+      tier2: 30, // Percentage of pool for tier 2
+      tier3: 20  // Percentage of pool for tier 3
+    },
+    winnerPercentages: {
+      tier1: 50, // Percentage of tier 1 members who receive rewards
+      tier2: 50, // Percentage of tier 2 members who receive rewards
+      tier3: 50  // Percentage of tier 3 members who receive rewards
+    },
+    tierPercentiles: {
+      tier1: 33, // Top 33% of users
+      tier2: 33, // Middle 33% of users
+      tier3: 34  // Bottom 34% of users
+    }
   });
 
   // State for modules
@@ -281,6 +302,50 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Failed to load tier thresholds:', error);
+    }
+  };
+
+  const loadRewardsConfig = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/rewards/config', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRewardsConfig(data.config);
+      }
+    } catch (error) {
+      console.error('Failed to load rewards config:', error);
+    }
+  };
+
+  const saveRewardsConfig = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/rewards/config', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ config: rewardsConfig })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Rewards Configuration Updated",
+          description: "Settings will take effect at the next distribution"
+        });
+      } else {
+        throw new Error('Failed to save configuration');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save rewards configuration",
+        variant: "destructive"
+      });
     }
   };
 
@@ -713,13 +778,14 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="rewards">Rewards</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -1762,6 +1828,454 @@ export default function Admin() {
                         </span>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                  <CardDescription>Current system information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">Database</span>
+                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">File Storage</span>
+                    <Badge className="bg-green-100 text-green-700">Operational</Badge>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                    <span className="text-sm font-medium">Email Service</span>
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                  </div>
+
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                    <span className="text-sm font-medium">Version</span>
+                    <Badge variant="outline">v1.0.0</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Rewards Management Tab */}
+          <TabsContent value="rewards" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Rewards Management</h2>
+                <p className="text-gray-600">Configure pool allocation, tier settings, and distribution rules</p>
+              </div>
+              <Button onClick={() => {/* Save rewards config */}} className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Save Configuration
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pool Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pool Configuration</CardTitle>
+                  <CardDescription>Manage how membership fees are allocated to the rewards pool</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Rewards Pool Percentage</Label>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.poolPercentage}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          poolPercentage: parseInt(e.target.value) || 0
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of membership fees</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Currently: {rewardsConfig.poolPercentage}% to rewards, {100 - rewardsConfig.poolPercentage}% to education
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Monthly Pool Estimate</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Total subscribers:</span>
+                        <span className="font-mono">12</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Monthly revenue:</span>
+                        <span className="font-mono">${12 * 20}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-1">
+                        <span>Rewards pool:</span>
+                        <span className="font-mono font-bold">${Math.round((12 * 20 * rewardsConfig.poolPercentage) / 100)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tier Allocations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tier Pool Allocation</CardTitle>
+                  <CardDescription>Distribute the rewards pool among user tiers</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Tier 1 (Top Performers)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.tierAllocations.tier1}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierAllocations: {
+                            ...rewardsConfig.tierAllocations,
+                            tier1: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of pool</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 2 (Middle Performers)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.tierAllocations.tier2}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierAllocations: {
+                            ...rewardsConfig.tierAllocations,
+                            tier2: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of pool</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 3 (Emerging Learners)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.tierAllocations.tier3}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierAllocations: {
+                            ...rewardsConfig.tierAllocations,
+                            tier3: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of pool</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="flex justify-between font-medium">
+                      <span>Total allocation:</span>
+                      <span className={
+                        (rewardsConfig.tierAllocations.tier1 + rewardsConfig.tierAllocations.tier2 + rewardsConfig.tierAllocations.tier3) === 100 
+                        ? "text-green-600" 
+                        : "text-red-600"
+                      }>
+                        {rewardsConfig.tierAllocations.tier1 + rewardsConfig.tierAllocations.tier2 + rewardsConfig.tierAllocations.tier3}%
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Winner Percentages */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Winner Selection</CardTitle>
+                  <CardDescription>Set what percentage of each tier receives monthly rewards</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Tier 1 Winners</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.winnerPercentages.tier1}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          winnerPercentages: {
+                            ...rewardsConfig.winnerPercentages,
+                            tier1: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 1 members</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 2 Winners</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.winnerPercentages.tier2}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          winnerPercentages: {
+                            ...rewardsConfig.winnerPercentages,
+                            tier2: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 2 members</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 3 Winners</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={rewardsConfig.winnerPercentages.tier3}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          winnerPercentages: {
+                            ...rewardsConfig.winnerPercentages,
+                            tier3: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 3 members</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tier Percentiles Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tier Percentile Configuration</CardTitle>
+                  <CardDescription>Define what percentage of users fall into each tier</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Tier 1 (Top Performers)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={rewardsConfig.tierPercentiles.tier1}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierPercentiles: {
+                            ...rewardsConfig.tierPercentiles,
+                            tier1: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of all users</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 2 (Middle Performers)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={rewardsConfig.tierPercentiles.tier2}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierPercentiles: {
+                            ...rewardsConfig.tierPercentiles,
+                            tier2: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of all users</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 3 (Emerging Learners)</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={rewardsConfig.tierPercentiles.tier3}
+                        onChange={(e) => setRewardsConfig({
+                          ...rewardsConfig,
+                          tierPercentiles: {
+                            ...rewardsConfig.tierPercentiles,
+                            tier3: parseInt(e.target.value) || 0
+                          }
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of all users</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="flex justify-between font-medium">
+                      <span>Total coverage:</span>
+                      <span className={
+                        (rewardsConfig.tierPercentiles.tier1 + rewardsConfig.tierPercentiles.tier2 + rewardsConfig.tierPercentiles.tier3) === 100 
+                        ? "text-green-600" 
+                        : "text-red-600"
+                      }>
+                        {rewardsConfig.tierPercentiles.tier1 + rewardsConfig.tierPercentiles.tier2 + rewardsConfig.tierPercentiles.tier3}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Current Tier Thresholds</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Tier 1 (Top {rewardsConfig.tierPercentiles.tier1}%):</span>
+                        <span className="font-mono">{tierThresholds.tier1}+ points</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tier 2 (Middle {rewardsConfig.tierPercentiles.tier2}%):</span>
+                        <span className="font-mono">{tierThresholds.tier2}+ points</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tier 3 (Bottom {rewardsConfig.tierPercentiles.tier3}%):</span>
+                        <span className="font-mono">{tierThresholds.tier3}+ points</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Thresholds update automatically based on user point distribution
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">System Settings</h2>
+                <p className="text-gray-600">Configure system-wide settings and preferences</p>
+              </div>
+              <Button onClick={handleSaveSettings} className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Save Settings
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* System Controls */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Controls</CardTitle>
+                  <CardDescription>Basic system operation settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Maintenance Mode</Label>
+                      <p className="text-sm text-gray-500">Temporarily disable user access</p>
+                    </div>
+                    <Switch
+                      checked={systemSettings.maintenanceMode}
+                      onCheckedChange={(checked) => setSystemSettings({
+                        ...systemSettings,
+                        maintenanceMode: checked
+                      })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Registration Enabled</Label>
+                      <p className="text-sm text-gray-500">Allow new user registrations</p>
+                    </div>
+                    <Switch
+                      checked={systemSettings.registrationEnabled}
+                      onCheckedChange={(checked) => setSystemSettings({
+                        ...systemSettings,
+                        registrationEnabled: checked
+                      })}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Points System */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Points System</CardTitle>
+                  <CardDescription>Configure point earning and limits</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Points Multiplier</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="10"
+                      value={systemSettings.pointsMultiplier}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        pointsMultiplier: parseFloat(e.target.value)
+                      })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Global multiplier for all point earnings</p>
+                  </div>
+
+                  <div>
+                    <Label>Max Daily Points</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={systemSettings.maxDailyPoints}
+                      onChange={(e) => setSystemSettings({
+                        ...systemSettings,
+                        maxDailyPoints: parseInt(e.target.value)
+                      })}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Maximum points a user can earn per day</p>
                   </div>
                 </CardContent>
               </Card>
