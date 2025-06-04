@@ -220,6 +220,25 @@ export default function Admin() {
     tier3PayoutPercentage: 100,
     randomSeed: ''
   });
+
+  // State for individual winner position percentages
+  const [winnerPositionPercentages, setWinnerPositionPercentages] = useState({
+    tier1: [
+      { position: 1, percentage: 40, label: '1st Place' },
+      { position: 2, percentage: 30, label: '2nd Place' },
+      { position: 3, percentage: 20, label: '3rd Place' },
+      { position: 4, percentage: 10, label: 'Remaining Winners' }
+    ],
+    tier2: [
+      { position: 1, percentage: 40, label: '1st Place' },
+      { position: 2, percentage: 30, label: '2nd Place' },
+      { position: 3, percentage: 30, label: 'Remaining Winners' }
+    ],
+    tier3: [
+      { position: 1, percentage: 50, label: '1st Place' },
+      { position: 2, percentage: 50, label: 'Remaining Winners' }
+    ]
+  });
   const [winnerPreview, setWinnerPreview] = useState([]);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [confirmDistribution, setConfirmDistribution] = useState(false);
@@ -837,7 +856,8 @@ export default function Admin() {
         },
         body: JSON.stringify({
           payoutConfig,
-          rewardsConfig: currentRewardsConfig
+          rewardsConfig: currentRewardsConfig,
+          winnerPositionPercentages
         })
       });
 
@@ -2498,6 +2518,139 @@ export default function Admin() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Individual Winner Position Percentages */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Winner Position Percentages</CardTitle>
+                  <CardDescription>Configure what percentage of each tier's pool goes to 1st, 2nd, 3rd place winners, etc.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Tier 1 Position Percentages */}
+                  <div className="bg-yellow-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-yellow-800 mb-3">Tier 1 (Top Performers) Position Distribution</h4>
+                    <div className="space-y-3">
+                      {winnerPositionPercentages.tier1.map((position, index) => (
+                        <div key={position.position} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{position.label}:</span>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={position.percentage}
+                              onChange={(e) => {
+                                const newPercentages = { ...winnerPositionPercentages };
+                                newPercentages.tier1[index].percentage = parseInt(e.target.value) || 0;
+                                setWinnerPositionPercentages(newPercentages);
+                              }}
+                              className="w-16 h-8"
+                            />
+                            <span className="text-sm text-gray-600">%</span>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2">
+                        <div className="flex justify-between text-sm font-medium">
+                          <span>Total:</span>
+                          <span className={
+                            winnerPositionPercentages.tier1.reduce((sum, p) => sum + p.percentage, 0) === 100 
+                            ? "text-green-600" 
+                            : "text-red-600"
+                          }>
+                            {winnerPositionPercentages.tier1.reduce((sum, p) => sum + p.percentage, 0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 2 Position Percentages */}
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-gray-800 mb-3">Tier 2 (Middle Performers) Position Distribution</h4>
+                    <div className="space-y-3">
+                      {winnerPositionPercentages.tier2.map((position, index) => (
+                        <div key={position.position} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{position.label}:</span>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={position.percentage}
+                              onChange={(e) => {
+                                const newPercentages = { ...winnerPositionPercentages };
+                                newPercentages.tier2[index].percentage = parseInt(e.target.value) || 0;
+                                setWinnerPositionPercentages(newPercentages);
+                              }}
+                              className="w-16 h-8"
+                            />
+                            <span className="text-sm text-gray-600">%</span>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2">
+                        <div className="flex justify-between text-sm font-medium">
+                          <span>Total:</span>
+                          <span className={
+                            winnerPositionPercentages.tier2.reduce((sum, p) => sum + p.percentage, 0) === 100 
+                            ? "text-green-600" 
+                            : "text-red-600"
+                          }>
+                            {winnerPositionPercentages.tier2.reduce((sum, p) => sum + p.percentage, 0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 3 Position Percentages */}
+                  <div className="bg-amber-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-amber-800 mb-3">Tier 3 (Emerging Learners) Position Distribution</h4>
+                    <div className="space-y-3">
+                      {winnerPositionPercentages.tier3.map((position, index) => (
+                        <div key={position.position} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{position.label}:</span>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={position.percentage}
+                              onChange={(e) => {
+                                const newPercentages = { ...winnerPositionPercentages };
+                                newPercentages.tier3[index].percentage = parseInt(e.target.value) || 0;
+                                setWinnerPositionPercentages(newPercentages);
+                              }}
+                              className="w-16 h-8"
+                            />
+                            <span className="text-sm text-gray-600">%</span>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2">
+                        <div className="flex justify-between text-sm font-medium">
+                          <span>Total:</span>
+                          <span className={
+                            winnerPositionPercentages.tier3.reduce((sum, p) => sum + p.percentage, 0) === 100 
+                            ? "text-green-600" 
+                            : "text-red-600"
+                          }>
+                            {winnerPositionPercentages.tier3.reduce((sum, p) => sum + p.percentage, 0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-blue-800 mb-2">Position Distribution Example</h5>
+                    <p className="text-sm text-blue-700">
+                      If Tier 1 has a $1,000 pool and 10 winners: 1st place gets $400 (40%), 2nd gets $300 (30%), 3rd gets $200 (20%), and remaining 7 winners split $100 (10% ÷ 7 = ~$14 each).
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Winner Preview */}
@@ -2524,6 +2677,9 @@ export default function Admin() {
                               <div key={winner.userId} className="bg-white p-2 rounded border text-sm">
                                 <div className="font-medium">{winner.username}</div>
                                 <div className="text-gray-600">{winner.points} points</div>
+                                <div className="text-xs text-gray-500">
+                                  {winner.positionLabel} ({winner.positionPercentage?.toFixed(1)}%)
+                                </div>
                                 <div className={`text-${tierColor}-600 font-medium`}>
                                   ${(winner.rewardAmount / 100).toFixed(2)}
                                 </div>
