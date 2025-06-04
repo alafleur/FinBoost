@@ -296,9 +296,9 @@ export default function Admin() {
 
       if (progressResponse.ok) {
         const analyticsData = await progressResponse.json();
-        // Calculate total completions from actual lesson completion data
+        // Use real completion data from database
         realStats.totalCompletions = analyticsData.analytics?.totalCompletions || 0;
-        realStats.avgCompletionRate = realStats.totalUsers > 0 ? 
+        realStats.avgCompletionRate = realStats.totalUsers > 0 && realStats.totalModules > 0 ? 
           Math.round((realStats.totalCompletions / (realStats.totalUsers * realStats.totalModules)) * 10000) / 100 : 0;
       }
 

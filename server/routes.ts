@@ -1392,22 +1392,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Get analytics data
   apiRouter.get("/admin/analytics", authenticateToken, async (req, res) => {
     try {
-      // TODO: Add admin role check here
-      const { period = '30d' } = req.query;
+      // Get real completion data from database
+      const totalCompletionsResult = await db.execute(sql`
+        SELECT COUNT(*) as total_completions 
+        FROM user_progress 
+        WHERE completed = true
+      `);
+      
+      const totalUsersResult = await db.execute(sql`
+        SELECT COUNT(*) as total_users 
+        FROM users 
+        WHERE is_active = true
+      `);
+      
+      const totalPointsResult = await db.execute(sql`
+        SELECT SUM(total_points) as total_points 
+        FROM users
+      `);
 
-      const analytics = await storage.getAdminAnalytics(period as string);
+      const totalCompletions = parseInt(totalCompletionsResult[0]?.total_completions || 0);
+      const totalUsers = parseInt(totalUsersResult[0]?.total_users || 0);
+      const totalPoints = parseInt(totalPointsResult[0]?.total_points || 0);
 
       res.json({
         success: true,
         analytics: {
-          userGrowth: analytics.userGrowth || [],
-          pointsDistribution: analytics.pointsDistribution || [],
-          recentActivity: analytics.recentActivity || [],
+          userGrowth: [],
+          pointsDistribution: [],
+          recentActivity: [],
+          totalCompletions,
           systemHealth: {
-            activeUsers: analytics.activeUsers || 0,
-            totalPointsAwarded: analytics.totalPointsAwarded || 0,
-            avgSessionDuration: analytics.avgSessionDuration || 0,
-            errorRate: analytics.errorRate || 0
+            activeUsers: totalUsers,
+            totalPointsAwarded: totalPoints,
+            avgSessionDuration: 0,
+            errorRate: 0
           }
         }
       });
