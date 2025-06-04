@@ -16,7 +16,8 @@ import {
   Target,
   Activity,
   Crown,
-  Medal
+  Medal,
+  Settings
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -351,6 +352,12 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
+              {user?.email === 'lafleur.andrew@gmail.com' && (
+                <Button variant="outline" onClick={() => setLocation('/admin')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="sm" 
