@@ -2179,16 +2179,16 @@ export default function Admin() {
                       <h5 className="font-medium mb-2">Tier Allocations</h5>
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Tier 1 ({rewardsConfig.tierAllocations.tier1}%):</span>
-                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier1 / 100))}</span>
+                          <span className="text-sm">Tier 1 ({nextRewardsConfig.tierAllocations.tier1}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier1 / 100))}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Tier 2 ({rewardsConfig.tierAllocations.tier2}%):</span>
-                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier2 / 100))}</span>
+                          <span className="text-sm">Tier 2 ({nextRewardsConfig.tierAllocations.tier2}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier2 / 100))}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Tier 3 ({rewardsConfig.tierAllocations.tier3}%):</span>
-                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100) * (rewardsConfig.tierAllocations.tier3 / 100))}</span>
+                          <span className="text-sm">Tier 3 ({nextRewardsConfig.tierAllocations.tier3}%):</span>
+                          <span className="font-mono text-sm">${Math.round(((stats.totalUsers * 20 * nextRewardsConfig.poolPercentage) / 100) * (nextRewardsConfig.tierAllocations.tier3 / 100))}</span>
                         </div>
                       </div>
                     </div>
@@ -2400,11 +2400,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.winnerPercentages.tier1}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.winnerPercentages.tier1}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           winnerPercentages: {
-                            ...rewardsConfig.winnerPercentages,
+                            ...nextRewardsConfig.winnerPercentages,
                             tier1: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2421,11 +2421,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.winnerPercentages.tier2}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.winnerPercentages.tier2}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           winnerPercentages: {
-                            ...rewardsConfig.winnerPercentages,
+                            ...nextRewardsConfig.winnerPercentages,
                             tier2: parseInt(e.target.value) || 0
                           }
                         })}
@@ -2442,11 +2442,11 @@ export default function Admin() {
                         type="number"
                         min="0"
                         max="100"
-                        value={rewardsConfig.winnerPercentages.tier3}
-                        onChange={(e) => setRewardsConfig({
-                          ...rewardsConfig,
+                        value={nextRewardsConfig.winnerPercentages.tier3}
+                        onChange={(e) => setNextRewardsConfig({
+                          ...nextRewardsConfig,
                           winnerPercentages: {
-                            ...rewardsConfig.winnerPercentages,
+                            ...nextRewardsConfig.winnerPercentages,
                             tier3: parseInt(e.target.value) || 0
                           }
                         })}
