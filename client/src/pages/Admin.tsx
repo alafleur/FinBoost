@@ -213,6 +213,18 @@ export default function Admin() {
   const [reviewingProof, setReviewingProof] = useState<PendingProof | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
+  // State for rewards payout
+  const [payoutConfig, setPayoutConfig] = useState({
+    tier1PayoutPercentage: 100,
+    tier2PayoutPercentage: 100,
+    tier3PayoutPercentage: 100,
+    randomSeed: ''
+  });
+  const [winnerPreview, setWinnerPreview] = useState([]);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const [confirmDistribution, setConfirmDistribution] = useState(false);
+  const [isExecutingDistribution, setIsExecutingDistribution] = useState(false);
+
   const categories = [
     { value: 'budgeting', label: 'Budgeting' },
     { value: 'credit', label: 'Credit' },
@@ -813,6 +825,84 @@ export default function Admin() {
     }
   };
 
+  const generateWinnerPreview = async () => {
+    setIsGeneratingPreview(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/rewards/preview-winners', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          payoutConfig,
+          rewardsConfig: currentRewardsConfig
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWinnerPreview(data.winners);
+      } else {
+        throw new Error('Failed to generate winner preview');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate winner preview",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingPreview(false);
+    }
+  };
+
+  const executeDistribution = async () => {
+    setIsExecutingDistribution(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/rewards/execute-distribution', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          payoutConfig,
+          rewardsConfig: currentRewardsConfig,
+          winners: winnerPreview
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Distribution Executed Successfully! 🎉",
+          description: `Processed ${data.totalWinners} winners with $${(data.totalPayout / 100).toFixed(2)} in rewards`
+        });
+        
+        // Reset state
+        setWinnerPreview([]);
+        setConfirmDistribution(false);
+        
+        // Refresh admin data
+        await loadAdminData();
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to execute distribution');
+      }
+    } catch (error) {
+      toast({
+        title: "Distribution Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsExecutingDistribution(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -848,7 +938,7 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
@@ -857,6 +947,7 @@ export default function Admin() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="current-rewards">Current Rewards</TabsTrigger>
             <TabsTrigger value="rewards-config">Rewards Config</TabsTrigger>
+            <TabsTrigger value="rewards-payout">Rewards Payout</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -2193,6 +2284,317 @@ export default function Admin() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Rewards Payout Tab */}
+          <TabsContent value="rewards-payout" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold">Rewards Payout Management</h2>
+                <p className="text-gray-600">Execute monthly rewards distribution and manage payouts</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button onClick={() => setActiveTab("current-rewards")} variant="outline">
+                  View Current Config
+                </Button>
+              </div>
+            </div>
+
+            {/* Current Month Payout Status */}
+            <Card className="border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="text-orange-800">Current Month Payout Status</CardTitle>
+                <CardDescription className="text-orange-600">
+                  {new Date(0, new Date().getMonth()).toLocaleString('default', { month: 'long' })} {new Date().getFullYear()} Distribution
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-orange-800">${Math.round((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100)}</div>
+                    <div className="text-sm text-orange-600">Total Pool</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-green-800">
+                      {Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * currentRewardsConfig.winnerPercentages.tier1) / 100) +
+                       Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier2) / 100) * currentRewardsConfig.winnerPercentages.tier2) / 100) +
+                       Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier3) / 100) * currentRewardsConfig.winnerPercentages.tier3) / 100)}
+                    </div>
+                    <div className="text-sm text-green-600">Total Winners</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-blue-800">Ready</div>
+                    <div className="text-sm text-blue-600">Status</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="text-lg font-semibold text-purple-800">
+                      {new Date().getDate() >= 28 ? 'Available' : `${28 - new Date().getDate()} days left`}
+                    </div>
+                    <div className="text-sm text-purple-600">Distribution Window</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payout Configuration */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Dynamic Payout Percentages */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dynamic Payout Configuration</CardTitle>
+                  <CardDescription>Adjust what percentage of each tier's pool is paid out this month</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Tier 1 Payout Percentage</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={payoutConfig.tier1PayoutPercentage}
+                        onChange={(e) => setPayoutConfig({
+                          ...payoutConfig,
+                          tier1PayoutPercentage: parseInt(e.target.value) || 0
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 1 pool</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Paying out: ${Math.round(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100) * (payoutConfig.tier1PayoutPercentage / 100))}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 2 Payout Percentage</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={payoutConfig.tier2PayoutPercentage}
+                        onChange={(e) => setPayoutConfig({
+                          ...payoutConfig,
+                          tier2PayoutPercentage: parseInt(e.target.value) || 0
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 2 pool</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Paying out: ${Math.round(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier2 / 100) * (payoutConfig.tier2PayoutPercentage / 100))}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tier 3 Payout Percentage</Label>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={payoutConfig.tier3PayoutPercentage}
+                        onChange={(e) => setPayoutConfig({
+                          ...payoutConfig,
+                          tier3PayoutPercentage: parseInt(e.target.value) || 0
+                        })}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-gray-600">% of tier 3 pool</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Paying out: ${Math.round(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier3 / 100) * (payoutConfig.tier3PayoutPercentage / 100))}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded text-sm">
+                    <div className="flex justify-between font-medium">
+                      <span>Total Payout Amount:</span>
+                      <span className="text-green-600">
+                        ${Math.round(
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100) * (payoutConfig.tier1PayoutPercentage / 100) +
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier2 / 100) * (payoutConfig.tier2PayoutPercentage / 100) +
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier3 / 100) * (payoutConfig.tier3PayoutPercentage / 100)
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Remaining Pool:</span>
+                      <span className="text-blue-600">
+                        ${Math.round((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) - Math.round(
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100) * (payoutConfig.tier1PayoutPercentage / 100) +
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier2 / 100) * (payoutConfig.tier2PayoutPercentage / 100) +
+                          ((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier3 / 100) * (payoutConfig.tier3PayoutPercentage / 100)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Winner Selection Controls */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Random Winner Selection</CardTitle>
+                  <CardDescription>Configure and execute random winner selection for each tier</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Selection Method: Weighted Random</h4>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Winners are selected randomly from eligible users in each tier, weighted by their monthly points to ensure fairness.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Tier 1 Winner Count:</span>
+                        <span className="font-mono text-sm">
+                          {Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * currentRewardsConfig.winnerPercentages.tier1) / 100)} users
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Tier 2 Winner Count:</span>
+                        <span className="font-mono text-sm">
+                          {Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier2) / 100) * currentRewardsConfig.winnerPercentages.tier2) / 100)} users
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Tier 3 Winner Count:</span>
+                        <span className="font-mono text-sm">
+                          {Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier3) / 100) * currentRewardsConfig.winnerPercentages.tier3) / 100)} users
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Random Seed (Optional)</Label>
+                    <Input
+                      type="text"
+                      value={payoutConfig.randomSeed}
+                      onChange={(e) => setPayoutConfig({
+                        ...payoutConfig,
+                        randomSeed: e.target.value
+                      })}
+                      placeholder="Enter seed for reproducible results"
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Leave empty for truly random selection, or enter a seed for reproducible results
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={generateWinnerPreview}
+                    variant="outline" 
+                    className="w-full"
+                    disabled={isGeneratingPreview}
+                  >
+                    {isGeneratingPreview ? 'Generating...' : 'Preview Random Selection'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Winner Preview */}
+            {winnerPreview.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Winner Selection Preview</CardTitle>
+                  <CardDescription>Preview of randomly selected winners for this distribution</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {['tier1', 'tier2', 'tier3'].map((tier) => {
+                      const tierWinners = winnerPreview.filter(w => w.tier === tier);
+                      const tierName = tier === 'tier1' ? 'Tier 1' : tier === 'tier2' ? 'Tier 2' : 'Tier 3';
+                      const tierColor = tier === 'tier1' ? 'yellow' : tier === 'tier2' ? 'gray' : 'amber';
+                      
+                      return (
+                        <div key={tier} className={`bg-${tierColor}-50 p-4 rounded-lg border`}>
+                          <h4 className={`font-semibold text-${tierColor}-800 mb-2`}>
+                            {tierName} Winners ({tierWinners.length})
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {tierWinners.map((winner) => (
+                              <div key={winner.userId} className="bg-white p-2 rounded border text-sm">
+                                <div className="font-medium">{winner.username}</div>
+                                <div className="text-gray-600">{winner.points} points</div>
+                                <div className={`text-${tierColor}-600 font-medium`}>
+                                  ${(winner.rewardAmount / 100).toFixed(2)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setWinnerPreview([])}
+                    >
+                      Clear Preview
+                    </Button>
+                    <Button 
+                      onClick={generateWinnerPreview}
+                      disabled={isGeneratingPreview}
+                    >
+                      Regenerate Selection
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Execute Distribution */}
+            <Card className="border-red-200">
+              <CardHeader>
+                <CardTitle className="text-red-800">Execute Monthly Distribution</CardTitle>
+                <CardDescription className="text-red-600">
+                  Execute the rewards distribution with current settings. This action cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-red-50 p-4 rounded-lg mb-4">
+                  <h4 className="font-semibold text-red-800 mb-2">Pre-Distribution Checklist:</h4>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    <li>✓ Tier thresholds calculated and locked</li>
+                    <li>✓ Rewards configuration verified</li>
+                    <li>✓ Payout percentages set</li>
+                    <li>✓ Winner selection previewed</li>
+                    <li>⚠️ Users will have points deducted according to config</li>
+                    <li>⚠️ Stripe payouts will be initiated for all winners</li>
+                  </ul>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="confirm-distribution"
+                      checked={confirmDistribution}
+                      onChange={(e) => setConfirmDistribution(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="confirm-distribution" className="text-sm font-medium">
+                      I confirm that I want to execute the monthly rewards distribution
+                    </label>
+                  </div>
+                  
+                  <Button 
+                    onClick={executeDistribution}
+                    disabled={!confirmDistribution || isExecutingDistribution}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {isExecutingDistribution ? 'Executing...' : 'Execute Distribution'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -21,9 +21,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-producti
 function calculateNextDistributionDate(settings: {[key: string]: string}): Date {
   const now = new Date();
   const delayDays = parseInt(settings.distributionDelayDays || "7");
-  
+
   let accumulationEndDate: Date;
-  
+
   switch (settings.accumulationPeriodEnd) {
     case "last_day_of_month":
       // Last day of current month
@@ -47,7 +47,7 @@ function calculateNextDistributionDate(settings: {[key: string]: string}): Date 
       // Default to last day of month
       accumulationEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   }
-  
+
   // If accumulation period has passed, move to next period
   if (accumulationEndDate < now) {
     switch (settings.accumulationPeriodEnd) {
@@ -60,11 +60,11 @@ function calculateNextDistributionDate(settings: {[key: string]: string}): Date 
       // Add more cases as needed
     }
   }
-  
+
   // Add distribution delay
   const distributionDate = new Date(accumulationEndDate);
   distributionDate.setDate(distributionDate.getDate() + delayDays);
-  
+
   return distributionDate;
 }
 
@@ -583,16 +583,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get total active users count
       const totalUsers = await storage.getUserCount();
-      
+
       // Monthly membership fee
       const monthlyFee = 20;
-      
+
       // Calculate total monthly revenue
       const totalRevenue = totalUsers * monthlyFee;
-      
+
       // 55% goes to reward pool, 45% to education costs
       const totalPool = totalRevenue * 0.55;
-      
+
       // Pool distribution: Tier 3 (50%), Tier 2 (30%), Tier 1 (20%)
       const tier3Pool = totalPool * 0.50;
       const tier2Pool = totalPool * 0.30;
@@ -624,12 +624,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get admin settings for distribution
       const settings = await storage.getDistributionSettings();
-      
+
       // Calculate next distribution date based on settings
       const nextDistribution = calculateNextDistributionDate(settings);
       const now = new Date();
       const timeRemaining = nextDistribution.getTime() - now.getTime();
-      
+
       // Calculate days, hours, minutes remaining
       const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
       const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -1398,13 +1398,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         FROM user_progress 
         WHERE completed = true
       `);
-      
+
       const totalUsersResult = await db.execute(sql`
         SELECT COUNT(*) as total_users 
         FROM users 
         WHERE is_active = true
       `);
-      
+
       const totalPointsResult = await db.execute(sql`
         SELECT SUM(total_points) as total_points 
         FROM users
@@ -1888,7 +1888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
 
       const existingRows = existingProgress.rows || existingProgress || [];
-      
+
       if (existingRows.length > 0 && existingRows[0].completed) {
         return res.json({
           success: true,
@@ -1929,14 +1929,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/debug/user/:userId/lessons", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = parseInt(req.params.userId);
-      
+
       // Get user progress from database
       const progress = await storage.getUserProgress(userId);
-      
+
       // Get points history for lessons
       const pointsHistory = await storage.getUserPointsHistory(userId);
       const lessonCompletions = pointsHistory.filter(h => h.action === 'lesson_complete');
-
       // Create lesson mapping for debugging
       const lessonIdMap: { [key: number]: string } = {
         1: 'budgeting-basics',
@@ -2005,7 +2004,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/admin/fix-lesson-completion", authenticateToken, async (req: Request, res: Response) => {
     try {
       const { userId, lessonId } = req.body;
-      
+
       if (!userId || !lessonId) {
         return res.status(400).json({
           success: false,
@@ -2040,7 +2039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
 
       const existingRows = existingProgress.rows || existingProgress || [];
-      
+
       if (existingRows.length > 0 && existingRows[0].completed) {
         return res.json({
           success: true,
@@ -2079,7 +2078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/admin/backfill-lesson-progress", authenticateToken, async (req: Request, res: Response) => {
     try {
       const { userId } = req.body;
-      
+
       if (!userId) {
         return res.status(400).json({
           success: false,
@@ -2171,7 +2170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `);
 
             const existingRows = existingProgress.rows || existingProgress || [];
-            
+
             if (existingRows.length === 0) {
               // Insert new progress record
               await db.execute(sql`
@@ -2209,7 +2208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/admin/modules", authenticateToken, async (req: Request, res: Response) => {
     try {
       const modules = await db.select().from(learningModules);
-      
+
       // Get completion counts for each module
       const modulesWithStats = await Promise.all(modules.map(async (module) => {
         const completionCount = await db.execute(sql`
@@ -2217,14 +2216,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM user_progress 
           WHERE module_id = ${module.id} AND completed = true
         `);
-        
+
         return {
           ...module,
           completions: parseInt(completionCount.rows?.[0]?.count || 0),
           avgRating: 4.5 // Placeholder for now, would need ratings table
         };
       }));
-      
+
       return res.status(200).json({
         success: true,
         modules: modulesWithStats
@@ -2425,6 +2424,244 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
+
+  // Middleware to check authentication
+  const requireAuth = (req: Request, res: Response, next: any) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    next();
+  };
+
+  // Middleware to check admin role
+  const requireAdmin = (req: Request, res: Response, next: any) => {
+    // Assuming req.user is populated by authenticateToken middleware
+    if (!req.user || req.user.email !== 'admin@example.com') { // replace admin email
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    next();
+  };
+
+  // Admin analytics endpoint
+  app.get("/api/admin/analytics", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getAdminAnalytics('30d');
+      res.json({ success: true, analytics });
+    } catch (error) {
+      console.error('Analytics error:', error);
+      res.status(500).json({ success: false, message: "Failed to load analytics" });
+    }
+  });
+
+  // Preview rewards winners with random selection
+  app.post("/api/admin/rewards/preview-winners", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { payoutConfig, rewardsConfig } = req.body;
+
+      // Get all eligible users by tier
+      const allUsers = await storage.getAdminUsers({ page: 1, limit: 1000 });
+
+      // Group users by tier
+      const usersByTier = {
+        tier1: allUsers.filter(u => u.tier === 'tier1' && u.currentMonthPoints > 0),
+        tier2: allUsers.filter(u => u.tier === 'tier2' && u.currentMonthPoints > 0),
+        tier3: allUsers.filter(u => u.tier === 'tier3' && u.currentMonthPoints > 0)
+      };
+
+      // Calculate reward amounts per tier
+      const totalPool = allUsers.length * 20 * (rewardsConfig.poolPercentage / 100);
+      const tierPools = {
+        tier1: totalPool * (rewardsConfig.tierAllocations.tier1 / 100) * (payoutConfig.tier1PayoutPercentage / 100),
+        tier2: totalPool * (rewardsConfig.tierAllocations.tier2 / 100) * (payoutConfig.tier2PayoutPercentage / 100),
+        tier3: totalPool * (rewardsConfig.tierAllocations.tier3 / 100) * (payoutConfig.tier3PayoutPercentage / 100)
+      };
+
+      // Calculate winner counts per tier
+      const winnerCounts = {
+        tier1: Math.round((usersByTier.tier1.length * rewardsConfig.winnerPercentages.tier1) / 100),
+        tier2: Math.round((usersByTier.tier2.length * rewardsConfig.winnerPercentages.tier2) / 100),
+        tier3: Math.round((usersByTier.tier3.length * rewardsConfig.winnerPercentages.tier3) / 100)
+      };
+
+      // Random selection function with optional seed
+      const seedRandom = (seed: string | undefined) => {
+        if (!seed) return Math.random;
+        let a = 1, b = 0, c = 0, d = 1;
+        for (let i = 0; i < seed.length; i++) {
+          const char = seed.charCodeAt(i);
+          a = (a * char) % 2147483647;
+          b = (b + char) % 2147483647;
+        }
+        return () => {
+          const t = 2091639 * a + 2.3283064365386963e-10 * b;
+          a = b; b = c; c = d; d = t - (t | 0);
+          return d;
+        };
+      };
+
+      const random = seedRandom(payoutConfig.randomSeed);
+
+      const winners = [];
+
+      // Select winners for each tier using weighted random selection
+      (['tier1', 'tier2', 'tier3'] as const).forEach(tier => {
+        const tierUsers = usersByTier[tier];
+        const winnerCount = winnerCounts[tier];
+        const tierPool = tierPools[tier];
+
+        if (tierUsers.length === 0 || winnerCount === 0) return;
+
+        // Create weighted array based on points
+        const weightedUsers = tierUsers.flatMap(user => 
+          Array(Math.max(1, Math.floor(user.currentMonthPoints / 10))).fill(user)
+        );
+
+        // Randomly select winners
+        const selectedWinners = [];
+        const availableUsers = [...weightedUsers];
+
+        for (let i = 0; i < winnerCount && availableUsers.length > 0; i++) {
+          const randomIndex = Math.floor(random() * availableUsers.length);
+          const selectedUser = availableUsers[randomIndex];
+
+          // Remove all instances of this user from available pool
+          const userInstances = availableUsers.filter(u => u.id === selectedUser.id);
+          userInstances.forEach(() => {
+            const index = availableUsers.findIndex(u => u.id === selectedUser.id);
+            if (index > -1) availableUsers.splice(index, 1);
+          });
+
+          // Only add if not already selected
+          if (!selectedWinners.find(w => w.id === selectedUser.id)) {
+            selectedWinners.push(selectedUser);
+          }
+        }
+
+        // Calculate individual reward amounts
+        const rewardPerWinner = Math.floor((tierPool * 100) / selectedWinners.length); // Convert to cents
+
+        selectedWinners.forEach(user => {
+          winners.push({
+            userId: user.id,
+            username: user.username,
+            tier,
+            points: user.currentMonthPoints,
+            rewardAmount: rewardPerWinner
+          });
+        });
+      });
+
+      res.json({ success: true, winners });
+    } catch (error) {
+      console.error('Preview winners error:', error);
+      res.status(500).json({ success: false, message: "Failed to preview winners" });
+    }
+  });
+
+  // Execute monthly rewards distribution
+  app.post("/api/admin/rewards/execute-distribution", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { payoutConfig, rewardsConfig, winners } = req.body;
+
+      // Create monthly reward record
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const totalRewardPool = winners.reduce((sum: number, w: any) => sum + w.rewardAmount, 0);
+
+      const monthlyReward = await storage.createMonthlyReward(
+        month,
+        totalRewardPool,
+        {
+          goldRewardPercentage: rewardsConfig.tierAllocations.tier3,
+          silverRewardPercentage: rewardsConfig.tierAllocations.tier2,
+          bronzeRewardPercentage: rewardsConfig.tierAllocations.tier1,
+          pointDeductionPercentage: 75 // Standard deduction
+        }
+      );
+
+      // Process each winner
+      for (const winner of winners) {
+        // Award the monetary reward and deduct points
+        const user = await storage.getUserById(winner.userId);
+        if (!user) continue;
+
+        // Calculate point deduction (75% of their monthly points)
+        const pointsDeducted = Math.floor(user.currentMonthPoints * 0.75);
+        const pointsRolledOver = user.currentMonthPoints - pointsDeducted;
+
+        // Create user monthly reward record
+        await storage.createUserMonthlyReward({
+          userId: winner.userId,
+          monthlyRewardId: monthlyReward.id,
+          tier: winner.tier,
+          pointsAtDistribution: user.currentMonthPoints,
+          rewardAmount: winner.rewardAmount,
+          pointsDeducted,
+          pointsRolledOver,
+          isWinner: true
+        });
+
+        // Update user points
+        await storage.updateUserPoints(
+          winner.userId,
+          user.totalPoints,
+          pointsRolledOver
+        );
+
+        // Record point deduction in history
+        await storage.awardPoints(
+          winner.userId,
+          'monthly_reward_deduction',
+          -pointsDeducted,
+          `Monthly reward distribution - 75% point deduction ($${(winner.rewardAmount / 100).toFixed(2)} reward)`,
+          { monthlyRewardId: monthlyReward.id, rewardAmount: winner.rewardAmount, tier: winner.tier }
+        );
+
+        // TODO: Initiate Stripe payout to user's connected account
+        // This would integrate with Stripe Connect for actual payouts
+      }
+
+      // Process non-winners (point rollover without deduction)
+      const allUsers = await storage.getAdminUsers({ page: 1, limit: 1000 });
+      const winnerIds = winners.map((w: any) => w.userId);
+      const nonWinners = allUsers.filter(u => !winnerIds.includes(u.id) && u.currentMonthPoints > 0);
+
+      for (const user of nonWinners) {
+        // Create user monthly reward record for non-winners
+        await storage.createUserMonthlyReward({
+          userId: user.id,
+          monthlyRewardId: monthlyReward.id,
+          tier: user.tier,
+          pointsAtDistribution: user.currentMonthPoints,
+          rewardAmount: 0,
+          pointsDeducted: 0,
+          pointsRolledOver: user.currentMonthPoints,
+          isWinner: false
+        });
+
+        // Record rollover in history
+        await storage.awardPoints(
+          user.id,
+          'monthly_rollover',
+          0,
+          `Monthly rollover - ${user.currentMonthPoints} points carried forward`,
+          { monthlyRewardId: monthlyReward.id, rolledOverPoints: user.currentMonthPoints, tier: user.tier }
+        );
+      }
+
+      // Mark reward as distributed
+      await storage.markMonthlyRewardDistributed(monthlyReward.id);
+
+      res.json({ 
+        success: true, 
+        totalWinners: winners.length,
+        totalPayout: totalRewardPool,
+        monthlyRewardId: monthlyReward.id
+      });
+    } catch (error) {
+      console.error('Execute distribution error:', error);
+      res.status(500).json({ success: false, message: "Failed to execute distribution" });
+    }
+  });
 
   const httpServer = createServer(app);
 

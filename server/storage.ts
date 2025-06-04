@@ -1473,6 +1473,29 @@ export class MemStorage implements IStorage {
     };
   }
 
+  async createUserMonthlyReward(data: {
+    userId: number;
+    monthlyRewardId: number;
+    tier: string;
+    pointsAtDistribution: number;
+    rewardAmount: number;
+    pointsDeducted: number;
+    pointsRolledOver: number;
+    isWinner: boolean;
+  }): Promise<UserMonthlyReward> {
+    const [userMonthlyReward] = await db.insert(userMonthlyRewards).values(data).returning();
+    return userMonthlyReward;
+  }
+
+  async markMonthlyRewardDistributed(monthlyRewardId: number): Promise<void> {
+    await db.update(monthlyRewards)
+      .set({
+        status: 'distributed',
+        distributedAt: new Date(),
+      })
+      .where(eq(monthlyRewards.id, monthlyRewardId));
+  }
+
   async getDistributionSettings(): Promise<{[key: string]: string}> {
     // Default settings for reward distribution
     return {
