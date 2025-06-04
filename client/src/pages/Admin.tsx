@@ -275,13 +275,11 @@ export default function Admin() {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
 
       // Fetch all data concurrently
       const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
-        fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` }}),
-        fetch('/api/admin/modules', { headers: { 'Authorization': `Bearer ${token}` }}),
+        fetch('/api/admin/users'),
+        fetch('/api/admin/modules'),
         fetch('/api/pool/monthly'),
         fetch('/api/tiers/thresholds')
       ]);
