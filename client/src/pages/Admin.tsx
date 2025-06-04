@@ -169,8 +169,6 @@ export default function Admin() {
     year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear()
   });
 
-  // State for modules
-  const [modules, setModules] = useState<LearningModule[]>([]);
   const [selectedModule, setSelectedModule] = useState<LearningModule | null>(null);
   const [isEditingModule, setIsEditingModule] = useState(false);
 
@@ -196,13 +194,7 @@ export default function Admin() {
     explanation: ''
   });
 
-  // Admin stats
-  const [stats, setStats] = useState({
-    totalModules: 0,
-    totalUsers: 0,
-    totalCompletions: 0,
-    avgCompletionRate: 0
-  });
+  // Remove duplicate stats declaration
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
     totalReferrers: 0,
@@ -229,10 +221,17 @@ export default function Admin() {
     tier3: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
   });
 
-  // Pool data state
-  const [poolData, setPoolData] = useState(null);
+  // Pool data state with proper typing
+  const [poolData, setPoolData] = useState<{
+    totalPool: number;
+    tier1Pool: number;
+    tier2Pool: number;
+    tier3Pool: number;
+  } | null>(null);
 
-  // Stats state with activeUsers
+  // Consolidated states
+  const [users, setUsers] = useState([]);
+  const [modules, setModules] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -240,9 +239,6 @@ export default function Admin() {
     totalCompletions: 0,
     avgCompletionRate: 0
   });
-
-  // Learning modules state
-  const [modules, setModules] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -333,7 +329,7 @@ export default function Admin() {
                   <CardTitle>Total Pool</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${poolData?.totalPool || 0}</div>
+                  <div className="text-2xl font-bold">${poolData?.totalPool ?? 0}</div>
                 </CardContent>
               </Card>
 
