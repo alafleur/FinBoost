@@ -269,19 +269,19 @@ export default function Dashboard() {
     }
   };
 
-  const getTierColor = (tier: string) => {
+  const getTierColor = (tier?: string) => {
     switch (tier?.toLowerCase()) {
       case 'tier3':
         return 'bg-gradient-to-r from-yellow-400 to-yellow-600';
       case 'tier2':
-        return 'bg-gradient-to-r from-slate-400 toslate-600';
+        return 'bg-gradient-to-r from-slate-400 to-slate-600';
       case 'tier1':
       default:
         return 'bg-gradient-to-r from-orange-400 to-orange-600';
     }
   };
 
-  const getTierDisplayName = (tier: string) => {
+  const getTierDisplayName = (tier?: string) => {
     switch (tier?.toLowerCase()) {
       case 'tier3':
         return 'Tier 3';
