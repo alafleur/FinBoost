@@ -75,6 +75,7 @@ export default function Dashboard() {
     timeRemaining: { days: number; hours: number; minutes: number; totalMs: number };
     settings: { [key: string]: string };
   } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -579,15 +580,13 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Filters and Sorting */}
+              {/* Category Filter */}
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex gap-2">
                   <select 
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    onChange={(e) => {
-                      const selectedCategory = e.target.value;
-                      // Filter implementation can be added here if needed
-                    }}
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
                   >
                     <option value="">All Categories</option>
                     <option value="Budgeting">Budgeting</option>
@@ -599,23 +598,11 @@ export default function Dashboard() {
                     <option value="Debt">Debt</option>
                     <option value="Insurance">Insurance</option>
                   </select>
-                  
-                  <select 
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    onChange={(e) => {
-                      const sortBy = e.target.value;
-                      // Sort implementation can be added here if needed
-                    }}
-                  >
-                    <option value="default">Default Order</option>
-                    <option value="points">Sort by Points</option>
-                    <option value="time">Sort by Time</option>
-                    <option value="category">Sort by Category</option>
-                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(educationContent)
+                  .filter(([key, lesson]) => selectedCategory === "" || lesson.category === selectedCategory)
                   .slice(0, isMobile ? 3 : 6)
                   .map(([key, lesson]) => {
                     const isCompleted = completedLessonIds.includes(key);
@@ -664,7 +651,8 @@ export default function Dashboard() {
               </div>
               <div className="text-center mt-4">
                 <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Showing {isMobile ? 3 : 6} of {Object.keys(educationContent).length} available lessons
+                  Showing {Math.min(isMobile ? 3 : 6, Object.entries(educationContent).filter(([key, lesson]) => selectedCategory === "" || lesson.category === selectedCategory).length)} of {selectedCategory === "" ? Object.keys(educationContent).length : Object.entries(educationContent).filter(([key, lesson]) => lesson.category === selectedCategory).length} available lessons
+                  {selectedCategory && ` in ${selectedCategory}`}
                 </p>
                 
                 {/* Next Lesson Recommendation */}
