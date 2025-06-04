@@ -2761,9 +2761,9 @@ export default function Admin() {
                     </div>
 
                     {/* Tier 2 Configuration */}
-                    <div className="bg-amber-50 p-4 rounded-lg border"></div>
+                    <div className="bg-amber-50 p-4 rounded-lg border">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-semibold text-amber-800"></div>
+                        <h4 className="font-semibold text-amber-800">
                           Tier 2 Winners ({calculateWinnerCounts().tier2} positions)
                         </h4>
                         <div className="flex items-center gap-2">
