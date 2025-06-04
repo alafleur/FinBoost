@@ -397,7 +397,7 @@ export default function Dashboard() {
             {/* Welcome Section */}
             <div className="mb-6 sm:mb-8">
               <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                Welcome to your FinBoost Dashboard! 🚀
+                Welcome to your Additive Dashboard! 🚀
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
                 Track your progress, earn points, and win monthly rewards for building better financial habits.
