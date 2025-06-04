@@ -63,9 +63,24 @@ export default function RewardsExplained() {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-5 text-center">
+              <div className="text-2xl font-bold text-gray-600 mb-2">Tier 1</div>
+              <div className="text-3xl font-bold text-gray-700 mb-1">15%</div>
+              <div className="text-sm text-gray-500">of pool</div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 text-center">
+              <div className="text-2xl font-bold text-blue-600 mb-2">Tier 2</div>
+              <div className="text-3xl font-bold text-blue-700 mb-1">35%</div>
+              <div className="text-sm text-blue-500">of pool</div>
+            </div>
+            
             <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-5 text-center">
-              <div className="text-2xl font-bold text-primary-600 mb-2">Top Tier</div>
-              <div className="text-3xl font-bold gradient-text">50%</div>
+              <div className="text-2xl font-bold text-primary-600 mb-2">Tier 3</div>
+              <div className="text-3xl font-bold gradient-tex</div>
+              <div className="text-sm text-primary-500">of pool</div>
+            </div>
+          </div>t">50%</div>
               <div className="text-sm text-gray-600 mt-2">of rewards pool</div>
             </div>
             
