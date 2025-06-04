@@ -269,27 +269,21 @@ export default function Admin() {
       if (!token) return;
 
       // Fetch all data concurrently
-      const [statsRes, usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
-        fetch('/api/admin/analytics', { headers: { 'Authorization': `Bearer ${token}` }}),
+      const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
         fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` }}),
         fetch('/api/admin/modules', { headers: { 'Authorization': `Bearer ${token}` }}),
         fetch('/api/pool/monthly'),
         fetch('/api/tiers/thresholds')
       ]);
 
-      if (statsRes.ok) {
-        const data = await statsRes.json();
-        setStats(data.analytics);
-      }
-
       if (usersRes.ok) {
         const data = await usersRes.json();
-        setUsers(data.users);
+        setUsers(data.users || []);
       }
 
       if (modulesRes.ok) {
         const data = await modulesRes.json();
-        setModules(data.modules);
+        setModules(data.modules || []);
       }
 
       if (poolRes.ok) {
@@ -306,6 +300,276 @@ export default function Admin() {
       calculateProportionalRatios();
     } catch (error) {
       console.error('Error fetching admin data:', error);
+    }
+  };
+
+  // CRUD Handlers for Modules
+  const handleCreateModule = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/admin/modules', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(moduleForm)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setModules([...modules, data.module]);
+        setModuleForm({
+          title: '',
+          description: '',
+          content: '',
+          pointsReward: 20,
+          category: 'budgeting',
+          difficulty: 'beginner',
+          estimatedMinutes: 5,
+          isActive: true,
+          isPublished: false
+        });
+        toast({
+          title: "Success",
+          description: "Module created successfully"
+        });
+      } else {
+        throw new Error('Failed to create module');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create module",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateModule = async (moduleId: number, updateData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/admin/modules/${moduleId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setModules(modules.map((m: any) => m.id === moduleId ? data.module : m));
+        toast({
+          title: "Success",
+          description: "Module updated successfully"
+        });
+      } else {
+        throw new Error('Failed to update module');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update module",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteModule = async (moduleId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/admin/modules/${moduleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setModules(modules.filter((m: any) => m.id !== moduleId));
+        toast({
+          title: "Success",
+          description: "Module deleted successfully"
+        });
+      } else {
+        throw new Error('Failed to delete module');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete module",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // CRUD Handlers for Users
+  const handleCreateUser = async (userData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers([...users, data.user]);
+        toast({
+          title: "Success",
+          description: "User created successfully"
+        });
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create user",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateUser = async (userId: number, updateData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(users.map((u: any) => u.id === userId ? data.user : u));
+        toast({
+          title: "Success",
+          description: "User updated successfully"
+        });
+      } else {
+        throw new Error('Failed to update user');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setUsers(users.filter((u: any) => u.id !== userId));
+        toast({
+          title: "Success",
+          description: "User deleted successfully"
+        });
+      } else {
+        throw new Error('Failed to delete user');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Points Management Handlers
+  const handleAwardPoints = async (userId: number, points: number, reason: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/admin/points/award', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId, points, reason })
+      });
+
+      if (response.ok) {
+        await fetchData(); // Refresh data
+        toast({
+          title: "Success",
+          description: "Points awarded successfully"
+        });
+      } else {
+        throw new Error('Failed to award points');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to award points",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeductPoints = async (userId: number, points: number, reason: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/admin/points/deduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId, points, reason })
+      });
+
+      if (response.ok) {
+        await fetchData(); // Refresh data
+        toast({
+          title: "Success",
+          description: "Points deducted successfully"
+        });
+      } else {
+        throw new Error('Failed to deduct points');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to deduct points",
+        variant: "destructive"
+      });
     }
   };
 
