@@ -46,7 +46,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
   };
 
   return (
-    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-b from-white to-gray-50">
+    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-b from-white via-blue-50/30 to-blue-100/50">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -72,7 +72,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                     type="button" 
                     disabled={isPending}
                     onClick={form.handleSubmit(onSubmit)}
-                    className="w-full h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 rounded-lg shadow-md transition duration-300 border border-blue-700 whitespace-nowrap text-sm sm:text-base flex items-center justify-center"
+                    className="w-full h-[50px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-4 rounded-lg shadow-lg transition duration-300 border border-blue-700 whitespace-nowrap text-sm sm:text-base flex items-center justify-center"
                   >
                     {isPending ? "Joining..." : "Join the Waitlist"}
                   </button>
