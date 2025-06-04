@@ -353,9 +353,8 @@ export default function Dashboard() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <AdditiveLogo className="h-6 w-6 sm:h-8 sm:w-8 text-slate-700" />
-              <h1 className="font-heading font-bold text-lg sm:text-2xl text-slate-800">ADDITIVE</h1>
+            <div className="flex items-center">
+              <AdditiveLogo variant="light" size="md" />
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="text-right hidden sm:block">
