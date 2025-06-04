@@ -30,7 +30,8 @@ import {
   CheckCircle,
   TrendingUp,
   Trophy,
-  X
+  X,
+  Activity
 } from 'lucide-react';
 
 interface LearningModule {
