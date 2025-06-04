@@ -1887,10 +1887,10 @@ export class MemStorage implements IStorage {
         description: moduleData.description,
         category: moduleData.category,
         difficulty: moduleData.difficulty,
-        estimatedTime: moduleData.estimatedTime,
+        estimatedMinutes: moduleData.estimatedMinutes || 5,
         content: moduleData.content,
-        isActive: moduleData.isActive || true,
-        sortOrder: moduleData.sortOrder || 0,
+        isActive: moduleData.isActive !== undefined ? moduleData.isActive : true,
+        order: moduleData.order || 0,
         pointsReward: moduleData.pointsReward || 20
       }).returning();
       return module;
@@ -1908,10 +1908,10 @@ export class MemStorage implements IStorage {
           description: moduleData.description,
           category: moduleData.category,
           difficulty: moduleData.difficulty,
-          estimatedTime: moduleData.estimatedTime,
+          estimatedMinutes: moduleData.estimatedMinutes,
           content: moduleData.content,
           isActive: moduleData.isActive,
-          sortOrder: moduleData.sortOrder,
+          order: moduleData.order,
           pointsReward: moduleData.pointsReward
         })
         .where(eq(learningModules.id, moduleId))
@@ -1934,7 +1934,7 @@ export class MemStorage implements IStorage {
 
   async getAllModules(): Promise<any[]> {
     try {
-      const modules = await db.select().from(learningModules).orderBy(learningModules.sortOrder);
+      const modules = await db.select().from(learningModules).orderBy(learningModules.order);
       return modules;
     } catch (error) {
       console.error('Error getting all modules:', error);
@@ -2000,11 +2000,10 @@ export class MemStorage implements IStorage {
         // Record points history
         await db.insert(userPointsHistory).values({
           userId: userId,
-          actionId: action,
-          pointsEarned: points,
+          action: action,
+          points: points,
           description: reason,
-          earnedAt: new Date(),
-          metadata: { adminAwarded: true }
+          metadata: JSON.stringify({ adminAwarded: true })
         });
       }
     } catch (error) {
@@ -2031,11 +2030,10 @@ export class MemStorage implements IStorage {
         // Record points history
         await db.insert(userPointsHistory).values({
           userId: userId,
-          actionId: action,
-          pointsEarned: -points,
+          action: action,
+          points: -points,
           description: reason,
-          earnedAt: new Date(),
-          metadata: { adminDeducted: true }
+          metadata: JSON.stringify({ adminDeducted: true })
         });
       }
     } catch (error) {

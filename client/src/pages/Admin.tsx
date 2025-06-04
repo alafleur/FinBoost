@@ -240,8 +240,8 @@ export default function Admin() {
   } | null>(null);
 
   // Consolidated states
-  const [users, setUsers] = useState([]);
-  const [modules, setModules] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     activeUsers: 0,
