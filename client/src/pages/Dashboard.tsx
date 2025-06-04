@@ -280,7 +280,15 @@ export default function Dashboard() {
   };
 
   const getTierDisplayName = (tier: string) => {
-    return tier || 'Bronze';
+    switch (tier?.toLowerCase()) {
+      case 'tier3':
+        return 'Tier 3';
+      case 'tier2':
+        return 'Tier 2';
+      case 'tier1':
+      default:
+        return 'Tier 1';
+    }
   };
 
   // Get the completed lesson IDs from lessonProgress with complete mapping

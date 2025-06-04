@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +66,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -211,13 +210,13 @@ export default function Profile() {
     if (!user) return 0;
     const currentTier = getCurrentTierInfo();
     if (!currentTier.nextTier) return 100;
-    
+
     // Calculate progress from current tier threshold to next tier threshold
     const currentThreshold = currentTier.threshold;
     const nextThreshold = currentTier.nextTier.threshold;
     const pointsInCurrentTier = user.currentMonthPoints - currentThreshold;
     const pointsNeededForNextTier = nextThreshold - currentThreshold;
-    
+
     const progress = (pointsInCurrentTier / pointsNeededForNextTier) * 100;
     return Math.max(0, Math.min(progress, 100));
   };
@@ -226,7 +225,7 @@ export default function Profile() {
     if (!user) return 0;
     const currentTier = getCurrentTierInfo();
     if (!currentTier.nextTier) return 0;
-    
+
     return Math.max(0, currentTier.nextTier.threshold - user.currentMonthPoints);
   };
 
@@ -573,14 +572,14 @@ export default function Profile() {
                     <p className="text-sm text-gray-600">Completed your first lesson</p>
                     <Badge className="mt-2 bg-green-100 text-green-700">Earned</Badge>
                   </div>
-                  
+
                   <div className="p-4 border rounded-lg text-center">
                     <Star className="h-8 w-8 text-blue-500 mx-auto mb-2" />
                     <h4 className="font-medium">Point Collector</h4>
                     <p className="text-sm text-gray-600">Earned 100+ points</p>
                     <Badge className="mt-2 bg-green-100 text-green-700">Earned</Badge>
                   </div>
-                  
+
                   <div className="p-4 border rounded-lg text-center opacity-60">
                     <Crown className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                     <h4 className="font-medium">Tier Climber</h4>
@@ -608,7 +607,7 @@ export default function Profile() {
                     </div>
                     <input type="checkbox" defaultChecked className="toggle" />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">Weekly Progress Reports</h4>
@@ -616,7 +615,7 @@ export default function Profile() {
                     </div>
                     <input type="checkbox" defaultChecked className="toggle" />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">Public Profile</h4>

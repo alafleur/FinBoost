@@ -322,8 +322,8 @@ export default function PointsManagement() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                <Badge className={`${user.tier === 'tier3' ? 'bg-yellow-500' : user.tier === 'tier2' ? 'bg-gray-400' : 'bg-orange-600'} text-white capitalize`}>
-                  {user.tier === 'tier1' ? 'Tier 1' : user.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
+                <Badge className={`${user.tier === 'tier3' ? 'bg-yellow-500' : user.tier === 'tier2' ? 'bg-gray-400' : 'bg-orange-600'} text-white`}>
+                  {user.tier === 'tier3' ? 'Tier 3' : user.tier === 'tier2' ? 'Tier 2' : 'Tier 1'}
                 </Badge>
               </div>
               <Progress value={getTierProgress()} className="mt-2" />

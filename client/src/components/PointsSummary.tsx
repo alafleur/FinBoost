@@ -82,10 +82,14 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   };
 
   const getTierDisplayName = (tier: string) => {
-    switch (tier) {
-      case 'tier3': return 'Tier 3';
-      case 'tier2': return 'Tier 2';
-      default: return 'Tier 1';
+    switch (tier?.toLowerCase()) {
+      case 'tier3':
+        return 'Tier 3';
+      case 'tier2':
+        return 'Tier 2';
+      case 'tier1':
+      default:
+        return 'Tier 1';
     }
   };
 
