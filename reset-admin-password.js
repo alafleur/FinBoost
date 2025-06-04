@@ -1,6 +1,7 @@
 
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
+import pkg from 'pg';
+const { Pool } = pkg;
+import bcrypt from 'bcryptjs';
 
 async function resetAdminPassword() {
   if (!process.env.DATABASE_URL) {
