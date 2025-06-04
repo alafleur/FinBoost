@@ -1,4 +1,4 @@
-import logoPath from "@assets/Additive logo v1.png";
+import logoPath from "@assets/Additive logo v2.png";
 
 interface AdditiveLogoProps {
   className?: string;
@@ -10,23 +10,18 @@ export function AdditiveLogo({
   size = 'md'
 }: AdditiveLogoProps) {
   const sizeClasses = {
-    sm: 'h-6 w-auto',
-    md: 'h-8 w-auto', 
-    lg: 'h-10 w-auto',
-    xl: 'h-12 w-auto'
+    sm: 'h-8',
+    md: 'h-10', 
+    lg: 'h-12',
+    xl: 'h-16'
   };
 
   return (
     <div className={`flex items-center ${className}`}>
-      <div 
-        className={`${sizeClasses[size]} bg-cover bg-no-repeat`}
-        style={{
-          backgroundImage: `url(${logoPath})`,
-          backgroundPosition: '0% 0%',
-          backgroundSize: '200% 200%',
-          aspectRatio: '2.5/1'
-        }}
-        aria-label="Additive Logo"
+      <img 
+        src={logoPath}
+        alt="Additive"
+        className={`${sizeClasses[size]} w-auto object-contain`}
       />
     </div>
   );
