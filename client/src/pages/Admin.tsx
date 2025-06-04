@@ -232,13 +232,27 @@ export default function Admin() {
 
   // State for cycle management
   const [cycleSettings, setCycleSettings] = useState({
-    cycleStartDay: 1,
-    distributionDay: 5,
-    distributionDelayDays: 3,
+    cycleStartDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+    cycleEndDate: (() => {
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      nextMonth.setDate(0); // Last day of current month
+      return nextMonth.toISOString().split('T')[0];
+    })(),
+    distributionDate: (() => {
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      nextMonth.setDate(5); // 5th of next month
+      return nextMonth.toISOString().split('T')[0];
+    })(),
+    rewardsAnnouncementDate: (() => {
+      const today = new Date();
+      today.setDate(today.getDate() + 3); // 3 days from now
+      return today.toISOString().split('T')[0];
+    })(),
     cycleStartTime: "00:00",
     distributionTime: "12:00",
     timezone: "UTC",
-    rewardsAnnouncementDay: 3,
     rewardsAnnouncementTime: "10:00"
   });
 
@@ -3566,26 +3580,40 @@ export default function Admin() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-500" />
-                    Monthly Cycle Start
+                    Monthly Cycle Dates
                   </CardTitle>
-                  <CardDescription>Configure when each monthly cycle begins</CardDescription>
+                  <CardDescription>Configure specific dates for cycle start and end</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Cycle Start Day of Month</Label>
+                    <Label className="text-sm font-medium">Cycle Start Date</Label>
                     <Input
-                      type="number"
-                      min="1"
-                      max="28"
-                      value={cycleSettings.cycleStartDay}
+                      type="date"
+                      value={cycleSettings.cycleStartDate}
                       onChange={(e) => setCycleSettings({
                         ...cycleSettings,
-                        cycleStartDay: parseInt(e.target.value) || 1
+                        cycleStartDate: e.target.value
                       })}
                       className="mt-1"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Day of the month when the new cycle starts (1-28)
+                      Exact date when the monthly cycle begins
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Cycle End Date</Label>
+                    <Input
+                      type="date"
+                      value={cycleSettings.cycleEndDate}
+                      onChange={(e) => setCycleSettings({
+                        ...cycleSettings,
+                        cycleEndDate: e.target.value
+                      })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Last day of the current cycle (points lock at midnight)
                     </p>
                   </div>
 
@@ -3637,20 +3665,18 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Announcement Day</Label>
+                    <Label className="text-sm font-medium">Announcement Date</Label>
                     <Input
-                      type="number"
-                      min="1"
-                      max="30"
-                      value={cycleSettings.rewardsAnnouncementDay}
+                      type="date"
+                      value={cycleSettings.rewardsAnnouncementDate}
                       onChange={(e) => setCycleSettings({
                         ...cycleSettings,
-                        rewardsAnnouncementDay: parseInt(e.target.value) || 3
+                        rewardsAnnouncementDate: e.target.value
                       })}
                       className="mt-1"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Day of month to announce upcoming rewards (relative to cycle start)
+                      Exact date to announce upcoming rewards and winner percentages
                     </p>
                   </div>
 
@@ -3689,20 +3715,18 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Distribution Delay (Days)</Label>
+                    <Label className="text-sm font-medium">Distribution Date</Label>
                     <Input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={cycleSettings.distributionDelayDays}
+                      type="date"
+                      value={cycleSettings.distributionDate}
                       onChange={(e) => setCycleSettings({
                         ...cycleSettings,
-                        distributionDelayDays: parseInt(e.target.value) || 3
+                        distributionDate: e.target.value
                       })}
                       className="mt-1"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Days after cycle end to execute distribution
+                      Exact date when rewards will be distributed to winners
                     </p>
                   </div>
 
@@ -3744,7 +3768,13 @@ export default function Admin() {
                     <div className="flex items-center justify-between p-3 bg-blue-50 rounded border-l-4 border-blue-400">
                       <div>
                         <div className="font-medium text-blue-800">Cycle Start</div>
-                        <div className="text-sm text-blue-600">Day {cycleSettings.cycleStartDay} at {cycleSettings.cycleStartTime}</div>
+                        <div className="text-sm text-blue-600">
+                          {new Date(cycleSettings.cycleStartDate).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })} at {cycleSettings.cycleStartTime}
+                        </div>
                       </div>
                       <div className="text-xs text-blue-500">Month begins</div>
                     </div>
@@ -3752,7 +3782,13 @@ export default function Admin() {
                     <div className="flex items-center justify-between p-3 bg-yellow-50 rounded border-l-4 border-yellow-400">
                       <div>
                         <div className="font-medium text-yellow-800">Rewards Announcement</div>
-                        <div className="text-sm text-yellow-600">Day {cycleSettings.rewardsAnnouncementDay} at {cycleSettings.rewardsAnnouncementTime}</div>
+                        <div className="text-sm text-yellow-600">
+                          {new Date(cycleSettings.rewardsAnnouncementDate).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })} at {cycleSettings.rewardsAnnouncementTime}
+                        </div>
                       </div>
                       <div className="text-xs text-yellow-500">Preview sent</div>
                     </div>
@@ -3760,7 +3796,13 @@ export default function Admin() {
                     <div className="flex items-center justify-between p-3 bg-red-50 rounded border-l-4 border-red-400">
                       <div>
                         <div className="font-medium text-red-800">Cycle End</div>
-                        <div className="text-sm text-red-600">Next month Day {cycleSettings.cycleStartDay - 1}</div>
+                        <div className="text-sm text-red-600">
+                          {new Date(cycleSettings.cycleEndDate).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })} at 23:59
+                        </div>
                       </div>
                       <div className="text-xs text-red-500">Points locked</div>
                     </div>
@@ -3769,7 +3811,11 @@ export default function Admin() {
                       <div>
                         <div className="font-medium text-green-800">Distribution</div>
                         <div className="text-sm text-green-600">
-                          +{cycleSettings.distributionDelayDays} days at {cycleSettings.distributionTime}
+                          {new Date(cycleSettings.distributionDate).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })} at {cycleSettings.distributionTime}
                         </div>
                       </div>
                       <div className="text-xs text-green-500">Payouts sent</div>
@@ -3779,6 +3825,9 @@ export default function Admin() {
                   <div className="mt-4 p-3 bg-gray-50 rounded">
                     <p className="text-xs text-gray-600">
                       ⏰ All times are in {cycleSettings.timezone}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      📅 Cycle duration: {Math.ceil((new Date(cycleSettings.cycleEndDate).getTime() - new Date(cycleSettings.cycleStartDate).getTime()) / (1000 * 60 * 60 * 24))} days
                     </p>
                   </div>
                 </CardContent>

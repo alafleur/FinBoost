@@ -23,41 +23,31 @@ function calculateNextDistributionDate(settings: {[key: string]: string | any}):
   
   // Get monthly settings from system settings
   const monthlySettings = settings.monthlySettings || {
-    cycleStartDay: 1,
-    distributionDay: 5,
-    distributionDelayDays: 3,
+    cycleStartDate: new Date().toISOString().split('T')[0],
+    cycleEndDate: new Date().toISOString().split('T')[0],
+    distributionDate: new Date().toISOString().split('T')[0],
+    rewardsAnnouncementDate: new Date().toISOString().split('T')[0],
     cycleStartTime: "00:00",
     distributionTime: "12:00",
-    timezone: "UTC"
+    timezone: "UTC",
+    rewardsAnnouncementTime: "10:00"
   };
 
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const currentDay = now.getDate();
-
-  // Calculate cycle end date (day before next cycle starts)
-  let nextCycleStartMonth = currentMonth + 1;
-  let nextCycleStartYear = currentYear;
-  
-  if (nextCycleStartMonth > 11) {
-    nextCycleStartMonth = 0;
-    nextCycleStartYear++;
+  // If we have an explicit distribution date, use it
+  if (monthlySettings.distributionDate) {
+    const distributionDate = new Date(monthlySettings.distributionDate);
+    
+    // Parse distribution time
+    const [distHour, distMinute] = (monthlySettings.distributionTime || "12:00").split(':').map(Number);
+    distributionDate.setHours(distHour, distMinute, 0, 0);
+    
+    return distributionDate;
   }
 
-  // Get the actual cycle start day, ensuring it exists in the month
-  const daysInNextMonth = new Date(nextCycleStartYear, nextCycleStartMonth + 1, 0).getDate();
-  const actualCycleStartDay = Math.min(monthlySettings.cycleStartDay, daysInNextMonth);
-
-  // Create next cycle start date
-  const nextCycleStart = new Date(nextCycleStartYear, nextCycleStartMonth, actualCycleStartDay);
-  
-  // Parse start time
-  const [startHour, startMinute] = monthlySettings.cycleStartTime.split(':').map(Number);
-  nextCycleStart.setHours(startHour, startMinute, 0, 0);
-
-  // Calculate distribution date
-  const distributionDate = new Date(nextCycleStart);
-  distributionDate.setDate(distributionDate.getDate() + (monthlySettings.distributionDelayDays || 3));
+  // Fallback to old calculation if no explicit date is set
+  const cycleEndDate = monthlySettings.cycleEndDate ? new Date(monthlySettings.cycleEndDate) : now;
+  const distributionDate = new Date(cycleEndDate);
+  distributionDate.setDate(distributionDate.getDate() + 3); // Default 3 day delay
 
   // If distribution date would be in the next month, adjust accordingly
   const [distHour, distMinute] = monthlySettings.distributionTime.split(':').map(Number);
