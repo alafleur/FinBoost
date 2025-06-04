@@ -43,41 +43,21 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white">
-      <div className="container mx-auto max-w-4xl text-center">
-        <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">Your Financial Progress Starts Here</h2>
-        <p className="text-white/90 text-xl mb-4 max-w-2xl mx-auto font-medium">
-          Get smarter with money. Get rewarded. Sign up today and be part of the first payout cycle.
+    <section className="py-20 px-4 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+      <div className="container mx-auto max-w-4xl text-center relative z-10">
+        <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+          Ready to Turn Learning Into Earning?
+        </h2>
+        <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+          Join thousands of members who are building wealth through knowledge and earning real rewards.
         </p>
-        <p className="text-white/80 text-base mb-8 max-w-2xl mx-auto">
-          Join the movement now and help build a community that learns and earns together.
+        <button className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 hover:from-blue-600 hover:via-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-2xl transition duration-300 transform hover:scale-105 border border-blue-400">
+          Join the Waitlist Today
+        </button>
+        <p className="text-sm text-blue-200 mt-4">
+          100% free to join • No credit card required • Cancel anytime
         </p>
-
-        <div className="max-w-lg mx-auto mb-8">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-grow">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full h-[50px] px-4 py-3 rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:ring-2 focus:ring-white/50 focus:outline-none"
-                value={form.watch("email")}
-                onChange={(e) => form.setValue("email", e.target.value)}
-              />
-            </div>
-            <div className="sm:w-[180px]">
-              <button 
-                type="button" 
-                disabled={isPending}
-                onClick={form.handleSubmit(onSubmit)}
-                className="w-full h-[50px] bg-green-500 text-white font-medium px-4 rounded-lg shadow-lg hover:bg-green-600 transition duration-300 text-sm sm:text-base border border-green-600"
-              >
-                {isPending ? "Processing..." : "Join the Movement"}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <p className="text-white/60 text-sm">We'll never share your email. Unsubscribe anytime.</p>
       </div>
     </section>
   );

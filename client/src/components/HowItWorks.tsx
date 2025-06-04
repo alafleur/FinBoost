@@ -39,16 +39,18 @@ export default function HowItWorks() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((step) => (
-            <div 
-              key={step.id} 
-              className="step-card bg-white rounded-xl shadow-md p-6 border border-gray-100 transition-all duration-300"
+          {steps.map((step, index) => (
+            <div
+              key={index}
+              className="text-center p-6 rounded-xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200 hover:border-blue-300 transform hover:-translate-y-1"
             >
-              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-6">
-                {step.icon}
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                <div className="text-white">
+                  {step.icon}
+                </div>
               </div>
-              <h3 className="font-heading font-semibold text-xl mb-3">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
+              <h3 className="font-heading font-bold text-xl mb-3 text-blue-900">{step.title}</h3>
+              <p className="text-blue-700">{step.description}</p>
             </div>
           ))}
         </div>
