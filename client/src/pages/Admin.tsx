@@ -46,6 +46,7 @@ interface LearningModule {
   difficulty: string;
   estimatedMinutes: number;
   isActive: boolean;
+  isPublished?: boolean;
   order: number;
   createdAt: string;
   completions?: number;
@@ -183,7 +184,8 @@ export default function Admin() {
     category: 'budgeting',
     difficulty: 'beginner',
     estimatedMinutes: 5,
-    isActive: true
+    isActive: true,
+    isPublished: false
   });
 
   // State for quiz questions
@@ -234,6 +236,16 @@ export default function Admin() {
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [confirmDistribution, setConfirmDistribution] = useState(false);
   const [isExecutingDistribution, setIsExecutingDistribution] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out."
+    });
+    setLocation('/auth');
+  };
 
   const categories = [
     { value: 'budgeting', label: 'Budgeting' },
@@ -496,8 +508,32 @@ export default function Admin() {
     }
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSaveModule = async () => {
+    setIsSaving(true);
     try {
+      // Validate required fields
+      if (!moduleForm.title.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Module title is required.",
+          variant: "destructive"
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      if (!moduleForm.content.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Module content is required.",
+          variant: "destructive"
+        });
+        setIsSaving(false);
+        return;
+      }
+
       if (isEditingModule && selectedModule) {
         // Update existing module
         const updatedModules = modules.map(m => 
@@ -507,14 +543,14 @@ export default function Admin() {
         );
         setModules(updatedModules);
         toast({
-          title: "Module Updated",
+          title: "✅ Module Updated",
           description: "Learning module has been successfully updated."
         });
       } else {
         // Create new module
         const newModule: LearningModule = {
           ...moduleForm,
-          id: Math.max(...modules.map(m => m.id)) + 1,
+          id: Math.max(...modules.map(m => m.id), 0) + 1,
           createdAt: new Date().toISOString(),
           order: modules.length + 1,
           completions: 0,
@@ -522,7 +558,7 @@ export default function Admin() {
         };
         setModules([...modules, newModule]);
         toast({
-          title: "Module Created",
+          title: "✅ Module Created",
           description: "New learning module has been successfully created."
         });
       }
@@ -536,16 +572,20 @@ export default function Admin() {
         category: 'budgeting',
         difficulty: 'beginner',
         estimatedMinutes: 5,
-        isActive: true
+        isActive: true,
+        isPublished: false
       });
       setIsEditingModule(false);
       setSelectedModule(null);
     } catch (error) {
+      console.error('Save module error:', error);
       toast({
-        title: "Error",
-        description: "Failed to save module. Please try again.",
+        title: "❌ Save Failed",
+        description: "Failed to save module. Please check your input and try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -559,21 +599,26 @@ export default function Admin() {
       category: module.category,
       difficulty: module.difficulty,
       estimatedMinutes: module.estimatedMinutes,
-      isActive: module.isActive
+      isActive: module.isActive,
+      isPublished: module.isPublished || false
     });
     setIsEditingModule(true);
   };
 
   const handleDeleteModule = async (moduleId: number) => {
     try {
-      setModules(modules.filter(m => m.id !== moduleId));
-      toast({
-        title: "Module Deleted",
-        description: "Learning module has been successfully deleted."
-      });
+      const moduleToDelete = modules.find(m => m.id === moduleId);
+      if (window.confirm(`Are you sure you want to delete "${moduleToDelete?.title}"? This action cannot be undone.`)) {
+        setModules(modules.filter(m => m.id !== moduleId));
+        toast({
+          title: "✅ Module Deleted",
+          description: `"${moduleToDelete?.title}" has been successfully deleted.`
+        });
+      }
     } catch (error) {
+      console.error('Delete module error:', error);
       toast({
-        title: "Error",
+        title: "❌ Delete Failed",
         description: "Failed to delete module. Please try again.",
         variant: "destructive"
       });
@@ -1078,9 +1123,15 @@ export default function Admin() {
                 <h1 className="font-heading font-bold text-2xl text-dark-800">Admin Dashboard</h1>
               </div>
             </div>
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              Admin Access
-            </Badge>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                Admin Access
+              </Badge>
+              <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -1400,34 +1451,51 @@ export default function Admin() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="title">Title</Label>
+                        <Label htmlFor="title" className="text-sm font-medium">
+                          Title <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                           id="title"
                           value={moduleForm.title}
                           onChange={(e) => setModuleForm({...moduleForm, title: e.target.value})}
                           placeholder="e.g., Budget Basics for Beginners"
+                          className={!moduleForm.title.trim() ? "border-red-300" : ""}
                         />
+                        {!moduleForm.title.trim() && (
+                          <p className="text-xs text-red-500 mt-1">Title is required</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="points">Points Reward</Label>
+                        <Label htmlFor="points" className="text-sm font-medium">
+                          Points Reward <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                           id="points"
                           type="number"
+                          min="1"
+                          max="100"
                           value={moduleForm.pointsReward}
-                          onChange={(e) => setModuleForm({...moduleForm, pointsReward: parseInt(e.target.value)})}
+                          onChange={(e) => setModuleForm({...moduleForm, pointsReward: parseInt(e.target.value) || 20})}
                         />
+                        <p className="text-xs text-gray-500 mt-1">Points awarded upon completion (1-100)</p>
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description" className="text-sm font-medium">
+                        Description <span className="text-red-500">*</span>
+                      </Label>
                       <Textarea
                         id="description"
                         value={moduleForm.description}
                         onChange={(e) => setModuleForm({...moduleForm, description: e.target.value})}
                         placeholder="Brief description of what users will learn..."
                         rows={2}
+                        className={!moduleForm.description.trim() ? "border-red-300" : ""}
                       />
+                      {!moduleForm.description.trim() && (
+                        <p className="text-xs text-red-500 mt-1">Description is required</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-3 gap-4">
@@ -1469,18 +1537,56 @@ export default function Admin() {
                     </div>
 
                     <div>
-                      <Label htmlFor="content">Lesson Content (HTML)</Label>
+                      <Label htmlFor="content" className="text-sm font-medium flex items-center gap-2">
+                        Lesson Content (HTML) <span className="text-red-500">*</span>
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          💡 Must be valid HTML format
+                        </span>
+                      </Label>
                       <Textarea
                         id="content"
                         value={moduleForm.content}
                         onChange={(e) => setModuleForm({...moduleForm, content: e.target.value})}
-                        placeholder="<h2>Lesson Title</h2><p>Lesson content here...</p>"
+                        placeholder="<h2>Lesson Title</h2><p>Lesson content here...</p><ul><li>Key point 1</li><li>Key point 2</li></ul>"
                         rows={8}
-                        className="font-mono text-sm"
+                        className={`font-mono text-sm ${!moduleForm.content.trim() ? "border-red-300" : ""}`}
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Use HTML tags for formatting. Supported: h2, h3, p, ul, ol, li, strong, em
-                      </p>
+                      <div className="mt-1 space-y-1">
+                        {!moduleForm.content.trim() && (
+                          <p className="text-xs text-red-500">Content is required</p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          ✅ Supported HTML tags: h2, h3, p, ul, ol, li, strong, em, blockquote, code
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          💡 Tip: Use &lt;h2&gt; for main sections, &lt;p&gt; for paragraphs, &lt;ul&gt; for lists
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium">Module Status</Label>
+                        <p className="text-xs text-gray-500">
+                          Only published modules are visible to learners
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={moduleForm.isActive}
+                            onCheckedChange={(checked) => setModuleForm({...moduleForm, isActive: checked})}
+                          />
+                          <Label className="text-sm">Active</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={moduleForm.isPublished}
+                            onCheckedChange={(checked) => setModuleForm({...moduleForm, isPublished: checked})}
+                          />
+                          <Label className="text-sm font-medium">Published</Label>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex justify-end gap-3">
@@ -1495,14 +1601,24 @@ export default function Admin() {
                           category: 'budgeting',
                           difficulty: 'beginner',
                           estimatedMinutes: 5,
-                          isActive: true
+                          isActive: true,
+                          isPublished: false
                         });
-                      }}>
+                      }} disabled={isSaving}>
                         Cancel
                       </Button>
-                      <Button onClick={handleSaveModule} className="flex items-center gap-2">
-                        <Save className="h-4 w-4" />
-                        {isEditingModule ? 'Update Module' : 'Create Module'}
+                      <Button onClick={handleSaveModule} disabled={isSaving} className="flex items-center gap-2">
+                        {isSaving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            {isEditingModule ? 'Update Module' : 'Create Module'}
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -1522,6 +1638,7 @@ export default function Admin() {
                       <TableHead>Completions</TableHead>
                       <TableHead>Rating</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Published</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1560,6 +1677,11 @@ export default function Admin() {
                           </Badge>
                         </TableCell>
                         <TableCell>
+                          <Badge variant={module.isPublished ? "default" : "outline"}>
+                            {module.isPublished ? '🌐 Published' : '📝 Draft'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEditModule(module)}>
                               <Edit className="h-3 w-3" />
@@ -1589,21 +1711,30 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="quiz-question">Question</Label>
+                  <Label htmlFor="quiz-question" className="text-sm font-medium">
+                    Question <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="quiz-question"
                     value={newQuestion.question}
                     onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
                     placeholder="Enter your quiz question here..."
                     rows={2}
+                    className={!newQuestion.question.trim() ? "border-red-300" : ""}
                   />
+                  {!newQuestion.question.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Question is required</p>
+                  )}
                 </div>
 
                 <div>
-                  <Label>Answer Options</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Label className="text-sm font-medium">
+                    Answer Options <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="grid grid-cols-1 gap-3">
                     {newQuestion.options.map((option, index) => (
                       <div key={index} className="flex items-center gap-2">
+                        <span className="text-sm font-medium w-8">{String.fromCharCode(65 + index)}.</span>
                         <Input
                           value={option}
                           onChange={(e) => {
@@ -1611,33 +1742,49 @@ export default function Admin() {
                             newOptions[index] = e.target.value;
                             setNewQuestion({...newQuestion, options: newOptions});
                           }}
-                          placeholder={`Option ${index + 1}`}
+                          placeholder={`Enter option ${String.fromCharCode(65 + index)}`}
+                          className={!option.trim() ? "border-red-300" : ""}
                         />
                         <Button
                           variant={newQuestion.correctAnswer === index ? "default" : "outline"}
                           size="sm"
                           onClick={() => setNewQuestion({...newQuestion, correctAnswer: index})}
+                          className={newQuestion.correctAnswer === index ? "bg-green-600 hover:bg-green-700" : ""}
                         >
-                          {newQuestion.correctAnswer === index ? '✓' : index + 1}
+                          {newQuestion.correctAnswer === index ? '✓ Correct' : 'Mark Correct'}
                         </Button>
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Click the number button to mark the correct answer</p>
+                  {newQuestion.options.some(opt => !opt.trim()) && (
+                    <p className="text-xs text-red-500 mt-1">All options must be filled</p>
+                  )}
+                  <p className="text-xs text-blue-600 mt-1">💡 Click "Mark Correct" to set the right answer</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="explanation">Explanation</Label>
+                  <Label htmlFor="explanation" className="text-sm font-medium">
+                    Explanation <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="explanation"
                     value={newQuestion.explanation}
                     onChange={(e) => setNewQuestion({...newQuestion, explanation: e.target.value})}
                     placeholder="Explain why this is the correct answer..."
                     rows={2}
+                    className={!newQuestion.explanation.trim() ? "border-red-300" : ""}
                   />
+                  {!newQuestion.explanation.trim() && (
+                    <p className="text-xs text-red-500 mt-1">Explanation is required</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">Help learners understand the correct answer</p>
                 </div>
 
-                <Button onClick={handleAddQuizQuestion} className="flex items-center gap-2">
+                <Button 
+                  onClick={handleAddQuizQuestion} 
+                  className="flex items-center gap-2"
+                  disabled={!newQuestion.question.trim() || newQuestion.options.some(opt => !opt.trim()) || !newQuestion.explanation.trim()}
+                >
                   <Plus className="h-4 w-4" />
                   Add Question
                 </Button>
