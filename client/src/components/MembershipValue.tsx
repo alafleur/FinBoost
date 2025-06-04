@@ -4,7 +4,7 @@ import { BookOpen, Gift } from "lucide-react";
 
 export default function MembershipValue() {
   return (
-    <section className="py-16 px-4 bg-gradient-to-r from-blue-400/10 via-purple-300/8 to-indigo-400/12" id="membership-value">
+    <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50/30" id="membership-value">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
