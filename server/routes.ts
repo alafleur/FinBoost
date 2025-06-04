@@ -171,10 +171,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", async (req, res) => {
     try {
-      if (!(req as any).isAuthenticated() || !(req as any).user || (req as any).user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const users = await storage.getAllUsers();
       res.json({ success: true, users });
     } catch (error: any) {
@@ -184,10 +180,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/modules", async (req, res) => {
     try {
-      if (!(req as any).isAuthenticated() || !(req as any).user || (req as any).user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const modules = await storage.getAllModules();
       res.json({ success: true, modules });
     } catch (error: any) {
