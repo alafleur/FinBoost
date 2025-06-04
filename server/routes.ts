@@ -11,7 +11,7 @@ import { OAuth2Client } from "google-auth-library";
 import { stripeService } from "./stripe";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
-import { users, userPointsHistory } from "@shared/schema";
+import { users, userPointsHistory, learningModules } from "@shared/schema";
 import { sql, eq } from "drizzle-orm";
 
 // JWT Secret (in production, use environment variable)
@@ -2093,6 +2093,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to backfill lesson progress"
+      });
+    }
+  });
+
+  // Get all learning modules for admin
+  apiRouter.get("/admin/modules", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const modules = await db.select().from(learningModules);
+      
+      // Get completion counts for each module
+      const modulesWithStats = await Promise.all(modules.map(async (module) => {
+        const completionCount = await db.execute(sql`
+          SELECT COUNT(*) as count 
+          FROM user_progress 
+          WHERE module_id = ${module.id} AND completed = true
+        `);
+        
+        return {
+          ...module,
+          completions: parseInt(completionCount.rows?.[0]?.count || 0),
+          avgRating: 4.5 // Placeholder for now, would need ratings table
+        };
+      }));
+      
+      return res.status(200).json({
+        success: true,
+        modules: modulesWithStats
+      });
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error fetching modules"
       });
     }
   });

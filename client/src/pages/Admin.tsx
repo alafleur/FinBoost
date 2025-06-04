@@ -239,88 +239,77 @@ export default function Admin() {
   };
 
   const loadModulesData = async () => {
-    // For now, use the sample modules but you'd load real modules from database
-    const sampleModules: LearningModule[] = [
-      {
-        id: 1,
-        title: "Creating Your First Budget That Actually Works",
-        description: "Learn the simple 50/30/20 rule and how to track expenses without feeling overwhelmed.",
-        content: "<h2>Budget Basics</h2><p>A budget is your financial roadmap...</p>",
-        pointsReward: 15,
-        category: "budgeting",
-        difficulty: "beginner",
-        estimatedMinutes: 5,
-        isActive: true,
-        order: 1,
-        createdAt: new Date().toISOString(),
-        completions: 234,
-        avgRating: 4.7
-      },
-      {
-        id: 2,
-        title: "Understanding Your Credit Score",
-        description: "Discover what affects your credit score and simple steps to improve it quickly.",
-        content: "<h2>Credit Score Fundamentals</h2><p>Your credit score is a three-digit number...</p>",
-        pointsReward: 20,
-        category: "credit",
-        difficulty: "beginner",
-        estimatedMinutes: 7,
-        isActive: true,
-        order: 2,
-        createdAt: new Date().toISOString(),
-        completions: 189,
-        avgRating: 4.5
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/modules', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setModules(data.modules || []);
+      } else {
+        console.error('Failed to load modules data');
+        setModules([]);
       }
-    ];
-    setModules(sampleModules);
+    } catch (error) {
+      console.error('Error loading modules:', error);
+      setModules([]);
+    }
   };
 
   const loadRealStats = async () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Get real user count
-      const usersResponse = await fetch('/api/admin/users?limit=1', {
+      // Get real module count
+      const modulesResponse = await fetch('/api/admin/modules', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      // Get real completion data from user progress
+      // Get real user count from pool data
+      const poolResponse = await fetch('/api/pool/monthly');
+      
+      // Get real completion data
       const progressResponse = await fetch('/api/admin/analytics', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       let realStats = {
-        totalModules: modules.length,
+        totalModules: 27, // Default to 27 if modules not loaded yet
         totalUsers: 0,
         totalCompletions: 0,
         avgCompletionRate: 0
       };
 
-      if (usersResponse.ok) {
-        const userData = await usersResponse.json();
-        // Since we only got 1 user in response, get total from user count API
-        const countResponse = await fetch('/api/pool/monthly');
-        if (countResponse.ok) {
-          const poolData = await countResponse.json();
-          realStats.totalUsers = parseInt(poolData.pool.totalUsers);
-        }
+      if (modulesResponse.ok) {
+        const moduleData = await modulesResponse.json();
+        realStats.totalModules = moduleData.modules?.length || 27;
+      }
+
+      if (poolResponse.ok) {
+        const poolData = await poolResponse.json();
+        realStats.totalUsers = parseInt(poolData.pool?.totalUsers || 0);
       }
 
       if (progressResponse.ok) {
         const analyticsData = await progressResponse.json();
-        realStats.totalCompletions = analyticsData.analytics?.totalPointsAwarded || 0;
+        // Calculate total completions from actual lesson completion data
+        realStats.totalCompletions = analyticsData.analytics?.totalCompletions || 0;
         realStats.avgCompletionRate = realStats.totalUsers > 0 ? 
-          Math.round((realStats.totalCompletions / realStats.totalUsers) * 100) / 100 : 0;
+          Math.round((realStats.totalCompletions / (realStats.totalUsers * realStats.totalModules)) * 10000) / 100 : 0;
       }
 
       setStats(realStats);
     } catch (error) {
       console.error('Failed to load real stats:', error);
-      // Fallback to sample data
+      // Use zero stats if data loading fails
       setStats({
-        totalModules: modules.length,
-        totalCompletions: modules.reduce((sum, m) => sum + (m.completions || 0), 0),
-        totalUsers: 12, // Based on your actual user count
+        totalModules: 0,
+        totalCompletions: 0,
+        totalUsers: 0,
         avgCompletionRate: 0
       });
     }
