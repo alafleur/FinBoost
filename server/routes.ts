@@ -171,13 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+      if (!req.isAuthenticated() || !req.user || req.user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
       
@@ -190,13 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/modules", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+      if (!req.isAuthenticated() || !req.user || req.user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
       

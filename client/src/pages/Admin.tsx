@@ -177,6 +177,16 @@ export default function Admin() {
 
   const [selectedModule, setSelectedModule] = useState<LearningModule | null>(null);
   const [isEditingModule, setIsEditingModule] = useState(false);
+  const [editingModule, setEditingModule] = useState<LearningModule | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  
+  // Dialog states
+  const [showModuleDialog, setShowModuleDialog] = useState(false);
+  const [showEditModuleDialog, setShowEditModuleDialog] = useState(false);
+  const [showUserDialog, setShowUserDialog] = useState(false);
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false);
+  const [showUserSettingsDialog, setShowUserSettingsDialog] = useState(false);
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -773,7 +783,12 @@ export default function Admin() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Input placeholder="Search users..." className="w-64" />
-                      <Button>
+                      <Button
+                        onClick={() => {
+                          setEditingUser(null);
+                          setShowEditUserDialog(true);
+                        }}
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add User
                       </Button>
@@ -1002,7 +1017,22 @@ export default function Admin() {
                         Manage educational content and point rewards
                       </CardDescription>
                     </div>
-                    <Button>
+                    <Button
+                      onClick={() => {
+                        setModuleForm({
+                          title: '',
+                          description: '',
+                          content: '',
+                          pointsReward: 20,
+                          category: 'budgeting',
+                          difficulty: 'beginner',
+                          estimatedMinutes: 5,
+                          isActive: true,
+                          isPublished: false
+                        });
+                        setShowEditModuleDialog(true);
+                      }}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Module
                     </Button>
@@ -1053,13 +1083,31 @@ export default function Admin() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedModule(module);
+                                    setShowModuleDialog(true);
+                                  }}
+                                >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingModule(module);
+                                    setShowEditModuleDialog(true);
+                                  }}
+                                >
                                   <Edit className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleDeleteModule(module.id)}
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
