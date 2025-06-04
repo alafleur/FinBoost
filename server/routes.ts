@@ -949,7 +949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { actionId } = req.params;
       const userId = req.user!.id;
 
-      // Import here to avoid circular dependency
+            // Import here to avoid circular dependency
       const { POINTS_CONFIG } = await import("@shared/pointsConfig");
 
       const actionConfig = POINTS_CONFIG[actionId];
@@ -2425,8 +2425,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes with /api prefix
   app.use("/api", apiRouter);
 
-  
-
   // Preview rewards winners with random selection
   apiRouter.post("/admin/rewards/preview-winners", authenticateToken, async (req, res) => {
     try {
@@ -2435,11 +2433,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all eligible users by tier
       const allUsers = await storage.getAdminUsers({ page: 1, limit: 1000 });
 
-      // Group users by tier
+      // Group users by tier (mapping database tier names to config tier names)
       const usersByTier = {
-        tier1: allUsers.filter(u => u.tier === 'tier1' && u.currentMonthPoints > 0),
-        tier2: allUsers.filter(u => u.tier === 'tier2' && u.currentMonthPoints > 0),
-        tier3: allUsers.filter(u => u.tier === 'tier3' && u.currentMonthPoints > 0)
+        tier1: allUsers.filter(u => u.tier === 'bronze' && u.currentMonthPoints > 0),
+        tier2: allUsers.filter(u => u.tier === 'silver' && u.currentMonthPoints > 0),
+        tier3: allUsers.filter(u => u.tier === 'gold' && u.currentMonthPoints > 0)
       };
 
       // Calculate reward amounts per tier
@@ -2513,10 +2511,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Use configured winner percentages or fall back to equal distribution
         const tierConfig = winnerConfiguration?.[tier] || [];
-        
+
         selectedWinners.forEach((user, index) => {
           const position = index + 1;
-          
+
           // Find configured percentage for this position
           const configEntry = tierConfig.find(config => config.position === position);
           const positionPercentage = configEntry ? configEntry.percentage : (100 / selectedWinners.length);
