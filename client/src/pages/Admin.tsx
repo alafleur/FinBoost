@@ -221,24 +221,15 @@ export default function Admin() {
     randomSeed: ''
   });
 
-  // State for individual winner position percentages
-  const [winnerPositionPercentages, setWinnerPositionPercentages] = useState({
-    tier1: [
-      { position: 1, percentage: 40, label: '1st Place' },
-      { position: 2, percentage: 30, label: '2nd Place' },
-      { position: 3, percentage: 20, label: '3rd Place' },
-      { position: 4, percentage: 10, label: 'Remaining Winners' }
-    ],
-    tier2: [
-      { position: 1, percentage: 40, label: '1st Place' },
-      { position: 2, percentage: 30, label: '2nd Place' },
-      { position: 3, percentage: 30, label: 'Remaining Winners' }
-    ],
-    tier3: [
-      { position: 1, percentage: 50, label: '1st Place' },
-      { position: 2, percentage: 50, label: 'Remaining Winners' }
-    ]
+  // State for dynamic winner configuration (spreadsheet-style)
+  const [winnerConfiguration, setWinnerConfiguration] = useState({
+    tier1: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>,
+    tier2: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>,
+    tier3: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
   });
+
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [csvImportData, setCsvImportData] = useState('');
   const [winnerPreview, setWinnerPreview] = useState([]);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [confirmDistribution, setConfirmDistribution] = useState(false);
@@ -844,6 +835,144 @@ export default function Admin() {
     }
   };
 
+  // Calculate how many winners each tier should have
+  const calculateWinnerCounts = () => {
+    return {
+      tier1: Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier1) / 100) * currentRewardsConfig.winnerPercentages.tier1) / 100),
+      tier2: Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier2) / 100) * currentRewardsConfig.winnerPercentages.tier2) / 100),
+      tier3: Math.round((Math.round((stats.totalUsers * currentRewardsConfig.tierPercentiles.tier3) / 100) * currentRewardsConfig.winnerPercentages.tier3) / 100)
+    };
+  };
+
+  // Initialize winner configuration based on calculated counts
+  const initializeWinnerConfiguration = () => {
+    const counts = calculateWinnerCounts();
+    const newConfig = { tier1: [], tier2: [], tier3: [] };
+
+    (['tier1', 'tier2', 'tier3'] as const).forEach(tier => {
+      const count = counts[tier];
+      const evenPercentage = count > 0 ? Math.floor(100 / count) : 0;
+      const remainder = count > 0 ? 100 - (evenPercentage * count) : 0;
+
+      newConfig[tier] = Array.from({ length: count }, (_, index) => ({
+        position: index + 1,
+        percentage: index === 0 ? evenPercentage + remainder : evenPercentage
+      }));
+    });
+
+    setWinnerConfiguration(newConfig);
+  };
+
+  // Export winner configuration to CSV
+  const exportToCSV = () => {
+    let csvContent = "Tier,Position,Percentage,User ID,Username,Points\n";
+    
+    (['tier1', 'tier2', 'tier3'] as const).forEach(tier => {
+      winnerConfiguration[tier].forEach(winner => {
+        csvContent += `${tier},${winner.position},${winner.percentage},${winner.userId || ''},${winner.username || ''},${winner.points || ''}\n`;
+      });
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `winner_configuration_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import winner configuration from CSV
+  const importFromCSV = () => {
+    try {
+      const lines = csvImportData.trim().split('\n');
+      const headers = lines[0].split(',');
+      
+      const newConfig = { tier1: [], tier2: [], tier3: [] };
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        const tier = values[0] as 'tier1' | 'tier2' | 'tier3';
+        const position = parseInt(values[1]);
+        const percentage = parseFloat(values[2]);
+        const userId = values[3] ? parseInt(values[3]) : undefined;
+        const username = values[4] || undefined;
+        const points = values[5] ? parseInt(values[5]) : undefined;
+
+        if (tier && position && percentage) {
+          newConfig[tier].push({
+            position,
+            percentage,
+            userId,
+            username,
+            points
+          });
+        }
+      }
+
+      // Sort by position
+      (['tier1', 'tier2', 'tier3'] as const).forEach(tier => {
+        newConfig[tier].sort((a, b) => a.position - b.position);
+      });
+
+      setWinnerConfiguration(newConfig);
+      setImportDialogOpen(false);
+      setCsvImportData('');
+      
+      toast({
+        title: "Configuration Imported",
+        description: "Winner configuration has been imported successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "Please check your CSV format and try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Update individual winner percentage
+  const updateWinnerPercentage = (tier: 'tier1' | 'tier2' | 'tier3', position: number, percentage: number) => {
+    setWinnerConfiguration(prev => ({
+      ...prev,
+      [tier]: prev[tier].map(winner => 
+        winner.position === position 
+          ? { ...winner, percentage } 
+          : winner
+      )
+    }));
+  };
+
+  // Add new winner position
+  const addWinnerPosition = (tier: 'tier1' | 'tier2' | 'tier3') => {
+    setWinnerConfiguration(prev => ({
+      ...prev,
+      [tier]: [
+        ...prev[tier],
+        {
+          position: prev[tier].length + 1,
+          percentage: 0
+        }
+      ]
+    }));
+  };
+
+  // Remove winner position
+  const removeWinnerPosition = (tier: 'tier1' | 'tier2' | 'tier3', position: number) => {
+    setWinnerConfiguration(prev => ({
+      ...prev,
+      [tier]: prev[tier]
+        .filter(winner => winner.position !== position)
+        .map((winner, index) => ({ ...winner, position: index + 1 }))
+    }));
+  };
+
+  // Calculate total percentage for a tier
+  const getTierTotalPercentage = (tier: 'tier1' | 'tier2' | 'tier3') => {
+    return winnerConfiguration[tier].reduce((sum, winner) => sum + winner.percentage, 0);
+  };
+
   const generateWinnerPreview = async () => {
     setIsGeneratingPreview(true);
     try {
@@ -857,7 +986,7 @@ export default function Admin() {
         body: JSON.stringify({
           payoutConfig,
           rewardsConfig: currentRewardsConfig,
-          winnerPositionPercentages
+          winnerConfiguration
         })
       });
 
@@ -2519,135 +2648,256 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Individual Winner Position Percentages */}
+              {/* Dynamic Winner Configuration (Spreadsheet Style) */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Winner Position Percentages</CardTitle>
-                  <CardDescription>Configure what percentage of each tier's pool goes to 1st, 2nd, 3rd place winners, etc.</CardDescription>
+                  <CardTitle>Winner Configuration Management</CardTitle>
+                  <CardDescription>
+                    Configure individual percentage allocations for all winners in each tier. Import/export spreadsheet data.
+                  </CardDescription>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={initializeWinnerConfiguration} variant="outline" size="sm">
+                      Auto-Generate Configuration
+                    </Button>
+                    <Button onClick={exportToCSV} variant="outline" size="sm">
+                      Export CSV
+                    </Button>
+                    <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">Import CSV</Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Import Winner Configuration</DialogTitle>
+                          <DialogDescription>
+                            Paste CSV data with columns: Tier,Position,Percentage,User ID,Username,Points
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Textarea
+                            value={csvImportData}
+                            onChange={(e) => setCsvImportData(e.target.value)}
+                            placeholder="tier1,1,25,123,john_doe,850&#10;tier1,2,20,456,jane_smith,820&#10;tier1,3,15,789,bob_wilson,790&#10;..."
+                            rows={10}
+                            className="font-mono text-sm"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button onClick={importFromCSV}>
+                              Import Configuration
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Tier 1 Position Percentages */}
-                  <div className="bg-yellow-50 p-4 rounded-lg border">
-                    <h4 className="font-semibold text-yellow-800 mb-3">Tier 1 (Top Performers) Position Distribution</h4>
-                    <div className="space-y-3">
-                      {winnerPositionPercentages.tier1.map((position, index) => (
-                        <div key={position.position} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{position.label}:</span>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={position.percentage}
-                              onChange={(e) => {
-                                const newPercentages = { ...winnerPositionPercentages };
-                                newPercentages.tier1[index].percentage = parseInt(e.target.value) || 0;
-                                setWinnerPositionPercentages(newPercentages);
-                              }}
-                              className="w-16 h-8"
-                            />
-                            <span className="text-sm text-gray-600">%</span>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="border-t pt-2">
-                        <div className="flex justify-between text-sm font-medium">
-                          <span>Total:</span>
-                          <span className={
-                            winnerPositionPercentages.tier1.reduce((sum, p) => sum + p.percentage, 0) === 100 
-                            ? "text-green-600" 
-                            : "text-red-600"
-                          }>
-                            {winnerPositionPercentages.tier1.reduce((sum, p) => sum + p.percentage, 0)}%
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Tier 1 Configuration */}
+                    <div className="bg-yellow-50 p-4 rounded-lg border">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-yellow-800">
+                          Tier 1 Winners ({calculateWinnerCounts().tier1} positions)
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            Total: {getTierTotalPercentage('tier1')}%
                           </span>
+                          <Button 
+                            onClick={() => addWinnerPosition('tier1')} 
+                            size="sm" 
+                            variant="outline"
+                            className="h-8"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Tier 2 Position Percentages */}
-                  <div className="bg-gray-50 p-4 rounded-lg border">
-                    <h4 className="font-semibold text-gray-800 mb-3">Tier 2 (Middle Performers) Position Distribution</h4>
-                    <div className="space-y-3">
-                      {winnerPositionPercentages.tier2.map((position, index) => (
-                        <div key={position.position} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{position.label}:</span>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={position.percentage}
-                              onChange={(e) => {
-                                const newPercentages = { ...winnerPositionPercentages };
-                                newPercentages.tier2[index].percentage = parseInt(e.target.value) || 0;
-                                setWinnerPositionPercentages(newPercentages);
-                              }}
-                              className="w-16 h-8"
-                            />
-                            <span className="text-sm text-gray-600">%</span>
+                      
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-600 pb-2 border-b">
+                          <span>Position</span>
+                          <span>Percentage</span>
+                          <span>Est. Amount</span>
+                          <span>User</span>
+                          <span>Actions</span>
+                        </div>
+                        
+                        {winnerConfiguration.tier1.map((winner, index) => (
+                          <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                            <span className="text-sm font-medium">#{winner.position}</span>
+                            <div className="flex items-center space-x-1">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={winner.percentage}
+                                onChange={(e) => updateWinnerPercentage('tier1', winner.position, parseFloat(e.target.value) || 0)}
+                                className="w-16 h-8 text-xs"
+                              />
+                              <span className="text-xs">%</span>
+                            </div>
+                            <span className="text-xs font-mono">
+                              ${Math.floor(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier1 / 100) * (payoutConfig.tier1PayoutPercentage / 100) * (winner.percentage / 100))}
+                            </span>
+                            <span className="text-xs text-gray-600 truncate">
+                              {winner.username || 'TBD'}
+                            </span>
+                            <Button
+                              onClick={() => removeWinnerPosition('tier1', winner.position)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
                           </div>
-                        </div>
-                      ))}
-                      <div className="border-t pt-2">
-                        <div className="flex justify-between text-sm font-medium">
-                          <span>Total:</span>
-                          <span className={
-                            winnerPositionPercentages.tier2.reduce((sum, p) => sum + p.percentage, 0) === 100 
-                            ? "text-green-600" 
-                            : "text-red-600"
-                          }>
-                            {winnerPositionPercentages.tier2.reduce((sum, p) => sum + p.percentage, 0)}%
-                          </span>
-                        </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Tier 3 Position Percentages */}
-                  <div className="bg-amber-50 p-4 rounded-lg border">
-                    <h4 className="font-semibold text-amber-800 mb-3">Tier 3 (Emerging Learners) Position Distribution</h4>
-                    <div className="space-y-3">
-                      {winnerPositionPercentages.tier3.map((position, index) => (
-                        <div key={position.position} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{position.label}:</span>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={position.percentage}
-                              onChange={(e) => {
-                                const newPercentages = { ...winnerPositionPercentages };
-                                newPercentages.tier3[index].percentage = parseInt(e.target.value) || 0;
-                                setWinnerPositionPercentages(newPercentages);
-                              }}
-                              className="w-16 h-8"
-                            />
-                            <span className="text-sm text-gray-600">%</span>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="border-t pt-2">
-                        <div className="flex justify-between text-sm font-medium">
-                          <span>Total:</span>
-                          <span className={
-                            winnerPositionPercentages.tier3.reduce((sum, p) => sum + p.percentage, 0) === 100 
-                            ? "text-green-600" 
-                            : "text-red-600"
-                          }>
-                            {winnerPositionPercentages.tier3.reduce((sum, p) => sum + p.percentage, 0)}%
+                    {/* Tier 2 Configuration */}
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-gray-800">
+                          Tier 2 Winners ({calculateWinnerCounts().tier2} positions)
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            Total: {getTierTotalPercentage('tier2')}%
                           </span>
+                          <Button 
+                            onClick={() => addWinnerPosition('tier2')} 
+                            size="sm" 
+                            variant="outline"
+                            className="h-8"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
                         </div>
                       </div>
+                      
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-600 pb-2 border-b">
+                          <span>Position</span>
+                          <span>Percentage</span>
+                          <span>Est. Amount</span>
+                          <span>User</span>
+                          <span>Actions</span>
+                        </div>
+                        
+                        {winnerConfiguration.tier2.map((winner, index) => (
+                          <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                            <span className="text-sm font-medium">#{winner.position}</span>
+                            <div className="flex items-center space-x-1">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={winner.percentage}
+                                onChange={(e) => updateWinnerPercentage('tier2', winner.position, parseFloat(e.target.value) || 0)}
+                                className="w-16 h-8 text-xs"
+                              />
+                              <span className="text-xs">%</span>
+                            </div>
+                            <span className="text-xs font-mono">
+                              ${Math.floor(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier2 / 100) * (payoutConfig.tier2PayoutPercentage / 100) * (winner.percentage / 100))}
+                            </span>
+                            <span className="text-xs text-gray-600 truncate">
+                              {winner.username || 'TBD'}
+                            </span>
+                            <Button
+                              onClick={() => removeWinnerPosition('tier2', winner.position)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-blue-800 mb-2">Position Distribution Example</h5>
-                    <p className="text-sm text-blue-700">
-                      If Tier 1 has a $1,000 pool and 10 winners: 1st place gets $400 (40%), 2nd gets $300 (30%), 3rd gets $200 (20%), and remaining 7 winners split $100 (10% ÷ 7 = ~$14 each).
-                    </p>
+                    {/* Tier 3 Configuration */}
+                    <div className="bg-amber-50 p-4 rounded-lg border">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-amber-800">
+                          Tier 3 Winners ({calculateWinnerCounts().tier3} positions)
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            Total: {getTierTotalPercentage('tier3')}%
+                          </span>
+                          <Button 
+                            onClick={() => addWinnerPosition('tier3')} 
+                            size="sm" 
+                            variant="outline"
+                            className="h-8"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-600 pb-2 border-b">
+                          <span>Position</span>
+                          <span>Percentage</span>
+                          <span>Est. Amount</span>
+                          <span>User</span>
+                          <span>Actions</span>
+                        </div>
+                        
+                        {winnerConfiguration.tier3.map((winner, index) => (
+                          <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                            <span className="text-sm font-medium">#{winner.position}</span>
+                            <div className="flex items-center space-x-1">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={winner.percentage}
+                                onChange={(e) => updateWinnerPercentage('tier3', winner.position, parseFloat(e.target.value) || 0)}
+                                className="w-16 h-8 text-xs"
+                              />
+                              <span className="text-xs">%</span>
+                            </div>
+                            <span className="text-xs font-mono">
+                              ${Math.floor(((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100) * (currentRewardsConfig.tierAllocations.tier3 / 100) * (payoutConfig.tier3PayoutPercentage / 100) * (winner.percentage / 100))}
+                            </span>
+                            <span className="text-xs text-gray-600 truncate">
+                              {winner.username || 'TBD'}
+                            </span>
+                            <Button
+                              onClick={() => removeWinnerPosition('tier3', winner.position)}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h5 className="font-medium text-blue-800 mb-2">Instructions</h5>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• Click "Auto-Generate Configuration" to create an even distribution for all winners</li>
+                        <li>• Add/remove positions using the + and × buttons</li>
+                        <li>• Export to CSV to work with spreadsheet software</li>
+                        <li>• Import CSV data to bulk-configure winner percentages</li>
+                        <li>• Ensure each tier's percentages total 100% before executing distribution</li>
+                      </ul>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

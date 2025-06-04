@@ -2456,7 +2456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Preview rewards winners with random selection
   app.post("/api/admin/rewards/preview-winners", requireAuth, requireAdmin, async (req, res) => {
     try {
-      const { payoutConfig, rewardsConfig, winnerPositionPercentages } = req.body;
+      const { payoutConfig, rewardsConfig, winnerConfiguration } = req.body;
 
       // Get all eligible users by tier
       const allUsers = await storage.getAdminUsers({ page: 1, limit: 1000 });
@@ -2537,39 +2537,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Calculate individual reward amounts based on position percentages
-        const positionPercentages = winnerPositionPercentages?.[tier] || [
-          { position: 1, percentage: 100 / selectedWinners.length }
-        ];
-
+        // Use configured winner percentages or fall back to equal distribution
+        const tierConfig = winnerConfiguration?.[tier] || [];
+        
         selectedWinners.forEach((user, index) => {
-          // Determine which position percentage to use
-          let positionPercentage = 0;
-          let position = index + 1;
-
-          // Find the appropriate percentage for this position
-          for (const posConfig of positionPercentages) {
-            if (position === 1 && posConfig.position === 1) {
-              positionPercentage = posConfig.percentage;
-              break;
-            } else if (position === 2 && posConfig.position === 2) {
-              positionPercentage = posConfig.percentage;
-              break;
-            } else if (position === 3 && posConfig.position === 3) {
-              positionPercentage = posConfig.percentage;
-              break;
-            } else if (position > 3 && posConfig.label.includes('Remaining')) {
-              // For remaining winners, split the remaining percentage
-              const remainingWinners = selectedWinners.length - (positionPercentages.length - 1);
-              positionPercentage = posConfig.percentage / Math.max(1, remainingWinners);
-              break;
-            }
-          }
-
-          // Fallback to equal distribution if no percentage found
-          if (positionPercentage === 0) {
-            positionPercentage = 100 / selectedWinners.length;
-          }
+          const position = index + 1;
+          
+          // Find configured percentage for this position
+          const configEntry = tierConfig.find(config => config.position === position);
+          const positionPercentage = configEntry ? configEntry.percentage : (100 / selectedWinners.length);
 
           const rewardAmount = Math.floor((tierPool * 100 * positionPercentage) / 100); // Convert to cents
 
