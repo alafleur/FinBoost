@@ -1934,7 +1934,7 @@ export class MemStorage implements IStorage {
 
   async getAllModules(): Promise<any[]> {
     try {
-      const modules = await db.select().from(learningModules).orderBy(learningModules.order);
+      const modules = await db.select().from(learningModules);
       return modules;
     } catch (error) {
       console.error('Error getting all modules:', error);
