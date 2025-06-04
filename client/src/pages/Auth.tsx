@@ -218,8 +218,8 @@ export default function Auth() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <AdditiveLogo className="h-10 w-10 text-primary-600" />
-            <span className="font-heading font-bold text-2xl text-dark-800">Additive</span>
+            <AdditiveLogo className="h-10 w-10 text-slate-700" />
+            <span className="font-heading font-bold text-2xl text-slate-800">ADDITIVE</span>
           </div>
           <p className="text-gray-600">Your financial education journey starts here</p>
         </div>

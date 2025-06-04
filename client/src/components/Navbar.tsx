@@ -16,8 +16,8 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm px-4 py-4 fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <AdditiveLogo className="h-8 w-8 text-primary-600" />
-          <span className="font-heading font-bold text-xl text-dark-800">Additive</span>
+          <AdditiveLogo className="h-8 w-8 text-slate-700" />
+          <span className="font-heading font-bold text-xl text-slate-800">ADDITIVE</span>
         </div>
         <div className="flex items-center space-x-3">
           <a 

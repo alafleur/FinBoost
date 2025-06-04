@@ -7,9 +7,9 @@ export default function Footer() {
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <AdditiveLogo className="h-8 w-8 text-primary-400" />
-              <span className="font-heading font-bold text-xl text-white">Additive</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <AdditiveLogo className="h-8 w-8 text-slate-700" />
+              <span className="font-heading font-bold text-xl text-slate-800">ADDITIVE</span>
             </div>
             <p className="mb-4">Financial education that rewards your progress</p>
             <div className="flex space-x-4">
