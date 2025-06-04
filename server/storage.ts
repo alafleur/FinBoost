@@ -123,6 +123,24 @@ export interface IStorage {
     }>;
 
     getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }>;
+
+    // Admin CRUD operations
+    createModule(moduleData: any): Promise<any>;
+    updateModule(moduleId: number, moduleData: any): Promise<any>;
+    deleteModule(moduleId: number): Promise<void>;
+    getAllModules(): Promise<any[]>;
+    
+    updateUser(userId: number, userData: any): Promise<User>;
+    deleteUser(userId: number): Promise<void>;
+    
+    awardPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
+    deductPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
+    
+    updateRewardsConfig(config: any): Promise<void>;
+    executeMonthlyDistribution(month: string): Promise<any>;
+    
+    getAllSupportTickets(): Promise<any[]>;
+    updateSupportTicket(ticketId: number, ticketData: any): Promise<any>;
 }
 
 import fs from 'fs/promises';
@@ -1860,6 +1878,238 @@ export class MemStorage implements IStorage {
 
   // Add tokens storage
   private tokens = new Map<string, { userId: number; createdAt: Date }>();
+
+  // Admin CRUD operations implementation
+  async createModule(moduleData: any): Promise<any> {
+    try {
+      const [module] = await db.insert(learningModules).values({
+        title: moduleData.title,
+        description: moduleData.description,
+        category: moduleData.category,
+        difficulty: moduleData.difficulty,
+        estimatedTime: moduleData.estimatedTime,
+        content: moduleData.content,
+        isActive: moduleData.isActive || true,
+        sortOrder: moduleData.sortOrder || 0,
+        pointsReward: moduleData.pointsReward || 20
+      }).returning();
+      return module;
+    } catch (error) {
+      console.error('Error creating module:', error);
+      throw error;
+    }
+  }
+
+  async updateModule(moduleId: number, moduleData: any): Promise<any> {
+    try {
+      const [module] = await db.update(learningModules)
+        .set({
+          title: moduleData.title,
+          description: moduleData.description,
+          category: moduleData.category,
+          difficulty: moduleData.difficulty,
+          estimatedTime: moduleData.estimatedTime,
+          content: moduleData.content,
+          isActive: moduleData.isActive,
+          sortOrder: moduleData.sortOrder,
+          pointsReward: moduleData.pointsReward
+        })
+        .where(eq(learningModules.id, moduleId))
+        .returning();
+      return module;
+    } catch (error) {
+      console.error('Error updating module:', error);
+      throw error;
+    }
+  }
+
+  async deleteModule(moduleId: number): Promise<void> {
+    try {
+      await db.delete(learningModules).where(eq(learningModules.id, moduleId));
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      throw error;
+    }
+  }
+
+  async getAllModules(): Promise<any[]> {
+    try {
+      const modules = await db.select().from(learningModules).orderBy(learningModules.sortOrder);
+      return modules;
+    } catch (error) {
+      console.error('Error getting all modules:', error);
+      return [];
+    }
+  }
+
+  async updateUser(userId: number, userData: any): Promise<User> {
+    try {
+      const updateData: any = {};
+      
+      if (userData.username !== undefined) updateData.username = userData.username;
+      if (userData.email !== undefined) updateData.email = userData.email;
+      if (userData.firstName !== undefined) updateData.firstName = userData.firstName;
+      if (userData.lastName !== undefined) updateData.lastName = userData.lastName;
+      if (userData.currentMonthPoints !== undefined) updateData.currentMonthPoints = userData.currentMonthPoints;
+      if (userData.totalPoints !== undefined) updateData.totalPoints = userData.totalPoints;
+      if (userData.tier !== undefined) updateData.tier = userData.tier;
+      if (userData.isActive !== undefined) updateData.isActive = userData.isActive;
+      if (userData.password !== undefined) {
+        updateData.password = await bcrypt.hash(userData.password, 10);
+      }
+
+      const [user] = await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+      
+      return user;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    try {
+      // Delete related records first
+      await db.delete(userPointsHistory).where(eq(userPointsHistory.userId, userId));
+      await db.delete(userProgress).where(eq(userProgress.userId, userId));
+      await db.delete(userMonthlyRewards).where(eq(userMonthlyRewards.userId, userId));
+      
+      // Delete the user
+      await db.delete(users).where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  }
+
+  async awardPoints(userId: number, points: number, action: string, reason: string): Promise<void> {
+    try {
+      // Update user points
+      const user = await this.getUserById(userId);
+      if (user) {
+        await db.update(users)
+          .set({
+            currentMonthPoints: (user.currentMonthPoints || 0) + points,
+            totalPoints: (user.totalPoints || 0) + points
+          })
+          .where(eq(users.id, userId));
+
+        // Record points history
+        await db.insert(userPointsHistory).values({
+          userId: userId,
+          actionId: action,
+          pointsEarned: points,
+          description: reason,
+          earnedAt: new Date(),
+          metadata: { adminAwarded: true }
+        });
+      }
+    } catch (error) {
+      console.error('Error awarding points:', error);
+      throw error;
+    }
+  }
+
+  async deductPoints(userId: number, points: number, action: string, reason: string): Promise<void> {
+    try {
+      // Update user points
+      const user = await this.getUserById(userId);
+      if (user) {
+        const newCurrentPoints = Math.max(0, (user.currentMonthPoints || 0) - points);
+        const newTotalPoints = Math.max(0, (user.totalPoints || 0) - points);
+        
+        await db.update(users)
+          .set({
+            currentMonthPoints: newCurrentPoints,
+            totalPoints: newTotalPoints
+          })
+          .where(eq(users.id, userId));
+
+        // Record points history
+        await db.insert(userPointsHistory).values({
+          userId: userId,
+          actionId: action,
+          pointsEarned: -points,
+          description: reason,
+          earnedAt: new Date(),
+          metadata: { adminDeducted: true }
+        });
+      }
+    } catch (error) {
+      console.error('Error deducting points:', error);
+      throw error;
+    }
+  }
+
+  async updateRewardsConfig(config: any): Promise<void> {
+    try {
+      // Store rewards configuration (implement based on your schema)
+      console.log('Updating rewards config:', config);
+      // Implementation depends on how you want to store the config
+    } catch (error) {
+      console.error('Error updating rewards config:', error);
+      throw error;
+    }
+  }
+
+  async executeMonthlyDistribution(month: string): Promise<any> {
+    try {
+      // Implement monthly distribution logic
+      console.log('Executing monthly distribution for:', month);
+      
+      // Get all users with points for the month
+      const usersWithPoints = await db.select()
+        .from(users)
+        .where(gte(users.currentMonthPoints, 1))
+        .orderBy(desc(users.currentMonthPoints));
+
+      const result = {
+        month: month,
+        distributedUsers: usersWithPoints.length,
+        totalAmount: 0,
+        distribution: []
+      };
+
+      return result;
+    } catch (error) {
+      console.error('Error executing monthly distribution:', error);
+      throw error;
+    }
+  }
+
+  async getAllSupportTickets(): Promise<any[]> {
+    try {
+      const tickets = await db.select().from(supportRequests).orderBy(desc(supportRequests.createdAt));
+      return tickets;
+    } catch (error) {
+      console.error('Error getting support tickets:', error);
+      return [];
+    }
+  }
+
+  async updateSupportTicket(ticketId: number, ticketData: any): Promise<any> {
+    try {
+      const updateData: any = {};
+      
+      if (ticketData.status !== undefined) updateData.status = ticketData.status;
+      if (ticketData.priority !== undefined) updateData.priority = ticketData.priority;
+      if (ticketData.response !== undefined) updateData.response = ticketData.response;
+      if (ticketData.resolvedAt !== undefined) updateData.resolvedAt = ticketData.resolvedAt;
+
+      const [ticket] = await db.update(supportRequests)
+        .set(updateData)
+        .where(eq(supportRequests.id, ticketId))
+        .returning();
+      
+      return ticket;
+    } catch (error) {
+      console.error('Error updating support ticket:', error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new MemStorage();

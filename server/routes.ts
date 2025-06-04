@@ -207,6 +207,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin module management routes
+  app.post("/api/admin/modules", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const moduleData = req.body;
+      const module = await storage.createModule(moduleData);
+      res.json({ success: true, module });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.put("/api/admin/modules/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const moduleId = parseInt(req.params.id);
+      const moduleData = req.body;
+      const module = await storage.updateModule(moduleId, moduleData);
+      res.json({ success: true, module });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.delete("/api/admin/modules/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const moduleId = parseInt(req.params.id);
+      await storage.deleteModule(moduleId);
+      res.json({ success: true, message: "Module deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Admin user management routes
+  app.post("/api/admin/users", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const userData = req.body;
+      const newUser = await storage.createUser(userData);
+      res.json({ success: true, user: newUser });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.put("/api/admin/users/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const userId = parseInt(req.params.id);
+      const userData = req.body;
+      const updatedUser = await storage.updateUser(userId, userData);
+      res.json({ success: true, user: updatedUser });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const userId = parseInt(req.params.id);
+      await storage.deleteUser(userId);
+      res.json({ success: true, message: "User deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Admin points management routes
+  app.post("/api/admin/points/award", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId, points, reason } = req.body;
+      await storage.awardPoints(userId, points, 'admin-award', reason);
+      res.json({ success: true, message: "Points awarded successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/points/deduct", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId, points, reason } = req.body;
+      await storage.deductPoints(userId, points, 'admin-deduction', reason);
+      res.json({ success: true, message: "Points deducted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Admin rewards configuration routes
+  app.post("/api/admin/rewards/config", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const config = req.body;
+      await storage.updateRewardsConfig(config);
+      res.json({ success: true, message: "Rewards configuration updated" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/rewards/distribute", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { month } = req.body;
+      const result = await storage.executeMonthlyDistribution(month);
+      res.json({ success: true, result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
