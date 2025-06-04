@@ -469,19 +469,19 @@ export default function Dashboard() {
                     {distributionInfo ? (
                       <div className="text-center">
                         <div className="text-sm text-blue-800 mb-2">
-                          <span className="font-semibold">Next payout:</span> {new Date(distributionInfo.nextDate).toLocaleDateString()}
+                          <span className="font-semibold">Next payout:</span> {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString() : 'TBD'}
                         </div>
                         <div className="flex justify-center items-center gap-4 text-xs">
                           <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.days}</span>
+                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.days || 0}</span>
                             <span className="text-blue-700 ml-1">days</span>
                           </div>
                           <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.hours}</span>
+                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.hours || 0}</span>
                             <span className="text-blue-700 ml-1">hrs</span>
                           </div>
                           <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo.timeRemaining.minutes}</span>
+                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.minutes || 0}</span>
                             <span className="text-blue-700 ml-1">min</span>
                           </div>
                         </div>
@@ -508,8 +508,8 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center space-x-2 mb-2">
-                    <Badge className={`${getTierColor(user?.tier)} text-white capitalize text-lg px-3 py-1`}>
-                      {getTierDisplayName(user?.tier)}
+                    <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white capitalize text-lg px-3 py-1`}>
+                      {getTierDisplayName(user?.tier || 'tier1')}
                     </Badge>
                   </div>
                   <p className="text-xs text-orange-700">
