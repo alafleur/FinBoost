@@ -2502,7 +2502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const winners = [];
 
-      // Select winners for each tier using weighted random selection
+      // Select winners for each tier using equal odds (random selection)
       (['tier1', 'tier2', 'tier3'] as const).forEach(tier => {
         const tierUsers = usersByTier[tier];
         const winnerCount = winnerCounts[tier];
@@ -2510,31 +2510,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (tierUsers.length === 0 || winnerCount === 0) return;
 
-        // Create weighted array based on points
-        const weightedUsers = tierUsers.flatMap(user => 
-          Array(Math.max(1, Math.floor(user.currentMonthPoints / 10))).fill(user)
-        );
-
-        // Randomly select winners
-        const selectedWinners = [];
-        const availableUsers = [...weightedUsers];
-
-        for (let i = 0; i < winnerCount && availableUsers.length > 0; i++) {
-          const randomIndex = Math.floor(random() * availableUsers.length);
-          const selectedUser = availableUsers[randomIndex];
-
-          // Remove all instances of this user from available pool
-          const userInstances = availableUsers.filter(u => u.id === selectedUser.id);
-          userInstances.forEach(() => {
-            const index = availableUsers.findIndex(u => u.id === selectedUser.id);
-            if (index > -1) availableUsers.splice(index, 1);
-          });
-
-          // Only add if not already selected
-          if (!selectedWinners.find(w => w.id === selectedUser.id)) {
-            selectedWinners.push(selectedUser);
-          }
+        // Create a shuffled copy of tier users for random selection
+        const availableUsers = [...tierUsers];
+        
+        // Fisher-Yates shuffle for true randomness
+        for (let i = availableUsers.length - 1; i > 0; i--) {
+          const j = Math.floor(random() * (i + 1));
+          [availableUsers[i], availableUsers[j]] = [availableUsers[j], availableUsers[i]];
         }
+
+        // Select the first N users as winners (equal odds for everyone)
+        const selectedWinners = availableUsers.slice(0, Math.min(winnerCount, availableUsers.length));
 
         // Use configured winner percentages or fall back to equal distribution
         const tierConfig = winnerConfiguration?.[tier] || [];
