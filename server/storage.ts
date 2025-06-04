@@ -1678,7 +1678,7 @@ export class MemStorage implements IStorage {
       const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
       const activeUsers = await db.select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(sql`last_login > NOW() - INTERVAL '30 days'`);
+        .where(sql`last_login_at > NOW() - INTERVAL '30 days'`);
       
       return {
         totalUsers: totalUsers[0]?.count || 0,
@@ -1709,7 +1709,7 @@ export class MemStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      const allUsers = await db.select().from(users).orderBy(desc(users.joinedAt));
       return allUsers;
     } catch (error) {
       console.error('Error getting all users:', error);
