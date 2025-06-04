@@ -51,9 +51,6 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="mb-6">
-              <AdditiveLogo variant="light" size="lg" className="mb-4" />
-            </div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-gray-800">
               Turn Financial Stress into Financial Progress <span className="gradient-text">– Together</span>
             </h1>

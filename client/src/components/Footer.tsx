@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="mb-4">
-              <AdditiveLogo variant="dark" size="md" />
+              <AdditiveLogo size="md" />
             </div>
             <p className="mb-4">Financial education that rewards your progress</p>
             <div className="flex space-x-4">

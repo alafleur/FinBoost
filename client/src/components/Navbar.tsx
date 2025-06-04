@@ -16,7 +16,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm px-4 py-4 fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <AdditiveLogo variant="light" size="sm" />
+          <AdditiveLogo size="md" />
         </div>
         <div className="flex items-center space-x-3">
           <a 

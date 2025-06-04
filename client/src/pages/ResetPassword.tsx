@@ -159,7 +159,7 @@ export default function ResetPassword() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AdditiveLogo variant="light" size="lg" />
+            <AdditiveLogo size="lg" />
           </div>
           <p className="text-gray-600">Set your new password</p>
         </div>
