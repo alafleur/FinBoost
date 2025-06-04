@@ -122,24 +122,50 @@ export default function Admin() {
     tier3: 0
   });
 
-  // Rewards configuration state
-  const [rewardsConfig, setRewardsConfig] = useState({
-    poolPercentage: 55, // Percentage of membership fees going to rewards pool
+  // Current month rewards configuration (locked)
+  const [currentRewardsConfig, setCurrentRewardsConfig] = useState({
+    poolPercentage: 55,
     tierAllocations: {
-      tier1: 50, // Percentage of pool for tier 1
-      tier2: 30, // Percentage of pool for tier 2
-      tier3: 20  // Percentage of pool for tier 3
+      tier1: 50,
+      tier2: 30,
+      tier3: 20
     },
     winnerPercentages: {
-      tier1: 50, // Percentage of tier 1 members who receive rewards
-      tier2: 50, // Percentage of tier 2 members who receive rewards
-      tier3: 50  // Percentage of tier 3 members who receive rewards
+      tier1: 50,
+      tier2: 50,
+      tier3: 50
     },
     tierPercentiles: {
-      tier1: 33, // Top 33% of users
-      tier2: 33, // Middle 33% of users
-      tier3: 34  // Bottom 34% of users
-    }
+      tier1: 33,
+      tier2: 33,
+      tier3: 34
+    },
+    isLocked: true,
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear()
+  });
+
+  // Next month rewards configuration (editable)
+  const [nextRewardsConfig, setNextRewardsConfig] = useState({
+    poolPercentage: 55,
+    tierAllocations: {
+      tier1: 50,
+      tier2: 30,
+      tier3: 20
+    },
+    winnerPercentages: {
+      tier1: 50,
+      tier2: 50,
+      tier3: 50
+    },
+    tierPercentiles: {
+      tier1: 33,
+      tier2: 33,
+      tier3: 34
+    },
+    isLocked: false,
+    month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
+    year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear()
   });
 
   // State for modules
@@ -786,7 +812,7 @@ export default function Admin() {
             <TabsTrigger value="quiz">Quiz Builder</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="rewards-overview">Rewards Overview</TabsTrigger>
+            <TabsTrigger value="current-rewards">Current Rewards</TabsTrigger>
             <TabsTrigger value="rewards-config">Rewards Config</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -1865,12 +1891,17 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          {/* Rewards Overview Tab */}
-          <TabsContent value="rewards-overview" className="space-y-6">
+          {/* Current Rewards Tab */}
+          <TabsContent value="current-rewards" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold">Rewards Overview</h2>
-                <p className="text-gray-600">Current month reward statistics and distribution analysis</p>
+                <h2 className="text-2xl font-bold">Current Rewards</h2>
+                <p className="text-gray-600">Locked settings for {new Date(0, currentRewardsConfig.month-1).toLocaleString('default', { month: 'long' })} {currentRewardsConfig.year}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  Locked & Active
+                </div>
               </div>
             </div>
 
@@ -1898,7 +1929,7 @@ export default function Admin() {
                 <CardContent className="p-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
-                      ${Math.round((stats.totalUsers * 20 * rewardsConfig.poolPercentage) / 100)}
+                      ${Math.round((stats.totalUsers * 20 * currentRewardsConfig.poolPercentage) / 100)}
                     </div>
                     <div className="text-sm text-gray-600">Monthly Rewards Pool</div>
                   </div>
@@ -1909,7 +1940,7 @@ export default function Admin() {
                 <CardContent className="p-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      ${Math.round((stats.totalUsers * 20 * (100 - rewardsConfig.poolPercentage)) / 100)}
+                      ${Math.round((stats.totalUsers * 20 * (100 - currentRewardsConfig.poolPercentage)) / 100)}
                     </div>
                     <div className="text-sm text-gray-600">Education Fund</div>
                   </div>
