@@ -580,12 +580,12 @@ export class MemStorage implements IStorage {
       .where(eq(userPointsHistory.id, historyId));
   }
 
-  async calculateUserTier(totalPoints: number): Promise<string> {
+  async calculateUserTier(currentMonthPoints: number): Promise<string> {
     const thresholds = await this.getTierThresholds();
 
-    if (totalPoints >= thresholds.tier3) {
+    if (currentMonthPoints >= thresholds.tier3) {
       return 'tier3';
-    } else if (totalPoints >= thresholds.tier2) {
+    } else if (currentMonthPoints >= thresholds.tier2) {
       return 'tier2';
     } else {
       return 'tier1';
@@ -1580,10 +1580,10 @@ export class MemStorage implements IStorage {
   }
 
   async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
-    // Temporarily disable cache to debug the issue
-    // if (this.tierThresholdCache) {
-    //   return this.tierThresholdCache;
-    // }
+    // Return cached thresholds if available
+    if (this.tierThresholdCache) {
+      return this.tierThresholdCache;
+    }
 
     // Get all active users' current month points to calculate percentiles
     const allUsers = await db.select({

@@ -897,6 +897,35 @@ export default function Admin() {
                 </Card>
               </div>
 
+              {/* Tier Thresholds Display */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Current Tier Thresholds</CardTitle>
+                  <CardDescription>
+                    Dynamic tier boundaries based on monthly points distribution
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg border">
+                      <div className="text-sm text-blue-600 font-medium">Tier 1 (Bronze)</div>
+                      <div className="text-2xl font-bold text-blue-700">0 - {tierThresholds.tier2 - 1}</div>
+                      <div className="text-xs text-blue-500">Bottom 33% (Monthly Points)</div>
+                    </div>
+                    <div className="bg-amber-50 p-4 rounded-lg border">
+                      <div className="text-sm text-amber-600 font-medium">Tier 2 (Silver)</div>
+                      <div className="text-2xl font-bold text-amber-700">{tierThresholds.tier2} - {tierThresholds.tier3 - 1}</div>
+                      <div className="text-xs text-amber-500">Middle 33% (Monthly Points)</div>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg border">
+                      <div className="text-sm text-yellow-600 font-medium">Tier 3 (Gold)</div>
+                      <div className="text-2xl font-bold text-yellow-700">{tierThresholds.tier3}+</div>
+                      <div className="text-xs text-yellow-500">Top 33% (Monthly Points)</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* User Management Table */}
               <Card>
                 <CardHeader>
