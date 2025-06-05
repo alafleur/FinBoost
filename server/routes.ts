@@ -196,6 +196,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lesson completion endpoint
+  app.post("/api/lessons/:id/complete", async (req, res) => {
+    try {
+      const lessonId = req.params.id;
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (!token) {
+        return res.status(401).json({ success: false, message: "No token provided" });
+      }
+
+      const user = await storage.validateToken(token);
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Invalid token" });
+      }
+
+      const result = await storage.markLessonComplete(user.id, lessonId);
+      res.json({ 
+        success: true, 
+        pointsEarned: result.pointsEarned,
+        streakBonus: result.streakBonus,
+        newStreak: result.newStreak
+      });
+    } catch (error: any) {
+      console.error('Lesson completion error:', error);
+      if (error.message.includes('already completed')) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin module management routes
   app.post("/api/admin/modules", async (req, res) => {
     try {

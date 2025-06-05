@@ -260,7 +260,6 @@ export type LearningModule = typeof learningModules.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type MonthlyReward = typeof monthlyRewards.$inferSelect;
 export type UserMonthlyReward = typeof userMonthlyRewards.$inferSelect;
-export type SupportRequest = typeof supportRequests.$inferSelect;
 export type Referral = typeof referrals.$inferSelect;
 export type UserReferralCode = typeof userReferralCodes.$inferSelect;
 export type StripePayment = typeof stripePayments.$inferSelect;

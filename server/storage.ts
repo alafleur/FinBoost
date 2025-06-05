@@ -36,6 +36,7 @@ export interface IStorage {
     updateUserProfile(userId: number, profileData: Partial<{firstName: string, lastName: string, bio: string, location: string, occupation: string, financialGoals: string}>): Promise<void>;
     generateToken(userId: number): Promise<string>;
     getUserByToken(token: string): Promise<User | null>;
+    validateToken(token: string): Promise<User | null>;
 
     // Enhanced Points System Methods
     awardPoints(userId: number, actionId: string, points: number, description: string, metadata?: any): Promise<UserPointsHistory>;
@@ -1692,6 +1693,10 @@ export class MemStorage implements IStorage {
       console.error('Error getting user by token:', error);
       return null;
     }
+  }
+
+  async validateToken(token: string): Promise<User | null> {
+    return this.getUserByToken(token);
   }
 
   // Admin methods
