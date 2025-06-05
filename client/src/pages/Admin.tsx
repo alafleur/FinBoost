@@ -100,6 +100,10 @@ export default function Admin() {
   const [userSearchTerm, setUserSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [bulkAction, setBulkAction] = useState("");
+  const [pointsToAdd, setPointsToAdd] = useState("");
+  const [pointsToDeduct, setPointsToDeduct] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(20);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState({
@@ -780,7 +784,15 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {users.slice(0, 20).map((user: any) => (
+                        {(() => {
+                          const filteredUsers = users.filter((user: any) => 
+                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                          );
+                          const startIndex = (currentPage - 1) * usersPerPage;
+                          const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
+                          
+                          return paginatedUsers.map((user: any) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-medium">
                               <div>
@@ -2706,13 +2718,30 @@ export default function Admin() {
                         id="pointsToAdd"
                         type="number"
                         placeholder="Points"
+                        value={pointsToAdd}
+                        onChange={(e) => setPointsToAdd(e.target.value)}
                         className="flex-1"
                       />
-                      <Button onClick={() => {
-                        toast({
-                          title: "Points Added",
-                          description: "Points have been awarded to user"
-                        });
+                      <Button onClick={async () => {
+                        if (!pointsToAdd || !selectedUser) return;
+                        try {
+                          const newPoints = selectedUser.totalPoints + parseInt(pointsToAdd);
+                          await handleUpdateUser(selectedUser.id, {
+                            ...selectedUser,
+                            totalPoints: newPoints
+                          });
+                          setPointsToAdd("");
+                          toast({
+                            title: "Points Added",
+                            description: `${pointsToAdd} points have been awarded to ${selectedUser.username}`
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to add points",
+                            variant: "destructive"
+                          });
+                        }
                       }}>
                         Add
                       </Button>
@@ -2726,13 +2755,30 @@ export default function Admin() {
                         id="pointsToDeduct"
                         type="number"
                         placeholder="Points"
+                        value={pointsToDeduct}
+                        onChange={(e) => setPointsToDeduct(e.target.value)}
                         className="flex-1"
                       />
-                      <Button variant="outline" onClick={() => {
-                        toast({
-                          title: "Points Deducted",
-                          description: "Points have been deducted from user"
-                        });
+                      <Button variant="outline" onClick={async () => {
+                        if (!pointsToDeduct || !selectedUser) return;
+                        try {
+                          const newPoints = Math.max(0, selectedUser.totalPoints - parseInt(pointsToDeduct));
+                          await handleUpdateUser(selectedUser.id, {
+                            ...selectedUser,
+                            totalPoints: newPoints
+                          });
+                          setPointsToDeduct("");
+                          toast({
+                            title: "Points Deducted",
+                            description: `${pointsToDeduct} points have been deducted from ${selectedUser.username}`
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to deduct points",
+                            variant: "destructive"
+                          });
+                        }
                       }}>
                         Deduct
                       </Button>
