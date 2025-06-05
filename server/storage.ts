@@ -1365,65 +1365,74 @@ export class MemStorage implements IStorage {
   }
 
   async markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
-    // Create a complete mapping of lesson string IDs to numbers for database storage
-    const lessonIdMap: { [key: string]: number } = {
-      'budgeting-basics': 1,
-      'emergency-fund': 2,
-      'investment-basics': 3,
-      'credit-management': 4,
-      'retirement-planning': 5,
-      'tax-optimization': 6,
-      'credit-basics': 7,
-      'understanding-credit-scores': 8,
-      'debt-snowball-vs-avalanche': 9,
-      'smart-expense-cutting': 10,
-      'zero-based-budgeting': 11,
-      'envelope-budgeting': 12,
-      'high-yield-savings': 13,
-      'cd-laddering': 14,
-      'sinking-funds': 15,
-      'roth-vs-traditional-ira': 16,
-      'index-fund-investing': 17,
-      'asset-allocation': 18,
-      'dollar-cost-averaging': 19,
-      'options-trading-basics': 20,
-      'smart-goal-setting': 21,
-      'estate-planning-basics': 22,
-      'insurance-essentials': 23,
-      'managing-student-loans': 24,
-      'charitable-giving-strategies': 25,
-      'home-buying-process': 26,
-      'retirement-income-planning': 27,
-      // Additional mappings for all education content
-      'emergency-fund-detailed': 28,
-      'budgeting-basics-detailed': 29,
-      'investment-basics-detailed': 30,
-      'credit-management-detailed': 31,
-      'retirement-planning-detailed': 32,
-      'tax-optimization-detailed': 33,
-      'building-emergency-fund': 34,
-      'debt-consolidation': 35,
-      'credit-repair': 36,
-      'mortgage-basics': 37,
-      'side-hustle-income': 38,
-      'financial-apps-tools': 39,
-      'compound-interest': 40,
-      'risk-management': 41,
-      'tax-deductions': 42,
-      'retirement-withdrawal': 43,
-      'healthcare-costs': 44,
-      'education-funding': 45,
-      'financial-planning': 46,
-      'investment-psychology': 47,
-      'wealth-building': 48
-    };
+    // Handle both numeric and string lesson IDs
+    let moduleId: number;
+    
+    // If lessonId is numeric, use it directly as moduleId
+    if (!isNaN(Number(lessonId))) {
+      moduleId = Number(lessonId);
+      console.log(`Marking lesson with numeric ID ${lessonId} as complete for user ${userId}`);
+    } else {
+      // Create a complete mapping of lesson string IDs to numbers for database storage
+      const lessonIdMap: { [key: string]: number } = {
+        'budgeting-basics': 1,
+        'emergency-fund': 2,
+        'investment-basics': 3,
+        'credit-management': 4,
+        'retirement-planning': 5,
+        'tax-optimization': 6,
+        'credit-basics': 7,
+        'understanding-credit-scores': 8,
+        'debt-snowball-vs-avalanche': 9,
+        'smart-expense-cutting': 10,
+        'zero-based-budgeting': 11,
+        'envelope-budgeting': 12,
+        'high-yield-savings': 13,
+        'cd-laddering': 14,
+        'sinking-funds': 15,
+        'roth-vs-traditional-ira': 16,
+        'index-fund-investing': 17,
+        'asset-allocation': 18,
+        'dollar-cost-averaging': 19,
+        'options-trading-basics': 20,
+        'smart-goal-setting': 21,
+        'estate-planning-basics': 22,
+        'insurance-essentials': 23,
+        'managing-student-loans': 24,
+        'charitable-giving-strategies': 25,
+        'home-buying-process': 26,
+        'retirement-income-planning': 27,
+        // Additional mappings for all education content
+        'emergency-fund-detailed': 28,
+        'budgeting-basics-detailed': 29,
+        'investment-basics-detailed': 30,
+        'credit-management-detailed': 31,
+        'retirement-planning-detailed': 32,
+        'tax-optimization-detailed': 33,
+        'building-emergency-fund': 34,
+        'debt-consolidation': 35,
+        'credit-repair': 36,
+        'mortgage-basics': 37,
+        'side-hustle-income': 38,
+        'financial-apps-tools': 39,
+        'compound-interest': 40,
+        'risk-management': 41,
+        'tax-deductions': 42,
+        'retirement-withdrawal': 43,
+        'healthcare-costs': 44,
+        'education-funding': 45,
+        'financial-planning': 46,
+        'investment-psychology': 47,
+        'wealth-building': 48
+      };
 
-    console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
+      console.log(`Marking lesson ${lessonId} (moduleId: ${lessonIdMap[lessonId]}) as complete for user ${userId}`);
 
-    const moduleId = lessonIdMap[lessonId];
-    if (!moduleId) {
-      console.error(`Unknown lesson ID: ${lessonId}. Available IDs:`, Object.keys(lessonIdMap));
-      throw new Error(`Unknown lesson ID: ${lessonId}`);
+      moduleId = lessonIdMap[lessonId];
+      if (!moduleId) {
+        console.error(`Unknown lesson ID: ${lessonId}. Available IDs:`, Object.keys(lessonIdMap));
+        throw new Error(`Unknown lesson ID: ${lessonId}`);
+      }
     }
 
     // Check if already completed using raw SQL
