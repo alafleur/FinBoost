@@ -655,7 +655,7 @@ export default function Dashboard() {
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="shrink-0">
-                                {module.points} pts
+                                {module.pointsReward} pts
                               </Badge>
                             )}
                           </div>
@@ -663,10 +663,7 @@ export default function Dashboard() {
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
-                              {module.difficulty}
-                            </Badge>
+                          <div className="flex items-center justify-end">
                             <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
                               {isCompleted ? "Review" : "Start Lesson"}
                             </Button>
@@ -702,7 +699,7 @@ export default function Dashboard() {
                           {nextLesson.title}
                         </Button>
                         <span className="text-xs text-blue-600">
-                          ({nextLesson.points} points)
+                          ({nextLesson.pointsReward} points)
                         </span>
                       </div>
                     );
