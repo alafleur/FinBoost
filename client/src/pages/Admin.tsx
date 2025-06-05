@@ -46,6 +46,7 @@ interface LearningModule {
   title: string;
   description: string;
   content: string;
+  quiz?: string;
   pointsReward: number;
   category: string;
   difficulty: string;
@@ -286,6 +287,30 @@ export default function Admin() {
   });
 
   const [proportionalDeductions, setProportionalDeductions] = useState([]);
+
+  // Load quiz questions when editing a module
+  useEffect(() => {
+    if (editingModule && editingModule.quiz) {
+      try {
+        const parsedQuiz = JSON.parse(editingModule.quiz);
+        if (Array.isArray(parsedQuiz)) {
+          const formattedQuiz = parsedQuiz.map((q, index) => ({
+            id: index + 1,
+            question: q.question || '',
+            options: q.options || ['', '', '', ''],
+            correctAnswer: q.correctAnswer || 0,
+            explanation: q.explanation || ''
+          }));
+          setQuizQuestions(formattedQuiz);
+        }
+      } catch (error) {
+        console.error('Error parsing quiz data:', error);
+        setQuizQuestions([]);
+      }
+    } else {
+      setQuizQuestions([]);
+    }
+  }, [editingModule]);
 
   const fetchData = async () => {
     try {
@@ -3211,7 +3236,12 @@ export default function Admin() {
             </Button>
             <Button onClick={() => {
               if (editingModule?.id) {
-                handleUpdateModule(editingModule.id, editingModule);
+                // Include quiz questions in the update data
+                const updateData = {
+                  ...editingModule,
+                  quiz: JSON.stringify(quizQuestions)
+                };
+                handleUpdateModule(editingModule.id, updateData);
               } else {
                 handleCreateModule();
               }
