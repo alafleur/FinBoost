@@ -208,6 +208,10 @@ export default function Admin() {
     isPublished: false
   });
 
+  // State for custom category
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+
   // State for quiz questions
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState({
@@ -2553,25 +2557,71 @@ export default function Admin() {
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <select 
-                  id="category"
-                  className="w-full p-2 border rounded"
-                  value={editingModule?.category || moduleForm.category}
-                  onChange={(e) => {
-                    if (editingModule) {
-                      setEditingModule({...editingModule, category: e.target.value});
-                    } else {
-                      setModuleForm({...moduleForm, category: e.target.value});
-                    }
-                  }}
-                >
-                  <option value="budgeting">Budgeting</option>
-                  <option value="investing">Investing</option>
-                  <option value="credit">Credit</option>
-                  <option value="taxes">Taxes</option>
-                  <option value="planning">Planning</option>
-                  <option value="savings">Savings</option>
-                </select>
+                <div className="space-y-2">
+                  <select 
+                    id="category"
+                    className="w-full p-2 border rounded"
+                    value={showCustomCategory ? 'custom' : (editingModule?.category || moduleForm.category)}
+                    onChange={(e) => {
+                      if (e.target.value === 'custom') {
+                        setShowCustomCategory(true);
+                        setCustomCategory('');
+                      } else {
+                        setShowCustomCategory(false);
+                        if (editingModule) {
+                          setEditingModule({...editingModule, category: e.target.value});
+                        } else {
+                          setModuleForm({...moduleForm, category: e.target.value});
+                        }
+                      }
+                    }}
+                  >
+                    <option value="budgeting">Budgeting</option>
+                    <option value="investing">Investing</option>
+                    <option value="credit">Credit</option>
+                    <option value="taxes">Taxes</option>
+                    <option value="planning">Planning</option>
+                    <option value="savings">Savings</option>
+                    <option value="custom">+ Add New Category</option>
+                  </select>
+                  
+                  {showCustomCategory && (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter new category name..."
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (customCategory.trim()) {
+                            if (editingModule) {
+                              setEditingModule({...editingModule, category: customCategory.trim()});
+                            } else {
+                              setModuleForm({...moduleForm, category: customCategory.trim()});
+                            }
+                            setShowCustomCategory(false);
+                            setCustomCategory('');
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowCustomCategory(false);
+                          setCustomCategory('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <Label htmlFor="difficulty">Difficulty</Label>
