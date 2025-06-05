@@ -322,6 +322,105 @@ export const contentDatabase: Record<string, ContentTemplate> = {
     ]
   },
 
+  "dollar_cost_averaging": {
+    keywords: ["dollar", "cost", "averaging", "DCA", "investment", "strategy"],
+    content: `<h2>Dollar Cost Averaging: Steady Investing for Long-Term Success</h2>
+<p>Dollar Cost Averaging (DCA) is an investment strategy where you invest a fixed amount of money at regular intervals, regardless of market conditions. This approach helps reduce the impact of market volatility on your investments.</p>
+
+<h3>How Dollar Cost Averaging Works</h3>
+<div style="background: #f0f9ff; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+  <h4 style="color: #1d4ed8; margin-top: 0;">Example: Investing $100 Monthly</h4>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+    <tr style="background: #dbeafe;">
+      <th style="padding: 0.5rem; border: 1px solid #93c5fd;">Month</th>
+      <th style="padding: 0.5rem; border: 1px solid #93c5fd;">Investment</th>
+      <th style="padding: 0.5rem; border: 1px solid #93c5fd;">Share Price</th>
+      <th style="padding: 0.5rem; border: 1px solid #93c5fd;">Shares Bought</th>
+    </tr>
+    <tr>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">Jan</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$100</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$20</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">5.0</td>
+    </tr>
+    <tr>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">Feb</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$100</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$25</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">4.0</td>
+    </tr>
+    <tr>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">Mar</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$100</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$15</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">6.7</td>
+    </tr>
+    <tr style="background: #dbeafe; font-weight: bold;">
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">Total</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">$300</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">Avg: $19.17</td>
+      <td style="padding: 0.5rem; border: 1px solid #93c5fd; text-align: center;">15.7</td>
+    </tr>
+  </table>
+</div>
+
+<h3>Benefits of Dollar Cost Averaging</h3>
+<ul>
+  <li><strong>Reduces market timing risk:</strong> You don't need to worry about finding the "perfect" time to invest</li>
+  <li><strong>Smooths out volatility:</strong> Buy more shares when prices are low, fewer when prices are high</li>
+  <li><strong>Builds discipline:</strong> Creates consistent investing habits</li>
+  <li><strong>Reduces emotional investing:</strong> Removes fear and greed from investment decisions</li>
+  <li><strong>Accessible to beginners:</strong> Easy to understand and implement</li>
+</ul>
+
+<h3>When to Use Dollar Cost Averaging</h3>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+  <div style="background: #f0fdf4; padding: 1rem; border-radius: 8px; border: 2px solid #10b981;">
+    <h4 style="color: #047857; margin-top: 0;">Best For:</h4>
+    <ul style="margin: 0;">
+      <li>Regular monthly investments</li>
+      <li>401(k) contributions</li>
+      <li>Volatile markets</li>
+      <li>Long-term goals (5+ years)</li>
+      <li>Beginning investors</li>
+    </ul>
+  </div>
+  <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; border: 2px solid #f59e0b;">
+    <h4 style="color: #92400e; margin-top: 0;">Consider Alternatives:</h4>
+    <ul style="margin: 0;">
+      <li>Large lump sum investing</li>
+      <li>Very stable markets</li>
+      <li>Short-term goals</li>
+      <li>When you can time markets accurately</li>
+    </ul>
+  </div>
+</div>
+
+<div style="background: #ecfdf5; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #10b981;">
+  <strong>Pro Tip:</strong> Set up automatic investments with your broker or 401(k) to make dollar cost averaging effortless and consistent.
+</div>`,
+    quiz: [
+      {
+        question: "What is the main benefit of dollar cost averaging?",
+        options: ["Guarantees profits", "Reduces the impact of market volatility", "Always beats lump sum investing", "Eliminates all investment risk"],
+        correctAnswer: 1,
+        explanation: "Dollar cost averaging helps reduce the impact of market volatility by spreading purchases over time, buying more shares when prices are low and fewer when prices are high."
+      },
+      {
+        question: "In the example table, what was the average cost per share using dollar cost averaging?",
+        options: ["$15.00", "$19.17", "$20.00", "$25.00"],
+        correctAnswer: 1,
+        explanation: "By investing $300 total and receiving 15.7 shares, the average cost per share was $19.17, which is lower than the simple average of the three prices ($20)."
+      },
+      {
+        question: "When is dollar cost averaging most beneficial?",
+        options: ["In stable, non-volatile markets", "For short-term investments", "In volatile markets over long periods", "Only during market crashes"],
+        correctAnswer: 2,
+        explanation: "Dollar cost averaging is most beneficial in volatile markets over long time periods, as it smooths out price fluctuations and reduces timing risk."
+      }
+    ]
+  },
+
   "debt_management": {
     keywords: ["debt", "snowball", "avalanche", "payoff", "strategy"],
     content: `<h2>Smart Debt Payoff Strategies</h2>

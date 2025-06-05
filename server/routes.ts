@@ -273,6 +273,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If publishing a module, auto-populate content if it's empty
       if (isPublished) {
         const currentModule = await storage.getModuleById(moduleId);
+        console.log(`Auto-population check for module ${moduleId}:`, {
+          title: currentModule?.title,
+          hasContent: !!currentModule?.content,
+          hasQuiz: !!currentModule?.quiz,
+          category: currentModule?.category
+        });
+        
         if (currentModule && (!currentModule.content || !currentModule.quiz)) {
           // Find matching content from database
           const contentTemplate = findBestContent(
@@ -281,12 +288,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currentModule.category
           ) || fallbackContent;
           
+          console.log(`Found content template:`, {
+            templateFound: !!contentTemplate,
+            contentLength: contentTemplate?.content?.length,
+            quizQuestions: contentTemplate?.quiz?.length
+          });
+          
           // Update module with auto-populated content
           await storage.updateModule(moduleId, {
             ...currentModule,
             content: currentModule.content || contentTemplate.content,
             quiz: currentModule.quiz || JSON.stringify(contentTemplate.quiz)
           });
+          
+          console.log(`Module ${moduleId} updated with auto-populated content`);
         }
       }
       
