@@ -2258,6 +2258,367 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User View Dialog */}
+      <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Username</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.username}</div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.email}</div>
+                </div>
+                <div>
+                  <Label>Total Points</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.totalPoints || 0}</div>
+                </div>
+                <div>
+                  <Label>Current Tier</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.tier?.replace('tier', 'Tier ') || 'Tier 1'}</div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Badge variant={selectedUser.isActive ? "default" : "secondary"}>
+                    {selectedUser.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div>
+                  <Label>Joined</Label>
+                  <div className="text-sm text-gray-600">
+                    {selectedUser.joinedAt ? new Date(selectedUser.joinedAt).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* User Edit Dialog */}
+      <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input 
+                  id="username"
+                  value={editingUser?.username || ''}
+                  onChange={(e) => setEditingUser({...editingUser, username: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email"
+                  type="email"
+                  value={editingUser?.email || ''}
+                  onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <Input 
+                  id="firstName"
+                  value={editingUser?.firstName || ''}
+                  onChange={(e) => setEditingUser({...editingUser, firstName: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input 
+                  id="lastName"
+                  value={editingUser?.lastName || ''}
+                  onChange={(e) => setEditingUser({...editingUser, lastName: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="totalPoints">Total Points</Label>
+                <Input 
+                  id="totalPoints"
+                  type="number"
+                  value={editingUser?.totalPoints || 0}
+                  onChange={(e) => setEditingUser({...editingUser, totalPoints: parseInt(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="tier">Tier</Label>
+                <select 
+                  id="tier"
+                  className="w-full p-2 border rounded"
+                  value={editingUser?.tier || 'tier1'}
+                  onChange={(e) => setEditingUser({...editingUser, tier: e.target.value})}
+                >
+                  <option value="tier1">Tier 1</option>
+                  <option value="tier2">Tier 2</option>
+                  <option value="tier3">Tier 3</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input 
+                type="checkbox"
+                id="isActive"
+                checked={editingUser?.isActive || false}
+                onChange={(e) => setEditingUser({...editingUser, isActive: e.target.checked})}
+              />
+              <Label htmlFor="isActive">Active User</Label>
+            </div>
+            {!editingUser && (
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password"
+                  type="password"
+                  value={editingUser?.password || ''}
+                  onChange={(e) => setEditingUser({...editingUser, password: e.target.value})}
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              if (editingUser?.id) {
+                handleUpdateUser(editingUser.id, editingUser);
+              } else {
+                handleCreateUser(editingUser);
+              }
+              setShowEditUserDialog(false);
+            }}>
+              {editingUser?.id ? 'Update' : 'Create'} User
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Module View Dialog */}
+      <Dialog open={showModuleDialog} onOpenChange={setShowModuleDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Module Details</DialogTitle>
+          </DialogHeader>
+          {selectedModule && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Title</Label>
+                  <div className="text-sm text-gray-600">{selectedModule.title}</div>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <div className="text-sm text-gray-600">{selectedModule.category}</div>
+                </div>
+                <div>
+                  <Label>Difficulty</Label>
+                  <div className="text-sm text-gray-600">{selectedModule.difficulty}</div>
+                </div>
+                <div>
+                  <Label>Points Reward</Label>
+                  <div className="text-sm text-gray-600">{selectedModule.pointsReward}</div>
+                </div>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <div className="text-sm text-gray-600">{selectedModule.description}</div>
+              </div>
+              <div>
+                <Label>Content</Label>
+                <div className="text-sm text-gray-600 max-h-48 overflow-y-auto">
+                  {selectedModule.content}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Module Edit Dialog */}
+      <Dialog open={showEditModuleDialog} onOpenChange={setShowEditModuleDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{editingModule ? 'Edit Module' : 'Add New Module'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input 
+                  id="title"
+                  value={editingModule?.title || moduleForm.title}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, title: e.target.value});
+                    } else {
+                      setModuleForm({...moduleForm, title: e.target.value});
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <select 
+                  id="category"
+                  className="w-full p-2 border rounded"
+                  value={editingModule?.category || moduleForm.category}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, category: e.target.value});
+                    } else {
+                      setModuleForm({...moduleForm, category: e.target.value});
+                    }
+                  }}
+                >
+                  <option value="budgeting">Budgeting</option>
+                  <option value="investing">Investing</option>
+                  <option value="credit">Credit</option>
+                  <option value="taxes">Taxes</option>
+                  <option value="planning">Planning</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="difficulty">Difficulty</Label>
+                <select 
+                  id="difficulty"
+                  className="w-full p-2 border rounded"
+                  value={editingModule?.difficulty || moduleForm.difficulty}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, difficulty: e.target.value});
+                    } else {
+                      setModuleForm({...moduleForm, difficulty: e.target.value});
+                    }
+                  }}
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="pointsReward">Points Reward</Label>
+                <Input 
+                  id="pointsReward"
+                  type="number"
+                  value={editingModule?.pointsReward || moduleForm.pointsReward}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, pointsReward: parseInt(e.target.value)});
+                    } else {
+                      setModuleForm({...moduleForm, pointsReward: parseInt(e.target.value)});
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="estimatedMinutes">Estimated Minutes</Label>
+                <Input 
+                  id="estimatedMinutes"
+                  type="number"
+                  value={editingModule?.estimatedMinutes || moduleForm.estimatedMinutes}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, estimatedMinutes: parseInt(e.target.value)});
+                    } else {
+                      setModuleForm({...moduleForm, estimatedMinutes: parseInt(e.target.value)});
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <textarea 
+                id="description"
+                className="w-full p-2 border rounded h-24"
+                value={editingModule?.description || moduleForm.description}
+                onChange={(e) => {
+                  if (editingModule) {
+                    setEditingModule({...editingModule, description: e.target.value});
+                  } else {
+                    setModuleForm({...moduleForm, description: e.target.value});
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <Label htmlFor="content">Content</Label>
+              <textarea 
+                id="content"
+                className="w-full p-2 border rounded h-48"
+                value={editingModule?.content || moduleForm.content}
+                onChange={(e) => {
+                  if (editingModule) {
+                    setEditingModule({...editingModule, content: e.target.value});
+                  } else {
+                    setModuleForm({...moduleForm, content: e.target.value});
+                  }
+                }}
+              />
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox"
+                  id="isActive"
+                  checked={editingModule?.isActive || moduleForm.isActive}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, isActive: e.target.checked});
+                    } else {
+                      setModuleForm({...moduleForm, isActive: e.target.checked});
+                    }
+                  }}
+                />
+                <Label htmlFor="isActive">Active</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox"
+                  id="isPublished"
+                  checked={editingModule?.isPublished || moduleForm.isPublished}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, isPublished: e.target.checked});
+                    } else {
+                      setModuleForm({...moduleForm, isPublished: e.target.checked});
+                    }
+                  }}
+                />
+                <Label htmlFor="isPublished">Published</Label>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowEditModuleDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              if (editingModule?.id) {
+                handleUpdateModule(editingModule.id, editingModule);
+              } else {
+                handleCreateModule();
+              }
+              setShowEditModuleDialog(false);
+            }}>
+              {editingModule?.id ? 'Update' : 'Create'} Module
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
