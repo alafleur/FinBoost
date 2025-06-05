@@ -128,9 +128,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/pool/next-distribution", async (req, res) => {
     try {
+      // Always calculate fresh distribution data for real-time countdown
       const distribution = await storage.getNextDistribution();
       res.json({ success: true, distribution });
     } catch (error: any) {
+      console.error('Error getting next distribution:', error);
       res.status(500).json({ success: false, message: error.message });
     }
   });

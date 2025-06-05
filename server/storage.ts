@@ -1665,12 +1665,14 @@ export class MemStorage implements IStorage {
   }
 
   async getDistributionSettings(): Promise<{[key: string]: string}> {
-    // Default settings for reward distribution
+    // In a real system, this would fetch from a settings table
+    // For now, using configurable defaults that admins can set
     return {
       accumulationPeriodEnd: "last_day_of_month", // Options: last_day_of_month, last_thursday, 15th, etc.
       distributionDelayDays: "1", // Days after accumulation period ends
       accumulationPeriodType: "monthly", // monthly, weekly, custom
-      timezone: "UTC"
+      timezone: "UTC",
+      nextDistributionDate: "auto" // auto-calculate or specific date
     };
   }
 
@@ -1876,11 +1878,46 @@ export class MemStorage implements IStorage {
   }
 
   async getNextDistribution(): Promise<any> {
-    return {
-      nextDate: "2024-07-01",
-      daysRemaining: 15,
-      estimatedPool: 1000
-    };
+    try {
+      // Get distribution settings
+      const settings = await this.getDistributionSettings();
+      
+      // Calculate next distribution date based on current date
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      // For monthly distributions, next payout is first day of next month
+      const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+      const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+      const nextDate = new Date(nextYear, nextMonth, 1);
+      
+      // Calculate time remaining
+      const timeRemaining = nextDate.getTime() - now.getTime();
+      const days = Math.max(0, Math.ceil(timeRemaining / (1000 * 60 * 60 * 24)));
+      const hours = Math.max(0, Math.ceil((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+      const minutes = Math.max(0, Math.ceil((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
+      
+      return {
+        nextDate: nextDate.toISOString(),
+        timeRemaining: {
+          days,
+          hours,
+          minutes,
+          totalMs: timeRemaining
+        },
+        settings,
+        estimatedPool: 1000
+      };
+    } catch (error) {
+      console.error('Error calculating next distribution:', error);
+      return {
+        nextDate: null,
+        timeRemaining: { days: 0, hours: 0, minutes: 0, totalMs: 0 },
+        settings: {},
+        estimatedPool: 0
+      };
+    }
   }
 
   async getTierThresholds(): Promise<any> {
