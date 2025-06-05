@@ -756,7 +756,12 @@ export default function Admin() {
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Input placeholder="Search users..." className="w-64" />
+                      <Input 
+                        placeholder="Search users..." 
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="w-64" 
+                      />
                       <Button
                         onClick={() => {
                           setEditingUser(null);
@@ -784,16 +789,14 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {(() => {
-                          const filteredUsers = users.filter((user: any) => 
+                        {users
+                          .filter((user: any) => 
                             user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
                             user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
-                          );
-                          const startIndex = (currentPage - 1) * usersPerPage;
-                          const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
-                          
-                          return paginatedUsers.map((user: any) => (
-                          <TableRow key={user.id}>
+                          )
+                          .slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
+                          .map((user: any) => (
+                            <TableRow key={user.id}>
                             <TableCell className="font-medium">
                               <div>
                                 <div className="flex items-center gap-2">
