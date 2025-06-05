@@ -540,6 +540,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Referral API endpoints
+  app.get("/api/referrals/my-code", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      // Get or create referral code
+      let referralCode = await storage.getUserReferralCode(user.id);
+      if (!referralCode) {
+        referralCode = await storage.createUserReferralCode(user.id);
+      }
+
+      // Get referral stats
+      const stats = await storage.getReferralStats(user.id);
+
+      res.json({ 
+        success: true, 
+        referralCode: referralCode.referralCode,
+        stats 
+      });
+    } catch (error: any) {
+      console.error('Error getting referral code:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.get("/api/referrals/history", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const referrals = await storage.getUserReferrals(user.id);
+      
+      res.json({ 
+        success: true, 
+        referrals: referrals.map(r => ({
+          id: r.referral.id,
+          referredUser: r.referredUser,
+          status: r.referral.status,
+          pointsAwarded: r.referral.pointsAwarded,
+          completedAt: r.referral.completedAt,
+          createdAt: r.referral.createdAt
+        }))
+      });
+    } catch (error: any) {
+      console.error('Error getting referral history:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Points history API endpoint
+  app.get("/api/points/history", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const history = await storage.getUserPointsHistory(user.id);
+      
+      res.json({ 
+        success: true, 
+        history: history.map(h => ({
+          id: h.id,
+          points: h.points,
+          action: h.action,
+          description: h.description,
+          status: 'approved',
+          createdAt: h.createdAt,
+          metadata: {}
+        }))
+      });
+    } catch (error: any) {
+      console.error('Error getting points history:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Rewards history API endpoint
+  app.get("/api/rewards/history", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const history = await storage.getUserMonthlyRewardsHistory(user.id);
+      
+      res.json({ 
+        success: true, 
+        history: history.map(h => ({
+          id: h.id,
+          month: h.monthlyRewardId,
+          tier: h.tier,
+          pointsAtDistribution: h.pointsAtDistribution,
+          rewardAmount: h.rewardAmount,
+          pointsDeducted: h.pointsDeducted,
+          pointsRolledOver: h.pointsRolledOver,
+          isWinner: h.isWinner,
+          createdAt: h.createdAt
+        }))
+      });
+    } catch (error: any) {
+      console.error('Error getting rewards history:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
