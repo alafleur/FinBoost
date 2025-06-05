@@ -16,11 +16,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 interface LeaderboardEntry {
-  rank: number;
+  rank: string | number;
   username: string;
   points: number;
   tier: string;
-  isCurrentUser: boolean;
+  isCurrentUser?: boolean;
+  userId?: number;
 }
 
 interface UserRank {
@@ -49,6 +50,19 @@ export default function Leaderboard() {
     try {
       const token = localStorage.getItem('token');
       
+      // Get current user info first
+      const userResponse = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      let currentUserId = null;
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        currentUserId = userData.user?.id;
+      }
+      
       // Fetch monthly leaderboard
       const monthlyResponse = await fetch('/api/leaderboard?period=monthly&limit=20', {
         headers: {
@@ -67,8 +81,36 @@ export default function Leaderboard() {
         const monthlyResult = await monthlyResponse.json();
         const allTimeResult = await allTimeResponse.json();
         
-        setMonthlyData(monthlyResult);
-        setAllTimeData(allTimeResult);
+        // Process the data to add isCurrentUser flag and normalize rank
+        const processLeaderboardData = (data: any) => {
+          if (!data.success || !data.leaderboard) return null;
+          
+          const leaderboard = data.leaderboard.map((entry: any) => ({
+            ...entry,
+            rank: parseInt(entry.rank),
+            isCurrentUser: currentUserId && entry.userId === currentUserId
+          }));
+          
+          // Find current user's position
+          const currentUserEntry = leaderboard.find((entry: any) => entry.isCurrentUser);
+          const currentUser = currentUserEntry ? {
+            rank: currentUserEntry.rank,
+            points: currentUserEntry.points,
+            tier: currentUserEntry.tier
+          } : {
+            rank: null,
+            points: 0,
+            tier: 'tier1'
+          };
+          
+          return {
+            leaderboard: leaderboard.slice(0, 20), // Limit to top 20
+            currentUser
+          };
+        };
+        
+        setMonthlyData(processLeaderboardData(monthlyResult));
+        setAllTimeData(processLeaderboardData(allTimeResult));
       } else {
         throw new Error('Failed to fetch leaderboard data');
       }
@@ -93,7 +135,7 @@ export default function Leaderboard() {
     }
   };
 
-  const getRankIcon = (rank: number) => {
+  const getRankIcon = (rank: string | number) => {
     return <span className="text-sm font-semibold text-gray-600">#{rank}</span>;
   };
 
@@ -135,7 +177,7 @@ export default function Leaderboard() {
                     {entry.username}
                   </p>
                   <p className="text-sm text-gray-600">{entry.points} pts</p>
-                  <Badge className={getTierColor(entry.tier)} size="sm">
+                  <Badge className={getTierColor(entry.tier)}>
                     {entry.tier}
                   </Badge>
                 </div>
@@ -173,7 +215,7 @@ export default function Leaderboard() {
                       <p className="text-sm text-gray-600">{entry.points} points</p>
                     </div>
                   </div>
-                  <Badge className={getTierColor(entry.tier)} size="sm">
+                  <Badge className={getTierColor(entry.tier)}>
                     {entry.tier}
                   </Badge>
                 </div>
