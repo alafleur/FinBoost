@@ -1185,6 +1185,38 @@ export default function Admin() {
                       </TableBody>
                     </Table>
                   </div>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-600">
+                      {(() => {
+                        const start = Math.min((currentModulePage - 1) * modulesPerPage + 1, modules.length);
+                        const end = Math.min(currentModulePage * modulesPerPage, modules.length);
+                        return `Showing ${start} to ${end} of ${modules.length} modules`;
+                      })()}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentModulePage(Math.max(1, currentModulePage - 1))}
+                        disabled={currentModulePage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm">
+                        Page {currentModulePage} of {Math.ceil(modules.length / modulesPerPage)}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentModulePage(currentModulePage + 1)}
+                        disabled={currentModulePage >= Math.ceil(modules.length / modulesPerPage)}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
