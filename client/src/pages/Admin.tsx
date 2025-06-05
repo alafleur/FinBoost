@@ -712,11 +712,15 @@ export default function Admin() {
 
   useEffect(() => {
     fetchData();
+    fetchPendingProofs();
   }, []);
 
   useEffect(() => {
     calculateProportionalRatios();
   }, [poolData, users, tierThresholds]);
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -750,7 +754,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
@@ -2202,6 +2206,84 @@ export default function Admin() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="proofs">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5" />
+                    Pending Proof Submissions
+                  </CardTitle>
+                  <CardDescription>
+                    Review and approve user-submitted proof of financial actions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {pendingProofs.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No pending proof submissions
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pendingProofs.map((proof) => (
+                        <Card key={proof.id} className="border-l-4 border-l-yellow-400">
+                          <CardContent className="pt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <h4 className="font-semibold">{proof.action}</h4>
+                                <p className="text-sm text-gray-600">
+                                  User: {proof.user?.username} ({proof.user?.email})
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  Points: {proof.points}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Submitted: {new Date(proof.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium mb-2">Description:</p>
+                                <p className="text-sm text-gray-700">{proof.description}</p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleApproveProof(proof.id)}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => handleRejectProof(proof.id, "Does not meet requirements")}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Reject
+                                </Button>
+                                {proof.proofUrl && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => window.open(proof.proofUrl, '_blank')}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View Proof
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 

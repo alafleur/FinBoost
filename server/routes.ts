@@ -275,6 +275,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin proof review routes
+  app.get("/api/admin/pending-proofs", async (req, res) => {
+    try {
+      const proofs = await storage.getPendingProofUploads();
+      res.json({ success: true, proofs });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/approve-proof/:id", async (req, res) => {
+    try {
+      const proofId = parseInt(req.params.id);
+      // For admin approval, we'll use a placeholder admin ID (1)
+      await storage.approveProofUpload(proofId, 1);
+      res.json({ success: true, message: "Proof approved and points awarded" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.post("/api/admin/reject-proof/:id", async (req, res) => {
+    try {
+      const proofId = parseInt(req.params.id);
+      const { reason } = req.body;
+      // For admin rejection, we'll use a placeholder admin ID (1)
+      await storage.rejectProofUpload(proofId, 1, reason || "Does not meet requirements");
+      res.json({ success: true, message: "Proof rejected" });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Points submission route
+  app.post("/api/points/submit-proof", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ success: false, message: "No token provided" });
+      }
+
+      const user = await storage.validateToken(token);
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Invalid token" });
+      }
+
+      const { actionId, description, proofUrl } = req.body;
+      
+      // Get the action configuration to determine points
+      const actions = await storage.getPointActions();
+      const action = actions.find(a => a.id === actionId);
+      
+      if (!action) {
+        return res.status(400).json({ success: false, message: "Invalid action" });
+      }
+
+      // Submit proof for review
+      const historyEntry = await storage.awardPointsWithProof(
+        user.id,
+        actionId,
+        action.basePoints,
+        description,
+        proofUrl
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Proof submitted for review",
+        historyEntry 
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin user management routes
   app.post("/api/admin/users", async (req, res) => {
     try {
