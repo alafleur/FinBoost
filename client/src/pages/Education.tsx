@@ -238,10 +238,9 @@ export default function Education() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {(() => {
-                        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-                        return userData.totalPoints || 0;
-                      })()}
+                      {userProgress.reduce((total, progress) => {
+                        return total + (progress.completed ? progress.pointsEarned || 0 : 0);
+                      }, 0)}
                     </div>
                     <div className="text-sm text-gray-600">Points Earned</div>
                   </div>
