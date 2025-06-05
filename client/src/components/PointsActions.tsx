@@ -62,7 +62,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
       if (response.ok) {
         const data = await response.json();
-        setActions(data.actions.filter((action: PointAction) => action.requiresProof));
+        setActions(data.actions || []);
       }
     } catch (error) {
       console.error('Failed to fetch actions:', error);

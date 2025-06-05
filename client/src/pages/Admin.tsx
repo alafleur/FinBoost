@@ -325,6 +325,71 @@ export default function Admin() {
     }
   };
 
+  const fetchPendingProofs = async () => {
+    try {
+      const response = await fetch('/api/admin/pending-proofs');
+      if (response.ok) {
+        const data = await response.json();
+        setPendingProofs(data.proofs || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pending proofs:', error);
+    }
+  };
+
+  const handleApproveProof = async (proofId: number) => {
+    try {
+      const response = await fetch(`/api/admin/approve-proof/${proofId}`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Proof Approved",
+          description: "Points have been awarded to the user."
+        });
+        fetchPendingProofs();
+        fetchData();
+      } else {
+        throw new Error('Failed to approve proof');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve proof",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRejectProof = async (proofId: number, reason: string) => {
+    try {
+      const response = await fetch(`/api/admin/reject-proof/${proofId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Proof Rejected",
+          description: "The submission has been rejected."
+        });
+        fetchPendingProofs();
+      } else {
+        throw new Error('Failed to reject proof');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reject proof",
+        variant: "destructive"
+      });
+    }
+  };
+
   // CRUD Handlers for Modules
   const handleCreateModule = async () => {
     try {
@@ -691,6 +756,7 @@ export default function Admin() {
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
+            <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
