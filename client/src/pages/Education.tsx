@@ -85,7 +85,6 @@ export default function Education() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.log('No token found, user not authenticated');
         setCompletedLessons([]);
         return;
       }
@@ -97,7 +96,6 @@ export default function Education() {
 
       if (progressResponse.ok) {
         const progressData = await progressResponse.json();
-        console.log('Raw progress data:', progressData.progress);
         setUserProgress(progressData.progress);
         setCompletedCount(progressData.completedCount || 0);
 
@@ -106,16 +104,12 @@ export default function Education() {
           .filter((p: any) => p.completed)
           .map((p: any) => p.moduleId.toString()); // Ensure IDs are strings
 
-        console.log('Fetched completed module IDs:', completedModuleIds);
-        console.log('Completed count from progress:', progressData.progress.filter((p: any) => p.completed).length);
         setCompletedLessons(completedModuleIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedModuleIds));
       } else if (progressResponse.status === 401) {
-        console.log('Authentication failed, clearing token and redirecting to login');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setCompletedLessons([]);
-        // Don't redirect here, just show empty state
       }
     } catch (error) {
       console.error('Error fetching completed lessons:', error);
@@ -148,9 +142,6 @@ export default function Education() {
     const moduleIdStr = module.id.toString();
     const isCompleted = completedLessons.includes(moduleIdStr);
     
-    console.log(`Module ${module.title} (ID: ${moduleIdStr}) - Completed: ${isCompleted}`);
-    console.log('Available completed lessons:', completedLessons);
-    
     return {
       id: moduleIdStr,
       title: module.title,
@@ -181,7 +172,7 @@ export default function Education() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <Button 
               variant="ghost" 
               size="sm"
@@ -191,6 +182,20 @@ export default function Education() {
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
+            {localStorage.getItem('token') && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  setLocation('/');
+                }}
+                className="flex items-center gap-2"
+              >
+                Logout
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-3 mb-2">
             <BookOpen className="h-8 w-8 text-primary-600" />
@@ -256,12 +261,7 @@ export default function Education() {
           </Card>
         </div>
 
-        {/* Debug Info */}
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-700">
-            <strong>Debug:</strong> Found {modules.length} total lessons across {allCategories.length} categories: {allCategories.join(', ')}
-          </p>
-        </div>
+
 
         {/* Learning Modules */}
         <Tabs defaultValue="All" className="w-full">
