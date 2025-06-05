@@ -272,37 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If publishing a module, auto-populate content if it's empty
       if (isPublished) {
-        const currentModule = await storage.getModuleById(moduleId);
-        console.log(`Auto-population check for module ${moduleId}:`, {
-          title: currentModule?.title,
-          hasContent: !!currentModule?.content,
-          hasQuiz: !!currentModule?.quiz,
-          category: currentModule?.category
-        });
-        
-        if (currentModule && (!currentModule.content || !currentModule.quiz)) {
-          // Find matching content from database
-          const contentTemplate = findBestContent(
-            currentModule.title, 
-            currentModule.description || '', 
-            currentModule.category
-          ) || fallbackContent;
-          
-          console.log(`Found content template:`, {
-            templateFound: !!contentTemplate,
-            contentLength: contentTemplate?.content?.length,
-            quizQuestions: contentTemplate?.quiz?.length
-          });
-          
-          // Update module with auto-populated content
-          await storage.updateModule(moduleId, {
-            ...currentModule,
-            content: currentModule.content || contentTemplate.content,
-            quiz: currentModule.quiz || JSON.stringify(contentTemplate.quiz)
-          });
-          
-          console.log(`Module ${moduleId} updated with auto-populated content`);
-        }
+        await autoPopulateModuleContent(moduleId);
       }
       
       const module = await storage.toggleModulePublish(moduleId, isPublished);
@@ -311,6 +281,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ success: false, message: error.message });
     }
   });
+
+  // Bulk auto-populate all published modules
+  app.post("/api/admin/modules/auto-populate", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+      
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const allModules = await storage.getAllModules();
+      let populatedCount = 0;
+      
+      for (const module of allModules) {
+        if (module.isPublished && (!module.content || !module.quiz)) {
+          await autoPopulateModuleContent(module.id);
+          populatedCount++;
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Auto-populated ${populatedCount} modules with educational content` 
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Helper function to auto-populate module content
+  async function autoPopulateModuleContent(moduleId: number) {
+    const currentModule = await storage.getModuleById(moduleId);
+    console.log(`Auto-population check for module ${moduleId}:`, {
+      title: currentModule?.title,
+      hasContent: !!currentModule?.content,
+      hasQuiz: !!currentModule?.quiz,
+      category: currentModule?.category
+    });
+    
+    if (currentModule && (!currentModule.content || !currentModule.quiz)) {
+      // Find matching content from database
+      const contentTemplate = findBestContent(
+        currentModule.title, 
+        currentModule.description || '', 
+        currentModule.category
+      ) || fallbackContent;
+      
+      console.log(`Found content template:`, {
+        templateFound: !!contentTemplate,
+        contentLength: contentTemplate?.content?.length,
+        quizQuestions: contentTemplate?.quiz?.length
+      });
+      
+      // Update module with auto-populated content
+      await storage.updateModule(moduleId, {
+        ...currentModule,
+        content: currentModule.content || contentTemplate.content,
+        quiz: currentModule.quiz || JSON.stringify(contentTemplate.quiz)
+      });
+      
+      console.log(`Module ${moduleId} updated with auto-populated content`);
+    }
+  }
 
   // Admin proof review routes
   app.get("/api/admin/pending-proofs", async (req, res) => {

@@ -421,6 +421,183 @@ export const contentDatabase: Record<string, ContentTemplate> = {
     ]
   },
 
+  // Additional investment content templates
+  "investing_advanced": {
+    keywords: ["portfolio", "diversification", "asset", "allocation", "rebalancing"],
+    content: `<h2>Building a Diversified Investment Portfolio</h2>
+<p>Diversification is the practice of spreading your investments across different asset classes, sectors, and geographic regions to reduce risk while maintaining growth potential.</p>
+
+<h3>Asset Allocation Basics</h3>
+<div style="background: #f0f9ff; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+  <h4 style="color: #1d4ed8; margin-top: 0;">Sample Portfolio Allocations by Age</h4>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+    <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+      <h5 style="color: #059669; margin: 0 0 0.5rem 0;">Age 20-30</h5>
+      <p style="margin: 0.25rem 0;">80% Stocks</p>
+      <p style="margin: 0.25rem 0;">20% Bonds</p>
+    </div>
+    <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+      <h5 style="color: #d97706; margin: 0 0 0.5rem 0;">Age 40-50</h5>
+      <p style="margin: 0.25rem 0;">60% Stocks</p>
+      <p style="margin: 0.25rem 0;">40% Bonds</p>
+    </div>
+    <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center;">
+      <h5 style="color: #dc2626; margin: 0 0 0.5rem 0;">Age 60+</h5>
+      <p style="margin: 0.25rem 0;">40% Stocks</p>
+      <p style="margin: 0.25rem 0;">60% Bonds</p>
+    </div>
+  </div>
+</div>
+
+<h3>Types of Investment Assets</h3>
+<ul>
+  <li><strong>Stocks:</strong> Higher risk, higher potential returns</li>
+  <li><strong>Bonds:</strong> Lower risk, steady income</li>
+  <li><strong>Real Estate:</strong> Tangible assets, inflation hedge</li>
+  <li><strong>International:</strong> Geographic diversification</li>
+</ul>
+
+<div style="background: #ecfdf5; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #10b981;">
+  <strong>Remember:</strong> Rebalance your portfolio annually to maintain your target allocation as markets change.
+</div>`,
+    quiz: [
+      {
+        question: "What is the primary purpose of diversification?",
+        options: ["To maximize returns", "To reduce risk while maintaining growth potential", "To eliminate all investment risk", "To focus on one asset class"],
+        correctAnswer: 1,
+        explanation: "Diversification helps reduce risk by spreading investments across different assets, while still allowing for growth potential."
+      },
+      {
+        question: "According to the age-based allocation guide, what percentage of stocks should a 40-year-old typically have?",
+        options: ["80%", "60%", "40%", "20%"],
+        correctAnswer: 1,
+        explanation: "A 40-year-old should typically have around 60% stocks and 40% bonds according to common age-based allocation strategies."
+      },
+      {
+        question: "How often should you rebalance your portfolio?",
+        options: ["Daily", "Weekly", "Monthly", "Annually"],
+        correctAnswer: 3,
+        explanation: "Annual rebalancing is typically recommended to maintain your target allocation without over-trading."
+      }
+    ]
+  },
+
+  "retirement_planning": {
+    keywords: ["retirement", "401k", "IRA", "pension", "planning"],
+    content: `<h2>Retirement Planning: Securing Your Financial Future</h2>
+<p>Retirement planning is about creating a strategy to maintain your desired lifestyle when you stop working. The earlier you start, the more time compound interest has to work in your favor.</p>
+
+<h3>Retirement Account Types</h3>
+<div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <div style="background: #dbeafe; padding: 1rem; border-radius: 8px;">
+      <h4 style="color: #1d4ed8; margin-top: 0;">401(k)</h4>
+      <ul style="margin: 0;">
+        <li>Employer-sponsored</li>
+        <li>Often includes matching</li>
+        <li>Higher contribution limits</li>
+        <li>Traditional or Roth options</li>
+      </ul>
+    </div>
+    <div style="background: #dcfce7; padding: 1rem; border-radius: 8px;">
+      <h4 style="color: #16a34a; margin-top: 0;">IRA</h4>
+      <ul style="margin: 0;">
+        <li>Individual account</li>
+        <li>More investment options</li>
+        <li>Traditional or Roth</li>
+        <li>Lower contribution limits</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3>How Much Should You Save?</h3>
+<p>Financial experts recommend saving 10-15% of your income for retirement, including any employer match.</p>
+<ul>
+  <li><strong>Start with employer match:</strong> Free money you shouldn't leave on the table</li>
+  <li><strong>Increase gradually:</strong> Raise contributions by 1% each year</li>
+  <li><strong>Use tax advantages:</strong> Traditional accounts reduce current taxes</li>
+  <li><strong>Consider Roth:</strong> Tax-free withdrawals in retirement</li>
+</ul>
+
+<div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #f59e0b;">
+  <strong>Rule of Thumb:</strong> You'll need about 70-80% of your pre-retirement income to maintain your lifestyle in retirement.
+</div>`,
+    quiz: [
+      {
+        question: "What percentage of income should you typically save for retirement?",
+        options: ["5-7%", "10-15%", "20-25%", "30-35%"],
+        correctAnswer: 1,
+        explanation: "Financial experts generally recommend saving 10-15% of your income for retirement, including any employer matching contributions."
+      },
+      {
+        question: "What should be your first priority when saving for retirement?",
+        options: ["Opening an IRA", "Maximizing 401(k) contributions", "Getting the full employer 401(k) match", "Investing in individual stocks"],
+        correctAnswer: 2,
+        explanation: "Getting the full employer match is essentially free money and should be your first priority in retirement savings."
+      },
+      {
+        question: "What percentage of pre-retirement income do most people need in retirement?",
+        options: ["50-60%", "70-80%", "90-100%", "110-120%"],
+        correctAnswer: 1,
+        explanation: "Most people need about 70-80% of their pre-retirement income to maintain their lifestyle in retirement."
+      }
+    ]
+  },
+
+  "savings_strategies": {
+    keywords: ["save", "saving", "strategies", "tips", "money"],
+    content: `<h2>Effective Saving Strategies</h2>
+<p>Saving money consistently is one of the most important financial habits you can develop. Here are proven strategies to help you save more effectively.</p>
+
+<h3>The Pay Yourself First Method</h3>
+<p>Treat savings like a non-negotiable bill. Set up automatic transfers to savings accounts right after payday.</p>
+
+<div style="background: #f0fdf4; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">
+  <h4 style="color: #047857; margin-top: 0;">Savings Goals by Priority</h4>
+  <ol style="margin: 0;">
+    <li><strong>Emergency Fund:</strong> $1,000 starter fund</li>
+    <li><strong>High-Interest Debt:</strong> Pay off credit cards</li>
+    <li><strong>Full Emergency Fund:</strong> 3-6 months expenses</li>
+    <li><strong>Retirement:</strong> 15% of income</li>
+    <li><strong>Other Goals:</strong> House, vacation, etc.</li>
+  </ol>
+</div>
+
+<h3>Practical Saving Tips</h3>
+<ul>
+  <li><strong>Automate everything:</strong> Set up automatic transfers</li>
+  <li><strong>Use the 24-hour rule:</strong> Wait a day before non-essential purchases</li>
+  <li><strong>Track your spending:</strong> Know where your money goes</li>
+  <li><strong>Find ways to cut expenses:</strong> Review subscriptions, negotiate bills</li>
+  <li><strong>Save windfalls:</strong> Tax refunds, bonuses, gifts go to savings</li>
+</ul>
+
+<div style="background: #ecfdf5; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #10b981;">
+  <strong>Success Tip:</strong> Start small but be consistent. Saving $25 per week adds up to $1,300 per year!
+</div>`,
+    quiz: [
+      {
+        question: "What does 'pay yourself first' mean?",
+        options: ["Buy things you want before needs", "Save money before paying any bills", "Transfer money to savings right after getting paid", "Pay off debt before saving"],
+        correctAnswer: 2,
+        explanation: "'Pay yourself first' means setting aside money for savings immediately after receiving income, treating it like a priority bill."
+      },
+      {
+        question: "What should be your first savings priority?",
+        options: ["Retirement fund", "$1,000 emergency fund", "Vacation fund", "New car fund"],
+        correctAnswer: 1,
+        explanation: "A starter emergency fund of $1,000 should be your first priority to handle small emergencies without going into debt."
+      },
+      {
+        question: "What is the 24-hour rule?",
+        options: ["Save for 24 hours daily", "Wait 24 hours before non-essential purchases", "Check your account balance every 24 hours", "Work 24 hours for extra money"],
+        correctAnswer: 1,
+        explanation: "The 24-hour rule means waiting a full day before making non-essential purchases to avoid impulse buying."
+      }
+    ]
+  },
+
   "debt_management": {
     keywords: ["debt", "snowball", "avalanche", "payoff", "strategy"],
     content: `<h2>Smart Debt Payoff Strategies</h2>
@@ -488,36 +665,56 @@ export const contentDatabase: Record<string, ContentTemplate> = {
 // Function to find the best matching content for a module
 export function findBestContent(title: string, description: string, category: string): ContentTemplate | null {
   const searchText = `${title} ${description} ${category}`.toLowerCase();
+  console.log('Finding content for:', { title, description, category, searchText });
   
-  // Direct category matching first
-  const categoryKey = category.toLowerCase().replace(/\s+/g, '_');
-  if (contentDatabase[categoryKey + '_basics']) {
-    return contentDatabase[categoryKey + '_basics'];
-  }
-  
-  // Keyword matching
+  // Enhanced keyword matching with higher priority patterns
   let bestMatch: { key: string; score: number } | null = null;
   
   for (const [key, template] of Object.entries(contentDatabase)) {
     let score = 0;
     
-    // Check how many keywords match
+    // Check direct title/key matches first (highest priority)
+    const keyWords = key.replace(/_/g, ' ');
+    if (title.toLowerCase().includes(keyWords) || keyWords.includes(title.toLowerCase())) {
+      score += 10;
+    }
+    
+    // Check individual keywords in title and description
     for (const keyword of template.keywords) {
       if (searchText.includes(keyword.toLowerCase())) {
-        score += 1;
+        score += 3;
+      }
+      // Bonus for keywords in title specifically
+      if (title.toLowerCase().includes(keyword.toLowerCase())) {
+        score += 2;
       }
     }
     
-    // Bonus for exact title matches
-    if (title.toLowerCase().includes(key.replace('_', ' '))) {
-      score += 3;
+    // Category matching bonus
+    if (category.toLowerCase() === 'investing' && key.includes('investment')) {
+      score += 5;
     }
+    if (category.toLowerCase() === 'budgeting' && key.includes('budget')) {
+      score += 5;
+    }
+    if (category.toLowerCase() === 'savings' && key.includes('emergency')) {
+      score += 5;
+    }
+    if (category.toLowerCase() === 'credit' && key.includes('credit')) {
+      score += 5;
+    }
+    if (category.toLowerCase() === 'debt' && key.includes('debt')) {
+      score += 5;
+    }
+    
+    console.log(`Template ${key} score: ${score}`);
     
     if (score > 0 && (!bestMatch || score > bestMatch.score)) {
       bestMatch = { key, score };
     }
   }
   
+  console.log('Best match found:', bestMatch);
   return bestMatch ? contentDatabase[bestMatch.key] : null;
 }
 
