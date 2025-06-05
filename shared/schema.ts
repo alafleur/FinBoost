@@ -73,6 +73,7 @@ export const learningModules = pgTable("learning_modules", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   content: text("content").notNull(),
+  quiz: text("quiz"), // JSON string containing quiz questions
   pointsReward: integer("points_reward").default(10).notNull(),
   category: text("category").notNull(), // 'debt', 'investing', 'budgeting', etc.
   difficulty: text("difficulty").default("beginner").notNull(),
