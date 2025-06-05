@@ -33,6 +33,7 @@ import {
   AlertCircle,
   CheckCircle,
   TrendingUp,
+  LogOut,
   Trophy,
   X,
   Activity,
@@ -613,9 +614,32 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">Manage users, content, and system settings</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="mt-2 text-gray-600">Manage users, content, and system settings</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                window.location.href = '/dashboard';
+              }}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/auth';
+              }}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
