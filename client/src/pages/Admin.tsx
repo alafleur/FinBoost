@@ -328,12 +328,17 @@ export default function Admin() {
   // CRUD Handlers for Modules
   const handleCreateModule = async () => {
     try {
+      const moduleData = {
+        ...moduleForm,
+        quiz: JSON.stringify(quizQuestions)
+      };
+
       const response = await fetch('/api/admin/modules', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(moduleForm)
+        body: JSON.stringify(moduleData)
       });
 
       if (response.ok) {
@@ -350,6 +355,7 @@ export default function Admin() {
           isActive: true,
           isPublished: false
         });
+        setQuizQuestions([]);
         toast({
           title: "Success",
           description: "Module created successfully"

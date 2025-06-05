@@ -1939,6 +1939,7 @@ export class MemStorage implements IStorage {
         difficulty: moduleData.difficulty,
         estimatedMinutes: moduleData.estimatedMinutes || 5,
         content: moduleData.content,
+        quiz: moduleData.quiz || null,
         isActive: moduleData.isActive !== undefined ? moduleData.isActive : true,
         order: moduleData.order || 0,
         pointsReward: moduleData.pointsReward || 20
@@ -1960,6 +1961,7 @@ export class MemStorage implements IStorage {
           difficulty: moduleData.difficulty,
           estimatedMinutes: moduleData.estimatedMinutes,
           content: moduleData.content,
+          quiz: moduleData.quiz,
           isActive: moduleData.isActive,
           order: moduleData.order,
           pointsReward: moduleData.pointsReward
