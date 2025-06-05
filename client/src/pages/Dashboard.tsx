@@ -168,6 +168,15 @@ export default function Dashboard() {
     fetchPoolData();
     fetchDistributionInfo();
     fetchPublishedModules();
+
+    // Set up automatic tier threshold refresh every 30 seconds
+    const tierThresholdInterval = setInterval(() => {
+      fetchTierThresholds();
+    }, 30000);
+
+    return () => {
+      clearInterval(tierThresholdInterval);
+    };
   }, []);
 
   // Update countdown timer every minute

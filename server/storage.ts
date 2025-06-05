@@ -271,11 +271,8 @@ export class MemStorage implements IStorage {
 
     // Skip all referral processing to fix registration
 
-    // Trigger tier threshold recalculation when new users are added
-    // Use setTimeout to avoid blocking user creation
-    setTimeout(async () => {
-      await this.recalculateAllUserTiers();
-    }, 1000);
+    // Invalidate tier threshold cache when new users are added
+    this.tierThresholdCache = null;
 
     return user;
   }
@@ -564,8 +561,8 @@ export class MemStorage implements IStorage {
         })
         .where(eq(users.id, entry.userId));
 
-      // Trigger tier threshold recalculation for all users when points are awarded
-      await this.recalculateAllUserTiers();
+      // Invalidate tier threshold cache to force recalculation on next request
+      this.tierThresholdCache = null;
     }
   }
 

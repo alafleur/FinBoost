@@ -713,6 +713,15 @@ export default function Admin() {
   useEffect(() => {
     fetchData();
     fetchPendingProofs();
+
+    // Set up automatic tier threshold refresh every 30 seconds
+    const tierThresholdInterval = setInterval(() => {
+      fetchData(); // This includes tier threshold fetching
+    }, 30000);
+
+    return () => {
+      clearInterval(tierThresholdInterval);
+    };
   }, []);
 
   useEffect(() => {
