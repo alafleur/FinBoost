@@ -34,7 +34,7 @@ interface Module {
 
 export default function Education() {
   const [, setLocation] = useLocation();
-  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
+  const [userProgress, setUserProgress] = useState<any[]>([]);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
   const [availablePoints, setAvailablePoints] = useState(0);
@@ -91,15 +91,14 @@ export default function Education() {
 
       if (progressResponse.ok) {
         const progressData = await progressResponse.json();
+        console.log('Raw progress data:', progressData.progress);
         setUserProgress(progressData.progress);
         setCompletedCount(progressData.completedCount || 0);
-
-
 
         // Get completed module IDs directly from progress
         const completedModuleIds = progressData.progress
           .filter((p: any) => p.completed)
-          .map((p: any) => p.moduleId);
+          .map((p: any) => p.moduleId.toString()); // Ensure IDs are strings
 
         console.log('Fetched completed module IDs:', completedModuleIds);
         console.log('Completed count from progress:', progressData.progress.filter((p: any) => p.completed).length);
@@ -134,8 +133,14 @@ export default function Education() {
   // Convert published modules to the required format
   const modules: Module[] = publishedModules.map(module => {
     const description = module.description || '';
+    const moduleIdStr = module.id.toString();
+    const isCompleted = completedLessons.includes(moduleIdStr);
+    
+    console.log(`Module ${module.title} (ID: ${moduleIdStr}) - Completed: ${isCompleted}`);
+    console.log('Available completed lessons:', completedLessons);
+    
     return {
-      id: module.id.toString(),
+      id: moduleIdStr,
       title: module.title,
       description: description.length > 120 ? description.substring(0, 120) + '...' : description,
       category: module.category,
@@ -143,7 +148,7 @@ export default function Education() {
       estimatedTime: '15 min', // Default since database doesn't have estimatedTime
       pointsReward: module.pointsReward,
       icon: getCategoryIcon(module.category),
-      completed: completedLessons.includes(module.id.toString())
+      completed: isCompleted
     };
   });
 
