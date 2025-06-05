@@ -219,6 +219,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/modules/:id/publish", async (req, res) => {
+    try {
+      const moduleId = parseInt(req.params.id);
+      const { isPublished } = req.body;
+      const module = await storage.toggleModulePublish(moduleId, isPublished);
+      res.json({ success: true, module });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin user management routes
   app.post("/api/admin/users", async (req, res) => {
     try {

@@ -21,6 +21,9 @@ export interface IStorage {
   getUserCount(): Promise<number>;
   getDistributionSettings(): Promise<{[key: string]: string}>;
 
+    // Module Publication Methods
+    toggleModulePublish(moduleId: number, isPublished: boolean): Promise<any>;
+
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
     getUserById(id: number): Promise<User | null>;

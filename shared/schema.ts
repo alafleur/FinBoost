@@ -78,6 +78,8 @@ export const learningModules = pgTable("learning_modules", {
   difficulty: text("difficulty").default("beginner").notNull(),
   estimatedMinutes: integer("estimated_minutes").default(5).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
   order: integer("order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
