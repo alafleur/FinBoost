@@ -565,10 +565,10 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-800">
-                    {Object.keys(educationContent).length > 0 ? Math.round((completedLessonIds.length / Object.keys(educationContent).length) * 100) : 0}%
+                    {publishedModules.length > 0 ? Math.round((completedLessonIds.length / publishedModules.length) * 100) : 0}%
                   </div>
                   <p className="text-xs text-blue-700">
-                    {completedLessonIds.length} of {Object.keys(educationContent).length} lessons
+                    {completedLessonIds.length} of {publishedModules.length} lessons
                   </p>
                 </CardContent>
               </Card>
@@ -602,7 +602,7 @@ export default function Dashboard() {
                 </h3>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                    {completedLessonIds.length} of {publishedModules.length} completed
                   </Badge>
                 </div>
               </div>
@@ -628,18 +628,18 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(educationContent)
-                  .filter(([key, lesson]) => selectedCategory === "" || lesson.category === selectedCategory)
+                {publishedModules
+                  .filter(module => selectedCategory === "" || module.category === selectedCategory)
                   .slice(0, isMobile ? 3 : 6)
-                  .map(([key, lesson]) => {
-                    const isCompleted = completedLessonIds.includes(key);
+                  .map(module => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
                     return (
                       <Card 
-                        key={key}
+                        key={module.id}
                         className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
                           isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
                         }`}
-                        onClick={() => setLocation(`/lesson/${key}`)}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         {isCompleted && (
                           <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -648,24 +648,24 @@ export default function Dashboard() {
                         )}
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
+                            <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
                             {isCompleted ? (
                               <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
                                 Completed
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="shrink-0">
-                                {lesson.points} pts
+                                {module.points} pts
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
+                            <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <Badge variant="outline" className="text-xs">
-                              {lesson.difficulty}
+                              {module.difficulty}
                             </Badge>
                             <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
                               {isCompleted ? "Review" : "Start Lesson"}
@@ -678,14 +678,14 @@ export default function Dashboard() {
               </div>
               <div className="text-center mt-4">
                 <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Showing {Math.min(isMobile ? 3 : 6, Object.entries(educationContent).filter(([key, lesson]) => selectedCategory === "" || lesson.category === selectedCategory).length)} of {selectedCategory === "" ? Object.keys(educationContent).length : Object.entries(educationContent).filter(([key, lesson]) => lesson.category === selectedCategory).length} available lessons
+                  Showing {Math.min(isMobile ? 3 : 6, publishedModules.filter(module => selectedCategory === "" || module.category === selectedCategory).length)} of {selectedCategory === "" ? publishedModules.length : publishedModules.filter(module => module.category === selectedCategory).length} available lessons
                   {selectedCategory && ` in ${selectedCategory}`}
                 </p>
                 
                 {/* Next Lesson Recommendation */}
                 {(() => {
-                  const nextLesson = Object.entries(educationContent)
-                    .find(([key, lesson]) => !completedLessonIds.includes(key));
+                  const nextLesson = publishedModules
+                    .find(module => !completedLessonIds.includes(module.id.toString()));
                   
                   if (nextLesson && completedLessonIds.length > 0) {
                     return (
@@ -694,15 +694,15 @@ export default function Dashboard() {
                           Next Recommended Lesson:
                         </p>
                         <Button 
-                          onClick={() => setLocation(`/lesson/${nextLesson[0]}`)}
+                          onClick={() => setLocation(`/lesson/${nextLesson.id}`)}
                           className="mr-2"
                           size="sm"
                         >
                           <BookOpen className="h-4 w-4 mr-2" />
-                          {nextLesson[1].title}
+                          {nextLesson.title}
                         </Button>
                         <span className="text-xs text-blue-600">
-                          ({nextLesson[1].points} points)
+                          ({nextLesson.points} points)
                         </span>
                       </div>
                     );
