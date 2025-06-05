@@ -84,6 +84,12 @@ export default function Education() {
   const fetchCompletedLessons = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token found, user not authenticated');
+        setCompletedLessons([]);
+        return;
+      }
+
       // Fetch user progress
       const progressResponse = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -104,6 +110,12 @@ export default function Education() {
         console.log('Completed count from progress:', progressData.progress.filter((p: any) => p.completed).length);
         setCompletedLessons(completedModuleIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedModuleIds));
+      } else if (progressResponse.status === 401) {
+        console.log('Authentication failed, clearing token and redirecting to login');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setCompletedLessons([]);
+        // Don't redirect here, just show empty state
       }
     } catch (error) {
       console.error('Error fetching completed lessons:', error);
@@ -197,33 +209,50 @@ export default function Education() {
             <CardHeader>
               <CardTitle>Your Progress</CardTitle>
               <CardDescription>
-                Complete lessons to earn points and build your financial knowledge
+                {localStorage.getItem('token') 
+                  ? "Complete lessons to earn points and build your financial knowledge"
+                  : "Log in to track your progress and earn points for completing lessons"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">
-                    {completedCount}
+              {!localStorage.getItem('token') ? (
+                <div className="text-center py-8">
+                  <div className="mb-4">
+                    <p className="text-gray-600 mb-4">Log in to see your progress and completed lessons</p>
+                    <Button onClick={() => setLocation('/login')} className="mr-2">
+                      Log In
+                    </Button>
+                    <Button variant="outline" onClick={() => setLocation('/signup')}>
+                      Sign Up
+                    </Button>
                   </div>
-                  <div className="text-sm text-gray-600">Lessons Completed</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {(() => {
-                      const userData = JSON.parse(localStorage.getItem('user') || '{}');
-                      return userData.totalPoints || 0;
-                    })()}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary-600">
+                      {completedCount}
+                    </div>
+                    <div className="text-sm text-gray-600">Lessons Completed</div>
                   </div>
-                  <div className="text-sm text-gray-600">Points Earned</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {modules.length > 0 ? Math.round((completedLessons.length / modules.length) * 100) : 0}%
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {(() => {
+                        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                        return userData.totalPoints || 0;
+                      })()}
+                    </div>
+                    <div className="text-sm text-gray-600">Points Earned</div>
                   </div>
-                  <div className="text-sm text-gray-600">Course Progress ({completedLessons.length}/{modules.length})</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {modules.length > 0 ? Math.round((completedLessons.length / modules.length) * 100) : 0}%
+                    </div>
+                    <div className="text-sm text-gray-600">Course Progress ({completedLessons.length}/{modules.length})</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
