@@ -1772,7 +1772,21 @@ export class MemStorage implements IStorage {
 
   async getPublishedModules(): Promise<any[]> {
     try {
-      const modules = await db.select()
+      const modules = await db.select({
+        id: learningModules.id,
+        title: learningModules.title,
+        description: learningModules.description,
+        content: learningModules.content,
+        quiz: learningModules.quiz,
+        pointsReward: learningModules.pointsReward,
+        category: learningModules.category,
+        difficulty: learningModules.difficulty,
+        estimatedMinutes: learningModules.estimatedMinutes,
+        isActive: learningModules.isActive,
+        isPublished: learningModules.isPublished,
+        order: learningModules.order,
+        createdAt: learningModules.createdAt
+      })
         .from(learningModules)
         .where(eq(learningModules.isPublished, true))
         .orderBy(learningModules.order);

@@ -78,6 +78,7 @@ export default function Lesson() {
           
           if (moduleData) {
             // Convert module data to lesson format
+            const quizData = moduleData.quiz ? JSON.parse(moduleData.quiz) : [];
             setLesson({
               id: moduleData.id,
               title: moduleData.title,
@@ -86,7 +87,7 @@ export default function Lesson() {
               timeEstimate: '15 min',
               points: moduleData.pointsReward,
               content: moduleData.content || 'Content not available',
-              quiz: moduleData.quiz || [],
+              quiz: quizData,
               completed: false
             });
           } else {
