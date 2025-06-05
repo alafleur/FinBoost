@@ -14,6 +14,8 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { educationContent } from "@/data/educationContent";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import {
   Settings,
   Plus,
@@ -2646,26 +2648,35 @@ export default function Admin() {
 
             {/* Lesson Content */}
             <div>
-              <Label htmlFor="content">Lesson Content (HTML)</Label>
-              <textarea 
-                id="content"
-                className="w-full p-3 border rounded h-48 font-mono text-sm"
-                placeholder={`<h2>Lesson Title</h2>
-<p>Introduction paragraph...</p>
-<h3>Key Points</h3>
-<ul>
-  <li>Point 1</li>
-  <li>Point 2</li>
-</ul>`}
-                value={editingModule?.content || moduleForm.content}
-                onChange={(e) => {
-                  if (editingModule) {
-                    setEditingModule({...editingModule, content: e.target.value});
-                  } else {
-                    setModuleForm({...moduleForm, content: e.target.value});
-                  }
-                }}
-              />
+              <Label htmlFor="content">Lesson Content</Label>
+              <div className="border rounded">
+                <ReactQuill
+                  theme="snow"
+                  value={editingModule?.content || moduleForm.content}
+                  onChange={(content) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, content});
+                    } else {
+                      setModuleForm({...moduleForm, content});
+                    }
+                  }}
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['link'],
+                      ['clean']
+                    ],
+                  }}
+                  formats={[
+                    'header', 'bold', 'italic', 'underline',
+                    'list', 'bullet', 'link'
+                  ]}
+                  placeholder="Start writing your lesson content... Use the toolbar above to format text, add headings, lists, and links."
+                  style={{ height: '200px', marginBottom: '50px' }}
+                />
+              </div>
             </div>
 
             {/* Quiz Questions Section */}
