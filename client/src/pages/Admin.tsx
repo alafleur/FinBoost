@@ -2841,6 +2841,119 @@ export default function Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Module View Dialog */}
+      <Dialog open={showModuleDialog} onOpenChange={setShowModuleDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Module Details</DialogTitle>
+            <DialogDescription>
+              View lesson content and quiz information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedModule && (
+            <div className="space-y-6">
+              {/* Module Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Title</Label>
+                  <div className="text-sm font-medium">{selectedModule.title}</div>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <div className="text-sm">{selectedModule.category}</div>
+                </div>
+                <div>
+                  <Label>Difficulty</Label>
+                  <div className="text-sm">{selectedModule.difficulty}</div>
+                </div>
+                <div>
+                  <Label>Points Reward</Label>
+                  <div className="text-sm">{selectedModule.pointsReward}</div>
+                </div>
+                <div>
+                  <Label>Duration</Label>
+                  <div className="text-sm">{selectedModule.estimatedMinutes} minutes</div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <div className="text-sm">{selectedModule.isActive ? 'Active' : 'Inactive'}</div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label>Description</Label>
+                <div className="text-sm p-3 bg-gray-50 rounded border">
+                  {selectedModule.description}
+                </div>
+              </div>
+
+              {/* Lesson Content */}
+              <div>
+                <Label>Lesson Content</Label>
+                <div className="text-sm p-4 bg-gray-50 rounded border max-h-60 overflow-y-auto">
+                  <div dangerouslySetInnerHTML={{ __html: selectedModule.content || 'No content available' }} />
+                </div>
+              </div>
+
+              {/* Quiz Questions */}
+              <div>
+                <Label>Quiz Questions ({selectedModule.quiz?.length || 0})</Label>
+                {selectedModule.quiz && selectedModule.quiz.length > 0 ? (
+                  <div className="space-y-4 max-h-60 overflow-y-auto">
+                    {selectedModule.quiz.map((question: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg bg-white">
+                        <div className="font-medium mb-2">
+                          Question {index + 1}: {question.question}
+                        </div>
+                        <div className="space-y-1">
+                          {question.options?.map((option: string, optIndex: number) => (
+                            <div key={optIndex} className={`text-sm p-2 rounded ${
+                              optIndex === question.correctAnswer ? 'bg-green-100 text-green-800' : 'bg-gray-50'
+                            }`}>
+                              {String.fromCharCode(65 + optIndex)}. {option}
+                              {optIndex === question.correctAnswer && ' ✓ (Correct)'}
+                            </div>
+                          ))}
+                        </div>
+                        {question.explanation && (
+                          <div className="mt-2 text-sm text-gray-600 italic">
+                            Explanation: {question.explanation}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm p-4 bg-gray-50 rounded border text-gray-500">
+                    No quiz questions available
+                  </div>
+                )}
+              </div>
+
+              {/* Module Stats */}
+              <div>
+                <Label>Statistics</Label>
+                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded border">
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{selectedModule.completions || 0}</div>
+                    <div className="text-xs text-gray-600">Completions</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{selectedModule.avgRating || 'N/A'}</div>
+                    <div className="text-xs text-gray-600">Avg Rating</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{selectedModule.order || 'N/A'}</div>
+                    <div className="text-xs text-gray-600">Order</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
