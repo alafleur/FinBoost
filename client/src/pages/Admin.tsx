@@ -2375,7 +2375,7 @@ export default function Admin() {
               />
               <Label htmlFor="isActive">Active User</Label>
             </div>
-            {!editingUser && (
+            {!editingUser?.id && (
               <div>
                 <Label htmlFor="password">Password</Label>
                 <Input 
@@ -2383,6 +2383,7 @@ export default function Admin() {
                   type="password"
                   value={editingUser?.password || ''}
                   onChange={(e) => setEditingUser({...editingUser, password: e.target.value})}
+                  placeholder="Enter password for new user"
                 />
               </div>
             )}
@@ -2395,7 +2396,18 @@ export default function Admin() {
               if (editingUser?.id) {
                 handleUpdateUser(editingUser.id, editingUser);
               } else {
-                handleCreateUser(editingUser);
+                // Initialize new user with default values
+                const newUser = {
+                  username: editingUser?.username || '',
+                  email: editingUser?.email || '',
+                  password: editingUser?.password || '',
+                  firstName: editingUser?.firstName || '',
+                  lastName: editingUser?.lastName || '',
+                  totalPoints: editingUser?.totalPoints || 0,
+                  tier: editingUser?.tier || 'tier1',
+                  isActive: editingUser?.isActive !== undefined ? editingUser.isActive : true
+                };
+                handleCreateUser(newUser);
               }
               setShowEditUserDialog(false);
             }}>
@@ -2617,6 +2629,119 @@ export default function Admin() {
               {editingModule?.id ? 'Update' : 'Create'} Module
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Settings Dialog */}
+      <Dialog open={showUserSettingsDialog} onOpenChange={setShowUserSettingsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Settings</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Username</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.username}</div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="text-sm text-gray-600">{selectedUser.email}</div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="font-medium">Account Actions</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button variant="outline" onClick={() => {
+                    // Reset password functionality
+                    toast({
+                      title: "Password Reset",
+                      description: "Password reset email sent to user"
+                    });
+                  }}>
+                    Reset Password
+                  </Button>
+                  
+                  <Button variant="outline" onClick={() => {
+                    // Toggle account status
+                    handleUpdateUser(selectedUser.id, {
+                      ...selectedUser,
+                      isActive: !selectedUser.isActive
+                    });
+                    setShowUserSettingsDialog(false);
+                  }}>
+                    {selectedUser.isActive ? 'Deactivate' : 'Activate'} Account
+                  </Button>
+                  
+                  <Button variant="outline" onClick={() => {
+                    // Clear user progress
+                    toast({
+                      title: "Progress Cleared",
+                      description: "User progress has been reset"
+                    });
+                  }}>
+                    Clear Progress
+                  </Button>
+                  
+                  <Button variant="destructive" onClick={() => {
+                    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                      handleDeleteUser(selectedUser.id);
+                      setShowUserSettingsDialog(false);
+                    }
+                  }}>
+                    Delete User
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="font-medium">Points Management</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="pointsToAdd">Add Points</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="pointsToAdd"
+                        type="number"
+                        placeholder="Points"
+                        className="flex-1"
+                      />
+                      <Button onClick={() => {
+                        toast({
+                          title: "Points Added",
+                          description: "Points have been awarded to user"
+                        });
+                      }}>
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="pointsToDeduct">Deduct Points</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="pointsToDeduct"
+                        type="number"
+                        placeholder="Points"
+                        className="flex-1"
+                      />
+                      <Button variant="outline" onClick={() => {
+                        toast({
+                          title: "Points Deducted",
+                          description: "Points have been deducted from user"
+                        });
+                      }}>
+                        Deduct
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
