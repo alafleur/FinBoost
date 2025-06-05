@@ -880,6 +880,54 @@ export default function Admin() {
                       </TableBody>
                     </Table>
                   </div>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-600">
+                      {(() => {
+                        const filteredUsers = users.filter((user: any) => 
+                          user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                          user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                        );
+                        const start = Math.min((currentPage - 1) * usersPerPage + 1, filteredUsers.length);
+                        const end = Math.min(currentPage * usersPerPage, filteredUsers.length);
+                        return `Showing ${start} to ${end} of ${filteredUsers.length} users`;
+                      })()}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm">
+                        Page {currentPage} of {(() => {
+                          const filteredUsers = users.filter((user: any) => 
+                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                          );
+                          return Math.ceil(filteredUsers.length / usersPerPage);
+                        })()}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={(() => {
+                          const filteredUsers = users.filter((user: any) => 
+                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                          );
+                          return currentPage >= Math.ceil(filteredUsers.length / usersPerPage);
+                        })()}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
