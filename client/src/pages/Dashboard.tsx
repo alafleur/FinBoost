@@ -90,17 +90,17 @@ export default function Dashboard() {
             <h3 className="font-heading font-bold text-lg mb-4 text-gray-800 mt-1">Tier Thresholds</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                <span className="text-orange-700 font-semibold">Tier 3</span>
-                <span className="text-orange-600">{tierThresholds?.tier3 || 0}+ pts</span>
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                <span className="text-blue-700 font-semibold">Tier 3</span>
+                <span className="text-blue-600">{tierThresholds?.tier3 || 0}+ pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                <span className="text-orange-700 font-semibold">Tier 2</span>
-                <span className="text-orange-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                <span className="text-blue-700 font-semibold">Tier 2</span>
+                <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                <span className="text-orange-700 font-semibold">Tier 1</span>
-                <span className="text-orange-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                <span className="text-blue-700 font-semibold">Tier 1</span>
+                <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
               </div>
             </div>
             {user && (
@@ -293,15 +293,8 @@ export default function Dashboard() {
   };
 
   const getTierColor = (tier?: string) => {
-    switch (tier?.toLowerCase()) {
-      case 'tier3':
-        return 'bg-gradient-to-r from-yellow-400 to-yellow-600';
-      case 'tier2':
-        return 'bg-gradient-to-r from-slate-400 to-slate-600';
-      case 'tier1':
-      default:
-        return 'bg-gradient-to-r from-orange-400 to-orange-600';
-    }
+    // Use consistent blue colors for all tiers
+    return 'bg-gradient-to-r from-blue-500 to-blue-600';
   };
 
   const getTierDisplayName = (tier?: string) => {
@@ -822,17 +815,17 @@ export default function Dashboard() {
                     <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
                     <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
                     <div className="space-y-2 text-xs">
-                      <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
-                        <span className="text-yellow-700 font-semibold">Tier 3</span>
-                        <span className="text-yellow-600">{tierThresholds?.tier3 || 0}+ pts</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                        <span className="text-blue-700 font-semibold">Tier 3</span>
+                        <span className="text-blue-600">{tierThresholds?.tier3 || 0}+ pts</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
-                        <span className="text-slate-700 font-semibold">Tier 2</span>
-                        <span className="text-slate-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                        <span className="text-blue-700 font-semibold">Tier 2</span>
+                        <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                        <span className="text-orange-700 font-semibold">Tier 1</span>
-                        <span className="text-orange-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                        <span className="text-blue-700 font-semibold">Tier 1</span>
+                        <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
                       </div>
                     </div>
                     
@@ -841,17 +834,17 @@ export default function Dashboard() {
                       <div className="mt-4 space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700">Tier Population</h4>
                         <div className="grid grid-cols-3 gap-2 text-xs">
-                          <div className="bg-yellow-50 p-2 rounded text-center">
-                            <div className="font-bold text-yellow-800">{poolData.tier3Users || 0}</div>
-                            <div className="text-yellow-600">Tier 3</div>
+                          <div className="bg-blue-50 p-2 rounded text-center">
+                            <div className="font-bold text-blue-800">{poolData.tier3Users || 0}</div>
+                            <div className="text-blue-600">Tier 3</div>
                           </div>
-                          <div className="bg-slate-50 p-2 rounded text-center">
-                            <div className="font-bold text-slate-800">{poolData.tier2Users || 0}</div>
-                            <div className="text-slate-600">Tier 2</div>
+                          <div className="bg-blue-50 p-2 rounded text-center">
+                            <div className="font-bold text-blue-800">{poolData.tier2Users || 0}</div>
+                            <div className="text-blue-600">Tier 2</div>
                           </div>
-                          <div className="bg-orange-50 p-2 rounded text-center">
-                            <div className="font-bold text-orange-800">{poolData.tier1Users || 0}</div>
-                            <div className="text-orange-600">Tier 1</div>
+                          <div className="bg-blue-50 p-2 rounded text-center">
+                            <div className="font-bold text-blue-800">{poolData.tier1Users || 0}</div>
+                            <div className="text-blue-600">Tier 1</div>
                           </div>
                         </div>
                       </div>

@@ -127,12 +127,8 @@ export default function Leaderboard() {
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'tier3': return 'bg-yellow-500 text-white';
-      case 'tier2': return 'bg-slate-500 text-white';
-      case 'tier1':
-      default: return 'bg-orange-600 text-white';
-    }
+    // Use consistent blue colors for all tiers
+    return 'bg-blue-600 text-white';
   };
 
   const getRankIcon = (rank: string | number) => {

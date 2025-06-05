@@ -74,11 +74,8 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'tier3': return 'bg-yellow-500';
-      case 'tier2': return 'bg-gray-400';
-      default: return 'bg-orange-600';
-    }
+    // Use consistent blue colors for all tiers
+    return 'bg-blue-600';
   };
 
   const getTierDisplayName = (tier: string) => {
@@ -177,17 +174,17 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' || user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-orange-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' || user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 1</span>
                 <span className="text-xs text-gray-500">0</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 2</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier2}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-yellow-500' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 3</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier3}</span>
               </div>
@@ -196,7 +193,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-orange-600 via-gray-400 to-yellow-500 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>
