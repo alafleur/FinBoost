@@ -187,6 +187,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/modules", async (req, res) => {
+    try {
+      const modules = await storage.getPublishedModules();
+      res.json({ success: true, modules });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin module management routes
   app.post("/api/admin/modules", async (req, res) => {
     try {

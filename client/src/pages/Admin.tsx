@@ -431,9 +431,12 @@ export default function Admin() {
 
       if (response.ok) {
         const data = await response.json();
-        setModules(modules.map((m: any) => 
-          m.id === moduleId ? { ...m, isPublished: data.module.isPublished, publishedAt: data.module.publishedAt } : m
-        ));
+        // Refresh modules data to ensure we have the latest state
+        const modulesRes = await fetch('/api/admin/modules');
+        if (modulesRes.ok) {
+          const data = await modulesRes.json();
+          setModules(data.modules || []);
+        }
         toast({
           title: "Success",
           description: `Module ${isPublished ? 'published' : 'unpublished'} successfully`

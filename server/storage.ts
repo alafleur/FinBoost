@@ -23,6 +23,7 @@ export interface IStorage {
 
     // Module Publication Methods
     toggleModulePublish(moduleId: number, isPublished: boolean): Promise<any>;
+    getPublishedModules(): Promise<any[]>;
 
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
@@ -1766,6 +1767,19 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error toggling module publish status:', error);
       throw new Error('Failed to update module publish status');
+    }
+  }
+
+  async getPublishedModules(): Promise<any[]> {
+    try {
+      const modules = await db.select()
+        .from(learningModules)
+        .where(eq(learningModules.isPublished, true))
+        .orderBy(learningModules.order);
+      return modules;
+    } catch (error) {
+      console.error('Error getting published modules:', error);
+      return [];
     }
   }
 
