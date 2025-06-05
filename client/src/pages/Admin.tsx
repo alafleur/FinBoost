@@ -419,6 +419,37 @@ export default function Admin() {
     }
   };
 
+  const handleTogglePublish = async (moduleId: number, isPublished: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/modules/${moduleId}/publish`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isPublished })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setModules(modules.map((m: any) => 
+          m.id === moduleId ? { ...m, isPublished: data.module.isPublished, publishedAt: data.module.publishedAt } : m
+        ));
+        toast({
+          title: "Success",
+          description: `Module ${isPublished ? 'published' : 'unpublished'} successfully`
+        });
+      } else {
+        throw new Error('Failed to update module publish status');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update module publish status",
+        variant: "destructive"
+      });
+    }
+  };
+
   // CRUD Handlers for Users
   const handleCreateUser = async (userData: any) => {
     try {
@@ -1115,6 +1146,8 @@ export default function Admin() {
                           <TableHead>Points</TableHead>
                           <TableHead>Duration</TableHead>
                           <TableHead>Status</TableHead>
+                          <TableHead>Published</TableHead>
+                          <TableHead>Published Since</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -1148,6 +1181,15 @@ export default function Admin() {
                               <Badge variant={module.isActive ? "default" : "secondary"}>
                                 {module.isActive ? "Active" : "Inactive"}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Switch 
+                                checked={module.isPublished} 
+                                onCheckedChange={(checked) => handleTogglePublish(module.id, checked)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {module.publishedAt ? new Date(module.publishedAt).toLocaleDateString() : "-"}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">

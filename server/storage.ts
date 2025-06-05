@@ -1750,6 +1750,25 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async toggleModulePublish(moduleId: number, isPublished: boolean): Promise<any> {
+    try {
+      const publishedAt = isPublished ? new Date() : null;
+      
+      const [updatedModule] = await db.update(learningModules)
+        .set({ 
+          isPublished: isPublished,
+          publishedAt: publishedAt
+        })
+        .where(eq(learningModules.id, moduleId))
+        .returning();
+      
+      return updatedModule;
+    } catch (error) {
+      console.error('Error toggling module publish status:', error);
+      throw new Error('Failed to update module publish status');
+    }
+  }
+
   async getMonthlyPool(): Promise<any> {
     try {
       const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
