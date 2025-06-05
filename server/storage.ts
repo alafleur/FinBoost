@@ -162,6 +162,7 @@ export class MemStorage implements IStorage {
   currentUserId: number;
   currentSubscriberId: number;
   db: any;
+  private tierThresholdCache: { tier1: number, tier2: number, tier3: number } | null = null;
 
   constructor() {
     this.users = new Map();
@@ -269,6 +270,12 @@ export class MemStorage implements IStorage {
     this.users.set(user.id, user);
 
     // Skip all referral processing to fix registration
+
+    // Trigger tier threshold recalculation when new users are added
+    // Use setTimeout to avoid blocking user creation
+    setTimeout(async () => {
+      await this.recalculateAllUserTiers();
+    }, 1000);
 
     return user;
   }
@@ -423,6 +430,9 @@ export class MemStorage implements IStorage {
         })
         .where(eq(users.id, userId));
 
+      // Invalidate tier threshold cache to force recalculation on next request
+      this.tierThresholdCache = null;
+
       // Save to file
       await this.saveToFile();
     } else {
@@ -553,6 +563,9 @@ export class MemStorage implements IStorage {
           tier: newTier
         })
         .where(eq(users.id, entry.userId));
+
+      // Trigger tier threshold recalculation for all users when points are awarded
+      await this.recalculateAllUserTiers();
     }
   }
 
@@ -1570,6 +1583,11 @@ export class MemStorage implements IStorage {
   }
 
   async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
+    // Return cached thresholds if available
+    if (this.tierThresholdCache) {
+      return this.tierThresholdCache;
+    }
+
     // Get all active users' current month points to calculate percentiles
     const allUsers = await db.select({
       currentMonthPoints: users.currentMonthPoints
@@ -1577,7 +1595,9 @@ export class MemStorage implements IStorage {
     .where(eq(users.isActive, true));
 
     if (allUsers.length === 0) {
-      return { tier1: 0, tier2: 0, tier3: 0 };
+      const thresholds = { tier1: 0, tier2: 0, tier3: 0 };
+      this.tierThresholdCache = thresholds;
+      return thresholds;
     }
 
     // Sort points in ascending order - include ALL users including those with 0 points
@@ -1602,6 +1622,8 @@ export class MemStorage implements IStorage {
 
     console.log(`Calculated thresholds: Tier 1: ${thresholds.tier1}, Tier 2: ${thresholds.tier2}, Tier 3: ${thresholds.tier3}`);
 
+    // Cache the calculated thresholds
+    this.tierThresholdCache = thresholds;
     return thresholds;
   }
 
