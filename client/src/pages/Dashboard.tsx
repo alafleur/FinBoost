@@ -601,134 +601,9 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Learning Modules Preview */}
-            <div className="mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                  Lessons
-                </h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="w-fit">
-                    {completedModuleIds.length} of {publishedModules.length} completed
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex gap-2">
-                  <select 
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                  >
-                    <option value="">All Categories</option>
-                    <option value="Budgeting">Budgeting</option>
-                    <option value="Credit">Credit</option>
-                    <option value="Investing">Investing</option>
-                    <option value="Saving">Saving</option>
-                    <option value="Planning">Planning</option>
-                    <option value="Taxes">Taxes</option>
-                    <option value="Debt">Debt</option>
-                    <option value="Insurance">Insurance</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {publishedModules
-                  .filter(module => selectedCategory === "" || module.category === selectedCategory)
-                  .slice(0, isMobile ? 3 : 6)
-                  .map(module => {
-                    const isCompleted = completedModuleIds.includes(module.id);
-                    return (
-                      <Card 
-                        key={module.id}
-                        className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
-                          isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
-                        }`}
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
-                      >
-                        {isCompleted && (
-                          <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
-                          </div>
-                        )}
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
-                            {isCompleted ? (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
-                                Completed
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="shrink-0">
-                                {module.pointsReward} pts
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-gray-500 capitalize">{module.category}</span>
-                          </div>
-                          <div className="flex items-center justify-end">
-                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
-                              {isCompleted ? "Review" : "Start Lesson"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-              </div>
-              <div className="text-center mt-4">
-                <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Showing {Math.min(isMobile ? 3 : 6, publishedModules.filter(module => selectedCategory === "" || module.category === selectedCategory).length)} of {selectedCategory === "" ? publishedModules.length : publishedModules.filter(module => module.category === selectedCategory).length} available lessons
-                  {selectedCategory && ` in ${selectedCategory}`}
-                </p>
-                
-                {/* Next Lesson Recommendation */}
-                {(() => {
-                  const nextLesson = publishedModules
-                    .find(module => !completedModuleIds.includes(module.id));
-                  
-                  if (nextLesson && completedModuleIds.length > 0) {
-                    return (
-                      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm font-medium text-blue-800 mb-2">
-                          Next Recommended Lesson:
-                        </p>
-                        <Button 
-                          onClick={() => setLocation(`/lesson/${nextLesson.id}`)}
-                          className="mr-2"
-                          size="sm"
-                        >
-                          <BookOpen className="h-4 w-4 mr-2" />
-                          {nextLesson.title}
-                        </Button>
-                        <span className="text-xs text-blue-600">
-                          ({nextLesson.pointsReward} points)
-                        </span>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                <Button 
-                  variant="outline" 
-                  onClick={() => setLocation('/education')}
-                  className="w-full sm:w-auto"
-                  size={isMobile ? "sm" : "default"}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  View All Learning Modules
-                </Button>
-              </div>
-            </div>
-
-            {/* Dashboard Content - Only show tabs on mobile */}
+            {/* Mobile Navigation Tabs - Show at top on mobile */}
             {isMobile ? (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
                 <TabsList className="grid w-full grid-cols-5 h-auto">
                   <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
                   <TabsTrigger value="earn" className="text-xs px-1 py-2">Earn</TabsTrigger>
@@ -743,14 +618,199 @@ export default function Dashboard() {
                       currentStreak={user?.currentStreak || 0}
                       longestStreak={user?.longestStreak || 0}
                     />
+                    
+                    {/* Monthly Pool Info for Mobile Overview */}
+                    {poolData && (
+                      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-bold text-purple-900 flex items-center gap-2">
+                            <DollarSign className="w-5 h-5 text-purple-600" />
+                            Monthly Pool
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-center mb-4">
+                            <div className="text-3xl font-bold text-purple-900 mb-1">
+                              ${poolData.totalPool.toLocaleString()}
+                            </div>
+                            <p className="text-sm text-purple-700">Total Community Pool</p>
+                          </div>
+                          
+                          {distributionInfo && (
+                            <div className="bg-green-100 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-green-900 mb-1">
+                                {distributionInfo.timeRemaining.days}
+                              </div>
+                              <p className="text-sm font-bold text-green-800">
+                                Days Until Distribution
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="mt-4 text-center">
+                            <div className="text-2xl font-bold text-green-900 mb-1">
+                              {poolData.totalUsers.toLocaleString()}
+                            </div>
+                            <p className="text-sm font-bold text-green-800">
+                              Active Members
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* User Tier Status */}
+                    {user && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Trophy className="w-5 h-5" />
+                            Your Status
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">Current Tier:</span>
+                              <Badge className={`${getTierColor(user.tier)} text-white`}>
+                                {getTierDisplayName(user.tier)}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm">Total Points:</span>
+                              <span className="font-bold">{user.totalPoints}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm">This Month:</span>
+                              <span className="font-medium">{user.currentMonthPoints}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="earn">
-                  <PointsActions 
-                    onPointsEarned={fetchUserData}
-                    quickWinActions={[]}
-                  />
+                <TabsContent value="earn" className="space-y-6">
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                      <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
+                        Lessons
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="w-fit">
+                          {completedModuleIds.length} of {publishedModules.length} completed
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Category Filter */}
+                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                      <div className="flex gap-2">
+                        <select 
+                          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                        >
+                          <option value="">All Categories</option>
+                          <option value="Budgeting">Budgeting</option>
+                          <option value="Credit">Credit</option>
+                          <option value="Investing">Investing</option>
+                          <option value="Saving">Saving</option>
+                          <option value="Planning">Planning</option>
+                          <option value="Taxes">Taxes</option>
+                          <option value="Debt">Debt</option>
+                          <option value="Insurance">Insurance</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      {publishedModules
+                        .filter(module => selectedCategory === "" || module.category === selectedCategory)
+                        .map(module => {
+                          const isCompleted = completedModuleIds.includes(module.id);
+                          return (
+                            <Card 
+                              key={module.id}
+                              className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
+                                isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                              }`}
+                              onClick={() => setLocation(`/lesson/${module.id}`)}
+                            >
+                              {isCompleted && (
+                                <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white text-xs">✓</span>
+                                </div>
+                              )}
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
+                                  {isCompleted ? (
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
+                                      Completed
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="shrink-0">
+                                      {module.pointsReward} pts
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-xs text-gray-500 capitalize">{module.category}</span>
+                                </div>
+                                <div className="flex items-center justify-end">
+                                  <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                                    {isCompleted ? "Review" : "Start Lesson"}
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                    
+                    {/* Next Lesson Recommendation */}
+                    {(() => {
+                      const nextLesson = publishedModules
+                        .find(module => !completedModuleIds.includes(module.id));
+                      
+                      if (nextLesson && completedModuleIds.length > 0) {
+                        return (
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-sm font-medium text-blue-800 mb-2">
+                              Next Recommended Lesson:
+                            </p>
+                            <Button 
+                              onClick={() => setLocation(`/lesson/${nextLesson.id}`)}
+                              className="mr-2"
+                              size="sm"
+                            >
+                              <BookOpen className="h-4 w-4 mr-2" />
+                              {nextLesson.title}
+                            </Button>
+                            <span className="text-xs text-blue-600">
+                              ({nextLesson.pointsReward} points)
+                            </span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
+                    <div className="text-center mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setLocation('/education')}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        View All Learning Modules
+                      </Button>
+                    </div>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="referrals">
@@ -775,6 +835,28 @@ export default function Dashboard() {
                         <span className="text-orange-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
                       </div>
                     </div>
+                    
+                    {/* Tier Population Distribution */}
+                    {poolData && (
+                      <div className="mt-4 space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700">Tier Population</h4>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-yellow-50 p-2 rounded text-center">
+                            <div className="font-bold text-yellow-800">{poolData.tier3Users || 0}</div>
+                            <div className="text-yellow-600">Tier 3</div>
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded text-center">
+                            <div className="font-bold text-slate-800">{poolData.tier2Users || 0}</div>
+                            <div className="text-slate-600">Tier 2</div>
+                          </div>
+                          <div className="bg-orange-50 p-2 rounded text-center">
+                            <div className="font-bold text-orange-800">{poolData.tier1Users || 0}</div>
+                            <div className="text-orange-600">Tier 1</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {user && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center mb-2">
@@ -798,19 +880,136 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="history">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Points History</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PointsHistory />
-                    </CardContent>
-                  </Card>
+                  <PointsHistory />
                 </TabsContent>
               </Tabs>
             ) : (
               /* Desktop: Show overview content directly */
               <div className="space-y-6">
+                {/* Learning Modules Preview for Desktop */}
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                    <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
+                      Lessons
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="w-fit">
+                        {completedModuleIds.length} of {publishedModules.length} completed
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                    <div className="flex gap-2">
+                      <select 
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                      >
+                        <option value="">All Categories</option>
+                        <option value="Budgeting">Budgeting</option>
+                        <option value="Credit">Credit</option>
+                        <option value="Investing">Investing</option>
+                        <option value="Saving">Saving</option>
+                        <option value="Planning">Planning</option>
+                        <option value="Taxes">Taxes</option>
+                        <option value="Debt">Debt</option>
+                        <option value="Insurance">Insurance</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {publishedModules
+                      .filter(module => selectedCategory === "" || module.category === selectedCategory)
+                      .slice(0, 6)
+                      .map(module => {
+                        const isCompleted = completedModuleIds.includes(module.id);
+                        return (
+                          <Card 
+                            key={module.id}
+                            className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
+                              isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                            }`}
+                            onClick={() => setLocation(`/lesson/${module.id}`)}
+                          >
+                            {isCompleted && (
+                              <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs">✓</span>
+                              </div>
+                            )}
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
+                                {isCompleted ? (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
+                                    Completed
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="shrink-0">
+                                    {module.pointsReward} pts
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs text-gray-500 capitalize">{module.category}</span>
+                              </div>
+                              <div className="flex items-center justify-end">
+                                <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                                  {isCompleted ? "Review" : "Start Lesson"}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                  </div>
+                  <div className="text-center mt-4">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                      Showing {Math.min(6, publishedModules.filter(module => selectedCategory === "" || module.category === selectedCategory).length)} of {selectedCategory === "" ? publishedModules.length : publishedModules.filter(module => module.category === selectedCategory).length} available lessons
+                      {selectedCategory && ` in ${selectedCategory}`}
+                    </p>
+                    
+                    {/* Next Lesson Recommendation */}
+                    {(() => {
+                      const nextLesson = publishedModules
+                        .find(module => !completedModuleIds.includes(module.id));
+                      
+                      if (nextLesson && completedModuleIds.length > 0) {
+                        return (
+                          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-sm font-medium text-blue-800 mb-2">
+                              Next Recommended Lesson:
+                            </p>
+                            <Button 
+                              onClick={() => setLocation(`/lesson/${nextLesson.id}`)}
+                              className="mr-2"
+                              size="sm"
+                            >
+                              <BookOpen className="h-4 w-4 mr-2" />
+                              {nextLesson.title}
+                            </Button>
+                            <span className="text-xs text-blue-600">
+                              ({nextLesson.pointsReward} points)
+                            </span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setLocation('/education')}
+                      className="w-full sm:w-auto"
+                    >
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      View All Learning Modules
+                    </Button>
+                  </div>
+                </div>
+
                 <StreakDisplay 
                   currentStreak={user?.currentStreak || 0}
                   longestStreak={user?.longestStreak || 0}
