@@ -39,10 +39,12 @@ export default function Education() {
   const [completedCount, setCompletedCount] = useState(0);
   const [availablePoints, setAvailablePoints] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [publishedModules, setPublishedModules] = useState<any[]>([]);
 
   useEffect(() => {
     // Fetch from API first to ensure sync
     fetchCompletedLessons();
+    fetchPublishedModules();
 
     // Listen for storage changes to refresh when lessons are completed
     const handleStorageChange = (e: StorageEvent) => {
@@ -66,6 +68,18 @@ export default function Education() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+
+  const fetchPublishedModules = async () => {
+    try {
+      const response = await fetch('/api/modules');
+      if (response.ok) {
+        const data = await response.json();
+        setPublishedModules(data.modules);
+      }
+    } catch (error) {
+      console.error('Error fetching published modules:', error);
+    }
+  };
 
   const fetchCompletedLessons = async () => {
     try {
@@ -157,26 +171,26 @@ export default function Education() {
     }
   };
 
-  // Convert educationContent to modules format - ensure all lessons are included
-  const modules: Module[] = Object.values(educationContent).map(lesson => {
-    const description = lesson.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  // Convert published modules to the required format
+  const modules: Module[] = publishedModules.map(module => {
+    const description = module.description || '';
     return {
-      id: lesson.id,
-      title: lesson.title,
+      id: module.id.toString(),
+      title: module.title,
       description: description.length > 120 ? description.substring(0, 120) + '...' : description,
-      category: lesson.category,
-      difficulty: lesson.difficulty,
-      estimatedTime: lesson.estimatedTime,
-      pointsReward: lesson.points,
-      icon: getCategoryIcon(lesson.category),
-      completed: completedLessons.includes(lesson.id)
+      category: module.category,
+      difficulty: 'Beginner' as const, // Default since database doesn't have difficulty
+      estimatedTime: '15 min', // Default since database doesn't have estimatedTime
+      pointsReward: module.pointsReward,
+      icon: getCategoryIcon(module.category),
+      completed: completedLessons.includes(module.id.toString())
     };
   });
 
   console.log('Total modules loaded:', modules.length); // Debug log
 
-  // Get all unique categories from educationContent
-  const allCategories = [...new Set(Object.values(educationContent).map(lesson => lesson.category))];
+  // Get all unique categories from published modules
+  const allCategories = [...new Set(publishedModules.map(module => module.category))];
   const categories = ['All', ...allCategories.sort()];
 
 
