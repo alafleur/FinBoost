@@ -2894,19 +2894,53 @@ export default function Admin() {
               <div>
                 <Label>Lesson Content</Label>
                 <div className="text-sm p-4 bg-gray-50 rounded border max-h-60 overflow-y-auto">
-                  {Object.keys(educationContent).find(key => 
-                    educationContent[key].title === selectedModule.title
-                  ) ? (
-                    <div dangerouslySetInnerHTML={{ 
-                      __html: educationContent[Object.keys(educationContent).find(key => 
-                        educationContent[key].title === selectedModule.title
-                      )!].content 
-                    }} />
-                  ) : (
-                    <div className="text-gray-500">
-                      No matching lesson content found for "{selectedModule.title}"
-                    </div>
-                  )}
+                  {(() => {
+                    // Create title mapping for mismatched titles
+                    const titleMappings: { [key: string]: string } = {
+                      'Credit Basics': 'Credit Management',
+                      'Emergency Fund Essentials': 'Emergency Fund',
+                      'Investment Basics': 'Investment Basics',
+                      'SMART Goal Setting': 'Setting SMART Financial Goals',
+                      'Understanding Credit Scores': 'Understanding Credit Scores: A Comprehensive Guide',
+                      'Managing Student Loans': 'Managing Student Loans Effectively',
+                      'Debt Snowball vs Avalanche': 'Debt Snowball vs. Avalanche: Which Strategy Wins?',
+                      'Zero-Based Budgeting': 'Zero-Based Budgeting: Give Every Dollar a Job'
+                    };
+
+                    // Try exact match first, then mapped title, then partial match
+                    let lessonKey = Object.keys(educationContent).find(key => 
+                      educationContent[key].title === selectedModule.title
+                    );
+                    
+                    if (!lessonKey && titleMappings[selectedModule.title]) {
+                      lessonKey = Object.keys(educationContent).find(key => 
+                        educationContent[key].title === titleMappings[selectedModule.title]
+                      );
+                    }
+                    
+                    if (!lessonKey) {
+                      lessonKey = Object.keys(educationContent).find(key => 
+                        educationContent[key].title.toLowerCase().includes(selectedModule.title.toLowerCase()) ||
+                        selectedModule.title.toLowerCase().includes(educationContent[key].title.toLowerCase())
+                      );
+                    }
+
+                    const lesson = lessonKey ? educationContent[lessonKey] : null;
+                    
+                    if (lesson) {
+                      return <div dangerouslySetInnerHTML={{ __html: lesson.content }} />;
+                    } else {
+                      return (
+                        <div className="text-gray-500">
+                          <div>No matching lesson content found for "{selectedModule.title}"</div>
+                          <div className="mt-2 text-xs">
+                            Database titles: {selectedModule.title}<br/>
+                            Available content titles: {Object.keys(educationContent).map(key => educationContent[key].title).slice(0, 5).join(', ')}...
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               </div>
 
@@ -2915,14 +2949,43 @@ export default function Admin() {
                 <Label>Quiz Questions</Label>
                 <div className="text-sm p-4 bg-gray-50 rounded border max-h-60 overflow-y-auto">
                   {(() => {
-                    const lessonKey = Object.keys(educationContent).find(key => 
+                    // Use same mapping logic for quiz questions
+                    const titleMappings: { [key: string]: string } = {
+                      'Credit Basics': 'Credit Management',
+                      'Emergency Fund Essentials': 'Emergency Fund',
+                      'Investment Basics': 'Investment Basics',
+                      'SMART Goal Setting': 'Setting SMART Financial Goals',
+                      'Understanding Credit Scores': 'Understanding Credit Scores: A Comprehensive Guide',
+                      'Managing Student Loans': 'Managing Student Loans Effectively',
+                      'Debt Snowball vs Avalanche': 'Debt Snowball vs. Avalanche: Which Strategy Wins?',
+                      'Zero-Based Budgeting': 'Zero-Based Budgeting: Give Every Dollar a Job'
+                    };
+
+                    let lessonKey = Object.keys(educationContent).find(key => 
                       educationContent[key].title === selectedModule.title
                     );
+                    
+                    if (!lessonKey && titleMappings[selectedModule.title]) {
+                      lessonKey = Object.keys(educationContent).find(key => 
+                        educationContent[key].title === titleMappings[selectedModule.title]
+                      );
+                    }
+                    
+                    if (!lessonKey) {
+                      lessonKey = Object.keys(educationContent).find(key => 
+                        educationContent[key].title.toLowerCase().includes(selectedModule.title.toLowerCase()) ||
+                        selectedModule.title.toLowerCase().includes(educationContent[key].title.toLowerCase())
+                      );
+                    }
+
                     const lesson = lessonKey ? educationContent[lessonKey] : null;
                     
                     if (lesson?.quiz && lesson.quiz.length > 0) {
                       return (
                         <div className="space-y-4">
+                          <div className="text-xs text-green-600 mb-2">
+                            Found {lesson.quiz.length} quiz questions for: {lesson.title}
+                          </div>
                           {lesson.quiz.map((question: any, index: number) => (
                             <div key={index} className="p-4 border rounded-lg bg-white">
                               <div className="font-medium mb-2">
@@ -2950,7 +3013,12 @@ export default function Admin() {
                     } else {
                       return (
                         <div className="text-gray-500">
-                          No quiz questions available for this lesson
+                          <div>No quiz questions found for "{selectedModule.title}"</div>
+                          {lesson ? (
+                            <div className="text-xs mt-1">Found lesson content but no quiz questions</div>
+                          ) : (
+                            <div className="text-xs mt-1">No matching lesson found</div>
+                          )}
                         </div>
                       );
                     }
