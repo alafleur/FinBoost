@@ -350,7 +350,9 @@ export default function Dashboard() {
     .filter(progress => progress.completed)
     .map(progress => progress.moduleId);
 
+  console.log('Raw lesson progress data:', lessonProgress);
   console.log('Fetched completed module IDs:', completedModuleIds);
+  console.log('Published modules with IDs:', publishedModules.map(m => ({ id: m.id, title: m.title })));
   console.log('Total published modules loaded:', publishedModules.length);
 
   if (isLoading) {
