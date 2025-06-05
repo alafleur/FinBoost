@@ -1580,14 +1580,14 @@ export class MemStorage implements IStorage {
   }
 
   async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
-    // Return cached thresholds if available
-    if (this.tierThresholdCache) {
-      return this.tierThresholdCache;
-    }
+    // Temporarily disable cache to debug the issue
+    // if (this.tierThresholdCache) {
+    //   return this.tierThresholdCache;
+    // }
 
-    // Get all active users' total points to calculate percentiles
+    // Get all active users' current month points to calculate percentiles
     const allUsers = await db.select({
-      totalPoints: users.totalPoints
+      currentMonthPoints: users.currentMonthPoints
     }).from(users)
     .where(eq(users.isActive, true));
 
@@ -1599,7 +1599,7 @@ export class MemStorage implements IStorage {
 
     // Sort points in ascending order - include ALL users including those with 0 points
     const allPoints = allUsers
-      .map(u => u.totalPoints || 0)
+      .map(u => u.currentMonthPoints || 0)
       .sort((a, b) => a - b);
 
     console.log(`Calculating tier thresholds for ${allPoints.length} users. Points range: ${allPoints[0]} to ${allPoints[allPoints.length - 1]}`);
