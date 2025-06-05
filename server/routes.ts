@@ -70,8 +70,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id, 
           username: user.username, 
           email: user.email, 
-          points: user.currentMonthPoints || 0,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          totalPoints: user.totalPoints || 0,
+          currentMonthPoints: user.currentMonthPoints || 0,
           tier: user.tier,
+          currentStreak: user.currentStreak || 0,
+          longestStreak: user.longestStreak || 0,
           isAdmin: user.email === 'lafleur.andrew@gmail.com'
         } 
       });
