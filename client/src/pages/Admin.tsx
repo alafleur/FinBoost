@@ -2524,16 +2524,21 @@ export default function Admin() {
 
       {/* Module Edit Dialog */}
       <Dialog open={showEditModuleDialog} onOpenChange={setShowEditModuleDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingModule ? 'Edit Module' : 'Add New Module'}</DialogTitle>
+            <DialogDescription>
+              Create comprehensive learning modules with lesson content and interactive quiz questions
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Basic Module Information */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="title">Title</Label>
                 <Input 
                   id="title"
+                  placeholder="e.g., Budgeting Basics"
                   value={editingModule?.title || moduleForm.title}
                   onChange={(e) => {
                     if (editingModule) {
@@ -2563,6 +2568,7 @@ export default function Admin() {
                   <option value="credit">Credit</option>
                   <option value="taxes">Taxes</option>
                   <option value="planning">Planning</option>
+                  <option value="savings">Savings</option>
                 </select>
               </div>
               <div>
@@ -2589,6 +2595,8 @@ export default function Admin() {
                 <Input 
                   id="pointsReward"
                   type="number"
+                  min="1"
+                  max="100"
                   value={editingModule?.pointsReward || moduleForm.pointsReward}
                   onChange={(e) => {
                     if (editingModule) {
@@ -2604,6 +2612,8 @@ export default function Admin() {
                 <Input 
                   id="estimatedMinutes"
                   type="number"
+                  min="1"
+                  max="60"
                   value={editingModule?.estimatedMinutes || moduleForm.estimatedMinutes}
                   onChange={(e) => {
                     if (editingModule) {
@@ -2615,11 +2625,14 @@ export default function Admin() {
                 />
               </div>
             </div>
+
+            {/* Description */}
             <div>
               <Label htmlFor="description">Description</Label>
               <textarea 
                 id="description"
-                className="w-full p-2 border rounded h-24"
+                className="w-full p-3 border rounded h-20"
+                placeholder="Brief description of what users will learn in this module..."
                 value={editingModule?.description || moduleForm.description}
                 onChange={(e) => {
                   if (editingModule) {
@@ -2630,11 +2643,20 @@ export default function Admin() {
                 }}
               />
             </div>
+
+            {/* Lesson Content */}
             <div>
-              <Label htmlFor="content">Content</Label>
+              <Label htmlFor="content">Lesson Content (HTML)</Label>
               <textarea 
                 id="content"
-                className="w-full p-2 border rounded h-48"
+                className="w-full p-3 border rounded h-48 font-mono text-sm"
+                placeholder={`<h2>Lesson Title</h2>
+<p>Introduction paragraph...</p>
+<h3>Key Points</h3>
+<ul>
+  <li>Point 1</li>
+  <li>Point 2</li>
+</ul>`}
                 value={editingModule?.content || moduleForm.content}
                 onChange={(e) => {
                   if (editingModule) {
@@ -2645,32 +2667,135 @@ export default function Admin() {
                 }}
               />
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Quiz Questions Section */}
+            <div className="border-t pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Quiz Questions ({quizQuestions.length})</h3>
+                <Button 
+                  onClick={() => {
+                    setQuizQuestions([...quizQuestions, {
+                      id: Date.now(),
+                      question: '',
+                      options: ['', '', '', ''],
+                      correctAnswer: 0,
+                      explanation: ''
+                    }]);
+                  }}
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Question
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {quizQuestions.map((question, index) => (
+                  <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <h4 className="font-medium">Question {index + 1}</h4>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setQuizQuestions(quizQuestions.filter((_, i) => i !== index));
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <Label>Question Text</Label>
+                        <Input
+                          placeholder="Enter your question here..."
+                          value={question.question}
+                          onChange={(e) => {
+                            const updated = [...quizQuestions];
+                            updated[index].question = e.target.value;
+                            setQuizQuestions(updated);
+                          }}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {question.options.map((option, optIndex) => (
+                          <div key={optIndex} className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              name={`correct-${question.id}`}
+                              checked={question.correctAnswer === optIndex}
+                              onChange={() => {
+                                const updated = [...quizQuestions];
+                                updated[index].correctAnswer = optIndex;
+                                setQuizQuestions(updated);
+                              }}
+                            />
+                            <Input
+                              placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
+                              value={option}
+                              onChange={(e) => {
+                                const updated = [...quizQuestions];
+                                updated[index].options[optIndex] = e.target.value;
+                                setQuizQuestions(updated);
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      <div>
+                        <Label>Explanation (Optional)</Label>
+                        <textarea
+                          className="w-full p-2 border rounded h-16 text-sm"
+                          placeholder="Explain why this is the correct answer..."
+                          value={question.explanation}
+                          onChange={(e) => {
+                            const updated = [...quizQuestions];
+                            updated[index].explanation = e.target.value;
+                            setQuizQuestions(updated);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {quizQuestions.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No quiz questions added yet.</p>
+                    <p className="text-sm">Click "Add Question" to create interactive quiz questions for this module.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Module Settings */}
+            <div className="flex items-center space-x-6 pt-4 border-t">
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox"
+                <Switch
                   id="isActive"
-                  checked={editingModule?.isActive || moduleForm.isActive}
-                  onChange={(e) => {
+                  checked={editingModule?.isActive ?? moduleForm.isActive}
+                  onCheckedChange={(checked) => {
                     if (editingModule) {
-                      setEditingModule({...editingModule, isActive: e.target.checked});
+                      setEditingModule({...editingModule, isActive: checked});
                     } else {
-                      setModuleForm({...moduleForm, isActive: e.target.checked});
+                      setModuleForm({...moduleForm, isActive: checked});
                     }
                   }}
                 />
                 <Label htmlFor="isActive">Active</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox"
+                <Switch
                   id="isPublished"
-                  checked={editingModule?.isPublished || moduleForm.isPublished}
-                  onChange={(e) => {
+                  checked={editingModule?.isPublished ?? moduleForm.isPublished}
+                  onCheckedChange={(checked) => {
                     if (editingModule) {
-                      setEditingModule({...editingModule, isPublished: e.target.checked});
+                      setEditingModule({...editingModule, isPublished: checked});
                     } else {
-                      setModuleForm({...moduleForm, isPublished: e.target.checked});
+                      setModuleForm({...moduleForm, isPublished: checked});
                     }
                   }}
                 />
@@ -2678,8 +2803,12 @@ export default function Admin() {
               </div>
             </div>
           </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowEditModuleDialog(false)}>
+          
+          <div className="flex justify-end space-x-2 pt-6 border-t">
+            <Button variant="outline" onClick={() => {
+              setShowEditModuleDialog(false);
+              setQuizQuestions([]);
+            }}>
               Cancel
             </Button>
             <Button onClick={() => {
@@ -2689,6 +2818,7 @@ export default function Admin() {
                 handleCreateModule();
               }
               setShowEditModuleDialog(false);
+              setQuizQuestions([]);
             }}>
               {editingModule?.id ? 'Update' : 'Create'} Module
             </Button>
