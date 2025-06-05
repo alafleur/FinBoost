@@ -1270,6 +1270,14 @@ export default function Admin() {
                       </TableHeader>
                       <TableBody>
                         {modules
+                          .sort((a: any, b: any) => {
+                            // Sort by published status first (published modules at top)
+                            if (a.isPublished !== b.isPublished) {
+                              return b.isPublished ? 1 : -1;
+                            }
+                            // Then sort by creation date (newest first)
+                            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                          })
                           .slice((currentModulePage - 1) * modulesPerPage, currentModulePage * modulesPerPage)
                           .map((module: any) => (
                           <TableRow key={module.id}>
