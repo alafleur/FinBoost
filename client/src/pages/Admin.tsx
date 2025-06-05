@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { educationContent } from "@/data/educationContent";
 import {
   Settings,
   Plus,
@@ -2885,7 +2886,7 @@ export default function Admin() {
               <div>
                 <Label>Description</Label>
                 <div className="text-sm p-3 bg-gray-50 rounded border">
-                  {selectedModule.description}
+                  {selectedModule.description || 'No description available'}
                 </div>
               </div>
 
@@ -2893,43 +2894,68 @@ export default function Admin() {
               <div>
                 <Label>Lesson Content</Label>
                 <div className="text-sm p-4 bg-gray-50 rounded border max-h-60 overflow-y-auto">
-                  <div dangerouslySetInnerHTML={{ __html: selectedModule.content || 'No content available' }} />
+                  {Object.keys(educationContent).find(key => 
+                    educationContent[key].title === selectedModule.title
+                  ) ? (
+                    <div dangerouslySetInnerHTML={{ 
+                      __html: educationContent[Object.keys(educationContent).find(key => 
+                        educationContent[key].title === selectedModule.title
+                      )!].content 
+                    }} />
+                  ) : (
+                    <div className="text-gray-500">
+                      No matching lesson content found for "{selectedModule.title}"
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Quiz Questions */}
               <div>
-                <Label>Quiz Questions ({selectedModule.quiz?.length || 0})</Label>
-                {selectedModule.quiz && selectedModule.quiz.length > 0 ? (
-                  <div className="space-y-4 max-h-60 overflow-y-auto">
-                    {selectedModule.quiz.map((question: any, index: number) => (
-                      <div key={index} className="p-4 border rounded-lg bg-white">
-                        <div className="font-medium mb-2">
-                          Question {index + 1}: {question.question}
-                        </div>
-                        <div className="space-y-1">
-                          {question.options?.map((option: string, optIndex: number) => (
-                            <div key={optIndex} className={`text-sm p-2 rounded ${
-                              optIndex === question.correctAnswer ? 'bg-green-100 text-green-800' : 'bg-gray-50'
-                            }`}>
-                              {String.fromCharCode(65 + optIndex)}. {option}
-                              {optIndex === question.correctAnswer && ' ✓ (Correct)'}
+                <Label>Quiz Questions</Label>
+                <div className="text-sm p-4 bg-gray-50 rounded border max-h-60 overflow-y-auto">
+                  {(() => {
+                    const lessonKey = Object.keys(educationContent).find(key => 
+                      educationContent[key].title === selectedModule.title
+                    );
+                    const lesson = lessonKey ? educationContent[lessonKey] : null;
+                    
+                    if (lesson?.quiz && lesson.quiz.length > 0) {
+                      return (
+                        <div className="space-y-4">
+                          {lesson.quiz.map((question: any, index: number) => (
+                            <div key={index} className="p-4 border rounded-lg bg-white">
+                              <div className="font-medium mb-2">
+                                Question {index + 1}: {question.question}
+                              </div>
+                              <div className="space-y-1">
+                                {question.options?.map((option: string, optIndex: number) => (
+                                  <div key={optIndex} className={`text-sm p-2 rounded ${
+                                    optIndex === question.correctAnswer ? 'bg-green-100 text-green-800' : 'bg-gray-50'
+                                  }`}>
+                                    {String.fromCharCode(65 + optIndex)}. {option}
+                                    {optIndex === question.correctAnswer && ' ✓ (Correct)'}
+                                  </div>
+                                ))}
+                              </div>
+                              {question.explanation && (
+                                <div className="mt-2 text-sm text-gray-600 italic">
+                                  Explanation: {question.explanation}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
-                        {question.explanation && (
-                          <div className="mt-2 text-sm text-gray-600 italic">
-                            Explanation: {question.explanation}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm p-4 bg-gray-50 rounded border text-gray-500">
-                    No quiz questions available
-                  </div>
-                )}
+                      );
+                    } else {
+                      return (
+                        <div className="text-gray-500">
+                          No quiz questions available for this lesson
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
 
               {/* Module Stats */}
