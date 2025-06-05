@@ -581,10 +581,10 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-800">
                     {(() => {
-                      const uncompletedLessons = Object.values(educationContent).filter(lesson => 
-                        !completedLessonIds.includes(lesson.id)
+                      const uncompletedLessons = publishedModules.filter(module => 
+                        !completedModuleIds.includes(module.id)
                       );
-                      return uncompletedLessons.reduce((total, lesson) => total + lesson.points, 0);
+                      return uncompletedLessons.reduce((total, module) => total + module.pointsReward, 0);
                     })()}
                   </div>
                   <p className="text-xs text-purple-700">
@@ -682,9 +682,9 @@ export default function Dashboard() {
                 {/* Next Lesson Recommendation */}
                 {(() => {
                   const nextLesson = publishedModules
-                    .find(module => !completedLessonIds.includes(module.id.toString()));
+                    .find(module => !completedModuleIds.includes(module.id));
                   
-                  if (nextLesson && completedLessonIds.length > 0) {
+                  if (nextLesson && completedModuleIds.length > 0) {
                     return (
                       <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="text-sm font-medium text-blue-800 mb-2">
