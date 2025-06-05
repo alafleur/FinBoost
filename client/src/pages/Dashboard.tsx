@@ -487,37 +487,33 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-center space-y-3">
-                      {/* Prominent Active Members Display */}
-                      <div className="bg-green-100 rounded-lg p-3">
-                        <div className="text-3xl font-bold text-green-900 mb-1">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Community Power Display */}
+                      <div className="bg-green-100 rounded-lg p-4 text-center">
+                        <div className="text-4xl font-bold text-green-900 mb-1">
                           {poolData ? poolData.totalUsers.toLocaleString() : '0'}
                         </div>
-                        <p className="text-sm font-semibold text-green-800 uppercase tracking-wide">
-                          Active Members
+                        <p className="text-sm font-bold text-green-800 uppercase tracking-wide">
+                          🚀 Community Power
                         </p>
                         <p className="text-xs text-green-600 mt-1">
-                          Growing the community rewards pool
+                          Members building wealth together
                         </p>
                       </div>
                       
-                      {/* Simplified Countdown - Days Only */}
-                      {distributionInfo ? (
-                        <div>
-                          <div className="text-sm text-green-800 mb-2">
-                            <span className="font-semibold">Next payout:</span> {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString() : 'TBD'}
-                          </div>
-                          <div className="bg-green-100 px-4 py-2 rounded-lg inline-block">
-                            <span className="text-2xl font-bold text-green-900">{distributionInfo?.timeRemaining?.days || 0}</span>
-                            <span className="text-green-700 ml-2 text-sm">days remaining</span>
-                          </div>
+                      {/* Payout Countdown */}
+                      <div className="bg-emerald-100 rounded-lg p-4 text-center">
+                        <div className="text-4xl font-bold text-emerald-900 mb-1">
+                          {distributionInfo?.timeRemaining?.days || 0}
                         </div>
-                      ) : (
-                        <div className="text-sm text-green-800">
-                          <span className="font-semibold">Next payout:</span> End of month
-                        </div>
-                      )}
+                        <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide">
+                          💰 Days to Payday
+                        </p>
+                        <p className="text-xs text-emerald-600 mt-1">
+                          {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
