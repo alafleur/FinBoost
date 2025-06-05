@@ -108,6 +108,8 @@ export default function Admin() {
   const [pointsToDeduct, setPointsToDeduct] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(20);
+  const [currentModulePage, setCurrentModulePage] = useState(1);
+  const [modulesPerPage] = useState(10);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState({
@@ -1117,7 +1119,9 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {modules.map((module: any) => (
+                        {modules
+                          .slice((currentModulePage - 1) * modulesPerPage, currentModulePage * modulesPerPage)
+                          .map((module: any) => (
                           <TableRow key={module.id}>
                             <TableCell className="font-medium">
                               <div>
@@ -1747,6 +1751,38 @@ export default function Admin() {
                         })}
                       </TableBody>
                     </Table>
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-600">
+                      {(() => {
+                        const start = Math.min((currentModulePage - 1) * modulesPerPage + 1, modules.length);
+                        const end = Math.min(currentModulePage * modulesPerPage, modules.length);
+                        return `Showing ${start} to ${end} of ${modules.length} modules`;
+                      })()}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentModulePage(Math.max(1, currentModulePage - 1))}
+                        disabled={currentModulePage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm">
+                        Page {currentModulePage} of {Math.ceil(modules.length / modulesPerPage)}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentModulePage(currentModulePage + 1)}
+                        disabled={currentModulePage >= Math.ceil(modules.length / modulesPerPage)}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
