@@ -449,7 +449,7 @@ export default function Dashboard() {
                         <div className="text-2xl font-bold text-purple-900">
                           ${poolData ? poolData.totalPool.toLocaleString() : '0'}
                         </div>
-                        <p className="text-xs text-purple-600 mt-1">55% of monthly fees</p>
+                        <p className="text-xs text-purple-600 mt-1">Community rewards</p>
                       </div>
                     </div>
 
@@ -487,35 +487,38 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    {distributionInfo ? (
-                      <div className="text-center">
-                        <div className="text-sm text-blue-800 mb-2">
-                          <span className="font-semibold">Next payout:</span> {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString() : 'TBD'}
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-center space-y-3">
+                      {/* Prominent Active Members Display */}
+                      <div className="bg-green-100 rounded-lg p-3">
+                        <div className="text-3xl font-bold text-green-900 mb-1">
+                          {poolData ? poolData.totalUsers.toLocaleString() : '0'}
                         </div>
-                        <div className="flex justify-center items-center gap-4 text-xs">
-                          <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.days || 0}</span>
-                            <span className="text-blue-700 ml-1">days</span>
-                          </div>
-                          <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.hours || 0}</span>
-                            <span className="text-blue-700 ml-1">hrs</span>
-                          </div>
-                          <div className="bg-blue-100 px-2 py-1 rounded">
-                            <span className="font-bold text-blue-900">{distributionInfo?.timeRemaining?.minutes || 0}</span>
-                            <span className="text-blue-700 ml-1">min</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-blue-600 mt-2">
-                          Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
+                        <p className="text-sm font-semibold text-green-800 uppercase tracking-wide">
+                          Active Members
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          Growing the community rewards pool
                         </p>
                       </div>
-                    ) : (
-                      <p className="text-sm text-blue-800 text-center">
-                        <span className="font-semibold">Next payout:</span> End of month • Based on {poolData ? poolData.totalUsers.toLocaleString() : '0'} active members at ${poolData ? poolData.monthlyFee : '20'}/month
-                      </p>
-                    )}
+                      
+                      {/* Simplified Countdown - Days Only */}
+                      {distributionInfo ? (
+                        <div>
+                          <div className="text-sm text-green-800 mb-2">
+                            <span className="font-semibold">Next payout:</span> {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString() : 'TBD'}
+                          </div>
+                          <div className="bg-green-100 px-4 py-2 rounded-lg inline-block">
+                            <span className="text-2xl font-bold text-green-900">{distributionInfo?.timeRemaining?.days || 0}</span>
+                            <span className="text-green-700 ml-2 text-sm">days remaining</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-green-800">
+                          <span className="font-semibold">Next payout:</span> End of month
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
