@@ -134,6 +134,7 @@ export interface IStorage {
     updateModule(moduleId: number, moduleData: any): Promise<any>;
     deleteModule(moduleId: number): Promise<void>;
     getAllModules(): Promise<any[]>;
+    getModuleById(moduleId: number): Promise<any | null>;
     
     updateUser(userId: number, userData: any): Promise<User>;
     deleteUser(userId: number): Promise<void>;
