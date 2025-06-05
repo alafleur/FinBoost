@@ -94,8 +94,7 @@ export default function Education() {
         setUserProgress(progressData.progress);
         setCompletedCount(progressData.completedCount || 0);
 
-        console.log('Raw progress data:', progressData.progress);
-        console.log('Completed count from API:', progressData.completedCount);
+
 
         // Create proper lesson ID mapping for completed lessons
         const lessonIdMap: { [key: number]: string } = {
@@ -187,7 +186,7 @@ export default function Education() {
     };
   });
 
-  console.log('Total modules loaded:', modules.length); // Debug log
+
 
   // Get all unique categories from published modules
   const allCategories = [...new Set(publishedModules.map(module => module.category))];
@@ -337,6 +336,7 @@ export default function Education() {
                             className="w-full" 
                             variant={isCompleted ? "outline" : "default"}
                             disabled={false}
+                            onClick={() => setLocation(`/lesson/${module.id}`)}
                           >
                             {isCompleted ? "✓ Completed" : "Start Lesson"}
                           </Button>
