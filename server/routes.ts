@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { findBestContent, fallbackContent } from "./contentDatabase";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -268,6 +269,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const moduleId = parseInt(req.params.id);
       const { isPublished } = req.body;
+      
+      // If publishing a module, auto-populate content if it's empty
+      if (isPublished) {
+        const currentModule = await storage.getModuleById(moduleId);
+        if (currentModule && (!currentModule.content || !currentModule.quiz)) {
+          // Find matching content from database
+          const contentTemplate = findBestContent(
+            currentModule.title, 
+            currentModule.description || '', 
+            currentModule.category
+          ) || fallbackContent;
+          
+          // Update module with auto-populated content
+          await storage.updateModule(moduleId, {
+            ...currentModule,
+            content: currentModule.content || contentTemplate.content,
+            quiz: currentModule.quiz || JSON.stringify(contentTemplate.quiz)
+          });
+        }
+      }
+      
       const module = await storage.toggleModulePublish(moduleId, isPublished);
       res.json({ success: true, module });
     } catch (error: any) {

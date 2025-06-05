@@ -1784,6 +1784,19 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getModuleById(moduleId: number): Promise<any | null> {
+    try {
+      const [module] = await db.select()
+        .from(learningModules)
+        .where(eq(learningModules.id, moduleId))
+        .limit(1);
+      return module || null;
+    } catch (error) {
+      console.error('Error getting module by ID:', error);
+      return null;
+    }
+  }
+
   async toggleModulePublish(moduleId: number, isPublished: boolean): Promise<any> {
     try {
       const publishedAt = isPublished ? new Date() : null;
