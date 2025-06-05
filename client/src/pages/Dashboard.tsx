@@ -508,7 +508,7 @@ export default function Dashboard() {
                           {distributionInfo?.timeRemaining?.days || 0}
                         </div>
                         <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide">
-                          💰 Days to Payday
+                          💰 Days to Rewards Distribution
                         </p>
                         <p className="text-xs text-emerald-600 mt-1">
                           {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
