@@ -58,19 +58,50 @@ export default function Lesson() {
   } | null>(null);
 
   useEffect(() => {
-    // Get lesson ID from URL params
-    const lessonId = window.location.pathname.split('/lesson/')[1] || 'emergency-fund';
-    const lessonData1 = educationContent[lessonId];
+    const fetchLesson = async () => {
+      try {
+        // Get lesson ID from URL params
+        const lessonId = window.location.pathname.split('/lesson/')[1];
+        
+        if (!lessonId) {
+          setLocation('/education');
+          return;
+        }
 
-    if (lessonData1) {
-      setLesson({
-        ...lessonData1,
-        id: lessonId, // Keep the string ID, don't convert to number
-        timeEstimate: lessonData1.estimatedTime
-      });
-    } else {
-      setLocation('/education');
-    }
+        // Fetch published modules from API
+        const response = await fetch('/api/modules');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Find the specific module by ID
+          const moduleData = data.modules.find((m: any) => m.id.toString() === lessonId);
+          
+          if (moduleData) {
+            // Convert module data to lesson format
+            setLesson({
+              id: moduleData.id,
+              title: moduleData.title,
+              category: moduleData.category,
+              difficulty: 'Beginner' as const,
+              timeEstimate: '15 min',
+              points: moduleData.pointsReward,
+              content: moduleData.content || 'Content not available',
+              quiz: moduleData.quiz || [],
+              completed: false
+            });
+          } else {
+            setLocation('/education');
+          }
+        } else {
+          setLocation('/education');
+        }
+      } catch (error) {
+        console.error('Error fetching lesson:', error);
+        setLocation('/education');
+      }
+    };
+
+    fetchLesson();
   }, [setLocation]);
 
   const handleAnswerSelect = (answerIndex: number) => {
