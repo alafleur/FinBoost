@@ -346,11 +346,11 @@ export default function Dashboard() {
     35: 'debt-consolidation'
   };
 
-  const completedLessonIds = lessonProgress
+  const completedModuleIds = lessonProgress
     .filter(progress => progress.completed)
-    .map(progress => moduleToLessonMap[progress.moduleId] || progress.moduleId.toString());
+    .map(progress => progress.moduleId);
 
-  console.log('Fetched completed lesson IDs:', completedLessonIds);
+  console.log('Fetched completed module IDs:', completedModuleIds);
   console.log('Total published modules loaded:', publishedModules.length);
 
   if (isLoading) {
@@ -565,10 +565,10 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-800">
-                    {publishedModules.length > 0 ? Math.round((completedLessonIds.length / publishedModules.length) * 100) : 0}%
+                    {publishedModules.length > 0 ? Math.round((completedModuleIds.length / publishedModules.length) * 100) : 0}%
                   </div>
                   <p className="text-xs text-blue-700">
-                    {completedLessonIds.length} of {publishedModules.length} lessons
+                    {completedModuleIds.length} of {publishedModules.length} lessons
                   </p>
                 </CardContent>
               </Card>
@@ -602,7 +602,7 @@ export default function Dashboard() {
                 </h3>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {publishedModules.length} completed
+                    {completedModuleIds.length} of {publishedModules.length} completed
                   </Badge>
                 </div>
               </div>
@@ -632,7 +632,7 @@ export default function Dashboard() {
                   .filter(module => selectedCategory === "" || module.category === selectedCategory)
                   .slice(0, isMobile ? 3 : 6)
                   .map(module => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isCompleted = completedModuleIds.includes(module.id);
                     return (
                       <Card 
                         key={module.id}
