@@ -77,6 +77,7 @@ export default function Dashboard() {
     settings: { [key: string]: string };
   } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [publishedModules, setPublishedModules] = useState<any[]>([]);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -166,6 +167,7 @@ export default function Dashboard() {
     fetchLessonProgress();
     fetchPoolData();
     fetchDistributionInfo();
+    fetchPublishedModules();
   }, []);
 
   // Update countdown timer every minute
@@ -255,6 +257,18 @@ export default function Dashboard() {
     }
   };
 
+  const fetchPublishedModules = async () => {
+    try {
+      const response = await fetch('/api/modules');
+      if (response.ok) {
+        const data = await response.json();
+        setPublishedModules(data.modules || []);
+      }
+    } catch (error) {
+      console.error('Error fetching published modules:', error);
+    }
+  };
+
   const fetchDistributionInfo = async () => {
     try {
       const response = await fetch('/api/pool/next-distribution');
@@ -337,7 +351,7 @@ export default function Dashboard() {
     .map(progress => moduleToLessonMap[progress.moduleId] || progress.moduleId.toString());
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
-  console.log('Total modules loaded:', Object.keys(educationContent).length);
+  console.log('Total published modules loaded:', publishedModules.length);
 
   if (isLoading) {
     return (
