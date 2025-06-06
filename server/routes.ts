@@ -2,6 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { findBestContent, fallbackContent } from "./contentDatabase";
+import Stripe from "stripe";
+
+// Initialize Stripe only if secret key is available
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-04-30.basil",
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -852,6 +861,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating support ticket:', error);
       res.status(500).json({ success: false, message: error.message });
     }
+  });
+
+  // Stripe subscription routes (disabled until API keys are configured)
+  app.post('/api/create-subscription', async (req, res) => {
+    res.status(503).json({ 
+      success: false, 
+      message: "Stripe integration not yet configured. Please provide API keys to enable payments." 
+    });
+  });
+
+  app.get('/api/subscription/status', async (req, res) => {
+    res.json({
+      success: true,
+      subscription: {
+        status: 'inactive',
+        message: 'Payment system will be available once Stripe is configured'
+      }
+    });
+  });
+
+  app.post('/api/subscription/cancel', async (req, res) => {
+    res.status(503).json({ 
+      success: false, 
+      message: "Stripe integration not yet configured" 
+    });
+  });
+
+  app.post('/webhook/stripe', async (req, res) => {
+    res.status(503).send('Stripe webhook not configured');
   });
 
   const httpServer = createServer(app);

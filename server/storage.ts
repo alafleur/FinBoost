@@ -138,6 +138,9 @@ export interface IStorage {
 
     updateUser(userId: number, userData: any): Promise<User>;
     deleteUser(userId: number): Promise<void>;
+    
+    // Stripe payment methods
+    addToRewardPool(amount: number): Promise<void>;
 
     awardPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
     deductPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
@@ -2353,6 +2356,14 @@ export class MemStorage implements IStorage {
       console.error('Error updating support ticket:', error);
       throw error;
     }
+  }
+
+  // Stripe payment methods
+  async addToRewardPool(amount: number): Promise<void> {
+    // Add payment amount to the monthly pool
+    // This would update the reward pool balance in the database
+    console.log(`Added $${amount/100} to reward pool from subscription payment`);
+    // In a real implementation, this would update a reward pool table
   }
 }
 
