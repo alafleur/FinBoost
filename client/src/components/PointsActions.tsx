@@ -22,14 +22,17 @@ import { useToast } from "@/hooks/use-toast";
 import FileUpload from './FileUpload';
 
 interface PointAction {
-  id: string;
+  id: number;
+  actionId: string;
   name: string;
   basePoints: number;
   requiresProof: boolean;
   category: string;
   description: string;
   maxDaily?: number;
+  maxMonthly?: number;
   maxTotal?: number;
+  isActive: boolean;
   points?: number;
 }
 
@@ -223,10 +226,14 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-3">{action.description}</p>
-              {(action.maxDaily || action.maxTotal) && (
+              {(action.maxDaily || action.maxMonthly || action.maxTotal) && (
                 <div className="text-xs text-gray-500">
-                  {action.maxDaily && <span>Max {action.maxDaily}/day</span>}
-                  {action.maxDaily && action.maxTotal && <span> • </span>}
+                  {action.maxMonthly ? (
+                    <span>Max {action.maxMonthly}/month</span>
+                  ) : action.maxDaily ? (
+                    <span>Max {action.maxDaily}/day</span>
+                  ) : null}
+                  {((action.maxMonthly || action.maxDaily) && action.maxTotal) && <span> • </span>}
                   {action.maxTotal && <span>Max {action.maxTotal} total</span>}
                 </div>
               )}
