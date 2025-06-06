@@ -81,7 +81,7 @@ task = "shell.exec"
 args = "npm run db:push"
 
 [[workflows.workflow]]
-name = "Start Additive"
+name = "Start FinBoost"
 author = 42749501
 mode = "sequential"
 

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Gift } from "lucide-react";
-import { AdditiveLogo } from "@/components/ui/additive-logo";
+import { FinBoostLogo } from "@/components/ui/finboost-logo";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -218,7 +218,7 @@ export default function Auth() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AdditiveLogo size="lg" />
+            <FinBoostLogo size="lg" />
           </div>
           <p className="text-gray-600">Your financial education journey starts here</p>
         </div>

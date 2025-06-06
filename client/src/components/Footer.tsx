@@ -1,4 +1,4 @@
-import { AdditiveLogo } from "@/components/ui/additive-logo";
+import { FinBoostLogo } from "@/components/ui/finboost-logo";
 import { FaTwitter, FaFacebook, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="mb-4">
-              <AdditiveLogo size="md" />
+              <FinBoostLogo size="md" />
             </div>
             <p className="mb-4">Financial education that rewards your progress</p>
             <div className="flex space-x-4">

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { AdditiveLogo } from "@/components/ui/additive-logo";
+import { FinBoostLogo } from "@/components/ui/finboost-logo";
 
 export default function Navbar() {
   const scrollToForm = () => {
@@ -16,7 +16,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm px-4 py-4 fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <AdditiveLogo size="sm" />
+          <FinBoostLogo size="sm" />
         </div>
         <div className="flex items-center space-x-3">
           <a 

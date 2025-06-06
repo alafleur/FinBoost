@@ -61,18 +61,18 @@ export default function FAQ() {
     },
     {
       id: "11",
-      question: "What is Additive?",
-      answer: "Additive is a learn-to-earn platform where members complete financial education lessons to earn points and qualify for monthly cash rewards. The more you learn, the better your odds of winning from our community-funded reward pool."
+      question: "What is FinBoost?",
+      answer: "FinBoost is a learn-to-earn platform where members complete financial education lessons to earn points and qualify for monthly cash rewards. The more you learn, the better your odds of winning from our community-funded reward pool."
     },
     {
       id: "12",
-      question: "How does Additive make money?",
-      answer: "Additive operates on a membership model. A portion of membership fees funds the monthly reward pools, while the remainder covers platform operations and content development. This creates a sustainable ecosystem where everyone benefits from collective learning."
+      question: "How does FinBoost make money?",
+      answer: "FinBoost operates on a membership model. A portion of membership fees funds the monthly reward pools, while the remainder covers platform operations and content development. This creates a sustainable ecosystem where everyone benefits from collective learning."
     },
     {
       id: "13",
       question: "How do I get started?",
-      answer: "Getting started with Additive is simple: 1) Sign up for an account, 2) Choose your membership tier, 3) Start completing lessons to earn points, 4) Watch your tier progress and qualify for bigger rewards. The platform is designed to be intuitive and rewarding from day one."
+      answer: "Getting started with FinBoost is simple: 1) Sign up for an account, 2) Choose your membership tier, 3) Start completing lessons to earn points, 4) Watch your tier progress and qualify for bigger rewards. The platform is designed to be intuitive and rewarding from day one."
     }
   ];
 
