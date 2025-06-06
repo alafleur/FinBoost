@@ -494,6 +494,8 @@ export default function Admin() {
       
       const method = editingPoolSetting ? 'PUT' : 'POST';
       
+      console.log('Saving pool setting:', { url, method, form: poolSettingForm, editingPoolSetting });
+      
       const response = await fetch(url, {
         method,
         headers: {
@@ -502,6 +504,9 @@ export default function Admin() {
         },
         body: JSON.stringify(poolSettingForm)
       });
+
+      const responseData = await response.text();
+      console.log('Response:', response.status, responseData);
 
       if (response.ok) {
         toast({
@@ -523,13 +528,13 @@ export default function Admin() {
         fetchMonthlyPoolSettings();
         fetchCurrentPoolSettings();
       } else {
-        throw new Error('Failed to save pool setting');
+        throw new Error(`Failed to save pool setting: ${response.status} ${responseData}`);
       }
     } catch (error) {
       console.error('Error saving pool setting:', error);
       toast({
         title: "Error saving pool setting",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
         variant: "destructive",
       });
     }
