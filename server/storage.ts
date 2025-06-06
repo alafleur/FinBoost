@@ -2458,6 +2458,83 @@ export class MemStorage implements IStorage {
       return [];
     }
   }
+
+  // Stripe integration methods
+  async updateUserSubscriptionStatus(userId: number, status: string): Promise<User | null> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ 
+          subscriptionStatus: status
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return user || null;
+    } catch (error) {
+      console.error('Error updating user subscription status:', error);
+      return null;
+    }
+  }
+
+  async updateUserStripeCustomerId(userId: number, stripeCustomerId: string): Promise<User | null> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ 
+          stripeCustomerId: stripeCustomerId
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return user || null;
+    } catch (error) {
+      console.error('Error updating user Stripe customer ID:', error);
+      return null;
+    }
+  }
+
+  async updateUserStripeSubscriptionId(userId: number, stripeSubscriptionId: string): Promise<User | null> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ 
+          stripeSubscriptionId: stripeSubscriptionId
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return user || null;
+    } catch (error) {
+      console.error('Error updating user Stripe subscription ID:', error);
+      return null;
+    }
+  }
+
+  async getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.stripeCustomerId, stripeCustomerId));
+      return user || null;
+    } catch (error) {
+      console.error('Error getting user by Stripe customer ID:', error);
+      return null;
+    }
+  }
+
+  async convertTheoreticalPoints(userId: number): Promise<void> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (user && user.theoreticalPoints > 0) {
+        await db
+          .update(users)
+          .set({ 
+            totalPoints: user.totalPoints + user.theoreticalPoints,
+            currentMonthPoints: user.currentMonthPoints + user.theoreticalPoints,
+            theoreticalPoints: 0
+          })
+          .where(eq(users.id, userId));
+      }
+    } catch (error) {
+      console.error('Error converting theoretical points:', error);
+    }
+  }
 }
 
 export const storage = new MemStorage();

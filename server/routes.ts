@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { findBestContent, fallbackContent } from "./contentDatabase";
@@ -1205,6 +1206,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe subscription routes
   app.post("/api/create-subscription", async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(500).json({ error: { message: "Stripe not configured" } });
+      }
+
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
@@ -1264,6 +1269,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Stripe webhook to handle subscription events
   app.post("/api/stripe/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
     const sig = req.headers['stripe-signature'] as string;
     let event;
 
@@ -1277,37 +1286,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       switch (event.type) {
         case 'invoice.payment_succeeded':
-          const invoice = event.data.object;
-          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-          
-          // Find user by Stripe customer ID
-          const user = await storage.getUserByStripeCustomerId(subscription.customer as string);
-          if (user) {
-            // Update user subscription status to active
-            await storage.updateUserSubscriptionStatus(user.id, 'active');
+          const invoice = event.data.object as any;
+          if (invoice.subscription) {
+            const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
             
-            // Convert theoretical points to real points
-            if (user.theoreticalPoints > 0) {
-              await storage.convertTheoreticalPoints(user.id);
+            // Find user by Stripe customer ID
+            const user = await storage.getUserByStripeCustomerId(subscription.customer as string);
+            if (user) {
+              // Update user subscription status to active
+              await storage.updateUserSubscriptionStatus(user.id, 'active');
+              
+              // Convert theoretical points to real points
+              if (user.theoreticalPoints > 0) {
+                await storage.convertTheoreticalPoints(user.id);
+              }
+              
+              console.log(`✅ User ${user.id} subscription activated`);
             }
-            
-            console.log(`✅ User ${user.id} subscription activated`);
           }
           break;
 
         case 'invoice.payment_failed':
-          const failedInvoice = event.data.object;
-          const failedSubscription = await stripe.subscriptions.retrieve(failedInvoice.subscription as string);
-          
-          const failedUser = await storage.getUserByStripeCustomerId(failedSubscription.customer as string);
-          if (failedUser) {
-            await storage.updateUserSubscriptionStatus(failedUser.id, 'inactive');
-            console.log(`❌ User ${failedUser.id} subscription payment failed`);
+          const failedInvoice = event.data.object as any;
+          if (failedInvoice.subscription) {
+            const failedSubscription = await stripe.subscriptions.retrieve(failedInvoice.subscription);
+            
+            const failedUser = await storage.getUserByStripeCustomerId(failedSubscription.customer as string);
+            if (failedUser) {
+              await storage.updateUserSubscriptionStatus(failedUser.id, 'inactive');
+              console.log(`❌ User ${failedUser.id} subscription payment failed`);
+            }
           }
           break;
 
         case 'customer.subscription.deleted':
-          const deletedSubscription = event.data.object;
+          const deletedSubscription = event.data.object as any;
           const canceledUser = await storage.getUserByStripeCustomerId(deletedSubscription.customer as string);
           if (canceledUser) {
             await storage.updateUserSubscriptionStatus(canceledUser.id, 'inactive');
