@@ -1409,15 +1409,15 @@ export default function Admin() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <Badge variant={user.subscriptionStatus === 'premium' ? "default" : "outline"}>
-                                  {user.subscriptionStatus === 'premium' ? 'Premium' : 'Free'}
+                                <Badge variant={user.subscriptionStatus === 'active' ? "default" : "outline"}>
+                                  {user.subscriptionStatus === 'active' ? 'Premium' : 'Free'}
                                 </Badge>
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
                                   onClick={() => handleToggleSubscription(user.id, user.subscriptionStatus)}
                                 >
-                                  {user.subscriptionStatus === 'premium' ? 'Downgrade' : 'Upgrade'}
+                                  {user.subscriptionStatus === 'active' ? 'Downgrade' : 'Upgrade'}
                                 </Button>
                               </div>
                             </TableCell>
