@@ -2620,7 +2620,9 @@ export default function Admin() {
                     <AlertCircle className="h-4 w-4 text-red-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">23</div>
+                    <div className="text-2xl font-bold">
+                      {supportTickets.filter(t => t.status === 'open').length}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Awaiting response
                     </p>
@@ -2629,39 +2631,43 @@ export default function Admin() {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Resolved Today</CardTitle>
+                    <CardTitle className="text-sm font-medium">Resolved</CardTitle>
                     <CheckCircle className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">8</div>
+                    <div className="text-2xl font-bold">
+                      {supportTickets.filter(t => t.status === 'resolved').length}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      +2 from yesterday
+                      Completed tickets
                     </p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Avg Response</CardTitle>
+                    <CardTitle className="text-sm font-medium">In Progress</CardTitle>
                     <Clock className="h-4 w-4 text-blue-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">2.4h</div>
+                    <div className="text-2xl font-bold">
+                      {supportTickets.filter(t => t.status === 'in-progress').length}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Response time
+                      Being handled
                     </p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
-                    <Star className="h-4 w-4 text-yellow-500" />
+                    <CardTitle className="text-sm font-medium">Total</CardTitle>
+                    <HelpCircle className="h-4 w-4 text-purple-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">4.8</div>
+                    <div className="text-2xl font-bold">{supportTickets.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      Out of 5.0
+                      All tickets
                     </p>
                   </CardContent>
                 </Card>
@@ -2701,64 +2707,99 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {[...Array(8)].map((_, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-mono text-sm">
-                              #{1000 + index}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                                  {users[index]?.username?.charAt(0)?.toUpperCase() || 'U'}
+                        {supportTickets.length > 0 ? (
+                          supportTickets.map((ticket) => (
+                            <TableRow key={ticket.id}>
+                              <TableCell className="font-mono text-sm">
+                                #{ticket.id}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                    {ticket.name?.charAt(0)?.toUpperCase() || 'A'}
+                                  </div>
+                                  <div>
+                                    <div className="text-sm font-medium">{ticket.name || 'Anonymous'}</div>
+                                    <div className="text-xs text-gray-500">{ticket.email}</div>
+                                  </div>
                                 </div>
-                                <span className="text-sm">{users[index]?.username || 'User'}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium text-sm">
-                                  {index % 3 === 0 ? 'Login Issues' : 
-                                   index % 3 === 1 ? 'Points Not Updating' : 'Module Content Error'}
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium text-sm capitalize">{ticket.category}</div>
+                                  <div className="text-xs text-gray-500 truncate max-w-xs">
+                                    {ticket.message.substring(0, 50)}...
+                                  </div>
                                 </div>
-                                <div className="text-xs text-gray-500 truncate max-w-xs">
-                                  {index % 3 === 0 ? 'Cannot access account after password reset' : 
-                                   index % 3 === 1 ? 'Completed lesson but points not added' : 'Video not loading in lesson 5'}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={
+                                  ticket.category === 'billing' ? 'destructive' :
+                                  ticket.category === 'technical' ? 'default' : 'secondary'
+                                }>
+                                  {ticket.category === 'billing' ? 'High' : 
+                                   ticket.category === 'technical' ? 'Medium' : 'Low'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={
+                                  ticket.status === 'open' ? 'destructive' :
+                                  ticket.status === 'in-progress' ? 'default' : 'outline'
+                                }>
+                                  {ticket.status === 'open' ? 'Open' : 
+                                   ticket.status === 'in-progress' ? 'In Progress' : 'Resolved'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                {new Date(ticket.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedTicket(ticket);
+                                      setShowTicketDialog(true);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  {ticket.status !== 'resolved' && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedTicket(ticket);
+                                        setTicketReply('');
+                                        setShowReplyDialog(true);
+                                      }}
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  {ticket.status === 'open' && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm"
+                                      onClick={() => handleTicketReply(ticket.id, 'Ticket resolved automatically', 'resolved')}
+                                    >
+                                      <CheckCircle className="w-4 h-4" />
+                                    </Button>
+                                  )}
                                 </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                index % 3 === 0 ? 'destructive' :
-                                index % 3 === 1 ? 'default' : 'secondary'
-                              }>
-                                {index % 3 === 0 ? 'High' : index % 3 === 1 ? 'Medium' : 'Low'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                index % 2 === 0 ? 'default' : 'secondary'
-                              }>
-                                {index % 2 === 0 ? 'Open' : 'In Progress'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {new Date(Date.now() - (index * 2 * 60 * 60 * 1000)).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <CheckCircle className="w-4 h-4" />
-                                </Button>
-                              </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                              <HelpCircle className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                              <p>No support tickets found</p>
+                              <p className="text-sm">Customer support requests will appear here</p>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
