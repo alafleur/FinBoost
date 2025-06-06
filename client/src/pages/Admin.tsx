@@ -2747,10 +2747,10 @@ export default function Admin() {
                               </TableCell>
                               <TableCell>
                                 <Badge variant={
-                                  ticket.status === 'open' ? 'destructive' :
+                                  ticket.status === 'pending' ? 'destructive' :
                                   ticket.status === 'in-progress' ? 'default' : 'outline'
                                 }>
-                                  {ticket.status === 'open' ? 'Open' : 
+                                  {ticket.status === 'pending' ? 'Open' : 
                                    ticket.status === 'in-progress' ? 'In Progress' : 'Resolved'}
                                 </Badge>
                               </TableCell>
@@ -2782,7 +2782,7 @@ export default function Admin() {
                                       <Edit className="w-4 h-4" />
                                     </Button>
                                   )}
-                                  {ticket.status === 'open' && (
+                                  {ticket.status === 'pending' && (
                                     <Button 
                                       variant="ghost" 
                                       size="sm"
@@ -4177,6 +4177,21 @@ export default function Admin() {
                   {selectedTicket.message}
                 </div>
               </div>
+              
+              {selectedTicket.hasAttachment && selectedTicket.fileName && (
+                <div>
+                  <Label>Attachment</Label>
+                  <div className="p-3 bg-yellow-50 rounded border">
+                    <div className="flex items-center gap-2">
+                      <Upload className="h-4 w-4 text-yellow-600" />
+                      <span className="text-sm font-medium">{selectedTicket.fileName}</span>
+                    </div>
+                    <p className="text-xs text-yellow-600 mt-1">
+                      File uploaded by user (stored in uploads folder)
+                    </p>
+                  </div>
+                </div>
+              )}
               
               {selectedTicket.response && (
                 <div>
