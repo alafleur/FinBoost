@@ -1,222 +1,271 @@
-import { useState } from "react";
+import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useEffect, useState } from 'react';
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, DollarSign, Users, TrendingUp, Star, Globe } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { CheckCircle, Loader2 } from "lucide-react";
 
-export default function Subscribe() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'CAD'>('USD');
+// Make sure to call `loadStripe` outside of a component's render to avoid
+// recreating the `Stripe` object on every render.
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+const SubscribeForm = () => {
+  const stripe = useStripe();
+  const elements = useElements();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      const response = await apiRequest("POST", "/api/stripe/create-subscription", {
-        currency: selectedCurrency
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/dashboard`,
+        },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.checkoutUrl) {
-          // Redirect to Stripe Checkout
-          window.location.href = data.checkoutUrl;
-        } else {
-          throw new Error(data.message || "Failed to create checkout session");
-        }
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Payment service unavailable");
+        toast({
+          title: "Payment Successful",
+          description: "Welcome to FinBoost Premium! You now have access to all features.",
+        });
       }
     } catch (error: any) {
-      console.error("Subscription error:", error);
       toast({
         title: "Payment Error",
-        description: error.message || "Unable to process subscription. Please try again.",
-        variant: "destructive"
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const priceDisplay = selectedCurrency === 'USD' ? '$20' : '$27 CAD';
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Complete Your Subscription</CardTitle>
+        <CardDescription>
+          Enter your payment details to start your $20/month FinBoost membership
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <PaymentElement />
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={!stripe || !elements || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              `Subscribe for $20/month`
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default function Subscribe() {
+  const [clientSecret, setClientSecret] = useState("");
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user already has a subscription
+    const checkSubscription = async () => {
+      try {
+        const response = await apiRequest("GET", "/api/subscription/status");
+        if (response.ok) {
+          const data = await response.json();
+          setSubscriptionStatus(data.subscription.status);
+          
+          if (data.subscription.status === 'active') {
+            setLoading(false);
+            return; // Don't create new subscription if already active
+          }
+        }
+      } catch (error) {
+        console.error('Error checking subscription status:', error);
+      }
+
+      // Create new subscription if none exists or not active
+      try {
+        const response = await apiRequest("POST", "/api/create-subscription");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret);
+          } else if (data.message?.includes('already has active subscription')) {
+            setSubscriptionStatus('active');
+          }
+        } else {
+          const errorData = await response.json();
+          toast({
+            title: "Subscription Error",
+            description: errorData.message || "Failed to create subscription",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error creating subscription:', error);
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to payment system",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSubscription();
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
+            <p>Loading subscription details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (subscriptionStatus === 'active') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+            <CardTitle>Already Subscribed!</CardTitle>
+            <CardDescription>
+              You already have an active FinBoost Premium membership
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button 
+              onClick={() => window.location.href = '/dashboard'}
+              className="w-full"
+            >
+              Go to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Subscription Error</CardTitle>
+            <CardDescription>
+              Unable to initialize payment. Please try again or contact support.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="w-full"
+            >
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <DollarSign className="h-12 w-12 text-blue-600 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-900">Join FinBoost</h1>
-          </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Transform your financial knowledge into real rewards. Learn, earn, and grow with our community.
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-4">Join FinBoost Premium</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Get access to all premium features, earn points, and win monthly cash rewards!
+        </p>
+      </div>
 
-        {/* Currency Selection */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg p-1 shadow-sm border">
-            <Button
-              variant={selectedCurrency === 'USD' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setSelectedCurrency('USD')}
-              className="mr-1"
-            >
-              🇺🇸 USD
-            </Button>
-            <Button
-              variant={selectedCurrency === 'CAD' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setSelectedCurrency('CAD')}
-            >
-              🇨🇦 CAD
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Pricing Card */}
-          <Card className="relative overflow-hidden border-2 border-blue-200 shadow-xl">
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-600 to-blue-500 text-white px-4 py-2 rounded-bl-lg">
-              <span className="text-sm font-semibold">Most Popular</span>
+      <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        {/* Benefits */}
+        <Card>
+          <CardHeader>
+            <CardTitle>What You Get</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Complete Education Library</h4>
+                <p className="text-sm text-muted-foreground">Access all 27 financial education modules and quizzes</p>
+              </div>
             </div>
-            
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="text-3xl font-bold text-gray-900">
-                Monthly Membership
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Learn financial skills and earn real rewards
-              </CardDescription>
-              
-              <div className="mt-6">
-                <div className="text-5xl font-bold text-blue-600">
-                  {priceDisplay}
-                </div>
-                <div className="text-gray-500 mt-2">per month</div>
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Monthly Reward Eligibility</h4>
+                <p className="text-sm text-muted-foreground">Earn points and compete for cash rewards distributed monthly</p>
               </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Access to all financial education content</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Earn points for completing lessons and activities</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Monthly cash rewards from the community pool</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Leaderboards and tier-based benefits</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Community referral bonuses</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span>Cancel anytime</span>
-                </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Tier-Based Rewards</h4>
+                <p className="text-sm text-muted-foreground">Higher tiers = bigger reward pools and better winning odds</p>
               </div>
-
-              <Button
-                onClick={handleSubscribe}
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
-                size="lg"
-              >
-                {isLoading ? "Processing..." : `Subscribe for ${priceDisplay}/month`}
-              </Button>
-
-              <p className="text-xs text-gray-500 text-center">
-                Secure payment powered by Stripe. Cancel anytime.
+            </div>
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Progress Tracking</h4>
+                <p className="text-sm text-muted-foreground">Track your learning journey and streak bonuses</p>
+              </div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg mt-6">
+              <h4 className="font-medium text-green-800 mb-2">How Rewards Work</h4>
+              <p className="text-sm text-green-700">
+                $11 from every $20 membership goes into monthly reward pools. 
+                Winners are selected based on points earned through learning activities.
               </p>
-            </CardContent>
-          </Card>
-
-          {/* How It Works */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-6 w-6 text-green-500 mr-2" />
-                  How You Earn
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold">Complete Lessons</h4>
-                  <p className="text-sm text-gray-600">
-                    Earn 10-50 points for each financial education module
-                  </p>
-                </div>
-                <div className="border-l-4 border-green-500 pl-4">
-                  <h4 className="font-semibold">Take Action</h4>
-                  <p className="text-sm text-gray-600">
-                    Upload proof of real financial improvements for bonus points
-                  </p>
-                </div>
-                <div className="border-l-4 border-purple-500 pl-4">
-                  <h4 className="font-semibold">Refer Friends</h4>
-                  <p className="text-sm text-gray-600">
-                    Get 100+ points for each successful referral
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="h-6 w-6 text-blue-500 mr-2" />
-                  Community Rewards
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">55% goes to reward pool</span>
-                    <Badge variant="secondary">$11/month</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">45% for education & platform</span>
-                    <Badge variant="outline">$9/month</Badge>
-                  </div>
-                  <div className="pt-2 border-t">
-                    <p className="text-xs text-gray-600">
-                      Higher tiers get larger shares of monthly rewards based on points earned
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Trust & Security */}
-        <div className="mt-12 text-center">
-          <div className="flex justify-center items-center space-x-6 text-gray-500">
-            <div className="flex items-center">
-              <Globe className="h-5 w-5 mr-2" />
-              <span className="text-sm">Available in US & Canada</span>
             </div>
-            <div className="flex items-center">
-              <Star className="h-5 w-5 mr-2" />
-              <span className="text-sm">Secure payments by Stripe</span>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment Form */}
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <SubscribeForm />
+        </Elements>
       </div>
     </div>
   );
