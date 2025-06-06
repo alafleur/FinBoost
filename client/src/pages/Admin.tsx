@@ -227,6 +227,12 @@ export default function Admin() {
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [showActionPublishDialog, setShowActionPublishDialog] = useState(false);
   const [selectedActionForPublish, setSelectedActionForPublish] = useState<any>(null);
+  
+  // Current pool settings
+  const [currentPoolSettings, setCurrentPoolSettings] = useState({
+    rewardPoolPercentage: 55,
+    membershipFee: 2000
+  });
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -446,6 +452,86 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching support tickets:', error);
+    }
+  };
+
+  const fetchMonthlyPoolSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/monthly-pool-settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMonthlyPoolSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching monthly pool settings:', error);
+    }
+  };
+
+  const fetchCurrentPoolSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/current-pool-settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentPoolSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching current pool settings:', error);
+    }
+  };
+
+  const handleSavePoolSetting = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = editingPoolSetting 
+        ? `/api/admin/monthly-pool-settings/${editingPoolSetting.id}`
+        : '/api/admin/monthly-pool-settings';
+      
+      const method = editingPoolSetting ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(poolSettingForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: editingPoolSetting ? "Pool setting updated" : "Pool setting created",
+          description: "Monthly pool configuration has been saved successfully.",
+        });
+        
+        setShowPoolSettingDialog(false);
+        setEditingPoolSetting(null);
+        setPoolSettingForm({
+          cycleName: '',
+          cycleStartDate: '',
+          cycleEndDate: '',
+          rewardPoolPercentage: 55,
+          membershipFee: 2000,
+          isActive: true
+        });
+        
+        fetchMonthlyPoolSettings();
+        fetchCurrentPoolSettings();
+      } else {
+        throw new Error('Failed to save pool setting');
+      }
+    } catch (error) {
+      console.error('Error saving pool setting:', error);
+      toast({
+        title: "Error saving pool setting",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -4471,11 +4557,7 @@ export default function Admin() {
               }}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                // Handle save pool setting
-                console.log('Saving pool setting:', poolSettingForm);
-                setShowPoolSettingDialog(false);
-              }}>
+              <Button onClick={handleSavePoolSetting}>
                 {editingPoolSetting ? 'Update Cycle' : 'Create Cycle'}
               </Button>
             </div>
