@@ -17,6 +17,8 @@ interface User {
   totalPoints: number;
   currentMonthPoints: number;
   tier: string;
+  subscriptionStatus?: string;
+  theoreticalPoints?: number;
 }
 
 interface PointsSummaryProps {

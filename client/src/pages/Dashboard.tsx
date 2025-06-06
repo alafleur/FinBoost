@@ -35,8 +35,9 @@ import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
 import PointsActions from "@/components/PointsActions";
+import UpgradePrompt from "@/components/UpgradePrompt";
 import { educationContent } from "@/data/educationContent";
-import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt } from "@shared/userAccess";
+import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt, type UserForAccess } from "@shared/userAccess";
 
 // Custom hook to determine if the screen is mobile
 function useIsMobile() {
@@ -502,6 +503,17 @@ export default function Dashboard() {
               </p>
             </div>
 
+            {/* Upgrade Prompt for Free Users */}
+            {user && shouldShowUpgradePrompt(user, window.location.pathname) && (
+              <div className="mb-6 sm:mb-8">
+                <UpgradePrompt 
+                  theoreticalPoints={user.theoreticalPoints || 0}
+                  currentMonthPoints={user.currentMonthPoints || 0}
+                  membershipJoinBonus={100}
+                />
+              </div>
+            )}
+
             {/* Monthly Reward Pool */}
             <div className="mb-6 sm:mb-8">
               <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
@@ -511,9 +523,17 @@ export default function Dashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
                     Monthly Reward Pool
+                    {user && !getUserAccessInfo(user).canAccessRewardsPool && (
+                      <Badge variant="secondary" className="ml-2 bg-orange-100 text-orange-800">
+                        Premium Only
+                      </Badge>
+                    )}
                   </CardTitle>
                   <p className="text-sm text-purple-700">
-                    Community funds distributed monthly based on participation and achievement
+                    {user && getUserAccessInfo(user).canAccessRewardsPool 
+                      ? "Community funds distributed monthly based on participation and achievement"
+                      : "Join premium membership to compete for monthly rewards"
+                    }
                   </p>
                 </CardHeader>
                 <CardContent>

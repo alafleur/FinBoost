@@ -1,4 +1,4 @@
-import { User, LearningModule } from "./schema";
+import { LearningModule } from "./schema";
 
 export interface UserAccessInfo {
   isActive: boolean;
@@ -9,11 +9,17 @@ export interface UserAccessInfo {
   totalClaimablePoints: number;
 }
 
-export function getUserAccessInfo(user: User): UserAccessInfo {
+export interface UserForAccess {
+  subscriptionStatus?: string;
+  theoreticalPoints?: number;
+  totalPoints?: number;
+}
+
+export function getUserAccessInfo(user: UserForAccess): UserAccessInfo {
   const isPremium = user.subscriptionStatus === 'active';
   
   return {
-    isActive: user.isActive,
+    isActive: true,
     isPremium,
     canAccessRewardsPool: isPremium,
     canClaimPoints: isPremium,
@@ -22,7 +28,7 @@ export function getUserAccessInfo(user: User): UserAccessInfo {
   };
 }
 
-export function canAccessModule(user: User, module: LearningModule): boolean {
+export function canAccessModule(user: UserForAccess, module: LearningModule): boolean {
   const isPremium = user.subscriptionStatus === 'active';
   
   // Premium users can access all published modules
@@ -41,7 +47,7 @@ export function getUpgradeMessage(theoreticalPoints: number): string {
   return "Upgrade to start earning real points and compete for monthly rewards!";
 }
 
-export function shouldShowUpgradePrompt(user: User, currentPath: string): boolean {
+export function shouldShowUpgradePrompt(user: UserForAccess, currentPath: string): boolean {
   const isPremium = user.subscriptionStatus === 'active';
   
   // Don't show on upgrade/payment pages
