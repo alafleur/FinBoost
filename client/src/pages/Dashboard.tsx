@@ -1245,7 +1245,7 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <PointsActions 
-                      onPointsEarned={fetchUserData}
+                      onPointsEarned={fetchDashboardData}
                       quickWinActions={[]}
                     />
                   </CardContent>
