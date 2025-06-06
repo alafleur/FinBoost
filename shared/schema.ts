@@ -201,6 +201,24 @@ export const rewardDistributionSettings = pgTable("reward_distribution_settings"
   updatedBy: integer("updated_by").references(() => users.id),
 });
 
+// Admin configurable points actions
+export const adminPointsActions = pgTable("admin_points_actions", {
+  id: serial("id").primaryKey(),
+  actionId: text("action_id").notNull().unique(), // e.g., 'debt_payment', 'investment', etc.
+  name: text("name").notNull(),
+  basePoints: integer("base_points").notNull(),
+  maxDaily: integer("max_daily"),
+  maxMonthly: integer("max_monthly"), // Admin configurable monthly limit
+  maxTotal: integer("max_total"),
+  requiresProof: boolean("requires_proof").default(false).notNull(),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
 export const insertRewardDistributionSettingSchema = createInsertSchema(rewardDistributionSettings).pick({
   name: true,
   value: true,
@@ -265,3 +283,4 @@ export type UserReferralCode = typeof userReferralCodes.$inferSelect;
 export type StripePayment = typeof stripePayments.$inferSelect;
 export type StripePayout = typeof stripePayouts.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type AdminPointsAction = typeof adminPointsActions.$inferSelect;

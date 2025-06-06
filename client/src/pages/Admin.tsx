@@ -788,12 +788,13 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
+            <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -2277,6 +2278,196 @@ export default function Admin() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="actions">
+            <div className="space-y-6">
+              {/* Points Actions Management */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        Points Actions Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Configure point values, limits, and proof requirements for user actions
+                      </CardDescription>
+                    </div>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Action
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Action</TableHead>
+                          <TableHead>Points</TableHead>
+                          <TableHead>Daily Limit</TableHead>
+                          <TableHead>Monthly Limit</TableHead>
+                          <TableHead>Requires Proof</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            <div>
+                              <div>Debt Payment</div>
+                              <div className="text-xs text-gray-500">Upload proof of debt payment</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="25" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="1" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="10" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Switch defaultChecked />
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">action</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            <div>
+                              <div>Investment Contribution</div>
+                              <div className="text-xs text-gray-500">Upload proof of investment</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="30" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="1" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="8" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Switch defaultChecked />
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">action</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            <div>
+                              <div>Savings Deposit</div>
+                              <div className="text-xs text-gray-500">Upload proof of savings deposit</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="20" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="1" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              type="number" 
+                              defaultValue="15" 
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Switch defaultChecked />
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">action</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Configuration Notes</h4>
+                    <div className="text-sm text-blue-800 space-y-1">
+                      <div>• Points: Base points awarded for completing this action</div>
+                      <div>• Daily Limit: Maximum times per day a user can earn points for this action</div>
+                      <div>• Monthly Limit: Maximum times per monthly rewards cycle (prevents gaming)</div>
+                      <div>• Requires Proof: Whether users must upload evidence to earn points</div>
+                      <div>• All financial actions should require proof to ensure legitimacy</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 

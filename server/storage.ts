@@ -1,7 +1,7 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and, lt, gte } from "drizzle-orm";
+import { eq, sql, desc, and, lt, gte, ne } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -135,18 +135,32 @@ export interface IStorage {
     deleteModule(moduleId: number): Promise<void>;
     getAllModules(): Promise<any[]>;
     getModuleById(moduleId: number): Promise<any | null>;
-    
+
     updateUser(userId: number, userData: any): Promise<User>;
     deleteUser(userId: number): Promise<void>;
-    
+
     awardPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
     deductPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
-    
+
     updateRewardsConfig(config: any): Promise<void>;
     executeMonthlyDistribution(month: string): Promise<any>;
-    
+
     getAllSupportTickets(): Promise<any[]>;
     updateSupportTicket(ticketId: number, ticketData: any): Promise<any>;
+
+    getPointActions(): Promise<any[]>;
+    createOrUpdatePointAction(actionData: {
+      actionId: string;
+      name: string;
+      basePoints: number;
+      maxDaily?: number;
+      maxMonthly?: number;
+      maxTotal?: number;
+      requiresProof: boolean;
+      category: string;
+      description: string;
+    }, adminUserId: number): Promise<any>;
+    deletePointAction(actionId: string): Promise<void>;
 }
 
 import fs from 'fs/promises';
@@ -440,30 +454,55 @@ export class MemStorage implements IStorage {
     return historyEntry;
   }
 
-  async awardPointsWithProof(userId: number, actionId: string, points: number, description: string, proofUrl: string, metadata?: any): Promise<UserPointsHistory> {
-    // Check action limits
-    const actionConfig = POINTS_CONFIG[actionId];
-    if (actionConfig) {
-      if (actionConfig.maxDaily && !(await this.checkDailyActionLimit(userId, actionId))) {
-        throw new Error(`Daily limit reached for action: ${actionId}`);
-      }
-      if (actionConfig.maxTotal && !(await this.checkTotalActionLimit(userId, actionId))) {
-        throw new Error(`Total limit reached for action: ${actionId}`);
+  async awardPointsWithProof(
+    userId: number, 
+    actionId: string, 
+    points: number, 
+    description: string, 
+    proofUrl: string,
+    metadata?: any
+  ): Promise<UserPointsHistory> {
+    // Check monthly limits
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+    const startOfMonth = new Date(currentMonth + '-01T00:00:00.000Z');
+
+    // Get action configuration
+    const actionConfig = await db.select()
+      .from(adminPointsActions)
+      .where(eq(adminPointsActions.actionId, actionId))
+      .limit(1);
+
+    if (actionConfig.length > 0 && actionConfig[0].maxMonthly) {
+      // Check how many times this action has been done this month
+      const monthlyCount = await db.select({ count: sql<number>`count(*)` })
+        .from(userPointsHistory)
+        .where(
+          and(
+            eq(userPointsHistory.userId, userId),
+            eq(userPointsHistory.action, actionId),
+            gte(userPointsHistory.createdAt, startOfMonth),
+            ne(userPointsHistory.status, 'rejected')
+          )
+        );
+
+      if (monthlyCount[0].count >= actionConfig[0].maxMonthly) {
+        throw new Error(`Monthly limit reached for ${actionConfig[0].name}. Limit: ${actionConfig[0].maxMonthly} per month.`);
       }
     }
 
-    // Create pending points history entry
-    const [historyEntry] = await db.insert(userPointsHistory).values({
-      userId,
-      points,
-      action: actionId,
-      description,
-      status: 'pending',
-      proofUrl,
-      metadata: metadata ? JSON.stringify(metadata) : null,
-    }).returning();
+    const entry = await db.insert(userPointsHistory)
+      .values({
+        userId,
+        points,
+        action: actionId,
+        description,
+        proofUrl,
+        status: 'pending', // Requires admin approval
+        metadata: metadata ? JSON.stringify(metadata) : null,
+      })
+      .returning();
 
-    return historyEntry;
+    return entry[0];
   }
 
   async checkDailyActionLimit(userId: number, actionId: string): Promise<boolean> {
@@ -595,31 +634,31 @@ export class MemStorage implements IStorage {
 
   async recalculateAllUserTiers(): Promise<void> {
     console.log("Starting tier recalculation for all users...");
-    
+
     // Get all active users
     const allUsers = await db.select().from(users).where(eq(users.isActive, true));
-    
+
     console.log(`Recalculating tiers for ${allUsers.length} users`);
-    
+
     // Update each user's tier based on their current points
     for (const user of allUsers) {
       const newTier = await this.calculateUserTier(user.currentMonthPoints || 0);
-      
+
       if (user.tier !== newTier) {
         console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentMonthPoints} points)`);
-        
+
         await db.update(users)
           .set({ 
             tier: newTier,
             updatedAt: new Date()
           })
           .where(eq(users.id, user.id));
-          
+
         // Update memory cache
         this.users.set(user.id, { ...user, tier: newTier });
       }
     }
-    
+
     console.log("Tier recalculation completed");
   }
 
@@ -1045,7 +1084,7 @@ export class MemStorage implements IStorage {
     const offset = (page - 1) * limit;
 
     let query = db.select().from(users);
-    
+
     const conditions = [];
     if (search) {
       conditions.push(sql`(${users.username} ILIKE ${'%' + search + '%'} OR ${users.email} ILIKE ${'%' + search + '%'})`);
@@ -1073,7 +1112,7 @@ export class MemStorage implements IStorage {
     // Get basic analytics data
     const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
     const activeUsers = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isActive, true));
-    
+
     const totalPointsAwarded = await db.select({ 
       total: sql<number>`coalesce(sum(points), 0)` 
     }).from(userPointsHistory).where(eq(userPointsHistory.status, 'approved'));
@@ -1357,9 +1396,9 @@ export class MemStorage implements IStorage {
 
       // Handle different response formats
       const rows = progress.rows || progress || [];
-      
+
       console.log(`User ${userId} progress query returned ${rows.length} total lessons, ${rows.filter((r: any) => r.completed).length} completed`);
-      
+
       return rows.map((p: any) => ({
         id: p.id,
         userId: p.user_id,
@@ -1378,7 +1417,7 @@ export class MemStorage implements IStorage {
   async markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
     // Handle both numeric and string lesson IDs
     let moduleId: number;
-    
+
     // If lessonId is numeric, use it directly as moduleId
     if (!isNaN(Number(lessonId))) {
       moduleId = Number(lessonId);
@@ -1655,7 +1694,7 @@ export class MemStorage implements IStorage {
         FROM user_monthly_rewards 
         WHERE user_id = ${userId} AND is_winner = true
       `);
-      
+
       const totalCents = result.rows?.[0]?.total_rewards || result[0]?.total_rewards || 0;
       return Math.floor(totalCents / 100); // Convert cents to dollars
     } catch (error) {
@@ -1681,7 +1720,7 @@ export class MemStorage implements IStorage {
     try {
       const [user] = await db.select().from(users).where(eq(users.email, email));
       if (!user) return null;
-      
+
       const isValid = await bcrypt.compare(password, user.password);
       return isValid ? user : null;
     } catch (error) {
@@ -1711,14 +1750,14 @@ export class MemStorage implements IStorage {
     try {
       const tokenData = this.tokens.get(token);
       if (!tokenData) return null;
-      
+
       // Check if token is expired (24 hours)
       const tokenAge = Date.now() - tokenData.createdAt.getTime();
       if (tokenAge > 24 * 60 * 60 * 1000) {
         this.tokens.delete(token);
         return null;
       }
-      
+
       return await this.getUser(tokenData.userId) || null;
     } catch (error) {
       console.error('Error getting user by token:', error);
@@ -1737,9 +1776,9 @@ export class MemStorage implements IStorage {
       const activeUsers = await db.select({ count: sql<number>`count(*)` })
         .from(users)
         .where(sql`last_login_at > NOW() - INTERVAL '30 days'`);
-      
+
       const moduleCount = await db.select({ count: sql<number>`count(*)` }).from(learningModules);
-      
+
       return {
         totalUsers: totalUsers[0]?.count || 0,
         activeUsers: activeUsers[0]?.count || 0,
@@ -1803,7 +1842,7 @@ export class MemStorage implements IStorage {
   async toggleModulePublish(moduleId: number, isPublished: boolean): Promise<any> {
     try {
       const publishedAt = isPublished ? new Date() : null;
-      
+
       const [updatedModule] = await db.update(learningModules)
         .set({ 
           isPublished: isPublished,
@@ -1811,7 +1850,7 @@ export class MemStorage implements IStorage {
         })
         .where(eq(learningModules.id, moduleId))
         .returning();
-      
+
       return updatedModule;
     } catch (error) {
       console.error('Error toggling module publish status:', error);
@@ -1850,10 +1889,10 @@ export class MemStorage implements IStorage {
     try {
       const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
       const userCount = totalUsers[0]?.count || 0;
-      
+
       const monthlyRevenue = userCount * 20; // $20 per user
       const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
-      
+
       return {
         totalUsers: userCount.toString(),
         monthlyRevenue: monthlyRevenue.toString(),
@@ -1881,23 +1920,23 @@ export class MemStorage implements IStorage {
     try {
       // Get distribution settings
       const settings = await this.getDistributionSettings();
-      
+
       // Calculate next distribution date based on current date
       const now = new Date();
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth();
-      
+
       // For monthly distributions, next payout is first day of next month
       const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
       const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
       const nextDate = new Date(nextYear, nextMonth, 1);
-      
+
       // Calculate time remaining
       const timeRemaining = nextDate.getTime() - now.getTime();
       const days = Math.max(0, Math.ceil(timeRemaining / (1000 * 60 * 60 * 24)));
       const hours = Math.max(0, Math.ceil((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
       const minutes = Math.max(0, Math.ceil((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
-      
+
       return {
         nextDate: nextDate.toISOString(),
         timeRemaining: {
@@ -1924,15 +1963,15 @@ export class MemStorage implements IStorage {
     try {
       const allUsers = await db.select({ points: users.currentMonthPoints }).from(users);
       const points = allUsers.map(u => u.points || 0).sort((a, b) => a - b);
-      
+
       if (points.length === 0) {
         return { tier1: 0, tier2: 0, tier3: 0 };
       }
-      
+
       // Calculate 33rd and 66th percentiles
       const tier2Index = Math.floor(points.length * 0.33);
       const tier3Index = Math.floor(points.length * 0.66);
-      
+
       return {
         tier1: 0,
         tier2: points[tier2Index] || 0,
@@ -1955,7 +1994,7 @@ export class MemStorage implements IStorage {
       .from(users)
       .orderBy(desc(users.currentMonthPoints))
       .limit(50);
-      
+
       return leaderboard.map((user, index) => ({
         rank: (index + 1).toString(),
         userId: user.userId,
@@ -1982,32 +2021,85 @@ export class MemStorage implements IStorage {
   }
 
   async getPointActions(): Promise<any[]> {
-    return [
-      {
-        id: "daily-login",
-        name: "Daily Login",
-        points: 5,
-        maxDaily: 1,
-        maxTotal: null,
-        category: "engagement"
-      },
-      {
-        id: "lesson-completion",
-        name: "Complete Lesson",
-        points: 20,
-        maxDaily: 5,
-        maxTotal: null,
-        category: "learning"
-      },
-      {
-        id: "quiz-perfect",
-        name: "Perfect Quiz Score",
-        points: 10,
-        maxDaily: 3,
-        maxTotal: null,
-        category: "learning"
+    try {
+      // First try to get from admin-configured actions
+      const adminActions = await db.select().from(adminPointsActions).where(eq(adminPointsActions.isActive, true));
+
+      if (adminActions.length > 0) {
+        return adminActions.map(action => ({
+          id: action.actionId,
+          name: action.name,
+          basePoints: action.basePoints,
+          maxDaily: action.maxDaily,
+          maxMonthly: action.maxMonthly,
+          maxTotal: action.maxTotal,
+          requiresProof: action.requiresProof,
+          category: action.category,
+          description: action.description
+        }));
       }
-    ];
+
+      // Fallback to static configuration
+      return Object.values(POINTS_CONFIG).filter(action => typeof action === 'object' && action.id);
+    } catch (error) {
+      console.error('Error fetching point actions:', error);
+      // Fallback to static configuration on error
+      return Object.values(POINTS_CONFIG).filter(action => typeof action === 'object' && action.id);
+    }
+  }
+
+  async createOrUpdatePointAction(actionData: {
+    actionId: string;
+    name: string;
+    basePoints: number;
+    maxDaily?: number;
+    maxMonthly?: number;
+    maxTotal?: number;
+    requiresProof: boolean;
+    category: string;
+    description: string;
+  }, adminUserId: number): Promise<any> {
+    const existing = await db.select()
+      .from(adminPointsActions)
+      .where(eq(adminPointsActions.actionId, actionData.actionId))
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Update existing
+      const updated = await db.update(adminPointsActions)
+        .set({
+          name: actionData.name,
+          basePoints: actionData.basePoints,
+          maxDaily: actionData.maxDaily,
+          maxMonthly: actionData.maxMonthly,
+          maxTotal: actionData.maxTotal,
+          requiresProof: actionData.requiresProof,
+          category: actionData.category,
+          description: actionData.description,
+          updatedAt: new Date(),
+          updatedBy: adminUserId
+        })
+        .where(eq(adminPointsActions.actionId, actionData.actionId))
+        .returning();
+
+      return updated[0];
+    } else {
+      // Create new
+      const created = await db.insert(adminPointsActions)
+        .values({
+          ...actionData,
+          updatedBy: adminUserId
+        })
+        .returning();
+
+      return created[0];
+    }
+  }
+
+  async deletePointAction(actionId: string): Promise<void> {
+    await db.update(adminPointsActions)
+      .set({ isActive: false })
+      .where(eq(adminPointsActions.actionId, actionId));
   }
 
   // Add tokens storage
@@ -2081,7 +2173,7 @@ export class MemStorage implements IStorage {
   async updateUser(userId: number, userData: any): Promise<User> {
     try {
       const updateData: any = {};
-      
+
       if (userData.username !== undefined) updateData.username = userData.username;
       if (userData.email !== undefined) updateData.email = userData.email;
       if (userData.firstName !== undefined) updateData.firstName = userData.firstName;
@@ -2098,7 +2190,7 @@ export class MemStorage implements IStorage {
         .set(updateData)
         .where(eq(users.id, userId))
         .returning();
-      
+
       return user;
     } catch (error) {
       console.error('Error updating user:', error);
@@ -2112,7 +2204,7 @@ export class MemStorage implements IStorage {
       await db.delete(userPointsHistory).where(eq(userPointsHistory.userId, userId));
       await db.delete(userProgress).where(eq(userProgress.userId, userId));
       await db.delete(userMonthlyRewards).where(eq(userMonthlyRewards.userId, userId));
-      
+
       // Delete the user
       await db.delete(users).where(eq(users.id, userId));
     } catch (error) {
@@ -2155,7 +2247,7 @@ export class MemStorage implements IStorage {
       if (user) {
         const newCurrentPoints = Math.max(0, (user.currentMonthPoints || 0) - points);
         const newTotalPoints = Math.max(0, (user.totalPoints || 0) - points);
-        
+
         await db.update(users)
           .set({
             currentMonthPoints: newCurrentPoints,
@@ -2193,7 +2285,7 @@ export class MemStorage implements IStorage {
     try {
       // Implement monthly distribution logic
       console.log('Executing monthly distribution for:', month);
-      
+
       // Get all users with points for the month
       const usersWithPoints = await db.select()
         .from(users)
@@ -2227,7 +2319,7 @@ export class MemStorage implements IStorage {
   async updateSupportTicket(ticketId: number, ticketData: any): Promise<any> {
     try {
       const updateData: any = {};
-      
+
       if (ticketData.status !== undefined) updateData.status = ticketData.status;
       if (ticketData.priority !== undefined) updateData.priority = ticketData.priority;
       if (ticketData.response !== undefined) updateData.response = ticketData.response;
@@ -2237,7 +2329,7 @@ export class MemStorage implements IStorage {
         .set(updateData)
         .where(eq(supportRequests.id, ticketId))
         .returning();
-      
+
       return ticket;
     } catch (error) {
       console.error('Error updating support ticket:', error);

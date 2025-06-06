@@ -4,6 +4,7 @@ export interface PointsAction {
   basePoints: number;
   maxDaily?: number; // Maximum times per day this action can earn points
   maxTotal?: number; // Maximum lifetime times this action can earn points
+  maxMonthly?: number; // Maximum times per monthly rewards cycle (admin configurable)
   requiresProof: boolean;
   category: 'education' | 'action' | 'social' | 'achievement';
   description: string;
@@ -124,6 +125,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     name: 'Debt Payment',
     basePoints: 25,
     maxDaily: 1,
+    maxMonthly: 10, // Admin configurable monthly limit
     requiresProof: true,
     category: 'action',
     description: 'Upload proof of debt payment (credit card, loan, etc.)'
@@ -133,6 +135,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     name: 'Investment Contribution',
     basePoints: 30,
     maxDaily: 1,
+    maxMonthly: 8, // Admin configurable monthly limit
     requiresProof: true,
     category: 'action',
     description: 'Upload proof of investment contribution (401k, IRA, brokerage)'
@@ -142,6 +145,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
     name: 'Savings Deposit',
     basePoints: 20,
     maxDaily: 1,
+    maxMonthly: 15, // Admin configurable monthly limit
     requiresProof: true,
     category: 'action',
     description: 'Upload proof of savings account deposit'
