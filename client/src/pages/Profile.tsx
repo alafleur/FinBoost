@@ -78,8 +78,40 @@ export default function Profile() {
 
   const tierConfig: Record<string, TierInfo> = {
     tier1: {
-      name: 'Tier 1',
-      threshold: 0,
+      name: 'Tier 1 (Gold)',
+      threshold: 500, // Now highest tier
+      color: 'from-yellow-400 to-yellow-600',
+      icon: Crown,
+      benefits: [
+        'All Tier 2 benefits',
+        'Premium lesson content',
+        'Personal finance coaching calls',
+        'Tier 1 exclusive webinars',
+        'Maximum monthly reward potential',
+        'Early access to new features'
+      ]
+    },
+    tier2: {
+      name: 'Tier 2 (Silver)',
+      threshold: 250,
+      color: 'from-gray-400 to-gray-600',
+      icon: Trophy,
+      benefits: [
+        'All Tier 3 benefits',
+        'Advanced lesson modules',
+        'Priority community support',
+        'Tier 2 exclusive content',
+        'Enhanced monthly rewards'
+      ],
+      nextTier: {
+        name: 'Tier 1 (Gold)',
+        threshold: 500,
+        pointsNeeded: 250
+      }
+    },
+    tier3: {
+      name: 'Tier 3 (Bronze)',
+      threshold: 0, // Now lowest tier
       color: 'from-orange-400 to-orange-600',
       icon: Medal,
       benefits: [
@@ -89,42 +121,10 @@ export default function Profile() {
         'Basic achievement badges'
       ],
       nextTier: {
-        name: 'Tier 2',
+        name: 'Tier 2 (Silver)',
         threshold: 250,
         pointsNeeded: 250
       }
-    },
-    tier2: {
-      name: 'Tier 2',
-      threshold: 250,
-      color: 'from-gray-400 to-gray-600',
-      icon: Trophy,
-      benefits: [
-        'All Tier 1 benefits',
-        'Advanced lesson modules',
-        'Priority community support',
-        'Tier 2 exclusive content',
-        'Enhanced monthly rewards'
-      ],
-      nextTier: {
-        name: 'Tier 3',
-        threshold: 500,
-        pointsNeeded: 250
-      }
-    },
-    tier3: {
-      name: 'Tier 3',
-      threshold: 500,
-      color: 'from-yellow-400 to-yellow-600',
-      icon: Crown,
-      benefits: [
-        'All Tier 2 benefits',
-        'Premium lesson content',
-        'Personal finance coaching calls',
-        'Tier 3 exclusive webinars',
-        'Maximum monthly reward potential',
-        'Early access to new features'
-      ]
     }
   };
 

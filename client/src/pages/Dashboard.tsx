@@ -90,16 +90,16 @@ export default function Dashboard() {
             <h3 className="font-heading font-bold text-lg mb-4 text-gray-800 mt-1">Tier Thresholds</h3>
             <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                <span className="text-blue-700 font-semibold">Tier 3</span>
-                <span className="text-blue-600">{tierThresholds?.tier3 || 0}+ pts</span>
+              <div className="flex justify-between items-center p-2 bg-yellow-50 rounded border">
+                <span className="text-yellow-700 font-semibold">Tier 1 (Gold)</span>
+                <span className="text-yellow-600">{tierThresholds?.tier1 || 0}+ pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                <span className="text-blue-700 font-semibold">Tier 2</span>
-                <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
+              <div className="flex justify-between items-center p-2 bg-amber-50 rounded border">
+                <span className="text-amber-700 font-semibold">Tier 2 (Silver)</span>
+                <span className="text-amber-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier1 ? tierThresholds.tier1 - 1 : 0} pts</span>
               </div>
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                <span className="text-blue-700 font-semibold">Tier 1</span>
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
+                <span className="text-blue-700 font-semibold">Tier 3 (Bronze)</span>
                 <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
               </div>
             </div>
@@ -815,16 +815,16 @@ export default function Dashboard() {
                     <h3 className="font-heading font-bold text-lg mb-4 text-gray-800">Tier Thresholds</h3>
                     <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
                     <div className="space-y-2 text-xs">
-                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                        <span className="text-blue-700 font-semibold">Tier 3</span>
-                        <span className="text-blue-600">{tierThresholds?.tier3 || 0}+ pts</span>
+                      <div className="flex justify-between items-center p-2 bg-yellow-50 rounded border">
+                        <span className="text-yellow-700 font-semibold">Tier 1 (Gold)</span>
+                        <span className="text-yellow-600">{tierThresholds?.tier1 || 0}+ pts</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                        <span className="text-blue-700 font-semibold">Tier 2</span>
-                        <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier3 ? tierThresholds.tier3 - 1 : 0} pts</span>
+                      <div className="flex justify-between items-center p-2 bg-amber-50 rounded border">
+                        <span className="text-amber-700 font-semibold">Tier 2 (Silver)</span>
+                        <span className="text-amber-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier1 ? tierThresholds.tier1 - 1 : 0} pts</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                        <span className="text-blue-700 font-semibold">Tier 1</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
+                        <span className="text-blue-700 font-semibold">Tier 3 (Bronze)</span>
                         <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
                       </div>
                     </div>

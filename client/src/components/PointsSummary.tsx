@@ -80,40 +80,40 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
   const getTierDisplayName = (tier: string) => {
     switch (tier?.toLowerCase()) {
-      case 'tier3':
-        return 'Tier 3';
-      case 'tier2':
-        return 'Tier 2';
       case 'tier1':
+        return 'Tier 1 (Gold)';
+      case 'tier2':
+        return 'Tier 2 (Silver)';
+      case 'tier3':
       default:
-        return 'Tier 1';
+        return 'Tier 3 (Bronze)';
     }
   };
 
   const getNextTierInfo = () => {
     switch (user.tier) {
-      case 'tier1': 
+      case 'tier3': 
         return { 
           points: tierThresholds.tier2, 
-          name: 'Tier 2',
+          name: 'Tier 2 (Silver)',
           isMaxTier: false 
         };
       case 'tier2': 
         return { 
-          points: tierThresholds.tier3, 
-          name: 'Tier 3',
+          points: tierThresholds.tier1, 
+          name: 'Tier 1 (Gold)',
           isMaxTier: false 
         };
-      case 'tier3': 
+      case 'tier1': 
         return { 
-          points: tierThresholds.tier3, 
-          name: 'Tier 3',
+          points: tierThresholds.tier1, 
+          name: 'Tier 1 (Gold)',
           isMaxTier: true 
         };
       default: 
         return { 
           points: tierThresholds.tier2, 
-          name: 'Tier 2',
+          name: 'Tier 2 (Silver)',
           isMaxTier: false 
         };
     }
@@ -174,19 +174,19 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' || user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Tier 1</span>
-                <span className="text-xs text-gray-500">0</span>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' ? 'bg-yellow-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 1 (Gold)</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier1}+</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' || user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Tier 2</span>
-                <span className="text-xs text-gray-500">{tierThresholds.tier2}</span>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' ? 'bg-amber-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 2 (Silver)</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier2}+</span>
               </div>
               <div className="flex items-center space-x-1">
                 <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                <span className="text-xs font-medium">Tier 3</span>
-                <span className="text-xs text-gray-500">{tierThresholds.tier3}</span>
+                <span className="text-xs font-medium">Tier 3 (Bronze)</span>
+                <span className="text-xs text-gray-500">0+</span>
               </div>
             </div>
 
