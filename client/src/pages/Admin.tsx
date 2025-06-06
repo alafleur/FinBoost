@@ -94,6 +94,19 @@ interface PendingProof {
   };
 }
 
+interface SupportTicket {
+  id: number;
+  userId?: number;
+  name: string;
+  email: string;
+  category: string;
+  message: string;
+  status: string;
+  response?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
 export default function Admin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -200,9 +213,10 @@ export default function Admin() {
   const [showUserSettingsDialog, setShowUserSettingsDialog] = useState(false);
   
   // Support ticket state
-  const [supportTickets, setSupportTickets] = useState([]);
-  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [showReplyDialog, setShowReplyDialog] = useState(false);
   const [ticketReply, setTicketReply] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [showActionPublishDialog, setShowActionPublishDialog] = useState(false);
