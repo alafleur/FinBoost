@@ -38,7 +38,11 @@ import {
   X,
   Activity,
   Lock,
-  Calculator
+  Calculator,
+  HelpCircle,
+  MessageSquare,
+  Timer,
+  MoreHorizontal
 } from 'lucide-react';
 
 interface LearningModule {
