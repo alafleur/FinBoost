@@ -58,6 +58,8 @@ export default function Lesson() {
     streakBonus: number;
     newStreak: number;
   } | null>(null);
+  const [user, setUser] = useState<UserForAccess | null>(null);
+  const [accessBlocked, setAccessBlocked] = useState(false);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -70,6 +72,25 @@ export default function Lesson() {
           return;
         }
 
+        // Fetch user data first
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLocation('/login');
+          return;
+        }
+
+        const userResponse = await fetch('/api/user', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!userResponse.ok) {
+          setLocation('/login');
+          return;
+        }
+
+        const userData = await userResponse.json();
+        setUser(userData);
+
         // Fetch published modules from API
         const response = await fetch('/api/modules');
         const data = await response.json();
@@ -79,6 +100,13 @@ export default function Lesson() {
           const moduleData = data.modules.find((m: any) => m.id.toString() === lessonId);
           
           if (moduleData) {
+            // Check if user can access this module
+            const canAccess = canAccessModule(userData, moduleData);
+            
+            if (!canAccess) {
+              setAccessBlocked(true);
+            }
+
             // Convert module data to lesson format
             const quizData = moduleData.quiz ? JSON.parse(moduleData.quiz) : [];
             setLesson({
@@ -273,6 +301,43 @@ export default function Lesson() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading lesson...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access blocked message for free users trying to access premium content
+  if (accessBlocked && user) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <Button 
+              onClick={() => setLocation('/education')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Lessons
+            </Button>
+          </div>
+          
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-6 w-6" />
+                {lesson.title}
+              </CardTitle>
+              <CardDescription>
+                This is premium content. Upgrade to access this lesson and earn points.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <UpgradePrompt 
+            theoreticalPoints={user.theoreticalPoints || 0}
+            currentMonthPoints={user.currentMonthPoints || 0}
+          />
         </div>
       </div>
     );

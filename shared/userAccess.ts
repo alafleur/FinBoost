@@ -13,6 +13,7 @@ export interface UserForAccess {
   subscriptionStatus?: string;
   theoreticalPoints?: number;
   totalPoints?: number;
+  currentMonthPoints?: number;
 }
 
 export function getUserAccessInfo(user: UserForAccess): UserAccessInfo {
