@@ -1215,6 +1215,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Demo upgrade to premium route
+  app.post("/api/upgrade-to-premium", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      // Update user subscription status to active
+      const updatedUser = await storage.updateUser(user.id, {
+        subscriptionStatus: 'active',
+        stripeCustomerId: 'demo_customer_' + user.id,
+        stripeSubscriptionId: 'demo_subscription_' + user.id,
+        subscriptionStartDate: new Date(),
+        subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Successfully upgraded to premium",
+        user: updatedUser
+      });
+    } catch (error: any) {
+      console.error('Premium upgrade error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Stripe subscription routes
   app.post("/api/create-subscription", async (req, res) => {
     try {

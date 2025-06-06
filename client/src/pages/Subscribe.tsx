@@ -15,15 +15,46 @@ const SubscribeForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Demo subscription flow
-    setTimeout(() => {
+    try {
+      // Get user token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLocation('/auth');
+        return;
+      }
+
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Update user subscription status
+      const response = await fetch('/api/upgrade-to-premium', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upgrade subscription');
+      }
+
       toast({
         title: "Welcome to Premium!",
         description: "Your membership is now active. Redirecting to dashboard...",
       });
+      
       setTimeout(() => setLocation('/dashboard'), 2000);
+    } catch (error) {
+      console.error('Subscription upgrade error:', error);
+      toast({
+        title: "Upgrade Failed",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
