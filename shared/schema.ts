@@ -48,6 +48,10 @@ export const users = pgTable("users", {
   connectOnboardingComplete: boolean("connect_onboarding_complete").default(false),
   payoutEligible: boolean("payout_eligible").default(false),
 
+  // Membership Bonus Tracking
+  membershipBonusReceived: boolean("membership_bonus_received").default(false),
+  theoreticalPoints: integer("theoretical_points").default(0).notNull(), // Points earned before membership
+
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -81,6 +85,7 @@ export const learningModules = pgTable("learning_modules", {
   estimatedMinutes: integer("estimated_minutes").default(5).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   isPublished: boolean("is_published").default(false).notNull(),
+  accessType: text("access_type").default("free").notNull(), // 'free' or 'premium'
   publishedAt: timestamp("published_at"),
   order: integer("order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -233,6 +238,19 @@ export const monthlyPoolSettings = pgTable("monthly_pool_settings", {
   createdBy: integer("created_by").references(() => users.id),
 });
 
+// Admin settings for membership and bonuses
+export const adminSettings = pgTable("admin_settings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(),
+  settingValue: text("setting_value").notNull(),
+  settingType: text("setting_type").notNull(), // 'number', 'text', 'boolean'
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // 'membership', 'rewards', 'features'
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
 export const insertRewardDistributionSettingSchema = createInsertSchema(rewardDistributionSettings).pick({
   name: true,
   value: true,
@@ -247,10 +265,36 @@ export const insertMonthlyPoolSettingSchema = createInsertSchema(monthlyPoolSett
   membershipFee: true,
 });
 
+export const insertAdminSettingSchema = createInsertSchema(adminSettings).pick({
+  settingKey: true,
+  settingValue: true,
+  settingType: true,
+  displayName: true,
+  description: true,
+  category: true,
+});
+
+export const insertLearningModuleSchema = createInsertSchema(learningModules).pick({
+  title: true,
+  description: true,
+  content: true,
+  quiz: true,
+  pointsReward: true,
+  category: true,
+  difficulty: true,
+  estimatedMinutes: true,
+  accessType: true,
+  order: true,
+});
+
 export type RewardDistributionSetting = typeof rewardDistributionSettings.$inferSelect;
 export type InsertRewardDistributionSetting = z.infer<typeof insertRewardDistributionSettingSchema>;
 export type MonthlyPoolSetting = typeof monthlyPoolSettings.$inferSelect;
 export type InsertMonthlyPoolSetting = z.infer<typeof insertMonthlyPoolSettingSchema>;
+export type AdminSetting = typeof adminSettings.$inferSelect;
+export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
+export type LearningModule = typeof learningModules.$inferSelect;
+export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
