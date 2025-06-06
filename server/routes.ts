@@ -92,6 +92,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tier: user.tier,
           currentStreak: user.currentStreak || 0,
           longestStreak: user.longestStreak || 0,
+          subscriptionStatus: user.subscriptionStatus || 'inactive',
+          theoreticalPoints: user.theoreticalPoints || 0,
           isAdmin: user.isAdmin || user.email === 'lafleur.andrew@gmail.com'
         } 
       });
