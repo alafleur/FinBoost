@@ -1108,9 +1108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByToken(token);
-      console.log('Admin check - User:', user?.email, 'isAdmin:', user?.isAdmin);
       if (!user || (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com')) {
-        console.log('Admin access denied for user:', user?.email);
         return res.status(403).json({ message: "Admin access required" });
       }
 
