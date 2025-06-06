@@ -8,13 +8,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { username, email, password } = req.body;
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ success: false, message: "User already exists" });
       }
-      
+
       const user = await storage.createUser({ username, email, password });
       res.json({ success: true, message: "User created successfully", user: { id: user.id, username: user.username, email: user.email } });
     } catch (error: any) {
@@ -25,18 +25,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       const user = await storage.validateUser(email, password);
       if (!user) {
         return res.status(401).json({ success: false, message: "Invalid email or password" });
       }
-      
+
       // Update last login
       await storage.updateUserLastLogin(user.id);
-      
+
       // Generate token
       const token = await storage.generateToken(user.id);
-      
+
       res.json({ 
         success: true, 
         message: "Login successful", 
@@ -59,12 +59,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       res.json({ 
         success: true, 
         user: { 
@@ -103,12 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const progress = await storage.getUserProgress(user.id);
       res.json({ success: true, progress, completedCount: progress.length });
     } catch (error: any) {
@@ -147,6 +147,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current rewards configuration
+  app.get('/api/rewards/config', async (req, res) => {
+    try {
+      // For now, return the hardcoded admin configuration
+      // In a full implementation, this would come from a database table
+      // storing the admin's current configuration
+      res.json({
+        success: true,
+        config: {
+          tierAllocations: {
+            tier1: 20,  // tier 1 (lowest) gets 20%
+            tier2: 30,  // tier 2 (middle) gets 30%
+            tier3: 50   // tier 3 (highest) gets 50%
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching rewards config:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch rewards configuration' });
+    }
+  });
+
   // Leaderboard routes
   app.get("/api/leaderboard", async (req, res) => {
     try {
@@ -164,12 +186,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const analytics = await storage.getAdminAnalytics();
       res.json({ success: true, analytics });
     } catch (error: any) {
@@ -209,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const lessonId = req.params.id;
       const token = req.headers.authorization?.replace('Bearer ', '');
-      
+
       if (!token) {
         return res.status(401).json({ success: false, message: "No token provided" });
       }
@@ -271,12 +293,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const moduleId = parseInt(req.params.id);
       const { isPublished } = req.body;
-      
+
       // If publishing a module, auto-populate content if it's empty
       if (isPublished) {
         await autoPopulateModuleContent(moduleId);
       }
-      
+
       const module = await storage.toggleModulePublish(moduleId, isPublished);
       res.json({ success: true, module });
     } catch (error: any) {
@@ -291,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
@@ -299,14 +321,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const allModules = await storage.getAllModules();
       let populatedCount = 0;
-      
+
       for (const module of allModules) {
         if (module.isPublished && (!module.content || !module.quiz)) {
           await autoPopulateModuleContent(module.id);
           populatedCount++;
         }
       }
-      
+
       res.json({ 
         success: true, 
         message: `Auto-populated ${populatedCount} modules with educational content` 
@@ -325,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       hasQuiz: !!currentModule?.quiz,
       category: currentModule?.category
     });
-    
+
     if (currentModule && (!currentModule.content || !currentModule.quiz)) {
       // Find matching content from database
       const contentTemplate = findBestContent(
@@ -333,20 +355,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentModule.description || '', 
         currentModule.category
       ) || fallbackContent;
-      
+
       console.log(`Found content template:`, {
         templateFound: !!contentTemplate,
         contentLength: contentTemplate?.content?.length,
         quizQuestions: contentTemplate?.quiz?.length
       });
-      
+
       // Update module with auto-populated content
       await storage.updateModule(moduleId, {
         ...currentModule,
         content: currentModule.content || contentTemplate.content,
         quiz: currentModule.quiz || JSON.stringify(contentTemplate.quiz)
       });
-      
+
       console.log(`Module ${moduleId} updated with auto-populated content`);
     }
   }
@@ -398,11 +420,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { actionId, description, proofUrl } = req.body;
-      
+
       // Get the action configuration to determine points
       const actions = await storage.getPointActions();
       const action = actions.find(a => a.id === actionId);
-      
+
       if (!action) {
         return res.status(400).json({ success: false, message: "Invalid action" });
       }
@@ -465,7 +487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
@@ -485,7 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
@@ -506,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
@@ -526,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
@@ -547,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
@@ -579,14 +601,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
 
       const referrals = await storage.getUserReferrals(user.id);
-      
+
       res.json({ 
         success: true, 
         referrals: referrals.map(r => ({
@@ -611,14 +633,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
 
       const history = await storage.getUserPointsHistory(user.id);
-      
+
       res.json({ 
         success: true, 
         history: history.map(h => ({
@@ -644,14 +666,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!token) {
         return res.status(401).json({ message: "Invalid token" });
       }
-      
+
       const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
 
       const history = await storage.getUserMonthlyRewardsHistory(user.id);
-      
+
       res.json({ 
         success: true, 
         history: history.map(h => ({

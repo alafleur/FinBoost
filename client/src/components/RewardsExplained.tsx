@@ -4,8 +4,32 @@ import {
   Trophy,
   ArrowRight
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function RewardsExplained() {
+  const [tierAllocations, setTierAllocations] = useState({
+    tier1: 20,
+    tier2: 30,
+    tier3: 50
+  });
+
+  useEffect(() => {
+    const fetchRewardsConfig = async () => {
+      try {
+        const response = await fetch('/api/rewards/config');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.config) {
+            setTierAllocations(data.config.tierAllocations);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch rewards config:', error);
+      }
+    };
+
+    fetchRewardsConfig();
+  }, []);
   return (
     <section className="py-20 px-4 bg-white" id="rewards-explained">
       <div className="container mx-auto max-w-6xl">
@@ -65,19 +89,19 @@ export default function RewardsExplained() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-5 text-center">
               <div className="text-2xl font-bold text-gray-600 mb-2">Tier 1</div>
-              <div className="text-3xl font-bold text-gray-700 mb-1">15%</div>
+              <div className="text-3xl font-bold text-gray-700 mb-1">{tierAllocations.tier1}%</div>
               <div className="text-sm text-gray-500">of pool</div>
             </div>
             
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 text-center">
               <div className="text-2xl font-bold text-blue-600 mb-2">Tier 2</div>
-              <div className="text-3xl font-bold text-blue-700 mb-1">35%</div>
+              <div className="text-3xl font-bold text-blue-700 mb-1">{tierAllocations.tier2}%</div>
               <div className="text-sm text-blue-500">of pool</div>
             </div>
             
             <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-5 text-center">
               <div className="text-2xl font-bold text-primary-600 mb-2">Tier 3</div>
-              <div className="text-3xl font-bold text-primary-700 mb-1">50%</div>
+              <div className="text-3xl font-bold text-primary-700 mb-1">{tierAllocations.tier3}%</div>
               <div className="text-sm text-primary-500">of pool</div>
             </div>
           </div>
