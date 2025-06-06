@@ -519,7 +519,7 @@ export default function Dashboard() {
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-purple-800 mb-1">Total Pool</h4>
                         <div className="text-2xl font-bold text-purple-900">
-                          ${poolData ? poolData.totalPool.toLocaleString() : '0'}
+                          ${poolData && poolData.totalPool ? poolData.totalPool.toLocaleString() : '0'}
                         </div>
                         <p className="text-xs text-purple-600 mt-1">Community rewards</p>
                       </div>
@@ -530,7 +530,7 @@ export default function Dashboard() {
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-blue-800 mb-1">Tier 1 Pool</h4>
                         <div className="text-xl font-bold text-blue-900">
-                          ${poolData ? poolData.tier1Pool.toLocaleString() : '0'}
+                          ${poolData && poolData.tier1Pool ? poolData.tier1Pool.toLocaleString() : '0'}
                         </div>
                         <p className="text-xs text-blue-600 mt-1">Top 33% performers</p>
                       </div>
@@ -541,7 +541,7 @@ export default function Dashboard() {
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-blue-800 mb-1">Tier 2 Pool</h4>
                         <div className="text-xl font-bold text-blue-900">
-                          ${poolData ? poolData.tier2Pool.toLocaleString() : '0'}
+                          ${poolData && poolData.tier2Pool ? poolData.tier2Pool.toLocaleString() : '0'}
                         </div>
                         <p className="text-xs text-blue-600 mt-1">Middle 33% performers</p>
                       </div>
@@ -552,7 +552,7 @@ export default function Dashboard() {
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-blue-800 mb-1">Tier 3 Pool</h4>
                         <div className="text-xl font-bold text-blue-900">
-                          ${poolData ? poolData.tier3Pool.toLocaleString() : '0'}
+                          ${poolData && poolData.tier3Pool ? poolData.tier3Pool.toLocaleString() : '0'}
                         </div>
                         <p className="text-xs text-blue-600 mt-1">Bottom 33% performers</p>
                       </div>
@@ -564,7 +564,7 @@ export default function Dashboard() {
                       {/* Community Power Display */}
                       <div className="bg-green-100 rounded-lg p-4 text-center">
                         <div className="text-4xl font-bold text-green-900 mb-1">
-                          {poolData ? poolData.totalUsers.toLocaleString() : '0'}
+                          {poolData && poolData.totalUsers ? poolData.totalUsers.toLocaleString() : '0'}
                         </div>
                         <p className="text-sm font-bold text-green-800 uppercase tracking-wide">
                           🚀 Community Power
@@ -750,7 +750,7 @@ export default function Dashboard() {
                         <CardContent>
                           <div className="text-center mb-4">
                             <div className="text-3xl font-bold text-purple-900 mb-1">
-                              ${poolData.totalPool.toLocaleString()}
+                              ${poolData && poolData.totalPool ? poolData.totalPool.toLocaleString() : '0'}
                             </div>
                             <p className="text-sm text-purple-700">Total Community Pool</p>
                           </div>
@@ -768,7 +768,7 @@ export default function Dashboard() {
                           
                           <div className="mt-4 text-center">
                             <div className="text-2xl font-bold text-green-900 mb-1">
-                              {poolData.totalUsers.toLocaleString()}
+                              {poolData && poolData.totalUsers ? poolData.totalUsers.toLocaleString() : '0'}
                             </div>
                             <p className="text-sm font-bold text-green-800">
                               Active Members
