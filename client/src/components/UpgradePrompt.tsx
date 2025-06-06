@@ -25,7 +25,7 @@ export default function UpgradePrompt({
         <div className="flex items-center gap-2">
           <Crown className="h-6 w-6 text-yellow-600" />
           <CardTitle className="text-xl font-bold text-gray-800">
-            Unlock Premium Benefits
+            Unlock Member Benefits
           </CardTitle>
           <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
             Limited Time
@@ -88,7 +88,7 @@ export default function UpgradePrompt({
             onClick={() => setLocation('/subscribe')}
             className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold"
           >
-            Upgrade to Premium - $20/month
+            Become a Member - $20/month
           </Button>
           <Button 
             variant="outline" 

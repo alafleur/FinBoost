@@ -40,7 +40,7 @@ const SubscribeForm = () => {
       }
 
       toast({
-        title: "Welcome to Premium!",
+        title: "Welcome as a Member!",
         description: "Your membership is now active. Redirecting to dashboard...",
       });
       
@@ -120,7 +120,7 @@ const SubscribeForm = () => {
         className="w-full"
         size="lg"
       >
-        {isLoading ? "Processing Payment..." : "Start Premium Membership - $20/month"}
+        {isLoading ? "Processing Payment..." : "Start Membership - $20/month"}
       </Button>
     </form>
   );
@@ -145,10 +145,10 @@ export default function Subscribe() {
             </Button>
             <div className="flex items-center justify-center gap-2 mb-4">
               <Crown className="w-8 h-8 text-yellow-500" />
-              <h1 className="text-4xl font-bold text-gray-900">FinBoost Premium</h1>
+              <h1 className="text-4xl font-bold text-gray-900">FinBoost Membership</h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Unlock your full financial potential with premium features, exclusive content, and real reward earnings.
+              Unlock your full financial potential with member features, exclusive content, and real reward earnings.
             </p>
           </div>
 

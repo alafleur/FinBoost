@@ -1267,7 +1267,7 @@ export default function Admin() {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
+                    <CardTitle className="text-sm font-medium">Members</CardTitle>
                     <Crown className="h-4 w-4 text-yellow-500" />
                   </CardHeader>
                   <CardContent>
@@ -1410,7 +1410,7 @@ export default function Admin() {
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Badge variant={user.subscriptionStatus === 'active' ? "default" : "outline"}>
-                                  {user.subscriptionStatus === 'active' ? 'Premium' : 'Free'}
+                                  {user.subscriptionStatus === 'active' ? 'Member' : 'Free'}
                                 </Badge>
                                 <Button 
                                   variant="ghost" 
