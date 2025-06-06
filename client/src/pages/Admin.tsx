@@ -4069,6 +4069,111 @@ export default function Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Support Ticket View Dialog */}
+      <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Support Ticket #{selectedTicket?.id}</DialogTitle>
+            <DialogDescription>
+              View ticket details and history
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>User</Label>
+                  <div className="text-sm">{selectedTicket.name || 'Anonymous'}</div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="text-sm">{selectedTicket.email}</div>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <div className="text-sm">{selectedTicket.category}</div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Badge variant={selectedTicket.status === 'resolved' ? 'default' : 'destructive'}>
+                    {selectedTicket.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Label>Created</Label>
+                  <div className="text-sm">{new Date(selectedTicket.createdAt).toLocaleString()}</div>
+                </div>
+                {selectedTicket.resolvedAt && (
+                  <div>
+                    <Label>Resolved</Label>
+                    <div className="text-sm">{new Date(selectedTicket.resolvedAt).toLocaleString()}</div>
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <Label>Message</Label>
+                <div className="p-3 bg-gray-50 rounded border text-sm">
+                  {selectedTicket.message}
+                </div>
+              </div>
+              
+              {selectedTicket.response && (
+                <div>
+                  <Label>Admin Response</Label>
+                  <div className="p-3 bg-blue-50 rounded border text-sm">
+                    {selectedTicket.response}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Support Ticket Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Reply to Ticket #{selectedTicket?.id}</DialogTitle>
+            <DialogDescription>
+              Send a response to {selectedTicket?.name || 'the user'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded border">
+                <div className="text-sm font-medium mb-2">Original Message:</div>
+                <div className="text-sm">{selectedTicket.message}</div>
+              </div>
+              
+              <div>
+                <Label htmlFor="ticketReply">Your Response</Label>
+                <Textarea
+                  id="ticketReply"
+                  value={ticketReply}
+                  onChange={(e) => setTicketReply(e.target.value)}
+                  placeholder="Type your response here..."
+                  rows={6}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowReplyDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => handleTicketReply(selectedTicket.id, ticketReply, 'resolved')}
+                  disabled={!ticketReply.trim() || isSubmittingReply}
+                >
+                  {isSubmittingReply ? 'Sending...' : 'Send & Resolve'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
