@@ -142,9 +142,21 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Star className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">Total Points</span>
+              <span className="text-sm font-medium">
+                {user.subscriptionStatus === 'active' ? 'Total Points' : 'Theoretical Points'}
+              </span>
             </div>
-            <div className="text-2xl font-bold">{user.totalPoints.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {user.subscriptionStatus === 'active' 
+                ? user.totalPoints.toLocaleString()
+                : (user.theoreticalPoints || 0).toLocaleString()
+              }
+            </div>
+            {user.subscriptionStatus !== 'active' && (
+              <p className="text-xs text-orange-600 mt-1">
+                Upgrade to claim as real points
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -155,6 +167,11 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
               <span className="text-sm font-medium">This Month</span>
             </div>
             <div className="text-2xl font-bold">{user.currentMonthPoints}</div>
+            {user.subscriptionStatus !== 'active' && (
+              <p className="text-xs text-orange-600 mt-1">
+                Theoretical points only
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
