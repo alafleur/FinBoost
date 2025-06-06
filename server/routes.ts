@@ -24,7 +24,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "User already exists" });
       }
 
-      const user = await storage.createUser({ username, email, password });
+      const user = await storage.createUser({ 
+        username, 
+        email, 
+        password,
+        subscriptionStatus: 'inactive' // All new users start as free
+      });
       res.json({ success: true, message: "User created successfully", user: { id: user.id, username: user.username, email: user.email } });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });

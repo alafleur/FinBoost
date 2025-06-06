@@ -243,6 +243,7 @@ export default function Admin() {
     category: 'budgeting',
     difficulty: 'beginner',
     estimatedMinutes: 5,
+    accessType: 'free',
     isActive: true,
     isPublished: false
   });
@@ -1601,6 +1602,7 @@ export default function Admin() {
                           category: 'budgeting',
                           difficulty: 'beginner',
                           estimatedMinutes: 5,
+                          accessType: 'free',
                           isActive: true,
                           isPublished: false
                         });
@@ -3645,6 +3647,24 @@ export default function Admin() {
                     }
                   }}
                 />
+              </div>
+              <div>
+                <Label htmlFor="accessType">Access Type</Label>
+                <select 
+                  id="accessType"
+                  className="w-full p-2 border rounded"
+                  value={editingModule?.accessType || moduleForm.accessType}
+                  onChange={(e) => {
+                    if (editingModule) {
+                      setEditingModule({...editingModule, accessType: e.target.value});
+                    } else {
+                      setModuleForm({...moduleForm, accessType: e.target.value});
+                    }
+                  }}
+                >
+                  <option value="free">Free (Available to all users)</option>
+                  <option value="premium">Premium (Paying members only)</option>
+                </select>
               </div>
             </div>
 

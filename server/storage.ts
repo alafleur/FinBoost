@@ -1895,14 +1895,17 @@ export class MemStorage implements IStorage {
 
   async getMonthlyPool(): Promise<any> {
     try {
-      const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
-      const userCount = totalUsers[0]?.count || 0;
+      // Only count premium members (active subscription status)
+      const premiumUsers = await db.select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'active'));
+      const premiumUserCount = premiumUsers[0]?.count || 0;
 
-      const monthlyRevenue = userCount * 20; // $20 per user
+      const monthlyRevenue = premiumUserCount * 20; // $20 per premium user
       const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
 
       return {
-        totalUsers: userCount.toString(),
+        totalUsers: premiumUserCount.toString(),
         monthlyRevenue: monthlyRevenue.toString(),
         totalPool,
         tier1Pool: Math.round(totalPool * 0.5), // 50%
