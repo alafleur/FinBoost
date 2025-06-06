@@ -777,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support ticket routes
   app.post("/api/support", async (req, res) => {
     try {
-      const { name, email, category, message } = req.body;
+      const { name, email, category, message, hasAttachment, fileName } = req.body;
       
       let userId = null;
       const token = req.headers.authorization?.replace('Bearer ', '');
@@ -793,7 +793,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name,
         email,
         category,
-        message
+        message,
+        hasAttachment: hasAttachment || false,
+        fileName: fileName || null
       });
 
       res.json({ success: true, supportRequest });
