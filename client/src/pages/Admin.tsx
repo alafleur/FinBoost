@@ -198,6 +198,13 @@ export default function Admin() {
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showEditUserDialog, setShowEditUserDialog] = useState(false);
   const [showUserSettingsDialog, setShowUserSettingsDialog] = useState(false);
+  
+  // Support ticket state
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [ticketReply, setTicketReply] = useState("");
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [showActionPublishDialog, setShowActionPublishDialog] = useState(false);
   const [selectedActionForPublish, setSelectedActionForPublish] = useState<any>(null);
 
@@ -391,6 +398,61 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching point actions:', error);
+    }
+  };
+
+  const fetchSupportTickets = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/support', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSupportTickets(data.tickets || []);
+      }
+    } catch (error) {
+      console.error('Error fetching support tickets:', error);
+    }
+  };
+
+  const handleTicketReply = async (ticketId: number, reply: string, status: string = 'resolved') => {
+    setIsSubmittingReply(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/support/${ticketId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          response: reply,
+          status: status,
+          resolvedAt: status === 'resolved' ? new Date().toISOString() : null
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Reply sent successfully",
+          description: "The support ticket has been updated.",
+        });
+        setTicketReply("");
+        setShowTicketDialog(false);
+        fetchSupportTickets(); // Refresh tickets
+      } else {
+        throw new Error('Failed to send reply');
+      }
+    } catch (error) {
+      console.error('Error sending ticket reply:', error);
+      toast({
+        title: "Failed to send reply",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReply(false);
     }
   };
 
@@ -880,6 +942,7 @@ export default function Admin() {
     fetchData();
     fetchPendingProofs();
     fetchPointActions();
+    fetchSupportTickets();
 
     // Set up automatic tier threshold refresh every 10 minutes to improve performance
     const tierThresholdInterval = setInterval(() => {

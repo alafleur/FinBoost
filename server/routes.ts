@@ -774,6 +774,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Support ticket routes
+  app.post("/api/support", async (req, res) => {
+    try {
+      const { name, email, category, message } = req.body;
+      
+      let userId = null;
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (token) {
+        const user = await storage.getUserByToken(token);
+        if (user) {
+          userId = user.id;
+        }
+      }
+
+      const supportRequest = await storage.createSupportRequest({
+        userId,
+        name,
+        email,
+        category,
+        message
+      });
+
+      res.json({ success: true, supportRequest });
+    } catch (error: any) {
+      console.error('Error creating support request:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Admin support ticket routes
+  app.get("/api/admin/support", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const tickets = await storage.getSupportRequests({});
+      res.json({ success: true, tickets });
+    } catch (error: any) {
+      console.error('Error fetching support tickets:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.patch("/api/admin/support/:ticketId", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const ticketId = parseInt(req.params.ticketId);
+      const { response, status, resolvedAt } = req.body;
+
+      await storage.updateSupportRequest(ticketId, {
+        response,
+        status,
+        resolvedAt: resolvedAt ? new Date(resolvedAt) : null
+      });
+
+      res.json({ success: true, message: "Support ticket updated successfully" });
+    } catch (error: any) {
+      console.error('Error updating support ticket:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

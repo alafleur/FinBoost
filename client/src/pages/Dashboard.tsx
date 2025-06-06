@@ -939,6 +939,104 @@ export default function Dashboard() {
                 <TabsContent value="history">
                   <PointsHistory />
                 </TabsContent>
+
+                <TabsContent value="support" className="space-y-6">
+                  {showSupportSuccess ? (
+                    <Card className="text-center">
+                      <CardContent className="pt-8 pb-8">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <HelpCircle className="h-8 w-8 text-green-600" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-4">Support Request Submitted!</h3>
+                        <p className="text-gray-600 mb-6">
+                          We've received your request and will get back to you within 24 hours.
+                        </p>
+                        <Button onClick={() => setShowSupportSuccess(false)} className="w-full">
+                          Submit Another Request
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageCircle className="h-5 w-5" />
+                          Submit Support Request
+                        </CardTitle>
+                        <CardDescription>
+                          Need help? We're here for you! Submit your question and we'll respond within 24 hours.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleSupportSubmit} className="space-y-4">
+                          <div>
+                            <Label htmlFor="category">Category *</Label>
+                            <Select value={supportForm.category} onValueChange={(value) => setSupportForm({...supportForm, category: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="technical">Technical Issue</SelectItem>
+                                <SelectItem value="billing">Billing & Payments</SelectItem>
+                                <SelectItem value="account">Account Issues</SelectItem>
+                                <SelectItem value="rewards">Rewards & Points</SelectItem>
+                                <SelectItem value="lessons">Lessons & Content</SelectItem>
+                                <SelectItem value="general">General Question</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="message">Message *</Label>
+                            <Textarea
+                              id="message"
+                              placeholder="Please describe your issue or question in detail..."
+                              value={supportForm.message}
+                              onChange={(e) => setSupportForm({...supportForm, message: e.target.value})}
+                              rows={6}
+                              className="resize-none"
+                            />
+                          </div>
+
+                          <Button 
+                            type="submit" 
+                            className="w-full" 
+                            disabled={isSubmittingSupport}
+                          >
+                            {isSubmittingSupport ? (
+                              <>
+                                <Send className="h-4 w-4 mr-2 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              <>
+                                <Send className="h-4 w-4 mr-2" />
+                                Submit Support Request
+                              </>
+                            )}
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Contact Info */}
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <HelpCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <h3 className="font-semibold mb-1">Need immediate help?</h3>
+                        <p className="text-sm text-gray-600">
+                          Email us directly at{' '}
+                          <a href="mailto:support@additive.com" className="text-blue-600 hover:underline">
+                            support@additive.com
+                          </a>
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
               </Tabs>
             ) : (
               /* Desktop: Show overview content directly */
