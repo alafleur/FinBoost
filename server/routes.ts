@@ -1233,8 +1233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: 'active',
         stripeCustomerId: 'demo_customer_' + user.id,
         stripeSubscriptionId: 'demo_subscription_' + user.id,
-        subscriptionStartDate: new Date(),
-        subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
       });
 
       res.json({ 
