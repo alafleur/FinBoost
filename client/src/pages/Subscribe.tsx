@@ -16,55 +16,89 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const SubscribeForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
     setIsLoading(true);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/dashboard?upgraded=true`,
-      },
-    });
-
-    if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+    // Demo subscription flow
+    setTimeout(() => {
       toast({
         title: "Welcome to Premium!",
         description: "Your membership is now active. Redirecting to dashboard...",
       });
       setTimeout(() => setLocation('/dashboard'), 2000);
-    }
-
-    setIsLoading(false);
+      setIsLoading(false);
+    }, 2000);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      {/* Demo Payment Form */}
+      <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Card Information
+            </label>
+            <div className="border rounded-md p-3 bg-white">
+              <input 
+                type="text" 
+                placeholder="1234 1234 1234 1234" 
+                className="w-full border-none outline-none text-gray-700"
+                defaultValue="4242 4242 4242 4242"
+                readOnly
+              />
+              <div className="flex gap-4 mt-2 pt-2 border-t">
+                <input 
+                  type="text" 
+                  placeholder="MM / YY" 
+                  className="flex-1 border-none outline-none text-gray-700"
+                  defaultValue="12 / 28"
+                  readOnly
+                />
+                <input 
+                  type="text" 
+                  placeholder="CVC" 
+                  className="w-16 border-none outline-none text-gray-700"
+                  defaultValue="123"
+                  readOnly
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cardholder Name
+            </label>
+            <input 
+              type="text" 
+              className="w-full border rounded-md p-3"
+              placeholder="Your Name"
+              defaultValue="Demo User"
+              readOnly
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          <strong>Demo Mode:</strong> This is a demonstration of the subscription flow. 
+          In production, this would process real payments through Stripe.
+        </p>
+      </div>
+
       <Button 
         type="submit" 
-        disabled={!stripe || isLoading}
+        disabled={isLoading}
         className="w-full"
         size="lg"
       >
-        {isLoading ? "Processing..." : "Start Premium Membership - $20/month"}
+        {isLoading ? "Processing Payment..." : "Start Premium Membership - $20/month"}
       </Button>
     </form>
   );
@@ -75,41 +109,15 @@ export default function Subscribe() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    // Create subscription as soon as the page loads
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLocation('/auth');
-      return;
-    }
+    // For demo purposes, simulate client secret generation
+    // In production, this would come from the Stripe API
+    const simulateStripeSetup = () => {
+      setTimeout(() => {
+        setClientSecret("pi_demo_client_secret_for_testing");
+      }, 1500);
+    };
 
-    fetch("/api/create-subscription", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) {
-          if (res.status === 401) {
-            // Token is invalid, redirect to login
-            localStorage.removeItem('token');
-            setLocation('/auth');
-            return;
-          }
-          throw new Error(data.error?.message || data.message || 'Failed to create subscription');
-        }
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else {
-          throw new Error('No client secret received');
-        }
-      })
-      .catch((error) => {
-        console.error('Subscription creation error:', error);
-        setLocation('/dashboard');
-      });
+    simulateStripeSetup();
   }, [setLocation]);
 
   if (!clientSecret) {
@@ -197,9 +205,7 @@ export default function Subscribe() {
             </div>
 
             {/* Payment Form */}
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <SubscribeForm />
-            </Elements>
+            <SubscribeForm />
 
             <p className="text-xs text-gray-500 text-center">
               By subscribing, you agree to our terms of service. Your subscription will automatically renew monthly unless canceled.
