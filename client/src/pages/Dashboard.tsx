@@ -169,23 +169,23 @@ export default function Dashboard() {
     fetchDistributionInfo();
     fetchPublishedModules();
 
-    // Set up automatic tier threshold refresh every 30 seconds
+    // Set up automatic tier threshold refresh every 5 minutes
     const tierThresholdInterval = setInterval(() => {
       fetchTierThresholds();
-    }, 30000);
+    }, 300000);
 
     return () => {
       clearInterval(tierThresholdInterval);
     };
   }, []);
 
-  // Update countdown timer every minute
+  // Update countdown timer every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       if (distributionInfo) {
         fetchDistributionInfo();
       }
-    }, 60000); // Update every minute
+    }, 300000); // Update every 5 minutes
 
     return () => clearInterval(interval);
   }, [distributionInfo]);

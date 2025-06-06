@@ -833,10 +833,10 @@ export default function Admin() {
     fetchPendingProofs();
     fetchPointActions();
 
-    // Set up automatic tier threshold refresh every 2 minutes to improve performance
+    // Set up automatic tier threshold refresh every 10 minutes to improve performance
     const tierThresholdInterval = setInterval(() => {
       fetchData(); // This includes tier threshold fetching
-    }, 120000);
+    }, 600000);
 
     return () => {
       clearInterval(tierThresholdInterval);
