@@ -519,6 +519,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/admin/points/actions/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const actionId = parseInt(req.params.id);
+      const action = await storage.updatePointAction(actionId, req.body, user.id);
+      res.json({ success: true, action });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   app.delete("/api/admin/points/actions/:actionId", async (req, res) => {
     try {
       const token = req.headers.authorization?.replace('Bearer ', '');

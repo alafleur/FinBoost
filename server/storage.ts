@@ -2019,12 +2019,13 @@ export class MemStorage implements IStorage {
 
   async getPointActions(): Promise<any[]> {
     try {
-      // First try to get from admin-configured actions
-      const adminActions = await db.select().from(adminPointsActions).where(eq(adminPointsActions.isActive, true));
+      // Get all admin-configured actions (both active and inactive for admin management)
+      const adminActions = await db.select().from(adminPointsActions);
 
       if (adminActions.length > 0) {
         return adminActions.map(action => ({
-          id: action.actionId,
+          id: action.id,
+          actionId: action.actionId,
           name: action.name,
           basePoints: action.basePoints,
           maxDaily: action.maxDaily,
@@ -2032,7 +2033,8 @@ export class MemStorage implements IStorage {
           maxTotal: action.maxTotal,
           requiresProof: action.requiresProof,
           category: action.category,
-          description: action.description
+          description: action.description,
+          isActive: action.isActive
         }));
       }
 
@@ -2091,6 +2093,26 @@ export class MemStorage implements IStorage {
 
       return created[0];
     }
+  }
+
+  async updatePointAction(id: number, actionData: any, adminUserId: number): Promise<any> {
+    const updated = await db.update(adminPointsActions)
+      .set({
+        name: actionData.name,
+        basePoints: actionData.basePoints,
+        maxDaily: actionData.maxDaily,
+        maxMonthly: actionData.maxMonthly,
+        requiresProof: actionData.requiresProof,
+        category: actionData.category,
+        description: actionData.description,
+        isActive: actionData.isActive,
+        updatedAt: new Date(),
+        updatedBy: adminUserId
+      })
+      .where(eq(adminPointsActions.id, id))
+      .returning();
+
+    return updated[0];
   }
 
   async deletePointAction(actionId: string): Promise<void> {
