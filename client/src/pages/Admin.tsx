@@ -806,7 +806,11 @@ export default function Admin() {
     }
   };
 
-  const handleDeletePointAction = async (actionId: string) => {
+  const handleDeletePointAction = async (actionId: number) => {
+    if (!confirm('Are you sure you want to delete this action? This cannot be undone.')) {
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/points/actions/${actionId}`, {
@@ -820,6 +824,13 @@ export default function Admin() {
           description: "Point action deleted successfully"
         });
         fetchPointActions();
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Failed to delete point action",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       toast({
@@ -2415,17 +2426,16 @@ export default function Admin() {
                                 <Settings className="w-3 h-3" />
                               </Button>
                               
-                              {!action.isActive && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedActionForPublish(action);
-                                    setShowActionPublishDialog(true);
-                                  }}
-                                >
-                                  Publish
-                                </Button>
-                              )}
+                              <Button
+                                size="sm"
+                                variant={action.isActive ? "secondary" : "default"}
+                                onClick={() => {
+                                  setSelectedActionForPublish(action);
+                                  setShowActionPublishDialog(true);
+                                }}
+                              >
+                                {action.isActive ? "Unpublish" : "Publish"}
+                              </Button>
                               
                               <Button
                                 size="sm"

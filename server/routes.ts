@@ -90,7 +90,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/points/actions", async (req, res) => {
     try {
       const actions = await storage.getPointActions();
-      res.json({ success: true, actions });
+      // Only return published actions for regular users
+      const publishedActions = actions.filter(action => action.isActive);
+      res.json({ success: true, actions: publishedActions });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
