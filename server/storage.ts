@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt, gte, ne } from "drizzle-orm";
@@ -141,6 +141,13 @@ export interface IStorage {
     
     // Stripe payment methods
     addToRewardPool(amount: number): Promise<void>;
+    
+    // Monthly pool settings methods
+    createMonthlyPoolSetting(setting: any): Promise<any>;
+    getActiveMonthlyPoolSetting(): Promise<any>;
+    getCurrentPoolSettingsForDate(date: Date): Promise<{ rewardPoolPercentage: number; membershipFee: number } | null>;
+    updateMonthlyPoolSetting(id: number, updates: any): Promise<any>;
+    getAllMonthlyPoolSettings(): Promise<any[]>;
 
     awardPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
     deductPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
@@ -2364,6 +2371,89 @@ export class MemStorage implements IStorage {
     // This would update the reward pool balance in the database
     console.log(`Added $${amount/100} to reward pool from subscription payment`);
     // In a real implementation, this would update a reward pool table
+  }
+
+  // Monthly pool settings methods
+  async createMonthlyPoolSetting(setting: any): Promise<any> {
+    try {
+      const [newSetting] = await db.insert(monthlyPoolSettings).values(setting).returning();
+      return newSetting;
+    } catch (error) {
+      console.error('Error creating monthly pool setting:', error);
+      throw error;
+    }
+  }
+
+  async getActiveMonthlyPoolSetting(): Promise<any> {
+    try {
+      const [activeSetting] = await db.select()
+        .from(monthlyPoolSettings)
+        .where(eq(monthlyPoolSettings.isActive, true))
+        .orderBy(desc(monthlyPoolSettings.cycleStartDate))
+        .limit(1);
+      return activeSetting || null;
+    } catch (error) {
+      console.error('Error getting active monthly pool setting:', error);
+      return null;
+    }
+  }
+
+  async getCurrentPoolSettingsForDate(date: Date): Promise<{ rewardPoolPercentage: number; membershipFee: number } | null> {
+    try {
+      const [setting] = await db.select()
+        .from(monthlyPoolSettings)
+        .where(
+          and(
+            gte(monthlyPoolSettings.cycleStartDate, date.toISOString()),
+            lt(monthlyPoolSettings.cycleEndDate, date.toISOString()),
+            eq(monthlyPoolSettings.isActive, true)
+          )
+        )
+        .limit(1);
+
+      if (setting) {
+        return {
+          rewardPoolPercentage: setting.rewardPoolPercentage,
+          membershipFee: setting.membershipFee
+        };
+      }
+
+      // Fallback to default if no setting found
+      return {
+        rewardPoolPercentage: 55, // Default 55%
+        membershipFee: 2000 // Default $20
+      };
+    } catch (error) {
+      console.error('Error getting current pool settings:', error);
+      return {
+        rewardPoolPercentage: 55,
+        membershipFee: 2000
+      };
+    }
+  }
+
+  async updateMonthlyPoolSetting(id: number, updates: any): Promise<any> {
+    try {
+      const [updated] = await db.update(monthlyPoolSettings)
+        .set(updates)
+        .where(eq(monthlyPoolSettings.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating monthly pool setting:', error);
+      throw error;
+    }
+  }
+
+  async getAllMonthlyPoolSettings(): Promise<any[]> {
+    try {
+      return await db.select()
+        .from(monthlyPoolSettings)
+        .orderBy(desc(monthlyPoolSettings.cycleStartDate));
+    } catch (error) {
+      console.error('Error getting all monthly pool settings:', error);
+      return [];
+    }
   }
 }
 

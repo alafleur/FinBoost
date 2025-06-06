@@ -1033,11 +1033,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 nextBillingDate: new Date(subscription.current_period_end * 1000)
               });
 
-              // Add $11 to reward pool (55% of $20 membership fee)
-              const rewardAmount = Math.round(20 * 0.55 * 100); // $11 in cents
-              await storage.addToRewardPool(rewardAmount);
-              
-              console.log(`Payment succeeded for user ${userId}, added $11 to reward pool`);
+              // Get current pool settings for dynamic percentage calculation
+              const poolSettings = await storage.getCurrentPoolSettingsForDate(new Date());
+              if (poolSettings) {
+                const membershipFeeInDollars = poolSettings.membershipFee / 100;
+                const rewardAmount = Math.round((membershipFeeInDollars * poolSettings.rewardPoolPercentage / 100) * 100);
+                await storage.addToRewardPool(rewardAmount);
+                
+                console.log(`Payment succeeded for user ${userId}, added $${rewardAmount/100} (${poolSettings.rewardPoolPercentage}% of $${membershipFeeInDollars}) to reward pool`);
+              } else {
+                // Fallback to default settings
+                const rewardAmount = Math.round(20 * 0.55 * 100); // $11 in cents
+                await storage.addToRewardPool(rewardAmount);
+                console.log(`Payment succeeded for user ${userId}, added $11 (default 55% of $20) to reward pool`);
+              }
             }
           }
           break;
