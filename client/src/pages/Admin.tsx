@@ -2268,75 +2268,7 @@ export default function Admin() {
                 </Card>
               </div>
 
-              {/* Point Actions Management */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Point Actions & Rewards</CardTitle>
-                  <CardDescription>Manage available point-earning activities</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">Available Actions</h3>
-                      <Button onClick={() => setShowPointActionDialog(true)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add New Action
-                      </Button>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {pointActions.map((action) => (
-                        <div key={action.id} className="p-4 border rounded-lg relative">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">{action.name}</span>
-                                <Badge variant={action.isActive ? "default" : "secondary"}>
-                                  {action.basePoints} pts
-                                </Badge>
-                              </div>
-                              <div className="text-xs text-gray-500 mb-3">{action.description}</div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Badge variant={action.isActive ? "default" : "outline"} className="text-xs">
-                                {action.isActive ? "Published" : "Draft"}
-                              </Badge>
-                            </div>
-                            
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedActionForPublish(action);
-                                  setShowActionPublishDialog(true);
-                                }}
-                              >
-                                <Settings className="w-3 h-3" />
-                              </Button>
-                              
-                              {!action.isActive && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedActionForPublish(action);
-                                    setShowActionPublishDialog(true);
-                                  }}
-                                >
-                                  Publish
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
 
               {/* Manual Point Management */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2494,6 +2426,14 @@ export default function Admin() {
                                   Publish
                                 </Button>
                               )}
+                              
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeletePointAction(action.id)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
                             </div>
                           </div>
                         </div>
