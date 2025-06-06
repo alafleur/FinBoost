@@ -1272,10 +1272,10 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {users.filter((u: any) => u.subscriptionStatus === 'premium').length}
+                      {users.filter((u: any) => u.subscriptionStatus === 'active').length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {users.filter((u: any) => u.subscriptionStatus === 'free').length} free users
+                      {users.filter((u: any) => u.subscriptionStatus !== 'active').length} free users
                     </p>
                   </CardContent>
                 </Card>
