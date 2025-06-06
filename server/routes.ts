@@ -1099,6 +1099,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin middleware
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      req.user = user;
+      next();
+    } catch (error) {
+      res.status(401).json({ message: "Unauthorized" });
+    }
+  };
+
+  // Monthly pool settings routes (admin only)
+  app.get("/api/admin/monthly-pool-settings", requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAllMonthlyPoolSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching monthly pool settings:', error);
+      res.status(500).json({ message: "Error fetching monthly pool settings" });
+    }
+  });
+
+  app.post("/api/admin/monthly-pool-settings", requireAdmin, async (req, res) => {
+    try {
+      const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee } = req.body;
+      
+      const newSetting = await storage.createMonthlyPoolSetting({
+        cycleName,
+        cycleStartDate: new Date(cycleStartDate),
+        cycleEndDate: new Date(cycleEndDate),
+        rewardPoolPercentage: parseInt(rewardPoolPercentage),
+        membershipFee: parseInt(membershipFee),
+        createdBy: req.user?.id
+      });
+
+      res.json(newSetting);
+    } catch (error) {
+      console.error('Error creating monthly pool setting:', error);
+      res.status(500).json({ message: "Error creating monthly pool setting" });
+    }
+  });
+
+  app.put("/api/admin/monthly-pool-settings/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee, isActive } = req.body;
+      
+      const updates: any = {};
+      if (cycleName) updates.cycleName = cycleName;
+      if (cycleStartDate) updates.cycleStartDate = new Date(cycleStartDate);
+      if (cycleEndDate) updates.cycleEndDate = new Date(cycleEndDate);
+      if (rewardPoolPercentage !== undefined) updates.rewardPoolPercentage = parseInt(rewardPoolPercentage);
+      if (membershipFee !== undefined) updates.membershipFee = parseInt(membershipFee);
+      if (isActive !== undefined) updates.isActive = isActive;
+
+      const updated = await storage.updateMonthlyPoolSetting(parseInt(id), updates);
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating monthly pool setting:', error);
+      res.status(500).json({ message: "Error updating monthly pool setting" });
+    }
+  });
+
+  app.get("/api/admin/current-pool-settings", requireAdmin, async (req, res) => {
+    try {
+      const currentSettings = await storage.getCurrentPoolSettingsForDate(new Date());
+      res.json(currentSettings);
+    } catch (error) {
+      console.error('Error fetching current pool settings:', error);
+      res.status(500).json({ message: "Error fetching current pool settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

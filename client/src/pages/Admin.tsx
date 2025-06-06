@@ -245,6 +245,19 @@ export default function Admin() {
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
 
+  // Monthly Pool Settings state
+  const [monthlyPoolSettings, setMonthlyPoolSettings] = useState([]);
+  const [showPoolSettingDialog, setShowPoolSettingDialog] = useState(false);
+  const [editingPoolSetting, setEditingPoolSetting] = useState(null);
+  const [poolSettingForm, setPoolSettingForm] = useState({
+    cycleName: '',
+    cycleStartDate: '',
+    cycleEndDate: '',
+    rewardPoolPercentage: 55,
+    membershipFee: 2000,
+    isActive: true
+  });
+
   // State for quiz questions
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState({
@@ -1013,11 +1026,12 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
+            <TabsTrigger value="pool-settings">Pool Settings</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>

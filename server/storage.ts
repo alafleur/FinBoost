@@ -1,7 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and, lt, gte, ne } from "drizzle-orm";
+import { eq, sql, desc, and, lt, gte, ne, lte } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -2404,8 +2404,8 @@ export class MemStorage implements IStorage {
         .from(monthlyPoolSettings)
         .where(
           and(
-            gte(monthlyPoolSettings.cycleStartDate, date.toISOString()),
-            lt(monthlyPoolSettings.cycleEndDate, date.toISOString()),
+            lte(monthlyPoolSettings.cycleStartDate, date.toISOString()),
+            gte(monthlyPoolSettings.cycleEndDate, date.toISOString()),
             eq(monthlyPoolSettings.isActive, true)
           )
         )
