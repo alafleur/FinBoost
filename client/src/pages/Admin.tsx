@@ -107,6 +107,8 @@ interface SupportTicket {
   message: string;
   status: string;
   response?: string;
+  hasAttachment?: boolean;
+  fileName?: string;
   createdAt: string;
   resolvedAt?: string;
 }
@@ -2730,10 +2732,22 @@ export default function Admin() {
                               </TableCell>
                               <TableCell>
                                 <div>
-                                  <div className="font-medium text-sm capitalize">{ticket.category}</div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium text-sm capitalize">{ticket.category}</div>
+                                    {ticket.hasAttachment && (
+                                      <div className="w-4 h-4 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <Upload className="w-3 h-3 text-yellow-600" />
+                                      </div>
+                                    )}
+                                  </div>
                                   <div className="text-xs text-gray-500 truncate max-w-xs">
                                     {ticket.message.substring(0, 50)}...
                                   </div>
+                                  {ticket.hasAttachment && ticket.fileName && (
+                                    <div className="text-xs text-yellow-600 mt-1">
+                                      📎 {ticket.fileName}
+                                    </div>
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell>
