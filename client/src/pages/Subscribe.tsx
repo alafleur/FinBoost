@@ -67,7 +67,7 @@ const SubscribeForm = () => {
             </label>
             <input 
               type="text" 
-              className="w-full border rounded-md p-3"
+              className="w-full border rounded-md p-3 bg-gray-50"
               placeholder="Your Name"
               defaultValue="Demo User"
               readOnly
