@@ -63,7 +63,7 @@ export default function ForgotPassword() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AdditiveLogo size="lg" />
+            <FinBoostLogo size="lg" />
           </div>
           <p className="text-gray-600">Reset your password</p>
         </div>

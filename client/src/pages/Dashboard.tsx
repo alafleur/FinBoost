@@ -174,21 +174,23 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchUserData();
-    fetchLeaderboardData();
-    fetchTierThresholds();
-    fetchLessonProgress();
-    fetchPoolData();
-    fetchDistributionInfo();
-    fetchPublishedModules();
+    // Use consolidated fetching to reduce server load
+    fetchDashboardData();
+    
+    // Load remaining data with delay to prevent crashes
+    setTimeout(() => {
+      fetchLessonProgress();
+      fetchDistributionInfo();
+      fetchPublishedModules();
+    }, 2000);
 
-    // Set up automatic tier threshold refresh every 5 minutes
-    const tierThresholdInterval = setInterval(() => {
-      fetchTierThresholds();
-    }, 300000);
+    // Set up automatic refresh every 10 minutes (reduced frequency)
+    const refreshInterval = setInterval(() => {
+      fetchSecondaryData();
+    }, 600000);
 
     return () => {
-      clearInterval(tierThresholdInterval);
+      clearInterval(refreshInterval);
     };
   }, []);
 
@@ -203,49 +205,63 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [distributionInfo]);
 
-  const fetchUserData = async () => {
+  // Consolidated data fetching to reduce API calls
+  const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+      // Fetch only essential data in a single batch
+      const [userResponse, poolResponse] = await Promise.all([
+        fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch('/api/pool/monthly')
+      ]);
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUser(userData.user);
       }
+
+      if (poolResponse.ok) {
+        const poolData = await poolResponse.json();
+        setPoolData(poolData);
+      }
+
+      // Load secondary data only after initial load
+      setTimeout(() => {
+        fetchSecondaryData();
+      }, 1000);
+
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching dashboard data:', error);
     }
   };
 
-  const fetchLeaderboardData = async () => {
+  const fetchSecondaryData = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/leaderboard', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const [leaderboardResponse, thresholdsResponse] = await Promise.all([
+        fetch('/api/leaderboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch('/api/tiers/thresholds')
+      ]);
+
+      if (leaderboardResponse.ok) {
+        const data = await leaderboardResponse.json();
         setLeaderboardData(data);
       }
-    } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-    }
-  };
 
-  const fetchTierThresholds = async () => {
-    try {
-      const response = await fetch('/api/tiers/thresholds');
-      if (response.ok) {
-        const data = await response.json();
+      if (thresholdsResponse.ok) {
+        const data = await thresholdsResponse.json();
         setTierThresholds(data.thresholds);
       }
     } catch (error) {
-      console.error('Error fetching tier thresholds:', error);
+      console.error('Error fetching secondary data:', error);
     }
   };
 

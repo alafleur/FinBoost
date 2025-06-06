@@ -51,7 +51,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-700 mt-12 pt-6 text-sm text-center">
-          <p>© {new Date().getFullYear()} Additive. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FinBoost. All rights reserved.</p>
         </div>
       </div>
     </footer>
