@@ -768,6 +768,41 @@ export default function Admin() {
     }
   };
 
+  // Handler for toggling user subscription status
+  const handleToggleSubscription = async (userId: number, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'premium' ? 'free' : 'premium';
+      const response = await fetch(`/api/admin/users/${userId}/subscription`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriptionStatus: newStatus })
+      });
+
+      if (response.ok) {
+        // Update the users list
+        setUsers(users.map((user: any) => 
+          user.id === userId 
+            ? { ...user, subscriptionStatus: newStatus }
+            : user
+        ));
+        toast({
+          title: "Success",
+          description: `User ${newStatus === 'premium' ? 'upgraded to premium' : 'downgraded to free'} successfully`
+        });
+      } else {
+        throw new Error('Failed to update subscription status');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update subscription status",
+        variant: "destructive"
+      });
+    }
+  };
+
   // CRUD Handlers for Users
   const handleCreateUser = async (userData: any) => {
     try {
@@ -1324,6 +1359,7 @@ export default function Admin() {
                           <TableHead>User</TableHead>
                           <TableHead>Points</TableHead>
                           <TableHead>Tier</TableHead>
+                          <TableHead>Membership</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Joined</TableHead>
                           <TableHead>Last Login</TableHead>
@@ -1367,6 +1403,20 @@ export default function Admin() {
                               }>
                                 {user.tier?.replace('tier', 'Tier ') || 'Tier 1'}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={user.subscriptionStatus === 'premium' ? "default" : "outline"}>
+                                  {user.subscriptionStatus === 'premium' ? 'Premium' : 'Free'}
+                                </Badge>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleToggleSubscription(user.id, user.subscriptionStatus)}
+                                >
+                                  {user.subscriptionStatus === 'premium' ? 'Downgrade' : 'Upgrade'}
+                                </Button>
+                              </div>
                             </TableCell>
                             <TableCell>
                               <Badge variant={user.isActive ? "default" : "secondary"}>
@@ -1624,6 +1674,7 @@ export default function Admin() {
                           <TableHead>Difficulty</TableHead>
                           <TableHead>Points</TableHead>
                           <TableHead>Duration</TableHead>
+                          <TableHead>Access</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Published</TableHead>
                           <TableHead>Published Since</TableHead>
@@ -1664,6 +1715,11 @@ export default function Admin() {
                             </TableCell>
                             <TableCell>{module.pointsReward}</TableCell>
                             <TableCell>{module.estimatedMinutes}min</TableCell>
+                            <TableCell>
+                              <Badge variant={module.accessType === 'premium' ? "default" : "outline"}>
+                                {module.accessType === 'premium' ? 'Premium' : 'Free'}
+                              </Badge>
+                            </TableCell>
                             <TableCell>
                               <Badge variant={module.isActive ? "default" : "secondary"}>
                                 {module.isActive ? "Active" : "Inactive"}

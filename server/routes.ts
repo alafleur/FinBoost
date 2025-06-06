@@ -1186,6 +1186,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User subscription status management
+  app.patch("/api/admin/users/:id/subscription", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { subscriptionStatus } = req.body;
+      
+      const updatedUser = await storage.updateUser(parseInt(id), { subscriptionStatus });
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error('Error updating user subscription status:', error);
+      res.status(500).json({ message: "Error updating subscription status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
