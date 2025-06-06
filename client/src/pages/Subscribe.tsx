@@ -1,19 +1,10 @@
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Crown, Star, TrendingUp, Users, CheckCircle, ArrowLeft } from 'lucide-react';
-
-// Make sure to call `loadStripe` outside of a component's render to avoid
-// recreating the `Stripe` object on every render.
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const SubscribeForm = () => {
   const { toast } = useToast();
@@ -105,113 +96,122 @@ const SubscribeForm = () => {
 };
 
 export default function Subscribe() {
-  const [clientSecret, setClientSecret] = useState("");
   const [, setLocation] = useLocation();
 
-  useEffect(() => {
-    // For demo purposes, simulate client secret generation
-    // In production, this would come from the Stripe API
-    const simulateStripeSetup = () => {
-      setTimeout(() => {
-        setClientSecret("pi_demo_client_secret_for_testing");
-      }, 1500);
-    };
-
-    simulateStripeSetup();
-  }, [setLocation]);
-
-  if (!clientSecret) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" aria-label="Loading"/>
-          <p className="mt-4 text-gray-600">Setting up your premium membership...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Make SURE to wrap the form in <Elements> which provides the stripe context.
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
-        <div className="mb-6">
-          <Button 
-            onClick={() => setLocation('/dashboard')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </div>
-
-        <Card className="border-2 border-gradient-to-r from-yellow-400 to-orange-500 bg-white shadow-xl">
-          <CardHeader className="text-center pb-6">
-            <div className="flex justify-center mb-4">
-              <Crown className="h-12 w-12 text-yellow-600" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Button 
+              variant="ghost" 
+              onClick={() => setLocation('/dashboard')}
+              className="mb-4 text-gray-600 hover:text-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Crown className="w-8 h-8 text-yellow-500" />
+              <h1 className="text-4xl font-bold text-gray-900">FinBoost Premium</h1>
             </div>
-            <CardTitle className="text-3xl font-bold text-gray-800">
-              Upgrade to Premium
-            </CardTitle>
-            <Badge variant="secondary" className="mx-auto bg-yellow-100 text-yellow-800 border-yellow-300">
-              Start Earning Real Rewards
-            </Badge>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {/* Benefits Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-600" />
-                Premium Benefits
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-800">Access All Content</p>
-                    <p className="text-sm text-gray-600">Unlock all premium lessons and resources</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-800">Earn Real Points</p>
-                    <p className="text-sm text-gray-600">Convert theoretical points to claimable rewards</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-800">Monthly Rewards Pool</p>
-                    <p className="text-sm text-gray-600">Compete for cash rewards distributed monthly</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-800">Priority Support</p>
-                    <p className="text-sm text-gray-600">Get faster help when you need it</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pricing */}
-            <div className="text-center py-4">
-              <div className="text-4xl font-bold text-gray-800 mb-2">$20</div>
-              <p className="text-gray-600">per month • Cancel anytime</p>
-            </div>
-
-            {/* Payment Form */}
-            <SubscribeForm />
-
-            <p className="text-xs text-gray-500 text-center">
-              By subscribing, you agree to our terms of service. Your subscription will automatically renew monthly unless canceled.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Unlock your full financial potential with premium features, exclusive content, and real reward earnings.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Benefits Section */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500" />
+                    Premium Benefits
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Access All 27 Learning Modules</p>
+                      <p className="text-sm text-gray-600">Complete financial education from basics to advanced strategies</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Earn Real Points & Rewards</p>
+                      <p className="text-sm text-gray-600">Every action counts toward monthly cash distributions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Monthly Reward Pool</p>
+                      <p className="text-sm text-gray-600">Share in 55% of all premium subscriptions collected</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Priority Support</p>
+                      <p className="text-sm text-gray-600">Get help when you need it most</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Advanced Analytics</p>
+                      <p className="text-sm text-gray-600">Track your learning progress and earnings</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Current Pool Display */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    Current Month Rewards
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 mb-2">$11.00</div>
+                    <p className="text-sm text-gray-600 mb-4">Available in reward pool</p>
+                    <div className="flex items-center justify-center gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span>1 Premium Member</span>
+                      </div>
+                      <Badge variant="outline">55% Pool Share</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Payment Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-center">Choose Premium</CardTitle>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-gray-800 mb-2">$20</div>
+                  <p className="text-gray-600">per month • Cancel anytime</p>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <SubscribeForm />
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  By subscribing, you agree to our terms of service. Your subscription will automatically renew monthly unless canceled.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
