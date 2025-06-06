@@ -36,6 +36,7 @@ import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
 import PointsActions from "@/components/PointsActions";
 import { educationContent } from "@/data/educationContent";
+import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt } from "@shared/userAccess";
 
 // Custom hook to determine if the screen is mobile
 function useIsMobile() {
@@ -65,6 +66,9 @@ interface User {
   tier: string;
   currentStreak?: number;
   longestStreak?: number;
+  subscriptionStatus?: string;
+  theoreticalPoints?: number;
+  membershipBonusReceived?: boolean;
 }
 
 export default function Dashboard() {

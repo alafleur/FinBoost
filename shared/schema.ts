@@ -293,7 +293,6 @@ export type MonthlyPoolSetting = typeof monthlyPoolSettings.$inferSelect;
 export type InsertMonthlyPoolSetting = z.infer<typeof insertMonthlyPoolSettingSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
-export type LearningModule = typeof learningModules.$inferSelect;
 export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
 
 export const insertUserSchema = createInsertSchema(users).pick({
