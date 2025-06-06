@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   BookOpen, 
   Trophy, 
@@ -17,7 +21,10 @@ import {
   Activity,
   Crown,
   Medal,
-  Settings
+  Settings,
+  HelpCircle,
+  MessageCircle,
+  Send
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -78,6 +85,12 @@ export default function Dashboard() {
   } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [publishedModules, setPublishedModules] = useState<any[]>([]);
+  const [supportForm, setSupportForm] = useState({
+    category: "",
+    message: ""
+  });
+  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
+  const [showSupportSuccess, setShowSupportSuccess] = useState(false);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -289,6 +302,56 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching distribution info:', error);
+    }
+  };
+
+  // Handle support ticket submission
+  const handleSupportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportForm.category || !supportForm.message.trim()) {
+      toast({
+        title: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingSupport(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/support', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username || '',
+          email: user?.email || '',
+          category: supportForm.category,
+          message: supportForm.message
+        })
+      });
+
+      if (response.ok) {
+        setShowSupportSuccess(true);
+        setSupportForm({ category: "", message: "" });
+        toast({
+          title: "Support ticket submitted",
+          description: "We'll get back to you within 24 hours!",
+        });
+      } else {
+        throw new Error('Failed to submit support request');
+      }
+    } catch (error) {
+      console.error('Support submission error:', error);
+      toast({
+        title: "Submission failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingSupport(false);
     }
   };
 
@@ -597,12 +660,13 @@ export default function Dashboard() {
             {/* Mobile Navigation Tabs - Show at top on mobile */}
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-                <TabsList className="grid w-full grid-cols-5 h-auto">
+                <TabsList className="grid w-full grid-cols-6 h-auto">
                   <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
                   <TabsTrigger value="earn" className="text-xs px-1 py-2">Earn</TabsTrigger>
                   <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
                   <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
                   <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
+                  <TabsTrigger value="support" className="text-xs px-1 py-2">Support</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
