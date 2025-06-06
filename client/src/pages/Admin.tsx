@@ -56,6 +56,7 @@ interface LearningModule {
   category: string;
   difficulty: string;
   estimatedMinutes: number;
+  accessType: string;
   isActive: boolean;
   isPublished?: boolean;
   order: number;
@@ -244,7 +245,7 @@ export default function Admin() {
     category: 'budgeting',
     difficulty: 'beginner',
     estimatedMinutes: 5,
-    accessType: 'free',
+    accessType: 'premium',
     isActive: true,
     isPublished: false
   });
@@ -1653,7 +1654,7 @@ export default function Admin() {
                           category: 'budgeting',
                           difficulty: 'beginner',
                           estimatedMinutes: 5,
-                          accessType: 'free',
+                          accessType: 'premium',
                           isActive: true,
                           isPublished: false
                         });
