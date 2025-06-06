@@ -576,6 +576,46 @@ export default function Dashboard() {
               </Card>
             </div>
 
+            {/* Quick Actions Bar */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <Button 
+                  onClick={() => setActiveTab('support')}
+                  variant="outline" 
+                  className="w-full h-12 text-left flex items-center justify-between border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <HelpCircle className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-blue-900">Need Help?</div>
+                      <div className="text-xs text-blue-600">Submit a support ticket</div>
+                    </div>
+                  </div>
+                  <MessageCircle className="h-4 w-4 text-blue-400" />
+                </Button>
+              </div>
+              <div className="flex-1">
+                <Button 
+                  onClick={() => setLocation('/education')}
+                  variant="outline" 
+                  className="w-full h-12 text-left flex items-center justify-between border-green-200 hover:border-green-300 hover:bg-green-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-green-900">Learn & Earn</div>
+                      <div className="text-xs text-green-600">Complete lessons for points</div>
+                    </div>
+                  </div>
+                  <Target className="h-4 w-4 text-green-400" />
+                </Button>
+              </div>
+            </div>
+
             {/* Enhanced Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
