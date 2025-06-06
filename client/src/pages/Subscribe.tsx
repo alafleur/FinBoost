@@ -78,7 +78,7 @@ export default function Subscribe() {
     // Create subscription as soon as the page loads
     const token = localStorage.getItem('token');
     if (!token) {
-      setLocation('/login');
+      setLocation('/auth');
       return;
     }
 
@@ -89,12 +89,21 @@ export default function Subscribe() {
         "Authorization": `Bearer ${token}`
       }
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          if (res.status === 401) {
+            // Token is invalid, redirect to login
+            localStorage.removeItem('token');
+            setLocation('/auth');
+            return;
+          }
+          throw new Error(data.error?.message || data.message || 'Failed to create subscription');
+        }
         if (data.clientSecret) {
           setClientSecret(data.clientSecret);
         } else {
-          throw new Error(data.error?.message || 'Failed to create subscription');
+          throw new Error('No client secret received');
         }
       })
       .catch((error) => {

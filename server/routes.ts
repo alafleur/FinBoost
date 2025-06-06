@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
+import jwt from "jsonwebtoken";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -11,6 +12,17 @@ if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2025-04-30.basil",
   });
+}
+
+// JWT Helper function
+async function getUserFromToken(token: string) {
+  try {
+    const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+    const user = await storage.getUserById(decoded.userId);
+    return user;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
