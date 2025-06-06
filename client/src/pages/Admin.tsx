@@ -2993,6 +2993,102 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          <TabsContent value="pool-settings">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    Monthly Pool Settings
+                    <Button onClick={() => setShowPoolSettingDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add New Cycle
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Configure reward pool percentages for each monthly cycle. Changes affect how much of each $20 subscription goes to rewards.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {monthlyPoolSettings.map((setting: any) => (
+                      <div key={setting.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium">{setting.cycleName}</h3>
+                            <div className="text-sm text-gray-500">
+                              {new Date(setting.cycleStartDate).toLocaleDateString()} - {new Date(setting.cycleEndDate).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm mt-1">
+                              <span className="font-medium">{setting.rewardPoolPercentage}%</span> of ${setting.membershipFee / 100} goes to rewards
+                              <span className="text-gray-500 ml-2">
+                                (${((setting.membershipFee / 100) * (setting.rewardPoolPercentage / 100)).toFixed(2)} per subscription)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={setting.isActive ? "default" : "secondary"}>
+                              {setting.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingPoolSetting(setting);
+                                setPoolSettingForm({
+                                  cycleName: setting.cycleName,
+                                  cycleStartDate: setting.cycleStartDate?.split('T')[0] || '',
+                                  cycleEndDate: setting.cycleEndDate?.split('T')[0] || '',
+                                  rewardPoolPercentage: setting.rewardPoolPercentage,
+                                  membershipFee: setting.membershipFee,
+                                  isActive: setting.isActive
+                                });
+                                setShowPoolSettingDialog(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {monthlyPoolSettings.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        No monthly cycles configured. Create your first cycle to start managing dynamic pool settings.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Pool Settings</CardTitle>
+                  <CardDescription>Active settings for this month's subscription payments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">55%</div>
+                      <div className="text-sm text-gray-500">Current Pool %</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">$11.00</div>
+                      <div className="text-sm text-gray-500">Per Subscription</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">$20.00</div>
+                      <div className="text-sm text-gray-500">Membership Fee</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">$9.00</div>
+                      <div className="text-sm text-gray-500">To Operations</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="settings">
             <Card>
               <CardHeader>
@@ -4274,6 +4370,116 @@ export default function Admin() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Monthly Pool Setting Dialog */}
+      <Dialog open={showPoolSettingDialog} onOpenChange={setShowPoolSettingDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingPoolSetting ? 'Edit Monthly Cycle' : 'Add New Monthly Cycle'}</DialogTitle>
+            <DialogDescription>
+              Configure reward pool percentage and membership fee for a specific monthly cycle.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cycleName">Cycle Name</Label>
+                <Input 
+                  id="cycleName"
+                  value={poolSettingForm.cycleName}
+                  onChange={(e) => setPoolSettingForm({...poolSettingForm, cycleName: e.target.value})}
+                  placeholder="e.g., January 2025"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rewardPoolPercentage">Reward Pool %</Label>
+                <Input 
+                  id="rewardPoolPercentage"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={poolSettingForm.rewardPoolPercentage}
+                  onChange={(e) => setPoolSettingForm({...poolSettingForm, rewardPoolPercentage: parseInt(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cycleStartDate">Start Date</Label>
+                <Input 
+                  id="cycleStartDate"
+                  type="date"
+                  value={poolSettingForm.cycleStartDate}
+                  onChange={(e) => setPoolSettingForm({...poolSettingForm, cycleStartDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cycleEndDate">End Date</Label>
+                <Input 
+                  id="cycleEndDate"
+                  type="date"
+                  value={poolSettingForm.cycleEndDate}
+                  onChange={(e) => setPoolSettingForm({...poolSettingForm, cycleEndDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="membershipFee">Membership Fee (cents)</Label>
+                <Input 
+                  id="membershipFee"
+                  type="number"
+                  min="0"
+                  value={poolSettingForm.membershipFee}
+                  onChange={(e) => setPoolSettingForm({...poolSettingForm, membershipFee: parseInt(e.target.value)})}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  ${(poolSettingForm.membershipFee / 100).toFixed(2)} per subscription
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="isActive"
+                  checked={poolSettingForm.isActive}
+                  onCheckedChange={(checked) => setPoolSettingForm({...poolSettingForm, isActive: checked})}
+                />
+                <Label htmlFor="isActive">Active</Label>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Preview</h4>
+              <div className="text-sm text-blue-700">
+                With {poolSettingForm.rewardPoolPercentage}% going to rewards:
+                <ul className="mt-1 space-y-1">
+                  <li>• ${((poolSettingForm.membershipFee / 100) * (poolSettingForm.rewardPoolPercentage / 100)).toFixed(2)} per subscription goes to reward pool</li>
+                  <li>• ${((poolSettingForm.membershipFee / 100) * ((100 - poolSettingForm.rewardPoolPercentage) / 100)).toFixed(2)} per subscription goes to operations</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setShowPoolSettingDialog(false);
+                setEditingPoolSetting(null);
+                setPoolSettingForm({
+                  cycleName: '',
+                  cycleStartDate: '',
+                  cycleEndDate: '',
+                  rewardPoolPercentage: 55,
+                  membershipFee: 2000,
+                  isActive: true
+                });
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                // Handle save pool setting
+                console.log('Saving pool setting:', poolSettingForm);
+                setShowPoolSettingDialog(false);
+              }}>
+                {editingPoolSetting ? 'Update Cycle' : 'Create Cycle'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
