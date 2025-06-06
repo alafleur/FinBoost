@@ -198,6 +198,8 @@ export default function Admin() {
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showEditUserDialog, setShowEditUserDialog] = useState(false);
   const [showUserSettingsDialog, setShowUserSettingsDialog] = useState(false);
+  const [showActionPublishDialog, setShowActionPublishDialog] = useState(false);
+  const [selectedActionForPublish, setSelectedActionForPublish] = useState<any>(null);
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -2238,53 +2240,71 @@ export default function Admin() {
                   <CardDescription>Manage available point-earning activities</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Daily Login</span>
-                        <Badge variant="default">5 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">Base daily activity reward</div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Available Actions</h3>
+                      <Button onClick={() => setShowPointActionDialog(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add New Action
+                      </Button>
                     </div>
                     
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Module Completion</span>
-                        <Badge variant="default">10-50 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">Variable by difficulty</div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Quiz Perfect Score</span>
-                        <Badge variant="default">15 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">100% quiz completion</div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Streak Bonus</span>
-                        <Badge variant="secondary">2-10 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">Consecutive day multiplier</div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Referral Signup</span>
-                        <Badge variant="default">25 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">Friend joins platform</div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Community Activity</span>
-                        <Badge variant="outline">1-5 pts</Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">Forum participation</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[
+                        { id: 'daily-login', name: 'Daily Login', points: '5 pts', description: 'Base daily activity reward', isPublished: true },
+                        { id: 'module-completion', name: 'Module Completion', points: '10-50 pts', description: 'Variable by difficulty', isPublished: true },
+                        { id: 'quiz-perfect', name: 'Quiz Perfect Score', points: '15 pts', description: '100% quiz completion', isPublished: true },
+                        { id: 'streak-bonus', name: 'Streak Bonus', points: '2-10 pts', description: 'Consecutive day multiplier', isPublished: false },
+                        { id: 'referral-signup', name: 'Referral Signup', points: '25 pts', description: 'Friend joins platform', isPublished: true },
+                        { id: 'community-activity', name: 'Community Activity', points: '1-5 pts', description: 'Forum participation', isPublished: false }
+                      ].map((action) => (
+                        <div key={action.id} className="p-4 border rounded-lg relative">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">{action.name}</span>
+                                <Badge variant={action.isPublished ? "default" : "secondary"}>
+                                  {action.points}
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-500 mb-3">{action.description}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={action.isPublished ? "default" : "outline"} className="text-xs">
+                                {action.isPublished ? "Published" : "Draft"}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedActionForPublish(action);
+                                  setShowActionPublishDialog(true);
+                                }}
+                              >
+                                <Settings className="w-3 h-3" />
+                              </Button>
+                              
+                              {!action.isPublished && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedActionForPublish(action);
+                                    setShowActionPublishDialog(true);
+                                  }}
+                                >
+                                  Publish
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
@@ -3886,6 +3906,137 @@ export default function Admin() {
                     <div className="text-lg font-bold">{selectedModule.order || 'N/A'}</div>
                     <div className="text-xs text-gray-600">Order</div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Action Publish Dialog */}
+      <Dialog open={showActionPublishDialog} onOpenChange={setShowActionPublishDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Action: {selectedActionForPublish?.name}</DialogTitle>
+            <DialogDescription>
+              Configure publication settings and properties for this point-earning action.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedActionForPublish && (
+            <div className="space-y-4">
+              {/* Action Details */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium">Action ID:</span>
+                    <span className="text-sm text-gray-600">{selectedActionForPublish.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium">Points:</span>
+                    <span className="text-sm text-gray-600">{selectedActionForPublish.points}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge variant={selectedActionForPublish.isPublished ? "default" : "outline"}>
+                      {selectedActionForPublish.isPublished ? "Published" : "Draft"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Publication Settings */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="action-published">Published</Label>
+                  <Switch
+                    id="action-published"
+                    checked={selectedActionForPublish.isPublished}
+                    onCheckedChange={(checked) => {
+                      setSelectedActionForPublish({
+                        ...selectedActionForPublish,
+                        isPublished: checked
+                      });
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="action-description">Description</Label>
+                  <Textarea
+                    id="action-description"
+                    value={selectedActionForPublish.description}
+                    onChange={(e) => {
+                      setSelectedActionForPublish({
+                        ...selectedActionForPublish,
+                        description: e.target.value
+                      });
+                    }}
+                    placeholder="Enter action description..."
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="action-points">Points Value</Label>
+                  <Input
+                    id="action-points"
+                    value={selectedActionForPublish.points}
+                    onChange={(e) => {
+                      setSelectedActionForPublish({
+                        ...selectedActionForPublish,
+                        points: e.target.value
+                      });
+                    }}
+                    placeholder="e.g., 10 pts or 5-15 pts"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-between pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowActionPublishDialog(false);
+                    setSelectedActionForPublish(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                
+                <div className="flex gap-2">
+                  {selectedActionForPublish.isPublished && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        // Handle unpublish action
+                        toast({
+                          title: "Action Unpublished",
+                          description: `${selectedActionForPublish.name} has been unpublished.`,
+                        });
+                        setShowActionPublishDialog(false);
+                        setSelectedActionForPublish(null);
+                      }}
+                    >
+                      Unpublish
+                    </Button>
+                  )}
+                  
+                  <Button
+                    onClick={() => {
+                      // Handle save/publish action
+                      const action = selectedActionForPublish.isPublished ? "updated" : "published";
+                      toast({
+                        title: `Action ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+                        description: `${selectedActionForPublish.name} has been ${action} successfully.`,
+                      });
+                      setShowActionPublishDialog(false);
+                      setSelectedActionForPublish(null);
+                    }}
+                  >
+                    {selectedActionForPublish.isPublished ? "Save Changes" : "Publish Action"}
+                  </Button>
                 </div>
               </div>
             </div>
