@@ -225,8 +225,8 @@ export default function Dashboard() {
       }
 
       if (poolResponse.ok) {
-        const poolData = await poolResponse.json();
-        setPoolData(poolData);
+        const poolResponse_data = await poolResponse.json();
+        setPoolData(poolResponse_data.pool);
       }
 
       // Load secondary data only after initial load
