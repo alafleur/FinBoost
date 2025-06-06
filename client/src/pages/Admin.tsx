@@ -2448,73 +2448,56 @@ export default function Admin() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Action</TableHead>
-                          <TableHead>Points</TableHead>
-                          <TableHead>Daily Limit</TableHead>
-                          <TableHead>Monthly Limit</TableHead>
-                          <TableHead>Requires Proof</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pointActions.map((action) => (
-                          <TableRow key={action.id}>
-                            <TableCell className="font-medium">
-                              <div>
-                                <div>{action.name}</div>
-                                <div className="text-xs text-gray-500">{action.description}</div>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {pointActions.map((action) => (
+                        <div key={action.id} className="p-4 border rounded-lg relative">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">{action.name}</span>
+                                <Badge variant={action.isActive ? "default" : "secondary"}>
+                                  {action.basePoints} pts
+                                </Badge>
                               </div>
-                            </TableCell>
-                            <TableCell>{action.basePoints}</TableCell>
-                            <TableCell>{action.maxDaily || 'Unlimited'}</TableCell>
-                            <TableCell>{action.maxMonthly || 'Unlimited'}</TableCell>
-                            <TableCell>
-                              <Switch checked={action.requiresProof} disabled />
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{action.category}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button 
-                                  variant="ghost" 
+                              <div className="text-xs text-gray-500 mb-3">{action.description}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={action.isActive ? "default" : "outline"} className="text-xs">
+                                {action.isActive ? "Published" : "Draft"}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedActionForPublish(action);
+                                  setShowActionPublishDialog(true);
+                                }}
+                              >
+                                <Settings className="w-3 h-3" />
+                              </Button>
+                              
+                              {!action.isActive && (
+                                <Button
                                   size="sm"
                                   onClick={() => {
-                                    setEditingPointAction(action);
-                                    setPointActionForm(action);
-                                    setShowPointActionDialog(true);
+                                    setSelectedActionForPublish(action);
+                                    setShowActionPublishDialog(true);
                                   }}
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  Publish
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleDeletePointAction(action.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Configuration Notes</h4>
-                    <div className="text-sm text-blue-800 space-y-1">
-                      <div>• Points: Base points awarded for completing this action</div>
-                      <div>• Daily Limit: Maximum times per day a user can earn points for this action</div>
-                      <div>• Monthly Limit: Maximum times per monthly rewards cycle (prevents gaming)</div>
-                      <div>• Requires Proof: Whether users must upload evidence to earn points</div>
-                      <div>• All financial actions should require proof to ensure legitimacy</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
