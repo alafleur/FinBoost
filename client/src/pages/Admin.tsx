@@ -830,6 +830,41 @@ export default function Admin() {
     }
   };
 
+  const handleUpdatePointAction = async (actionData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/points/actions/${actionData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: actionData.name,
+          basePoints: actionData.basePoints,
+          maxDaily: actionData.maxDaily,
+          maxMonthly: actionData.maxMonthly,
+          requiresProof: actionData.requiresProof,
+          category: actionData.category,
+          description: actionData.description,
+          isActive: actionData.isActive
+        })
+      });
+
+      if (response.ok) {
+        fetchPointActions(); // Refresh the actions list
+      } else {
+        throw new Error('Failed to update point action');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update point action",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     fetchData();
     fetchPendingProofs();
@@ -2250,21 +2285,14 @@ export default function Admin() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[
-                        { id: 'daily-login', name: 'Daily Login', points: '5 pts', description: 'Base daily activity reward', isPublished: true },
-                        { id: 'module-completion', name: 'Module Completion', points: '10-50 pts', description: 'Variable by difficulty', isPublished: true },
-                        { id: 'quiz-perfect', name: 'Quiz Perfect Score', points: '15 pts', description: '100% quiz completion', isPublished: true },
-                        { id: 'streak-bonus', name: 'Streak Bonus', points: '2-10 pts', description: 'Consecutive day multiplier', isPublished: false },
-                        { id: 'referral-signup', name: 'Referral Signup', points: '25 pts', description: 'Friend joins platform', isPublished: true },
-                        { id: 'community-activity', name: 'Community Activity', points: '1-5 pts', description: 'Forum participation', isPublished: false }
-                      ].map((action) => (
+                      {pointActions.map((action) => (
                         <div key={action.id} className="p-4 border rounded-lg relative">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-sm font-medium">{action.name}</span>
-                                <Badge variant={action.isPublished ? "default" : "secondary"}>
-                                  {action.points}
+                                <Badge variant={action.isActive ? "default" : "secondary"}>
+                                  {action.basePoints} pts
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 mb-3">{action.description}</div>
@@ -2273,8 +2301,8 @@ export default function Admin() {
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Badge variant={action.isPublished ? "default" : "outline"} className="text-xs">
-                                {action.isPublished ? "Published" : "Draft"}
+                              <Badge variant={action.isActive ? "default" : "outline"} className="text-xs">
+                                {action.isActive ? "Published" : "Draft"}
                               </Badge>
                             </div>
                             
@@ -2290,7 +2318,7 @@ export default function Admin() {
                                 <Settings className="w-3 h-3" />
                               </Button>
                               
-                              {!action.isPublished && (
+                              {!action.isActive && (
                                 <Button
                                   size="sm"
                                   onClick={() => {
@@ -3930,16 +3958,16 @@ export default function Admin() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Action ID:</span>
-                    <span className="text-sm text-gray-600">{selectedActionForPublish.id}</span>
+                    <span className="text-sm text-gray-600">{selectedActionForPublish.actionId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Points:</span>
-                    <span className="text-sm text-gray-600">{selectedActionForPublish.points}</span>
+                    <span className="text-sm text-gray-600">{selectedActionForPublish.basePoints} pts</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Status:</span>
-                    <Badge variant={selectedActionForPublish.isPublished ? "default" : "outline"}>
-                      {selectedActionForPublish.isPublished ? "Published" : "Draft"}
+                    <Badge variant={selectedActionForPublish.isActive ? "default" : "outline"}>
+                      {selectedActionForPublish.isActive ? "Published" : "Draft"}
                     </Badge>
                   </div>
                 </div>
@@ -3951,11 +3979,11 @@ export default function Admin() {
                   <Label htmlFor="action-published">Published</Label>
                   <Switch
                     id="action-published"
-                    checked={selectedActionForPublish.isPublished}
+                    checked={selectedActionForPublish.isActive}
                     onCheckedChange={(checked) => {
                       setSelectedActionForPublish({
                         ...selectedActionForPublish,
-                        isPublished: checked
+                        isActive: checked
                       });
                     }}
                   />
@@ -4006,11 +4034,12 @@ export default function Admin() {
                 </Button>
                 
                 <div className="flex gap-2">
-                  {selectedActionForPublish.isPublished && (
+                  {selectedActionForPublish.isActive && (
                     <Button
                       variant="destructive"
-                      onClick={() => {
+                      onClick={async () => {
                         // Handle unpublish action
+                        await handleUpdatePointAction({ ...selectedActionForPublish, isActive: false });
                         toast({
                           title: "Action Unpublished",
                           description: `${selectedActionForPublish.name} has been unpublished.`,
@@ -4024,9 +4053,10 @@ export default function Admin() {
                   )}
                   
                   <Button
-                    onClick={() => {
+                    onClick={async () => {
                       // Handle save/publish action
-                      const action = selectedActionForPublish.isPublished ? "updated" : "published";
+                      await handleUpdatePointAction(selectedActionForPublish);
+                      const action = selectedActionForPublish.isActive ? "updated" : "published";
                       toast({
                         title: `Action ${action.charAt(0).toUpperCase() + action.slice(1)}`,
                         description: `${selectedActionForPublish.name} has been ${action} successfully.`,
@@ -4035,7 +4065,7 @@ export default function Admin() {
                       setSelectedActionForPublish(null);
                     }}
                   >
-                    {selectedActionForPublish.isPublished ? "Save Changes" : "Publish Action"}
+                    {selectedActionForPublish.isActive ? "Save Changes" : "Publish Action"}
                   </Button>
                 </div>
               </div>
