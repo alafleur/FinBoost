@@ -178,6 +178,7 @@ export class MemStorage implements IStorage {
   currentSubscriberId: number;
   db: any;
   private tierThresholdCache: { tier1: number, tier2: number, tier3: number } | null = null;
+  private tokens = new Map<string, { userId: number; createdAt: Date }>();
 
   constructor() {
     this.users = new Map();
@@ -1718,8 +1719,7 @@ export class MemStorage implements IStorage {
   // Authentication methods
   async validateUser(email: string, password: string): Promise<User | null> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
-      if (!user) return null;
+      const [user] = await db.select().from(users).where(eq(users.email, email));      if (!user) return null;
 
       const isValid = await bcrypt.compare(password, user.password);
       return isValid ? user : null;
@@ -2101,9 +2101,6 @@ export class MemStorage implements IStorage {
       .set({ isActive: false })
       .where(eq(adminPointsActions.actionId, actionId));
   }
-
-  // Add tokens storage
-  private tokens = new Map<string, { userId: number; createdAt: Date }>();
 
   // Admin CRUD operations implementation
   async createModule(moduleData: any): Promise<any> {
