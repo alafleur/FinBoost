@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id, 
           username: user.username, 
           email: user.email, 
-          isAdmin: user.email === 'lafleur.andrew@gmail.com' // Admin check by email
+          isAdmin: user.isAdmin || user.email === 'lafleur.andrew@gmail.com' // Admin check by database field or original admin email
         },
         token 
       });
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tier: user.tier,
           currentStreak: user.currentStreak || 0,
           longestStreak: user.longestStreak || 0,
-          isAdmin: user.email === 'lafleur.andrew@gmail.com'
+          isAdmin: user.isAdmin || user.email === 'lafleur.andrew@gmail.com'
         } 
       });
     } catch (error: any) {
