@@ -2213,6 +2213,10 @@ export class MemStorage implements IStorage {
       if (userData.totalPoints !== undefined) updateData.totalPoints = userData.totalPoints;
       if (userData.tier !== undefined) updateData.tier = userData.tier;
       if (userData.isActive !== undefined) updateData.isActive = userData.isActive;
+      if (userData.subscriptionStatus !== undefined) updateData.subscriptionStatus = userData.subscriptionStatus;
+      if (userData.stripeCustomerId !== undefined) updateData.stripeCustomerId = userData.stripeCustomerId;
+      if (userData.stripeSubscriptionId !== undefined) updateData.stripeSubscriptionId = userData.stripeSubscriptionId;
+      if (userData.nextBillingDate !== undefined) updateData.nextBillingDate = userData.nextBillingDate;
       if (userData.password !== undefined) {
         updateData.password = await bcrypt.hash(userData.password, 10);
       }
