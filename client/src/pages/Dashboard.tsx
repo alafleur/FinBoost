@@ -580,7 +580,13 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <Button 
-                  onClick={() => setActiveTab('support')}
+                  onClick={() => {
+                    if (isMobile) {
+                      setActiveTab('support');
+                    } else {
+                      setLocation('/support');
+                    }
+                  }}
                   variant="outline" 
                   className="w-full h-12 text-left flex items-center justify-between border-blue-200 hover:border-blue-300 hover:bg-blue-50"
                 >
