@@ -663,6 +663,7 @@ export default function Admin() {
           category: 'budgeting',
           difficulty: 'beginner',
           estimatedMinutes: 5,
+          accessType: 'premium',
           isActive: true,
           isPublished: false
         });
