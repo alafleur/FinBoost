@@ -16,6 +16,8 @@ import {
   Target
 } from 'lucide-react';
 import StreakNotification from "@/components/StreakNotification";
+import UpgradePrompt from "@/components/UpgradePrompt";
+import { getUserAccessInfo, canAccessModule, getUpgradeMessage, type UserForAccess } from "@shared/userAccess";
 
 interface QuizQuestion {
   id: number;

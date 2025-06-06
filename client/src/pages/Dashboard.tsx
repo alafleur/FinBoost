@@ -616,6 +616,16 @@ export default function Dashboard() {
               </Card>
             </div>
 
+            {/* Upgrade Prompt for Free Users */}
+            {user && user.subscriptionStatus !== 'active' && (
+              <div className="mb-6">
+                <UpgradePrompt 
+                  theoreticalPoints={user.theoreticalPoints || 0}
+                  currentMonthPoints={user.currentMonthPoints || 0}
+                />
+              </div>
+            )}
+
             {/* Quick Actions Bar */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
@@ -873,40 +883,66 @@ export default function Dashboard() {
                         .filter(module => selectedCategory === "" || module.category === selectedCategory)
                         .map(module => {
                           const isCompleted = completedModuleIds.includes(module.id);
+                          const canAccess = user ? canAccessModule(user, module) : false;
+                          const accessInfo = user ? getUserAccessInfo(user) : null;
+                          const isPremiumModule = module.accessType === 'premium';
+                          
                           return (
                             <Card 
                               key={module.id}
-                              className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
-                                isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                              className={`transition-all duration-200 hover:shadow-md relative ${
+                                canAccess ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
+                              } ${
+                                isCompleted ? 'border-green-200 bg-green-50' : 
+                                isPremiumModule && !accessInfo?.isPremium ? 'border-yellow-200 bg-yellow-50' :
+                                'hover:border-primary-200'
                               }`}
-                              onClick={() => setLocation(`/lesson/${module.id}`)}
+                              onClick={() => canAccess ? setLocation(`/lesson/${module.id}`) : null}
                             >
                               {isCompleted && (
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                   <span className="text-white text-xs">✓</span>
                                 </div>
                               )}
+                              {isPremiumModule && (
+                                <div className="absolute top-2 left-2">
+                                  <Crown className="w-4 h-4 text-yellow-500" />
+                                </div>
+                              )}
                               <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">
                                   <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
-                                  {isCompleted ? (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
-                                      Completed
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="outline" className="shrink-0">
-                                      {module.pointsReward} pts
-                                    </Badge>
-                                  )}
+                                  <div className="flex flex-col gap-1 shrink-0">
+                                    {isPremiumModule && (
+                                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                                        Premium
+                                      </Badge>
+                                    )}
+                                    {isCompleted ? (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                        Completed
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline">
+                                        {accessInfo?.isPremium || !isPremiumModule ? `${module.pointsReward} pts` : 'Upgrade'}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                                 <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                                 </div>
                                 <div className="flex items-center justify-end">
-                                  <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
-                                    {isCompleted ? "Review" : "Start Lesson"}
-                                  </Button>
+                                  {canAccess ? (
+                                    <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                                      {isCompleted ? "Review" : "Start Lesson"}
+                                    </Button>
+                                  ) : (
+                                    <Button size="sm" variant="outline" disabled>
+                                      Premium Only
+                                    </Button>
+                                  )}
                                 </div>
                               </CardContent>
                             </Card>
