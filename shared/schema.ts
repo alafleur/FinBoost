@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   isActive: boolean("is_active").default(true).notNull(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
   totalPoints: integer("total_points").default(0).notNull(),
   currentMonthPoints: integer("current_month_points").default(0).notNull(),
   tier: text("tier").default("bronze").notNull(),
