@@ -144,9 +144,9 @@ export default function Admin() {
   const [currentRewardsConfig, setCurrentRewardsConfig] = useState({
     poolPercentage: 55,
     tierAllocations: {
-      tier1: 50,
+      tier1: 50, // Tier 1 is now highest, gets largest allocation
       tier2: 30,
-      tier3: 20
+      tier3: 20 // Tier 3 is now lowest, gets smallest allocation
     },
     winnerPercentages: {
       tier1: 50,
@@ -154,9 +154,9 @@ export default function Admin() {
       tier3: 50
     },
     tierPercentiles: {
-      tier1: 33,
-      tier2: 33,
-      tier3: 34
+      tier1: 33, // Top 33%
+      tier2: 33, // Middle 33%
+      tier3: 34  // Bottom 34%
     },
     isLocked: true,
     month: new Date().getMonth() + 1,
@@ -167,9 +167,9 @@ export default function Admin() {
   const [nextRewardsConfig, setNextRewardsConfig] = useState({
     poolPercentage: 55,
     tierAllocations: {
-      tier1: 50,
+      tier1: 50, // Tier 1 is now highest, gets largest allocation
       tier2: 30,
-      tier3: 20
+      tier3: 20 // Tier 3 is now lowest, gets smallest allocation
     },
     winnerPercentages: {
       tier1: 50,
@@ -177,9 +177,9 @@ export default function Admin() {
       tier3: 50
     },
     tierPercentiles: {
-      tier1: 33,
-      tier2: 33,
-      tier3: 34
+      tier1: 33, // Top 33%
+      tier2: 33, // Middle 33%
+      tier3: 34  // Bottom 34%
     },
     isLocked: false,
     month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
@@ -980,9 +980,9 @@ export default function Admin() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <Label className="text-sm font-medium">Tier 3</Label>
+                        <Label className="text-sm font-medium">Tier 1</Label>
                         <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
-                          {tierThresholds.tier3}+ points
+                          {tierThresholds.tier1}+ points
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -992,7 +992,7 @@ export default function Admin() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <Label className="text-sm font-medium">Tier 1</Label>
+                        <Label className="text-sm font-medium">Tier 3</Label>
                         <span className="font-mono text-sm bg-white px-2 py-1 rounded border">
                           0+ points
                         </span>
@@ -1075,20 +1075,20 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg border">
-                      <div className="text-sm text-blue-600 font-medium">Tier 1 (Bronze)</div>
-                      <div className="text-2xl font-bold text-blue-700">0 - {tierThresholds.tier2 - 1}</div>
-                      <div className="text-xs text-blue-500">Bottom 33% (Monthly Points)</div>
+                    <div className="bg-yellow-50 p-4 rounded-lg border">
+                      <div className="text-sm text-yellow-600 font-medium">Tier 1 (Gold)</div>
+                      <div className="text-2xl font-bold text-yellow-700">{tierThresholds.tier1}+</div>
+                      <div className="text-xs text-yellow-500">Top 33% (Monthly Points)</div>
                     </div>
                     <div className="bg-amber-50 p-4 rounded-lg border">
                       <div className="text-sm text-amber-600 font-medium">Tier 2 (Silver)</div>
-                      <div className="text-2xl font-bold text-amber-700">{tierThresholds.tier2} - {tierThresholds.tier3 - 1}</div>
+                      <div className="text-2xl font-bold text-amber-700">{tierThresholds.tier2} - {tierThresholds.tier1 - 1}</div>
                       <div className="text-xs text-amber-500">Middle 33% (Monthly Points)</div>
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg border">
-                      <div className="text-sm text-yellow-600 font-medium">Tier 3 (Gold)</div>
-                      <div className="text-2xl font-bold text-yellow-700">{tierThresholds.tier3}+</div>
-                      <div className="text-xs text-yellow-500">Top 33% (Monthly Points)</div>
+                    <div className="bg-blue-50 p-4 rounded-lg border">
+                      <div className="text-sm text-blue-600 font-medium">Tier 3 (Bronze)</div>
+                      <div className="text-2xl font-bold text-blue-700">0 - {tierThresholds.tier2 - 1}</div>
+                      <div className="text-xs text-blue-500">Bottom 33% (Monthly Points)</div>
                     </div>
                   </div>
                 </CardContent>

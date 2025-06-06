@@ -625,12 +625,12 @@ export class MemStorage implements IStorage {
   async calculateUserTier(currentMonthPoints: number): Promise<string> {
     const thresholds = await this.getTierThresholds();
 
-    if (currentMonthPoints >= thresholds.tier3) {
-      return 'tier3';
+    if (currentMonthPoints >= thresholds.tier1) {
+      return 'tier1';
     } else if (currentMonthPoints >= thresholds.tier2) {
       return 'tier2';
     } else {
-      return 'tier1';
+      return 'tier3';
     }
   }
 
@@ -1647,13 +1647,14 @@ export class MemStorage implements IStorage {
       .sort((a, b) => a - b);
 
     // Calculate percentile thresholds based on ALL users
+    // Now Tier 1 is highest (67th percentile), Tier 3 is lowest (0-33rd percentile)
     const tier2Index = Math.floor(allPoints.length * 0.33);
-    const tier3Index = Math.floor(allPoints.length * 0.67);
+    const tier1Index = Math.floor(allPoints.length * 0.67);
 
     const thresholds = {
-      tier1: 0, // Tier 1 always starts at 0
-      tier2: allPoints[tier2Index] || 0,
-      tier3: allPoints[tier3Index] || 0
+      tier1: allPoints[tier1Index] || 0, // Tier 1 is now highest (67th percentile+)
+      tier2: allPoints[tier2Index] || 0, // Tier 2 is middle (33rd-67th percentile)
+      tier3: 0 // Tier 3 is now lowest (0-33rd percentile)
     };
 
     // Cache the calculated thresholds with timestamp
@@ -1965,14 +1966,15 @@ export class MemStorage implements IStorage {
         return { tier1: 0, tier2: 0, tier3: 0 };
       }
 
-      // Calculate 33rd and 66th percentiles
+      // Calculate 33rd and 67th percentiles
+      // Now Tier 1 is highest (67th percentile), Tier 3 is lowest (0-33rd percentile)
       const tier2Index = Math.floor(points.length * 0.33);
-      const tier3Index = Math.floor(points.length * 0.66);
+      const tier1Index = Math.floor(points.length * 0.67);
 
       return {
-        tier1: 0,
-        tier2: points[tier2Index] || 0,
-        tier3: points[tier3Index] || 0
+        tier1: points[tier1Index] || 0, // Tier 1 is now highest (67th percentile+)
+        tier2: points[tier2Index] || 0, // Tier 2 is middle (33rd-67th percentile)
+        tier3: 0 // Tier 3 is now lowest (0-33rd percentile)
       };
     } catch (error) {
       console.error('Error calculating tier thresholds:', error);
