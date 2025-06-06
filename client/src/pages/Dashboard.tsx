@@ -446,34 +446,34 @@ export default function Dashboard() {
                       </div>
                     </div>
 
+                    {/* Tier 1 Pool */}
+                    <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-4 border border-green-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-green-800 mb-1">Tier 1 Pool</h4>
+                        <div className="text-xl font-bold text-green-900">
+                          ${poolData ? poolData.tier1Pool.toLocaleString() : '0'}
+                        </div>
+                        <p className="text-xs text-green-600 mt-1">Top 33% performers</p>
+                      </div>
+                    </div>
+
+                    {/* Tier 2 Pool */}
+                    <div className="bg-gradient-to-br from-blue-100 to-blue-100 rounded-lg p-4 border border-blue-200">
+                      <div className="text-center">
+                        <h4 className="text-sm font-semibold text-blue-800 mb-1">Tier 2 Pool</h4>
+                        <div className="text-xl font-bold text-blue-900">
+                          ${poolData ? poolData.tier2Pool.toLocaleString() : '0'}
+                        </div>
+                        <p className="text-xs text-blue-600 mt-1">Middle 33% performers</p>
+                      </div>
+                    </div>
+
                     {/* Tier 3 Pool */}
                     <div className="bg-gradient-to-br from-orange-100 to-yellow-100 rounded-lg p-4 border border-orange-200">
                       <div className="text-center">
                         <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 3 Pool</h4>
                         <div className="text-xl font-bold text-orange-900">
                           ${poolData ? poolData.tier3Pool.toLocaleString() : '0'}
-                        </div>
-                        <p className="text-xs text-orange-600 mt-1">Top 33% performers</p>
-                      </div>
-                    </div>
-
-                    {/* Tier 2 Pool */}
-                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                      <div className="text-center">
-                        <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 2 Pool</h4>
-                        <div className="text-xl font-bold text-orange-900">
-                          ${poolData ? poolData.tier2Pool.toLocaleString() : '0'}
-                        </div>
-                        <p className="text-xs text-orange-600 mt-1">Middle 33% performers</p>
-                      </div>
-                    </div>
-
-                    {/* Tier 1 Pool */}
-                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                      <div className="text-center">
-                        <h4 className="text-sm font-semibold text-orange-800 mb-1">Tier 1 Pool</h4>
-                        <div className="text-xl font-bold text-orange-900">
-                          ${poolData ? poolData.tier1Pool.toLocaleString() : '0'}
                         </div>
                         <p className="text-xs text-orange-600 mt-1">Bottom 33% performers</p>
                       </div>
