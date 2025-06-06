@@ -178,6 +178,7 @@ export class MemStorage implements IStorage {
   currentSubscriberId: number;
   db: any;
   private tierThresholdCache: { tier1: number, tier2: number, tier3: number } | null = null;
+  private tierThresholdCacheTime: number | null = null;
   private tokens = new Map<string, { userId: number; createdAt: Date }>();
 
   constructor() {
@@ -1621,8 +1622,9 @@ export class MemStorage implements IStorage {
   }
 
   async getTierThresholds(): Promise<{ tier1: number, tier2: number, tier3: number }> {
-    // Return cached thresholds if available
-    if (this.tierThresholdCache) {
+    // Return cached thresholds if available and not expired (cache for 5 minutes)
+    if (this.tierThresholdCache && this.tierThresholdCacheTime && 
+        (Date.now() - this.tierThresholdCacheTime < 5 * 60 * 1000)) {
       return this.tierThresholdCache;
     }
 
@@ -1635,6 +1637,7 @@ export class MemStorage implements IStorage {
     if (allUsers.length === 0) {
       const thresholds = { tier1: 0, tier2: 0, tier3: 0 };
       this.tierThresholdCache = thresholds;
+      this.tierThresholdCacheTime = Date.now();
       return thresholds;
     }
 
@@ -1643,12 +1646,7 @@ export class MemStorage implements IStorage {
       .map(u => u.currentMonthPoints || 0)
       .sort((a, b) => a - b);
 
-    console.log(`Calculating tier thresholds for ${allPoints.length} users. Points range: ${allPoints[0]} to ${allPoints[allPoints.length - 1]}`);
-
     // Calculate percentile thresholds based on ALL users
-    // Tier 3 = top 33% (67th percentile and above)
-    // Tier 2 = middle 33% (34th to 66th percentile) 
-    // Tier 1 = bottom 33% (0 to 33rd percentile)
     const tier2Index = Math.floor(allPoints.length * 0.33);
     const tier3Index = Math.floor(allPoints.length * 0.67);
 
@@ -1658,10 +1656,9 @@ export class MemStorage implements IStorage {
       tier3: allPoints[tier3Index] || 0
     };
 
-    console.log(`Calculated thresholds: Tier 1: ${thresholds.tier1}, Tier 2: ${thresholds.tier2}, Tier 3: ${thresholds.tier3}`);
-
-    // Cache the calculated thresholds
+    // Cache the calculated thresholds with timestamp
     this.tierThresholdCache = thresholds;
+    this.tierThresholdCacheTime = Date.now();
     return thresholds;
   }
 

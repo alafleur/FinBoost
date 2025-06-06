@@ -256,6 +256,21 @@ export default function Admin() {
     tier3: [] as Array<{ position: number; percentage: number; userId?: number; username?: string; points?: number }>
   });
 
+  // Point actions management state
+  const [pointActions, setPointActions] = useState<any[]>([]);
+  const [editingPointAction, setEditingPointAction] = useState<any>(null);
+  const [showPointActionDialog, setShowPointActionDialog] = useState(false);
+  const [pointActionForm, setPointActionForm] = useState({
+    actionId: '',
+    name: '',
+    basePoints: 10,
+    maxDaily: 1,
+    maxMonthly: 10,
+    requiresProof: true,
+    category: 'action',
+    description: ''
+  });
+
   // Pool data state with proper typing
   const [poolData, setPoolData] = useState<{
     totalPool: number;
@@ -359,6 +374,21 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching pending proofs:', error);
+    }
+  };
+
+  const fetchPointActions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/points/actions', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPointActions(data.actions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching point actions:', error);
     }
   };
 
@@ -735,14 +765,78 @@ export default function Admin() {
     return Math.round(rewardAmount * ratio);
   };
 
+  const handleCreatePointAction = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/points/actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(pointActionForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Point action created successfully"
+        });
+        setShowPointActionDialog(false);
+        setPointActionForm({
+          actionId: '',
+          name: '',
+          basePoints: 10,
+          maxDaily: 1,
+          maxMonthly: 10,
+          requiresProof: true,
+          category: 'action',
+          description: ''
+        });
+        fetchPointActions();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create point action",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeletePointAction = async (actionId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/points/actions/${actionId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Point action deleted successfully"
+        });
+        fetchPointActions();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete point action",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     fetchData();
     fetchPendingProofs();
+    fetchPointActions();
 
-    // Set up automatic tier threshold refresh every 30 seconds
+    // Set up automatic tier threshold refresh every 2 minutes to improve performance
     const tierThresholdInterval = setInterval(() => {
       fetchData(); // This includes tier threshold fetching
-    }, 30000);
+    }, 120000);
 
     return () => {
       clearInterval(tierThresholdInterval);
@@ -2296,7 +2390,10 @@ export default function Admin() {
                         Configure point values, limits, and proof requirements for user actions
                       </CardDescription>
                     </div>
-                    <Button>
+                    <Button onClick={() => {
+                      setEditingPointAction(null);
+                      setShowPointActionDialog(true);
+                    }}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Action
                     </Button>
@@ -2317,141 +2414,47 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            <div>
-                              <div>Debt Payment</div>
-                              <div className="text-xs text-gray-500">Upload proof of debt payment</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="25" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="1" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="10" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Switch defaultChecked />
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">action</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Save className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            <div>
-                              <div>Investment Contribution</div>
-                              <div className="text-xs text-gray-500">Upload proof of investment</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="30" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="1" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="8" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Switch defaultChecked />
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">action</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Save className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            <div>
-                              <div>Savings Deposit</div>
-                              <div className="text-xs text-gray-500">Upload proof of savings deposit</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="20" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="1" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              defaultValue="15" 
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Switch defaultChecked />
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">action</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Save className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        {pointActions.map((action) => (
+                          <TableRow key={action.id}>
+                            <TableCell className="font-medium">
+                              <div>
+                                <div>{action.name}</div>
+                                <div className="text-xs text-gray-500">{action.description}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{action.basePoints}</TableCell>
+                            <TableCell>{action.maxDaily || 'Unlimited'}</TableCell>
+                            <TableCell>{action.maxMonthly || 'Unlimited'}</TableCell>
+                            <TableCell>
+                              <Switch checked={action.requiresProof} disabled />
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{action.category}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingPointAction(action);
+                                    setPointActionForm(action);
+                                    setShowPointActionDialog(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleDeletePointAction(action.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   </div>
@@ -2922,6 +2925,98 @@ export default function Admin() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Point Action Dialog */}
+      <Dialog open={showPointActionDialog} onOpenChange={setShowPointActionDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingPointAction ? 'Edit Point Action' : 'Add New Point Action'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="actionId">Action ID</Label>
+                <Input 
+                  id="actionId"
+                  value={pointActionForm.actionId}
+                  onChange={(e) => setPointActionForm({...pointActionForm, actionId: e.target.value})}
+                  placeholder="e.g., debt-payment"
+                />
+              </div>
+              <div>
+                <Label htmlFor="name">Action Name</Label>
+                <Input 
+                  id="name"
+                  value={pointActionForm.name}
+                  onChange={(e) => setPointActionForm({...pointActionForm, name: e.target.value})}
+                  placeholder="e.g., Debt Payment"
+                />
+              </div>
+              <div>
+                <Label htmlFor="basePoints">Base Points</Label>
+                <Input 
+                  id="basePoints"
+                  type="number"
+                  value={pointActionForm.basePoints}
+                  onChange={(e) => setPointActionForm({...pointActionForm, basePoints: parseInt(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input 
+                  id="category"
+                  value={pointActionForm.category}
+                  onChange={(e) => setPointActionForm({...pointActionForm, category: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxDaily">Max Daily</Label>
+                <Input 
+                  id="maxDaily"
+                  type="number"
+                  value={pointActionForm.maxDaily}
+                  onChange={(e) => setPointActionForm({...pointActionForm, maxDaily: parseInt(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxMonthly">Max Monthly</Label>
+                <Input 
+                  id="maxMonthly"
+                  type="number"
+                  value={pointActionForm.maxMonthly}
+                  onChange={(e) => setPointActionForm({...pointActionForm, maxMonthly: parseInt(e.target.value)})}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={pointActionForm.description}
+                onChange={(e) => setPointActionForm({...pointActionForm, description: e.target.value})}
+                placeholder="Describe what this action involves..."
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input 
+                type="checkbox"
+                id="requiresProof"
+                checked={pointActionForm.requiresProof}
+                onChange={(e) => setPointActionForm({...pointActionForm, requiresProof: e.target.checked})}
+              />
+              <Label htmlFor="requiresProof">Requires Proof</Label>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowPointActionDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreatePointAction}>
+              {editingPointAction ? 'Update' : 'Create'} Action
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
