@@ -78,9 +78,9 @@ export default function Profile() {
 
   const tierConfig: Record<string, TierInfo> = {
     tier1: {
-      name: 'Tier 1 (Gold)',
+      name: 'Tier 1',
       threshold: 500, // Now highest tier
-      color: 'from-yellow-400 to-yellow-600',
+      color: 'from-blue-400 to-blue-600',
       icon: Crown,
       benefits: [
         'All Tier 2 benefits',
@@ -92,9 +92,9 @@ export default function Profile() {
       ]
     },
     tier2: {
-      name: 'Tier 2 (Silver)',
+      name: 'Tier 2',
       threshold: 250,
-      color: 'from-gray-400 to-gray-600',
+      color: 'from-blue-400 to-blue-600',
       icon: Trophy,
       benefits: [
         'All Tier 3 benefits',
@@ -104,15 +104,15 @@ export default function Profile() {
         'Enhanced monthly rewards'
       ],
       nextTier: {
-        name: 'Tier 1 (Gold)',
+        name: 'Tier 1',
         threshold: 500,
         pointsNeeded: 250
       }
     },
     tier3: {
-      name: 'Tier 3 (Bronze)',
+      name: 'Tier 3',
       threshold: 0, // Now lowest tier
-      color: 'from-orange-400 to-orange-600',
+      color: 'from-blue-400 to-blue-600',
       icon: Medal,
       benefits: [
         'Access to basic financial lessons',
@@ -121,7 +121,7 @@ export default function Profile() {
         'Basic achievement badges'
       ],
       nextTier: {
-        name: 'Tier 2 (Silver)',
+        name: 'Tier 2',
         threshold: 250,
         pointsNeeded: 250
       }
