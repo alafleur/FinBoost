@@ -1,0 +1,133 @@
+{
+  "budgeting-variable-expenses": {
+    "id": "budgeting-variable-expenses",
+    "title": "Mastering Variable Expenses in Your Budget",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Understanding Variable Expenses</h2><p>Variable expenses change month-to-month, like groceries or gas. Unlike fixed expenses, they require active management to avoid overspending.</p><h3>Examples of Variable Expenses</h3><ul><li>Dining out</li><li>Entertainment</li><li>Fuel</li><li>Groceries</li></ul><h3>Managing These Costs</h3><p>Use spending caps and track them weekly using apps or spreadsheets. Build flexibility into your budget by setting aside a buffer.</p>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of the following is a variable expense?",
+        "options": ["Rent", "Car payment", "Internet bill", "Groceries"],
+        "correctAnswer": 3,
+        "explanation": "Groceries vary in cost month to month, making them a variable expense."
+      },
+      {
+        "id": 2,
+        "question": "What’s one way to manage variable expenses?",
+        "options": ["Ignore them", "Use a credit card", "Set a weekly spending limit", "Cancel fixed bills"],
+        "correctAnswer": 2,
+        "explanation": "Setting weekly caps helps manage variable spending within your budget."
+      }
+    ]
+  },
+  "saving-windfalls": {
+    "id": "saving-windfalls",
+    "title": "What to Do With a Financial Windfall",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Handling Unexpected Money Wisely</h2><p>Windfalls like tax refunds, bonuses, or inheritances are opportunities to accelerate financial goals—not splurge.</p><h3>Prioritization Strategy</h3><ul><li>Pay off high-interest debt</li><li>Build or top off emergency fund</li><li>Invest for long-term goals</li><li>Set aside for personal enjoyment (10%–20%)</li></ul><p>Resist lifestyle inflation by applying a clear plan before spending.</p>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is a financial windfall?",
+        "options": ["Regular paycheck", "Tax bill", "Unexpected money received", "Mortgage payment"],
+        "correctAnswer": 2,
+        "explanation": "A windfall is money received unexpectedly, like a bonus or inheritance."
+      },
+      {
+        "id": 2,
+        "question": "What’s the recommended first step with a windfall?",
+        "options": ["Spend it all", "Buy luxury items", "Pay off high-interest debt", "Ignore it"],
+        "correctAnswer": 2,
+        "explanation": "Prioritizing debt can free future cash flow and reduce interest payments."
+      }
+    ]
+  },
+  "investing-dividends": {
+    "id": "investing-dividends",
+    "title": "How Dividend Investing Works",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Dividend Investing Basics</h2><p>Dividends are periodic payments made to shareholders from a company's earnings. Some investors build portfolios focused on dividend-paying stocks for regular income.</p><h3>Key Benefits</h3><ul><li>Stable income stream</li><li>Reinvesting dividends for compounding growth</li><li>Often from well-established companies</li></ul><h3>Considerations</h3><p>Dividend yields vary and can change. Not all stocks pay dividends. Always review the company's payout history and stability.</p>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What are dividends?",
+        "options": ["Company debt", "Taxes", "Employee bonuses", "Payments to shareholders"],
+        "correctAnswer": 3,
+        "explanation": "Dividends are payouts to shareholders from company profits."
+      },
+      {
+        "id": 2,
+        "question": "Why might someone focus on dividend investing?",
+        "options": ["High risk", "Short-term gains", "Consistent income", "No taxes"],
+        "correctAnswer": 2,
+        "explanation": "Dividend investors seek regular, passive income."
+      }
+    ]
+  },
+  "credit-inquiries": {
+    "id": "credit-inquiries",
+    "title": "How Credit Inquiries Affect Your Score",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Understanding Credit Inquiries</h2><p>Credit inquiries occur when a lender checks your credit report. There are two types: soft and hard inquiries.</p><h3>Types of Inquiries</h3><ul><li><strong>Soft Inquiries:</strong> Do not affect your score (e.g., checking your own credit)</li><li><strong>Hard Inquiries:</strong> Can lower your score slightly and occur during loan applications</li></ul><h3>Limiting Inquiries</h3><p>Multiple inquiries in a short time can compound score impacts. Shop for rates within a short window to reduce effect.</p>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What type of inquiry affects your credit score?",
+        "options": ["Soft inquiry", "Hard inquiry", "Job interview", "Bank transfer"],
+        "correctAnswer": 1,
+        "explanation": "Hard inquiries from lenders can slightly lower your score."
+      },
+      {
+        "id": 2,
+        "question": "Which of these is a soft credit inquiry?",
+        "options": ["Applying for a car loan", "Lender checking for mortgage", "You checking your own score", "Credit card application"],
+        "correctAnswer": 2,
+        "explanation": "When you check your own score, it’s a soft inquiry with no impact."
+      }
+    ]
+  },
+  "debt-secured-vs-unsecured": {
+    "id": "debt-secured-vs-unsecured",
+    "title": "Secured vs. Unsecured Debt",
+    "category": "Debt",
+    "difficulty": "Beginner",
+    "points": 15,
+    "estimatedTime": "10 min",
+    "completed": false,
+    "content": "<h2>Types of Debt</h2><p>Debt falls into two categories: secured and unsecured. Understanding the difference helps you evaluate risk and repayment terms.</p><h3>Secured Debt</h3><ul><li>Backed by collateral (e.g., mortgage, car loan)</li><li>Lower interest rates</li></ul><h3>Unsecured Debt</h3><ul><li>No collateral (e.g., credit cards, student loans)</li><li>Higher interest rates due to risk</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which is an example of secured debt?",
+        "options": ["Credit card", "Student loan", "Mortgage", "Personal loan"],
+        "correctAnswer": 2,
+        "explanation": "Mortgages are secured by the home itself as collateral."
+      }
+    ]
+  },
+  "tax-deductions-vs-credits": {
+    "id": "tax-deductions-vs-credits",
+    "title": "Tax Deductions vs. Tax Credits",
+    "category": "Taxes",
+    "difficulty": "Beginner",
+    "points": 15,
+    "estimatedTime": "10 min",
+    "completed": false,
+    "content": "<h2>Understanding Tax Breaks</h2><p>Tax deductions reduce your taxable income. Tax credits reduce the actual amount you owe.</p><h3>Key Difference
