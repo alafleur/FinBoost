@@ -51,8 +51,15 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     }
   });
 
+  const { data: tierThresholdsData } = useQuery({
+    queryKey: ['/api/tiers/thresholds'],
+    enabled: isOpen,
+    refetchInterval: 30000,
+  });
+
   const allUsers = (leaderboardData as any)?.leaderboard || [];
   const currentUsername = (currentUserData as any)?.user?.username || null;
+  const tierThresholds = (tierThresholdsData as any)?.thresholds;
   
   // Calculate points to next tier
   const calculatePointsToNextTier = (points: string | number, tier: string) => {
