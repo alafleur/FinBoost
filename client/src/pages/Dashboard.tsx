@@ -144,6 +144,17 @@ export default function Dashboard() {
           </div>
 
           <div>
+            {/* View Full Leaderboard Button - Above Heading */}
+            <div className="mb-4">
+              <Button 
+                onClick={() => setShowExpandedLeaderboard(true)}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
+              >
+                <Trophy className="h-5 w-5 mr-2" />
+                View Full Leaderboard
+              </Button>
+            </div>
+
             <h3 className="font-heading font-bold text-lg mb-4">Leaderboard</h3>
             <div className="space-y-1">
               {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
@@ -174,17 +185,6 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-
-            {/* View Full Leaderboard Button - More Prominent */}
-            <div className="mt-3">
-              <Button 
-                onClick={() => setShowExpandedLeaderboard(true)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
-              >
-                <Trophy className="h-5 w-5 mr-2" />
-                View Full Leaderboard
-              </Button>
-            </div>
           </div>
         </div>
       </div>

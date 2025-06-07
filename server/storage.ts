@@ -1974,7 +1974,9 @@ export class MemStorage implements IStorage {
 
   async getTierThresholds(): Promise<any> {
     try {
-      const allUsers = await db.select({ points: users.currentMonthPoints }).from(users);
+      const allUsers = await db.select({ points: users.currentMonthPoints })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'active'));
       const points = allUsers.map(u => u.points || 0).sort((a, b) => a - b);
 
       if (points.length === 0) {
