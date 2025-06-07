@@ -58,7 +58,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     queryKey: ['/api/tiers/thresholds'],
   });
 
-  const filteredUsers = leaderboardData?.users?.filter((user: LeaderboardUser) =>
+  const filteredUsers = (leaderboardData as any)?.users?.filter((user: LeaderboardUser) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 

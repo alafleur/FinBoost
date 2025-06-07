@@ -36,6 +36,7 @@ import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
 import PointsActions from "@/components/PointsActions";
 import UpgradePrompt from "@/components/UpgradePrompt";
+import ExpandedLeaderboard from "@/components/ExpandedLeaderboard";
 import { educationContent } from "@/data/educationContent";
 import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt, type UserForAccess } from "@shared/userAccess";
 
@@ -96,6 +97,7 @@ export default function Dashboard() {
   });
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
   const [showSupportSuccess, setShowSupportSuccess] = useState(false);
+  const [showExpandedLeaderboard, setShowExpandedLeaderboard] = useState(false);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -172,6 +174,19 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
+            {/* View Full Leaderboard Button */}
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowExpandedLeaderboard(true)}
+                className="w-full"
+              >
+                <Trophy className="h-4 w-4 mr-2" />
+                View Full Leaderboard
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -1322,6 +1337,12 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Expanded Leaderboard Modal */}
+      <ExpandedLeaderboard 
+        isOpen={showExpandedLeaderboard} 
+        onClose={() => setShowExpandedLeaderboard(false)} 
+      />
     </div>
   );
 }
