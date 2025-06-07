@@ -2037,7 +2037,10 @@ export class MemStorage implements IStorage {
         createdAt: sql<string>`to_char(${users.createdAt}, 'YYYY-MM-DD')`.as('joinDate')
       })
       .from(users)
-      .where(users.isActive ? eq(users.isActive, true) : sql`true`);
+      .where(and(
+        eq(users.subscriptionStatus, 'active'),
+        users.isActive ? eq(users.isActive, true) : sql`true`
+      ));
 
       let query = baseQuery;
       
