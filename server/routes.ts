@@ -210,6 +210,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Expanded leaderboard with pagination and search
+  app.get("/api/leaderboard/expanded", async (req, res) => {
+    try {
+      const { timeFilter = 'month', page = 1, search = '' } = req.query;
+      const leaderboard = await storage.getExpandedLeaderboard(
+        timeFilter as string, 
+        parseInt(page as string), 
+        search as string
+      );
+      res.json({ success: true, users: leaderboard });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // User stats for leaderboard
+  app.get("/api/leaderboard/user-stats", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ success: false, message: "No token provided" });
+      }
+
+      const user = await storage.validateToken(token);
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Invalid token" });
+      }
+
+      const { timeFilter = 'month' } = req.query;
+      const userStats = await storage.getUserLeaderboardStats(user.id, timeFilter as string);
+      res.json({ success: true, currentUser: userStats });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/analytics", async (req, res) => {
     try {

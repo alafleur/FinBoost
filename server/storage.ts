@@ -51,6 +51,8 @@ export interface IStorage {
     //Leaderboard Methods
     getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>>;
     getUserRank(userId: number, period: 'monthly' | 'allTime'): Promise<{rank: number, points: number, tier: string} | null>;
+    getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>>;
+    getUserLeaderboardStats(userId: number, timeFilter: string): Promise<{username: string, rank: number, points: number, tier: string, streak: number, modulesCompleted: number, pointsToNextTier: number, pointsToTopPosition?: number}>;
 
     // Monthly Rewards Methods
     createMonthlyReward(month: string, totalRewardPool: number, config?: Partial<{goldRewardPercentage: number, silverRewardPercentage: number, bronzeRewardPercentage: number, pointDeductionPercentage: number}>): Promise<MonthlyReward>;
@@ -2017,6 +2019,144 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting leaderboard:', error);
       return [];
+    }
+  }
+
+  async getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>> {
+    try {
+      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
+      
+      // Get all users with their module completion count
+      const baseQuery = db.select({
+        id: users.id,
+        username: users.username,
+        points: pointsColumn,
+        tier: users.tier,
+        streak: users.currentStreak,
+        createdAt: sql<string>`to_char(${users.createdAt}, 'YYYY-MM-DD')`.as('joinDate')
+      })
+      .from(users)
+      .where(users.isActive ? eq(users.isActive, true) : sql`true`);
+
+      let query = baseQuery;
+      
+      if (search) {
+        query = query.where(sql`${users.username} ILIKE ${`%${search}%`}`);
+      }
+
+      const usersData = await query.orderBy(desc(pointsColumn));
+
+      // Get module completion counts for all users
+      const moduleCompletions = await db.select({
+        userId: userProgress.userId,
+        completedCount: sql<number>`COUNT(*)`.as('completedCount')
+      })
+      .from(userProgress)
+      .where(eq(userProgress.completed, true))
+      .groupBy(userProgress.userId);
+
+      const completionMap = new Map(
+        moduleCompletions.map(c => [c.userId, c.completedCount])
+      );
+
+      return usersData.map((user, index) => ({
+        rank: (index + 1).toString(),
+        username: user.username,
+        points: (user.points || 0).toString(),
+        tier: user.tier || 'member',
+        streak: user.streak || 0,
+        modulesCompleted: completionMap.get(user.id) || 0,
+        joinDate: user.joinDate || new Date().toISOString().split('T')[0]
+      }));
+    } catch (error) {
+      console.error('Error getting expanded leaderboard:', error);
+      return [];
+    }
+  }
+
+  async getUserLeaderboardStats(userId: number, timeFilter: string): Promise<{username: string, rank: number, points: number, tier: string, streak: number, modulesCompleted: number, pointsToNextTier: number, pointsToTopPosition?: number}> {
+    try {
+      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
+      
+      // Get user data
+      const userData = await db.select({
+        username: users.username,
+        points: pointsColumn,
+        tier: users.tier,
+        streak: users.currentStreak
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+      if (!userData.length) {
+        throw new Error('User not found');
+      }
+
+      const user = userData[0];
+
+      // Get user's rank
+      const rankQuery = await db.select({
+        rank: sql<number>`COUNT(*) + 1`.as('rank')
+      })
+      .from(users)
+      .where(sql`${pointsColumn} > ${user.points}`);
+
+      const rank = rankQuery[0]?.rank || 1;
+
+      // Get module completion count
+      const moduleCompletion = await db.select({
+        count: sql<number>`COUNT(*)`.as('count')
+      })
+      .from(userProgress)
+      .where(and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.completed, true)
+      ));
+
+      const modulesCompleted = moduleCompletion[0]?.count || 0;
+
+      // Calculate points to next tier
+      const tierThresholds = await this.getTierThresholds();
+      let pointsToNextTier = 0;
+      const currentPoints = user.points || 0;
+
+      if (user.tier === 'member') {
+        pointsToNextTier = tierThresholds.tier1 - currentPoints;
+      } else if (user.tier === 'tier1') {
+        pointsToNextTier = tierThresholds.tier2 - currentPoints;
+      } else if (user.tier === 'tier2') {
+        pointsToNextTier = tierThresholds.tier3 - currentPoints;
+      }
+
+      // Get points to top position if user is in top tier
+      let pointsToTopPosition;
+      if (user.tier === 'tier3') {
+        const topUser = await db.select({
+          points: pointsColumn
+        })
+        .from(users)
+        .orderBy(desc(pointsColumn))
+        .limit(1);
+
+        if (topUser.length && topUser[0].points > currentPoints) {
+          pointsToTopPosition = topUser[0].points - currentPoints + 1;
+        }
+      }
+
+      return {
+        username: user.username,
+        rank,
+        points: currentPoints,
+        tier: user.tier || 'member',
+        streak: user.streak || 0,
+        modulesCompleted,
+        pointsToNextTier: Math.max(0, pointsToNextTier),
+        pointsToTopPosition
+      };
+    } catch (error) {
+      console.error('Error getting user leaderboard stats:', error);
+      throw error;
     }
   }
 
