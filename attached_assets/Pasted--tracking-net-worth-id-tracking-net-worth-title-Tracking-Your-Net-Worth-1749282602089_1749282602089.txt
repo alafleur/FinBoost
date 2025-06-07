@@ -1,0 +1,192 @@
+{
+  "tracking-net-worth": {
+    "id": "tracking-net-worth",
+    "title": "Tracking Your Net Worth",
+    "category": "Planning",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is Net Worth?</h2><p>Net worth is the total of your assets minus liabilities. It gives you a snapshot of your financial health.</p><h3>Why Track It?</h3><ul><li>Measures financial progress</li><li>Helps set realistic goals</li><li>Motivates better money habits</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does your net worth measure?",
+        "options": ["Monthly income", "Credit score", "Income minus expenses", "Assets minus liabilities"],
+        "correctAnswer": 3,
+        "explanation": "Net worth equals everything you own minus everything you owe."
+      }
+    ]
+  },
+  "high-yield-savings": {
+    "id": "high-yield-savings",
+    "title": "High-Yield Savings Accounts: Are They Worth It?",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is a High-Yield Savings Account?</h2><p>These accounts offer higher interest rates than traditional savings accounts, helping your money grow faster.</p><h3>Advantages</h3><ul><li>Better interest rates</li><li>FDIC insured</li><li>Accessible funds</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Why might someone use a high-yield savings account?",
+        "options": ["To invest in stocks", "To earn higher interest on savings", "To get a mortgage", "To pay off credit cards"],
+        "correctAnswer": 1,
+        "explanation": "High-yield savings accounts help your money grow faster in a safe place."
+      }
+    ]
+  },
+  "intro-to-etfs": {
+    "id": "intro-to-etfs",
+    "title": "Introduction to ETFs",
+    "category": "Investing",
+    "difficulty": "Beginner",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>What is an ETF?</h2><p>An Exchange-Traded Fund (ETF) is a collection of securities traded on an exchange, similar to a stock.</p><h3>Benefits</h3><ul><li>Diversification</li><li>Low costs</li><li>Liquidity</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does ETF stand for?",
+        "options": ["Electronic Transfer Fund", "Earnings Tax Fund", "Exchange-Traded Fund", "Equity Trade Fund"],
+        "correctAnswer": 2,
+        "explanation": "ETF stands for Exchange-Traded Fund — a basket of assets traded like a stock."
+      }
+    ]
+  },
+  "secured-vs-unsecured-credit": {
+    "id": "secured-vs-unsecured-credit",
+    "title": "Secured vs. Unsecured Credit",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What’s the Difference?</h2><p>Secured credit is backed by collateral (like a car or deposit). Unsecured credit relies solely on your creditworthiness.</p><h3>Examples</h3><ul><li>Secured: Car loans, secured credit cards</li><li>Unsecured: Credit cards, personal loans</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of the following is an example of secured credit?",
+        "options": ["Personal loan", "Credit card", "Car loan", "Student loan"],
+        "correctAnswer": 2,
+        "explanation": "Car loans are secured by the vehicle itself."
+      }
+    ]
+  },
+  "negotiating-bills": {
+    "id": "negotiating-bills",
+    "title": "Negotiating Bills and Lowering Expenses",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Why Negotiation Matters</h2><p>You can often reduce bills like cable, internet, or insurance by negotiating or switching providers.</p><h3>Tips</h3><ul><li>Call customer service</li><li>Ask for promotions</li><li>Compare competitor offers</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of these bills is commonly negotiable?",
+        "options": ["Federal income tax", "Internet service", "Credit card interest", "401(k) fees"],
+        "correctAnswer": 1,
+        "explanation": "Many internet and cable providers offer promotional rates if you ask."
+      }
+    ]
+  },
+  "refinancing-debt": {
+    "id": "refinancing-debt",
+    "title": "Refinancing Debt: When It Makes Sense",
+    "category": "Debt",
+    "difficulty": "Advanced",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>What is Refinancing?</h2><p>Refinancing involves replacing existing debt with new terms—often to lower interest or monthly payments.</p><h3>When to Refinance</h3><ul><li>Interest rates drop</li><li>Improved credit</li><li>Need lower payments</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "One benefit of refinancing debt is:",
+        "options": ["Increasing debt", "Raising your credit limit", "Lowering interest payments", "Eliminating the need for credit"],
+        "correctAnswer": 2,
+        "explanation": "Refinancing can lower the amount of interest you pay over time."
+      }
+    ]
+  },
+  "tax-brackets": {
+    "id": "tax-brackets",
+    "title": "Understanding Tax Brackets",
+    "category": "Taxes",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>How Tax Brackets Work</h2><p>The U.S. has a progressive tax system — you pay higher rates on higher portions of your income.</p><h3>Example</h3><ul><li>First portion taxed at 10%</li><li>Next portion at 12%, and so on</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "In a progressive tax system, how is income taxed?",
+        "options": ["Flat rate for all income", "Higher income is taxed at lower rates", "All income taxed at highest rate", "Different parts taxed at different rates"],
+        "correctAnswer": 3,
+        "explanation": "Each bracket of income is taxed separately at its own rate."
+      }
+    ]
+  },
+  "planning-for-major-purchases": {
+    "id": "planning-for-major-purchases",
+    "title": "Planning for Major Purchases",
+    "category": "Planning",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What Counts as a Major Purchase?</h2><p>Major purchases include cars, weddings, or large appliances. Planning helps avoid unnecessary debt.</p><h3>Steps</h3><ul><li>Research total cost</li><li>Set savings goal</li><li>Compare options</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What’s a smart first step before a major purchase?",
+        "options": ["Apply for a credit card", "Guess your budget", "Compare financing options", "Research the total cost"],
+        "correctAnswer": 3,
+        "explanation": "Understanding full costs helps set a realistic savings or financing plan."
+      }
+    ]
+  },
+  "renting-vs-leasing": {
+    "id": "renting-vs-leasing",
+    "title": "Renting vs. Leasing: What's the Difference?",
+    "category": "Real Estate",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Renting vs. Leasing</h2><p>Renting typically refers to short-term agreements, while leasing is usually long-term and involves a contract.</p><h3>When to Choose</h3><ul><li>Rent if you need flexibility</li><li>Lease for stability</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which is usually a longer commitment?",
+        "options": ["Renting", "Leasing", "Subletting", "Flipping"],
+        "correctAnswer": 1,
+        "explanation": "Leasing often requires a fixed-term contract, such as 12 months."
+      }
+    ]
+  },
+  "life-insurance-types": {
+    "id": "life-insurance-types",
+    "title": "Understanding Types of Life Insurance",
+    "category": "Insurance",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Types of Life Insurance</h2><p>There are two primary types: term and whole life. Term provides coverage for a set period. Whole life lasts your lifetime and includes a cash value.</p><h3>Comparison</h3><ul><li>Term is cheaper, no cash value</li><li>Whole life is expensive, includes savings</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which type of life insurance has a savings component?",
+        "options": ["Term life", "Whole life", "Accidental death", "None"],
+        "correctAnswer": 1,
+        "explanation": "Whole life insurance includes a cash value that grows over time."
+      }
+    ]
+  }
+}
