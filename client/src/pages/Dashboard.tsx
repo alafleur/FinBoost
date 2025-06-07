@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { AdditiveLogo } from "@/components/ui/additive-logo";
+import { FinBoostLogo } from "@/components/ui/finboost-logo";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
 import Leaderboard from "@/components/Leaderboard";
@@ -466,7 +466,7 @@ export default function Dashboard() {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <AdditiveLogo size="md" />
+              <FinBoostLogo size="md" />
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="text-right hidden sm:block">

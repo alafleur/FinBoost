@@ -445,7 +445,7 @@ export default function Profile() {
               <Card>
                 <CardHeader>
                   <CardTitle>Activity Summary</CardTitle>
-                  <CardDescription>Your recent Additive activity</CardDescription>
+                  <CardDescription>Your recent FinBoost activity</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">

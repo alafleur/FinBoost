@@ -374,7 +374,7 @@ export default function Support() {
               <Mail className="h-8 w-8 text-gray-400 mx-auto mb-2" />
               <h3 className="font-semibold mb-1">Need immediate help?</h3>
               <p className="text-sm text-gray-600">
-                Email us directly at <a href="mailto:support@additive.com" className="text-primary-600 hover:underline">support@additive.com</a>
+                Email us directly at <a href="mailto:support@finboost.com" className="text-primary-600 hover:underline">support@finboost.com</a>
               </p>
             </div>
           </CardContent>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 import QuizDialog from "@/components/QuizDialog";
 import { BarChart2 } from "lucide-react";
-import { AdditiveLogo } from "@/components/ui/additive-logo";
+import { FinBoostLogo } from "@/components/ui/finboost-logo";
 
 interface HeroProps {
   onSubscribeSuccess: () => void;

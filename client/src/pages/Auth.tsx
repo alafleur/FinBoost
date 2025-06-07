@@ -225,7 +225,7 @@ export default function Auth() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to Additive</CardTitle>
+            <CardTitle>Welcome to FinBoost</CardTitle>
             <CardDescription>
               Join thousands learning to earn with financial education
             </CardDescription>
