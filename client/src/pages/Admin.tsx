@@ -1109,16 +1109,8 @@ export default function Admin() {
     fetchMonthlyPoolSettings();
     fetchCurrentPoolSettings();
 
-    // Set up automatic tier threshold refresh every 10 minutes to improve performance
-    const tierThresholdInterval = setInterval(() => {
-      fetchData(); // This includes tier threshold fetching
-      fetchMonthlyPoolSettings();
-      fetchCurrentPoolSettings();
-    }, 600000);
-
-    return () => {
-      clearInterval(tierThresholdInterval);
-    };
+    // Removed automatic polling to improve performance
+    // Data will refresh when user manually interacts with the interface
   }, []);
 
   useEffect(() => {

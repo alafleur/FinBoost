@@ -189,23 +189,23 @@ export default function Dashboard() {
       fetchPublishedModules();
     }, 2000);
 
-    // Set up automatic refresh every 10 minutes (reduced frequency)
+    // Set up automatic refresh every 30 minutes (greatly reduced frequency)
     const refreshInterval = setInterval(() => {
       fetchSecondaryData();
-    }, 600000);
+    }, 1800000);
 
     return () => {
       clearInterval(refreshInterval);
     };
   }, []);
 
-  // Update countdown timer every 5 minutes
+  // Update countdown timer only when needed (reduced frequency)
   useEffect(() => {
     const interval = setInterval(() => {
       if (distributionInfo) {
         fetchDistributionInfo();
       }
-    }, 300000); // Update every 5 minutes
+    }, 900000); // Update every 15 minutes
 
     return () => clearInterval(interval);
   }, [distributionInfo]);
