@@ -54,32 +54,24 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
   const allUsers = (leaderboardData as any)?.leaderboard || [];
   const currentUsername = (currentUserData as any)?.user?.username || null;
   
-  // Tier thresholds
-  const tierThresholds = {
-    tier1: 0,
-    tier2: 100,
-    tier3: 250,
-    tier4: 500,
-    tier5: 1000
-  };
-  
   // Calculate points to next tier
   const calculatePointsToNextTier = (points: string | number, tier: string) => {
     const currentPoints = parseInt(points.toString()) || 0;
     
+    if (!tierThresholds) return 0;
+    
+    // tier1 is the highest tier, tier3 is the lowest
     switch(tier) {
-      case 'tier1': 
-        return tierThresholds.tier2 - currentPoints;
-      case 'tier2': 
-        return tierThresholds.tier3 - currentPoints;
       case 'tier3': 
-        return tierThresholds.tier4 - currentPoints;
-      case 'tier4': 
-        return tierThresholds.tier5 - currentPoints;
-      case 'tier5': 
-        return 0; // Top tier users show 0 points to next tier
+        // Need to move from tier3 to tier2
+        return Math.max(0, tierThresholds.tier2 - currentPoints);
+      case 'tier2': 
+        // Need to move from tier2 to tier1
+        return Math.max(0, tierThresholds.tier1 - currentPoints);
+      case 'tier1': 
+        return 0; // Highest tier users show 0 points to next tier
       default: 
-        return tierThresholds.tier2 - currentPoints;
+        return Math.max(0, tierThresholds.tier2 - currentPoints);
     }
   };
   
