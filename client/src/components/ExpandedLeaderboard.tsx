@@ -66,14 +66,30 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
   // Calculate points to next tier
   const calculatePointsToNextTier = (points: string | number, tier: string) => {
     const currentPoints = parseInt(points.toString()) || 0;
+    let pointsNeeded = 0;
+    
     switch(tier) {
-      case 'tier1': return tierThresholds.tier2 - currentPoints;
-      case 'tier2': return tierThresholds.tier3 - currentPoints;
-      case 'tier3': return tierThresholds.tier4 - currentPoints;
-      case 'tier4': return tierThresholds.tier5 - currentPoints;
-      case 'tier5': return 'Max Tier';
-      default: return tierThresholds.tier2 - currentPoints;
+      case 'tier1': 
+        pointsNeeded = tierThresholds.tier2 - currentPoints;
+        break;
+      case 'tier2': 
+        pointsNeeded = tierThresholds.tier3 - currentPoints;
+        break;
+      case 'tier3': 
+        pointsNeeded = tierThresholds.tier4 - currentPoints;
+        break;
+      case 'tier4': 
+        pointsNeeded = tierThresholds.tier5 - currentPoints;
+        break;
+      case 'tier5': 
+        return 'Max Tier';
+      default: 
+        pointsNeeded = tierThresholds.tier2 - currentPoints;
+        break;
     }
+    
+    // Return 0 if user already has enough points for next tier (no negative values)
+    return pointsNeeded <= 0 ? 0 : pointsNeeded;
   };
   
   // Find current user in leaderboard
