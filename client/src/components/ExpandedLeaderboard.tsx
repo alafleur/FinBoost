@@ -35,8 +35,27 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     refetchInterval: 30000,
   });
 
-  const allUsers = leaderboardData?.leaderboard?.users || [];
-  const currentUser = leaderboardData?.leaderboard?.currentUser || null;
+  const { data: currentUserData } = useQuery({
+    queryKey: ['/api/auth/me'],
+    enabled: isOpen,
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      return response.json();
+    }
+  });
+
+  const allUsers = (leaderboardData as any)?.leaderboard || [];
+  const currentUsername = (currentUserData as any)?.user?.username || null;
+  
+  // Find current user in leaderboard
+  const currentUser = allUsers.find((user: any) => user.username === currentUsername) || null;
   
   const filteredUsers = allUsers.filter((user: any) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
@@ -115,7 +134,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <Crown className="h-5 w-5 text-yellow-500 mr-1" />
-                      <span className="text-lg font-bold text-gray-800">#{currentUser.rank || '-'}</span>
+                      <span className="text-lg font-bold text-gray-800">#{parseInt(currentUser.rank) || '-'}</span>
                     </div>
                     <p className="text-xs text-gray-600">Your Rank</p>
                   </div>
