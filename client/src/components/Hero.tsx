@@ -58,28 +58,23 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               Earn monthly cash rewards while leveling up your money smarts—with the power of the collective behind you.
             </p>
             <div className="max-w-lg" id="waitlist-signup-form">
-              <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
-                <div className="sm:col-span-5">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none"
-                    value={form.watch("email")}
-                    onChange={(e) => form.setValue("email", e.target.value)}
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <button 
-                    type="button" 
-                    disabled={isPending}
-                    onClick={form.handleSubmit(onSubmit)}
-                    className="w-full h-[50px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-4 rounded-lg shadow-lg transition duration-300 border border-blue-700 whitespace-nowrap text-sm sm:text-base flex items-center justify-center"
-                  >
-                    {isPending ? "Joining..." : "Join the Waitlist"}
-                  </button>
-                </div>
+              <div className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none text-lg"
+                  value={form.watch("email")}
+                  onChange={(e) => form.setValue("email", e.target.value)}
+                />
+                <button 
+                  type="button" 
+                  disabled={isPending}
+                  onClick={form.handleSubmit(onSubmit)}
+                  className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
+                >
+                  {isPending ? "Joining..." : "Join the Waitlist"}
+                </button>
               </div>
-
             </div>
             <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
           </div>
