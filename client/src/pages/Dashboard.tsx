@@ -747,20 +747,32 @@ export default function Dashboard() {
 
               <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-purple-800">Available Points</CardTitle>
+                  <CardTitle className="text-sm font-medium text-purple-800">Points to Next Tier</CardTitle>
                   <Star className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-800">
                     {(() => {
-                      const uncompletedLessons = publishedModules.filter(module => 
-                        !completedModuleIds.includes(module.id)
-                      );
-                      return uncompletedLessons.reduce((total, module) => total + module.pointsReward, 0);
+                      if (!user || !tierThresholds) return 0;
+                      
+                      const currentPoints = user.currentMonthPoints || 0;
+                      const currentTier = user.tier || 'tier3';
+                      
+                      // tier1 is the highest tier, tier3 is the lowest
+                      switch(currentTier) {
+                        case 'tier3': 
+                          return Math.max(0, tierThresholds.tier2 - currentPoints);
+                        case 'tier2': 
+                          return Math.max(0, tierThresholds.tier1 - currentPoints);
+                        case 'tier1': 
+                          return 0; // Highest tier users show 0 points to next tier
+                        default: 
+                          return Math.max(0, tierThresholds.tier2 - currentPoints);
+                      }
                     })()}
                   </div>
                   <p className="text-xs text-purple-700">
-                    Points to earn
+                    {user?.tier === 'tier1' ? 'Top tier reached' : 'Points needed to advance'}
                   </p>
                 </CardContent>
               </Card>
