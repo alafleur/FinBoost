@@ -175,15 +175,13 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* View Full Leaderboard Button */}
-            <div className="mt-4 pt-3 border-t border-gray-200">
+            {/* View Full Leaderboard Button - More Prominent */}
+            <div className="mt-3">
               <Button 
-                variant="outline" 
-                size="sm" 
                 onClick={() => setShowExpandedLeaderboard(true)}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
               >
-                <Trophy className="h-4 w-4 mr-2" />
+                <Trophy className="h-5 w-5 mr-2" />
                 View Full Leaderboard
               </Button>
             </div>

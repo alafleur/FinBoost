@@ -2006,6 +2006,7 @@ export class MemStorage implements IStorage {
         tier: users.tier
       })
       .from(users)
+      .where(eq(users.subscriptionStatus, 'active'))
       .orderBy(desc(users.currentMonthPoints))
       .limit(50);
 

@@ -54,8 +54,33 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
   const allUsers = (leaderboardData as any)?.leaderboard || [];
   const currentUsername = (currentUserData as any)?.user?.username || null;
   
+  // Tier thresholds
+  const tierThresholds = {
+    tier1: 0,
+    tier2: 100,
+    tier3: 250,
+    tier4: 500,
+    tier5: 1000
+  };
+  
+  // Calculate points to next tier
+  const calculatePointsToNextTier = (points: string | number, tier: string) => {
+    const currentPoints = parseInt(points.toString()) || 0;
+    switch(tier) {
+      case 'tier1': return tierThresholds.tier2 - currentPoints;
+      case 'tier2': return tierThresholds.tier3 - currentPoints;
+      case 'tier3': return tierThresholds.tier4 - currentPoints;
+      case 'tier4': return tierThresholds.tier5 - currentPoints;
+      case 'tier5': return 'Max Tier';
+      default: return tierThresholds.tier2 - currentPoints;
+    }
+  };
+  
   // Find current user in leaderboard
   const currentUser = allUsers.find((user: any) => user.username === currentUsername) || null;
+  if (currentUser) {
+    currentUser.pointsToNextTier = calculatePointsToNextTier(currentUser.points, currentUser.tier);
+  }
   
   const filteredUsers = allUsers.filter((user: any) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
@@ -157,10 +182,10 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                   
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Activity className="h-5 w-5 text-green-500 mr-1" />
-                      <span className="text-lg font-bold text-gray-800">{currentUser.streak || 0}</span>
+                      <TrendingUp className="h-5 w-5 text-blue-500 mr-1" />
+                      <span className="text-lg font-bold text-gray-800">{currentUser.pointsToNextTier || 'Max Tier'}</span>
                     </div>
-                    <p className="text-xs text-gray-600">Streak</p>
+                    <p className="text-xs text-gray-600">To Next Tier</p>
                   </div>
                 </div>
               </div>
@@ -205,9 +230,6 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                               <Badge variant="outline" className={getTierBadgeColor(user.tier)}>
                                 {user.tier}
                               </Badge>
-                              <span className="text-xs text-gray-500">
-                                {user.streak} day streak
-                              </span>
                             </div>
                           </div>
                         </div>
