@@ -1,0 +1,192 @@
+{
+  "cash-flow-analysis": {
+    "id": "cash-flow-analysis",
+    "title": "Mastering Cash Flow Analysis",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is Cash Flow Analysis?</h2><p>Cash flow analysis helps you understand where your money is coming from and where it's going.</p><h3>Benefits</h3><ul><li>Tracks income vs expenses</li><li>Identifies spending leaks</li><li>Helps improve saving habits</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is the main purpose of cash flow analysis?",
+        "options": ["To calculate your net worth", "To predict future interest rates", "To understand income and expenses", "To invest in stocks"],
+        "correctAnswer": 2,
+        "explanation": "Cash flow analysis focuses on tracking money coming in and going out."
+      }
+    ]
+  },
+  "sinking-funds": {
+    "id": "sinking-funds",
+    "title": "Sinking Funds: Save Smarter for Irregular Expenses",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is a Sinking Fund?</h2><p>A sinking fund is money you save monthly for predictable but irregular expenses, like holidays or car maintenance.</p><h3>Why Use One?</h3><ul><li>Reduces reliance on credit</li><li>Prevents budget disruptions</li><li>Builds discipline</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is the main benefit of a sinking fund?",
+        "options": ["Investing in the stock market", "Paying off debt faster", "Avoiding surprise expenses", "Getting a tax refund"],
+        "correctAnswer": 2,
+        "explanation": "Sinking funds help you prepare for non-monthly but expected costs."
+      }
+    ]
+  },
+  "roth-vs-traditional-ira": {
+    "id": "roth-vs-traditional-ira",
+    "title": "Roth vs. Traditional IRA: Which Should You Choose?",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Key Differences</h2><p>Roth IRA contributions are made after-tax, but withdrawals are tax-free. Traditional IRAs are pre-tax but taxed upon withdrawal.</p><h3>Which is Better?</h3><ul><li>Roth is ideal if you expect higher future tax rates</li><li>Traditional works if you want tax deductions now</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which IRA offers tax-free withdrawals in retirement?",
+        "options": ["Traditional IRA", "Roth IRA", "SEP IRA", "401(k)"],
+        "correctAnswer": 1,
+        "explanation": "Roth IRAs are funded with after-tax dollars, so withdrawals are tax-free."
+      }
+    ]
+  },
+  "credit-utilization": {
+    "id": "credit-utilization",
+    "title": "Credit Utilization: A Key to Your Credit Score",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Understanding Credit Utilization</h2><p>Your credit utilization ratio is the amount of credit you’re using compared to your total limit. Aim to keep it below 30%.</p><h3>Improving Your Score</h3><ul><li>Pay down balances</li><li>Request higher limits</li><li>Avoid maxing out cards</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is the recommended credit utilization ratio?",
+        "options": ["90%", "50%", "30%", "10%"],
+        "correctAnswer": 2,
+        "explanation": "Experts suggest keeping credit usage below 30% of your available limit."
+      }
+    ]
+  },
+  "debt-to-income-ratio": {
+    "id": "debt-to-income-ratio",
+    "title": "Understanding Your Debt-to-Income Ratio",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is DTI?</h2><p>Debt-to-Income (DTI) ratio compares your monthly debt payments to your gross income. Lenders use it to evaluate your ability to repay loans.</p><h3>Healthy Ratio</h3><ul><li>Below 36% is generally considered good</li><li>High DTI can hurt your borrowing chances</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does a high debt-to-income ratio indicate?",
+        "options": ["High income", "Low debt", "Financial stability", "Potential repayment difficulty"],
+        "correctAnswer": 3,
+        "explanation": "A high DTI means a large portion of income goes toward debt, which may concern lenders."
+      }
+    ]
+  },
+  "tax-deductions-vs-credits": {
+    "id": "tax-deductions-vs-credits",
+    "title": "Tax Deductions vs. Tax Credits",
+    "category": "Taxes",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What’s the Difference?</h2><p>Deductions reduce your taxable income. Credits reduce the tax you owe directly.</p><h3>Examples</h3><ul><li>Deduction: Student loan interest</li><li>Credit: Child tax credit</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which directly reduces the amount of tax you owe?",
+        "options": ["Deduction", "Exemption", "Credit", "Income"],
+        "correctAnswer": 2,
+        "explanation": "Tax credits reduce your final tax bill, not just your taxable income."
+      }
+    ]
+  },
+  "building-wealth-mindset": {
+    "id": "building-wealth-mindset",
+    "title": "Building a Wealth Mindset",
+    "category": "Planning",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is a Wealth Mindset?</h2><p>A wealth mindset involves thinking long-term, prioritizing growth, and managing money wisely.</p><h3>Steps to Cultivate It</h3><ul><li>Set clear goals</li><li>Invest in learning</li><li>Stay disciplined</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which is a key trait of a wealth mindset?",
+        "options": ["Living paycheck to paycheck", "Impulse spending", "Short-term thinking", "Goal orientation"],
+        "correctAnswer": 3,
+        "explanation": "A wealth mindset focuses on long-term goals and financial discipline."
+      }
+    ]
+  },
+  "renters-insurance-basics": {
+    "id": "renters-insurance-basics",
+    "title": "Renter's Insurance Basics",
+    "category": "Insurance",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is Renter's Insurance?</h2><p>It protects your belongings in a rental home against theft, fire, or damage.</p><h3>Why You Need It</h3><ul><li>Landlord’s insurance doesn’t cover your stuff</li><li>Liability protection</li><li>Affordable and valuable</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does renter's insurance cover?",
+        "options": ["The building structure", "Your personal belongings", "Your landlord's property", "Your mortgage"],
+        "correctAnswer": 1,
+        "explanation": "Renter's insurance covers your belongings and personal liability."
+      }
+    ]
+  },
+  "real-estate-vs-rent": {
+    "id": "real-estate-vs-rent",
+    "title": "Renting vs. Buying Real Estate: Pros and Cons",
+    "category": "Real Estate",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Renting vs. Buying</h2><p>Buying builds equity, while renting offers flexibility. The right choice depends on your lifestyle, finances, and goals.</p><h3>Pros of Buying</h3><ul><li>Asset appreciation</li><li>Stable housing costs</li></ul><h3>Pros of Renting</h3><ul><li>Lower upfront costs</li><li>Flexibility</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which is a major benefit of renting?",
+        "options": ["Equity growth", "Tax benefits", "Flexibility", "Property appreciation"],
+        "correctAnswer": 2,
+        "explanation": "Renting allows for easier relocation and lower upfront costs."
+      }
+    ]
+  },
+  "intro-to-hsas": {
+    "id": "intro-to-hsas",
+    "title": "Introduction to Health Savings Accounts (HSAs)",
+    "category": "Insurance",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is an HSA?</h2><p>HSAs are tax-advantaged accounts for medical expenses, available to those with high-deductible health plans (HDHPs).</p><h3>Why Use One?</h3><ul><li>Tax-deductible contributions</li><li>Tax-free growth and withdrawals for qualified expenses</li><li>Triple tax benefit</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Who is eligible for an HSA?",
+        "options": ["Anyone with any health plan", "Those with employer insurance only", "People with HDHPs", "Retirees over 65"],
+        "correctAnswer": 2,
+        "explanation": "HSAs are available only to individuals with high-deductible health plans."
+      }
+    ]
+  }
+}
