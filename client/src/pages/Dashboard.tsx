@@ -468,6 +468,11 @@ export default function Dashboard() {
     .filter(progress => progress.completed)
     .map(progress => progress.moduleId);
 
+  // Debug completion data structure
+  console.log('Lesson Progress Data:', lessonProgress);
+  console.log('Completed Module IDs:', completedModuleIds);
+  console.log('Published Module IDs:', publishedModules.map(m => m.id));
+
 
 
 
@@ -981,7 +986,11 @@ export default function Dashboard() {
                                 </div>
                                 <div className="flex items-center justify-end">
                                   {canAccess ? (
-                                    <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                                    <Button 
+                                      size="sm" 
+                                      variant={isCompleted ? "secondary" : "default"}
+                                      onClick={() => setLocation(`/lesson/${module.id}`)}
+                                    >
                                       {isCompleted ? "Review" : "Start Lesson"}
                                     </Button>
                                   ) : (
