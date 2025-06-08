@@ -987,6 +987,20 @@ export default function Dashboard() {
                       </div>
                     </div>
                     
+                    
+                    {/* Test Navigation Button */}
+                    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                      <Button 
+                        onClick={() => {
+                          alert('Test button clicked!');
+                          setLocation('/lesson/1');
+                        }}
+                        className="mb-2"
+                      >
+                        TEST: Go to Lesson 1
+                      </Button>
+                    </div>
+                    
                     <div className="grid grid-cols-1 gap-4">
                       {publishedModules
                         .filter(module => selectedCategory === "" || module.category === selectedCategory)
@@ -995,16 +1009,6 @@ export default function Dashboard() {
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
-                          
-                          console.log('🔍 ACCESS DEBUG:', {
-                            moduleId: module.id,
-                            moduleTitle: module.title,
-                            user: user?.username,
-                            canAccess,
-                            isPremiumModule,
-                            accessType: module.accessType,
-                            userPremium: accessInfo?.isPremium
-                          });
                           
                           return (
                             <Card 
