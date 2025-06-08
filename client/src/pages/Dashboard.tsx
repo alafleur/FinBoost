@@ -1047,7 +1047,10 @@ export default function Dashboard() {
                                     <Button 
                                       size="sm" 
                                       variant={isCompleted ? "secondary" : "default"}
-                                      onClick={() => setLocation(`/lesson/${module.id}`)}
+                                      onClick={() => {
+                                        console.log('🚀 DASHBOARD: Navigating to lesson:', `/lesson/${module.id}`);
+                                        setLocation(`/lesson/${module.id}`)
+                                      }}
                                     >
                                       {isCompleted ? "Review" : "Start Lesson"}
                                     </Button>
