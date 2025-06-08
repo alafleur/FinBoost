@@ -1042,22 +1042,20 @@ export default function Dashboard() {
                                   <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                                 </div>
                                 <div className="flex items-center justify-end">
-                                  {canAccess ? (
-                                    <Button 
-                                      size="sm" 
-                                      variant={isCompleted ? "secondary" : "default"}
-                                      onClick={() => {
+                                  <Button 
+                                    size="sm" 
+                                    variant={isCompleted ? "secondary" : "default"}
+                                    disabled={!canAccess}
+                                    onClick={() => {
+                                      console.log('🚀 DASHBOARD: Button clicked! Module:', module.id, 'Can access:', canAccess);
+                                      if (canAccess) {
                                         console.log('🚀 DASHBOARD: Navigating to lesson:', `/lesson/${module.id}`);
-                                        setLocation(`/lesson/${module.id}`)
-                                      }}
-                                    >
-                                      {isCompleted ? "Review" : "Start Lesson"}
-                                    </Button>
-                                  ) : (
-                                    <Button size="sm" variant="outline" disabled>
-                                      Premium Only
-                                    </Button>
-                                  )}
+                                        setLocation(`/lesson/${module.id}`);
+                                      }
+                                    }}
+                                  >
+                                    {!canAccess ? "Premium Only" : (isCompleted ? "Review" : "Start Lesson")}
+                                  </Button>
                                 </div>
                               </CardContent>
                             </Card>
