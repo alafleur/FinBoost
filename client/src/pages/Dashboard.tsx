@@ -192,6 +192,13 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    // Check authentication and redirect if needed
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLocation('/auth');
+      return;
+    }
+
     // Use consolidated fetching to reduce server load
     fetchDashboardData().then((authSuccess) => {
       if (authSuccess) {
@@ -200,7 +207,9 @@ export default function Dashboard() {
         fetchDistributionInfo();
         fetchPublishedModules();
       } else {
-        console.log('Authentication failed, redirecting to login');
+        // Clear invalid auth data and redirect
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setLocation('/auth');
       }
     });
@@ -230,29 +239,9 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-      
-      console.log('Debug - localStorage token exists:', !!token);
-      console.log('Debug - localStorage user exists:', !!storedUser);
-      console.log('Debug - All localStorage keys:', Object.keys(localStorage));
-      
       if (!token) {
-        console.log('No token found in fetchDashboardData');
-        // Check if user data exists in localStorage as fallback
-        if (storedUser) {
-          try {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-            console.log('Using stored user data as fallback');
-            return true;
-          } catch (e) {
-            console.error('Failed to parse stored user data');
-          }
-        }
         return false;
       }
-
-      console.log('Found token in fetchDashboardData:', token.substring(0, 20) + '...');
 
       // Fetch only essential data in a single batch
       const [userResponse, poolResponse] = await Promise.all([
@@ -265,9 +254,7 @@ export default function Dashboard() {
       if (userResponse.ok) {
         const userData = await userResponse.json();
         setUser(userData.user);
-        console.log('User data loaded successfully');
       } else {
-        console.error('User data fetch failed:', userResponse.status);
         return false;
       }
 
@@ -318,25 +305,15 @@ export default function Dashboard() {
   const fetchLessonProgress = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        console.log('No token found for progress fetch');
-        return;
-      }
+      if (!token) return;
 
-      console.log('Fetching progress with token:', token.substring(0, 20) + '...');
       const response = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      console.log('Progress API response status:', response.status);
-      
       if (response.ok) {
         const data = await response.json();
-        console.log('Raw progress data:', data);
         setLessonProgress(data.progress || []);
-      } else {
-        const errorData = await response.text();
-        console.error('Progress API error:', response.status, errorData);
       }
     } catch (error) {
       console.error('Error fetching lesson progress:', error);
@@ -491,15 +468,7 @@ export default function Dashboard() {
     .filter(progress => progress.completed)
     .map(progress => progress.moduleId);
 
-  // Debug logging to understand the completion status issue
-  console.log('Dashboard Debug - Lesson Progress:', lessonProgress);
-  console.log('Dashboard Debug - Completed Module IDs:', completedModuleIds);
-  console.log('Dashboard Debug - Published Modules:', publishedModules.length);
-  console.log('Dashboard Debug - Module check for each lesson:');
-  publishedModules.forEach(module => {
-    const isCompleted = completedModuleIds.includes(module.id);
-    console.log(`Module ${module.id} (${module.title}): ${isCompleted ? 'COMPLETED' : 'NOT COMPLETED'}`);
-  });
+
 
 
 
