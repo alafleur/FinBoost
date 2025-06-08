@@ -304,17 +304,27 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
+      console.log('Starting fetchLessonProgress...');
       const token = localStorage.getItem('token');
-      if (!token) return;
+      console.log('Token exists:', !!token);
+      if (!token) {
+        console.log('No token found, skipping progress fetch');
+        return;
+      }
 
+      console.log('Making API call to /api/user/progress...');
       const response = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
+      console.log('API response status:', response.status);
       if (response.ok) {
         const data = await response.json();
         console.log('Full API response:', data);
+        console.log('Progress array length:', data.progress?.length || 0);
         setLessonProgress(data.progress || []);
+      } else {
+        console.error('API call failed with status:', response.status);
       }
     } catch (error) {
       console.error('Error fetching lesson progress:', error);
