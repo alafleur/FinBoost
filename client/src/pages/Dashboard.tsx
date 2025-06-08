@@ -193,35 +193,49 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log('🔄 DASHBOARD: useEffect triggered');
-    // Check authentication and redirect if needed
-    const token = localStorage.getItem('token');
-    console.log('🔄 DASHBOARD: Token check:', !!token);
-    if (!token) {
-      console.log('🔄 DASHBOARD: No token, redirecting to auth');
-      setLocation('/auth');
-      return;
-    }
-
-    console.log('🔄 DASHBOARD: Starting fetchDashboardData...');
-    // Use consolidated fetching to reduce server load
-    fetchDashboardData().then((authSuccess) => {
-      console.log('🔄 DASHBOARD: fetchDashboardData result:', authSuccess);
-      if (authSuccess) {
-        // Only fetch progress data after user authentication is confirmed
-        console.log('🚀 DASHBOARD: Auth successful, fetching progress data...');
-        fetchLessonProgress();
-        fetchDistributionInfo();
-        fetchPublishedModules();
-      } else {
-        // Clear invalid auth data and redirect
-        console.log('🚀 DASHBOARD: Auth failed, redirecting to login...');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    
+    // Small delay to allow localStorage to be set after redirect
+    const initializeDashboard = () => {
+      const token = localStorage.getItem('token');
+      console.log('🔄 DASHBOARD: Token check:', !!token);
+      if (!token) {
+        console.log('🔄 DASHBOARD: No token, redirecting to auth');
         setLocation('/auth');
+        return;
       }
-    }).catch((error) => {
-      console.error('❌ DASHBOARD: fetchDashboardData promise rejected:', error);
-    });
+
+      console.log('🔄 DASHBOARD: Starting fetchDashboardData...');
+      // Use consolidated fetching to reduce server load
+      fetchDashboardData().then((authSuccess) => {
+        console.log('🔄 DASHBOARD: fetchDashboardData result:', authSuccess);
+        if (authSuccess) {
+          // Only fetch progress data after user authentication is confirmed
+          console.log('🚀 DASHBOARD: Auth successful, fetching progress data...');
+          fetchLessonProgress();
+          fetchDistributionInfo();
+          fetchPublishedModules();
+        } else {
+          // Clear invalid auth data and redirect
+          console.log('🚀 DASHBOARD: Auth failed, redirecting to login...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setLocation('/auth');
+        }
+      }).catch((error) => {
+        console.error('❌ DASHBOARD: fetchDashboardData promise rejected:', error);
+      });
+    };
+
+    // Check immediately, then retry after a short delay if no token found
+    const token = localStorage.getItem('token');
+    if (token) {
+      initializeDashboard();
+    } else {
+      // Wait a bit for potential login redirect to complete
+      setTimeout(() => {
+        initializeDashboard();
+      }, 100);
+    }
 
     // Set up automatic refresh every 30 minutes (greatly reduced frequency)
     const refreshInterval = setInterval(() => {
