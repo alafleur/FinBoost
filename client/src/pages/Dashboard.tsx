@@ -194,10 +194,10 @@ export default function Dashboard() {
   useEffect(() => {
     console.log('🔄 DASHBOARD: useEffect triggered');
     
-    // Small delay to allow localStorage to be set after redirect
-    const initializeDashboard = () => {
+    const initializeDashboard = async () => {
       const token = localStorage.getItem('token');
       console.log('🔄 DASHBOARD: Token check:', !!token);
+      
       if (!token) {
         console.log('🔄 DASHBOARD: No token, redirecting to auth');
         setLocation('/auth');
@@ -205,39 +205,33 @@ export default function Dashboard() {
       }
 
       console.log('🔄 DASHBOARD: Starting fetchDashboardData...');
-      // Use consolidated fetching to reduce server load
-      fetchDashboardData().then((authSuccess) => {
+      try {
+        const authSuccess = await fetchDashboardData();
         console.log('🔄 DASHBOARD: fetchDashboardData result:', authSuccess);
+        
         if (authSuccess) {
-          // Only fetch progress data after user authentication is confirmed
-          console.log('🚀 DASHBOARD: Auth successful, fetching progress data...');
-          fetchLessonProgress();
-          fetchDistributionInfo();
-          fetchPublishedModules();
+          console.log('🚀 DASHBOARD: Auth successful, fetching additional data...');
+          await Promise.all([
+            fetchLessonProgress(),
+            fetchDistributionInfo(),
+            fetchPublishedModules()
+          ]);
         } else {
-          // Clear invalid auth data and redirect
           console.log('🚀 DASHBOARD: Auth failed, redirecting to login...');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setLocation('/auth');
         }
-      }).catch((error) => {
-        console.error('❌ DASHBOARD: fetchDashboardData promise rejected:', error);
-      });
+      } catch (error) {
+        console.error('❌ DASHBOARD: Error in initialization:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setLocation('/auth');
+      }
     };
 
-    // Check immediately, then retry after a short delay if no token found
-    const token = localStorage.getItem('token');
-    if (token) {
-      initializeDashboard();
-    } else {
-      // Wait a bit for potential login redirect to complete
-      setTimeout(() => {
-        initializeDashboard();
-      }, 100);
-    }
+    initializeDashboard();
 
-    // Set up automatic refresh every 30 minutes (greatly reduced frequency)
     const refreshInterval = setInterval(() => {
       fetchSecondaryData();
     }, 1800000);
@@ -1013,13 +1007,14 @@ export default function Dashboard() {
                           return (
                             <Card 
                               key={module.id}
-                              className={`transition-all duration-200 hover:shadow-md relative ${
-                                canAccess ? '' : 'cursor-not-allowed opacity-75'
-                              } ${
+                              className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
                                 isCompleted ? 'border-green-200 bg-green-50' : 
-                                isPremiumModule && !accessInfo?.isPremium ? 'border-yellow-200 bg-yellow-50' :
+                                isPremiumModule ? 'border-yellow-200 bg-yellow-50' :
                                 'hover:border-primary-200'
                               }`}
+                              onClick={() => {
+                                window.location.href = `/lesson/${module.id}`;
+                              }}
                             >
                               {isCompleted && (
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -1046,7 +1041,7 @@ export default function Dashboard() {
                                       </Badge>
                                     ) : (
                                       <Badge variant="outline">
-                                        {accessInfo?.isPremium || !isPremiumModule ? `${module.pointsReward} pts` : 'Upgrade'}
+                                        {module.pointsReward} pts
                                       </Badge>
                                     )}
                                   </div>
