@@ -193,11 +193,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log('🔄 DASHBOARD: useEffect triggered');
-    
+
     const initializeDashboard = async () => {
       const token = localStorage.getItem('token');
       console.log('🔄 DASHBOARD: Token check:', !!token);
-      
+
       if (!token) {
         console.log('🔄 DASHBOARD: No token, redirecting to auth');
         setLocation('/auth');
@@ -208,7 +208,7 @@ export default function Dashboard() {
       try {
         const authSuccess = await fetchDashboardData();
         console.log('🔄 DASHBOARD: fetchDashboardData result:', authSuccess);
-        
+
         if (authSuccess) {
           console.log('🚀 DASHBOARD: Auth successful, fetching additional data...');
           await Promise.all([
@@ -340,7 +340,7 @@ export default function Dashboard() {
       const response = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       console.log('🔄 DASHBOARD: API response status:', response.status);
       if (response.ok) {
         const data = await response.json();
@@ -516,7 +516,7 @@ export default function Dashboard() {
     completed: p.completed, 
     type: typeof p.moduleId 
   })));
-  
+
   // Test the completion matching logic directly
   if (lessonProgress.length > 0 && publishedModules.length > 0) {
     const testModule = publishedModules.find(m => m.id === 52); // Test with first visible module
@@ -688,7 +688,7 @@ export default function Dashboard() {
                           Members building wealth together
                         </p>
                       </div>
-                      
+
                       {/* Payout Countdown */}
                       <div className="bg-emerald-100 rounded-lg p-4 text-center">
                         <div className="text-4xl font-bold text-emerald-900 mb-1">
@@ -832,10 +832,10 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-purple-800">
                     {(() => {
                       if (!user || !tierThresholds) return 0;
-                      
+
                       const currentPoints = user.currentMonthPoints || 0;
                       const currentTier = user.tier || 'tier3';
-                      
+
                       // tier1 is the highest tier, tier3 is the lowest
                       switch(currentTier) {
                         case 'tier3': 
@@ -874,7 +874,7 @@ export default function Dashboard() {
                       currentStreak={user?.currentStreak || 0}
                       longestStreak={user?.longestStreak || 0}
                     />
-                    
+
                     {/* Monthly Pool Info for Mobile Overview */}
                     {poolData && (
                       <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
@@ -891,7 +891,7 @@ export default function Dashboard() {
                             </div>
                             <p className="text-sm text-purple-700">Total Community Pool</p>
                           </div>
-                          
+
                           {distributionInfo && (
                             <div className="bg-green-100 rounded-lg p-4 text-center">
                               <div className="text-2xl font-bold text-green-900 mb-1">
@@ -902,7 +902,7 @@ export default function Dashboard() {
                               </p>
                             </div>
                           )}
-                          
+
                           <div className="mt-4 text-center">
                             <div className="text-2xl font-bold text-green-900 mb-1">
                               {poolData && poolData.totalUsers ? poolData.totalUsers.toLocaleString() : '0'}
@@ -980,8 +980,8 @@ export default function Dashboard() {
                         </select>
                       </div>
                     </div>
-                    
-                    
+
+
                     {/* Test Navigation Button */}
                     <div className="mb-4 p-4 bg-blue-50 rounded-lg">
                       <Button 
@@ -994,7 +994,7 @@ export default function Dashboard() {
                         TEST: Go to Lesson 1
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 gap-4">
                       {publishedModules
                         .filter(module => selectedCategory === "" || module.category === selectedCategory)
@@ -1003,18 +1003,15 @@ export default function Dashboard() {
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
-                          
+
                           return (
                             <Card 
                               key={module.id}
-                              className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
+                              className={`transition-all duration-200 hover:shadow-md relative ${
                                 isCompleted ? 'border-green-200 bg-green-50' : 
                                 isPremiumModule ? 'border-yellow-200 bg-yellow-50' :
                                 'hover:border-primary-200'
                               }`}
-                              onClick={() => {
-                                window.location.href = `/lesson/${module.id}`;
-                              }}
                             >
                               {isCompleted && (
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -1051,28 +1048,25 @@ export default function Dashboard() {
                                   <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                                 </div>
                                 <div className="flex items-center justify-end">
-                                  <a 
-                                    href={`/lesson/${module.id}`}
-                                    className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                      isCompleted 
-                                        ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' 
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                                    }`}
+                                  <Button 
+                                    onClick={() => setLocation(`/lesson/${module.id}`)}
+                                    size="sm"
+                                    variant={isCompleted ? "secondary" : "default"}
                                   >
                                     {isCompleted ? "Review" : "Start Lesson"}
-                                  </a>
+                                  </Button>
                                 </div>
                               </CardContent>
                             </Card>
                           );
                         })}
                     </div>
-                    
+
                     {/* Next Lesson Recommendation */}
                     {(() => {
                       const nextLesson = publishedModules
                         .find(module => !completedModuleIds.includes(module.id));
-                      
+
                       if (nextLesson && completedModuleIds.length > 0) {
                         return (
                           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -1132,7 +1126,7 @@ export default function Dashboard() {
                         <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
                       </div>
                     </div>
-                    
+
                     {/* Tier Population Distribution */}
                     {poolData && (
                       <div className="mt-4 space-y-2">
@@ -1153,7 +1147,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     )}
-                    
+
                     {user && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center mb-2">
@@ -1310,7 +1304,7 @@ export default function Dashboard() {
                         <option value="Planning">Planning</option>
                         <option value="Taxes">Taxes</option>
                         <option value="Debt">Debt</option>
-                        <option value="Insurance">Insurance</option>
+                        <option value="Insurance">Insurance</Insurance>
                       </select>
                     </div>
                   </div>
@@ -1323,10 +1317,9 @@ export default function Dashboard() {
                         return (
                           <Card 
                             key={module.id}
-                            className={`transition-all duration-200 hover:shadow-md cursor-pointer relative ${
-                              isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
-                            }`}
-                            onClick={() => setLocation(`/lesson/${module.id}`)}
+                            className={`transition-all duration-200 hover:shadow-md ${
+                          isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                        }`}
                           >
                             {isCompleted && (
                               <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -1351,7 +1344,11 @@ export default function Dashboard() {
                                 <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                               </div>
                               <div className="flex items-center justify-end">
-                                <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                                <Button 
+                                    onClick={() => setLocation(`/lesson/${module.id}`)}
+                                    size="sm"
+                                    variant={isCompleted ? "secondary" : "default"}
+                                  >
                                   {isCompleted ? "Review" : "Start Lesson"}
                                 </Button>
                               </div>
@@ -1365,12 +1362,12 @@ export default function Dashboard() {
                       Showing {Math.min(6, publishedModules.filter(module => selectedCategory === "" || module.category === selectedCategory).length)} of {selectedCategory === "" ? publishedModules.length : publishedModules.filter(module => module.category === selectedCategory).length} available lessons
                       {selectedCategory && ` in ${selectedCategory}`}
                     </p>
-                    
+
                     {/* Next Lesson Recommendation */}
                     {(() => {
                       const nextLesson = publishedModules
                         .find(module => !completedModuleIds.includes(module.id));
-                      
+
                       if (nextLesson && completedModuleIds.length > 0) {
                         return (
                           <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">

@@ -66,10 +66,11 @@ export default function Lesson() {
       try {
         console.log('🔄 LESSON: Starting lesson fetch...');
         // Get lesson ID from URL params
-        const lessonId = window.location.pathname.split('/lesson/')[1];
+        const pathParts = window.location.pathname.split('/');
+        const lessonId = pathParts[pathParts.length - 1];
         console.log('🔄 LESSON: Lesson ID from URL:', lessonId);
         
-        if (!lessonId) {
+        if (!lessonId || lessonId === 'lesson') {
           console.log('❌ LESSON: No lesson ID found, redirecting to education');
           setLocation('/education');
           return;
