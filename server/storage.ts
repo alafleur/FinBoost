@@ -1903,6 +1903,20 @@ export class MemStorage implements IStorage {
         .where(eq(users.subscriptionStatus, 'active'));
       const premiumUserCount = premiumUsers[0]?.count || 0;
 
+      // Get tier distribution for premium users only
+      const tierCounts = await db.select({
+        tier: users.tier,
+        count: sql<number>`count(*)`
+      })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'active'))
+        .groupBy(users.tier);
+
+      const tierMap = tierCounts.reduce((acc, { tier, count }) => {
+        acc[tier] = count;
+        return acc;
+      }, {} as Record<string, number>);
+
       const monthlyRevenue = premiumUserCount * 20; // $20 per premium user
       const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
 
@@ -1913,6 +1927,9 @@ export class MemStorage implements IStorage {
         tier1Pool: Math.round(totalPool * 0.5), // 50%
         tier2Pool: Math.round(totalPool * 0.3), // 30%
         tier3Pool: Math.round(totalPool * 0.2), // 20%
+        tier1Users: tierMap.tier1 || 0,
+        tier2Users: tierMap.tier2 || 0,
+        tier3Users: tierMap.tier3 || 0,
         lastUpdated: new Date().toISOString()
       };
     } catch (error) {
@@ -1924,6 +1941,9 @@ export class MemStorage implements IStorage {
         tier1Pool: 0,
         tier2Pool: 0,
         tier3Pool: 0,
+        tier1Users: 0,
+        tier2Users: 0,
+        tier3Users: 0,
         lastUpdated: new Date().toISOString()
       };
     }

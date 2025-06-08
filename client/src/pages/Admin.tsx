@@ -1197,19 +1197,22 @@ export default function Admin() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Total Users</CardTitle>
+                  <CardTitle>Premium Members</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{users.length}</div>
+                  <div className="text-2xl font-bold">{users.filter((u: any) => u.subscriptionStatus === 'active').length}</div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Active Users</CardTitle>
+                  <CardTitle>Total Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{users.filter((u: any) => u.isActive).length}</div>
+                  <div className="text-2xl font-bold">{users.length}</div>
+                  <div className="text-sm text-gray-500">
+                    {users.filter((u: any) => u.subscriptionStatus === 'active').length} premium
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1556,8 +1559,9 @@ export default function Admin() {
                   <CardContent>
                     <div className="space-y-4">
                       {['tier1', 'tier2', 'tier3'].map((tier) => {
-                        const count = users.filter((u: any) => u.tier === tier).length;
-                        const percentage = Math.round((count / users.length) * 100);
+                        const premiumUsers = users.filter((u: any) => u.subscriptionStatus === 'active');
+                        const count = premiumUsers.filter((u: any) => u.tier === tier).length;
+                        const percentage = premiumUsers.length > 0 ? Math.round((count / premiumUsers.length) * 100) : 0;
                         return (
                           <div key={tier} className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
@@ -2272,7 +2276,7 @@ export default function Admin() {
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {['tier3', 'tier2', 'tier1'].map((tier) => {
-                        const tierUsers = users.filter((u: any) => u.tier === tier);
+                        const tierUsers = users.filter((u: any) => u.tier === tier && u.subscriptionStatus === 'active');
                         const tierName = tier.replace('tier', 'Tier ');
                         const tierPool = poolData?.[`${tier}Pool` as keyof typeof poolData] || 0;
                         
@@ -2502,10 +2506,11 @@ export default function Admin() {
                   <CardContent>
                     <div className="space-y-4">
                       {['tier3', 'tier2', 'tier1'].map((tier) => {
-                        const tierUsers = users.filter((u: any) => u.tier === tier);
+                        const premiumUsers = users.filter((u: any) => u.subscriptionStatus === 'active');
+                        const tierUsers = premiumUsers.filter((u: any) => u.tier === tier);
                         const totalPoints = tierUsers.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0);
                         const avgPoints = tierUsers.length > 0 ? Math.round(totalPoints / tierUsers.length) : 0;
-                        const allPoints = users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0);
+                        const allPoints = premiumUsers.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0);
                         return (
                           <div key={tier} className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
