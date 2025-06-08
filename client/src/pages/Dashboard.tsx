@@ -453,6 +453,11 @@ export default function Dashboard() {
   console.log('Dashboard Debug - Lesson Progress:', lessonProgress);
   console.log('Dashboard Debug - Completed Module IDs:', completedModuleIds);
   console.log('Dashboard Debug - Published Modules:', publishedModules.length);
+  console.log('Dashboard Debug - Module check for each lesson:');
+  publishedModules.forEach(module => {
+    const isCompleted = completedModuleIds.includes(module.id);
+    console.log(`Module ${module.id} (${module.title}): ${isCompleted ? 'COMPLETED' : 'NOT COMPLETED'}`);
+  });
 
 
 
