@@ -313,6 +313,7 @@ export default function Dashboard() {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Full API response:', data);
         setLessonProgress(data.progress || []);
       }
     } catch (error) {
