@@ -286,15 +286,25 @@ export default function Dashboard() {
   const fetchLessonProgress = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        console.log('No token found for progress fetch');
+        return;
+      }
 
+      console.log('Fetching progress with token:', token.substring(0, 20) + '...');
       const response = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      console.log('Progress API response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        console.log('Raw progress data:', data.progress);
-        setLessonProgress(data.progress);
+        console.log('Raw progress data:', data);
+        setLessonProgress(data.progress || []);
+      } else {
+        const errorData = await response.text();
+        console.error('Progress API error:', response.status, errorData);
       }
     } catch (error) {
       console.error('Error fetching lesson progress:', error);
