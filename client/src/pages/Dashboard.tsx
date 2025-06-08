@@ -996,6 +996,16 @@ export default function Dashboard() {
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
                           
+                          console.log('🔍 ACCESS DEBUG:', {
+                            moduleId: module.id,
+                            moduleTitle: module.title,
+                            user: user?.username,
+                            canAccess,
+                            isPremiumModule,
+                            accessType: module.accessType,
+                            userPremium: accessInfo?.isPremium
+                          });
+                          
                           return (
                             <Card 
                               key={module.id}
