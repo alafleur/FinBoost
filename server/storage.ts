@@ -2295,7 +2295,9 @@ export class MemStorage implements IStorage {
         quiz: moduleData.quiz || null,
         isActive: moduleData.isActive !== undefined ? moduleData.isActive : true,
         order: moduleData.order || 0,
-        pointsReward: moduleData.pointsReward || 20
+        pointsReward: moduleData.pointsReward || 20,
+        accessType: 'premium',
+        isPublished: false
       }).returning();
       return module;
     } catch (error) {
@@ -2317,7 +2319,9 @@ export class MemStorage implements IStorage {
           quiz: moduleData.quiz,
           isActive: moduleData.isActive,
           order: moduleData.order,
-          pointsReward: moduleData.pointsReward
+          pointsReward: moduleData.pointsReward,
+          accessType: moduleData.accessType,
+          isPublished: moduleData.isPublished
         })
         .where(eq(learningModules.id, moduleId))
         .returning();
