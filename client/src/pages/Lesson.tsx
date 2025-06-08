@@ -64,52 +64,70 @@ export default function Lesson() {
   useEffect(() => {
     const fetchLesson = async () => {
       try {
+        console.log('🔄 LESSON: Starting lesson fetch...');
         // Get lesson ID from URL params
         const lessonId = window.location.pathname.split('/lesson/')[1];
+        console.log('🔄 LESSON: Lesson ID from URL:', lessonId);
         
         if (!lessonId) {
+          console.log('❌ LESSON: No lesson ID found, redirecting to education');
           setLocation('/education');
           return;
         }
 
         // Fetch user data first
         const token = localStorage.getItem('token');
+        console.log('🔄 LESSON: Token exists:', !!token);
         if (!token) {
+          console.log('❌ LESSON: No token, redirecting to login');
           setLocation('/login');
           return;
         }
 
+        console.log('🔄 LESSON: Fetching user data...');
         const userResponse = await fetch('/api/user', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        console.log('🔄 LESSON: User response status:', userResponse.status);
         if (!userResponse.ok) {
+          console.log('❌ LESSON: User fetch failed, redirecting to login');
           setLocation('/login');
           return;
         }
 
         const userData = await userResponse.json();
+        console.log('✅ LESSON: User data received:', userData);
         setUser(userData);
 
         // Fetch published modules from API
+        console.log('🔄 LESSON: Fetching modules...');
         const response = await fetch('/api/modules');
         const data = await response.json();
+        console.log('🔄 LESSON: Modules response:', data);
         
         if (data.success) {
+          console.log('🔄 LESSON: Looking for module with ID:', lessonId);
           // Find the specific module by ID
           const moduleData = data.modules.find((m: any) => m.id.toString() === lessonId);
+          console.log('🔄 LESSON: Found module data:', moduleData);
           
           if (moduleData) {
             // Check if user can access this module
             const canAccess = canAccessModule(userData, moduleData);
+            console.log('🔄 LESSON: Can access module:', canAccess);
             
             if (!canAccess) {
+              console.log('❌ LESSON: Access blocked for module');
               setAccessBlocked(true);
             }
 
             // Convert module data to lesson format
+            console.log('🔄 LESSON: Parsing quiz data...');
             const quizData = moduleData.quiz ? JSON.parse(moduleData.quiz) : [];
-            setLesson({
+            console.log('✅ LESSON: Quiz data parsed:', quizData);
+            
+            const lessonObj = {
               id: moduleData.id,
               title: moduleData.title,
               category: moduleData.category,
@@ -119,15 +137,19 @@ export default function Lesson() {
               content: moduleData.content || 'Content not available',
               quiz: quizData,
               completed: false
-            });
+            };
+            console.log('✅ LESSON: Setting lesson object:', lessonObj);
+            setLesson(lessonObj);
           } else {
+            console.log('❌ LESSON: Module not found, redirecting to education');
             setLocation('/education');
           }
         } else {
+          console.log('❌ LESSON: API response not successful, redirecting to education');
           setLocation('/education');
         }
       } catch (error) {
-        console.error('Error fetching lesson:', error);
+        console.error('❌ LESSON: Error fetching lesson:', error);
         setLocation('/education');
       }
     };
