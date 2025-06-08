@@ -1304,7 +1304,7 @@ export default function Dashboard() {
                         <option value="Planning">Planning</option>
                         <option value="Taxes">Taxes</option>
                         <option value="Debt">Debt</option>
-                        <option value="Insurance">Insurance</Insurance>
+                        <option value="Insurance">Insurance</option>
                       </select>
                     </div>
                   </div>
