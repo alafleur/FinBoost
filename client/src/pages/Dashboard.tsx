@@ -203,13 +203,13 @@ export default function Dashboard() {
     fetchDashboardData().then((authSuccess) => {
       if (authSuccess) {
         // Only fetch progress data after user authentication is confirmed
-        console.log('Auth successful, fetching progress data...');
+        console.log('🚀 DASHBOARD: Auth successful, fetching progress data...');
         fetchLessonProgress();
         fetchDistributionInfo();
         fetchPublishedModules();
       } else {
         // Clear invalid auth data and redirect
-        console.log('Auth failed, redirecting to login...');
+        console.log('🚀 DASHBOARD: Auth failed, redirecting to login...');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setLocation('/auth');
@@ -240,11 +240,14 @@ export default function Dashboard() {
   // Consolidated data fetching to reduce API calls
   const fetchDashboardData = async () => {
     try {
+      console.log('🔄 DASHBOARD: Starting fetchDashboardData...');
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('🔄 DASHBOARD: No token found in fetchDashboardData');
         return false;
       }
 
+      console.log('🔄 DASHBOARD: Making parallel API calls...');
       // Fetch only essential data in a single batch
       const [userResponse, poolResponse] = await Promise.all([
         fetch('/api/auth/me', {
@@ -253,10 +256,13 @@ export default function Dashboard() {
         fetch('/api/pool/monthly')
       ]);
 
+      console.log('🔄 DASHBOARD: Auth response status:', userResponse.status);
       if (userResponse.ok) {
         const userData = await userResponse.json();
         setUser(userData.user);
+        console.log('✅ DASHBOARD: User data set successfully');
       } else {
+        console.log('❌ DASHBOARD: Auth failed in fetchDashboardData');
         return false;
       }
 
@@ -270,10 +276,11 @@ export default function Dashboard() {
         fetchSecondaryData();
       }, 1000);
 
+      console.log('✅ DASHBOARD: fetchDashboardData completed successfully');
       return true; // Indicates successful authentication
 
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('❌ DASHBOARD: Error fetching dashboard data:', error);
       return false;
     }
   };
@@ -486,14 +493,22 @@ export default function Dashboard() {
     .map(progress => Number(progress.moduleId)); // Ensure numeric comparison
 
   // Debug completion data structure with more detail
-  console.log('Lesson Progress Data:', lessonProgress);
-  console.log('Completed Module IDs (converted to numbers):', completedModuleIds);
-  console.log('Published Module IDs:', publishedModules.map(m => ({ id: m.id, title: m.title })));
-  console.log('Progress details:', lessonProgress.map(p => ({ 
+  console.log('📊 DASHBOARD STATE: Lesson Progress Data:', lessonProgress);
+  console.log('📊 DASHBOARD STATE: Completed Module IDs (converted to numbers):', completedModuleIds);
+  console.log('📊 DASHBOARD STATE: Published Module IDs:', publishedModules.map(m => ({ id: m.id, title: m.title })));
+  console.log('📊 DASHBOARD STATE: Progress details:', lessonProgress.map(p => ({ 
     moduleId: p.moduleId, 
     completed: p.completed, 
     type: typeof p.moduleId 
   })));
+  
+  // Test the completion matching logic directly
+  if (lessonProgress.length > 0 && publishedModules.length > 0) {
+    const testModule = publishedModules.find(m => m.id === 52); // Test with first visible module
+    const isTestCompleted = completedModuleIds.includes(52);
+    console.log('🧪 DASHBOARD TEST: Module 52 completed?', isTestCompleted);
+    console.log('🧪 DASHBOARD TEST: Available completed IDs:', completedModuleIds);
+  }
 
 
 
