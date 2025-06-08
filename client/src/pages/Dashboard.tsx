@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'wouter';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,7 +27,6 @@ import {
   MessageCircle,
   Send
 } from "lucide-react";
-import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { FinBoostLogo } from "@/components/ui/finboost-logo";
 import PointsSummary from "@/components/PointsSummary";
@@ -1048,13 +1048,16 @@ export default function Dashboard() {
                                   <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                                 </div>
                                 <div className="flex items-center justify-end">
-                                  <Button 
-                                    onClick={() => setLocation(`/lesson/${module.id}`)}
-                                    size="sm"
-                                    variant={isCompleted ? "secondary" : "default"}
+                                  <Link 
+                                    href={`/lesson/${module.id}`}
+                                    className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                      isCompleted 
+                                        ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' 
+                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                    }`}
                                   >
                                     {isCompleted ? "Review" : "Start Lesson"}
-                                  </Button>
+                                  </Link>
                                 </div>
                               </CardContent>
                             </Card>
