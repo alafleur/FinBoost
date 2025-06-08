@@ -288,7 +288,10 @@ export default function Education() {
                         className={`hover:shadow-lg transition-shadow cursor-pointer ${
                           isCompleted ? 'border-green-200 bg-green-50' : ''
                         }`}
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        onClick={() => {
+                          console.log(`Card clicked - navigating to lesson ${module.id}`);
+                          setLocation(`/lesson/${module.id}`);
+                        }}
                       >
                         <CardHeader>
                           <div className="flex items-start justify-between">
@@ -330,9 +333,13 @@ export default function Education() {
                             className="w-full" 
                             variant={isCompleted ? "outline" : "default"}
                             disabled={false}
-                            onClick={() => setLocation(`/lesson/${module.id}`)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log(`Navigating to lesson ${module.id}`);
+                              setLocation(`/lesson/${module.id}`);
+                            }}
                           >
-                            {isCompleted ? "✓ Completed" : "Start Lesson"}
+                            {isCompleted ? "Review" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>

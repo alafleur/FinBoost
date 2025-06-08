@@ -1048,16 +1048,17 @@ export default function Dashboard() {
                                   <span className="text-xs text-gray-500 capitalize">{module.category}</span>
                                 </div>
                                 <div className="flex items-center justify-end">
-                                  <Link 
-                                    href={`/lesson/${module.id}`}
-                                    className={`inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                      isCompleted 
-                                        ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' 
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                                    }`}
+                                  <Button 
+                                    onClick={() => {
+                                      console.log(`Navigating to lesson ${module.id}`);
+                                      setLocation(`/lesson/${module.id}`);
+                                    }}
+                                    size="sm"
+                                    variant={isCompleted ? "secondary" : "default"}
+                                    className="w-full"
                                   >
                                     {isCompleted ? "Review" : "Start Lesson"}
-                                  </Link>
+                                  </Button>
                                 </div>
                               </CardContent>
                             </Card>
@@ -1449,3 +1450,4 @@ export default function Dashboard() {
     </div>
   );
 }
+// Replace Link components with Button components that use setLocation for navigation in the lesson cards.
