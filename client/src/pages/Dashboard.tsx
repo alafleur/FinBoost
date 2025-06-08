@@ -1000,13 +1000,12 @@ export default function Dashboard() {
                             <Card 
                               key={module.id}
                               className={`transition-all duration-200 hover:shadow-md relative ${
-                                canAccess ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
+                                canAccess ? '' : 'cursor-not-allowed opacity-75'
                               } ${
                                 isCompleted ? 'border-green-200 bg-green-50' : 
                                 isPremiumModule && !accessInfo?.isPremium ? 'border-yellow-200 bg-yellow-50' :
                                 'hover:border-primary-200'
                               }`}
-                              onClick={() => canAccess ? setLocation(`/lesson/${module.id}`) : null}
                             >
                               {isCompleted && (
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
