@@ -306,30 +306,34 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
-      console.log('Starting fetchLessonProgress...');
+      console.log('🔄 DASHBOARD: Starting fetchLessonProgress...');
       const token = localStorage.getItem('token');
-      console.log('Token exists:', !!token);
+      console.log('🔄 DASHBOARD: Token exists:', !!token);
       if (!token) {
-        console.log('No token found, skipping progress fetch');
+        console.log('🔄 DASHBOARD: No token found, skipping progress fetch');
         return;
       }
 
-      console.log('Making API call to /api/user/progress...');
+      console.log('🔄 DASHBOARD: Making API call to /api/user/progress...');
       const response = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      console.log('API response status:', response.status);
+      console.log('🔄 DASHBOARD: API response status:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Full API response:', data);
-        console.log('Progress array length:', data.progress?.length || 0);
+        console.log('✅ DASHBOARD: Full API response:', data);
+        console.log('✅ DASHBOARD: Progress array length:', data.progress?.length || 0);
+        console.log('✅ DASHBOARD: Setting lesson progress to:', data.progress);
         setLessonProgress(data.progress || []);
+        console.log('✅ DASHBOARD: State updated with progress data');
       } else {
-        console.error('API call failed with status:', response.status);
+        console.error('❌ DASHBOARD: API call failed with status:', response.status);
+        const errorText = await response.text();
+        console.error('❌ DASHBOARD: Error details:', errorText);
       }
     } catch (error) {
-      console.error('Error fetching lesson progress:', error);
+      console.error('❌ DASHBOARD: Error fetching lesson progress:', error);
     }
   };
 
