@@ -1,0 +1,192 @@
+{
+  "sinking-funds": {
+    "id": "sinking-funds",
+    "title": "Sinking Funds: Saving with Purpose",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What Are Sinking Funds?</h2><p>A sinking fund is money set aside for a known future expense, like a vacation or car repair.</p><h3>Benefits</h3><ul><li>Prevents debt</li><li>Provides financial clarity</li><li>Encourages intentional saving</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of the following is a good use of a sinking fund?",
+        "options": ["Mortgage payment", "Emergency fund", "Vacation savings", "Credit card payment"],
+        "correctAnswer": 2,
+        "explanation": "Sinking funds are meant for planned future expenses like vacations."
+      }
+    ]
+  },
+  "ethical-investing": {
+    "id": "ethical-investing",
+    "title": "Ethical & ESG Investing",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>What is ESG Investing?</h2><p>ESG stands for Environmental, Social, and Governance. Ethical investing focuses on aligning investments with personal values.</p><h3>Common Criteria</h3><ul><li>Environmental impact</li><li>Labor practices</li><li>Corporate transparency</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does ESG stand for in investing?",
+        "options": ["Equity, Stock, Growth", "Environmental, Social, Governance", "Earnings, Savings, Growth", "Ethics, Strategy, Goals"],
+        "correctAnswer": 1,
+        "explanation": "ESG considers how companies handle environmental, social, and governance issues."
+      }
+    ]
+  },
+  "good-debt-vs-bad-debt": {
+    "id": "good-debt-vs-bad-debt",
+    "title": "Good Debt vs. Bad Debt",
+    "category": "Debt",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Understanding the Difference</h2><p>Good debt helps build long-term value, while bad debt often funds depreciating items.</p><h3>Examples</h3><ul><li>Good: Student loans, mortgages</li><li>Bad: High-interest credit cards</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of the following is generally considered good debt?",
+        "options": ["Payday loan", "Car title loan", "Mortgage", "Store credit card"],
+        "correctAnswer": 2,
+        "explanation": "Mortgages can build equity and are typically lower interest, making them good debt."
+      }
+    ]
+  },
+  "filing-taxes-online": {
+    "id": "filing-taxes-online",
+    "title": "How to File Taxes Online",
+    "category": "Taxes",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Online Filing Basics</h2><p>Most people can file taxes online using free or paid platforms.</p><h3>Steps</h3><ul><li>Gather your documents</li><li>Choose a platform (IRS Free File, TurboTax, etc.)</li><li>Submit before the deadline</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is the main benefit of filing taxes online?",
+        "options": ["Takes longer", "Costs more", "Faster and easier", "Requires an accountant"],
+        "correctAnswer": 2,
+        "explanation": "Online filing is typically faster, easier, and often free for simple returns."
+      }
+    ]
+  },
+  "real-estate-investing-basics": {
+    "id": "real-estate-investing-basics",
+    "title": "Real Estate Investing Basics",
+    "category": "Real Estate",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Why Invest in Real Estate?</h2><p>Real estate can build wealth through rental income, appreciation, and tax advantages.</p><h3>Types of Investments</h3><ul><li>Rental properties</li><li>REITs (Real Estate Investment Trusts)</li><li>House flipping</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is a REIT?",
+        "options": ["Real Estate Insurance Trust", "Rental Earnings Income Tool", "Real Estate Investment Trust", "Real Estate Interest Transaction"],
+        "correctAnswer": 2,
+        "explanation": "REITs allow people to invest in real estate without owning property directly."
+      }
+    ]
+  },
+  "renters-insurance": {
+    "id": "renters-insurance",
+    "title": "Understanding Renter’s Insurance",
+    "category": "Insurance",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is Renter's Insurance?</h2><p>It protects your personal belongings in a rental unit from damage, theft, or liability.</p><h3>Coverage Includes</h3><ul><li>Personal property</li><li>Liability protection</li><li>Additional living expenses</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What does renter’s insurance primarily cover?",
+        "options": ["Your landlord’s property", "Your car", "Your personal belongings", "Medical bills"],
+        "correctAnswer": 2,
+        "explanation": "Renter’s insurance protects your personal belongings and provides liability coverage."
+      }
+    ]
+  },
+  "career-change-planning": {
+    "id": "career-change-planning",
+    "title": "Financial Planning for a Career Change",
+    "category": "Career",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Planning a Career Shift</h2><p>Switching careers can affect your income and benefits. Plan ahead to stay financially stable.</p><h3>Steps</h3><ul><li>Build an emergency fund</li><li>Budget for transition time</li><li>Upskill or retrain as needed</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What should you do before changing careers?",
+        "options": ["Quit immediately", "Increase spending", "Build an emergency fund", "Take a vacation"],
+        "correctAnswer": 2,
+        "explanation": "An emergency fund cushions you financially during the transition."
+      }
+    ]
+  },
+  "retirement-healthcare-planning": {
+    "id": "retirement-healthcare-planning",
+    "title": "Planning for Healthcare in Retirement",
+    "category": "Retirement",
+    "difficulty": "Advanced",
+    "points": 30,
+    "estimatedTime": "25 min",
+    "completed": false,
+    "content": "<h2>Why Healthcare Planning Matters</h2><p>Healthcare is a major expense in retirement. Planning helps avoid surprises.</p><h3>Options</h3><ul><li>Medicare and supplemental plans</li><li>Health Savings Accounts (HSAs)</li><li>Long-term care insurance</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which tool can help cover medical costs in retirement tax-free?",
+        "options": ["401(k)", "Roth IRA", "HSA", "Annuity"],
+        "correctAnswer": 2,
+        "explanation": "HSAs offer tax-free savings for qualified medical expenses."
+      }
+    ]
+  },
+  "insurance-for-self-employed": {
+    "id": "insurance-for-self-employed",
+    "title": "Insurance Options for the Self-Employed",
+    "category": "Insurance",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Insurance Challenges for Freelancers</h2><p>Without employer-sponsored insurance, self-employed individuals must find coverage on their own.</p><h3>Options</h3><ul><li>Marketplace plans</li><li>Health Savings Accounts</li><li>Professional liability insurance</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which health insurance source is available for freelancers?",
+        "options": ["Employer plans", "Medicare", "Marketplace exchange", "COBRA"],
+        "correctAnswer": 2,
+        "explanation": "Marketplace plans offer coverage options for self-employed individuals."
+      }
+    ]
+  },
+  "estate-tax-planning": {
+    "id": "estate-tax-planning",
+    "title": "Estate Tax Planning Basics",
+    "category": "Planning",
+    "difficulty": "Advanced",
+    "points": 30,
+    "estimatedTime": "25 min",
+    "completed": false,
+    "content": "<h2>What is Estate Tax?</h2><p>Estate tax is imposed on large estates before assets are passed on to heirs.</p><h3>Strategies</h3><ul><li>Use of trusts</li><li>Annual gifting</li><li>Charitable donations</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is one way to reduce estate taxes?",
+        "options": ["Sell your house", "Invest in stocks", "Use a trust", "Spend everything"],
+        "correctAnswer": 2,
+        "explanation": "Trusts can help minimize the taxable value of your estate."
+      }
+    ]
+  }
+}
