@@ -193,14 +193,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Use consolidated fetching to reduce server load
-    fetchDashboardData();
-    
-    // Load remaining data with delay to prevent crashes
-    setTimeout(() => {
-      fetchLessonProgress();
-      fetchDistributionInfo();
-      fetchPublishedModules();
-    }, 2000);
+    fetchDashboardData().then((authSuccess) => {
+      if (authSuccess) {
+        // Only fetch progress data after user authentication is confirmed
+        fetchLessonProgress();
+        fetchDistributionInfo();
+        fetchPublishedModules();
+      } else {
+        console.log('Authentication failed, redirecting to login');
+        setLocation('/auth');
+      }
+    });
 
     // Set up automatic refresh every 30 minutes (greatly reduced frequency)
     const refreshInterval = setInterval(() => {
@@ -227,7 +230,29 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      const storedUser = localStorage.getItem('user');
+      
+      console.log('Debug - localStorage token exists:', !!token);
+      console.log('Debug - localStorage user exists:', !!storedUser);
+      console.log('Debug - All localStorage keys:', Object.keys(localStorage));
+      
+      if (!token) {
+        console.log('No token found in fetchDashboardData');
+        // Check if user data exists in localStorage as fallback
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            console.log('Using stored user data as fallback');
+            return true;
+          } catch (e) {
+            console.error('Failed to parse stored user data');
+          }
+        }
+        return false;
+      }
+
+      console.log('Found token in fetchDashboardData:', token.substring(0, 20) + '...');
 
       // Fetch only essential data in a single batch
       const [userResponse, poolResponse] = await Promise.all([
@@ -240,6 +265,10 @@ export default function Dashboard() {
       if (userResponse.ok) {
         const userData = await userResponse.json();
         setUser(userData.user);
+        console.log('User data loaded successfully');
+      } else {
+        console.error('User data fetch failed:', userResponse.status);
+        return false;
       }
 
       if (poolResponse.ok) {
@@ -252,8 +281,11 @@ export default function Dashboard() {
         fetchSecondaryData();
       }, 1000);
 
+      return true; // Indicates successful authentication
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      return false;
     }
   };
 
