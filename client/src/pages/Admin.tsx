@@ -739,10 +739,21 @@ export default function Admin() {
 
   const handleTogglePublish = async (moduleId: number, isPublished: boolean) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Error",
+          description: "Authentication required",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const response = await fetch(`/api/admin/modules/${moduleId}/publish`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ isPublished })
       });
@@ -750,22 +761,26 @@ export default function Admin() {
       if (response.ok) {
         const data = await response.json();
         // Refresh modules data to ensure we have the latest state
-        const modulesRes = await fetch('/api/admin/modules');
+        const modulesRes = await fetch('/api/admin/modules', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (modulesRes.ok) {
-          const data = await modulesRes.json();
-          setModules(data.modules || []);
+          const modulesData = await modulesRes.json();
+          setModules(modulesData.modules || []);
         }
         toast({
           title: "Success",
           description: `Module ${isPublished ? 'published' : 'unpublished'} successfully`
         });
       } else {
-        throw new Error('Failed to update module publish status');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update module publish status');
       }
     } catch (error) {
+      console.error('Toggle publish error:', error);
       toast({
         title: "Error",
-        description: "Failed to update module publish status",
+        description: error instanceof Error ? error.message : "Failed to update module publish status",
         variant: "destructive"
       });
     }
