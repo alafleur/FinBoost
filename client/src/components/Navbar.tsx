@@ -13,7 +13,7 @@ export default function Navbar() {
   };
   
   return (
-    <nav className="bg-white shadow-sm px-4 py-6 fixed w-full z-50">
+    <nav className="bg-white shadow-sm px-4 py-8 fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <FinBoostLogo size="lg" />

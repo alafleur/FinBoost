@@ -11,10 +11,10 @@ export function FinBoostLogo({
   size = 'md'
 }: FinBoostLogoProps) {
   const sizeClasses = {
-    sm: 'h-12',
-    md: 'h-16', 
-    lg: 'h-24',
-    xl: 'h-32'
+    sm: 'h-16',
+    md: 'h-20', 
+    lg: 'h-32',
+    xl: 'h-40'
   };
 
   return (
