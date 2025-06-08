@@ -1055,16 +1055,13 @@ export default function Dashboard() {
                                   <Button 
                                     size="sm" 
                                     variant={isCompleted ? "secondary" : "default"}
-                                    disabled={!canAccess}
                                     onClick={() => {
-                                      console.log('🚀 DASHBOARD: Button clicked! Module:', module.id, 'Can access:', canAccess);
-                                      if (canAccess) {
-                                        console.log('🚀 DASHBOARD: Navigating to lesson:', `/lesson/${module.id}`);
-                                        setLocation(`/lesson/${module.id}`);
-                                      }
+                                      console.log('🚀 DASHBOARD: Button clicked! Module:', module.id, 'Title:', module.title);
+                                      console.log('🚀 DASHBOARD: Navigating to lesson:', `/lesson/${module.id}`);
+                                      setLocation(`/lesson/${module.id}`);
                                     }}
                                   >
-                                    {!canAccess ? "Premium Only" : (isCompleted ? "Review" : "Start Lesson")}
+                                    {isCompleted ? "Review" : "Start Lesson"}
                                   </Button>
                                 </div>
                               </CardContent>
