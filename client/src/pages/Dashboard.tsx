@@ -203,11 +203,13 @@ export default function Dashboard() {
     fetchDashboardData().then((authSuccess) => {
       if (authSuccess) {
         // Only fetch progress data after user authentication is confirmed
+        console.log('Auth successful, fetching progress data...');
         fetchLessonProgress();
         fetchDistributionInfo();
         fetchPublishedModules();
       } else {
         // Clear invalid auth data and redirect
+        console.log('Auth failed, redirecting to login...');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setLocation('/auth');
@@ -477,12 +479,17 @@ export default function Dashboard() {
 
   const completedModuleIds = lessonProgress
     .filter(progress => progress.completed)
-    .map(progress => progress.moduleId);
+    .map(progress => Number(progress.moduleId)); // Ensure numeric comparison
 
-  // Debug completion data structure
+  // Debug completion data structure with more detail
   console.log('Lesson Progress Data:', lessonProgress);
-  console.log('Completed Module IDs:', completedModuleIds);
-  console.log('Published Module IDs:', publishedModules.map(m => m.id));
+  console.log('Completed Module IDs (converted to numbers):', completedModuleIds);
+  console.log('Published Module IDs:', publishedModules.map(m => ({ id: m.id, title: m.title })));
+  console.log('Progress details:', lessonProgress.map(p => ({ 
+    moduleId: p.moduleId, 
+    completed: p.completed, 
+    type: typeof p.moduleId 
+  })));
 
 
 
