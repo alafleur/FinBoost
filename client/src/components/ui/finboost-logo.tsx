@@ -1,5 +1,5 @@
 
-import logoPath from "@assets/FinBoost logo v1_1749412447920.png";
+import logoPath from "@assets/FinBoost logo v2_1749413292436.png";
 
 interface FinBoostLogoProps {
   className?: string;
@@ -11,10 +11,10 @@ export function FinBoostLogo({
   size = 'md'
 }: FinBoostLogoProps) {
   const sizeClasses = {
-    sm: 'h-16',
-    md: 'h-20', 
-    lg: 'h-32',
-    xl: 'h-40'
+    sm: 'h-6',
+    md: 'h-8', 
+    lg: 'h-10',
+    xl: 'h-12'
   };
 
   return (
