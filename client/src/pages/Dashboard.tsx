@@ -449,6 +449,11 @@ export default function Dashboard() {
     .filter(progress => progress.completed)
     .map(progress => progress.moduleId);
 
+  // Debug logging to understand the completion status issue
+  console.log('Dashboard Debug - Lesson Progress:', lessonProgress);
+  console.log('Dashboard Debug - Completed Module IDs:', completedModuleIds);
+  console.log('Dashboard Debug - Published Modules:', publishedModules.length);
+
 
 
   if (isLoading) {
