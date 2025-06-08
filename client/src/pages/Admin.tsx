@@ -715,8 +715,21 @@ export default function Admin() {
 
   const handleDeleteModule = async (moduleId: number) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Error",
+          description: "Authentication required",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const response = await fetch(`/api/admin/modules/${moduleId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
