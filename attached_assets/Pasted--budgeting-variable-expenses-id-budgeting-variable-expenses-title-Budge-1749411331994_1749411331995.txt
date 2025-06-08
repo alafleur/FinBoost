@@ -1,0 +1,192 @@
+{
+  "budgeting-variable-expenses": {
+    "id": "budgeting-variable-expenses",
+    "title": "Budgeting for Variable Expenses",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What Are Variable Expenses?</h2><p>Variable expenses change month to month. Examples include groceries, gas, and entertainment.</p><h3>Tips to Manage</h3><ul><li>Review spending trends</li><li>Set a monthly range</li><li>Use envelopes or budgeting apps</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which of these is a variable expense?",
+        "options": ["Car loan", "Rent", "Groceries", "Gym membership"],
+        "correctAnswer": 2,
+        "explanation": "Groceries vary month to month, while others are fixed costs."
+      }
+    ]
+  },
+  "cds-explained": {
+    "id": "cds-explained",
+    "title": "Certificates of Deposit (CDs) Explained",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is a CD?</h2><p>A Certificate of Deposit (CD) is a savings product that locks your money in for a fixed period at a fixed interest rate.</p><h3>Key Features</h3><ul><li>Higher interest than savings accounts</li><li>Penalties for early withdrawal</li><li>FDIC insured</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is one disadvantage of a CD?",
+        "options": ["Low interest", "Not FDIC insured", "Money is not accessible", "No interest at all"],
+        "correctAnswer": 2,
+        "explanation": "With CDs, your money is locked up for a set time unless you pay a penalty."
+      }
+    ]
+  },
+  "roth-vs-traditional-ira": {
+    "id": "roth-vs-traditional-ira",
+    "title": "Roth vs. Traditional IRA",
+    "category": "Retirement",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>IRA Basics</h2><p>Both Roth and Traditional IRAs are retirement accounts with tax advantages. The key difference is when you pay taxes.</p><h3>Key Differences</h3><ul><li>Roth: Pay taxes now, withdraw tax-free</li><li>Traditional: Deduct now, pay taxes later</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which IRA offers tax-free withdrawals in retirement?",
+        "options": ["Traditional IRA", "Roth IRA", "SEP IRA", "None of the above"],
+        "correctAnswer": 1,
+        "explanation": "With Roth IRAs, contributions are taxed upfront, so withdrawals are tax-free."
+      }
+    ]
+  },
+  "credit-utilization": {
+    "id": "credit-utilization",
+    "title": "Understanding Credit Utilization",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is Credit Utilization?</h2><p>This is the percentage of your credit limit you're using. A lower utilization rate is better for your credit score.</p><h3>Tips</h3><ul><li>Keep it under 30%</li><li>Pay balances early</li><li>Request higher limits</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Why is it important to keep your credit utilization low?",
+        "options": ["To avoid interest", "To increase your debt", "To raise your credit score", "To lower your APR"],
+        "correctAnswer": 2,
+        "explanation": "Low utilization indicates responsible credit use, improving your score."
+      }
+    ]
+  },
+  "medical-debt": {
+    "id": "medical-debt",
+    "title": "Dealing with Medical Debt",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Understanding Medical Debt</h2><p>Medical bills can lead to debt if unpaid. Know your rights and explore payment options.</p><h3>Strategies</h3><ul><li>Review charges for errors</li><li>Request itemized bills</li><li>Negotiate or set up a payment plan</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What should you do if you receive a large medical bill?",
+        "options": ["Ignore it", "Request a payment plan", "Pay with credit card immediately", "Wait for collections"],
+        "correctAnswer": 1,
+        "explanation": "Payment plans help avoid collections and manage costs."
+      }
+    ]
+  },
+  "side-hustle-income": {
+    "id": "side-hustle-income",
+    "title": "Managing Side Hustle Income",
+    "category": "Career",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>Why Track Side Hustle Income?</h2><p>Freelancing and gig work are great ways to boost income, but they require self-management for taxes and budgeting.</p><h3>Tips</h3><ul><li>Open a separate bank account</li><li>Track all income and expenses</li><li>Set aside money for taxes</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What’s a good practice for managing side hustle finances?",
+        "options": ["Mix funds with personal account", "Ignore taxes", "Use cash only", "Track income and expenses"],
+        "correctAnswer": 3,
+        "explanation": "Tracking income and expenses ensures proper reporting and helps budgeting."
+      }
+    ]
+  },
+  "capital-gains-taxes": {
+    "id": "capital-gains-taxes",
+    "title": "Capital Gains Taxes Explained",
+    "category": "Taxes",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>What are Capital Gains?</h2><p>A capital gain is the profit from selling an asset. Taxes vary by how long you hold the asset.</p><h3>Types</h3><ul><li>Short-term: Held < 1 year, taxed as income</li><li>Long-term: Held > 1 year, lower tax rate</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "Which capital gains tax rate is usually lower?",
+        "options": ["Short-term", "Long-term", "Corporate", "Property"],
+        "correctAnswer": 1,
+        "explanation": "Long-term capital gains are taxed more favorably to encourage investing."
+      }
+    ]
+  },
+  "planning-child-expenses": {
+    "id": "planning-child-expenses",
+    "title": "Financial Planning for a New Child",
+    "category": "Planning",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>Preparing for Parenthood</h2><p>Children add major expenses: medical, childcare, food, and education.</p><h3>Steps</h3><ul><li>Create a baby budget</li><li>Plan for parental leave</li><li>Start education savings early</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What is one financial step new parents should take early?",
+        "options": ["Buy a new car", "Open a 529 plan", "Pay off student loans", "Move to a larger house"],
+        "correctAnswer": 1,
+        "explanation": "A 529 plan helps you save for education with tax benefits."
+      }
+    ]
+  },
+  "real-estate-taxes": {
+    "id": "real-estate-taxes",
+    "title": "Real Estate and Property Taxes",
+    "category": "Real Estate",
+    "difficulty": "Intermediate",
+    "points": 25,
+    "estimatedTime": "20 min",
+    "completed": false,
+    "content": "<h2>What Are Property Taxes?</h2><p>Homeowners pay property taxes based on the value of their home and local tax rates.</p><h3>Key Facts</h3><ul><li>Tax rates vary by location</li><li>Funds schools and local services</li><li>Paid annually or monthly through escrow</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What do property taxes typically fund?",
+        "options": ["Federal highways", "Military spending", "Local schools and services", "Medicare"],
+        "correctAnswer": 2,
+        "explanation": "Property taxes support your local community infrastructure and services."
+      }
+    ]
+  },
+  "insurance-deductibles": {
+    "id": "insurance-deductibles",
+    "title": "How Insurance Deductibles Work",
+    "category": "Insurance",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": "15 min",
+    "completed": false,
+    "content": "<h2>What is a Deductible?</h2><p>Your deductible is the amount you must pay out of pocket before insurance kicks in.</p><h3>Impacts</h3><ul><li>Higher deductible = lower premiums</li><li>Lower deductible = higher monthly costs</li></ul>",
+    "quiz": [
+      {
+        "id": 1,
+        "question": "What happens when you choose a higher deductible plan?",
+        "options": ["Higher monthly payments", "Lower out-of-pocket costs", "Lower premiums", "No coverage"],
+        "correctAnswer": 2,
+        "explanation": "High deductibles reduce your monthly premium but increase out-of-pocket costs during claims."
+      }
+    ]
+  }
+}
