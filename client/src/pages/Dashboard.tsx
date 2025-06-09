@@ -1027,7 +1027,10 @@ export default function Dashboard() {
                               )}
                               <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">
-                                  <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
+                                  <h4 className="font-semibold text-sm leading-tight pr-2">
+                                    {module.title}
+                                    {isPremiumModule && <span className="text-yellow-600 ml-1">★</span>}
+                                  </h4>
                                   <div className="flex flex-col gap-1 shrink-0">
                                     {isPremiumModule && (
                                       <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
