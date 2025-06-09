@@ -1003,14 +1003,13 @@ export default function Dashboard() {
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
-                          console.log(`📊 MODULE ACCESS CHECK: ${module.title} - accessType: ${module.accessType}, isPremium: ${isPremiumModule}`);
 
                           return (
                             <Card 
                               key={module.id}
                               className={`transition-all duration-200 hover:shadow-md relative ${
                                 isCompleted ? 'border-green-200 bg-green-50' : 
-                                isPremiumModule ? 'border-yellow-200 bg-yellow-50' :
+                                isPremiumModule ? 'border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100' :
                                 'hover:border-primary-200'
                               }`}
                             >
@@ -1029,8 +1028,8 @@ export default function Dashboard() {
                                   <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
                                   <div className="flex flex-col gap-1 shrink-0">
                                     {isPremiumModule && (
-                                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
-                                        Premium
+                                      <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
+                                        Members
                                       </Badge>
                                     )}
                                     {isCompleted ? (
