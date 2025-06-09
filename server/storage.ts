@@ -1922,7 +1922,8 @@ export class MemStorage implements IStorage {
       const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
 
       return {
-        totalUsers: premiumUserCount.toString(),
+        totalUsers: premiumUserCount, // Return as number for consistency
+        premiumUsers: premiumUserCount, // Explicitly show premium user count
         monthlyRevenue: monthlyRevenue.toString(),
         totalPool,
         tier1Pool: Math.round(totalPool * 0.5), // 50%
@@ -1936,7 +1937,8 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting monthly pool:', error);
       return {
-        totalUsers: "0",
+        totalUsers: 0,
+        premiumUsers: 0,
         monthlyRevenue: "0",
         totalPool: 0,
         tier1Pool: 0,

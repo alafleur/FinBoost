@@ -679,10 +679,10 @@ export default function Dashboard() {
                       {/* Community Power Display */}
                       <div className="bg-green-100 rounded-lg p-4 text-center">
                         <div className="text-4xl font-bold text-green-900 mb-1">
-                          {poolData && poolData.totalUsers ? poolData.totalUsers.toLocaleString() : '0'}
+                          {poolData && poolData.premiumUsers ? poolData.premiumUsers.toLocaleString() : '0'}
                         </div>
                         <p className="text-sm font-bold text-green-800 uppercase tracking-wide">
-                          🚀 Community Power
+                          🚀 Premium Members
                         </p>
                         <p className="text-xs text-green-600 mt-1">
                           Members building wealth together
@@ -905,10 +905,10 @@ export default function Dashboard() {
 
                           <div className="mt-4 text-center">
                             <div className="text-2xl font-bold text-green-900 mb-1">
-                              {poolData && poolData.totalUsers ? poolData.totalUsers.toLocaleString() : '0'}
+                              {poolData && poolData.premiumUsers ? poolData.premiumUsers.toLocaleString() : '0'}
                             </div>
                             <p className="text-sm font-bold text-green-800">
-                              Active Members
+                              Premium Members
                             </p>
                           </div>
                         </CardContent>

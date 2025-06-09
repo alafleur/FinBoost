@@ -1233,6 +1233,9 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">${poolData?.totalPool ?? 0}</div>
+                  <div className="text-sm text-gray-500">
+                    From {poolData?.premiumUsers ?? 0} premium members
+                  </div>
                 </CardContent>
               </Card>
 
