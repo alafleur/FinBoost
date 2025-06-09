@@ -16,7 +16,8 @@ import {
   PiggyBank,
   CreditCard,
   Calculator,
-  Target
+  Target,
+  Crown
 } from 'lucide-react';
 import { educationContent } from '../data/educationContent';
 
@@ -280,19 +281,27 @@ export default function Education() {
                   .filter((module) => category === 'All' || module.category === category)
                   .map((module) => {
                     const isCompleted = completedLessons.includes(module.id);
+                    const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
+                    const isPremiumModule = knownPremiumModules.includes(module.title);
                     const Icon = module.icon;
 
                     return (
                       <Card 
                         key={module.id} 
-                        className={`hover:shadow-lg transition-shadow cursor-pointer ${
-                          isCompleted ? 'border-green-200 bg-green-50' : ''
+                        className={`hover:shadow-lg transition-shadow cursor-pointer relative ${
+                          isCompleted ? 'border-green-200 bg-green-50' : 
+                          isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-xl border-2' : ''
                         }`}
                         onClick={() => {
                           console.log(`Card clicked - navigating to lesson ${module.id}`);
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
+                        {isPremiumModule && (
+                          <div className="absolute top-3 left-3">
+                            <Crown className="w-5 h-5 text-yellow-600" />
+                          </div>
+                        )}
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex items-center space-x-3">
@@ -309,11 +318,18 @@ export default function Education() {
                                 <CardTitle className="text-lg leading-tight">{module.title}</CardTitle>
                               </div>
                             </div>
-                            {isCompleted && (
-                              <Badge className="bg-green-100 text-green-700">
-                                Completed
-                              </Badge>
-                            )}
+                            <div className="flex flex-col gap-2">
+                              {isPremiumModule && (
+                                <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
+                                  Members
+                                </Badge>
+                              )}
+                              {isCompleted && (
+                                <Badge className="bg-green-100 text-green-700">
+                                  Completed
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                           <CardDescription className="mt-2">
                             {module.description}
@@ -330,8 +346,8 @@ export default function Education() {
 
                           </div>
                           <Button 
-                            className="w-full" 
-                            variant={isCompleted ? "outline" : "default"}
+                            className={`w-full ${isPremiumModule && !isCompleted ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
+                            variant={isCompleted ? "outline" : isPremiumModule ? "outline" : "default"}
                             disabled={false}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -339,7 +355,7 @@ export default function Education() {
                               setLocation(`/lesson/${module.id}`);
                             }}
                           >
-                            {isCompleted ? "Review" : "Start Lesson"}
+                            {isCompleted ? "Review" : isPremiumModule ? "Upgrade to Access" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>
