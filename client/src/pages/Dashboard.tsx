@@ -1077,7 +1077,8 @@ export default function Dashboard() {
                               </CardContent>
                             </Card>
                           );
-                        })}
+                        })
+                      }
                     </div>
 
                     {/* Next Lesson Recommendation */}
