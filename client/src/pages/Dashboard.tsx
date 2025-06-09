@@ -1003,6 +1003,16 @@ export default function Dashboard() {
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
+                          
+                          // Debug logging for Credit Management specifically
+                          if (module.title === 'Credit Management') {
+                            console.log('🔍 CREDIT MANAGEMENT DEBUG:', {
+                              title: module.title,
+                              accessType: module.accessType,
+                              isPremiumModule,
+                              allModuleProps: Object.keys(module)
+                            });
+                          }
 
                           return (
                             <Card 
