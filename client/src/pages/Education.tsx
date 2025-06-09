@@ -22,15 +22,16 @@ import {
 import { educationContent } from '../data/educationContent';
 
 interface Module {
-  id: string;
+  id: number;
   title: string;
   description: string;
   category: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  estimatedTime: string;
+  estimatedMinutes: number;
   pointsReward: number;
   icon: any;
   completed?: boolean;
+  accessType: 'free' | 'premium';
 }
 
 export default function Education() {
@@ -282,6 +283,7 @@ export default function Education() {
                   .map((module) => {
                     const isCompleted = completedLessons.includes(module.id);
                     const isPremiumModule = module.accessType === 'premium';
+                    console.log(`Module ${module.title}: accessType=${module.accessType}, isPremium=${isPremiumModule}`);
                     const Icon = module.icon;
 
                     return (
