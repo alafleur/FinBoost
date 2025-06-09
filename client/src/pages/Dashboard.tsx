@@ -1003,6 +1003,7 @@ export default function Dashboard() {
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           const isPremiumModule = module.accessType === 'premium';
+                          console.log(`📊 MODULE ACCESS CHECK: ${module.title} - accessType: ${module.accessType}, isPremium: ${isPremiumModule}`);
 
                           return (
                             <Card 
