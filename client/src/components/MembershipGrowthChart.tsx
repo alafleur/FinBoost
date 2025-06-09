@@ -82,7 +82,7 @@ export default function MembershipGrowthChart() {
             1
           </div>
           <h3 className="font-semibold text-lg mb-2 text-blue-600">Tier 1</h3>
-          <p className="text-gray-600 text-sm">Everyone wins, even beginners</p>
+          <p className="text-gray-600 text-sm">Top performers get the biggest share</p>
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm text-center">
@@ -98,7 +98,7 @@ export default function MembershipGrowthChart() {
             3
           </div>
           <h3 className="font-semibold text-lg mb-2 text-blue-600">Tier 3</h3>
-          <p className="text-gray-600 text-sm">Top performers get the biggest share</p>
+          <p className="text-gray-600 text-sm">Everyone wins, even beginners</p>
         </div>
       </div>
 
