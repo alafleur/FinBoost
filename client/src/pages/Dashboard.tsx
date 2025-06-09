@@ -376,6 +376,11 @@ export default function Dashboard() {
       const response = await fetch('/api/modules');
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 FETCH MODULES DEBUG:', {
+          totalModules: data.modules?.length || 0,
+          creditModule: data.modules?.find(m => m.title === 'Credit Management'),
+          sampleModules: data.modules?.slice(0, 3).map(m => ({ title: m.title, accessType: m.accessType }))
+        });
         setPublishedModules(data.modules || []);
       }
     } catch (error) {
