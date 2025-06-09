@@ -86,7 +86,7 @@ export default function Lesson() {
         }
 
         console.log('🔄 LESSON: Fetching user data...');
-        const userResponse = await fetch('/api/user', {
+        const userResponse = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -99,7 +99,7 @@ export default function Lesson() {
 
         const userData = await userResponse.json();
         console.log('✅ LESSON: User data received:', userData);
-        setUser(userData);
+        setUser(userData.user);
 
         // Fetch published modules from API
         console.log('🔄 LESSON: Fetching modules...');
