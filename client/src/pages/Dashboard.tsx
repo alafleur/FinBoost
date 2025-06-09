@@ -1054,10 +1054,14 @@ export default function Dashboard() {
                                       setLocation(`/lesson/${module.id}`);
                                     }}
                                     size="sm"
-                                    variant={isCompleted ? "secondary" : "default"}
-                                    className="w-full hover:opacity-90 transition-opacity"
+                                    variant={isCompleted ? "secondary" : isPremiumModule ? "outline" : "default"}
+                                    className={`w-full hover:opacity-90 transition-opacity ${
+                                      isPremiumModule && !isCompleted 
+                                        ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' 
+                                        : ''
+                                    }`}
                                   >
-                                    {isCompleted ? "Review" : "Start Lesson"}
+                                    {isCompleted ? "Review" : isPremiumModule ? "Upgrade to Access" : "Start Lesson"}
                                   </Button>
                                 </div>
                               </CardContent>
