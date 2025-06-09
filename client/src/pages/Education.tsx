@@ -281,8 +281,7 @@ export default function Education() {
                   .filter((module) => category === 'All' || module.category === category)
                   .map((module) => {
                     const isCompleted = completedLessons.includes(module.id);
-                    const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
-                    const isPremiumModule = knownPremiumModules.includes(module.title);
+                    const isPremiumModule = module.accessType === 'premium';
                     const Icon = module.icon;
 
                     return (

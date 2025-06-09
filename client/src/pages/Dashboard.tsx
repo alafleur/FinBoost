@@ -1325,8 +1325,7 @@ export default function Dashboard() {
                       .slice(0, 6)
                       .map(module => {
                         const isCompleted = completedModuleIds.includes(module.id);
-                        const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
-                        const isPremiumModule = module.accessType === 'premium' || knownPremiumModules.includes(module.title);
+                        const isPremiumModule = module.accessType === 'premium';
                         return (
                           <Card 
                             key={module.id}
