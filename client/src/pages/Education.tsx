@@ -145,15 +145,16 @@ export default function Education() {
     const isCompleted = completedLessons.includes(moduleIdStr);
     
     return {
-      id: moduleIdStr,
+      id: module.id,
       title: module.title,
       description: description.length > 120 ? description.substring(0, 120) + '...' : description,
       category: module.category,
-      difficulty: 'Beginner' as const, // Default since database doesn't have difficulty
-      estimatedTime: '15 min', // Default since database doesn't have estimatedTime
+      difficulty: 'Beginner' as const,
+      estimatedMinutes: module.estimatedMinutes || 15,
       pointsReward: module.pointsReward,
       icon: getCategoryIcon(module.category),
-      completed: isCompleted
+      completed: isCompleted,
+      accessType: module.accessType || 'free'
     };
   });
 
@@ -281,9 +282,8 @@ export default function Education() {
                 {modules
                   .filter((module) => category === 'All' || module.category === category)
                   .map((module) => {
-                    const isCompleted = completedLessons.includes(module.id);
+                    const isCompleted = completedLessons.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
-                    console.log(`Module ${module.title}: accessType=${module.accessType}, isPremium=${isPremiumModule}`);
                     const Icon = module.icon;
 
                     return (
