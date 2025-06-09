@@ -678,31 +678,26 @@ export class MemStorage implements IStorage {
 
   async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
     try {
-      const pointsColumn = period === 'monthly' ? 'current_month_points' : 'total_points';
+      const pointsColumn = period === 'monthly' ? users.currentMonthPoints : users.totalPoints;
 
-      // Use raw SQL to avoid Drizzle issues
-      const query = `
-        SELECT 
-          ROW_NUMBER() OVER (ORDER BY ${pointsColumn} DESC) as rank,
-          id as user_id,
-          username,
-          ${pointsColumn} as points,
-          tier
-        FROM users 
-        WHERE subscription_status = 'active'
-        ORDER BY ${pointsColumn} DESC
-        LIMIT $1
-      `;
+      // Use Drizzle ORM instead of raw SQL
+      const leaderboard = await db.select({
+        userId: users.id,
+        username: users.username,
+        points: pointsColumn,
+        tier: users.tier
+      })
+      .from(users)
+      .where(eq(users.subscriptionStatus, 'active'))
+      .orderBy(desc(pointsColumn))
+      .limit(limit);
 
-      const result = await db.execute(sql.raw(query, [limit]));
-      const rows = result.rows || result || [];
-
-      return rows.map((row: any) => ({
-        rank: parseInt(row.rank),
-        userId: row.user_id,
-        username: row.username,
-        points: row.points || 0,
-        tier: row.tier || 'tier3'
+      return leaderboard.map((user, index) => ({
+        rank: index + 1,
+        userId: user.userId,
+        username: user.username,
+        points: user.points || 0,
+        tier: user.tier || 'tier3'
       }));
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -2034,68 +2029,50 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async getLeaderboard(): Promise<any[]> {
-    try {
-      const leaderboard = await db.select({
-        userId: users.id,
-        username: users.username,
-        points: users.currentMonthPoints,
-        tier: users.tier
-      })
-      .from(users)
-      .where(eq(users.subscriptionStatus, 'active'))
-      .orderBy(desc(users.currentMonthPoints))
-      .limit(50);
 
-      return leaderboard.map((user, index) => ({
-        rank: (index + 1).toString(),
-        userId: user.userId,
-        username: user.username,
-        points: user.points || 0,
-        tier: user.tier || 'tier1'
-      }));
-    } catch (error) {
-      console.error('Error getting leaderboard:', error);
-      return [];
-    }
-  }
 
   async getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>> {
     try {
       console.log(`Getting expanded leaderboard with timeFilter: ${timeFilter}, search: "${search}"`);
 
-      // Use raw SQL to avoid Drizzle ORM issues
-      const pointsColumn = timeFilter === 'alltime' ? 'total_points' : 'current_month_points';
-      let searchCondition = '';
-      let searchParam: string[] = [];
+      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
 
+      // Build the query with conditional search
+      let query = db.select({
+        id: users.id,
+        username: users.username,
+        totalPoints: users.totalPoints,
+        currentMonthPoints: users.currentMonthPoints,
+        tier: users.tier,
+        currentStreak: users.currentStreak,
+        createdAt: users.createdAt
+      })
+      .from(users)
+      .where(eq(users.subscriptionStatus, 'active'))
+      .orderBy(desc(pointsColumn));
+
+      // Add search filter if provided
       if (search && search.trim()) {
-        searchCondition = ` AND username ILIKE $2`;
-        searchParam = [`%${search}%`];
+        query = db.select({
+          id: users.id,
+          username: users.username,
+          totalPoints: users.totalPoints,
+          currentMonthPoints: users.currentMonthPoints,
+          tier: users.tier,
+          currentStreak: users.currentStreak,
+          createdAt: users.createdAt
+        })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'active'),
+            sql`${users.username} ILIKE ${`%${search}%`}`
+          )
+        )
+        .orderBy(desc(pointsColumn));
       }
 
-      // Get all premium users with their data
-      const usersQuery = `
-        SELECT 
-          id,
-          username,
-          total_points,
-          current_month_points,
-          tier,
-          current_streak,
-          created_at
-        FROM users 
-        WHERE subscription_status = 'active'${searchCondition}
-        ORDER BY ${pointsColumn} DESC
-      `;
-
-      const usersResult = await db.execute(
-        searchParam.length > 0 
-          ? sql.raw(usersQuery, searchParam)
-          : sql.raw(usersQuery)
-      );
-
-      const usersData = usersResult.rows || usersResult || [];
+      const usersData = await query;
       console.log(`Found ${usersData.length} premium users`);
 
       if (usersData.length === 0) {
@@ -2103,18 +2080,29 @@ export class MemStorage implements IStorage {
       }
 
       // Get module completions for these users
-      const userIds = usersData.map((u: any) => u.id);
-      const completionsQuery = `
-        SELECT user_id, COUNT(*) as completed_count
-        FROM user_progress 
-        WHERE user_id = ANY($1) AND completed = true
-        GROUP BY user_id
-      `;
-
-      let moduleCompletions: Array<{user_id: number, completed_count: number}> = [];
+      const userIds = usersData.map(u => u.id);
+      
+      let moduleCompletions: Array<{userId: number, completedCount: number}> = [];
       try {
-        const completionsResult = await db.execute(sql.raw(completionsQuery, [userIds]));
-        moduleCompletions = completionsResult.rows || completionsResult || [];
+        if (userIds.length > 0) {
+          const completionsData = await db.select({
+            userId: userProgress.userId,
+            completedCount: sql<number>`COUNT(*)`.as('completedCount')
+          })
+          .from(userProgress)
+          .where(
+            and(
+              sql`${userProgress.userId} IN (${sql.join(userIds.map(id => sql`${id}`), sql`, `)})`,
+              eq(userProgress.completed, true)
+            )
+          )
+          .groupBy(userProgress.userId);
+
+          moduleCompletions = completionsData.map(c => ({
+            userId: c.userId,
+            completedCount: Number(c.completedCount) || 0
+          }));
+        }
       } catch (progressError) {
         console.error('Error fetching module completions:', progressError);
         moduleCompletions = [];
@@ -2122,24 +2110,24 @@ export class MemStorage implements IStorage {
 
       // Create completion map
       const completionMap = new Map(
-        moduleCompletions.map((c: any) => [c.user_id, parseInt(c.completed_count) || 0])
+        moduleCompletions.map(c => [c.userId, c.completedCount])
       );
 
       // Format results
-      const result = usersData.map((user: any, index: number) => {
+      const result = usersData.map((user, index) => {
         const points = timeFilter === 'alltime' 
-          ? (user.total_points || 0) 
-          : (user.current_month_points || 0);
+          ? (user.totalPoints || 0) 
+          : (user.currentMonthPoints || 0);
         
         return {
           rank: (index + 1).toString(),
           username: user.username || 'Unknown',
           points: points.toString(),
           tier: user.tier || 'tier3',
-          streak: user.current_streak || 0,
+          streak: user.currentStreak || 0,
           modulesCompleted: completionMap.get(user.id) || 0,
-          joinDate: user.created_at 
-            ? new Date(user.created_at).toISOString().split('T')[0] 
+          joinDate: user.createdAt 
+            ? new Date(user.createdAt).toISOString().split('T')[0] 
             : new Date().toISOString().split('T')[0]
         };
       });
