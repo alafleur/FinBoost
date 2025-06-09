@@ -2051,7 +2051,17 @@ export class MemStorage implements IStorage {
   async getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>> {
     try {
       // Build base query for all premium users (active subscription status)
-      let query = db.select({
+      let whereConditions = [eq(users.subscriptionStatus, 'active')];
+
+      // Add search filter if provided
+      if (search && search.trim()) {
+        whereConditions.push(sql`${users.username} ILIKE ${`%${search}%`}`);
+      }
+
+      // Determine which points column to use for ordering
+      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
+      
+      const usersData = await db.select({
         id: users.id,
         username: users.username,
         totalPoints: users.totalPoints,
@@ -2061,20 +2071,8 @@ export class MemStorage implements IStorage {
         createdAt: users.createdAt
       })
       .from(users)
-      .where(eq(users.subscriptionStatus, 'active'));
-
-      // Add search filter if provided
-      if (search && search.trim()) {
-        query = query.where(and(
-          eq(users.subscriptionStatus, 'active'),
-          sql`${users.username} ILIKE ${`%${search}%`}`
-        ));
-      }
-
-      // Determine which points column to use and order by it
-      const pointsColumn = timeFilter === 'alltime' ? 'totalPoints' : 'currentMonthPoints';
-      
-      const usersData = await query.orderBy(desc(pointsColumn === 'alltime' ? users.totalPoints : users.currentMonthPoints));
+      .where(and(...whereConditions))
+      .orderBy(desc(pointsColumn));
 
       console.log(`Expanded leaderboard query returned ${usersData.length} premium users`);
 
