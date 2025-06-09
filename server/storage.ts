@@ -2052,8 +2052,19 @@ export class MemStorage implements IStorage {
     try {
       const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
       
-      // Get all premium users (active subscription status)
-      let query = db.select({
+      // Build base query for all premium users (active subscription status)
+      const baseConditions = [
+        eq(users.subscriptionStatus, 'active'),
+        users.isActive ? eq(users.isActive, true) : sql`true`
+      ];
+
+      // Add search filter if provided
+      if (search && search.trim()) {
+        baseConditions.push(sql`${users.username} ILIKE ${`%${search}%`}`);
+      }
+
+      // Get all matching users without pagination limits
+      const usersData = await db.select({
         id: users.id,
         username: users.username,
         points: pointsColumn,
@@ -2062,21 +2073,10 @@ export class MemStorage implements IStorage {
         createdAt: sql<string>`to_char(${users.createdAt}, 'YYYY-MM-DD')`.as('joinDate')
       })
       .from(users)
-      .where(and(
-        eq(users.subscriptionStatus, 'active'),
-        users.isActive ? eq(users.isActive, true) : sql`true`
-      ));
+      .where(and(...baseConditions))
+      .orderBy(desc(pointsColumn));
 
-      // Apply search filter if provided
-      if (search) {
-        query = query.where(and(
-          eq(users.subscriptionStatus, 'active'),
-          users.isActive ? eq(users.isActive, true) : sql`true`,
-          sql`${users.username} ILIKE ${`%${search}%`}`
-        ));
-      }
-
-      const usersData = await query.orderBy(desc(pointsColumn));
+      console.log(`Expanded leaderboard query returned ${usersData.length} users`);
 
       // Get module completion counts for all users
       const moduleCompletions = await db.select({

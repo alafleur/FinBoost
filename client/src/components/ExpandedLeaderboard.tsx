@@ -25,9 +25,7 @@ interface ExpandedLeaderboardProps {
 
 export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [timeFilter, setTimeFilter] = useState<"monthly" | "all-time">("monthly");
-  const itemsPerPage = 10;
 
   const { data: leaderboardData, isLoading } = useQuery({
     queryKey: ['/api/leaderboard'],
@@ -92,9 +90,8 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  // Show all users without pagination
+  const displayedUsers = filteredUsers;
 
   const getTierBadgeColor = (tier: string) => {
     switch (tier.toLowerCase()) {
@@ -205,8 +202,8 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {paginatedUsers.map((user: any, index: number) => {
-                    const actualRank = startIndex + index + 1;
+                  {displayedUsers.map((user: any, index: number) => {
+                    const actualRank = index + 1;
                     const isCurrentUser = currentUser && user.username === currentUser.username;
 
                     return (
@@ -254,32 +251,12 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                 </div>
               )}
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                  <div className="text-sm text-gray-600">
-                    Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
+              {/* Summary */}
+              <div className="mt-6 pt-4 border-t">
+                <div className="text-sm text-gray-600 text-center">
+                  Showing all {filteredUsers.length} of {allUsers.length} premium members
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
