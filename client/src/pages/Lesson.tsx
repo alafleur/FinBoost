@@ -80,8 +80,8 @@ export default function Lesson() {
         const token = localStorage.getItem('token');
         console.log('🔄 LESSON: Token exists:', !!token);
         if (!token) {
-          console.log('❌ LESSON: No token, redirecting to login');
-          setLocation('/login');
+          console.log('❌ LESSON: No token, redirecting to auth');
+          setLocation('/auth');
           return;
         }
 
@@ -92,8 +92,8 @@ export default function Lesson() {
         
         console.log('🔄 LESSON: User response status:', userResponse.status);
         if (!userResponse.ok) {
-          console.log('❌ LESSON: User fetch failed, redirecting to login');
-          setLocation('/login');
+          console.log('❌ LESSON: User fetch failed, redirecting to auth');
+          setLocation('/auth');
           return;
         }
 
