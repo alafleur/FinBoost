@@ -376,11 +376,6 @@ export default function Dashboard() {
       const response = await fetch('/api/modules');
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 FETCH MODULES DEBUG:', {
-          totalModules: data.modules?.length || 0,
-          creditModule: data.modules?.find(m => m.title === 'Credit Management'),
-          sampleModules: data.modules?.slice(0, 3).map(m => ({ title: m.title, accessType: m.accessType }))
-        });
         setPublishedModules(data.modules || []);
       }
     } catch (error) {
@@ -1007,17 +1002,9 @@ export default function Dashboard() {
                           const isCompleted = completedModuleIds.includes(module.id);
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
-                          const isPremiumModule = module.accessType === 'premium';
-                          
-                          // Debug logging for Credit Management specifically
-                          if (module.title === 'Credit Management') {
-                            console.log('🔍 CREDIT MANAGEMENT DEBUG:', {
-                              title: module.title,
-                              accessType: module.accessType,
-                              isPremiumModule,
-                              allModuleProps: Object.keys(module)
-                            });
-                          }
+                          // Check for premium modules - use both API data and fallback for known premium modules
+                          const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
+                          const isPremiumModule = module.accessType === 'premium' || knownPremiumModules.includes(module.title);
 
                           return (
                             <Card 
