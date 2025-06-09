@@ -1880,6 +1880,7 @@ export class MemStorage implements IStorage {
         category: learningModules.category,
         difficulty: learningModules.difficulty,
         estimatedMinutes: learningModules.estimatedMinutes,
+        accessType: learningModules.accessType,
         isActive: learningModules.isActive,
         isPublished: learningModules.isPublished,
         order: learningModules.order,
