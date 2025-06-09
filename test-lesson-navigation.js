@@ -1,5 +1,4 @@
 // Test script to verify lesson navigation functionality
-const fetch = require('node-fetch');
 
 async function testLessonNavigation() {
   const baseUrl = 'http://localhost:5000';

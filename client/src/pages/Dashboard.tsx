@@ -1050,12 +1050,12 @@ export default function Dashboard() {
                                 <div className="flex items-center justify-end">
                                   <Button 
                                     onClick={() => {
-                                      console.log(`Navigating to lesson ${module.id}`);
+                                      console.log(`🔗 DASHBOARD: Navigating to lesson ${module.id}`);
                                       setLocation(`/lesson/${module.id}`);
                                     }}
                                     size="sm"
                                     variant={isCompleted ? "secondary" : "default"}
-                                    className="w-full"
+                                    className="w-full hover:opacity-90 transition-opacity"
                                   >
                                     {isCompleted ? "Review" : "Start Lesson"}
                                   </Button>
