@@ -213,14 +213,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid token" });
       }
 
-      // Get both monthly and all-time leaderboards
-      const monthlyLeaderboard = await storage.getLeaderboard('monthly', 50);
-      const allTimeLeaderboard = await storage.getLeaderboard('allTime', 50);
+      const period = req.query.period as string || 'monthly';
+      const limit = parseInt(req.query.limit as string) || 50;
 
+      // Get the requested leaderboard
+      const leaderboard = await storage.getLeaderboard(period === 'monthly' ? 'monthly' : 'allTime', limit);
+      
+      // Get current user's rank
+      const userRank = await storage.getUserRank(user.id, period === 'monthly' ? 'monthly' : 'allTime');
+
+      // For Dashboard sidebar compatibility, return data in expected format
+      if (!req.query.period && !req.query.limit) {
+        // This is likely a Dashboard sidebar request, return both monthly and all-time
+        const monthlyLeaderboard = await storage.getLeaderboard('monthly', 50);
+        const allTimeLeaderboard = await storage.getLeaderboard('allTime', 50);
+        const monthlyUserRank = await storage.getUserRank(user.id, 'monthly');
+
+        return res.json({
+          success: true,
+          leaderboard: monthlyLeaderboard,
+          currentUser: monthlyUserRank || { rank: null, points: 0, tier: 'tier3', username: user.username, id: user.id },
+          monthly: monthlyLeaderboard,
+          allTime: allTimeLeaderboard
+        });
+      }
+
+      // For specific period requests (from Leaderboard component)
       res.json({
         success: true,
-        monthly: monthlyLeaderboard,
-        allTime: allTimeLeaderboard
+        leaderboard: leaderboard,
+        currentUser: userRank || { rank: null, points: 0, tier: 'tier3' }
       });
     } catch (error) {
       console.error('Error fetching leaderboard:', error);

@@ -2045,7 +2045,7 @@ export class MemStorage implements IStorage {
         currentMonthPoints: users.currentMonthPoints,
         tier: users.tier,
         currentStreak: users.currentStreak,
-        createdAt: users.createdAt
+        joinedAt: users.joinedAt
       })
       .from(users)
       .where(eq(users.subscriptionStatus, 'active'))
@@ -2060,7 +2060,7 @@ export class MemStorage implements IStorage {
           currentMonthPoints: users.currentMonthPoints,
           tier: users.tier,
           currentStreak: users.currentStreak,
-          createdAt: users.createdAt
+          joinedAt: users.joinedAt
         })
         .from(users)
         .where(
@@ -2126,8 +2126,8 @@ export class MemStorage implements IStorage {
           tier: user.tier || 'tier3',
           streak: user.currentStreak || 0,
           modulesCompleted: completionMap.get(user.id) || 0,
-          joinDate: user.createdAt 
-            ? new Date(user.createdAt).toISOString().split('T')[0] 
+          joinDate: user.joinedAt 
+            ? new Date(user.joinedAt).toISOString().split('T')[0] 
             : new Date().toISOString().split('T')[0]
         };
       });
