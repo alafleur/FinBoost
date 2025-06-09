@@ -678,23 +678,35 @@ export class MemStorage implements IStorage {
 
   async getLeaderboard(period: 'monthly' | 'allTime', limit: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
     try {
-      const pointsColumn = period === 'monthly' ? 'currentMonthPoints' : 'totalPoints';
+      const pointsColumn = period === 'monthly' ? 'current_month_points' : 'total_points';
 
-      const query = await db.select({
-        rank: sql<number>`RANK() OVER (ORDER BY ${pointsColumn} DESC)`.as('rank'),
-        userId: users.id,
-        username: users.username,
-        points: users[pointsColumn],
-        tier: users.tier
-      }).from(users)
-      .where(eq(users.isActive, true))
-      .orderBy(desc(users[pointsColumn]))
-      .limit(limit);
+      // Use raw SQL to avoid Drizzle issues
+      const query = `
+        SELECT 
+          ROW_NUMBER() OVER (ORDER BY ${pointsColumn} DESC) as rank,
+          id as user_id,
+          username,
+          ${pointsColumn} as points,
+          tier
+        FROM users 
+        WHERE subscription_status = 'active'
+        ORDER BY ${pointsColumn} DESC
+        LIMIT $1
+      `;
 
-      return query as Array<{rank: number, userId: number, username: string, points: number, tier: string}>;
+      const result = await db.execute(sql.raw(query, [limit]));
+      const rows = result.rows || result || [];
+
+      return rows.map((row: any) => ({
+        rank: parseInt(row.rank),
+        userId: row.user_id,
+        username: row.username,
+        points: row.points || 0,
+        tier: row.tier || 'tier3'
+      }));
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
-      throw error;
+      return [];
     }
   }
 
@@ -2050,70 +2062,85 @@ export class MemStorage implements IStorage {
 
   async getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>> {
     try {
-      // Build base query for all premium users (active subscription status)
-      let whereConditions = [eq(users.subscriptionStatus, 'active')];
+      console.log(`Getting expanded leaderboard with timeFilter: ${timeFilter}, search: "${search}"`);
 
-      // Add search filter if provided
+      // Use raw SQL to avoid Drizzle ORM issues
+      const pointsColumn = timeFilter === 'alltime' ? 'total_points' : 'current_month_points';
+      let searchCondition = '';
+      let searchParam: string[] = [];
+
       if (search && search.trim()) {
-        whereConditions.push(sql`${users.username} ILIKE ${`%${search}%`}`);
+        searchCondition = ` AND username ILIKE $2`;
+        searchParam = [`%${search}%`];
       }
 
-      // Determine which points column to use for ordering
-      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
-      
-      const usersData = await db.select({
-        id: users.id,
-        username: users.username,
-        totalPoints: users.totalPoints,
-        currentMonthPoints: users.currentMonthPoints,
-        tier: users.tier,
-        streak: users.currentStreak,
-        createdAt: users.createdAt
-      })
-      .from(users)
-      .where(and(...whereConditions))
-      .orderBy(desc(pointsColumn));
+      // Get all premium users with their data
+      const usersQuery = `
+        SELECT 
+          id,
+          username,
+          total_points,
+          current_month_points,
+          tier,
+          current_streak,
+          created_at
+        FROM users 
+        WHERE subscription_status = 'active'${searchCondition}
+        ORDER BY ${pointsColumn} DESC
+      `;
 
-      console.log(`Expanded leaderboard query returned ${usersData.length} premium users`);
-
-      // Get module completion counts using raw SQL to avoid table reference issues
-      const userIds = usersData.map(u => u.id);
-      let moduleCompletions: Array<{userId: number, completedCount: number}> = [];
-      
-      if (userIds.length > 0) {
-        try {
-          const result = await db.execute(sql`
-            SELECT user_id as "userId", COUNT(*) as "completedCount"
-            FROM user_progress 
-            WHERE user_id = ANY(${userIds}) AND completed = true
-            GROUP BY user_id
-          `);
-          
-          moduleCompletions = (result.rows || result || []).map((row: any) => ({
-            userId: row.userId,
-            completedCount: parseInt(row.completedCount) || 0
-          }));
-        } catch (progressError) {
-          console.error('Error fetching module completions:', progressError);
-          moduleCompletions = [];
-        }
-      }
-
-      const completionMap = new Map(
-        moduleCompletions.map(c => [c.userId, c.completedCount])
+      const usersResult = await db.execute(
+        searchParam.length > 0 
+          ? sql.raw(usersQuery, searchParam)
+          : sql.raw(usersQuery)
       );
 
-      const result = usersData.map((user, index) => {
-        const points = timeFilter === 'alltime' ? (user.totalPoints || 0) : (user.currentMonthPoints || 0);
+      const usersData = usersResult.rows || usersResult || [];
+      console.log(`Found ${usersData.length} premium users`);
+
+      if (usersData.length === 0) {
+        return [];
+      }
+
+      // Get module completions for these users
+      const userIds = usersData.map((u: any) => u.id);
+      const completionsQuery = `
+        SELECT user_id, COUNT(*) as completed_count
+        FROM user_progress 
+        WHERE user_id = ANY($1) AND completed = true
+        GROUP BY user_id
+      `;
+
+      let moduleCompletions: Array<{user_id: number, completed_count: number}> = [];
+      try {
+        const completionsResult = await db.execute(sql.raw(completionsQuery, [userIds]));
+        moduleCompletions = completionsResult.rows || completionsResult || [];
+      } catch (progressError) {
+        console.error('Error fetching module completions:', progressError);
+        moduleCompletions = [];
+      }
+
+      // Create completion map
+      const completionMap = new Map(
+        moduleCompletions.map((c: any) => [c.user_id, parseInt(c.completed_count) || 0])
+      );
+
+      // Format results
+      const result = usersData.map((user: any, index: number) => {
+        const points = timeFilter === 'alltime' 
+          ? (user.total_points || 0) 
+          : (user.current_month_points || 0);
         
         return {
           rank: (index + 1).toString(),
-          username: user.username,
+          username: user.username || 'Unknown',
           points: points.toString(),
           tier: user.tier || 'tier3',
-          streak: user.streak || 0,
+          streak: user.current_streak || 0,
           modulesCompleted: completionMap.get(user.id) || 0,
-          joinDate: user.createdAt ? user.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+          joinDate: user.created_at 
+            ? new Date(user.created_at).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0]
         };
       });
 
