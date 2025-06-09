@@ -2050,28 +2050,31 @@ export class MemStorage implements IStorage {
 
   async getExpandedLeaderboard(timeFilter: string, page: number, search: string): Promise<Array<{rank: string, username: string, points: string, tier: string, streak: number, modulesCompleted: number, joinDate: string}>> {
     try {
-      const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
-      
       // Build base query for all premium users (active subscription status)
-      const baseConditions = [eq(users.subscriptionStatus, 'active')];
-
-      // Add search filter if provided
-      if (search && search.trim()) {
-        baseConditions.push(sql`${users.username} ILIKE ${`%${search}%`}`);
-      }
-
-      // Get ALL matching users without any limits
-      const usersData = await db.select({
+      let query = db.select({
         id: users.id,
         username: users.username,
-        points: pointsColumn,
+        totalPoints: users.totalPoints,
+        currentMonthPoints: users.currentMonthPoints,
         tier: users.tier,
         streak: users.currentStreak,
         createdAt: users.createdAt
       })
       .from(users)
-      .where(and(...baseConditions))
-      .orderBy(desc(pointsColumn));
+      .where(eq(users.subscriptionStatus, 'active'));
+
+      // Add search filter if provided
+      if (search && search.trim()) {
+        query = query.where(and(
+          eq(users.subscriptionStatus, 'active'),
+          sql`${users.username} ILIKE ${`%${search}%`}`
+        ));
+      }
+
+      // Determine which points column to use and order by it
+      const pointsColumn = timeFilter === 'alltime' ? 'totalPoints' : 'currentMonthPoints';
+      
+      const usersData = await query.orderBy(desc(pointsColumn === 'alltime' ? users.totalPoints : users.currentMonthPoints));
 
       console.log(`Expanded leaderboard query returned ${usersData.length} premium users`);
 
@@ -2080,31 +2083,40 @@ export class MemStorage implements IStorage {
       let moduleCompletions = [];
       
       if (userIds.length > 0) {
-        moduleCompletions = await db.select({
-          userId: userProgress.userId,
-          completedCount: sql<number>`COUNT(*)`.as('completedCount')
-        })
-        .from(userProgress)
-        .where(and(
-          sql`${userProgress.userId} = ANY(${userIds})`,
-          eq(userProgress.completed, true)
-        ))
-        .groupBy(userProgress.userId);
+        try {
+          moduleCompletions = await db.select({
+            userId: userProgress.userId,
+            completedCount: sql<number>`COUNT(*)`.as('completedCount')
+          })
+          .from(userProgress)
+          .where(and(
+            sql`${userProgress.userId} = ANY(${userIds})`,
+            eq(userProgress.completed, true)
+          ))
+          .groupBy(userProgress.userId);
+        } catch (progressError) {
+          console.error('Error fetching module completions:', progressError);
+          moduleCompletions = [];
+        }
       }
 
       const completionMap = new Map(
         moduleCompletions.map(c => [c.userId, c.completedCount])
       );
 
-      const result = usersData.map((user, index) => ({
-        rank: (index + 1).toString(),
-        username: user.username,
-        points: (user.points || 0).toString(),
-        tier: user.tier || 'tier3',
-        streak: user.streak || 0,
-        modulesCompleted: completionMap.get(user.id) || 0,
-        joinDate: user.createdAt ? user.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-      }));
+      const result = usersData.map((user, index) => {
+        const points = timeFilter === 'alltime' ? (user.totalPoints || 0) : (user.currentMonthPoints || 0);
+        
+        return {
+          rank: (index + 1).toString(),
+          username: user.username,
+          points: points.toString(),
+          tier: user.tier || 'tier3',
+          streak: user.streak || 0,
+          modulesCompleted: completionMap.get(user.id) || 0,
+          joinDate: user.createdAt ? user.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        };
+      });
 
       console.log(`Returning ${result.length} users in expanded leaderboard`);
       return result;
