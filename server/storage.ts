@@ -2053,53 +2053,61 @@ export class MemStorage implements IStorage {
       const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
       
       // Build base query for all premium users (active subscription status)
-      const baseConditions = [
-        eq(users.subscriptionStatus, 'active'),
-        users.isActive ? eq(users.isActive, true) : sql`true`
-      ];
+      const baseConditions = [eq(users.subscriptionStatus, 'active')];
 
       // Add search filter if provided
       if (search && search.trim()) {
         baseConditions.push(sql`${users.username} ILIKE ${`%${search}%`}`);
       }
 
-      // Get all matching users without pagination limits
+      // Get ALL matching users without any limits
       const usersData = await db.select({
         id: users.id,
         username: users.username,
         points: pointsColumn,
         tier: users.tier,
         streak: users.currentStreak,
-        createdAt: sql<string>`to_char(${users.createdAt}, 'YYYY-MM-DD')`.as('joinDate')
+        createdAt: users.createdAt
       })
       .from(users)
       .where(and(...baseConditions))
       .orderBy(desc(pointsColumn));
 
-      console.log(`Expanded leaderboard query returned ${usersData.length} users`);
+      console.log(`Expanded leaderboard query returned ${usersData.length} premium users`);
 
-      // Get module completion counts for all users
-      const moduleCompletions = await db.select({
-        userId: userProgress.userId,
-        completedCount: sql<number>`COUNT(*)`.as('completedCount')
-      })
-      .from(userProgress)
-      .where(eq(userProgress.completed, true))
-      .groupBy(userProgress.userId);
+      // Get module completion counts for all these users
+      const userIds = usersData.map(u => u.id);
+      let moduleCompletions = [];
+      
+      if (userIds.length > 0) {
+        moduleCompletions = await db.select({
+          userId: userProgress.userId,
+          completedCount: sql<number>`COUNT(*)`.as('completedCount')
+        })
+        .from(userProgress)
+        .where(and(
+          sql`${userProgress.userId} = ANY(${userIds})`,
+          eq(userProgress.completed, true)
+        ))
+        .groupBy(userProgress.userId);
+      }
 
       const completionMap = new Map(
         moduleCompletions.map(c => [c.userId, c.completedCount])
       );
 
-      return usersData.map((user, index) => ({
+      const result = usersData.map((user, index) => ({
         rank: (index + 1).toString(),
         username: user.username,
         points: (user.points || 0).toString(),
         tier: user.tier || 'tier3',
         streak: user.streak || 0,
         modulesCompleted: completionMap.get(user.id) || 0,
-        joinDate: user.joinDate || new Date().toISOString().split('T')[0]
+        joinDate: user.createdAt ? user.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
       }));
+
+      console.log(`Returning ${result.length} users in expanded leaderboard`);
+      return result;
     } catch (error) {
       console.error('Error getting expanded leaderboard:', error);
       return [];

@@ -200,28 +200,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Leaderboard routes
+  // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     try {
-      const leaderboard = await storage.getLeaderboard();
-      res.json({ success: true, leaderboard });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      // Get both monthly and all-time leaderboards
+      const monthlyLeaderboard = await storage.getLeaderboard('monthly', 50);
+      const allTimeLeaderboard = await storage.getLeaderboard('allTime', 50);
+
+      res.json({
+        success: true,
+        monthly: monthlyLeaderboard,
+        allTime: allTimeLeaderboard
+      });
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch leaderboard' });
     }
   });
 
-  // Expanded leaderboard with pagination and search
+  // Get expanded leaderboard (all premium members)
   app.get("/api/leaderboard/expanded", async (req, res) => {
     try {
-      const { timeFilter = 'month', page = 1, search = '' } = req.query;
-      const leaderboard = await storage.getExpandedLeaderboard(
-        timeFilter as string, 
-        parseInt(page as string), 
-        search as string
-      );
-      res.json({ success: true, users: leaderboard });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const timeFilter = req.query.timeFilter as string || 'monthly';
+      const search = req.query.search as string || '';
+      const page = parseInt(req.query.page as string) || 1;
+
+      const users = await storage.getExpandedLeaderboard(timeFilter, page, search);
+
+      res.json({
+        success: true,
+        users: users,
+        totalCount: users.length
+      });
+    } catch (error) {
+      console.error('Error fetching expanded leaderboard:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch expanded leaderboard' });
     }
   });
 
@@ -808,7 +841,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true, 
-        history: history.map(h => ({
+        history:<replit_final_file>
+ history.map(h => ({
           id: h.id,
           points: h.points,
           action: h.action,
@@ -863,7 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/support", async (req, res) => {
     try {
       const { name, email, category, message, hasAttachment, fileName } = req.body;
-      
+
       let userId = null;
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (token) {
@@ -1052,13 +1086,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
       }
-      
+
       if (!user.stripeSubscriptionId) {
         return res.status(400).json({ success: false, message: "No active subscription found" });
       }
 
       await stripe.subscriptions.cancel(user.stripeSubscriptionId);
-      
+
       await storage.updateUser(user.id, {
         subscriptionStatus: 'canceled'
       });
@@ -1093,14 +1127,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       switch (event.type) {
         case 'invoice.payment_succeeded':
           const invoice = event.data.object as any;
-          
+
           if (invoice.subscription) {
             // Get subscription and customer details
             const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
             const customer = await stripe.customers.retrieve(subscription.customer as string);
-            
+
             if (!customer || customer.deleted) break;
-            
+
             const userId = (customer as any).metadata?.userId;
             if (userId) {
               // Update user subscription status
@@ -1115,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const membershipFeeInDollars = poolSettings.membershipFee / 100;
                 const rewardAmount = Math.round((membershipFeeInDollars * poolSettings.rewardPoolPercentage / 100) * 100);
                 await storage.addToRewardPool(rewardAmount);
-                
+
                 console.log(`Payment succeeded for user ${userId}, added $${rewardAmount/100} (${poolSettings.rewardPoolPercentage}% of $${membershipFeeInDollars}) to reward pool`);
               } else {
                 // Fallback to default settings
@@ -1129,19 +1163,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         case 'invoice.payment_failed':
           const failedInvoice = event.data.object as any;
-          
+
           if (failedInvoice.subscription) {
             const subscription = await stripe.subscriptions.retrieve(failedInvoice.subscription);
             const customer = await stripe.customers.retrieve(subscription.customer as string);
-            
+
             if (!customer || customer.deleted) break;
-            
+
             const userId = (customer as any).metadata?.userId;
             if (userId) {
               await storage.updateUser(parseInt(userId), {
                 subscriptionStatus: 'past_due'
               });
-              
+
               console.log(`Payment failed for user ${userId}`);
             }
           }
@@ -1150,16 +1184,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'customer.subscription.deleted':
           const deletedSubscription = event.data.object as any;
           const customer = await stripe.customers.retrieve(deletedSubscription.customer);
-          
+
           if (!customer || customer.deleted) break;
-          
+
           const userId = (customer as any).metadata?.userId;
           if (userId) {
             await storage.updateUser(parseInt(userId), {
               subscriptionStatus: 'canceled',
               stripeSubscriptionId: null
             });
-            
+
             console.log(`Subscription canceled for user ${userId}`);
           }
           break;
@@ -1209,7 +1243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/monthly-pool-settings", requireAdmin, async (req, res) => {
     try {
       const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee } = req.body;
-      
+
       const newSetting = await storage.createMonthlyPoolSetting({
         cycleName,
         cycleStartDate: new Date(cycleStartDate),
@@ -1230,7 +1264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee, isActive } = req.body;
-      
+
       const updates: any = {};
       if (cycleName) updates.cycleName = cycleName;
       if (cycleStartDate) updates.cycleStartDate = new Date(cycleStartDate);
@@ -1262,7 +1296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { subscriptionStatus } = req.body;
-      
+
       const updatedUser = await storage.updateUser(parseInt(id), { subscriptionStatus });
       res.json({ success: true, user: updatedUser });
     } catch (error) {
@@ -1389,18 +1423,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const invoice = event.data.object as any;
           if (invoice.subscription) {
             const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-            
+
             // Find user by Stripe customer ID
             const user = await storage.getUserByStripeCustomerId(subscription.customer as string);
             if (user) {
               // Update user subscription status to active
               await storage.updateUserSubscriptionStatus(user.id, 'active');
-              
+
               // Convert theoretical points to real points
               if (user.theoreticalPoints > 0) {
                 await storage.convertTheoreticalPoints(user.id);
               }
-              
+
               console.log(`✅ User ${user.id} subscription activated`);
             }
           }
@@ -1410,7 +1444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const failedInvoice = event.data.object as any;
           if (failedInvoice.subscription) {
             const failedSubscription = await stripe.subscriptions.retrieve(failedInvoice.subscription);
-            
+
             const failedUser = await storage.getUserByStripeCustomerId(failedSubscription.customer as string);
             if (failedUser) {
               await storage.updateUserSubscriptionStatus(failedUser.id, 'inactive');

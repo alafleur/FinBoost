@@ -28,9 +28,19 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
   const [timeFilter, setTimeFilter] = useState<"monthly" | "all-time">("monthly");
 
   const { data: leaderboardData, isLoading } = useQuery({
-    queryKey: ['/api/leaderboard'],
+    queryKey: ['/api/leaderboard/expanded', timeFilter, searchTerm],
     enabled: isOpen,
     refetchInterval: 30000,
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/leaderboard/expanded?timeFilter=${timeFilter}&search=${encodeURIComponent(searchTerm)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+      return response.json();
+    }
   });
 
   const { data: currentUserData } = useQuery({
@@ -55,7 +65,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     refetchInterval: 30000,
   });
 
-  const allUsers = (leaderboardData as any)?.leaderboard || [];
+  const allUsers = (leaderboardData as any)?.users || [];
   const currentUsername = (currentUserData as any)?.user?.username || null;
   const tierThresholds = (tierThresholdsData as any)?.thresholds;
 
@@ -86,12 +96,8 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
     currentUser.pointsToNextTier = calculatePointsToNextTier(currentUser.points, currentUser.tier);
   }
 
-  const filteredUsers = allUsers.filter((user: any) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Show all users without pagination
-  const displayedUsers = filteredUsers;
+  // Users are already filtered by search in the backend
+  const displayedUsers = allUsers;
 
   const getTierBadgeColor = (tier: string) => {
     switch (tier.toLowerCase()) {
@@ -254,7 +260,8 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
               {/* Summary */}
               <div className="mt-6 pt-4 border-t">
                 <div className="text-sm text-gray-600 text-center">
-                  Showing all {filteredUsers.length} of {allUsers.length} premium members
+                  Showing all {displayedUsers.length} premium members
+                  {searchTerm && ` (filtered by "${searchTerm}")`}
                 </div>
               </div>
             </div>
