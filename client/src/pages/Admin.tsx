@@ -686,10 +686,21 @@ export default function Admin() {
 
   const handleUpdateModule = async (moduleId: number, updateData: any) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Error",
+          description: "Authentication required",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const response = await fetch(`/api/admin/modules/${moduleId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(updateData)
       });
