@@ -60,13 +60,13 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
   const allUsers = (leaderboardData as any)?.leaderboard || [];
   const currentUsername = (currentUserData as any)?.user?.username || null;
   const tierThresholds = (tierThresholdsData as any)?.thresholds;
-  
+
   // Calculate points to next tier
   const calculatePointsToNextTier = (points: string | number, tier: string) => {
     const currentPoints = parseInt(points.toString()) || 0;
-    
+
     if (!tierThresholds) return 0;
-    
+
     // tier1 is the highest tier, tier3 is the lowest
     switch(tier) {
       case 'tier3': 
@@ -81,13 +81,13 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
         return Math.max(0, tierThresholds.tier2 - currentPoints);
     }
   };
-  
+
   // Find current user in leaderboard
   const currentUser = allUsers.find((user: any) => user.username === currentUsername) || null;
   if (currentUser) {
     currentUser.pointsToNextTier = calculatePointsToNextTier(currentUser.points, currentUser.tier);
   }
-  
+
   const filteredUsers = allUsers.filter((user: any) =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -169,7 +169,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                     </div>
                     <p className="text-xs text-gray-600">Your Rank</p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <Star className="h-5 w-5 text-purple-500 mr-1" />
@@ -177,7 +177,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                     </div>
                     <p className="text-xs text-gray-600">Points</p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <Trophy className="h-5 w-5 text-orange-500 mr-1" />
@@ -185,7 +185,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                     </div>
                     <p className="text-xs text-gray-600">Tier</p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
                       <TrendingUp className="h-5 w-5 text-blue-500 mr-1" />
@@ -208,7 +208,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                   {paginatedUsers.map((user: any, index: number) => {
                     const actualRank = startIndex + index + 1;
                     const isCurrentUser = currentUser && user.username === currentUser.username;
-                    
+
                     return (
                       <div
                         key={user.username}
@@ -239,7 +239,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <div className={`text-lg font-bold ${isCurrentUser ? 'text-blue-800' : 'text-gray-900'}`}>

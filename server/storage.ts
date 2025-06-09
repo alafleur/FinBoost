@@ -2052,8 +2052,8 @@ export class MemStorage implements IStorage {
     try {
       const pointsColumn = timeFilter === 'alltime' ? users.totalPoints : users.currentMonthPoints;
       
-      // Get all users with their module completion count
-      const baseQuery = db.select({
+      // Get all premium users (active subscription status)
+      let query = db.select({
         id: users.id,
         username: users.username,
         points: pointsColumn,
@@ -2067,10 +2067,13 @@ export class MemStorage implements IStorage {
         users.isActive ? eq(users.isActive, true) : sql`true`
       ));
 
-      let query = baseQuery;
-      
+      // Apply search filter if provided
       if (search) {
-        query = query.where(sql`${users.username} ILIKE ${`%${search}%`}`);
+        query = query.where(and(
+          eq(users.subscriptionStatus, 'active'),
+          users.isActive ? eq(users.isActive, true) : sql`true`,
+          sql`${users.username} ILIKE ${`%${search}%`}`
+        ));
       }
 
       const usersData = await query.orderBy(desc(pointsColumn));
@@ -2092,7 +2095,7 @@ export class MemStorage implements IStorage {
         rank: (index + 1).toString(),
         username: user.username,
         points: (user.points || 0).toString(),
-        tier: user.tier || 'member',
+        tier: user.tier || 'tier3',
         streak: user.streak || 0,
         modulesCompleted: completionMap.get(user.id) || 0,
         joinDate: user.joinDate || new Date().toISOString().split('T')[0]
