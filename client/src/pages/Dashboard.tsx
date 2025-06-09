@@ -1027,10 +1027,7 @@ export default function Dashboard() {
                               )}
                               <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-2">
-                                  <h4 className="font-semibold text-sm leading-tight pr-2">
-                                    {module.title}
-                                    {isPremiumModule && <span className="text-yellow-600 ml-1">★</span>}
-                                  </h4>
+                                  <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
                                   <div className="flex flex-col gap-1 shrink-0">
                                     {isPremiumModule && (
                                       <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
@@ -1328,30 +1325,46 @@ export default function Dashboard() {
                       .slice(0, 6)
                       .map(module => {
                         const isCompleted = completedModuleIds.includes(module.id);
+                        const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
+                        const isPremiumModule = module.accessType === 'premium' || knownPremiumModules.includes(module.title);
                         return (
                           <Card 
                             key={module.id}
                             className={`transition-all duration-200 hover:shadow-md ${
-                          isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
-                        }`}
+                              isCompleted ? 'border-green-200 bg-green-50' : 
+                              isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-lg border-2' : 
+                              'hover:border-primary-200'
+                            }`}
                           >
                             {isCompleted && (
                               <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                               </div>
                             )}
+                            {isPremiumModule && (
+                              <div className="absolute top-2 left-2">
+                                <Crown className="w-4 h-4 text-yellow-600" />
+                              </div>
+                            )}
                             <CardContent className="p-4">
                               <div className="flex items-start justify-between mb-2">
                                 <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
-                                {isCompleted ? (
-                                  <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
-                                    Completed
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="shrink-0">
-                                    {module.pointsReward} pts
-                                  </Badge>
-                                )}
+                                <div className="flex flex-col gap-1 shrink-0">
+                                  {isPremiumModule && (
+                                    <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
+                                      Members
+                                    </Badge>
+                                  )}
+                                  {isCompleted ? (
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                      Completed
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline">
+                                      {module.pointsReward} pts
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                               <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.content?.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>
                               <div className="flex items-center justify-between mb-2">
@@ -1361,9 +1374,10 @@ export default function Dashboard() {
                                 <Button 
                                     onClick={() => setLocation(`/lesson/${module.id}`)}
                                     size="sm"
-                                    variant={isCompleted ? "secondary" : "default"}
+                                    variant={isCompleted ? "secondary" : isPremiumModule ? "outline" : "default"}
+                                    className={isPremiumModule && !isCompleted ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}
                                   >
-                                  {isCompleted ? "Review" : "Start Lesson"}
+                                  {isCompleted ? "Review" : isPremiumModule ? "Upgrade to Access" : "Start Lesson"}
                                 </Button>
                               </div>
                             </CardContent>
