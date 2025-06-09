@@ -2076,22 +2076,23 @@ export class MemStorage implements IStorage {
 
       console.log(`Expanded leaderboard query returned ${usersData.length} premium users`);
 
-      // Get module completion counts for all these users
+      // Get module completion counts using raw SQL to avoid table reference issues
       const userIds = usersData.map(u => u.id);
-      let moduleCompletions = [];
+      let moduleCompletions: Array<{userId: number, completedCount: number}> = [];
       
       if (userIds.length > 0) {
         try {
-          moduleCompletions = await db.select({
-            userId: userProgress.userId,
-            completedCount: sql<number>`COUNT(*)`.as('completedCount')
-          })
-          .from(userProgress)
-          .where(and(
-            sql`${userProgress.userId} = ANY(${userIds})`,
-            eq(userProgress.completed, true)
-          ))
-          .groupBy(userProgress.userId);
+          const result = await db.execute(sql`
+            SELECT user_id as "userId", COUNT(*) as "completedCount"
+            FROM user_progress 
+            WHERE user_id = ANY(${userIds}) AND completed = true
+            GROUP BY user_id
+          `);
+          
+          moduleCompletions = (result.rows || result || []).map((row: any) => ({
+            userId: row.userId,
+            completedCount: parseInt(row.completedCount) || 0
+          }));
         } catch (progressError) {
           console.error('Error fetching module completions:', progressError);
           moduleCompletions = [];
