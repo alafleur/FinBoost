@@ -1002,9 +1002,8 @@ export default function Dashboard() {
                           const isCompleted = completedModuleIds.includes(module.id);
                           const canAccess = user ? canAccessModule(user, module) : false;
                           const accessInfo = user ? getUserAccessInfo(user) : null;
-                          // Check for premium modules - use both API data and fallback for known premium modules
-                          const knownPremiumModules = ['Credit Management', 'Budgeting Basics', 'Investment Basics'];
-                          const isPremiumModule = module.accessType === 'premium' || knownPremiumModules.includes(module.title);
+                          // Check for premium modules using database accessType
+                          const isPremiumModule = module.accessType === 'premium';
 
                           return (
                             <Card 
