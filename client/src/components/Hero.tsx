@@ -55,7 +55,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
               Turn Financial Stress into Financial Progress <span className="gradient-text">– Together</span>
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Earn monthly cash rewards while leveling up your money smarts—with the power of the collective behind you.
+              Earn monthly cash rewards while leveling up your money smarts, with the power of the collective behind you.
             </p>
             <div className="max-w-lg" id="waitlist-signup-form">
               <div className="space-y-4">
