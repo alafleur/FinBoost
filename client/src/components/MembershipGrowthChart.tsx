@@ -75,32 +75,7 @@ export default function MembershipGrowthChart() {
         </div>
       </div>
 
-      {/* Tier System Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm text-center">
-          <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-            1
-          </div>
-          <h3 className="font-semibold text-lg mb-2 text-blue-600">Tier 1</h3>
-          <p className="text-gray-600 text-sm">Top performers get the biggest share</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm text-center">
-          <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-            2
-          </div>
-          <h3 className="font-semibold text-lg mb-2 text-blue-600">Tier 2</h3>
-          <p className="text-gray-600 text-sm">Consistent earners get steady rewards</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm text-center">
-          <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-            3
-          </div>
-          <h3 className="font-semibold text-lg mb-2 text-blue-600">Tier 3</h3>
-          <p className="text-gray-600 text-sm">Everyone wins, even beginners</p>
-        </div>
-      </div>
+      
 
       {/* Example Reward Distribution */}
       <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
