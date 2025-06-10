@@ -71,7 +71,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none"
+                className="flex-1 px-4 py-3 h-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none"
                 value={form.watch("email")}
                 onChange={(e) => form.setValue("email", e.target.value)}
               />
@@ -79,7 +79,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
                 type="button" 
                 disabled={isPending}
                 onClick={form.handleSubmit(onSubmit)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition duration-300 whitespace-nowrap"
+                className="h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-lg transition duration-300 whitespace-nowrap"
               >
                 {isPending ? "Joining..." : "Join Waitlist"}
               </Button>
