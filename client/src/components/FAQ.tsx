@@ -1,5 +1,5 @@
+
 import { useState } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface FAQItem {
   id: string;
@@ -8,6 +8,8 @@ interface FAQItem {
 }
 
 export default function FAQ() {
+  const [selectedFAQ, setSelectedFAQ] = useState<string | null>(null);
+
   const faqs: FAQItem[] = [
     {
       id: "1",
@@ -31,12 +33,12 @@ export default function FAQ() {
     },
     {
       id: "5",
-      question: "How are the rewards distributed?",
+      question: "How are rewards distributed?",
       answer: "Every month, 50% of each tier's members are randomly selected to receive rewards. Higher tiers receive bigger shares of the pool: Top Tier = 50%, Middle Tier = 35%, and Bottom Tier = 15%."
     },
     {
       id: "6",
-      question: "What if I don't get rewarded one month?",
+      question: "What if I don't get rewarded?",
       answer: "Your points roll over — increasing your tier and chances next month. Consistent participation will help you climb to higher tiers where both your odds and potential reward amounts are greater."
     },
     {
@@ -56,7 +58,7 @@ export default function FAQ() {
     },
     {
       id: "10",
-      question: "When does the platform launch?",
+      question: "When does it launch?",
       answer: "We're planning to launch soon. Waitlist members will receive early access invitations in waves, with priority given to those who joined earliest. The sooner you join the waitlist, the earlier you can help grow the rewards pool and your financial future."
     },
     {
@@ -66,40 +68,51 @@ export default function FAQ() {
     },
     {
       id: "12",
-      question: "How does FinBoost make money?",
+      question: "How do we make money?",
       answer: "FinBoost operates on a membership model. A portion of membership fees funds the monthly reward pools, while the remainder covers platform operations and content development. This creates a sustainable ecosystem where everyone benefits from collective learning."
-    },
-    {
-      id: "13",
-      question: "How do I get started?",
-      answer: "Getting started with FinBoost is simple: 1) Sign up for an account, 2) Choose your membership tier, 3) Start completing lessons to earn points, 4) Watch your tier progress and qualify for bigger rewards. The platform is designed to be intuitive and rewarding from day one."
     }
   ];
 
+  const toggleFAQ = (id: string) => {
+    setSelectedFAQ(selectedFAQ === id ? null : id);
+  };
+
   return (
     <section className="py-20 px-4 bg-white" id="faq">
-      <div className="container mx-auto max-w-4xl">
-        <div className="text-center mb-16">
+      <div className="container mx-auto max-w-6xl">
+        <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">Frequently Asked Questions</h2>
           <p className="text-gray-600">Everything you need to know about our financial learning platform</p>
         </div>
 
-        <Accordion type="single" collapsible className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {faqs.map((faq) => (
-            <AccordionItem 
-              key={faq.id} 
-              value={faq.id}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+            <div 
+              key={faq.id}
+              className={`relative border border-gray-200 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-primary-500 hover:shadow-md ${
+                selectedFAQ === faq.id ? 'border-primary-500 bg-primary-50' : 'bg-white hover:bg-gray-50'
+              }`}
+              onClick={() => toggleFAQ(faq.id)}
             >
-              <AccordionTrigger className="p-6 text-left focus:outline-none bg-gray-50 hover:bg-gray-100 font-heading font-medium text-lg">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="p-6 bg-white text-gray-600">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
+              <div className="flex items-start justify-between">
+                <h4 className="font-heading font-medium text-sm leading-tight pr-2">{faq.question}</h4>
+                <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center transition-all duration-200 ${
+                  selectedFAQ === faq.id ? 'border-primary-500 bg-primary-500' : ''
+                }`}>
+                  <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    selectedFAQ === faq.id ? 'bg-white' : ''
+                  }`} />
+                </div>
+              </div>
+              
+              {selectedFAQ === faq.id && (
+                <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600 leading-relaxed">
+                  {faq.answer}
+                </div>
+              )}
+            </div>
           ))}
-        </Accordion>
+        </div>
       </div>
     </section>
   );
