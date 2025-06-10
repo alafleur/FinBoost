@@ -74,10 +74,6 @@ export default function MembershipGrowthChart() {
           <p className="mt-2 text-xs font-medium text-gray-600">Based on $20 monthly membership fee</p>
         </div>
       </div>
-
-
-
-
     </div>
   );
 }
