@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Gift, Users, TrendingUp } from "lucide-react";
@@ -13,7 +12,7 @@ export default function MembershipValue() {
   useEffect(() => {
     const count = memberCount[0];
     let percentage;
-    
+
     if (count <= 1000) {
       percentage = 50;
     } else if (count <= 10000) {
@@ -32,9 +31,9 @@ export default function MembershipValue() {
       // 80%+ for 100k+ members
       percentage = 80 + Math.min(((count - 100000) / 100000) * 5, 5);
     }
-    
+
     setRewardsPercentage(Math.round(percentage));
-    
+
     // Calculate reward pool size ($20 monthly fee per member)
     const totalRevenue = count * 20;
     const poolSize = Math.round(totalRevenue * (percentage / 100));
@@ -72,7 +71,7 @@ export default function MembershipValue() {
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
+
             {/* Interactive Controls */}
             <div className="space-y-8">
               <div>
@@ -108,7 +107,7 @@ export default function MembershipValue() {
                   </div>
                   <div className="text-xs text-primary-500">of membership fees</div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
                   <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
                   <div className="text-2xl font-bold text-green-700 mb-1">
@@ -150,7 +149,7 @@ export default function MembershipValue() {
                     cy="50"
                     r="35"
                     fill="none"
-                    stroke="#3b82f6"
+                    stroke="#10b981"
                     strokeWidth="10"
                     strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
                     strokeLinecap="round"
@@ -164,7 +163,7 @@ export default function MembershipValue() {
                     cy="50"
                     r="35"
                     fill="none"
-                    stroke="#10b981"
+                    stroke="#3b82f6"
                     strokeWidth="10"
                     strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
                     strokeDashoffset={`-${rewardsPercentage * 2.199}`}
@@ -177,22 +176,22 @@ export default function MembershipValue() {
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                   />
                 </svg>
-                
+
                 {/* Center content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div className="text-3xl font-bold text-gray-800">$20</div>
                   <div className="text-sm text-gray-500">monthly membership</div>
                 </div>
               </div>
-              
+
               {/* Legend */}
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                  <div className="w-4 h-4 bg-green-500 rounded"></div>
                   <span>{rewardsPercentage}% → Collective Rewards Pool</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
+                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
                   <span>{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
