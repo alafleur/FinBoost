@@ -75,9 +75,9 @@ export default function MembershipGrowthChart() {
         </div>
       </div>
 
-      
 
-      
+
+
     </div>
   );
 }
