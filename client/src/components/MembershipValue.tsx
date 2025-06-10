@@ -70,7 +70,12 @@ export default function MembershipValue() {
         </div>
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Centered heading */}
+        <div className="text-center mb-8">
+          <h3 className="text-lg font-medium text-gray-700">Toggle the dial to see the power of the collective</h3>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
             {/* Interactive Controls */}
             <div className="space-y-8">
@@ -114,18 +119,6 @@ export default function MembershipValue() {
                     {formatCurrency(rewardPoolSize)}
                   </div>
                   <div className="text-xs text-green-500">available for rewards</div>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-blue-800 mb-1">Economies of Scale</p>
-                    <p className="text-sm text-blue-700">
-                      Fixed platform costs spread across more members means higher reward percentages for everyone.
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
