@@ -60,7 +60,7 @@ export default function MembershipValue() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Strength in Numbers of The Collective
+            The Power of The Collective
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
             The more members who join, the larger the monthly rewards pool.
@@ -72,7 +72,7 @@ export default function MembershipValue() {
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
           {/* Centered heading */}
         <div className="text-center mb-8">
-          <h3 className="text-lg font-medium text-gray-700">Toggle the dial to see the power of the collective</h3>
+          <h3 className="text-lg font-bold text-gray-700">Toggle the dial to see the power of the collective</h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
