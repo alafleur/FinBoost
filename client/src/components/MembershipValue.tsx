@@ -1,108 +1,236 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Gift } from "lucide-react";
+import { BookOpen, Gift, Users, TrendingUp } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 export default function MembershipValue() {
+  const [memberCount, setMemberCount] = useState([5000]);
+  const [rewardsPercentage, setRewardsPercentage] = useState(50);
+  const [rewardPoolSize, setRewardPoolSize] = useState(0);
+
+  // Calculate scaling percentage based on member count
+  useEffect(() => {
+    const count = memberCount[0];
+    let percentage;
+    
+    if (count <= 1000) {
+      percentage = 50;
+    } else if (count <= 10000) {
+      // Scale from 50% to 60% between 1k-10k members
+      percentage = 50 + ((count - 1000) / 9000) * 10;
+    } else if (count <= 25000) {
+      // Scale from 60% to 70% between 10k-25k members
+      percentage = 60 + ((count - 10000) / 15000) * 10;
+    } else if (count <= 50000) {
+      // Scale from 70% to 75% between 25k-50k members
+      percentage = 70 + ((count - 25000) / 25000) * 5;
+    } else if (count <= 100000) {
+      // Scale from 75% to 80% between 50k-100k members
+      percentage = 75 + ((count - 50000) / 50000) * 5;
+    } else {
+      // 80%+ for 100k+ members
+      percentage = 80 + Math.min(((count - 100000) / 100000) * 5, 5);
+    }
+    
+    setRewardsPercentage(Math.round(percentage));
+    
+    // Calculate reward pool size ($20 monthly fee per member)
+    const totalRevenue = count * 20;
+    const poolSize = Math.round(totalRevenue * (percentage / 100));
+    setRewardPoolSize(poolSize);
+  }, [memberCount]);
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
+    return num.toString();
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50/30" id="membership-value">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Where Your Membership Fee Goes
+            The Power of Our Growing Collective
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            You're not just paying for a service — you're fueling a collective system designed to help everyone thrive financially.
+            As our community grows, operational costs per member decrease—meaning more of your membership fee can go directly to rewards.
+            <br />
+            <span className="font-medium text-primary-600">Strength in numbers creates better outcomes for everyone.</span>
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left column - Simplified Pie Chart */}
-          <div className="relative">
-            <div className="w-[320px] h-[320px] mx-auto relative">
-              {/* Create a donut chart using CSS approach */}
-              <div className="relative w-full h-full">
-                {/* Outer circle with conic gradient */}
-                <motion.div 
-                  className="w-full h-full rounded-full relative"
-                  style={{
-                    background: `conic-gradient(from 0deg, #4285F4 0deg 198deg, #34A853 198deg 360deg)`
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                >
-                  {/* Inner white circle to create donut effect */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] bg-white rounded-full shadow-md flex flex-col items-center justify-center">
-                    <p className="text-4xl font-bold text-gray-800">$20</p>
-                    <p className="text-gray-500 text-sm">monthly membership</p>
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* Interactive Controls */}
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary-600" />
+                    Community Size
+                  </label>
+                  <span className="text-2xl font-bold text-primary-600">
+                    {formatNumber(memberCount[0])} members
+                  </span>
+                </div>
+                <Slider
+                  value={memberCount}
+                  onValueChange={setMemberCount}
+                  max={150000}
+                  min={1000}
+                  step={1000}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>1K</span>
+                  <span>75K</span>
+                  <span>150K+</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 text-center">
+                  <div className="text-sm text-primary-600 font-medium mb-1">Rewards Allocation</div>
+                  <div className="text-3xl font-bold text-primary-700 mb-1">
+                    {rewardsPercentage}%
                   </div>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Breakdown below pie chart */}
-            <div className="mt-8 space-y-4">
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 bg-[#4285F4] rounded-sm mr-3"></div>
-                <span className="text-lg font-medium">55% → Collective Rewards Pool</span>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 bg-[#34A853] rounded-sm mr-3"></div>
-                <span className="text-lg font-medium">45% → Financial Education & Platform Operations</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column - What You Get */}
-          <div>
-            <h3 className="font-heading font-semibold text-2xl mb-6">What You Get in Return</h3>
-
-            <div className="space-y-6">
-              {/* Learn Card */}
-              <motion.div 
-                className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
-                    <BookOpen className="h-6 w-6 text-blue-600" />
+                  <div className="text-xs text-primary-500">of membership fees</div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                  <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
+                  <div className="text-2xl font-bold text-green-700 mb-1">
+                    {formatCurrency(rewardPoolSize)}
                   </div>
+                  <div className="text-xs text-green-500">available for rewards</div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xl text-gray-800 mb-2 flex items-center">
-                      📘 Learn
-                    </h4>
-                    <p className="text-gray-700">
-                      Access to high-quality, bite-sized financial education that fits into your busy life.
+                    <p className="font-medium text-blue-800 mb-1">Economies of Scale</p>
+                    <p className="text-sm text-blue-700">
+                      Fixed platform costs spread across more members means higher reward percentages for everyone.
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
+            </div>
 
-              {/* Earn Card */}
-              <motion.div 
-                className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-xl p-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
-                    <Gift className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xl text-gray-800 mb-2 flex items-center">
-                      🎁 Earn
-                    </h4>
-                    <p className="text-gray-700">
-                      Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.
-                    </p>
-                  </div>
+            {/* Dynamic Donut Chart */}
+            <div className="flex flex-col items-center">
+              <div className="relative w-64 h-64 mb-6">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                  />
+                  {/* Rewards percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#3b82f6"
+                    strokeWidth="10"
+                    strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                  {/* Operations percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="10"
+                    strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
+                    strokeDashoffset={`-${rewardsPercentage * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ 
+                      strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
+                      strokeDashoffset: `-${rewardsPercentage * 2.199}`
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                </svg>
+                
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold text-gray-800">$20</div>
+                  <div className="text-sm text-gray-500">monthly membership</div>
                 </div>
-              </motion.div>
+              </div>
+              
+              {/* Legend */}
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                  <span>{rewardsPercentage}% → Collective Rewards Pool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded"></div>
+                  <span>{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* What You Get Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-blue-800">Learn</h3>
+            </div>
+            <p className="text-blue-700">
+              Access to high-quality, bite-sized financial education that fits into your busy life.
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                <Gift className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-green-800">Earn</h3>
+            </div>
+            <p className="text-green-700">
+              Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-500">
+            <em>* Figures shown are illustrative projections based on community growth scenarios</em>
+          </p>
         </div>
       </div>
     </section>
