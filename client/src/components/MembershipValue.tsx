@@ -199,6 +199,22 @@ export default function MembershipValue() {
           </div>
         </div>
 
+        {/* Membership Fee Breakdown */}
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">Your Membership Fee Goes To:</h3>
+          <div className="flex items-center justify-center gap-4 text-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-500 rounded"></div>
+              <span className="font-medium text-blue-700">Learn</span>
+            </div>
+            <span className="text-gray-400">+</span>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-green-500 rounded"></div>
+              <span className="font-medium text-green-700">Earn</span>
+            </div>
+          </div>
+        </div>
+
         {/* What You Get Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
