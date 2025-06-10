@@ -60,12 +60,12 @@ export default function MembershipValue() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            The Power of Our Growing Collective
+            Strength in Numbers of The Collective
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            As our community grows, operational costs per member decrease—meaning more of your membership fee can go directly to rewards.
+            The more members who join, the larger the monthly rewards pool.
             <br />
-            <span className="font-medium text-primary-600">Strength in numbers creates better outcomes for everyone.</span>
+            <span className="font-medium text-primary-600">Real people. Real money. Real financial progress.</span>
           </p>
         </div>
 
