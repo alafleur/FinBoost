@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import FlywheelFeatures from "@/components/FlywheelFeatures";
 import MembershipValue from "@/components/MembershipValue";
 import TrustBanner from "@/components/TrustBanner";
+import GrowthCTA from "@/components/GrowthCTA";
 
 export default function Home() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -49,10 +50,13 @@ export default function Home() {
         {/* Mini Trust Banner */}
         <TrustBanner />
         
-        {/* 6. FAQs */}
+        {/* 6. Growth Chart + Waitlist CTA */}
+        <GrowthCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
+        
+        {/* 7. FAQs */}
         <FAQ />
         
-        {/* 7. Join the Waitlist (Repeat CTA) */}
+        {/* 8. Join the Waitlist (Final CTA) */}
         <FinalCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
       </main>
       <Footer />

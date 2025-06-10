@@ -1,5 +1,4 @@
 import { DollarSign, BarChart3, TrendingUp, Users } from "lucide-react";
-import MembershipGrowthChart from "./MembershipGrowthChart";
 import TierSystem from "./TierSystem";
 
 export default function HowRewardsWork() {
@@ -16,8 +15,6 @@ export default function HowRewardsWork() {
         </div>
 
         <TierSystem />
-
-        <MembershipGrowthChart />
       </div>
     </section>
   );
