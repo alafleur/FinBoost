@@ -7,12 +7,10 @@ export default function HowRewardsWork() {
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-10">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            <span className="text-primary-500">💪</span> Strength in Numbers
+            How Rewards Work
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            The more members who join, the larger the monthly rewards pool.
-            <br />
-            <span className="font-medium">Real people. Real money. Real financial progress.</span>
+            Learn how our point system and monthly reward distribution creates value for everyone.
           </p>
         </div>
 
@@ -48,25 +46,7 @@ export default function HowRewardsWork() {
               </p>
             </div>
           </div>
-
-          <div className="mt-10 pt-8 border-t border-gray-100">
-            <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center mr-4">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-lg flex items-center gap-2">
-                  <span className="text-gradient">📈</span> Community Growth Benefits Everyone
-                </p>
-                <p className="text-gray-600">
-                  The more you engage—and the more our community grows—the bigger the rewards for everyone.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-
-
 
         <MembershipGrowthChart />
       </div>
