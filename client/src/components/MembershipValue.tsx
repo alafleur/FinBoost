@@ -251,8 +251,3 @@ export default function MembershipValue() {
     </section>
   );
 }
-```
-
-```
-Removing the specified section of code from MembershipValue.tsx
-```
