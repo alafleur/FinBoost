@@ -46,17 +46,24 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50/30">
       <div className="container mx-auto max-w-5xl">
+        {/* Section Header */}
+        <div className="text-center mb-8">
+          <h3 className="font-heading font-bold text-2xl md:text-3xl mb-4 text-gray-800">
+            Join the Growing Community
+          </h3>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            The earlier you join, the more you benefit from our collective growth. 
+            Be part of building something bigger than yourself.
+          </p>
+        </div>
+        
         {/* Growth Chart */}
         <MembershipGrowthChart />
         
         {/* CTA Section */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center">
-          <h3 className="font-heading font-bold text-2xl md:text-3xl mb-4 text-gray-800">
-            Join the Growing Community
-          </h3>
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center mt-8">
           <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
-            The earlier you join, the more you benefit from our collective growth. 
-            Be part of building something bigger than yourself.
+            Ready to join? Get early access to our financial community platform.
           </p>
           
           <div className="max-w-md mx-auto">
