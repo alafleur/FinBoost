@@ -302,6 +302,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
+  app.get("/api/admin/subscribers", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const subscribers = await storage.getAllSubscribers();
+      res.json({ success: true, subscribers });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   app.get("/api/admin/analytics", async (req, res) => {
     try {
       const token = req.headers.authorization?.replace('Bearer ', '');
