@@ -1,32 +1,61 @@
-// Simple analytics tracking for the application
-// In a real app, this would be replaced with a proper analytics service
-
-/**
- * Track a page view
- * @param page The page that was viewed
- */
-export function trackPageView(page: string): void {
-  console.log(`[Analytics] Page view: ${page}`);
-  // In a real implementation, this would send data to an analytics service
+// Define the gtag function globally
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+  }
 }
 
-/**
- * Track an event
- * @param event The event that occurred
- * @param category The category of the event
- * @param label Optional label for the event
- * @param value Optional value for the event
- */
-export function trackEvent(
-  event: string,
-  category: string,
-  label?: string,
+// Initialize Google Analytics
+export const initGA = () => {
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+
+  if (!measurementId) {
+    console.warn('Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID');
+    return;
+  }
+
+  // Add Google Analytics script to the head
+  const script1 = document.createElement('script');
+  script1.async = true;
+  script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  document.head.appendChild(script1);
+
+  // Initialize gtag
+  const script2 = document.createElement('script');
+  script2.innerHTML = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${measurementId}');
+  `;
+  document.head.appendChild(script2);
+};
+
+// Track page views - useful for single-page applications
+export const trackPageView = (url: string) => {
+  if (typeof window === 'undefined' || !window.gtag) return;
+  
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  if (!measurementId) return;
+  
+  window.gtag('config', measurementId, {
+    page_path: url
+  });
+};
+
+// Track events
+export const trackEvent = (
+  action: string, 
+  category?: string, 
+  label?: string, 
   value?: number
-): void {
-  console.log(
-    `[Analytics] Event: ${event}, Category: ${category}${
-      label ? `, Label: ${label}` : ""
-    }${value !== undefined ? `, Value: ${value}` : ""}`
-  );
-  // In a real implementation, this would send data to an analytics service
-}
+) => {
+  if (typeof window === 'undefined' || !window.gtag) return;
+  
+  window.gtag('event', action, {
+    event_category: category,
+    event_label: label,
+    value: value,
+  });
+};

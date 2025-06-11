@@ -13,11 +13,17 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
+import { useEffect } from "react";
+import { initGA } from "./lib/analytics";
+import { useAnalytics } from "./hooks/use-analytics";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 function Router() {
+  // Track page views automatically
+  useAnalytics();
+  
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -37,12 +43,16 @@ function Router() {
 }
 
 function App() {
+  // Initialize Google Analytics when app starts
+  useEffect(() => {
+    initGA();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Router />
-
       </TooltipProvider>
     </QueryClientProvider>
   );
