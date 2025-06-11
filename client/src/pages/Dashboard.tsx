@@ -619,6 +619,7 @@ export default function Dashboard() {
                   totalPoints: user?.totalPoints || 0,
                   currentMonthPoints: user?.currentMonthPoints || 0
                 }}
+                distributionInfo={distributionInfo}
                 onUpgradeClick={() => setLocation('/subscribe')}
               />
             )}
@@ -678,20 +679,6 @@ export default function Dashboard() {
                         </div>
                         <p className="text-xs text-blue-600 mt-1">Bottom 33% performers</p>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                    <div className="bg-emerald-100 rounded-lg p-4 text-center">
-                      <div className="text-4xl font-bold text-emerald-900 mb-1">
-                        {distributionInfo?.timeRemaining?.days || 0}
-                      </div>
-                      <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide">
-                        💰 Days to Rewards Distribution
-                      </p>
-                      <p className="text-xs text-emerald-600 mt-1">
-                        {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
-                      </p>
                     </div>
                   </div>
                 </CardContent>

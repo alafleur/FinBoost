@@ -17,10 +17,14 @@ interface CommunityGrowthDialProps {
     totalPoints: number;
     currentMonthPoints: number;
   };
+  distributionInfo?: {
+    nextDate: string;
+    timeRemaining: { days: number; hours: number; minutes: number; totalMs: number };
+  } | null;
   onUpgradeClick: () => void;
 }
 
-export default function CommunityGrowthDial({ poolData, user, onUpgradeClick }: CommunityGrowthDialProps) {
+export default function CommunityGrowthDial({ poolData, user, distributionInfo, onUpgradeClick }: CommunityGrowthDialProps) {
   const [rewardsPercentage, setRewardsPercentage] = useState(75);
   const [referralPoints, setReferralPoints] = useState(20);
   const { toast } = useToast();
@@ -210,13 +214,45 @@ export default function CommunityGrowthDial({ poolData, user, onUpgradeClick }: 
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    onClick={handleReferralClick}
-                    className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium py-3"
-                  >
-                    <Gift className="w-4 h-4 mr-2" />
-                    Share Referral Link - Earn Points
-                  </Button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button 
+                      onClick={async () => {
+                        try {
+                          const token = localStorage.getItem('token');
+                          const response = await fetch('/api/referrals/my-code', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                          });
+                          
+                          if (response.ok) {
+                            const data = await response.json();
+                            const referralLink = `${window.location.origin}/auth?ref=${data.referralCode}`;
+                            await navigator.clipboard.writeText(referralLink);
+                            toast({
+                              title: "Link copied!",
+                              description: "Referral link copied to clipboard",
+                            });
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to copy referral link",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                    >
+                      Copy Link
+                    </Button>
+                    <Button 
+                      onClick={handleReferralClick}
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium"
+                    >
+                      <Gift className="w-4 h-4 mr-2" />
+                      Share Link
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
@@ -258,15 +294,32 @@ export default function CommunityGrowthDial({ poolData, user, onUpgradeClick }: 
             </div>
 
             {/* Community Stats */}
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Users className="w-5 h-5 text-green-600" />
-                <span className="text-2xl font-bold text-green-900">
-                  {formatNumber(memberCount)}
-                </span>
+            <div className="text-center space-y-4">
+              <div>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Users className="w-5 h-5 text-green-600" />
+                  <span className="text-2xl font-bold text-green-900">
+                    {formatNumber(memberCount)}
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-green-800">Premium Members</p>
+                <p className="text-xs text-green-600">Building wealth together</p>
               </div>
-              <p className="text-sm font-medium text-green-800">Premium Members</p>
-              <p className="text-xs text-green-600">Building wealth together</p>
+
+              {/* Days to Distribution */}
+              {distributionInfo && (
+                <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                  <div className="text-2xl font-bold text-orange-900 mb-1">
+                    {distributionInfo.timeRemaining?.days || 0}
+                  </div>
+                  <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">
+                    💰 Days to Distribution
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">
+                    {distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
