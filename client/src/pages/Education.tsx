@@ -316,17 +316,7 @@ export default function Education() {
                     const canAccess = isPremiumModule ? isUserPremium : true; // Free modules accessible to all
                     const Icon = module.icon;
                     
-                    // Debug output for first premium module only
-                    if (isPremiumModule && module.id === 5) {
-                      console.log('DEBUG:', {
-                        userId: user?.id,
-                        userSubStatus: user?.subscriptionStatus,
-                        isUserPremium,
-                        moduleId: module.id,
-                        moduleAccessType: module.accessType,
-                        canAccess
-                      });
-                    }
+
 
                     return (
                       <Card 
@@ -389,8 +379,8 @@ export default function Education() {
 
                           </div>
                           <Button 
-                            className={`w-full ${(isPremiumModule && !canAccess) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
-                            variant={isCompleted ? "outline" : (isPremiumModule && !canAccess) ? "outline" : "default"}
+                            className={`w-full ${(isPremiumModule && !isUserPremium) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
+                            variant={isCompleted ? "outline" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
                             disabled={false}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -398,7 +388,7 @@ export default function Education() {
                               setLocation(`/lesson/${module.id}`);
                             }}
                           >
-                            {isCompleted ? "Review" : (isPremiumModule && !canAccess) ? "Upgrade to Access" : "Start Lesson"}
+                            {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>
