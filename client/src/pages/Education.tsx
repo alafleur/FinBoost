@@ -311,28 +311,9 @@ export default function Education() {
                   .map((module) => {
                     const isCompleted = completedLessons.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
-                    // Map module to the expected type for canAccessModule
-                    const moduleForAccess = {
-                      id: module.id,
-                      title: module.title,
-                      accessType: module.accessType,
-                      isPublished: true, // Since these are from published modules
-                      content: '', // Not needed for access checking
-                      description: module.description,
-                      quiz: null,
-                      pointsReward: module.pointsReward,
-                      category: module.category,
-                      difficulty: module.difficulty,
-                      estimatedMinutes: module.estimatedMinutes,
-                      order: 0,
-                      isActive: true,
-                      publishedAt: new Date(),
-                      createdAt: new Date()
-                    };
-                    console.log('🔍 EDUCATION USER OBJECT:', user);
-                    console.log('🔍 EDUCATION MODULE ACCESS TYPE:', module.accessType);
-                    const canAccess = user ? canAccessModule(user, moduleForAccess) : false;
-                    console.log('🔍 EDUCATION CAN ACCESS RESULT:', canAccess);
+                    // Direct access check - premium users (active subscription) can access all content
+                    const isUserPremium = user?.subscriptionStatus === 'active';
+                    const canAccess = isPremiumModule ? isUserPremium : true; // Free modules accessible to all
                     const Icon = module.icon;
 
                     return (

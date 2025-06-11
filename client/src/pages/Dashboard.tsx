@@ -978,13 +978,11 @@ export default function Dashboard() {
                         .filter(module => selectedCategory === "" || module.category === selectedCategory)
                         .map(module => {
                           const isCompleted = completedModuleIds.includes(module.id);
-                          console.log('🔍 DASHBOARD USER OBJECT:', user);
-                          console.log('🔍 DASHBOARD MODULE OBJECT:', module);
-                          const canAccess = user ? canAccessModule(user, module) : false;
-                          console.log('🔍 DASHBOARD CAN ACCESS RESULT:', canAccess);
-                          const accessInfo = user ? getUserAccessInfo(user) : null;
-                          // Check for premium modules using database accessType
+                          // Direct access check - premium users (active subscription) can access all content
+                          const isUserPremium = user?.subscriptionStatus === 'active';
                           const isPremiumModule = module.accessType === 'premium';
+                          const canAccess = isPremiumModule ? isUserPremium : true; // Free modules accessible to all
+                          const accessInfo = user ? getUserAccessInfo(user) : null;
 
                           return (
                             <Card 
