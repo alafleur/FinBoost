@@ -20,6 +20,7 @@ import {
   Crown
 } from 'lucide-react';
 import { educationContent } from '../data/educationContent';
+import { canAccessModule, type UserForAccess } from "@shared/userAccess";
 
 interface Module {
   id: number;
@@ -42,9 +43,11 @@ export default function Education() {
   const [availablePoints, setAvailablePoints] = useState(0);
   const [loading, setLoading] = useState(true);
   const [publishedModules, setPublishedModules] = useState<any[]>([]);
+  const [user, setUser] = useState<UserForAccess | null>(null);
 
   useEffect(() => {
     // Fetch from API first to ensure sync
+    fetchUserData();
     fetchCompletedLessons();
     fetchPublishedModules();
 
