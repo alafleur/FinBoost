@@ -29,8 +29,9 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
   const [referralPoints, setReferralPoints] = useState(20);
   const { toast } = useToast();
   
-  // Ensure proper subscription status checking - only 'active' status gets referral features
-  const isPremiumUser = Boolean(user.subscriptionStatus === 'active');
+  // Only users with 'active' subscription status get referral features
+  // All other statuses (inactive, past_due, canceled, etc.) see upgrade prompts
+  const isPremiumUser = user.subscriptionStatus === 'active';
   const memberCount = poolData.premiumUsers || 0;
   
   // Fetch current referral points from admin configuration
