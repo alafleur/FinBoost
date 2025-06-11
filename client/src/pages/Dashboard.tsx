@@ -1034,14 +1034,14 @@ export default function Dashboard() {
                                       setLocation(`/lesson/${module.id}`);
                                     }}
                                     size="sm"
-                                    variant={isCompleted ? "secondary" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
+                                    variant={isCompleted ? "secondary" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "outline" : "default"}
                                     className={`w-full hover:opacity-90 transition-opacity ${
-                                      isPremiumModule && !isUserPremium
+                                      isPremiumModule && user?.subscriptionStatus !== 'active'
                                         ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' 
                                         : ''
                                     }`}
                                   >
-                                    {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
+                                    {isCompleted ? "Review" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "Upgrade to Access" : "Start Lesson"}
                                   </Button>
                                 </div>
                               </CardContent>
@@ -1351,10 +1351,10 @@ export default function Dashboard() {
                                 <Button 
                                     onClick={() => setLocation(`/lesson/${module.id}`)}
                                     size="sm"
-                                    variant={isCompleted ? "secondary" : isPremiumModule ? "outline" : "default"}
-                                    className={isPremiumModule && !isCompleted ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}
+                                    variant={isCompleted ? "secondary" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "outline" : "default"}
+                                    className={(isPremiumModule && user?.subscriptionStatus !== 'active') ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}
                                   >
-                                  {isCompleted ? "Review" : isPremiumModule ? "Upgrade to Access" : "Start Lesson"}
+                                  {isCompleted ? "Review" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "Upgrade to Access" : "Start Lesson"}
                                 </Button>
                               </div>
                             </CardContent>

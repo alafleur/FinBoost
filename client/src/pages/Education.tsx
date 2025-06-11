@@ -379,8 +379,8 @@ export default function Education() {
 
                           </div>
                           <Button 
-                            className={`w-full ${(isPremiumModule && !isUserPremium) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
-                            variant={isCompleted ? "outline" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
+                            className={`w-full ${(isPremiumModule && user?.subscriptionStatus !== 'active') ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
+                            variant={isCompleted ? "outline" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "outline" : "default"}
                             disabled={false}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -388,7 +388,7 @@ export default function Education() {
                               setLocation(`/lesson/${module.id}`);
                             }}
                           >
-                            {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
+                            {isCompleted ? "Review" : (isPremiumModule && user?.subscriptionStatus !== 'active') ? "Upgrade to Access" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>
