@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Crown, Star, TrendingUp, Users, CheckCircle, ArrowLeft } from 'lucide-react';
+import { trackEvent } from "@/lib/analytics";
 
 const SubscribeForm = () => {
   const { toast } = useToast();
@@ -39,6 +40,7 @@ const SubscribeForm = () => {
         throw new Error('Failed to upgrade subscription');
       }
 
+      trackEvent('purchase', 'subscription', 'membership_upgrade', 20);
       toast({
         title: "Welcome as a Member!",
         description: "Your membership is now active. Redirecting to dashboard...",

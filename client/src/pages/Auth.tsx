@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, Link } from "wouter";
+import { trackEvent } from "@/lib/analytics";
 
 interface RegisterForm {
   email: string;
@@ -85,6 +86,7 @@ export default function Auth() {
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      trackEvent('sign_up', 'user_engagement', 'registration_complete');
       toast({
         title: "Registration successful!",
         description: "Welcome to FinBoost!",
@@ -120,6 +122,7 @@ export default function Auth() {
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      trackEvent('login', 'user_engagement', 'login_complete');
       toast({
         title: "Login successful!",
         description: "Welcome back!",

@@ -18,6 +18,7 @@ import {
 import StreakNotification from "@/components/StreakNotification";
 import UpgradePrompt from "@/components/UpgradePrompt";
 import { getUserAccessInfo, canAccessModule, getUpgradeMessage, type UserForAccess } from "@shared/userAccess";
+import { trackEvent } from "@/lib/analytics";
 
 interface QuizQuestion {
   id: number;
@@ -209,6 +210,9 @@ export default function Lesson() {
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
 
           console.log('Lesson completed successfully:', lesson!.id, completionResult);
+
+          // Track lesson completion event
+          trackEvent('lesson_complete', 'education', lesson!.category, completionResult.pointsEarned);
 
           if (!completedLessons.includes(lesson!.id)) {
             completedLessons.push(lesson!.id);
@@ -415,6 +419,10 @@ export default function Lesson() {
 
     // Award points for quiz completion if passed
     const score = calculateScore();
+    
+    // Track quiz completion with score
+    trackEvent('quiz_complete', 'education', lesson!.category, score);
+    
     if (score >= 70 && !hasEarnedQuizPoints) {
       await awardPoints('quiz_complete', 'emergency-fund-quiz');
       setHasEarnedQuizPoints(true);
