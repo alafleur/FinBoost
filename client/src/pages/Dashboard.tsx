@@ -595,16 +595,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Upgrade Prompt for Free Users */}
-            {user && shouldShowUpgradePrompt(user, window.location.pathname) && (
-              <div className="mb-6 sm:mb-8">
-                <UpgradePrompt 
-                  theoreticalPoints={user.theoreticalPoints || 0}
-                  currentMonthPoints={user.currentMonthPoints || 0}
-                  membershipJoinBonus={100}
-                />
-              </div>
-            )}
+
 
             {/* Community Growth Dial */}
             {poolData && (
