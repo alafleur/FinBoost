@@ -978,7 +978,15 @@ export default function Dashboard() {
                         .filter(module => selectedCategory === "" || module.category === selectedCategory)
                         .map(module => {
                           const isCompleted = completedModuleIds.includes(module.id);
+                          console.log('🔍 DASHBOARD ACCESS CHECK:', {
+                            moduleId: module.id,
+                            moduleTitle: module.title,
+                            moduleAccessType: module.accessType,
+                            userSubscriptionStatus: user?.subscriptionStatus,
+                            userId: user?.id
+                          });
                           const canAccess = user ? canAccessModule(user, module) : false;
+                          console.log('🔍 DASHBOARD CAN ACCESS RESULT:', canAccess);
                           const accessInfo = user ? getUserAccessInfo(user) : null;
                           // Check for premium modules using database accessType
                           const isPremiumModule = module.accessType === 'premium';
