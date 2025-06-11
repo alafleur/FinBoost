@@ -55,6 +55,21 @@ export default function MembershipValue() {
     }).format(amount);
   };
 
+  const formatCurrencyMobile = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    }
+    if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(1)}K`;
+    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50/30" id="membership-value">
       <div className="container mx-auto max-w-6xl">
@@ -116,7 +131,8 @@ export default function MembershipValue() {
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
                   <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
                   <div className="text-2xl font-bold text-green-700 mb-1">
-                    {formatCurrency(rewardPoolSize)}
+                    <span className="hidden sm:inline">{formatCurrency(rewardPoolSize)}</span>
+                    <span className="sm:hidden">{formatCurrencyMobile(rewardPoolSize)}</span>
                   </div>
                   <div className="text-xs text-green-500">available for rewards</div>
                 </div>
