@@ -74,6 +74,30 @@ export default function Education() {
     };
   }, []);
 
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setUser(null);
+    }
+  };
+
   const fetchPublishedModules = async () => {
     try {
       const response = await fetch('/api/modules');
@@ -287,6 +311,25 @@ export default function Education() {
                   .map((module) => {
                     const isCompleted = completedLessons.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
+                    // Map module to the expected type for canAccessModule
+                    const moduleForAccess = {
+                      id: module.id,
+                      title: module.title,
+                      accessType: module.accessType,
+                      isPublished: true, // Since these are from published modules
+                      content: '', // Not needed for access checking
+                      description: module.description,
+                      quiz: null,
+                      pointsReward: module.pointsReward,
+                      category: module.category,
+                      difficulty: module.difficulty,
+                      estimatedMinutes: module.estimatedMinutes,
+                      order: 0,
+                      isActive: true,
+                      publishedAt: new Date(),
+                      createdAt: new Date()
+                    };
+                    const canAccess = user ? canAccessModule(user, moduleForAccess) : false;
                     const Icon = module.icon;
 
                     return (
@@ -350,8 +393,8 @@ export default function Education() {
 
                           </div>
                           <Button 
-                            className={`w-full ${isPremiumModule && !isCompleted ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
-                            variant={isCompleted ? "outline" : isPremiumModule ? "outline" : "default"}
+                            className={`w-full ${(isPremiumModule && !canAccess) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
+                            variant={isCompleted ? "outline" : (isPremiumModule && !canAccess) ? "outline" : "default"}
                             disabled={false}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -359,7 +402,7 @@ export default function Education() {
                               setLocation(`/lesson/${module.id}`);
                             }}
                           >
-                            {isCompleted ? "Review" : isPremiumModule ? "Upgrade to Access" : "Start Lesson"}
+                            {isCompleted ? "Review" : (isPremiumModule && !canAccess) ? "Upgrade to Access" : "Start Lesson"}
                           </Button>
                         </CardContent>
                       </Card>
