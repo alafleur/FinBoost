@@ -37,6 +37,7 @@ import StreakDisplay from "@/components/StreakDisplay";
 import PointsActions from "@/components/PointsActions";
 import UpgradePrompt from "@/components/UpgradePrompt";
 import ExpandedLeaderboard from "@/components/ExpandedLeaderboard";
+import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import { educationContent } from "@/data/educationContent";
 import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt, type UserForAccess } from "@shared/userAccess";
 
