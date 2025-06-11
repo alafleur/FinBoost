@@ -115,7 +115,7 @@ export default function Lesson() {
           
           if (moduleData) {
             // Check if user can access this module
-            const canAccess = canAccessModule(userData, moduleData);
+            const canAccess = canAccessModule(userData.user, moduleData);
             console.log('🔄 LESSON: Can access module:', canAccess);
             
             if (!canAccess) {
