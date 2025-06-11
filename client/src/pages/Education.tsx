@@ -329,7 +329,10 @@ export default function Education() {
                       publishedAt: new Date(),
                       createdAt: new Date()
                     };
+                    console.log('🔍 EDUCATION USER OBJECT:', user);
+                    console.log('🔍 EDUCATION MODULE ACCESS TYPE:', module.accessType);
                     const canAccess = user ? canAccessModule(user, moduleForAccess) : false;
+                    console.log('🔍 EDUCATION CAN ACCESS RESULT:', canAccess);
                     const Icon = module.icon;
 
                     return (
