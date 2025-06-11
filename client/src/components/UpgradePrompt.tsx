@@ -67,21 +67,7 @@ export default function UpgradePrompt({
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg p-4 border border-green-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold text-green-800">
-                Membership Bonus: +{membershipJoinBonus} Points
-              </p>
-              <p className="text-sm text-green-700">
-                One-time bonus when you upgrade today
-              </p>
-            </div>
-            <Badge className="bg-green-500 text-white">
-              Bonus!
-            </Badge>
-          </div>
-        </div>
+
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button 

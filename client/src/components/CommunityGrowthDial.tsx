@@ -182,14 +182,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                     <p className="text-sm text-gray-600 mb-4">
                       Join {formatNumber(memberCount)} premium members earning real rewards every month
                     </p>
-                    <div className="bg-green-50 rounded-lg p-3 mb-4">
-                      <p className="text-sm font-medium text-green-800">
-                        Your potential monthly earnings: <span className="font-bold">${Math.round(poolData.totalPool / Math.max(memberCount, 1) * 0.8)}</span>
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Based on current pool size and your {user.currentMonthPoints} points
-                      </p>
-                    </div>
+
                   </div>
                   <Button 
                     onClick={onUpgradeClick}
