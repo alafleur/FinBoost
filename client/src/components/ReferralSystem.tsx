@@ -47,6 +47,7 @@ export default function ReferralSystem() {
   });
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
+  const [referralPoints, setReferralPoints] = useState(20);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,6 +57,19 @@ export default function ReferralSystem() {
   const fetchReferralData = async () => {
     try {
       const token = localStorage.getItem('token');
+      
+      // Fetch current referral points from admin configuration
+      const pointsResponse = await fetch('/api/points/actions', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (pointsResponse.ok) {
+        const pointsData = await pointsResponse.json();
+        const referralAction = pointsData.actions.find((action: any) => action.actionId === 'referral_signup');
+        if (referralAction) {
+          setReferralPoints(referralAction.basePoints);
+        }
+      }
       
       // Fetch referral code and stats
       const codeResponse = await fetch('/api/referrals/my-code', {
@@ -182,7 +196,7 @@ export default function ReferralSystem() {
             <p className="font-medium text-blue-800 mb-1">How it works:</p>
             <p>• Share your referral code with friends</p>
             <p>• They sign up using your code</p>
-            <p>• You earn 100 points when they join</p>
+            <p>• You earn {referralPoints} points when they join</p>
             <p>• Both of you benefit from building better financial habits!</p>
           </div>
         </CardContent>

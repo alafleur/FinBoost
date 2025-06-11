@@ -182,7 +182,7 @@ export const POINTS_CONFIG: Record<string, PointsAction> = {
   referral_signup: {
     id: 'referral_signup',
     name: 'Successful Referral',
-    basePoints: 100,
+    basePoints: 20,
     requiresProof: false,
     category: 'social',
     description: 'Referred user completes signup and first lesson'

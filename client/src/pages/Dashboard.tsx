@@ -606,6 +606,23 @@ export default function Dashboard() {
               </div>
             )}
 
+            {/* Community Growth Dial */}
+            {poolData && (
+              <CommunityGrowthDial 
+                poolData={{
+                  totalPool: poolData.totalPool || 0,
+                  premiumUsers: poolData.premiumUsers || 0,
+                  totalUsers: poolData.totalUsers || 0
+                }}
+                user={{
+                  subscriptionStatus: user?.subscriptionStatus,
+                  totalPoints: user?.totalPoints || 0,
+                  currentMonthPoints: user?.currentMonthPoints || 0
+                }}
+                onUpgradeClick={() => setLocation('/subscribe')}
+              />
+            )}
+
             {/* Monthly Reward Pool */}
             <div className="mb-6 sm:mb-8">
               <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
@@ -629,18 +646,7 @@ export default function Dashboard() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Total Pool */}
-                    <div className="bg-white/60 rounded-lg p-4 border border-purple-200">
-                      <div className="text-center">
-                        <h4 className="text-sm font-semibold text-purple-800 mb-1">Total Pool</h4>
-                        <div className="text-2xl font-bold text-purple-900">
-                          ${poolData && poolData.totalPool ? poolData.totalPool.toLocaleString() : '0'}
-                        </div>
-                        <p className="text-xs text-purple-600 mt-1">Community rewards</p>
-                      </div>
-                    </div>
-
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {/* Tier 1 Pool */}
                     <div className="bg-gradient-to-br from-blue-100 to-blue-100 rounded-lg p-4 border border-blue-200">
                       <div className="text-center">
@@ -675,33 +681,17 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Community Power Display */}
-                      <div className="bg-green-100 rounded-lg p-4 text-center">
-                        <div className="text-4xl font-bold text-green-900 mb-1">
-                          {poolData && poolData.premiumUsers ? poolData.premiumUsers.toLocaleString() : '0'}
-                        </div>
-                        <p className="text-sm font-bold text-green-800 uppercase tracking-wide">
-                          🚀 Premium Members
-                        </p>
-                        <p className="text-xs text-green-600 mt-1">
-                          Members building wealth together
-                        </p>
+                  <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                    <div className="bg-emerald-100 rounded-lg p-4 text-center">
+                      <div className="text-4xl font-bold text-emerald-900 mb-1">
+                        {distributionInfo?.timeRemaining?.days || 0}
                       </div>
-
-                      {/* Payout Countdown */}
-                      <div className="bg-emerald-100 rounded-lg p-4 text-center">
-                        <div className="text-4xl font-bold text-emerald-900 mb-1">
-                          {distributionInfo?.timeRemaining?.days || 0}
-                        </div>
-                        <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide">
-                          💰 Days to Rewards Distribution
-                        </p>
-                        <p className="text-xs text-emerald-600 mt-1">
-                          {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
-                        </p>
-                      </div>
+                      <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide">
+                        💰 Days to Rewards Distribution
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        {distributionInfo?.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
