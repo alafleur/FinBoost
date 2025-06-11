@@ -315,6 +315,18 @@ export default function Education() {
                     const isUserPremium = user?.subscriptionStatus === 'active';
                     const canAccess = isPremiumModule ? isUserPremium : true; // Free modules accessible to all
                     const Icon = module.icon;
+                    
+                    // Debug output for first premium module only
+                    if (isPremiumModule && module.id === 5) {
+                      console.log('DEBUG:', {
+                        userId: user?.id,
+                        userSubStatus: user?.subscriptionStatus,
+                        isUserPremium,
+                        moduleId: module.id,
+                        moduleAccessType: module.accessType,
+                        canAccess
+                      });
+                    }
 
                     return (
                       <Card 
