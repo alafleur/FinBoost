@@ -16,6 +16,7 @@ import Subscribe from "./pages/Subscribe";
 import { useEffect } from "react";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
+import { initGTM, addGTMNoScript } from "./lib/gtm";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -43,9 +44,15 @@ function Router() {
 }
 
 function App() {
-  // Initialize Google Analytics when app starts
+  // Initialize tracking when app starts
   useEffect(() => {
     initGA();
+    initGTM();
+    
+    // Add GTM noscript fallback after DOM is ready
+    setTimeout(() => {
+      addGTMNoScript();
+    }, 100);
   }, []);
 
   return (

@@ -11,6 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, Link } from "wouter";
 import { trackEvent } from "@/lib/analytics";
+import { trackGTMEvent, trackGTMConversion, trackGTMUserAction } from "@/lib/gtm";
 
 interface RegisterForm {
   email: string;
@@ -87,6 +88,11 @@ export default function Auth() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       trackEvent('sign_up', 'user_engagement', 'registration_complete');
+      trackGTMConversion('registration', 0);
+      trackGTMUserAction('user_registered', data.user.id, {
+        username: data.user.username,
+        registration_source: 'direct'
+      });
       toast({
         title: "Registration successful!",
         description: "Welcome to FinBoost!",
@@ -123,6 +129,10 @@ export default function Auth() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       trackEvent('login', 'user_engagement', 'login_complete');
+      trackGTMUserAction('user_logged_in', data.user.id, {
+        username: data.user.username,
+        login_method: 'email'
+      });
       toast({
         title: "Login successful!",
         description: "Welcome back!",

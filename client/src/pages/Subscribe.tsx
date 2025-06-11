@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Crown, Star, TrendingUp, Users, CheckCircle, ArrowLeft } from 'lucide-react';
 import { trackEvent } from "@/lib/analytics";
+import { trackGTMConversion, trackGTMUserAction } from "@/lib/gtm";
 
 const SubscribeForm = () => {
   const { toast } = useToast();
