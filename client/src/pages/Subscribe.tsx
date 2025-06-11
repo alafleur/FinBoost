@@ -42,6 +42,12 @@ const SubscribeForm = () => {
       }
 
       trackEvent('purchase', 'subscription', 'membership_upgrade', 20);
+      trackGTMConversion('subscription_purchase', 20, 'USD');
+      trackGTMUserAction('subscription_activated', undefined, {
+        plan: 'premium',
+        value: 20,
+        currency: 'USD'
+      });
       toast({
         title: "Welcome as a Member!",
         description: "Your membership is now active. Redirecting to dashboard...",

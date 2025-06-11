@@ -19,6 +19,7 @@ import StreakNotification from "@/components/StreakNotification";
 import UpgradePrompt from "@/components/UpgradePrompt";
 import { getUserAccessInfo, canAccessModule, getUpgradeMessage, type UserForAccess } from "@shared/userAccess";
 import { trackEvent } from "@/lib/analytics";
+import { trackGTMEvent, trackGTMUserAction } from "@/lib/gtm";
 
 interface QuizQuestion {
   id: number;
@@ -213,6 +214,14 @@ export default function Lesson() {
 
           // Track lesson completion event
           trackEvent('lesson_complete', 'education', lesson!.category, completionResult.pointsEarned);
+          trackGTMUserAction('lesson_completed', undefined, {
+            lesson_id: lesson!.id,
+            lesson_title: lesson!.title,
+            category: lesson!.category,
+            difficulty: lesson!.difficulty,
+            points_earned: completionResult.pointsEarned,
+            streak_bonus: completionResult.streakBonus
+          });
 
           if (!completedLessons.includes(lesson!.id)) {
             completedLessons.push(lesson!.id);
@@ -422,6 +431,15 @@ export default function Lesson() {
     
     // Track quiz completion with score
     trackEvent('quiz_complete', 'education', lesson!.category, score);
+    trackGTMUserAction('quiz_completed', undefined, {
+      lesson_id: lesson!.id,
+      lesson_title: lesson!.title,
+      category: lesson!.category,
+      quiz_score: score,
+      passed: score >= 70,
+      questions_total: lesson!.quiz.length,
+      questions_correct: Math.round((score / 100) * lesson!.quiz.length)
+    });
     
     if (score >= 70 && !hasEarnedQuizPoints) {
       await awardPoints('quiz_complete', 'emergency-fund-quiz');
