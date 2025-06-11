@@ -120,17 +120,17 @@ export default function MembershipValue() {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-6 text-center">
+                <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-4 sm:p-6 text-center">
                   <div className="text-sm text-primary-600 font-medium mb-1">Rewards Allocation</div>
-                  <div className="text-3xl font-bold text-primary-700 mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-700 mb-1">
                     {rewardsPercentage}%
                   </div>
                   <div className="text-xs text-primary-500">of membership fees</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 text-center">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 text-center">
                   <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
-                  <div className="text-2xl font-bold text-green-700 mb-1">
+                  <div className="text-xl sm:text-2xl font-bold text-green-700 mb-1">
                     <span className="hidden sm:inline">{formatCurrency(rewardPoolSize)}</span>
                     <span className="sm:hidden">{formatCurrencyMobile(rewardPoolSize)}</span>
                   </div>
