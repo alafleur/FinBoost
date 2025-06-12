@@ -24,10 +24,10 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-gray-800">
-              Get Your Free Financial Health Score <span className="gradient-text">+ Start Learning</span>
+              Turn Financial Stress into Financial Progress <span className="gradient-text">– Together</span>
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Take our 2-minute assessment to discover your financial personality and unlock personalized lessons + monthly cash rewards.
+              Earn monthly cash rewards while leveling up your money smarts, with the power of the collective behind you.
             </p>
             <div className="max-w-lg space-y-4">
               <Button 
@@ -35,8 +35,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 size="lg"
                 className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
               >
-                <BarChart2 className="h-5 w-5 mr-2" />
-                Get My Financial Score Free
+                Start Learning Free
               </Button>
               
               <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
@@ -46,7 +45,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 </div>
                 <div className="flex items-center">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                  Personalized insights
+                  Financial assessment
                 </div>
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-1 text-purple-600" />
@@ -64,32 +63,38 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 </div>
               </div>
 
-              <h3 className="font-heading font-semibold text-xl mb-4 text-center">Your Financial Assessment Reveals</h3>
+              <h3 className="font-heading font-semibold text-xl mb-4 text-center">Financial Progress Made Simple</h3>
 
               <ul className="space-y-4 mt-6">
                 <li className="flex items-center">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300 flex items-center justify-center">
-                    <BarChart2 className="h-4 w-4 text-blue-600" />
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
-                  <p className="ml-3 text-gray-700">Your financial personality type</p>
+                  <p className="ml-3 text-gray-700">Learn essential financial skills</p>
                 </li>
                 <li className="flex items-center">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
-                  <p className="ml-3 text-gray-700">Personalized improvement areas</p>
+                  <p className="ml-3 text-gray-700">Take action and earn points</p>
                 </li>
                 <li className="flex items-center">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 border border-purple-300 flex items-center justify-center">
-                    <Award className="h-4 w-4 text-purple-600" />
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
-                  <p className="ml-3 text-gray-700">Free lessons tailored for you</p>
+                  <p className="ml-3 text-gray-700">Receive cash rewards monthly</p>
                 </li>
               </ul>
 
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-                <p className="text-gray-600">Plus unlock monthly cash rewards</p>
-                <p className="text-primary-600 font-medium mt-2">Learn → Earn → Grow Together</p>
+                <p className="text-gray-600">Join a community that grows together</p>
+                <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
                 <div className="mt-4 flex justify-center">
                   <div className="transform hover:scale-105 transition-transform">
                     <QuizDialog />

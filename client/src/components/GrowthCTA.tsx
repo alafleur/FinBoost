@@ -24,11 +24,11 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
         {/* Section Header */}
         <div className="text-center mb-8">
           <h3 className="font-heading font-bold text-2xl md:text-3xl mb-4 text-gray-800">
-            Ready to Transform Your Financial Future?
+            Join the Growing Community
           </h3>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Join thousands who are already improving their financial health and earning rewards. 
-            Start with your free assessment today.
+            The earlier you join, the more you benefit from our collective growth. 
+            Be part of building something bigger than yourself.
           </p>
         </div>
         
@@ -38,7 +38,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
         {/* CTA Section */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center mt-8">
           <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
-            Get your personalized financial health score and start learning immediately.
+            Ready to join? Start learning and earning with our financial community platform.
           </p>
           
           <div className="max-w-md mx-auto">
@@ -47,8 +47,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
               size="lg"
               className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-lg transition duration-300"
             >
-              <BarChart2 className="h-5 w-5 mr-2" />
-              Start Your Financial Assessment
+              Start Learning Free
             </Button>
             
             <div className="flex items-center justify-center space-x-8 mt-4 text-sm text-gray-600">
@@ -58,7 +57,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
               </div>
               <div className="flex items-center">
                 <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                Instant insights
+                Instant access
               </div>
             </div>
           </div>
