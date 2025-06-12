@@ -1658,6 +1658,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function for tier distribution calculation
+  function calculateTierDistribution(users: any[]) {
+    // Sort users by current month points (descending)
+    const sortedUsers = users.sort((a, b) => b.currentMonthPoints - a.currentMonthPoints);
+    
+    // Divide into three tiers
+    const totalUsers = sortedUsers.length;
+    const tier1Count = Math.ceil(totalUsers / 3); // Top third
+    const tier2Count = Math.ceil((totalUsers - tier1Count) / 2); // Middle third
+    const tier3Count = totalUsers - tier1Count - tier2Count; // Bottom third
+    
+    const tier1Users = sortedUsers.slice(0, tier1Count);
+    const tier2Users = sortedUsers.slice(tier1Count, tier1Count + tier2Count);
+    const tier3Users = sortedUsers.slice(tier1Count + tier2Count);
+    
+    // Get current pool settings (simplified calculation)
+    const averageMonthlyFee = 2000; // $20 in cents
+    const totalMonthlyRevenue = totalUsers * averageMonthlyFee;
+    const rewardPoolPercentage = 50; // 50% goes to rewards
+    const totalRewardPool = Math.floor(totalMonthlyRevenue * (rewardPoolPercentage / 100));
+    
+    // Pool distribution: Tier 1 (50%), Tier 2 (35%), Tier 3 (15%)
+    const tier1Pool = Math.floor(totalRewardPool * 0.5);
+    const tier2Pool = Math.floor(totalRewardPool * 0.35);
+    const tier3Pool = totalRewardPool - tier1Pool - tier2Pool;
+    
+    // Calculate individual rewards (50% of each tier gets rewards)
+    const tier1Winners = Math.floor(tier1Count * 0.5) || 1;
+    const tier2Winners = Math.floor(tier2Count * 0.5) || 1;
+    const tier3Winners = Math.floor(tier3Count * 0.5) || 1;
+    
+    const tier1Reward = tier1Winners > 0 ? Math.floor(tier1Pool / tier1Winners) : 0;
+    const tier2Reward = tier2Winners > 0 ? Math.floor(tier2Pool / tier2Winners) : 0;
+    const tier3Reward = tier3Winners > 0 ? Math.floor(tier3Pool / tier3Winners) : 0;
+    
+    // Create payout list with selected winners (simplified: top performers from each tier)
+    const payouts = [
+      ...tier1Users.slice(0, tier1Winners).map(user => ({
+        ...user,
+        tier: 'gold',
+        rewardAmount: tier1Reward,
+        selected: true
+      })),
+      ...tier2Users.slice(0, tier2Winners).map(user => ({
+        ...user,
+        tier: 'silver',
+        rewardAmount: tier2Reward,
+        selected: true
+      })),
+      ...tier3Users.slice(0, tier3Winners).map(user => ({
+        ...user,
+        tier: 'bronze',
+        rewardAmount: tier3Reward,
+        selected: true
+      }))
+    ];
+    
+    return {
+      totalPool: totalRewardPool,
+      tiers: {
+        tier1: { users: tier1Users, pool: tier1Pool, winners: tier1Winners, rewardPerWinner: tier1Reward },
+        tier2: { users: tier2Users, pool: tier2Pool, winners: tier2Winners, rewardPerWinner: tier2Reward },
+        tier3: { users: tier3Users, pool: tier3Pool, winners: tier3Winners, rewardPerWinner: tier3Reward }
+      },
+      payouts
+    };
+  }
+
+  // PayPal Disbursement Routes
+  app.post("/api/admin/disbursements/calculate", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      // Get all premium users with points
+      const premiumUsers = await storage.getPremiumUsersForRewards();
+      
+      // Calculate tier distributions based on current month points
+      const tierDistribution = calculateTierDistribution(premiumUsers);
+      
+      res.json({
+        success: true,
+        totalUsers: premiumUsers.length,
+        tierDistribution,
+        estimatedPayouts: tierDistribution.payouts
+      });
+    } catch (error) {
+      console.error("Error calculating disbursements:", error);
+      res.status(500).json({ error: "Failed to calculate disbursements" });
+    }
+  });
+
+  app.post("/api/admin/disbursements/process", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { selectedUsers, totalAmount } = req.body;
+
+      if (!selectedUsers || selectedUsers.length === 0) {
+        return res.status(400).json({ error: "No users selected for disbursement" });
+      }
+
+      // Prepare PayPal payout recipients
+      const recipients = selectedUsers.map((user: any) => ({
+        email: user.paypalEmail || user.email,
+        amount: user.rewardAmount, // Amount in cents
+        currency: "USD",
+        note: `FinBoost ${user.tier} tier reward for ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+        recipientId: `user_${user.id}_${Date.now()}`
+      }));
+
+      // Create PayPal batch payout
+      const { createPaypalPayout } = await import('./paypal');
+      const payoutResult = await createPaypalPayout(recipients);
+
+      // Save payout records to database
+      const payoutPromises = selectedUsers.map(async (user: any, index: number) => {
+        return db.insert(paypalPayouts).values({
+          userId: user.id,
+          paypalPayoutId: payoutResult.batch_header?.payout_batch_id,
+          paypalItemId: payoutResult.items?.[index]?.payout_item_id,
+          recipientEmail: user.paypalEmail || user.email,
+          amount: user.rewardAmount,
+          currency: "usd",
+          status: "pending",
+          reason: "monthly_reward",
+          tier: user.tier,
+          pointsUsed: user.currentMonthPoints,
+          processedAt: new Date(),
+          paypalResponse: JSON.stringify(payoutResult)
+        });
+      });
+
+      await Promise.all(payoutPromises);
+
+      res.json({
+        success: true,
+        batchId: payoutResult.batch_header?.payout_batch_id,
+        message: `Successfully initiated payouts to ${selectedUsers.length} users`,
+        totalAmount: totalAmount
+      });
+    } catch (error) {
+      console.error("Error processing disbursements:", error);
+      res.status(500).json({ error: "Failed to process disbursements" });
+    }
+  });
+
+  app.get("/api/admin/disbursements/history", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const payouts = await db
+        .select({
+          id: paypalPayouts.id,
+          userId: paypalPayouts.userId,
+          recipientEmail: paypalPayouts.recipientEmail,
+          amount: paypalPayouts.amount,
+          currency: paypalPayouts.currency,
+          status: paypalPayouts.status,
+          reason: paypalPayouts.reason,
+          tier: paypalPayouts.tier,
+          processedAt: paypalPayouts.processedAt,
+          createdAt: paypalPayouts.createdAt,
+          username: users.username,
+          email: users.email
+        })
+        .from(paypalPayouts)
+        .leftJoin(users, eq(paypalPayouts.userId, users.id))
+        .orderBy(desc(paypalPayouts.createdAt))
+        .limit(100);
+
+      res.json({ success: true, payouts });
+    } catch (error) {
+      console.error("Error fetching disbursement history:", error);
+      res.status(500).json({ error: "Failed to fetch disbursement history" });
+    }
+  });
+
+  app.post("/api/user/paypal-email", authenticateToken, async (req, res) => {
+    try {
+      const { paypalEmail } = req.body;
+      const userId = req.user.id;
+
+      if (!paypalEmail || !paypalEmail.includes("@")) {
+        return res.status(400).json({ error: "Valid PayPal email required" });
+      }
+
+      await db.update(users)
+        .set({ paypalEmail })
+        .where(eq(users.id, userId));
+
+      res.json({ success: true, message: "PayPal email updated successfully" });
+    } catch (error) {
+      console.error("Error updating PayPal email:", error);
+      res.status(500).json({ error: "Failed to update PayPal email" });
+    }
+  });
+
+  app.get("/api/user/payouts", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      const userPayouts = await db
+        .select()
+        .from(paypalPayouts)
+        .where(eq(paypalPayouts.userId, userId))
+        .orderBy(desc(paypalPayouts.createdAt));
+
+      res.json({ success: true, payouts: userPayouts });
+    } catch (error) {
+      console.error("Error fetching user payouts:", error);
+      res.status(500).json({ error: "Failed to fetch payouts" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

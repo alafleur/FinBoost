@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt, gte, ne, lte, between } from "drizzle-orm";
@@ -100,6 +100,21 @@ export interface IStorage {
     // === PAYPAL METHODS ===
     updateUserPayPalOrderId(userId: number, orderId: string): Promise<void>;
     updateUserMembershipStatus(userId: number, isPremium: boolean, paymentMethod: string): Promise<void>;
+    updateUserPayPalEmail(userId: number, paypalEmail: string): Promise<void>;
+    
+    // === PAYPAL PAYOUT METHODS ===
+    createPayPalPayout(payoutData: {
+      userId: number;
+      amount: number;
+      currency: string;
+      reason: string;
+      tier?: string;
+      recipientEmail: string;
+    }): Promise<any>;
+    updatePayPalPayoutStatus(payoutId: number, status: string, paypalResponse?: string): Promise<void>;
+    getPayPalPayoutsByUser(userId: number): Promise<any[]>;
+    getAllPendingPayouts(): Promise<any[]>;
+    getEligibleUsersForRewards(): Promise<any[]>;
 
     // === SUPPORT REQUEST METHODS ===
 
@@ -1979,7 +1994,6 @@ export class MemStorage implements IStorage {
       await db.update(users)
         .set({ 
           subscriptionStatus: isPremium ? 'active' : 'inactive',
-          paymentMethod: paymentMethod,
           subscriptionStartDate: isPremium ? new Date() : null
         })
         .where(eq(users.id, userId));
