@@ -6,6 +6,7 @@ import {
   HelpCircle,
   Award,
   ChevronRight,
+  ChevronLeft,
   BarChart2,
   TrendingUp,
   PiggyBank,
@@ -50,45 +51,7 @@ const FinancialPersona = {
   }
 };
 
-const CharacterGuide = ({ mood = "happy" }: { mood?: "happy" | "thinking" | "excited" }) => {
-  return (
-    <div className="relative">
-      <div className="w-24 h-24 md:w-28 md:h-28 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden relative">
-        {/* Coin character face */}
-        <div className="w-20 h-20 md:w-24 md:h-24 bg-yellow-400 rounded-full border-4 border-yellow-500 flex items-center justify-center">
-          {/* Eyes */}
-          {mood === "happy" && (
-            <>
-              <div className="absolute top-8 left-7 md:top-10 md:left-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              <div className="absolute top-8 right-7 md:top-10 md:right-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              {/* Happy mouth */}
-              <div className="absolute top-14 md:top-16 w-8 h-4 border-b-2 border-gray-800 rounded-full"></div>
-            </>
-          )}
-          {mood === "thinking" && (
-            <>
-              <div className="absolute top-8 left-7 md:top-10 md:left-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              <div className="absolute top-8 right-7 md:top-10 md:right-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              {/* Thinking mouth */}
-              <div className="absolute top-16 md:top-18 w-4 h-1 bg-gray-800 rounded-full"></div>
-            </>
-          )}
-          {mood === "excited" && (
-            <>
-              <div className="absolute top-8 left-7 md:top-10 md:left-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              <div className="absolute top-8 right-7 md:top-10 md:right-8 w-2 h-3 bg-gray-800 rounded-full"></div>
-              {/* Excited mouth */}
-              <div className="absolute top-14 md:top-16 w-6 h-6 border-2 border-gray-800 rounded-full"></div>
-            </>
-          )}
-        </div>
-      </div>
-      <div className="absolute -right-1 -top-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-        $
-      </div>
-    </div>
-  );
-};
+
 
 export default function FinancialQuiz() {
   const [step, setStep] = useState<number>(0);
@@ -183,8 +146,6 @@ export default function FinancialQuiz() {
   // Progress percentage
   const progress = step === 0 ? 0 : (step / questions.length) * 100;
   
-  const characterMood = persona ? "excited" : step < 2 ? "happy" : "thinking";
-  
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
       <div className="p-6 md:p-8">
@@ -199,12 +160,14 @@ export default function FinancialQuiz() {
               className="text-center"
             >
               <div className="flex justify-center mb-6">
-                <CharacterGuide mood="happy" />
+                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <BarChart2 className="h-8 w-8 text-indigo-600" />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Meet Coiny, Your Financial Guide</h3>
+              <h3 className="text-2xl font-bold mb-4">Financial Personality Assessment</h3>
               <p className="text-gray-600 mb-6">
-                Take this quick 4-question quiz to discover your financial personality
-                and get a personalized plan for earning rewards!
+                Take this quick assessment to discover your financial personality
+                and get personalized strategies for earning rewards!
               </p>
               <Button 
                 size="lg" 
@@ -224,12 +187,24 @@ export default function FinancialQuiz() {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-xl font-bold">Question {step + 1} of {questions.length}</h3>
-                  <Progress value={progress} className="h-2 w-44 mt-2" />
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">Question {step + 1} of {questions.length}</h3>
+                    <Progress value={progress} className="h-2 w-44 mt-2" />
+                  </div>
+                  {step > 0 && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setStep(step - 1)}
+                      className="ml-4"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Back
+                    </Button>
+                  )}
                 </div>
-                <CharacterGuide mood={characterMood} />
               </div>
               
               <h4 className="text-xl font-medium mb-6">{questions[step].question}</h4>
