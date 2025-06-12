@@ -92,6 +92,8 @@ export default function PayPalButton({
   };
 
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
     const loadPayPalSDK = async () => {
       try {
         if (!(window as any).paypal) {
@@ -100,10 +102,16 @@ export default function PayPalButton({
             ? "https://www.paypal.com/web-sdk/v6/core"
             : "https://www.sandbox.paypal.com/web-sdk/v6/core";
           script.async = true;
-          script.onload = () => initPayPal();
+          script.onload = () => {
+            initPayPal().then(fn => {
+              cleanup = fn;
+            }).catch(e => console.error("PayPal init error:", e));
+          };
           document.body.appendChild(script);
         } else {
-          await initPayPal();
+          initPayPal().then(fn => {
+            cleanup = fn;
+          }).catch(e => console.error("PayPal init error:", e));
         }
       } catch (e) {
         console.error("Failed to load PayPal SDK", e);
@@ -111,6 +119,12 @@ export default function PayPalButton({
     };
 
     loadPayPalSDK();
+
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, []);
   const initPayPal = async () => {
     try {
@@ -155,7 +169,8 @@ export default function PayPalButton({
         }
       };
     } catch (e) {
-      console.error(e);
+      console.error("PayPal initialization error:", e);
+      return () => {}; // Return empty cleanup function on error
     }
   };
 
