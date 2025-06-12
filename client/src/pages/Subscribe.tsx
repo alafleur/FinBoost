@@ -77,7 +77,7 @@ export default function Subscribe() {
 
   useEffect(() => {
     // Create Stripe subscription intent when component loads
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       navigate('/auth?mode=signup');
       return;

@@ -17,6 +17,7 @@ export default function PayPalButtonSimple({
   currency,
   intent,
 }: PayPalButtonProps) {
+  console.log('PayPal component rendered with props:', { amount, currency, intent });
   const paypalRef = useRef<HTMLDivElement>(null);
   const hasRendered = useRef(false);
 
@@ -160,5 +161,13 @@ export default function PayPalButtonSimple({
     };
   }, [amount, currency, intent]);
 
-  return <div ref={paypalRef} className="w-full"></div>;
+  return (
+    <div className="w-full">
+      <div ref={paypalRef} className="w-full min-h-[50px]"></div>
+      {/* Fallback message for debugging */}
+      <div className="text-xs text-gray-400 mt-2 text-center">
+        PayPal component loaded - initializing payment button...
+      </div>
+    </div>
+  );
 }
