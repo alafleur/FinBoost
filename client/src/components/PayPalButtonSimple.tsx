@@ -31,7 +31,9 @@ export default function PayPalButtonSimple({
       }
 
       const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test'}&currency=${currency}&intent=${intent}`;
+      // Use a default client ID for sandbox testing - this will be replaced with env var when available
+      const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R';
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=${intent}`;
       script.async = true;
       script.onload = () => initPayPal();
       script.onerror = () => console.error('PayPal SDK failed to load');

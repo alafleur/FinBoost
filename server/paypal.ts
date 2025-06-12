@@ -163,4 +163,7 @@ export async function loadPaypalDefault(req: Request, res: Response) {
     clientToken,
   });
 }
+
+// Export the orders controller for use in routes
+export { ordersController };
 // <END_EXACT_CODE>
