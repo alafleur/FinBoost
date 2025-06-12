@@ -25,7 +25,8 @@ import {
   Settings,
   HelpCircle,
   MessageCircle,
-  Send
+  Send,
+  BarChart2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FinBoostLogo } from "@/components/ui/finboost-logo";
@@ -614,6 +615,26 @@ export default function Dashboard() {
                 distributionInfo={distributionInfo}
                 onUpgradeClick={() => setLocation('/subscribe')}
               />
+            )}
+
+            {/* Financial Assessment Card for Desktop */}
+            {!isMobile && (
+              <div className="mb-6 sm:mb-8">
+                <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-indigo-900 flex items-center gap-2">
+                      <BarChart2 className="w-6 h-6 text-indigo-600" />
+                      Financial Personality Assessment
+                    </CardTitle>
+                    <p className="text-sm text-indigo-700">
+                      Discover your financial personality and get personalized strategies for maximizing your FinBoost rewards.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <FinancialQuiz />
+                  </CardContent>
+                </Card>
+              </div>
             )}
 
             {/* Monthly Reward Pool */}
