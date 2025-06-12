@@ -90,23 +90,35 @@ export default function Subscribe() {
         'Content-Type': 'application/json'
       }
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        const data = await res.json();
+        
+        if (!res.ok) {
+          // Handle authentication or other errors
+          if (res.status === 401) {
+            toast({
+              title: "Authentication Error",
+              description: "Please log in again to continue.",
+              variant: "destructive"
+            });
+            navigate('/auth?mode=login');
+            return;
+          }
+          
+          throw new Error(data.message || 'Subscription creation failed');
+        }
+        
         if (data.clientSecret) {
           setClientSecret(data.clientSecret);
-        } else if (data.error) {
-          toast({
-            title: "Error",
-            description: data.error.message,
-            variant: "destructive"
-          });
+        } else {
+          throw new Error('No client secret received');
         }
       })
       .catch((error) => {
         console.error('Error creating subscription:', error);
         toast({
           title: "Error",
-          description: "Failed to initialize payment. Please try again.",
+          description: error.message || "Failed to initialize payment. Please try again.",
           variant: "destructive"
         });
       });
