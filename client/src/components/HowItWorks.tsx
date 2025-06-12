@@ -12,7 +12,7 @@ export default function HowItWorks() {
     {
       id: 1,
       title: "1. Take Your Assessment",
-      description: "Start with our 2-minute financial health assessment to discover your personality type and get personalized lesson recommendations.",
+      description: "Take our quick assessment to discover your financial personality and get personalized strategies.",
       icon: <BarChart2 className="h-6 w-6" />,
     },
     {
