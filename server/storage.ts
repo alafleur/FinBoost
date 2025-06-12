@@ -115,6 +115,7 @@ export interface IStorage {
     getPayPalPayoutsByUser(userId: number): Promise<any[]>;
     getAllPendingPayouts(): Promise<any[]>;
     getEligibleUsersForRewards(): Promise<any[]>;
+    getPremiumUsersForRewards(): Promise<any[]>;
 
     // === SUPPORT REQUEST METHODS ===
 
@@ -2791,6 +2792,122 @@ export class MemStorage implements IStorage {
       }
     } catch (error) {
       console.error('Error converting theoretical points:', error);
+    }
+  }
+
+  // PayPal payout methods
+  async getPremiumUsersForRewards(): Promise<any[]> {
+    try {
+      const premiumUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        currentMonthPoints: users.currentMonthPoints,
+        totalPoints: users.totalPoints,
+        paypalEmail: users.paypalEmail,
+        subscriptionStatus: users.subscriptionStatus
+      })
+      .from(users)
+      .where(
+        and(
+          eq(users.subscriptionStatus, 'active'),
+          gte(users.currentMonthPoints, 1)
+        )
+      )
+      .orderBy(desc(users.currentMonthPoints));
+
+      return premiumUsers;
+    } catch (error) {
+      console.error('Error getting premium users for rewards:', error);
+      return [];
+    }
+  }
+
+  async updateUserPayPalEmail(userId: number, paypalEmail: string): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ paypalEmail })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error updating PayPal email:', error);
+      throw error;
+    }
+  }
+
+  async createPayPalPayout(payoutData: {
+    userId: number;
+    amount: number;
+    currency: string;
+    reason: string;
+    tier?: string;
+    recipientEmail: string;
+  }): Promise<any> {
+    try {
+      const [payout] = await db.insert(paypalPayouts).values({
+        userId: payoutData.userId,
+        recipientEmail: payoutData.recipientEmail,
+        amount: payoutData.amount,
+        currency: payoutData.currency,
+        status: 'pending',
+        reason: payoutData.reason,
+        tier: payoutData.tier,
+        processedAt: new Date()
+      }).returning();
+      
+      return payout;
+    } catch (error) {
+      console.error('Error creating PayPal payout:', error);
+      throw error;
+    }
+  }
+
+  async updatePayPalPayoutStatus(payoutId: number, status: string, paypalResponse?: string): Promise<void> {
+    try {
+      await db.update(paypalPayouts)
+        .set({ 
+          status,
+          paypalResponse,
+          processedAt: new Date()
+        })
+        .where(eq(paypalPayouts.id, payoutId));
+    } catch (error) {
+      console.error('Error updating PayPal payout status:', error);
+      throw error;
+    }
+  }
+
+  async getPayPalPayoutsByUser(userId: number): Promise<any[]> {
+    try {
+      return await db.select()
+        .from(paypalPayouts)
+        .where(eq(paypalPayouts.userId, userId))
+        .orderBy(desc(paypalPayouts.createdAt));
+    } catch (error) {
+      console.error('Error getting PayPal payouts by user:', error);
+      return [];
+    }
+  }
+
+  async getAllPendingPayouts(): Promise<any[]> {
+    try {
+      return await db.select()
+        .from(paypalPayouts)
+        .where(eq(paypalPayouts.status, 'pending'))
+        .orderBy(desc(paypalPayouts.createdAt));
+    } catch (error) {
+      console.error('Error getting pending payouts:', error);
+      return [];
+    }
+  }
+
+  async getEligibleUsersForRewards(): Promise<any[]> {
+    try {
+      return await this.getPremiumUsersForRewards();
+    } catch (error) {
+      console.error('Error getting eligible users for rewards:', error);
+      return [];
     }
   }
 }
