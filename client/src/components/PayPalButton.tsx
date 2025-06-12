@@ -92,7 +92,7 @@ export default function PayPalButton({
   };
 
   useEffect(() => {
-    const loadPayPalSDK = async () => {
+    const loadPayPalSDK = () => {
       try {
         if (!(window as any).paypal) {
           const script = document.createElement("script");
@@ -100,10 +100,12 @@ export default function PayPalButton({
             ? "https://www.paypal.com/web-sdk/v6/core"
             : "https://www.sandbox.paypal.com/web-sdk/v6/core";
           script.async = true;
-          script.onload = () => initPayPal();
+          script.onload = () => {
+            setTimeout(() => initPayPal(), 100);
+          };
           document.body.appendChild(script);
         } else {
-          initPayPal();
+          setTimeout(() => initPayPal(), 100);
         }
       } catch (e) {
         console.error("Failed to load PayPal SDK", e);
@@ -114,22 +116,32 @@ export default function PayPalButton({
   }, []);
   const initPayPal = async () => {
     try {
+      // Check if PayPal SDK is available
+      if (!(window as any).paypal) {
+        console.error("PayPal SDK not loaded");
+        return;
+      }
+
       const clientToken: string = await fetch("/setup")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to fetch client token');
+          return res.json();
+        })
         .then((data) => {
+          if (!data.clientToken) throw new Error('No client token received');
           return data.clientToken;
         });
+
       const sdkInstance = await (window as any).paypal.createInstance({
         clientToken,
         components: ["paypal-payments"],
       });
 
-      const paypalCheckout =
-            sdkInstance.createPayPalOneTimePaymentSession({
-              onApprove,
-              onCancel,
-              onError,
-            });
+      const paypalCheckout = sdkInstance.createPayPalOneTimePaymentSession({
+        onApprove,
+        onCancel,
+        onError,
+      });
 
       const onClick = async () => {
         try {
@@ -139,13 +151,14 @@ export default function PayPalButton({
             checkoutOptionsPromise,
           );
         } catch (e) {
-          console.error(e);
+          console.error("PayPal checkout error:", e);
         }
       };
 
       const paypalButton = document.getElementById("paypal-button");
-
       if (paypalButton) {
+        // Remove any existing listeners first
+        paypalButton.removeEventListener("click", onClick);
         paypalButton.addEventListener("click", onClick);
       }
     } catch (e) {
