@@ -1,46 +1,21 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useSubscribe } from "@/hooks/use-subscribe";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { trackEvent } from "@/lib/analytics";
+import { useLocation } from "wouter";
 import MembershipGrowthChart from "./MembershipGrowthChart";
+import { BarChart2, Users, TrendingUp } from "lucide-react";
 
 interface GrowthCTAProps {
   onSubscribeSuccess: () => void;
 }
 
-const subscribeSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
-
-type SubscribeFormValues = z.infer<typeof subscribeSchema>;
-
 export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
-  const { mutate: subscribe, isPending } = useSubscribe();
-  const [memberCount] = useState("5,000+");
+  const [, navigate] = useLocation();
+  const [memberCount] = useState("2,400+");
 
-  const form = useForm<SubscribeFormValues>({
-    resolver: zodResolver(subscribeSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const onSubmit = (values: SubscribeFormValues) => {
-    trackEvent("subscribe_attempt", "growth_cta_section");
-    subscribe(
-      { email: values.email },
-      {
-        onSuccess: () => {
-          trackEvent("subscribe_success", "growth_cta_section");
-          onSubscribeSuccess();
-          form.reset();
-        },
-      }
-    );
+  const handleStartLearning = () => {
+    trackEvent("cta_click", "start_learning_growth");
+    navigate("/auth?mode=signup");
   };
 
   return (
@@ -49,11 +24,11 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
         {/* Section Header */}
         <div className="text-center mb-8">
           <h3 className="font-heading font-bold text-2xl md:text-3xl mb-4 text-gray-800">
-            Join the Growing Community
+            Ready to Transform Your Financial Future?
           </h3>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            The earlier you join, the more you benefit from our collective growth. 
-            Be part of building something bigger than yourself.
+            Join thousands who are already improving their financial health and earning rewards. 
+            Start with your free assessment today.
           </p>
         </div>
         
@@ -63,31 +38,33 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
         {/* CTA Section */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center mt-8">
           <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
-            Ready to join? Get early access to our financial community platform.
+            Get your personalized financial health score and start learning immediately.
           </p>
           
           <div className="max-w-md mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 h-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none"
-                value={form.watch("email")}
-                onChange={(e) => form.setValue("email", e.target.value)}
-              />
-              <Button 
-                type="button" 
-                disabled={isPending}
-                onClick={form.handleSubmit(onSubmit)}
-                className="h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-lg transition duration-300 whitespace-nowrap"
-              >
-                {isPending ? "Joining..." : "Join Waitlist"}
-              </Button>
+            <Button 
+              onClick={handleStartLearning}
+              size="lg"
+              className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-lg transition duration-300"
+            >
+              <BarChart2 className="h-5 w-5 mr-2" />
+              Start Your Financial Assessment
+            </Button>
+            
+            <div className="flex items-center justify-center space-x-8 mt-4 text-sm text-gray-600">
+              <div className="flex items-center">
+                <Users className="h-4 w-4 mr-1 text-blue-600" />
+                Free to start
+              </div>
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                Instant insights
+              </div>
             </div>
           </div>
           
           <p className="text-gray-500 text-sm mt-4">
-            Join {memberCount} members already building the future of financial rewards
+            Join {memberCount} learners already improving their financial health
           </p>
         </div>
       </div>

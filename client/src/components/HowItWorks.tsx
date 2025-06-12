@@ -1,4 +1,4 @@
-import { CheckCircle, BarChart3, Trophy } from "lucide-react";
+import { BarChart2, BookOpen, Trophy } from "lucide-react";
 
 interface Step {
   id: number;
@@ -11,20 +11,20 @@ export default function HowItWorks() {
   const steps: Step[] = [
     {
       id: 1,
-      title: "1. Earn Points",
-      description: "Complete short tutorials, quizzes, refer friends, or take action like uploading proof of debt repayment. The more you participate, the more points you earn.",
-      icon: <CheckCircle className="h-6 w-6" />,
+      title: "1. Take Your Assessment",
+      description: "Start with our 2-minute financial health assessment to discover your personality type and get personalized lesson recommendations.",
+      icon: <BarChart2 className="h-6 w-6" />,
     },
     {
       id: 2,
-      title: "2. Enter Monthly Tiers",
-      description: "Every month, members are ranked into 3 tiers based on their point totals. Each tier earns a share of the reward pool — top tier gets the most.",
-      icon: <BarChart3 className="h-6 w-6" />,
+      title: "2. Learn & Apply",
+      description: "Complete bite-sized lessons, quizzes, and take real financial actions. Track your progress as you build essential money management skills.",
+      icon: <BookOpen className="h-6 w-6" />,
     },
     {
       id: 3,
-      title: "3. Win Rewards — Randomly & Fairly",
-      description: "Half of each tier is selected at random to receive cash rewards. Your points help you qualify — and the more points, the better your tier and payout odds.",
+      title: "3. Earn Rewards",
+      description: "Get points for every lesson completed and action taken. Join our monthly reward pools and earn real cash for your financial progress.",
       icon: <Trophy className="h-6 w-6" />,
     },
   ];
@@ -34,8 +34,8 @@ export default function HowItWorks() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">🧭 How It Works</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">Our platform makes financial education rewarding through a simple three-step process</p>
-          <p className="text-lg font-medium text-primary-600 mt-4"><span className="font-bold">Break the cycle. Build together.</span> A new approach to financial wellness.</p>
+          <p className="text-gray-600 max-w-2xl mx-auto">Get started in minutes and begin your financial transformation journey today</p>
+          <p className="text-lg font-medium text-primary-600 mt-4"><span className="font-bold">Assess. Learn. Earn.</span> Your path to financial wellness starts now.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

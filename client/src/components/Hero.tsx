@@ -64,38 +64,32 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 </div>
               </div>
 
-              <h3 className="font-heading font-semibold text-xl mb-4 text-center">Financial Progress Made Simple</h3>
+              <h3 className="font-heading font-semibold text-xl mb-4 text-center">Your Financial Assessment Reveals</h3>
 
               <ul className="space-y-4 mt-6">
                 <li className="flex items-center">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300 flex items-center justify-center">
+                    <BarChart2 className="h-4 w-4 text-blue-600" />
                   </div>
-                  <p className="ml-3 text-gray-700">Learn essential financial skills</p>
+                  <p className="ml-3 text-gray-700">Your financial personality type</p>
                 </li>
                 <li className="flex items-center">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <TrendingUp className="h-4 w-4 text-green-600" />
                   </div>
-                  <p className="ml-3 text-gray-700">Take action and earn points</p>
+                  <p className="ml-3 text-gray-700">Personalized improvement areas</p>
                 </li>
                 <li className="flex items-center">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 border border-green-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 border border-purple-300 flex items-center justify-center">
+                    <Award className="h-4 w-4 text-purple-600" />
                   </div>
-                  <p className="ml-3 text-gray-700">Receive cash rewards monthly</p>
+                  <p className="ml-3 text-gray-700">Free lessons tailored for you</p>
                 </li>
               </ul>
 
               <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-                <p className="text-gray-600">Join a community that grows together</p>
-                <p className="text-primary-600 font-medium mt-2">The more we learn, the more we earn</p>
+                <p className="text-gray-600">Plus unlock monthly cash rewards</p>
+                <p className="text-primary-600 font-medium mt-2">Learn → Earn → Grow Together</p>
                 <div className="mt-4 flex justify-center">
                   <div className="transform hover:scale-105 transition-transform">
                     <QuizDialog />
