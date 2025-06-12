@@ -238,9 +238,14 @@ export default function Auth() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <FinBoostLogo size="lg" />
+            <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+              <FinBoostLogo size="lg" />
+            </Link>
           </div>
           <p className="text-gray-600">Your financial education journey starts here</p>
+          <Link href="/" className="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block">
+            ← Back to Home
+          </Link>
         </div>
 
         <Card>
