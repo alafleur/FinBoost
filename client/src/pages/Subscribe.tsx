@@ -1,256 +1,222 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useEffect } from 'react';
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Crown, Star, TrendingUp, Users, CheckCircle, ArrowLeft } from 'lucide-react';
-import { trackEvent } from "@/lib/analytics";
-import { trackGTMConversion, trackGTMUserAction } from "@/lib/gtm";
+import PayPalButton from "@/components/PayPalButton";
+import { CheckCircle, DollarSign, Trophy, Users } from "lucide-react";
+import { useLocation } from "wouter";
 
-const SubscribeForm = () => {
+// Make sure to call `loadStripe` outside of a component's render to avoid
+// recreating the `Stripe` object on every render.
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+const StripeSubscribeForm = () => {
+  const stripe = useStripe();
+  const elements = useElements();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [, setLocation] = useLocation();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    try {
-      // Get user token
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLocation('/auth');
-        return;
-      }
+    if (!stripe || !elements) {
+      return;
+    }
 
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsProcessing(true);
 
-      // Update user subscription status
-      const response = await fetch('/api/upgrade-to-premium', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: window.location.origin + "/dashboard",
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to upgrade subscription');
-      }
-
-      trackEvent('purchase', 'subscription', 'membership_upgrade', 20);
-      trackGTMConversion('subscription_purchase', 20, 'USD');
-      trackGTMUserAction('subscription_activated', undefined, {
-        plan: 'premium',
-        value: 20,
-        currency: 'USD'
-      });
+    if (error) {
       toast({
-        title: "Welcome as a Member!",
-        description: "Your membership is now active. Redirecting to dashboard...",
-      });
-      
-      setTimeout(() => setLocation('/dashboard'), 2000);
-    } catch (error) {
-      console.error('Subscription upgrade error:', error);
-      toast({
-        title: "Upgrade Failed",
-        description: "Please try again or contact support.",
+        title: "Payment Failed",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      toast({
+        title: "Payment Successful",
+        description: "Welcome to FinBoost Premium!",
+      });
     }
-  };
+
+    setIsProcessing(false);
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Demo Payment Form */}
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Card Information
-            </label>
-            <div className="border rounded-md p-3 bg-white">
-              <input 
-                type="text" 
-                placeholder="1234 1234 1234 1234" 
-                className="w-full border-none outline-none text-gray-700"
-                defaultValue="4242 4242 4242 4242"
-                readOnly
-              />
-              <div className="flex gap-4 mt-2 pt-2 border-t">
-                <input 
-                  type="text" 
-                  placeholder="MM / YY" 
-                  className="flex-1 border-none outline-none text-gray-700"
-                  defaultValue="12 / 28"
-                  readOnly
-                />
-                <input 
-                  type="text" 
-                  placeholder="CVC" 
-                  className="w-16 border-none outline-none text-gray-700"
-                  defaultValue="123"
-                  readOnly
-                />
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Cardholder Name
-            </label>
-            <input 
-              type="text" 
-              className="w-full border rounded-md p-3 bg-gray-50"
-              placeholder="Your Name"
-              defaultValue="Demo User"
-              readOnly
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
-          <strong>Demo Mode:</strong> This is a demonstration of the subscription flow. 
-          In production, this would process real payments through Stripe.
-        </p>
-      </div>
-
+      <PaymentElement />
       <Button 
         type="submit" 
-        disabled={isLoading}
-        className="w-full"
-        size="lg"
+        className="w-full" 
+        disabled={!stripe || isProcessing}
       >
-        {isLoading ? "Processing Payment..." : "Start Membership - $20/month"}
+        {isProcessing ? "Processing..." : "Subscribe with Stripe"}
       </Button>
     </form>
   );
 };
 
 export default function Subscribe() {
-  const [, setLocation] = useLocation();
+  const [clientSecret, setClientSecret] = useState("");
+  const [activeTab, setActiveTab] = useState("stripe");
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    // Create Stripe subscription intent when component loads
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/auth?mode=signup');
+      return;
+    }
+
+    apiRequest("POST", "/api/create-subscription", {}, {
+      'Authorization': `Bearer ${token}`
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+        } else if (data.error) {
+          toast({
+            title: "Error",
+            description: data.error.message,
+            variant: "destructive"
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error creating subscription:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize payment. Please try again.",
+          variant: "destructive"
+        });
+      });
+  }, []);
+
+  const benefits = [
+    {
+      icon: <Trophy className="h-5 w-5 text-blue-600" />,
+      title: "Access to Monthly Reward Pools",
+      description: "Compete for real cash prizes every month"
+    },
+    {
+      icon: <DollarSign className="h-5 w-5 text-green-600" />,
+      title: "Higher Earning Potential",
+      description: "Unlock premium lessons with bigger point rewards"
+    },
+    {
+      icon: <Users className="h-5 w-5 text-purple-600" />,
+      title: "Exclusive Community Access",
+      description: "Join premium-only discussions and events"
+    },
+    {
+      icon: <CheckCircle className="h-5 w-5 text-orange-600" />,
+      title: "Priority Support",
+      description: "Get faster responses to your questions"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <Button 
-              variant="ghost" 
-              onClick={() => setLocation('/dashboard')}
-              className="mb-4 text-gray-600 hover:text-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Crown className="w-8 h-8 text-yellow-500" />
-              <h1 className="text-4xl font-bold text-gray-900">FinBoost Membership</h1>
-            </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Unlock your full financial potential with member features, exclusive content, and real reward earnings.
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-4xl mx-auto py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Upgrade to FinBoost Premium
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Join thousands of members earning real cash while learning about money
+          </p>
+          <div className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold">
+            Only $20/month
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-start">
-            {/* Benefits Section */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500" />
-                    Premium Benefits
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">Access All 27 Learning Modules</p>
-                      <p className="text-sm text-gray-600">Complete financial education from basics to advanced strategies</p>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <Card>
+            <CardHeader>
+              <CardTitle>Premium Benefits</CardTitle>
+              <CardDescription>
+                What you get with your FinBoost Premium membership
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {benefit.icon}
                   </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">Earn Real Points & Rewards</p>
-                      <p className="text-sm text-gray-600">Every action counts toward monthly cash distributions</p>
-                    </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">{benefit.title}</h3>
+                    <p className="text-sm text-gray-600">{benefit.description}</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">Monthly Reward Pool</p>
-                      <p className="text-sm text-gray-600">Share in 55% of all premium subscriptions collected</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">Priority Support</p>
-                      <p className="text-sm text-gray-600">Get help when you need it most</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold">Advanced Analytics</p>
-                      <p className="text-sm text-gray-600">Track your learning progress and earnings</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Current Pool Display */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    Current Month Rewards
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">$11.00</div>
-                    <p className="text-sm text-gray-600 mb-4">Available in reward pool</p>
-                    <div className="flex items-center justify-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>1 Premium Member</span>
-                      </div>
-                      <Badge variant="outline">55% Pool Share</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Payment Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">Choose Premium</CardTitle>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-gray-800 mb-2">$20</div>
-                  <p className="text-gray-600">per month • Cancel anytime</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <SubscribeForm />
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  By subscribing, you agree to our terms of service. Your subscription will automatically renew monthly unless canceled.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Choose Your Payment Method</CardTitle>
+              <CardDescription>
+                Select how you'd like to pay for your premium membership
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="stripe">Credit Card</TabsTrigger>
+                  <TabsTrigger value="paypal">PayPal</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="stripe" className="mt-6">
+                  {clientSecret ? (
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <StripeSubscribeForm />
+                    </Elements>
+                  ) : (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="paypal" className="mt-6">
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600 mb-4">
+                      Pay securely with PayPal or your credit card through PayPal
+                    </p>
+                    <PayPalButton 
+                      amount="20.00"
+                      currency="USD"
+                      intent="CAPTURE"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-500">
+            Cancel anytime. No long-term commitments. Your subscription helps fund the monthly reward pools.
+          </p>
         </div>
       </div>
     </div>
