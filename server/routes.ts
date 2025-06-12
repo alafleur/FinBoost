@@ -1029,77 +1029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe subscription routes
-  app.post('/api/create-subscription', async (req, res) => {
-    if (!req.session?.userId) {
-      return res.status(401).json({ success: false, message: "Authentication required" });
-    }
-
-    if (!stripe) {
-      return res.status(500).json({ success: false, message: "Stripe not configured" });
-    }
-
-    try {
-      const user = await storage.getUser(req.session.userId);
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-
-      // Check if user already has an active subscription
-      if (user.stripeSubscriptionId && user.subscriptionStatus === 'active') {
-        return res.json({ 
-          success: true, 
-          message: "User already has active subscription",
-          subscriptionId: user.stripeSubscriptionId 
-        });
-      }
-
-      // Create or get Stripe customer
-      let customerId = user.stripeCustomerId;
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user.email,
-          name: user.username,
-          metadata: {
-            userId: user.id.toString()
-          }
-        });
-        customerId = customer.id;
-        await storage.updateUser(user.id, { stripeCustomerId: customerId });
-      }
-
-      // Create subscription
-      const subscription = await stripe.subscriptions.create({
-        customer: customerId,
-        items: [{
-          price: process.env.STRIPE_PRICE_ID,
-        }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: { save_default_payment_method: 'on_subscription' },
-        expand: ['latest_invoice.payment_intent'],
-      });
-
-      // Update user with subscription info
-      await storage.updateUser(user.id, {
-        stripeSubscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
-        nextBillingDate: new Date(subscription.current_period_end * 1000)
-      });
-
-      const latestInvoice = subscription.latest_invoice as any;
-      const clientSecret = latestInvoice?.payment_intent?.client_secret;
-
-      res.json({
-        success: true,
-        subscriptionId: subscription.id,
-        clientSecret: clientSecret,
-      });
-
-    } catch (error: any) {
-      console.error('Subscription creation error:', error);
-      res.status(500).json({ success: false, message: error.message });
-    }
-  });
+  // Removed duplicate session-based subscription endpoint - using token-based version below
 
   // Get subscription status
   app.get('/api/subscription/status', async (req, res) => {
