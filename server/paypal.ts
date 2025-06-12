@@ -133,9 +133,26 @@ export async function capturePaypalOrder(req: Request, res: Response) {
     const jsonResponse = JSON.parse(String(body));
     const httpStatusCode = httpResponse.statusCode;
 
+    // If payment was successful, update user subscription status and pool
+    if (httpStatusCode === 200 || httpStatusCode === 201) {
+      // Get user from session or token if available
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (token) {
+        const { storage } = await import('./storage');
+        const user = await storage.getUserByToken(token);
+        if (user && user.subscriptionStatus !== 'active') {
+          // Update user subscription status
+          await storage.updateUserSubscriptionStatus(user.id, 'active');
+          
+          console.log(`✅ PayPal payment successful - User ${user.id} upgraded to premium`);
+          console.log(`💰 Monthly pool will automatically increase with new premium member`);
+        }
+      }
+    }
+
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error("Failed to create order:", error);
+    console.error("Failed to capture order:", error);
     res.status(500).json({ error: "Failed to capture order." });
   }
 }

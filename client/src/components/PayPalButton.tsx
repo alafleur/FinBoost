@@ -46,11 +46,18 @@ export default function PayPalButton({
   };
 
   const captureOrder = async (orderId: string) => {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`/order/${orderId}/capture`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
     });
     const data = await response.json();
 
@@ -61,6 +68,19 @@ export default function PayPalButton({
     console.log("onApprove", data);
     const orderData = await captureOrder(data.orderId);
     console.log("Capture result", orderData);
+    
+    // If payment was successful, refresh the page to update user data
+    if (orderData && (orderData.status === 'COMPLETED' || orderData.httpStatusCode === 200)) {
+      // Clear any cached user data to force refresh
+      localStorage.removeItem('user');
+      
+      alert('Payment successful! You are now a premium member. Redirecting to dashboard...');
+      
+      // Force a complete page reload to refresh all data
+      setTimeout(() => {
+        window.location.href = '/dashboard?refresh=true';
+      }, 1000);
+    }
   };
 
   const onCancel = async (data: any) => {
