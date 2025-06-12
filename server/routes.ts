@@ -1365,7 +1365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUserStripeCustomerId(user.id, stripeCustomerId);
       }
 
-      // Create subscription
+      // Create subscription with immediate payment intent creation
       const subscription = await stripe.subscriptions.create({
         customer: stripeCustomerId,
         items: [{
@@ -1379,31 +1379,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store subscription ID
       await storage.updateUserStripeSubscriptionId(user.id, subscription.id);
 
-      const invoice = subscription.latest_invoice as any;
-      const paymentIntent = invoice?.payment_intent;
-      
-      // Extract client secret from different possible paths
+      // Extract or create client secret for payment
       let clientSecret = null;
-      if (paymentIntent?.client_secret) {
-        clientSecret = paymentIntent.client_secret;
-      } else if (invoice?.payment_intent?.client_secret) {
-        clientSecret = invoice.payment_intent.client_secret;
-      } else if (typeof invoice?.payment_intent === 'string') {
-        // If payment_intent is just an ID, we need to retrieve it
-        try {
-          const pi = await stripe.paymentIntents.retrieve(invoice.payment_intent);
-          clientSecret = pi.client_secret;
-        } catch (e) {
-          console.error('Error retrieving payment intent:', e);
-        }
-      }
+      const subInvoice = subscription.latest_invoice as any;
       
+      if (subInvoice?.payment_intent?.client_secret) {
+        clientSecret = subInvoice.payment_intent.client_secret;
+      } else {
+        // Create a standalone payment intent for the subscription amount
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: 2000, // $20.00 in cents
+          currency: 'usd',
+          customer: stripeCustomerId,
+          metadata: {
+            subscription_id: subscription.id,
+            user_id: user.id.toString()
+          }
+        });
+        clientSecret = paymentIntent.client_secret;
+      }
+
       console.log('Subscription created:', {
         subscriptionId: subscription.id,
-        hasInvoice: !!invoice,
-        hasPaymentIntent: !!paymentIntent,
-        clientSecret: clientSecret ? 'Present' : 'Missing',
-        invoiceType: typeof invoice?.payment_intent
+        clientSecret: clientSecret ? 'Present' : 'Missing'
       });
 
       res.json({
