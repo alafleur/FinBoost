@@ -1381,6 +1381,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const invoice = subscription.latest_invoice as any;
       const paymentIntent = invoice?.payment_intent;
+      
+      console.log('Subscription created:', {
+        subscriptionId: subscription.id,
+        hasInvoice: !!invoice,
+        hasPaymentIntent: !!paymentIntent,
+        clientSecret: paymentIntent?.client_secret ? 'Present' : 'Missing'
+      });
 
       res.json({
         subscriptionId: subscription.id,
