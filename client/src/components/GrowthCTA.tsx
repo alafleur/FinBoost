@@ -47,7 +47,7 @@ export default function GrowthCTA({ onSubscribeSuccess }: GrowthCTAProps) {
               size="lg"
               className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-lg transition duration-300"
             >
-              Start Learning Free
+              Join the FinBoost Movement
             </Button>
             
             <div className="flex items-center justify-center space-x-8 mt-4 text-sm text-gray-600">

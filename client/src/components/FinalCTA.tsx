@@ -32,7 +32,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
             size="lg"
             className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 hover:from-blue-600 hover:via-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-2xl transition duration-300 transform hover:scale-105 border border-blue-400"
           >
-            Start Learning Free
+            Join the FinBoost Movement
           </Button>
           
           <div className="flex items-center justify-center space-x-8 text-sm text-blue-200">
