@@ -172,9 +172,9 @@ export default function FinancialQuiz() {
               <Button 
                 size="lg" 
                 onClick={startQuiz}
-                className="bg-primary-500 hover:bg-primary-600"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
               >
-                Start Quiz <ChevronRight className="ml-2 h-4 w-4" />
+                Start Assessment <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>
           )}
@@ -209,18 +209,21 @@ export default function FinancialQuiz() {
               
               <h4 className="text-xl font-medium mb-6">{questions[step].question}</h4>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {questions[step].options.map((option) => (
-                  <div 
+                  <label 
                     key={option.id}
-                    onClick={() => handleAnswer(questions[step].id, option.id)}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 cursor-pointer transition-all duration-200 flex items-center"
+                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all duration-200"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
-                      {option.icon}
-                    </div>
-                    <span>{option.text}</span>
-                  </div>
+                    <input
+                      type="radio"
+                      name={`question-${questions[step].id}`}
+                      value={option.id}
+                      onChange={() => handleAnswer(questions[step].id, option.id)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mr-3"
+                    />
+                    <span className="text-gray-700">{option.text}</span>
+                  </label>
                 ))}
               </div>
               
