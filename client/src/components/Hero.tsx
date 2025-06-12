@@ -1,49 +1,21 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useSubscribe } from "@/hooks/use-subscribe";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 import QuizDialog from "@/components/QuizDialog";
-import { BarChart2 } from "lucide-react";
-import { FinBoostLogo } from "@/components/ui/finboost-logo";
+import { BarChart2, TrendingUp, Award, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 interface HeroProps {
   onSubscribeSuccess: () => void;
 }
 
-const subscribeSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
-
-type SubscribeFormValues = z.infer<typeof subscribeSchema>;
-
 export default function Hero({ onSubscribeSuccess }: HeroProps) {
-  const { mutate: subscribe, isPending } = useSubscribe();
-  const [memberCount] = useState("5,000+");
+  const [, navigate] = useLocation();
+  const [memberCount] = useState("2,400+");
 
-  const form = useForm<SubscribeFormValues>({
-    resolver: zodResolver(subscribeSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const onSubmit = (values: SubscribeFormValues) => {
-    trackEvent("subscribe_attempt", "hero_section");
-    subscribe(
-      { email: values.email },
-      {
-        onSuccess: () => {
-          trackEvent("subscribe_success", "hero_section");
-          onSubscribeSuccess();
-          form.reset();
-        },
-      }
-    );
+  const handleStartLearning = () => {
+    trackEvent("cta_click", "start_learning_hero");
+    navigate("/auth?mode=signup");
   };
 
   return (
@@ -52,31 +24,37 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight text-gray-800">
-              Turn Financial Stress into Financial Progress <span className="gradient-text">– Together</span>
+              Get Your Free Financial Health Score <span className="gradient-text">+ Start Learning</span>
             </h1>
             <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-              Earn monthly cash rewards while leveling up your money smarts, with the power of the collective behind you.
+              Take our 2-minute assessment to discover your financial personality and unlock personalized lessons + monthly cash rewards.
             </p>
-            <div className="max-w-lg" id="waitlist-signup-form">
-              <div className="space-y-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-300 focus:border-primary-500 focus:outline-none text-lg"
-                  value={form.watch("email")}
-                  onChange={(e) => form.setValue("email", e.target.value)}
-                />
-                <button 
-                  type="button" 
-                  disabled={isPending}
-                  onClick={form.handleSubmit(onSubmit)}
-                  className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
-                >
-                  {isPending ? "Joining..." : "Join the Waitlist"}
-                </button>
+            <div className="max-w-lg space-y-4">
+              <Button 
+                onClick={handleStartLearning}
+                size="lg"
+                className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
+              >
+                <BarChart2 className="h-5 w-5 mr-2" />
+                Get My Financial Score Free
+              </Button>
+              
+              <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <Award className="h-4 w-4 mr-1 text-blue-600" />
+                  Free lessons
+                </div>
+                <div className="flex items-center">
+                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                  Personalized insights
+                </div>
+                <div className="flex items-center">
+                  <Users className="h-4 w-4 mr-1 text-purple-600" />
+                  Cash rewards
+                </div>
               </div>
             </div>
-            <p className="text-gray-500 text-sm mt-3">Join {memberCount} members already on the waitlist</p>
+            <p className="text-gray-500 text-sm mt-3">Join {memberCount} learners already improving their financial health</p>
           </div>
           <div className="relative">
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
