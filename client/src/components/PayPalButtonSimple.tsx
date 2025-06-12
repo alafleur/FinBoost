@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 
 interface PayPalButtonProps {
@@ -27,22 +28,30 @@ export default function PayPalButtonSimple({
     const loadPayPalScript = () => {
       // Check if script already exists
       if (document.querySelector('script[src*="paypal.com/sdk"]')) {
+        console.log('PayPal script already exists, initializing...');
         setTimeout(() => initPayPal(), 100);
         return;
       }
 
+      console.log('Loading PayPal SDK...');
       const script = document.createElement('script');
-      // Use a default client ID for sandbox testing - this will be replaced with env var when available
+      
+      // Use environment variable or fallback to sandbox client ID
       const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R';
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=${intent}`;
+      
+      // Correct PayPal SDK URL with proper parameters
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=${intent}&components=buttons`;
       script.async = true;
+      
       script.onload = () => {
         console.log('PayPal SDK loaded successfully');
         setTimeout(() => initPayPal(), 100);
       };
+      
       script.onerror = () => {
         console.error('PayPal SDK failed to load');
       };
+      
       document.head.appendChild(script);
     };
 
@@ -70,13 +79,14 @@ export default function PayPalButtonSimple({
         window.paypal.Buttons({
           createOrder: async () => {
             try {
-              console.log('Creating PayPal order...');
+              console.log('Creating PayPal order with amount:', amount);
               const token = localStorage.getItem('token');
               if (!token) {
                 throw new Error('No authentication token');
               }
               
-              const response = await fetch('/api/paypal/create-order', {
+              // Match the correct server route
+              const response = await fetch('/api/paypal/order', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -89,13 +99,19 @@ export default function PayPalButtonSimple({
                 })
               });
               
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+              }
+              
               const data = await response.json();
               console.log('PayPal order response:', data);
               
-              if (data.success) {
-                return data.orderId;
+              if (data.id) {
+                console.log('Order created successfully with ID:', data.id);
+                return data.id;
               }
-              throw new Error(data.error || 'Order creation failed');
+              throw new Error('No order ID received');
             } catch (error) {
               console.error('Error creating PayPal order:', error);
               throw error;
@@ -104,9 +120,11 @@ export default function PayPalButtonSimple({
           
           onApprove: async (data: any) => {
             try {
-              console.log('PayPal payment approved:', data);
+              console.log('PayPal payment approved with order ID:', data.orderID);
               const token = localStorage.getItem('token');
-              const response = await fetch(`/api/paypal/capture-order/${data.orderID}`, {
+              
+              // Match the correct server route
+              const response = await fetch(`/api/paypal/order/${data.orderID}/capture`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -114,12 +132,20 @@ export default function PayPalButtonSimple({
                 }
               });
               
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+              }
+              
               const result = await response.json();
-              if (result.success) {
+              console.log('Payment capture result:', result);
+              
+              // Check if the capture was successful
+              if (result.status === 'COMPLETED' || result.purchase_units) {
                 alert('Payment successful! Your subscription is now active.');
                 window.location.href = '/dashboard';
               } else {
-                throw new Error(result.error || 'Payment capture failed');
+                throw new Error('Payment capture incomplete');
               }
             } catch (error) {
               console.error('Error capturing PayPal payment:', error);
@@ -134,16 +160,18 @@ export default function PayPalButtonSimple({
           
           onCancel: (data: any) => {
             console.log('PayPal payment cancelled:', data);
+            alert('Payment was cancelled.');
           },
           
           style: {
             layout: 'vertical',
             color: 'blue',
             shape: 'rect',
-            label: 'paypal'
+            label: 'paypal',
+            height: 40
           }
         }).render(paypalRef.current).then(() => {
-          console.log('PayPal buttons rendered successfully');
+          console.log('PayPal buttons rendered successfully to DOM');
         }).catch((error: any) => {
           console.error('Error rendering PayPal buttons:', error);
           hasRendered.current = false;
@@ -163,10 +191,9 @@ export default function PayPalButtonSimple({
 
   return (
     <div className="w-full">
-      <div ref={paypalRef} className="w-full min-h-[50px]"></div>
-      {/* Fallback message for debugging */}
-      <div className="text-xs text-gray-400 mt-2 text-center">
-        PayPal component loaded - initializing payment button...
+      <div ref={paypalRef} className="w-full min-h-[50px] bg-gray-50 rounded-lg p-2"></div>
+      <div className="text-xs text-gray-500 mt-2 text-center">
+        {hasRendered.current ? 'PayPal button should appear above' : 'Loading PayPal payment button...'}
       </div>
     </div>
   );
