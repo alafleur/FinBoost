@@ -1397,17 +1397,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/create-subscription", async (req, res) => {
     try {
       if (!stripe) {
+        console.error('Stripe not configured - missing STRIPE_SECRET_KEY');
         return res.status(500).json({ error: { message: "Stripe not configured" } });
       }
 
       const token = req.headers.authorization?.replace('Bearer ', '');
+      console.log('Token received:', token ? 'Present' : 'Missing');
+      
       if (!token) {
-        return res.status(401).json({ message: "No token provided" });
+        return res.status(401).json({ success: false, message: "Authentication required" });
       }
 
       const user = await storage.getUserByToken(token);
+      console.log('User lookup result:', user ? `Found user ${user.id}` : 'No user found');
+      
       if (!user) {
-        return res.status(401).json({ message: "Invalid token" });
+        return res.status(401).json({ success: false, message: "Authentication failed" });
       }
 
       // Check if user already has an active subscription
