@@ -320,7 +320,7 @@ export default function FinancialQuiz() {
                 <Button 
                   className="bg-primary-500 hover:bg-primary-600"
                 >
-                  Join Waitlist
+                  Get Started on Boosting Your Finances
                 </Button>
               </div>
             </motion.div>

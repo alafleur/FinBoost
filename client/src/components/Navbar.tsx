@@ -29,7 +29,7 @@ export default function Navbar() {
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-2 border-blue-600"
             onClick={scrollToForm}
           >
-            Join Waitlist
+            Sign Up for Free
           </Button>
         </div>
       </div>
