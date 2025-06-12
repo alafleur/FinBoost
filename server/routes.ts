@@ -1382,16 +1382,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoice = subscription.latest_invoice as any;
       const paymentIntent = invoice?.payment_intent;
       
+      // Extract client secret from different possible paths
+      let clientSecret = null;
+      if (paymentIntent?.client_secret) {
+        clientSecret = paymentIntent.client_secret;
+      } else if (invoice?.payment_intent?.client_secret) {
+        clientSecret = invoice.payment_intent.client_secret;
+      } else if (typeof invoice?.payment_intent === 'string') {
+        // If payment_intent is just an ID, we need to retrieve it
+        try {
+          const pi = await stripe.paymentIntents.retrieve(invoice.payment_intent);
+          clientSecret = pi.client_secret;
+        } catch (e) {
+          console.error('Error retrieving payment intent:', e);
+        }
+      }
+      
       console.log('Subscription created:', {
         subscriptionId: subscription.id,
         hasInvoice: !!invoice,
         hasPaymentIntent: !!paymentIntent,
-        clientSecret: paymentIntent?.client_secret ? 'Present' : 'Missing'
+        clientSecret: clientSecret ? 'Present' : 'Missing',
+        invoiceType: typeof invoice?.payment_intent
       });
 
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: paymentIntent?.client_secret,
+        clientSecret: clientSecret,
       });
     } catch (error: any) {
       console.error('Error creating subscription:', error);
