@@ -216,7 +216,7 @@ export default function Subscribe() {
                     <p className="text-sm text-gray-600 mb-4">
                       Pay securely with PayPal or your credit card through PayPal
                     </p>
-                    <PayPalButton 
+                    <PayPalButtonSimple 
                       amount="20.00"
                       currency="USD"
                       intent="CAPTURE"
