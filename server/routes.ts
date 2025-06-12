@@ -1513,8 +1513,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PayPal routes
   app.get("/api/paypal/setup", loadPaypalDefault);
-  app.post("/api/paypal/order", authMiddleware, createPaypalOrder);
-  app.post("/api/paypal/order/:orderID/capture", authMiddleware, capturePaypalOrder);
+  app.post("/api/paypal/order", authenticateToken, createPaypalOrder);
+  app.post("/api/paypal/order/:orderID/capture", authenticateToken, capturePaypalOrder);
   
   // Legacy PayPal routes for backward compatibility
   app.get("/setup", loadPaypalDefault);
