@@ -26,6 +26,30 @@ async function getUserFromToken(token: string) {
   }
 }
 
+// Authentication middleware
+const authenticateToken = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+    const user = await storage.getUserById(decoded.userId);
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid token' });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
@@ -1490,6 +1514,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/setup", loadPaypalDefault);
   app.post("/order", createPaypalOrder);
   app.post("/order/:orderID/capture", capturePaypalOrder);
+
+  // Simplified PayPal routes for subscription
+  app.post("/api/paypal/create-order", authenticateToken, async (req, res) => {
+    try {
+      const { amount, currency, intent } = req.body;
+      const user = req.user as User;
+
+      if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid amount. Amount must be a positive number."
+        });
+      }
+
+      const collect = {
+        body: {
+          intent: intent || "CAPTURE",
+          purchaseUnits: [{
+            amount: {
+              currencyCode: currency || "USD",
+              value: amount.toString()
+            },
+            description: "FinBoost Premium Subscription"
+          }],
+          applicationContext: {
+            returnUrl: `${req.protocol}://${req.get('host')}/api/paypal/success`,
+            cancelUrl: `${req.protocol}://${req.get('host')}/subscribe`
+          }
+        },
+        prefer: "return=representation"
+      };
+
+      const { body, ...httpResponse } = await ordersController.createOrder(collect);
+      const jsonResponse = JSON.parse(String(body));
+
+      if (httpResponse.statusCode === 201) {
+        // Store order ID with user for later verification
+        await storage.updateUserPayPalOrderId(user.id, jsonResponse.id);
+        
+        const approvalUrl = jsonResponse.links.find((link: any) => link.rel === "approve")?.href;
+        
+        res.json({
+          success: true,
+          orderId: jsonResponse.id,
+          approvalUrl
+        });
+      } else {
+        res.status(httpResponse.statusCode).json({
+          success: false,
+          error: "Failed to create PayPal order"
+        });
+      }
+    } catch (error) {
+      console.error("PayPal order creation error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create PayPal order"
+      });
+    }
+  });
+
+  app.post("/api/paypal/capture-order/:orderID", authenticateToken, async (req, res) => {
+    try {
+      const { orderID } = req.params;
+      const user = req.user as User;
+
+      const collect = {
+        id: orderID,
+        prefer: "return=representation"
+      };
+
+      const { body, ...httpResponse } = await ordersController.captureOrder(collect);
+      const jsonResponse = JSON.parse(String(body));
+
+      if (httpResponse.statusCode === 201 && jsonResponse.status === "COMPLETED") {
+        // Update user to premium status
+        await storage.updateUserMembershipStatus(user.id, true, "paypal");
+        
+        res.json({
+          success: true,
+          message: "Payment captured successfully"
+        });
+      } else {
+        res.status(httpResponse.statusCode).json({
+          success: false,
+          error: "Failed to capture PayPal payment"
+        });
+      }
+    } catch (error) {
+      console.error("PayPal capture error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to capture PayPal payment"
+      });
+    }
+  });
+
+  app.get("/api/paypal/success", async (req, res) => {
+    const { token } = req.query; // PayPal returns token (order ID)
+    if (token) {
+      res.redirect(`/subscribe?paypal_success=${token}`);
+    } else {
+      res.redirect('/subscribe?paypal_error=invalid_token');
+    }
+  });
 
   // PayPal subscription route for membership
   app.post("/api/paypal/create-subscription", async (req, res) => {

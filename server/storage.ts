@@ -97,6 +97,10 @@ export interface IStorage {
     resetUserPassword(token: string, newPassword: string): Promise<boolean>;
     cleanupExpiredTokens(): Promise<void>;
 
+    // === PAYPAL METHODS ===
+    updateUserPayPalOrderId(userId: number, orderId: string): Promise<void>;
+    updateUserMembershipStatus(userId: number, isPremium: boolean, paymentMethod: string): Promise<void>;
+
     // === SUPPORT REQUEST METHODS ===
 
     createSupportRequest(data: {
@@ -1956,6 +1960,32 @@ export class MemStorage implements IStorage {
         tier3Users: 0,
         lastUpdated: new Date().toISOString()
       };
+    }
+  }
+
+  async updateUserPayPalOrderId(userId: number, orderId: string): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ paypalOrderId: orderId })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error updating PayPal order ID:', error);
+      throw new Error('Failed to update PayPal order ID');
+    }
+  }
+
+  async updateUserMembershipStatus(userId: number, isPremium: boolean, paymentMethod: string): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ 
+          subscriptionStatus: isPremium ? 'active' : 'inactive',
+          paymentMethod: paymentMethod,
+          subscriptionStartDate: isPremium ? new Date() : null
+        })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error updating membership status:', error);
+      throw new Error('Failed to update membership status');
     }
   }
 

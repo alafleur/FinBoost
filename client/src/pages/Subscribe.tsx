@@ -6,7 +6,7 @@ import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-
 import { loadStripe } from '@stripe/stripe-js';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import PayPalButton from "@/components/PayPalButton";
+import PayPalButtonSimple from "@/components/PayPalButtonSimple";
 import { CheckCircle, DollarSign, Trophy, Users } from "lucide-react";
 import { useLocation } from "wouter";
 
