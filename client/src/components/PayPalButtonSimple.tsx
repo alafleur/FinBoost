@@ -71,7 +71,7 @@ export default function PayPalButtonSimple({
           createOrder: async () => {
             try {
               console.log('Creating PayPal order...');
-              const token = localStorage.getItem('auth_token');
+              const token = localStorage.getItem('token');
               if (!token) {
                 throw new Error('No authentication token');
               }
@@ -105,7 +105,7 @@ export default function PayPalButtonSimple({
           onApprove: async (data: any) => {
             try {
               console.log('PayPal payment approved:', data);
-              const token = localStorage.getItem('auth_token');
+              const token = localStorage.getItem('token');
               const response = await fetch(`/api/paypal/capture-order/${data.orderID}`, {
                 method: 'POST',
                 headers: {
