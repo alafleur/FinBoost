@@ -40,6 +40,7 @@ import ExpandedLeaderboard from "@/components/ExpandedLeaderboard";
 import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import { educationContent } from "@/data/educationContent";
 import { getUserAccessInfo, canAccessModule, getUpgradeMessage, shouldShowUpgradePrompt, type UserForAccess } from "@shared/userAccess";
+import FinancialQuiz from "@/components/FinancialQuiz";
 
 // Custom hook to determine if the screen is mobile
 function useIsMobile() {
@@ -828,9 +829,10 @@ export default function Dashboard() {
             {/* Mobile Navigation Tabs - Show at top on mobile */}
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-                <TabsList className="grid w-full grid-cols-6 h-auto">
+                <TabsList className="grid w-full grid-cols-7 h-auto">
                   <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
                   <TabsTrigger value="earn" className="text-xs px-1 py-2">Earn</TabsTrigger>
+                  <TabsTrigger value="assessment" className="text-xs px-1 py-2">Quiz</TabsTrigger>
                   <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
                   <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
                   <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
@@ -1082,6 +1084,23 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   </div>
+                </TabsContent>
+
+                <TabsContent value="assessment">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart2 className="h-5 w-5" />
+                        Financial Personality Assessment
+                      </CardTitle>
+                      <CardDescription>
+                        Discover your financial personality and get personalized strategies for maximizing your FinBoost rewards.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <FinancialQuiz />
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="referrals">
