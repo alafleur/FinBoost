@@ -35,7 +35,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                 size="lg"
                 className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
               >
-                Sign Up for Free
+                Get Started on Boosting Your Finances
               </Button>
               
               <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
