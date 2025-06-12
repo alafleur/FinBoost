@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
+import TestPayPal from "./pages/TestPayPal";
 import { useEffect } from "react";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/support" component={Support} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/test-paypal" component={TestPayPal} />
       <Route path="/admin" component={Admin} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
