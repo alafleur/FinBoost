@@ -229,6 +229,10 @@ export default function Admin() {
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [showActionPublishDialog, setShowActionPublishDialog] = useState(false);
   const [selectedActionForPublish, setSelectedActionForPublish] = useState<any>(null);
+
+  // Quiz management state
+  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+  const [showQuizDialog, setShowQuizDialog] = useState(false);
   
   // Current pool settings
   const [currentPoolSettings, setCurrentPoolSettings] = useState({
@@ -267,14 +271,7 @@ export default function Admin() {
     isActive: true
   });
 
-  // State for quiz questions
-  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
-  const [newQuestion, setNewQuestion] = useState({
-    question: '',
-    options: ['', '', '', ''],
-    correctAnswer: 0,
-    explanation: ''
-  });
+
 
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
@@ -1896,6 +1893,101 @@ export default function Admin() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quiz">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <HelpCircle className="w-5 h-5" />
+                        Quiz Management
+                      </CardTitle>
+                      <CardDescription>
+                        Manage financial personality assessment questions
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => setShowQuizDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Question
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {quizQuestions.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <HelpCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>No quiz questions found. Add your first question to get started.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {quizQuestions.map((question: any, index: number) => (
+                          <Card key={question.id || index} className="border-l-4 border-l-blue-500">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium mb-2">
+                                    Question {question.order || index + 1}: {question.question}
+                                  </h4>
+                                  <div className="space-y-1 text-sm text-gray-600">
+                                    {question.options?.map((option: any, optIndex: number) => (
+                                      <div key={optIndex} className="flex items-center gap-2">
+                                        <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs">
+                                          {String.fromCharCode(65 + optIndex)}
+                                        </span>
+                                        <span>{option.text || option}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {question.explanation && (
+                                    <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+                                      <strong>Explanation:</strong> {question.explanation}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 ml-4">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      // Edit functionality
+                                      toast({
+                                        title: "Edit Question",
+                                        description: "Question editing will be available soon.",
+                                      });
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      // Delete functionality
+                                      const updatedQuestions = quizQuestions.filter((_, i) => i !== index);
+                                      setQuizQuestions(updatedQuestions);
+                                      toast({
+                                        title: "Question Deleted",
+                                        description: "Quiz question has been removed.",
+                                      });
+                                    }}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
