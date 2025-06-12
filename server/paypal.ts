@@ -167,3 +167,111 @@ export async function loadPaypalDefault(req: Request, res: Response) {
 // Export the orders controller for use in routes
 export { ordersController };
 // <END_EXACT_CODE>
+
+/* PayPal Payouts API - Separate from orders SDK */
+
+async function getAccessToken(): Promise<string> {
+  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
+  
+  const response = await fetch(
+    process.env.NODE_ENV === "production"
+      ? "https://api-m.paypal.com/v1/oauth2/token"
+      : "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    }
+  );
+
+  const data = await response.json();
+  return data.access_token;
+}
+
+export async function createPaypalPayout(recipients: Array<{
+  email: string;
+  amount: number;
+  currency: string;
+  note?: string;
+  recipientId?: string;
+}>) {
+  try {
+    const accessToken = await getAccessToken();
+    
+    const payoutData = {
+      sender_batch_header: {
+        sender_batch_id: `payout_${Date.now()}`,
+        email_subject: "FinBoost Reward Payout",
+        email_message: "You have received a reward payout from FinBoost!",
+      },
+      items: recipients.map((recipient, index) => ({
+        recipient_type: "EMAIL",
+        amount: {
+          value: (recipient.amount / 100).toFixed(2), // Convert cents to dollars
+          currency: recipient.currency.toUpperCase(),
+        },
+        receiver: recipient.email,
+        note: recipient.note || "FinBoost monthly reward",
+        sender_item_id: recipient.recipientId || `item_${index}_${Date.now()}`,
+      })),
+    };
+
+    const response = await fetch(
+      process.env.NODE_ENV === "production"
+        ? "https://api-m.paypal.com/v1/payments/payouts"
+        : "https://api-m.sandbox.paypal.com/v1/payments/payouts",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payoutData),
+      }
+    );
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`PayPal Payout API error: ${JSON.stringify(result)}`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("PayPal payout error:", error);
+    throw error;
+  }
+}
+
+export async function getPayoutStatus(payoutBatchId: string) {
+  try {
+    const accessToken = await getAccessToken();
+    
+    const response = await fetch(
+      `${process.env.NODE_ENV === "production"
+        ? "https://api-m.paypal.com"
+        : "https://api-m.sandbox.paypal.com"}/v1/payments/payouts/${payoutBatchId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(`PayPal Payout Status API error: ${JSON.stringify(result)}`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("PayPal payout status error:", error);
+    throw error;
+  }
+}

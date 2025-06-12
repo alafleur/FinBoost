@@ -52,6 +52,10 @@ export const users = pgTable("users", {
   membershipBonusReceived: boolean("membership_bonus_received").default(false),
   theoreticalPoints: integer("theoretical_points").default(0).notNull(), // Points earned before membership
 
+  // PayPal Disbursement Information
+  paypalEmail: text("paypal_email"), // PayPal email for receiving payouts
+  payoutMethod: text("payout_method").default("paypal"), // paypal, stripe, bank_transfer
+
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -184,6 +188,25 @@ export const stripePayouts = pgTable("stripe_payouts", {
   pointsUsed: integer("points_used").default(0),
   adminNotes: text("admin_notes"),
   processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// PayPal Payouts (Rewards)
+export const paypalPayouts = pgTable("paypal_payouts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  paypalPayoutId: text("paypal_payout_id"), // PayPal batch payout ID
+  paypalItemId: text("paypal_item_id"), // Individual payout item ID
+  recipientEmail: text("recipient_email").notNull(), // PayPal email to send money to
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: text("currency").default("usd").notNull(), // usd, cad
+  status: text("status").notNull(), // pending, processing, success, failed, unclaimed
+  reason: text("reason").notNull(), // monthly_reward, bonus, achievement
+  tier: text("tier"), // bronze, silver, gold
+  pointsUsed: integer("points_used").default(0),
+  adminNotes: text("admin_notes"),
+  processedAt: timestamp("processed_at"),
+  paypalResponse: text("paypal_response"), // JSON response from PayPal
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -349,5 +372,6 @@ export type Referral = typeof referrals.$inferSelect;
 export type UserReferralCode = typeof userReferralCodes.$inferSelect;
 export type StripePayment = typeof stripePayments.$inferSelect;
 export type StripePayout = typeof stripePayouts.$inferSelect;
+export type PaypalPayout = typeof paypalPayouts.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type AdminPointsAction = typeof adminPointsActions.$inferSelect;
