@@ -243,7 +243,7 @@ export default function Dashboard() {
   };
 
   // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = lessonProgress.map(progress => {
+  const completedLessonIds = (lessonProgress || []).map(progress => {
     const lessonKey = Object.keys(educationContent).find(key => 
       educationContent[key].id === progress.moduleId
     );
@@ -465,7 +465,7 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            {lessonProgress?.slice(0, 3).map((lesson: any) => (
+                            {(lessonProgress || []).slice(0, 3).map((lesson: any) => (
                               <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div>
                                   <h4 className="font-medium text-sm">{lesson.title}</h4>
@@ -621,7 +621,7 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {lessonProgress?.slice(0, 5).map((lesson: any) => (
+                      {(lessonProgress || []).slice(0, 5).map((lesson: any) => (
                         <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
                             <h4 className="font-medium">{lesson.title}</h4>
