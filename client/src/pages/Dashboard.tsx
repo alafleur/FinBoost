@@ -987,7 +987,7 @@ export default function Dashboard() {
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
+              <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -1028,14 +1028,7 @@ export default function Dashboard() {
                   <Trophy className="h-4 w-4" aria-hidden="true" />
                   <span className="font-medium">Board</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="profile" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Profile and admin tab"
-                >
-                  <UserIcon className="h-4 w-4" aria-hidden="true" />
-                  <span className="font-medium">Profile</span>
-                </TabsTrigger>
+
               </TabsList>
             </div>
           </div>
@@ -1186,6 +1179,131 @@ export default function Dashboard() {
             <LeaderboardSidebar />
           </div>
         </div>
+            </TabsContent>
+
+            {/* Referrals Tab */}
+            <TabsContent value="referrals" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-purple-100 rounded-lg">
+                    <Users className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-2xl text-gray-900">Referral System</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <ReferralSystem />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Learn Tab */}
+            <TabsContent value="learn" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <BookOpen className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-2xl text-gray-900">All Learning Modules</h3>
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium">
+                    {completedLessonIds.length} of {publishedLessons.length} completed
+                  </Badge>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-medium text-gray-700">Learning Progress</span>
+                    <span className="text-sm text-gray-500">
+                      {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
+                    className="h-3"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {publishedLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
+                    return (
+                      <Card 
+                        key={module.id} 
+                        className={`group border-0 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 pr-4">
+                              <h4 className="font-semibold text-lg text-gray-900 leading-tight mb-2">{module.title}</h4>
+                              <p className="text-sm text-gray-600 line-clamp-3 mb-3">{module.description?.substring(0, 150)}...</p>
+                              <div className="flex items-center space-x-3">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full capitalize font-medium">
+                                  {module.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-3">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="lg" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
+                              ) : (
+                                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Leaderboard Tab */}
+            <TabsContent value="leaderboard" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-orange-100 rounded-lg">
+                    <Trophy className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-2xl text-gray-900">Leaderboard</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <Leaderboard />
+                </div>
+              </div>
+            </TabsContent>
+
+
+
+          </div>
+        </Tabs>
       )}
     </div>
   );
