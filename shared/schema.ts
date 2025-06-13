@@ -307,6 +307,10 @@ export const winnerSelectionCycles = pgTable("winner_selection_cycles", {
   selectionCompleted: boolean("selection_completed").default(false).notNull(),
   disbursementCompleted: boolean("disbursement_completed").default(false).notNull(),
   totalPoolAmount: integer("total_pool_amount").default(0), // Total amount available for disbursement in cents
+  totalRewardPool: integer("total_reward_pool").default(0), // Calculated from pool settings
+  tier1Pool: integer("tier1_pool").default(0), // 50% of total reward pool
+  tier2Pool: integer("tier2_pool").default(0), // 35% of total reward pool
+  tier3Pool: integer("tier3_pool").default(0), // 15% of total reward pool
   createdAt: timestamp("created_at").defaultNow().notNull(),
   createdBy: integer("created_by").references(() => users.id),
   completedAt: timestamp("completed_at"),

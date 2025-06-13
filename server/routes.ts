@@ -2059,19 +2059,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(winnerSelectionCycles.id, cycleId));
 
-      // Mark cycle as selection completed
-      await db
-        .update(winnerSelectionCycles)
-        .set({ selectionCompleted: true })
-        .where(eq(winnerSelectionCycles.id, cycleId));
-
       res.json({
         success: true,
         message: "Random selection completed",
+        poolCalculation: {
+          totalSubscribers,
+          monthlyRevenue: monthlyRevenue,
+          rewardPoolPercentage: poolSettings.rewardPoolPercentage,
+          totalRewardPool,
+          tier1Pool,
+          tier2Pool,
+          tier3Pool
+        },
         results: {
-          tier1: { total: usersByTier.tier1.length, winners: tier1Winners.length },
-          tier2: { total: usersByTier.tier2.length, winners: tier2Winners.length },
-          tier3: { total: usersByTier.tier3.length, winners: tier3Winners.length }
+          tier1: { total: usersByTier.tier1.length, winners: tier1Winners.length, rewardPerWinner: tier1RewardPerWinner },
+          tier2: { total: usersByTier.tier2.length, winners: tier2Winners.length, rewardPerWinner: tier2RewardPerWinner },
+          tier3: { total: usersByTier.tier3.length, winners: tier3Winners.length, rewardPerWinner: tier3RewardPerWinner }
         },
         winners: allWinners
       });
