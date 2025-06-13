@@ -64,12 +64,33 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [leaderboardData, setLeaderboardData] = useState<any>(null);
-  const [tierThresholds, setTierThresholds] = useState<any>(null);
-  const [lessonProgress, setLessonProgress] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Use React Query for data fetching with proper authentication
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ['/api/auth/me'],
+    enabled: true
+  });
+
+  const user = (userData as any)?.user || userData;
+
+  const { data: leaderboardData } = useQuery({
+    queryKey: ['/api/leaderboard'],
+    enabled: !!user
+  });
+
+  const { data: tierThresholdsData } = useQuery({
+    queryKey: ['/api/tiers/thresholds']
+  });
+
+  const tierThresholds = (tierThresholdsData as any)?.thresholds;
+
+  const { data: progressData } = useQuery({
+    queryKey: ['/api/user/progress'],
+    enabled: !!user
+  });
+
+  const lessonProgress = (progressData as any)?.progress || progressData || [];
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -80,7 +101,7 @@ export default function Dashboard() {
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
             <div className="space-y-3">
-              {leaderboardData.tier2?.slice(0, 3).map((entry: any, index: number) => (
+              {(leaderboardData as any)?.tier2?.slice(0, 3).map((entry: any, index: number) => (
                 <div key={entry.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-shrink-0">
                     {index === 0 && <Crown className="h-5 w-5 text-yellow-500" />}
@@ -99,7 +120,7 @@ export default function Dashboard() {
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Silver Tier</h3>
             <div className="space-y-2">
-              {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
+              {(leaderboardData as any)?.tier3?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{entry.username}</span>
                   <span className="text-xs text-gray-500">{entry.totalPoints}</span>
@@ -111,9 +132,9 @@ export default function Dashboard() {
           <div>
             <h3 className="font-heading font-bold text-lg mb-4">Full Leaderboard</h3>
             <div className="space-y-2">
-              {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
+              {(leaderboardData as any)?.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
                 <div key={entry.id} className={`flex items-center justify-between p-2 rounded ${
-                  leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
+                  (leaderboardData as any)?.currentUser && entry.id === (leaderboardData as any)?.currentUser.id 
                     ? 'bg-blue-50 border border-blue-200' 
                     : 'bg-gray-50'
                 }`}>
@@ -126,14 +147,14 @@ export default function Dashboard() {
               ))}
             </div>
             
-            {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
+            {(leaderboardData as any)?.currentUser && (leaderboardData as any)?.currentUser.rank > 10 && (
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500 w-6">#{leaderboardData.currentUser.rank}</span>
-                    <span className="text-sm font-medium">{leaderboardData.currentUser.username} (You)</span>
+                    <span className="text-xs text-gray-500 w-6">#{(leaderboardData as any)?.currentUser.rank}</span>
+                    <span className="text-sm font-medium">{(leaderboardData as any)?.currentUser.username} (You)</span>
                   </div>
-                  <span className="text-xs text-gray-500">{leaderboardData.currentUser.totalPoints}</span>
+                  <span className="text-xs text-gray-500">{(leaderboardData as any)?.currentUser.totalPoints}</span>
                 </div>
               </div>
             )}
@@ -143,65 +164,9 @@ export default function Dashboard() {
     );
   };
 
-  useEffect(() => {
-    fetchUserData();
-    fetchLeaderboardData();
-    fetchTierThresholds();
-    fetchLessonProgress();
-  }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData.user || userData);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
 
-  const fetchLeaderboardData = async () => {
-    try {
-      const response = await fetch('/api/leaderboard');
-      if (response.ok) {
-        const data = await response.json();
-        setLeaderboardData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-    }
-  };
 
-  const fetchTierThresholds = async () => {
-    try {
-      const response = await fetch('/api/tiers/thresholds');
-      if (response.ok) {
-        const data = await response.json();
-        setTierThresholds(data);
-      }
-    } catch (error) {
-      console.error('Error fetching tier thresholds:', error);
-    }
-  };
-
-  const fetchLessonProgress = async () => {
-    try {
-      const response = await fetch('/api/user/progress');
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Raw progress data:', data);
-        setLessonProgress(data);
-      }
-    } catch (error) {
-      console.error('Error fetching lesson progress:', error);
-    }
-  };
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
