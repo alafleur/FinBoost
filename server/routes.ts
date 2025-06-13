@@ -1963,14 +1963,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Selection already completed for this cycle" });
       }
 
-      // Get all premium users grouped by tier
+      // Get all premium users and calculate percentile-based tiers
       const premiumUsers = await storage.getPremiumUsersForRewards();
       
-      // Group users by tier (using current tier logic)
+      // Sort users by points to calculate percentile ranks
+      const sortedUsers = premiumUsers
+        .map(u => ({ ...u, points: u.currentMonthPoints || 0 }))
+        .sort((a, b) => b.points - a.points); // Highest to lowest
+      
+      const totalUsers = sortedUsers.length;
+      const tier1Cutoff = Math.floor(totalUsers * 0.33); // Top 33%
+      const tier2Cutoff = Math.floor(totalUsers * 0.67); // Top 67%
+      
+      // Assign percentile-based tiers
       const usersByTier = {
-        tier1: premiumUsers.filter(u => u.tier === 'tier1' || u.currentMonthPoints >= 100),
-        tier2: premiumUsers.filter(u => u.tier === 'tier2' || (u.currentMonthPoints >= 50 && u.currentMonthPoints < 100)),
-        tier3: premiumUsers.filter(u => u.tier === 'tier3' || u.currentMonthPoints < 50)
+        tier1: sortedUsers.slice(0, tier1Cutoff), // Top 33%
+        tier2: sortedUsers.slice(tier1Cutoff, tier2Cutoff), // Middle 33%
+        tier3: sortedUsers.slice(tier2Cutoff) // Bottom 33%
       };
 
       // Perform random selection for each tier
@@ -2258,6 +2267,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching cycles:", error);
       res.status(500).json({ error: "Failed to fetch cycles" });
+    }
+  });
+
+  // Recalculate all user tiers based on percentiles
+  app.post("/api/admin/recalculate-tiers", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      await storage.recalculateAllUserTiers();
+      res.json({ success: true, message: "All user tiers recalculated based on percentiles" });
+    } catch (error) {
+      console.error("Error recalculating tiers:", error);
+      res.status(500).json({ error: "Failed to recalculate tiers" });
     }
   });
 

@@ -655,14 +655,32 @@ export class MemStorage implements IStorage {
   }
 
   async calculateUserTier(currentMonthPoints: number): Promise<string> {
-    const thresholds = await this.getTierThresholds();
+    // Get all active premium users' points for percentile calculation
+    const allUsers = await db.select({
+      currentMonthPoints: users.currentMonthPoints
+    }).from(users)
+    .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
-    if (currentMonthPoints >= thresholds.tier1) {
-      return 'tier1';
-    } else if (currentMonthPoints >= thresholds.tier2) {
-      return 'tier2';
-    } else {
+    if (allUsers.length === 0) {
       return 'tier3';
+    }
+
+    // Sort all points in descending order (highest to lowest)
+    const allPoints = allUsers
+      .map(u => u.currentMonthPoints || 0)
+      .sort((a, b) => b - a);
+
+    // Calculate percentile rank for this user's points
+    const userRank = allPoints.filter(points => points > currentMonthPoints).length;
+    const percentile = (userRank / allPoints.length) * 100;
+
+    // Assign tier based on percentile (top 33% = tier1, middle 33% = tier2, bottom 33% = tier3)
+    if (percentile <= 33) {
+      return 'tier1'; // Top 33%
+    } else if (percentile <= 67) {
+      return 'tier2'; // Middle 33%
+    } else {
+      return 'tier3'; // Bottom 33%
     }
   }
 
@@ -1667,11 +1685,11 @@ export class MemStorage implements IStorage {
       return this.tierThresholdCache;
     }
 
-    // Get all active users' current month points to calculate percentiles
+    // Get all active premium users' current month points to calculate percentiles
     const allUsers = await db.select({
       currentMonthPoints: users.currentMonthPoints
     }).from(users)
-    .where(eq(users.isActive, true));
+    .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
     if (allUsers.length === 0) {
       const thresholds = { tier1: 0, tier2: 0, tier3: 0 };
@@ -1680,20 +1698,20 @@ export class MemStorage implements IStorage {
       return thresholds;
     }
 
-    // Sort points in ascending order - include ALL users including those with 0 points
+    // Sort points in descending order (highest to lowest)
     const allPoints = allUsers
       .map(u => u.currentMonthPoints || 0)
-      .sort((a, b) => a - b);
+      .sort((a, b) => b - a);
 
-    // Calculate percentile thresholds based on ALL users
-    // Now Tier 1 is highest (67th percentile), Tier 3 is lowest (0-33rd percentile)
-    const tier2Index = Math.floor(allPoints.length * 0.33);
-    const tier1Index = Math.floor(allPoints.length * 0.67);
+    // Calculate percentile thresholds for tier boundaries
+    // Top 33% = Tier 1, Middle 33% = Tier 2, Bottom 33% = Tier 3
+    const tier1Index = Math.floor(allPoints.length * 0.33); // 33rd percentile cutoff
+    const tier2Index = Math.floor(allPoints.length * 0.67); // 67th percentile cutoff
 
     const thresholds = {
-      tier1: allPoints[tier1Index] || 0, // Tier 1 is now highest (67th percentile+)
-      tier2: allPoints[tier2Index] || 0, // Tier 2 is middle (33rd-67th percentile)
-      tier3: 0 // Tier 3 is now lowest (0-33rd percentile)
+      tier1: allPoints[tier1Index - 1] || allPoints[0] || 0, // Minimum points for top 33%
+      tier2: allPoints[tier2Index - 1] || 0, // Minimum points for middle 33%
+      tier3: 0 // Bottom 33% starts at 0
     };
 
     // Cache the calculated thresholds with timestamp
