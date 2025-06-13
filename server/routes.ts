@@ -220,6 +220,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user PayPal payment information
+  app.patch("/api/user/payment-info", authenticateToken, async (req, res) => {
+    try {
+      const { paypalEmail, payoutMethod } = req.body;
+      const user = req.user;
+
+      if (!paypalEmail || typeof paypalEmail !== 'string') {
+        return res.status(400).json({ success: false, message: 'Valid PayPal email is required' });
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(paypalEmail)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format' });
+      }
+
+      // Update user payment information
+      await db.update(users)
+        .set({
+          paypalEmail: paypalEmail.toLowerCase().trim(),
+          payoutMethod: payoutMethod || 'paypal'
+        })
+        .where(eq(users.id, user.id));
+
+      res.json({ 
+        success: true, 
+        message: 'Payment information updated successfully',
+        paypalEmail: paypalEmail.toLowerCase().trim(),
+        payoutMethod: payoutMethod || 'paypal'
+      });
+    } catch (error: any) {
+      console.error('Error updating payment info:', error);
+      res.status(500).json({ success: false, message: 'Failed to update payment information' });
+    }
+  });
+
   // Get current rewards configuration
   app.get('/api/rewards/config', async (req, res) => {
     try {

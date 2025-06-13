@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   BookOpen, 
   Trophy, 
@@ -62,6 +63,8 @@ interface User {
   currentStreak?: number;
   longestStreak?: number;
   subscriptionStatus?: string;
+  paypalEmail?: string;
+  payoutMethod?: string;
 }
 
 export default function Dashboard() {
@@ -77,6 +80,9 @@ export default function Dashboard() {
   const [publishedModules, setPublishedModules] = useState<any[]>([]);
   const [poolData, setPoolData] = useState({ totalPool: 0, premiumUsers: 0, totalUsers: 0 });
   const [distributionInfo, setDistributionInfo] = useState<any>(null);
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState('paypal');
+  const [savingPayment, setSavingPayment] = useState(false);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -137,6 +143,9 @@ export default function Dashboard() {
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setUser(userData.user);
+          // Populate PayPal form with existing data
+          setPaypalEmail(userData.user.paypalEmail || '');
+          setPayoutMethod(userData.user.payoutMethod || 'paypal');
         }
 
         // Fetch lesson progress
