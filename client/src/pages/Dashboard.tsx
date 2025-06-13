@@ -99,42 +99,11 @@ export default function Dashboard() {
             <div className="space-y-2">
               {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{entry.username}</span>
+                  <span className="text-sm truncate">{entry.username}</span>
                   <span className="text-xs text-gray-500">{entry.totalPoints}</span>
                 </div>
               ))}
             </div>
-          </div>
-
-          <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Full Leaderboard</h3>
-            <div className="space-y-2">
-              {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
-                <div key={entry.id} className={`flex items-center justify-between p-2 rounded ${
-                  leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
-                    ? 'bg-blue-50 border border-blue-200' 
-                    : 'bg-gray-50'
-                }`}>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500 w-6">#{index + 1}</span>
-                    <span className="text-sm">{entry.username}</span>
-                  </div>
-                  <span className="text-xs text-gray-500">{entry.totalPoints}</span>
-                </div>
-              ))}
-            </div>
-            
-            {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500 w-6">#{leaderboardData.currentUser.rank}</span>
-                    <span className="text-sm font-medium">{leaderboardData.currentUser.username} (You)</span>
-                  </div>
-                  <span className="text-xs text-gray-500">{leaderboardData.currentUser.totalPoints}</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -142,60 +111,66 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchUserData();
-    fetchLeaderboardData();
-    fetchTierThresholds();
-    fetchLessonProgress();
-  }, []);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLocation('/login');
+          return;
+        }
 
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
+        // Fetch user data
+        const userResponse = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData.user);
+        }
 
-  const fetchLeaderboardData = async () => {
-    try {
-      const response = await fetch('/api/leaderboard');
-      if (response.ok) {
-        const data = await response.json();
-        setLeaderboardData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-    }
-  };
+        // Fetch lesson progress
+        const progressResponse = await fetch('/api/user/progress', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          setLessonProgress(progressData.progress || []);
+        }
 
-  const fetchTierThresholds = async () => {
-    try {
-      const response = await fetch('/api/tiers/thresholds');
-      if (response.ok) {
-        const data = await response.json();
-        setTierThresholds(data);
-      }
-    } catch (error) {
-      console.error('Error fetching tier thresholds:', error);
-    }
-  };
+        // Fetch leaderboard data
+        const leaderboardResponse = await fetch('/api/leaderboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (leaderboardResponse.ok) {
+          const leaderboardData = await leaderboardResponse.json();
+          setLeaderboardData(leaderboardData);
+        }
 
-  const fetchLessonProgress = async () => {
-    try {
-      const response = await fetch('/api/user/progress');
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Raw progress data:', data);
-        setLessonProgress(data);
+        // Fetch tier thresholds
+        const thresholdsResponse = await fetch('/api/tiers/thresholds');
+        if (thresholdsResponse.ok) {
+          const thresholdsData = await thresholdsResponse.json();
+          setTierThresholds(thresholdsData.thresholds);
+        }
+
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching lesson progress:', error);
-    }
-  };
+    };
+
+    fetchData();
+  }, [setLocation, toast]);
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
@@ -236,25 +211,29 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+      {/* Header with accessibility improvements */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50" role="banner">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" />
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" aria-hidden="true" />
               <h1 className="font-heading font-bold text-lg sm:text-2xl text-dark-800">FinBoost</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="text-right hidden sm:block">
+              <div className="text-right hidden sm:block" aria-label="User greeting">
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setLocation('/profile')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  setLocation('/login');
+                }}
+                aria-label="Logout from account"
               >
-                Profile
+                Logout
               </Button>
             </div>
           </div>
@@ -262,102 +241,121 @@ export default function Dashboard() {
       </header>
 
       {isMobile ? (
-        /* Mobile Layout with Full Feature Parity */
+        /* Mobile Layout with Complete Feature Parity */
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-          {/* Mobile Tab Navigation */}
-          <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-0 rounded-none">
+          {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
+          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
+            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
-                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
               >
-                Overview
+                <Activity className="h-4 w-4" />
+                <span className="font-medium">Overview</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="learn" 
-                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
               >
-                Learn
+                <BookOpen className="h-4 w-4" />
+                <span className="font-medium">Learn</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="referrals" 
-                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
               >
-                Referrals
+                <Users className="h-4 w-4" />
+                <span className="font-medium">Referrals</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
-                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
               >
-                Rewards
+                <Award className="h-4 w-4" />
+                <span className="font-medium">Rewards</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
-                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
               >
-                Board
+                <Trophy className="h-4 w-4" />
+                <span className="font-medium">Board</span>
               </TabsTrigger>
             </TabsList>
           </div>
 
-          {/* Mobile Tab Content */}
-          <div className="px-4 py-6">
+          {/* Mobile Tab Content with Full Desktop Features */}
+          <div className="px-4 py-6 pb-20">
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Welcome Section */}
-              <div>
-                <h2 className="font-heading font-bold text-xl mb-2">
-                  Welcome to your FinBoost Dashboard! 🚀
-                </h2>
-                <p className="text-sm text-gray-600 mb-6">
-                  Track your progress, earn points, and win monthly rewards for building better financial habits.
-                </p>
+              {/* Welcome Section with improved typography */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
+                      Welcome back, {user?.firstName || user?.username}!
+                    </h2>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Track your progress, earn points, and win monthly rewards for building better financial habits.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Mobile Stats Cards - Same as Desktop */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center justify-between">
-                      Current Tier
-                      <Trophy className="h-4 w-4 text-orange-500" />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs`}>
-                      {getTierDisplayName(user?.tier || '')}
-                    </Badge>
-                    <p className="text-xs text-gray-500 mt-1">Monthly standing</p>
+              {/* Mobile Stats Cards with improved design */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Trophy className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs font-medium shadow-sm`}>
+                        {getTierDisplayName(user?.tier || '')}
+                      </Badge>
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Current Tier</h3>
+                    <p className="text-xs text-gray-600">Monthly standing</p>
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center justify-between">
-                      Total Points
-                      <Star className="h-4 w-4 text-yellow-500" />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-xl font-bold">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-gray-500">+{user?.currentMonthPoints || 0} this month</p>
+                <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Star className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
+                    <p className="text-xs text-gray-600">+{user?.currentMonthPoints || 0} this month</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Mobile Points Summary - Same as Desktop */}
+              {/* Mobile Points Summary - Same Component as Desktop */}
               {user && <PointsSummary user={user as User} />}
 
-              {/* Mobile Streak Display - Same as Desktop */}
+              {/* Mobile Streak Display - Same Component as Desktop */}
               <StreakDisplay 
                 currentStreak={user?.currentStreak || 0}
                 longestStreak={user?.longestStreak || 0}
               />
 
-              {/* Mobile Learning Preview - Same as Desktop */}
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading font-bold text-lg">Continue Learning</h3>
-                  <Badge variant="secondary" className="text-xs">
+              {/* Mobile Learning Preview with enhanced design */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <BookOpen className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
                     {completedLessonIds.length} of {Object.keys(educationContent).length} completed
                   </Badge>
                 </div>
@@ -366,28 +364,42 @@ export default function Dashboard() {
                   {Object.entries(educationContent).slice(0, 3).map(([key, lesson]) => {
                     const isCompleted = completedLessonIds.includes(key);
                     return (
-                      <Card key={key} className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
-                        isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
-                      }`} onClick={() => setLocation(`/lesson/${key}`)}>
+                      <Card 
+                        key={key} 
+                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => setLocation(`/lesson/${key}`)}
+                      >
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
-                            {isCompleted ? (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0 text-xs">
-                                ✓ Completed
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="shrink-0 text-xs">
-                                {lesson.points} pts
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
-                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
-                              {isCompleted ? "Review" : "Start"}
-                            </Button>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-3">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{lesson.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{lesson.content?.substring(0, 100)}...</p>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
+                                  {lesson.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                                    {lesson.points} pts
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : (
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -395,48 +407,99 @@ export default function Dashboard() {
                   })}
                 </div>
                 
-                <div className="text-center mt-4">
-                  <Button variant="outline" size="sm" onClick={() => setLocation('/education')} className="w-full">
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    View All Learning Modules
-                  </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setLocation('/education')} 
+                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View All Learning Modules
+                </Button>
+              </div>
+
+              {/* Mobile Rewards Preview with enhanced design */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
+                    <Award className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Recent Rewards</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <RewardsHistory />
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="learn" className="mt-0 space-y-6">
-              <div>
-                <h3 className="font-heading font-bold text-lg mb-4">All Learning Modules</h3>
-                <Badge variant="secondary" className="mb-4">
-                  {completedLessonIds.length} of {Object.keys(educationContent).length} completed
-                </Badge>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <BookOpen className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-gray-900">All Learning Modules</h3>
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                  </Badge>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Learning Progress</span>
+                    <span className="text-sm text-gray-500">
+                      {Math.round((completedLessonIds.length / Object.keys(educationContent).length) * 100)}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(completedLessonIds.length / Object.keys(educationContent).length) * 100} 
+                    className="h-2"
+                  />
+                </div>
                 
                 <div className="space-y-3">
                   {Object.entries(educationContent).map(([key, lesson]) => {
                     const isCompleted = completedLessonIds.includes(key);
                     return (
-                      <Card key={key} className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
-                        isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
-                      }`} onClick={() => setLocation(`/lesson/${key}`)}>
+                      <Card 
+                        key={key} 
+                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => setLocation(`/lesson/${key}`)}
+                      >
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
-                            {isCompleted ? (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0 text-xs">
-                                ✓ Completed
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="shrink-0 text-xs">
-                                {lesson.points} pts
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
-                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
-                              {isCompleted ? "Review" : "Start"}
-                            </Button>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-3">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{lesson.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{lesson.content?.substring(0, 100)}...</p>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
+                                  {lesson.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                                    {lesson.points} pts
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : (
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -446,16 +509,46 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
-            <TabsContent value="referrals" className="mt-0">
-              <ReferralSystem />
+            <TabsContent value="referrals" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-purple-100 rounded-lg">
+                    <Users className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Referral System</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <ReferralSystem />
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="rewards" className="mt-0">
-              <RewardsHistory />
+            <TabsContent value="rewards" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
+                    <Award className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Rewards History</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <RewardsHistory />
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="leaderboard" className="mt-0">
-              <Leaderboard />
+            <TabsContent value="leaderboard" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-orange-100 rounded-lg">
+                    <Trophy className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Leaderboard</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <Leaderboard />
+                </div>
+              </div>
             </TabsContent>
           </div>
         </Tabs>
