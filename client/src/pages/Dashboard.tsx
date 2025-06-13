@@ -203,8 +203,14 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" role="status" aria-live="polite">
+        <div className="text-center space-y-4">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" aria-hidden="true" />
+          <div className="space-y-2">
+            <p className="text-lg font-semibold text-gray-900">Loading your dashboard...</p>
+            <p className="text-sm text-gray-600">Getting your latest progress and rewards</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -242,43 +248,48 @@ export default function Dashboard() {
 
       {isMobile ? (
         /* Mobile Layout with Complete Feature Parity */
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
             <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Dashboard overview tab"
               >
-                <Activity className="h-4 w-4" />
+                <Activity className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Overview</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="learn" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Learning modules tab"
               >
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Learn</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="referrals" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Referral system tab"
               >
-                <Users className="h-4 w-4" />
+                <Users className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Referrals</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Rewards history tab"
               >
-                <Award className="h-4 w-4" />
+                <Award className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Rewards</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500"
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Leaderboard tab"
               >
-                <Trophy className="h-4 w-4" />
+                <Trophy className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Board</span>
               </TabsTrigger>
             </TabsList>
