@@ -28,6 +28,8 @@ export interface IStorage {
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
     getUserById(id: number): Promise<User | null>;
+    getUserByGoogleId(googleId: string): Promise<User | null>;
+    updateUserGoogleId(userId: number, googleId: string): Promise<void>;
     validateUser(email: string, password: string): Promise<User | null>;
     updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void>;
     getUserPointsHistory(userId: number): Promise<UserPointsHistory[]>;
