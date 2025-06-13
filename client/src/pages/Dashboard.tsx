@@ -646,54 +646,74 @@ export default function Dashboard() {
                   {publishedLessons.map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
+                    const isUserPremium = user?.subscriptionStatus === 'active';
+                    
                     return (
                       <Card 
                         key={module.id} 
-                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                          isCompleted 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                            : 'bg-white hover:bg-gray-50 border-gray-100'
-                        }`} 
+                        className={`hover:shadow-lg transition-shadow cursor-pointer relative ${
+                          isCompleted ? 'border-green-200 bg-green-50' : 
+                          isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-xl border-2' : ''
+                        }`}
                         onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {module.category}
-                                </span>
-                                {!isCompleted && (
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremiumModule && !isUserPremium 
-                                      ? 'text-yellow-700 bg-yellow-100' 
-                                      : 'text-blue-600 bg-blue-100'
-                                  }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
-                                  </span>
+                        {isPremiumModule && (
+                          <div className="absolute top-3 left-3">
+                            <Crown className="w-5 h-5 text-yellow-600" />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                isCompleted ? 'bg-green-100' : 'bg-gray-100'
+                              }`}>
+                                {isCompleted ? (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <BookOpen className="h-5 w-5 text-gray-600" />
                                 )}
                               </div>
+                              <div className="flex-1">
+                                <CardTitle className="text-sm leading-tight">{module.title}</CardTitle>
+                              </div>
                             </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {isCompleted ? (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
-                                  ✓ Done
+                            <div className="flex flex-col gap-2">
+                              {isPremiumModule && (
+                                <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
+                                  Members
                                 </Badge>
-                              ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
-                                  Upgrade
-                                </Button>
-                              ) : (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
-                                  Start
-                                </Button>
+                              )}
+                              {isCompleted && (
+                                <Badge className="bg-green-100 text-green-700">
+                                  Completed
+                                </Badge>
                               )}
                             </div>
                           </div>
+                          <CardDescription className="mt-2">
+                            {module.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-1">
+                                <Star className="h-4 w-4 text-yellow-500" />
+                                <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
+                              </div>
+                            </div>
+                          </div>
+                          <Button 
+                            className={`w-full ${(isPremiumModule && !isUserPremium) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
+                            variant={isCompleted ? "secondary" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation(`/lesson/${module.id}`);
+                            }}
+                          >
+                            {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
+                          </Button>
                         </CardContent>
                       </Card>
                     );
