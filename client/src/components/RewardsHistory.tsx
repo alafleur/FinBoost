@@ -315,7 +315,13 @@ export default function RewardsHistory() {
                 }
               </p>
               <Button 
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => {
+                  // Use the header Profile button functionality
+                  const profileButton = document.querySelector('button[aria-label="View profile and subscription details"]') as HTMLButtonElement;
+                  if (profileButton) {
+                    profileButton.click();
+                  }
+                }}
                 variant="secondary"
                 className="bg-white text-blue-600 hover:bg-gray-100"
               >

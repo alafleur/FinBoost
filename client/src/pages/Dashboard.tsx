@@ -134,6 +134,18 @@ export default function Dashboard() {
     );
   };
 
+  // Add event listener for switching to profile tab
+  useEffect(() => {
+    const handleSwitchToProfile = () => {
+      setActiveTab('profile');
+    };
+
+    window.addEventListener('switchToProfile', handleSwitchToProfile);
+    return () => {
+      window.removeEventListener('switchToProfile', handleSwitchToProfile);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -622,7 +634,7 @@ export default function Dashboard() {
                     <h3 className="font-heading font-bold text-lg text-gray-900">All Learning Modules</h3>
                   </div>
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                    {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
                 
@@ -631,17 +643,17 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Learning Progress</span>
                     <span className="text-sm text-gray-500">
-                      {publishedModules.length > 0 ? Math.round((completedLessonIds.length / publishedModules.length) * 100) : 0}%
+                      {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
                     </span>
                   </div>
                   <Progress 
-                    value={publishedModules.length > 0 ? (completedLessonIds.length / publishedModules.length) * 100 : 0} 
+                    value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
                     className="h-2"
                   />
                 </div>
                 
                 <div className="space-y-3">
-                  {allAvailableLessons.map((module) => {
+                  {publishedLessons.map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
                     return (
