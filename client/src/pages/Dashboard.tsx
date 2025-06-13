@@ -1042,7 +1042,7 @@ export default function Dashboard() {
                   </Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableLessons.map((module) => {
+                  {publishedLessons.slice(0, 6).map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
                     return (
