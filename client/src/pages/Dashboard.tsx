@@ -320,9 +320,10 @@ export default function Dashboard() {
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
-  // Filter lessons to show only published modules
-  const availableLessons = publishedModules.slice(0, isMobile ? 3 : 6);
-  const allAvailableLessons = publishedModules;
+  // Filter lessons to show only published modules with proper access control
+  const publishedLessons = publishedModules.filter(module => module.isPublished);
+  const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
+  const allAvailableLessons = publishedLessons;
 
   // Check if user is premium
   const isUserPremium = user?.subscriptionStatus === 'active';
@@ -424,12 +425,12 @@ export default function Dashboard() {
                 <span className="font-medium text-[10px]">Rewards</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="profile" 
+                value="leaderboard" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Profile settings tab"
+                aria-label="Leaderboard tab"
               >
-                <UserIcon className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Profile</span>
+                <Trophy className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Board</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -524,7 +525,7 @@ export default function Dashboard() {
                     <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
                   </div>
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {publishedModules.length} completed
+                    {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
                 
@@ -1035,7 +1036,7 @@ export default function Dashboard() {
                     Continue Learning
                   </h3>
                   <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {publishedModules.length} completed
+                    {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1089,7 +1090,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-center mt-4">
                   <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    Showing {availableLessons.length} of {publishedModules.length} available lessons
+                    Showing {availableLessons.length} of {publishedLessons.length} available lessons
                   </p>
                   <Button 
                     variant="outline" 

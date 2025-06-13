@@ -305,13 +305,13 @@ export default function RewardsHistory() {
                   <Target className="w-5 h-5 text-orange-300" />
                 )}
                 <h4 className="font-semibold">
-                  {user?.paypalEmail ? 'Payment Details Ready' : 'Setup Payment Info'}
+                  {user?.paypalEmail ? 'Payment Details Ready' : 'Setup Rewards Collection Info'}
                 </h4>
               </div>
               <p className="text-green-100 text-sm mb-3">
                 {user?.paypalEmail ? 
                   `Rewards will be sent to ${user.paypalEmail}` : 
-                  'Configure your PayPal email to receive monthly rewards'
+                  'Configure your payment collection information to receive your rewards'
                 }
               </p>
               <Button 
