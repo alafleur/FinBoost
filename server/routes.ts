@@ -2142,7 +2142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No undisbursed winners found for this cycle" });
       }
 
-      // Validate all winners have PayPal emails
+      // Validate all winners have PayPal emails and reward amounts
       const winnersWithoutPayPal = winners.filter(w => !w.paypalEmail);
       if (winnersWithoutPayPal.length > 0) {
         return res.status(400).json({ 
@@ -2151,12 +2151,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      const winnersWithoutAmount = winners.filter(w => !w.rewardAmount || w.rewardAmount <= 0);
+      if (winnersWithoutAmount.length > 0) {
+        return res.status(400).json({ 
+          error: "Some winners have invalid reward amounts", 
+          usernames: winnersWithoutAmount.map(w => w.username)
+        });
+      }
+
       // Use existing PayPal integration function
       const { createPaypalPayout } = await import('./paypal');
       
       const recipients = winners.map(winner => ({
-        email: winner.paypalEmail,
-        amount: winner.rewardAmount, // Amount in cents
+        email: winner.paypalEmail!,
+        amount: winner.rewardAmount!,
         currency: "USD",
         note: `FinBoost Reward - ${cycle.cycleName} - Tier ${winner.tier.toUpperCase()}`,
         recipientId: `winner_${winner.id}`
@@ -2171,8 +2179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paypalItemId: payoutResult.items?.find((item: any) => 
           item.payout_item.sender_item_id === `winner_${winner.id}`
         )?.payout_item_id || null,
-        recipientEmail: winner.paypalEmail,
-        amount: winner.rewardAmount,
+        recipientEmail: winner.paypalEmail!,
+        amount: winner.rewardAmount!,
         currency: "usd",
         status: "pending",
         reason: "winner_cycle_reward",
@@ -2212,7 +2220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         message: "Disbursements processed successfully",
         batchId: payoutResult.batch_header?.payout_batch_id,
-        totalAmount: winners.reduce((sum, w) => sum + w.rewardAmount, 0),
+        totalAmount: winners.reduce((sum, w) => sum + (w.rewardAmount || 0), 0),
         totalRecipients: winners.length,
         payoutsByTier: {
           tier1: winners.filter(w => w.tier === 'tier1').length,

@@ -248,6 +248,9 @@ export default function Admin() {
   const [selectedCycle, setSelectedCycle] = useState<any>(null);
   const [winners, setWinners] = useState<any>({});
   const [showCreateCycleDialog, setShowCreateCycleDialog] = useState(false);
+  const [isRunningSelection, setIsRunningSelection] = useState(false);
+  const [selectionResults, setSelectionResults] = useState<any>(null);
+  const [isProcessingDisbursements, setIsProcessingDisbursements] = useState(false);
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
   const [newCycleForm, setNewCycleForm] = useState({
@@ -3555,6 +3558,7 @@ export default function Admin() {
                       <Button 
                         onClick={async () => {
                           try {
+                            setIsRunningSelection(true);
                             const token = localStorage.getItem('token');
                             const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/run-selection`, {
                               method: 'POST',
@@ -3564,8 +3568,9 @@ export default function Admin() {
                             if (data.success) {
                               toast({
                                 title: "Random Selection Complete",
-                                description: `Selected ${data.winners.length} winners across all tiers`
+                                description: `Selected ${data.winners.length} winners. Pool: $${(data.poolCalculation.totalRewardPool / 100).toFixed(2)}`
                               });
+                              setSelectionResults(data);
                               loadWinners();
                               loadCycles();
                             }
@@ -3575,13 +3580,56 @@ export default function Admin() {
                               description: "Failed to run selection",
                               variant: "destructive"
                             });
+                          } finally {
+                            setIsRunningSelection(false);
                           }
                         }}
-                        disabled={selectedCycle.selectionCompleted}
+                        disabled={selectedCycle.selectionCompleted || isRunningSelection}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <Star className="w-4 h-4 mr-2" />
-                        Run Random Selection
+                        {isRunningSelection ? "Running..." : "Run Random Selection"}
+                      </Button>
+
+                      <Button 
+                        onClick={async () => {
+                          try {
+                            setIsProcessingDisbursements(true);
+                            const token = localStorage.getItem('token');
+                            const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
+                              method: 'POST',
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                              toast({
+                                title: "Disbursements Processed",
+                                description: `$${(data.totalAmount / 100).toFixed(2)} sent to ${data.totalRecipients} winners`
+                              });
+                              loadCycles();
+                            } else {
+                              toast({
+                                title: "Error",
+                                description: data.error || "Failed to process disbursements",
+                                variant: "destructive"
+                              });
+                            }
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to process disbursements",
+                              variant: "destructive"
+                            });
+                          } finally {
+                            setIsProcessingDisbursements(false);
+                          }
+                        }}
+                        disabled={!selectedCycle.selectionCompleted || selectedCycle.disbursementCompleted || isProcessingDisbursements}
+                        variant={selectedCycle.disbursementCompleted ? "secondary" : "default"}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        {isProcessingDisbursements ? "Processing..." : selectedCycle.disbursementCompleted ? "Disbursed" : "Process PayPal Disbursements"}
                       </Button>
                       
                       <Button 
@@ -3610,6 +3658,66 @@ export default function Admin() {
                         <Upload className="w-4 h-4 mr-2" />
                         Import CSV
                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Pool Calculation Results */}
+              {selectionResults && selectionResults.poolCalculation && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pool Calculation Results</CardTitle>
+                    <CardDescription>
+                      Reward pool calculated from current pool settings and subscription revenue
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {selectionResults.poolCalculation.totalSubscribers}
+                        </div>
+                        <div className="text-sm text-gray-600">Total Subscribers</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          ${(selectionResults.poolCalculation.monthlyRevenue).toFixed(2)}
+                        </div>
+                        <div className="text-sm text-gray-600">Monthly Revenue</div>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {selectionResults.poolCalculation.rewardPoolPercentage}%
+                        </div>
+                        <div className="text-sm text-gray-600">Pool Percentage</div>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          ${(selectionResults.poolCalculation.totalRewardPool / 100).toFixed(2)}
+                        </div>
+                        <div className="text-sm text-gray-600">Total Pool</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-yellow-50 rounded">
+                        <div className="font-bold text-yellow-600">
+                          ${(selectionResults.poolCalculation.tier1Pool / 100).toFixed(2)}
+                        </div>
+                        <div className="text-sm">Tier 1 Pool (50%)</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded">
+                        <div className="font-bold text-gray-600">
+                          ${(selectionResults.poolCalculation.tier2Pool / 100).toFixed(2)}
+                        </div>
+                        <div className="text-sm">Tier 2 Pool (35%)</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded">
+                        <div className="font-bold text-orange-600">
+                          ${(selectionResults.poolCalculation.tier3Pool / 100).toFixed(2)}
+                        </div>
+                        <div className="text-sm">Tier 3 Pool (15%)</div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
