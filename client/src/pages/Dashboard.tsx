@@ -390,7 +390,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-4 h-auto bg-transparent border-0 p-1 rounded-none">
+            <TabsList className="grid w-full grid-cols-4 h-12 bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
