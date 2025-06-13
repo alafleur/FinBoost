@@ -244,6 +244,12 @@ export default function Admin() {
   // PayPal disbursement state
   const [disbursementData, setDisbursementData] = useState<any>(null);
   const [payoutHistory, setPayoutHistory] = useState<any[]>([]);
+  const [winnerCycles, setWinnerCycles] = useState<any[]>([]);
+  const [selectedCycle, setSelectedCycle] = useState<any>(null);
+  const [winners, setWinners] = useState<any>({});
+  const [showCreateCycleDialog, setShowCreateCycleDialog] = useState(false);
+  const [csvImportData, setCsvImportData] = useState("");
+  const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -379,6 +385,23 @@ export default function Admin() {
       setQuizQuestions([]);
     }
   }, [editingModule]);
+
+  // Load initial data including winner cycles
+  useEffect(() => {
+    fetchData();
+    fetchPendingProofs();
+    fetchPointActions();
+    fetchSupportTickets();
+    fetchMonthlyPoolSettings();
+    loadCycles();
+  }, []);
+
+  // Load winners when selected cycle changes
+  useEffect(() => {
+    if (selectedCycle?.selectionCompleted) {
+      loadWinners();
+    }
+  }, [selectedCycle]);
 
   const fetchData = async () => {
     try {
@@ -925,6 +948,114 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to delete user",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Winner cycle management functions
+  const loadCycles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/winner-cycles', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setWinnerCycles(data.cycles);
+      }
+    } catch (error) {
+      console.error('Failed to load cycles:', error);
+    }
+  };
+
+  const loadWinners = async () => {
+    if (!selectedCycle) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/winners`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setWinners(data.winners);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load winners",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateWinnerPercentage = async (winnerId: number, percentage: number) => {
+    if (!selectedCycle) return;
+
+    // Update local state immediately for responsive UI
+    setWinners((prev: any) => {
+      const updated = { ...prev };
+      for (const tier in updated) {
+        updated[tier] = updated[tier].map((w: any) => 
+          w.id === winnerId ? { ...w, rewardPercentage: percentage } : w
+        );
+      }
+      return updated;
+    });
+
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/update-percentages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          updates: [{ winnerId, rewardPercentage: percentage }]
+        })
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update percentage",
+        variant: "destructive"
+      });
+      // Reload winners to revert changes
+      loadWinners();
+    }
+  };
+
+  const exportWinners = async () => {
+    if (!selectedCycle) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/export`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cycle_${selectedCycle.id}_allocations.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Export Complete",
+          description: "CSV file downloaded successfully"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export CSV",
         variant: "destructive"
       });
     }
@@ -3321,172 +3452,222 @@ export default function Admin() {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                    <CardTitle className="text-sm font-medium">Active Cycles</CardTitle>
                     <Calendar className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
-                      {new Date().toLocaleDateString('en-US', { month: 'long' })}
-                    </div>
+                    <div className="text-2xl font-bold">{winnerCycles.length}</div>
                     <p className="text-xs text-muted-foreground">
-                      Current cycle
+                      Winner selection cycles
                     </p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Last Payout</CardTitle>
+                    <CardTitle className="text-sm font-medium">Current Selection</CardTitle>
                     <Clock className="h-4 w-4 text-purple-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">-</div>
+                    <div className="text-2xl font-bold">
+                      {selectedCycle ? selectedCycle.cycleName : "None"}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      No recent payouts
+                      Selected cycle
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Disbursement Actions */}
+              {/* Winner Cycle Management */}
               <Card>
                 <CardHeader>
-                  <CardTitle>PayPal Disbursements</CardTitle>
-                  <CardDescription>
-                    Process monthly reward payouts to premium members via PayPal
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Winner Selection Cycles</CardTitle>
+                      <CardDescription>
+                        Manage random winner selection and disbursement cycles
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => setShowCreateCycleDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Cycle
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-4">
+                    {winnerCycles.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No winner cycles created yet. Create your first cycle to begin random selection.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {winnerCycles.map((cycle: any) => (
+                          <div 
+                            key={cycle.id} 
+                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                              selectedCycle?.id === cycle.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                            }`}
+                            onClick={() => setSelectedCycle(cycle)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-semibold">{cycle.cycleName}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {new Date(cycle.cycleStartDate).toLocaleDateString()} - {new Date(cycle.cycleEndDate).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={cycle.selectionCompleted ? "default" : "secondary"}>
+                                  {cycle.selectionCompleted ? "Selection Complete" : "Pending"}
+                                </Badge>
+                                <Badge variant={cycle.disbursementCompleted ? "default" : "outline"}>
+                                  {cycle.disbursementCompleted ? "Disbursed" : "Not Disbursed"}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Selected Cycle Actions */}
+              {selectedCycle && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cycle Actions: {selectedCycle.cycleName}</CardTitle>
+                    <CardDescription>
+                      Run random selection, manage winners, and process disbursements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <Button 
                         onClick={async () => {
                           try {
                             const token = localStorage.getItem('token');
-                            const response = await fetch('/api/admin/disbursements/calculate', {
+                            const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/run-selection`, {
                               method: 'POST',
                               headers: { 'Authorization': `Bearer ${token}` }
                             });
                             const data = await response.json();
                             if (data.success) {
                               toast({
-                                title: "Calculation Complete",
-                                description: `Found ${data.totalUsers} eligible users for disbursement`
+                                title: "Random Selection Complete",
+                                description: `Selected ${data.winners.length} winners across all tiers`
                               });
-                              setDisbursementData(data);
+                              loadWinners();
+                              loadCycles();
                             }
                           } catch (error) {
                             toast({
                               title: "Error",
-                              description: "Failed to calculate disbursements",
+                              description: "Failed to run selection",
                               variant: "destructive"
                             });
                           }
                         }}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        disabled={selectedCycle.selectionCompleted}
+                        className="bg-green-600 hover:bg-green-700"
                       >
-                        <Calculator className="w-4 h-4 mr-2" />
-                        Calculate Disbursements
+                        <Star className="w-4 h-4 mr-2" />
+                        Run Random Selection
                       </Button>
                       
                       <Button 
                         variant="outline"
-                        onClick={async () => {
-                          try {
-                            const token = localStorage.getItem('token');
-                            const response = await fetch('/api/admin/disbursements/history', {
-                              method: 'GET',
-                              headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            const data = await response.json();
-                            if (data.success) {
-                              setPayoutHistory(data.payouts);
-                            }
-                          } catch (error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to load payout history",
-                              variant: "destructive"
-                            });
-                          }
-                        }}
+                        onClick={loadWinners}
+                        disabled={!selectedCycle.selectionCompleted}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        View History
+                        View Winners
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={() => exportWinners()}
+                        disabled={!selectedCycle.selectionCompleted}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Export CSV
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowCsvImportDialog(true)}
+                        disabled={!selectedCycle.selectionCompleted}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Import CSV
                       </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                    {disbursementData && (
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="font-semibold mb-3">Disbursement Preview</h4>
-                        <div className="grid grid-cols-3 gap-4 mb-4">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-yellow-600">
-                              {disbursementData.tierDistribution?.tier1?.users?.length || 0}
+              {/* Winners Display */}
+              {selectedCycle && winners && Object.keys(winners).length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {['tier1', 'tier2', 'tier3'].map(tier => (
+                    <Card key={tier}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Crown className={`w-5 h-5 ${
+                            tier === 'tier1' ? 'text-yellow-500' : 
+                            tier === 'tier2' ? 'text-gray-500' : 'text-orange-500'
+                          }`} />
+                          {tier.replace('tier', 'Tier ')} Winners
+                        </CardTitle>
+                        <CardDescription>
+                          {winners[tier]?.length || 0} winners selected
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {winners[tier]?.map((winner: any, index: number) => (
+                            <div key={winner.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                              <div>
+                                <div className="font-medium">#{winner.tierRank} {winner.username}</div>
+                                <div className="text-sm text-gray-600">{winner.email}</div>
+                              </div>
+                              <div className="text-right">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={winner.rewardPercentage}
+                                  onChange={(e) => updateWinnerPercentage(winner.id, parseInt(e.target.value))}
+                                  className="w-16 text-center"
+                                  placeholder="%"
+                                />
+                                <div className="text-xs text-gray-500 mt-1">Percentage</div>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">Tier 1 Winners</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-gray-600">
-                              {disbursementData.tierDistribution?.tier2?.users?.length || 0}
+                          ))}
+                          
+                          {winners[tier]?.length > 0 && (
+                            <div className="pt-2 border-t">
+                              <div className="flex justify-between text-sm font-medium">
+                                <span>Total:</span>
+                                <span className={`${
+                                  winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0) === 100 
+                                    ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0)}%
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">Tier 2 Winners</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-orange-600">
-                              {disbursementData.tierDistribution?.tier3?.users?.length || 0}
-                            </div>
-                            <div className="text-sm text-gray-600">Tier 3 Winners</div>
-                          </div>
+                          )}
                         </div>
-                        
-                        <Button 
-                          onClick={async () => {
-                            try {
-                              const token = localStorage.getItem('token');
-                              const allWinners = [
-                                ...(disbursementData.tierDistribution?.tier1?.users || []),
-                                ...(disbursementData.tierDistribution?.tier2?.users || []),
-                                ...(disbursementData.tierDistribution?.tier3?.users || [])
-                              ];
-                              
-                              const response = await fetch('/api/admin/disbursements/process', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify({
-                                  selectedUsers: allWinners,
-                                  totalAmount: poolData?.totalPool || 0
-                                })
-                              });
-                              
-                              const data = await response.json();
-                              if (data.success) {
-                                toast({
-                                  title: "Disbursement Initiated",
-                                  description: `Processing payouts to ${allWinners.length} users`
-                                });
-                                setDisbursementData(null);
-                              }
-                            } catch (error) {
-                              toast({
-                                title: "Error",
-                                description: "Failed to process disbursements",
-                                variant: "destructive"
-                              });
-                            }
-                          }}
-                          className="w-full bg-green-600 hover:bg-green-700"
-                        >
-                          Process All Payouts
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
 
               {/* Payout History */}
               {payoutHistory && payoutHistory.length > 0 && (

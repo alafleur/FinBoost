@@ -1880,6 +1880,345 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Winner Selection and Disbursement System
+  
+  // Helper function for random selection within tiers
+  function performRandomSelection(users: any[], selectionPercentage: number = 50) {
+    const numToSelect = Math.floor(users.length * (selectionPercentage / 100));
+    if (numToSelect === 0) return [];
+    
+    // Shuffle users randomly
+    const shuffled = [...users].sort(() => Math.random() - 0.5);
+    
+    // Select the specified percentage
+    const selected = shuffled.slice(0, numToSelect);
+    
+    // Assign random ranks
+    return selected.map((user, index) => ({
+      ...user,
+      tierRank: index + 1,
+      rewardPercentage: 0 // Will be set by admin
+    }));
+  }
+
+  // Create new winner selection cycle
+  app.post("/api/admin/winner-cycles/create", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { cycleName, cycleStartDate, cycleEndDate, poolSettings } = req.body;
+
+      const [cycle] = await db
+        .insert(winnerSelectionCycles)
+        .values({
+          cycleName,
+          cycleStartDate: new Date(cycleStartDate),
+          cycleEndDate: new Date(cycleEndDate),
+          poolSettings: JSON.stringify(poolSettings),
+          createdBy: req.user.id
+        })
+        .returning();
+
+      res.json({ success: true, cycle });
+    } catch (error) {
+      console.error("Error creating winner cycle:", error);
+      res.status(500).json({ error: "Failed to create winner cycle" });
+    }
+  });
+
+  // Run random selection for a cycle
+  app.post("/api/admin/winner-cycles/:cycleId/run-selection", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+
+      // Get cycle details
+      const [cycle] = await db
+        .select()
+        .from(winnerSelectionCycles)
+        .where(eq(winnerSelectionCycles.id, cycleId));
+
+      if (!cycle) {
+        return res.status(404).json({ error: "Cycle not found" });
+      }
+
+      if (cycle.selectionCompleted) {
+        return res.status(400).json({ error: "Selection already completed for this cycle" });
+      }
+
+      // Get all premium users grouped by tier
+      const premiumUsers = await storage.getPremiumUsersForRewards();
+      
+      // Group users by tier (using current tier logic)
+      const usersByTier = {
+        tier1: premiumUsers.filter(u => u.tier === 'tier1' || u.currentMonthPoints >= 100),
+        tier2: premiumUsers.filter(u => u.tier === 'tier2' || (u.currentMonthPoints >= 50 && u.currentMonthPoints < 100)),
+        tier3: premiumUsers.filter(u => u.tier === 'tier3' || u.currentMonthPoints < 50)
+      };
+
+      // Perform random selection for each tier
+      const tier1Winners = performRandomSelection(usersByTier.tier1);
+      const tier2Winners = performRandomSelection(usersByTier.tier2);
+      const tier3Winners = performRandomSelection(usersByTier.tier3);
+
+      // Insert winner selections into database
+      const allWinners = [
+        ...tier1Winners.map(w => ({ ...w, tier: 'tier1', cycleId })),
+        ...tier2Winners.map(w => ({ ...w, tier: 'tier2', cycleId })),
+        ...tier3Winners.map(w => ({ ...w, tier: 'tier3', cycleId }))
+      ];
+
+      if (allWinners.length > 0) {
+        await db.insert(winnerSelections).values(
+          allWinners.map(winner => ({
+            cycleId,
+            userId: winner.id,
+            tier: winner.tier,
+            tierRank: winner.tierRank,
+            rewardPercentage: winner.rewardPercentage,
+            paypalEmail: winner.paypalEmail
+          }))
+        );
+      }
+
+      // Mark cycle as selection completed
+      await db
+        .update(winnerSelectionCycles)
+        .set({ selectionCompleted: true })
+        .where(eq(winnerSelectionCycles.id, cycleId));
+
+      res.json({
+        success: true,
+        message: "Random selection completed",
+        results: {
+          tier1: { total: usersByTier.tier1.length, winners: tier1Winners.length },
+          tier2: { total: usersByTier.tier2.length, winners: tier2Winners.length },
+          tier3: { total: usersByTier.tier3.length, winners: tier3Winners.length }
+        },
+        winners: allWinners
+      });
+    } catch (error) {
+      console.error("Error running selection:", error);
+      res.status(500).json({ error: "Failed to run selection" });
+    }
+  });
+
+  // Get cycle winners with current allocations
+  app.get("/api/admin/winner-cycles/:cycleId/winners", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+
+      const winners = await db
+        .select({
+          id: winnerSelections.id,
+          userId: winnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          paypalEmail: users.paypalEmail,
+          tier: winnerSelections.tier,
+          tierRank: winnerSelections.tierRank,
+          rewardPercentage: winnerSelections.rewardPercentage,
+          rewardAmount: winnerSelections.rewardAmount,
+          disbursed: winnerSelections.disbursed
+        })
+        .from(winnerSelections)
+        .leftJoin(users, eq(winnerSelections.userId, users.id))
+        .where(eq(winnerSelections.cycleId, cycleId))
+        .orderBy(winnerSelections.tier, winnerSelections.tierRank);
+
+      // Group by tier
+      const winnersByTier = {
+        tier1: winners.filter(w => w.tier === 'tier1'),
+        tier2: winners.filter(w => w.tier === 'tier2'),
+        tier3: winners.filter(w => w.tier === 'tier3')
+      };
+
+      res.json({ success: true, winners: winnersByTier });
+    } catch (error) {
+      console.error("Error fetching winners:", error);
+      res.status(500).json({ error: "Failed to fetch winners" });
+    }
+  });
+
+  // Update winner percentages
+  app.post("/api/admin/winner-cycles/:cycleId/update-percentages", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      const { updates } = req.body; // Array of { winnerId, rewardPercentage }
+
+      // Validate percentages sum to 100% per tier
+      const winnersByTier = await db
+        .select()
+        .from(winnerSelections)
+        .where(eq(winnerSelections.cycleId, cycleId));
+
+      const tierTotals = { tier1: 0, tier2: 0, tier3: 0 };
+      
+      for (const update of updates) {
+        const winner = winnersByTier.find(w => w.id === update.winnerId);
+        if (winner) {
+          tierTotals[winner.tier as keyof typeof tierTotals] += update.rewardPercentage;
+        }
+      }
+
+      // Check if any tier exceeds 100%
+      for (const [tier, total] of Object.entries(tierTotals)) {
+        if (total > 100) {
+          return res.status(400).json({ 
+            error: `${tier} percentages exceed 100% (current: ${total}%)` 
+          });
+        }
+      }
+
+      // Update percentages in database
+      for (const update of updates) {
+        await db
+          .update(winnerSelections)
+          .set({ rewardPercentage: update.rewardPercentage })
+          .where(eq(winnerSelections.id, update.winnerId));
+      }
+
+      res.json({ success: true, message: "Percentages updated successfully" });
+    } catch (error) {
+      console.error("Error updating percentages:", error);
+      res.status(500).json({ error: "Failed to update percentages" });
+    }
+  });
+
+  // Export winner allocations to CSV
+  app.get("/api/admin/winner-cycles/:cycleId/export", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+
+      const winners = await db
+        .select({
+          userId: winnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          paypalEmail: users.paypalEmail,
+          tier: winnerSelections.tier,
+          tierRank: winnerSelections.tierRank,
+          rewardPercentage: winnerSelections.rewardPercentage
+        })
+        .from(winnerSelections)
+        .leftJoin(users, eq(winnerSelections.userId, users.id))
+        .where(eq(winnerSelections.cycleId, cycleId))
+        .orderBy(winnerSelections.tier, winnerSelections.tierRank);
+
+      // Create CSV content
+      const csvHeader = "UserID,Username,Email,PayPalEmail,Tier,TierRank,Percentage\n";
+      const csvRows = winners.map(w => 
+        `${w.userId},${w.username},${w.email},${w.paypalEmail || ''},${w.tier},${w.tierRank},${w.rewardPercentage}`
+      ).join('\n');
+
+      const csvContent = csvHeader + csvRows;
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="cycle_${cycleId}_allocations.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      res.status(500).json({ error: "Failed to export CSV" });
+    }
+  });
+
+  // Import winner allocations from CSV
+  app.post("/api/admin/winner-cycles/:cycleId/import", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      const { csvData } = req.body;
+
+      // Parse CSV data
+      const lines = csvData.trim().split('\n');
+      const header = lines[0].toLowerCase();
+      
+      if (!header.includes('userid') || !header.includes('percentage')) {
+        return res.status(400).json({ error: "CSV must contain UserID and Percentage columns" });
+      }
+
+      const updates = [];
+      for (let i = 1; i < lines.length; i++) {
+        const columns = lines[i].split(',');
+        const userId = parseInt(columns[0]);
+        const percentage = parseInt(columns[6]); // Assuming percentage is in column 6
+
+        if (userId && !isNaN(percentage)) {
+          // Find the winner selection record
+          const [winner] = await db
+            .select()
+            .from(winnerSelections)
+            .where(and(
+              eq(winnerSelections.cycleId, cycleId),
+              eq(winnerSelections.userId, userId)
+            ));
+
+          if (winner) {
+            updates.push({ winnerId: winner.id, rewardPercentage: percentage });
+          }
+        }
+      }
+
+      if (updates.length === 0) {
+        return res.status(400).json({ error: "No valid updates found in CSV" });
+      }
+
+      // Update percentages using existing endpoint logic
+      const updateResult = await fetch(`/api/admin/winner-cycles/${cycleId}/update-percentages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates })
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Imported ${updates.length} percentage updates from CSV`
+      });
+    } catch (error) {
+      console.error("Error importing CSV:", error);
+      res.status(500).json({ error: "Failed to import CSV" });
+    }
+  });
+
+  // Get all winner cycles
+  app.get("/api/admin/winner-cycles", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycles = await db
+        .select()
+        .from(winnerSelectionCycles)
+        .orderBy(desc(winnerSelectionCycles.createdAt));
+
+      res.json({ success: true, cycles });
+    } catch (error) {
+      console.error("Error fetching cycles:", error);
+      res.status(500).json({ error: "Failed to fetch cycles" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
