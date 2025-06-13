@@ -422,35 +422,42 @@ export default function Dashboard() {
                     <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
                   </div>
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                    {completedLessonIds.length} of {publishedModules.length} completed
                   </Badge>
                 </div>
                 
                 <div className="space-y-3">
-                  {Object.entries(educationContent).slice(0, 3).map(([key, lesson]) => {
-                    const isCompleted = completedLessonIds.includes(key);
+                  {availableLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
                     return (
                       <Card 
-                        key={key} 
+                        key={module.id} 
                         className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
                           isCompleted 
                             ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${key}`)}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{lesson.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{lesson.content?.substring(0, 100)}...</p>
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
                               <div className="flex items-center space-x-2">
                                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {lesson.category}
+                                  {module.category}
                                 </span>
                                 {!isCompleted && (
-                                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
-                                    {lesson.points} pts
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
                                   </span>
                                 )}
                               </div>
@@ -460,6 +467,10 @@ export default function Dashboard() {
                                 <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
                                   ✓ Done
                                 </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
                               ) : (
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
                                   Start
@@ -517,40 +528,47 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Learning Progress</span>
                     <span className="text-sm text-gray-500">
-                      {Math.round((completedLessonIds.length / Object.keys(educationContent).length) * 100)}%
+                      {publishedModules.length > 0 ? Math.round((completedLessonIds.length / publishedModules.length) * 100) : 0}%
                     </span>
                   </div>
                   <Progress 
-                    value={(completedLessonIds.length / Object.keys(educationContent).length) * 100} 
+                    value={publishedModules.length > 0 ? (completedLessonIds.length / publishedModules.length) * 100 : 0} 
                     className="h-2"
                   />
                 </div>
                 
                 <div className="space-y-3">
-                  {Object.entries(educationContent).map(([key, lesson]) => {
-                    const isCompleted = completedLessonIds.includes(key);
+                  {allAvailableLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
                     return (
                       <Card 
-                        key={key} 
+                        key={module.id} 
                         className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
                           isCompleted 
                             ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${key}`)}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{lesson.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{lesson.content?.substring(0, 100)}...</p>
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
                               <div className="flex items-center space-x-2">
                                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {lesson.category}
+                                  {module.category}
                                 </span>
                                 {!isCompleted && (
-                                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-medium">
-                                    {lesson.points} pts
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
                                   </span>
                                 )}
                               </div>
@@ -560,6 +578,10 @@ export default function Dashboard() {
                                 <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
                                   ✓ Done
                                 </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
                               ) : (
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
                                   Start
@@ -676,38 +698,51 @@ export default function Dashboard() {
                     Continue Learning
                   </h3>
                   <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                    {completedLessonIds.length} of {publishedModules.length} completed
                   </Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(educationContent).slice(0, 6).map(([key, lesson]) => {
-                    const isCompleted = completedLessonIds.includes(key);
+                  {availableLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
                     return (
                       <Card 
-                        key={key}
+                        key={module.id}
                         className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
-                          isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                          isCompleted 
+                            ? 'border-green-200 bg-green-50' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'border-yellow-200 bg-yellow-50'
+                            : 'hover:border-primary-200'
                         }`}
-                        onClick={() => setLocation(`/lesson/${key}`)}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
+                            <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
                             {isCompleted ? (
                               <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
                                 ✓ Completed
                               </Badge>
+                            ) : isPremiumModule && !isUserPremium ? (
+                              <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300 shrink-0">
+                                Premium
+                              </Badge>
                             ) : (
                               <Badge variant="outline" className="shrink-0">
-                                {lesson.points} pts
+                                {module.pointsReward} pts
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.description?.substring(0, 100)}...</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
-                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
-                              {isCompleted ? "Review" : "Start Lesson"}
+                            <span className="text-xs text-gray-500 capitalize">{module.category}</span>
+                            <Button 
+                              size="sm" 
+                              variant={isCompleted ? "secondary" : isPremiumModule && !isUserPremium ? "outline" : "default"}
+                              className={isPremiumModule && !isUserPremium ? "border-yellow-400 text-yellow-700 hover:bg-yellow-50" : ""}
+                            >
+                              {isCompleted ? "Review" : isPremiumModule && !isUserPremium ? "Upgrade to Access" : "Start Lesson"}
                             </Button>
                           </div>
                         </CardContent>
@@ -717,7 +752,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-center mt-4">
                   <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    Showing 6 of {Object.keys(educationContent).length} available lessons
+                    Showing {availableLessons.length} of {publishedModules.length} available lessons
                   </p>
                   <Button 
                     variant="outline" 
