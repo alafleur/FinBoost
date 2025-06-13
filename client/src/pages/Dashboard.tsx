@@ -18,6 +18,7 @@ import {
   Activity,
   Crown,
   Medal,
+  User,
   User as UserIcon,
   Mail,
   CreditCard,
@@ -359,6 +360,16 @@ export default function Dashboard() {
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
               <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTab('profile')}
+                aria-label="View profile and subscription details"
+                className="flex items-center space-x-1"
+              >
+                <UserIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
@@ -379,7 +390,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
+            <TabsList className="grid w-full grid-cols-4 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -419,14 +430,6 @@ export default function Dashboard() {
               >
                 <Trophy className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Board</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="profile" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Profile settings tab"
-              >
-                <UserIcon className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Profile</span>
               </TabsTrigger>
             </TabsList>
           </div>
