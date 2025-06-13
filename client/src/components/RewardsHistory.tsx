@@ -11,9 +11,12 @@ import {
   Sparkles,
   Gift,
   Medal,
-  Target
+  Target,
+  Users,
+  Share2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface Disbursement {
   id: number;
@@ -35,10 +38,13 @@ interface RewardsData {
 export default function RewardsHistory() {
   const [rewardsData, setRewardsData] = useState<RewardsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     fetchRewardsHistory();
+    fetchUserData();
   }, []);
 
   const fetchRewardsHistory = async () => {
@@ -58,6 +64,63 @@ export default function RewardsHistory() {
       console.error('Error fetching rewards history:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleUpgradeClick = () => {
+    setLocation('/subscribe');
+  };
+
+  const handleReferralClick = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/referrals/my-code', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const referralLink = `${window.location.origin}/auth?ref=${data.referralCode}`;
+        
+        if (navigator.share) {
+          await navigator.share({
+            title: 'Join FinBoost',
+            text: `Join me on FinBoost and earn money while building better financial habits! Use my referral code: ${data.referralCode}`,
+            url: referralLink
+          });
+        } else {
+          await navigator.clipboard.writeText(referralLink);
+          toast({
+            title: "Referral link copied!",
+            description: "Share it with friends to grow the rewards pool",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error sharing referral:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get referral link",
+        variant: "destructive"
+      });
     }
   };
 
@@ -127,7 +190,7 @@ export default function RewardsHistory() {
             <p className="text-gray-600 mb-4">
               Complete financial modules, earn points, and join our monthly winner selection for cash prizes!
             </p>
-            <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+            <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                   <Target className="w-6 h-6 text-blue-600" />
@@ -147,6 +210,44 @@ export default function RewardsHistory() {
                 <p className="text-sm font-medium">Win Cash</p>
               </div>
             </div>
+            
+            {/* CTA based on user subscription status */}
+            {user?.subscriptionStatus === 'active' ? (
+              <div className="bg-white rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-semibold text-blue-900">Grow the Community</h4>
+                </div>
+                <p className="text-gray-600 text-sm mb-3">
+                  Refer friends to increase the monthly rewards pool for everyone
+                </p>
+                <Button 
+                  onClick={handleReferralClick}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Referral Link
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown className="w-5 h-5 text-yellow-600" />
+                  <h4 className="font-semibold text-yellow-900">Unlock Premium Rewards</h4>
+                </div>
+                <p className="text-gray-600 text-sm mb-3">
+                  Premium members have better odds and access to exclusive reward tiers
+                </p>
+                <Button 
+                  onClick={handleUpgradeClick}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Upgrade to Premium - $20/month</span>
+                  <span className="sm:hidden">Upgrade - $20/mo</span>
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -167,7 +268,7 @@ export default function RewardsHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="text-center">
               <div className="text-3xl font-bold mb-1">
                 ${((rewardsData?.totalEarned || 0) / 100).toFixed(2)}
@@ -180,13 +281,46 @@ export default function RewardsHistory() {
               </div>
               <p className="text-green-100 text-sm">Rewards Received</p>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-1">
-                {rewardsData?.disbursements?.filter(d => d.status === 'success').length || 0}
-              </div>
-              <p className="text-green-100 text-sm">Successful Payouts</p>
-            </div>
           </div>
+          
+          {/* CTA based on user subscription status */}
+          {user?.subscriptionStatus === 'active' ? (
+            <div className="text-center bg-white/10 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Users className="w-5 h-5" />
+                <h4 className="font-semibold">Grow the Rewards Pool</h4>
+              </div>
+              <p className="text-green-100 text-sm mb-3">
+                Refer friends to increase monthly rewards for everyone
+              </p>
+              <Button 
+                onClick={handleReferralClick}
+                variant="secondary"
+                className="bg-white text-blue-600 hover:bg-gray-100"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share Referral Link
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center bg-white/10 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Crown className="w-5 h-5" />
+                <h4 className="font-semibold">Unlock Higher Rewards</h4>
+              </div>
+              <p className="text-green-100 text-sm mb-3">
+                Premium members have better odds and exclusive reward tiers
+              </p>
+              <Button 
+                onClick={handleUpgradeClick}
+                variant="secondary"
+                className="bg-white text-blue-600 hover:bg-gray-100"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Premium - $20/month
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
