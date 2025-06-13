@@ -26,6 +26,7 @@ import RewardsHistory from "@/components/RewardsHistory";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
+import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -56,6 +57,7 @@ interface User {
   tier: string;
   currentStreak?: number;
   longestStreak?: number;
+  subscriptionStatus?: string;
 }
 
 export default function Dashboard() {
@@ -68,6 +70,9 @@ export default function Dashboard() {
   const [tierThresholds, setTierThresholds] = useState<any>(null);
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+  const [publishedModules, setPublishedModules] = useState<any[]>([]);
+  const [poolData, setPoolData] = useState({ totalPool: 0, premiumUsers: 0, totalUsers: 0 });
+  const [distributionInfo, setDistributionInfo] = useState<any>(null);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -157,6 +162,36 @@ export default function Dashboard() {
           setTierThresholds(thresholdsData.thresholds);
         }
 
+        // Fetch published modules for proper lesson filtering
+        const modulesResponse = await fetch('/api/education/modules', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (modulesResponse.ok) {
+          const modulesData = await modulesResponse.json();
+          setPublishedModules(modulesData.modules || []);
+        }
+
+        // Fetch pool data for CommunityGrowthDial
+        const poolResponse = await fetch('/api/pool/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (poolResponse.ok) {
+          const poolData = await poolResponse.json();
+          setPoolData(poolData);
+        }
+
+        // Fetch distribution info for CommunityGrowthDial
+        const distributionResponse = await fetch('/api/distribution/next', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (distributionResponse.ok) {
+          const distributionData = await distributionResponse.json();
+          setDistributionInfo(distributionData);
+        }
+
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
         toast({
@@ -191,15 +226,17 @@ export default function Dashboard() {
   };
 
   // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = lessonProgress.map(progress => {
-    const lessonKey = Object.keys(educationContent).find(key => 
-      educationContent[key].id === progress.moduleId
-    );
-    return lessonKey || progress.moduleId.toString();
-  });
+  const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
+
+  // Filter lessons to show only published modules
+  const availableLessons = publishedModules.slice(0, isMobile ? 3 : 6);
+  const allAvailableLessons = publishedModules;
+
+  // Check if user is premium
+  const isUserPremium = user?.subscriptionStatus === 'active';
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
-  console.log('Total modules loaded:', Object.keys(educationContent).length);
+  console.log('Total published modules loaded:', publishedModules.length);
 
   if (isLoading) {
     return (
@@ -356,6 +393,24 @@ export default function Dashboard() {
                 currentStreak={user?.currentStreak || 0}
                 longestStreak={user?.longestStreak || 0}
               />
+
+              {/* Mobile Community Growth Dial - Same as Desktop */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-purple-100 rounded-lg">
+                    <Users className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Community Growth</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <CommunityGrowthDial 
+                    poolData={poolData}
+                    user={user as any}
+                    distributionInfo={distributionInfo}
+                    onUpgradeClick={() => setLocation('/subscribe')}
+                  />
+                </div>
+              </div>
 
               {/* Mobile Learning Preview with enhanced design */}
               <div className="space-y-4">
