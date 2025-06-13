@@ -261,249 +261,267 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Mobile Tab Navigation - At top of page */}
-      {isMobile && (
-        <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-          <div className="px-4">
-            <div className="grid grid-cols-5 h-auto">
-              <button 
-                onClick={() => setActiveTab('overview')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'overview' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+      {isMobile ? (
+        /* Mobile Layout with Full Feature Parity */
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+          {/* Mobile Tab Navigation */}
+          <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
+            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-0 rounded-none">
+              <TabsTrigger 
+                value="overview" 
+                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
               >
                 Overview
-              </button>
-              <button 
-                onClick={() => setActiveTab('learn')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'learn' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="learn" 
+                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
               >
                 Learn
-              </button>
-              <button 
-                onClick={() => setActiveTab('referrals')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'referrals' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="referrals" 
+                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
               >
                 Referrals
-              </button>
-              <button 
-                onClick={() => setActiveTab('rewards')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'rewards' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="rewards" 
+                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
               >
                 Rewards
-              </button>
-              <button 
-                onClick={() => setActiveTab('leaderboard')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'leaderboard' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="leaderboard" 
+                className="text-xs px-2 py-3 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-700 rounded-none border-b-2 border-transparent"
               >
                 Board
-              </button>
-            </div>
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </div>
-      )}
 
-      <div className="flex">
-        {/* Main Content */}
-        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-            {/* Mobile Tab Content */}
-            {isMobile ? (
-              <div className="space-y-6">
-                {activeTab === 'overview' && (
-                  <div className="space-y-6">
-                    {/* Welcome Section */}
-                    <div className="mb-6">
-                      <h2 className="font-heading font-bold text-xl mb-2">
-                        Welcome to your FinBoost Dashboard! 🚀
-                      </h2>
-                      <p className="text-sm text-gray-600">
-                        Track your progress, earn points, and win monthly rewards for building better financial habits.
-                      </p>
-                    </div>
-
-                    {/* Mobile Stats Cards */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center justify-between">
-                            Current Tier
-                            <Trophy className="h-4 w-4 text-orange-500" />
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs`}>
-                            {getTierDisplayName(user?.tier || '')}
-                          </Badge>
-                          <p className="text-xs text-gray-500 mt-1">Monthly standing</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium flex items-center justify-between">
-                            Points
-                            <Star className="h-4 w-4 text-yellow-500" />
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="text-xl font-bold">{user?.totalPoints || 0}</div>
-                          <p className="text-xs text-gray-500">+{user?.currentMonthPoints || 0} this month</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {user && <PointsSummary user={user as User} />}
-                    
-                    <StreakDisplay 
-                      currentStreak={user?.currentStreak || 0}
-                      longestStreak={user?.longestStreak || 0}
-                    />
-                  </div>
-                )}
-
-                {activeTab === 'learn' && (
-                  <div className="space-y-6">
-                    <div className="mb-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                        <h3 className="font-heading font-bold text-lg mb-2 sm:mb-0">
-                          Continue Learning
-                        </h3>
-                        <Badge variant="secondary" className="w-fit">
-                          {completedLessonIds.length} of {Object.keys(educationContent).length} completed
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid gap-4">
-                        {Object.entries(educationContent).slice(0, 3).map(([key, lesson]) => (
-                          <Card key={key} className="border hover:shadow-md transition-shadow">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-sm mb-1">{lesson.title}</h4>
-                                  <div className="flex items-center text-xs text-gray-500 mb-2">
-                                    <span className="capitalize">{lesson.category}</span>
-                                    <span className="mx-2">•</span>
-                                    <span>{lesson.points} pts</span>
-                                  </div>
-                                </div>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => window.location.href = `/learning/${key}`}
-                                  disabled={completedLessonIds.includes(key)}
-                                >
-                                  {completedLessonIds.includes(key) ? 'Completed' : 'Start Lesson'}
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                      
-                      <div className="text-center mt-4">
-                        <p className="text-sm text-gray-500 mb-2">
-                          Showing 3 of {Object.keys(educationContent).length} available lessons
-                        </p>
-                        <Button variant="outline" size="sm" onClick={() => window.location.href = '/learning'}>
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          View All Learning Modules
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'referrals' && <ReferralSystem />}
-                {activeTab === 'rewards' && <RewardsHistory />}
-                {activeTab === 'leaderboard' && <Leaderboard />}
-              </div>
-            ) : (
-              /* Desktop: Show welcome section normally */
+          {/* Mobile Tab Content */}
+          <div className="px-4 py-6">
+            <TabsContent value="overview" className="mt-0 space-y-6">
+              {/* Welcome Section */}
               <div>
-                {/* Welcome Section */}
-                <div className="mb-6 sm:mb-8">
-                  <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                    Welcome to your FinBoost Dashboard! 🚀
-                  </h2>
-                  <p className="text-sm sm:text-base text-gray-600">
-                    Track your progress, earn points, and win monthly rewards for building better financial habits.
-                  </p>
+                <h2 className="font-heading font-bold text-xl mb-2">
+                  Welcome to your FinBoost Dashboard! 🚀
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  Track your progress, earn points, and win monthly rewards for building better financial habits.
+                </p>
+              </div>
+
+              {/* Mobile Stats Cards - Same as Desktop */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center justify-between">
+                      Current Tier
+                      <Trophy className="h-4 w-4 text-orange-500" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs`}>
+                      {getTierDisplayName(user?.tier || '')}
+                    </Badge>
+                    <p className="text-xs text-gray-500 mt-1">Monthly standing</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center justify-between">
+                      Total Points
+                      <Star className="h-4 w-4 text-yellow-500" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-xl font-bold">{user?.totalPoints || 0}</div>
+                    <p className="text-xs text-gray-500">+{user?.currentMonthPoints || 0} this month</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Mobile Points Summary - Same as Desktop */}
+              {user && <PointsSummary user={user as User} />}
+
+              {/* Mobile Streak Display - Same as Desktop */}
+              <StreakDisplay 
+                currentStreak={user?.currentStreak || 0}
+                longestStreak={user?.longestStreak || 0}
+              />
+
+              {/* Mobile Learning Preview - Same as Desktop */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-heading font-bold text-lg">Continue Learning</h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                  </Badge>
+                </div>
+                
+                <div className="space-y-3">
+                  {Object.entries(educationContent).slice(0, 3).map(([key, lesson]) => {
+                    const isCompleted = completedLessonIds.includes(key);
+                    return (
+                      <Card key={key} className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
+                        isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                      }`} onClick={() => setLocation(`/lesson/${key}`)}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
+                            {isCompleted ? (
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0 text-xs">
+                                ✓ Completed
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="shrink-0 text-xs">
+                                {lesson.points} pts
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
+                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                              {isCompleted ? "Review" : "Start"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                
+                <div className="text-center mt-4">
+                  <Button variant="outline" size="sm" onClick={() => setLocation('/education')} className="w-full">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    View All Learning Modules
+                  </Button>
                 </div>
               </div>
-            )}
+            </TabsContent>
 
-            {/* Desktop Only: Stats Overview */}
-            {!isMobile && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                      <Trophy className="h-4 w-4 text-orange-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
-                          {getTierDisplayName(user?.tier || '')}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Monthly standing
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                      <Star className="h-4 w-4 text-yellow-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                      <p className="text-xs text-muted-foreground">
-                        +{user?.currentMonthPoints || 0} this month
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <PointsSummary user={user as User} />
-              </>
-            )}
-
-            {/* Desktop Only: Learning Modules Preview */}
-            {!isMobile && (
-            <div className="mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                  Continue Learning
-                </h3>
-                <Badge variant="secondary" className="w-fit">
+            <TabsContent value="learn" className="mt-0 space-y-6">
+              <div>
+                <h3 className="font-heading font-bold text-lg mb-4">All Learning Modules</h3>
+                <Badge variant="secondary" className="mb-4">
                   {completedLessonIds.length} of {Object.keys(educationContent).length} completed
                 </Badge>
+                
+                <div className="space-y-3">
+                  {Object.entries(educationContent).map(([key, lesson]) => {
+                    const isCompleted = completedLessonIds.includes(key);
+                    return (
+                      <Card key={key} className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
+                        isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                      }`} onClick={() => setLocation(`/lesson/${key}`)}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
+                            {isCompleted ? (
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0 text-xs">
+                                ✓ Completed
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="shrink-0 text-xs">
+                                {lesson.points} pts
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
+                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                              {isCompleted ? "Review" : "Start"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(educationContent)
-                  .slice(0, isMobile ? 3 : 6)
-                  .map(([key, lesson]) => {
+            </TabsContent>
+
+            <TabsContent value="referrals" className="mt-0">
+              <ReferralSystem />
+            </TabsContent>
+
+            <TabsContent value="rewards" className="mt-0">
+              <RewardsHistory />
+            </TabsContent>
+
+            <TabsContent value="leaderboard" className="mt-0">
+              <Leaderboard />
+            </TabsContent>
+          </div>
+        </Tabs>
+      ) : (
+        /* Desktop Layout */
+        <div className="flex">
+          {/* Main Content */}
+          <div className="flex-1 mr-80">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+              {/* Welcome Section */}
+              <div className="mb-6 sm:mb-8">
+                <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
+                  Welcome to your FinBoost Dashboard! 🚀
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600">
+                  Track your progress, earn points, and win monthly rewards for building better financial habits.
+                </p>
+              </div>
+
+              {/* Desktop Stats Overview */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
+                    <Trophy className="h-4 w-4 text-orange-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
+                        {getTierDisplayName(user?.tier || '')}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Monthly standing
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      +{user?.currentMonthPoints || 0} this month
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {user && <PointsSummary user={user as User} />}
+
+              {/* Desktop Learning Modules Preview */}
+              <div className="mb-6 sm:mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                  <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
+                    Continue Learning
+                  </h3>
+                  <Badge variant="secondary" className="w-fit">
+                    {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(educationContent).slice(0, 6).map(([key, lesson]) => {
                     const isCompleted = completedLessonIds.includes(key);
                     return (
                       <Card 
@@ -537,49 +555,36 @@ export default function Dashboard() {
                       </Card>
                     );
                   })}
-              </div>
-              <div className="text-center mt-4">
-                <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Showing {isMobile ? 3 : 6} of {Object.keys(educationContent).length} available lessons
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setLocation('/education')}
-                  className="w-full sm:w-auto"
-                  size={isMobile ? "sm" : "default"}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  View All Learning Modules
-                </Button>
-              </div>
-            </div>
-            )}
-
-            {/* Desktop Only: Show overview content directly */}
-            {!isMobile && (
-              <div className="space-y-6">
-                <StreakDisplay 
-                  currentStreak={user?.currentStreak || 0}
-                  longestStreak={user?.longestStreak || 0}
-                />
-                
-                {/* Desktop Rewards Section */}
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
-                  <RewardsHistory />
+                </div>
+                <div className="text-center mt-4">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                    Showing 6 of {Object.keys(educationContent).length} available lessons
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setLocation('/education')}
+                    className="w-full sm:w-auto"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    View All Learning Modules
+                  </Button>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Desktop Leaderboard Sidebar */}
-        {!isMobile && (
+              {/* Desktop Rewards Section */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
+                <RewardsHistory />
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Leaderboard Sidebar */}
           <div className="fixed right-0 top-0 h-full">
             <LeaderboardSidebar />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
