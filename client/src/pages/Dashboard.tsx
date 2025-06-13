@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FinBoostLogo } from "@/components/ui/finboost-logo";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
+import RewardsHistory from "@/components/RewardsHistory";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
@@ -103,92 +104,108 @@ export default function Dashboard() {
   const [showExpandedLeaderboard, setShowExpandedLeaderboard] = useState(false);
 
   const LeaderboardSidebar = () => {
+    const [sidebarTab, setSidebarTab] = useState("leaderboard");
+    
     if (!leaderboardData) return null;
 
     return (
       <div className="w-full h-full bg-white border-l border-gray-200 overflow-y-auto">
         <div className="p-6 space-y-6" style={{ paddingTop: '1.5rem' }}>
-          {/* Tier Progress Summary */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-            <h3 className="font-heading font-bold text-lg mb-4 text-gray-800 mt-1">Tier Thresholds</h3>
-            <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
-                <span className="text-blue-700 font-semibold">Tier 1</span>
-                <span className="text-blue-600">{tierThresholds?.tier1 || 0}+ pts</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
-                <span className="text-blue-700 font-semibold">Tier 2</span>
-                <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier1 ? tierThresholds.tier1 - 1 : 0} pts</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
-                <span className="text-blue-700 font-semibold">Tier 3</span>
-                <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
-              </div>
-            </div>
-            {user && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-blue-800">Your Status</span>
-                  <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
-                    {getTierDisplayName(user.tier)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-blue-700">Total Points:</span>
-                  <span className="text-xs font-bold text-blue-800">{user.totalPoints}</span>
-                </div>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-blue-700">This Month:</span>
-                  <span className="text-xs font-medium text-blue-800">{user.currentMonthPoints}</span>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Sidebar Tabs */}
+          <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="leaderboard" className="text-sm">Leaderboard</TabsTrigger>
+              <TabsTrigger value="rewards" className="text-sm">Rewards</TabsTrigger>
+            </TabsList>
 
-          <div>
-            {/* View Full Leaderboard Button - Above Heading */}
-            <div className="mb-4">
-              <Button 
-                onClick={() => setShowExpandedLeaderboard(true)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
-              >
-                <Trophy className="h-5 w-5 mr-2" />
-                View Full Leaderboard
-              </Button>
-            </div>
-
-            <h3 className="font-heading font-bold text-lg mb-4">Leaderboard</h3>
-            <div className="space-y-1">
-              {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
-                <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                  leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
-                    ? 'bg-blue-100 border border-blue-300' 
-                    : 'bg-gray-50 hover:bg-gray-100'
-                }`}>
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
+            <TabsContent value="leaderboard" className="space-y-6 mt-4">
+              {/* Tier Progress Summary */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                <h3 className="font-heading font-bold text-lg mb-4 text-gray-800 mt-1">Tier Thresholds</h3>
+                <p className="text-xs text-gray-600 mb-3">Dynamic thresholds based on user percentiles</p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
+                    <span className="text-blue-700 font-semibold">Tier 1</span>
+                    <span className="text-blue-600">{tierThresholds?.tier1 || 0}+ pts</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
+                    <span className="text-blue-700 font-semibold">Tier 2</span>
+                    <span className="text-blue-600">{tierThresholds?.tier2 || 0} - {tierThresholds?.tier1 ? tierThresholds.tier1 - 1 : 0} pts</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-blue-50 rounded border">
+                    <span className="text-blue-700 font-semibold">Tier 3</span>
+                    <span className="text-blue-600">0 - {tierThresholds?.tier2 ? tierThresholds.tier2 - 1 : 0} pts</span>
+                  </div>
+                </div>
+                {user && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-blue-800">Your Status</span>
+                      <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
+                        {getTierDisplayName(user.tier)}
+                      </Badge>
                     </div>
-                    <span className="text-sm font-medium truncate">{entry.username}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-blue-700">Total Points:</span>
+                      <span className="text-xs font-bold text-blue-800">{user.totalPoints}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-blue-700">This Month:</span>
+                      <span className="text-xs font-medium text-blue-800">{user.currentMonthPoints}</span>
+                    </div>
                   </div>
-                  <span className="text-xs font-semibold text-gray-700">{entry.points} pts</span>
-                </div>
-              ))}
-            </div>
-
-            {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between p-3 bg-blue-100 border border-blue-300 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xs font-medium text-blue-600 w-6">#{leaderboardData.currentUser.rank}</span>
-                    <span className="text-sm font-semibold text-blue-800">{leaderboardData.currentUser.username} (You)</span>
-                  </div>
-                  <span className="text-xs font-bold text-blue-800">{leaderboardData.currentUser.points} pts</span>
-                </div>
+                )}
               </div>
-            )}
-          </div>
+
+              <div>
+                {/* View Full Leaderboard Button - Above Heading */}
+                <div className="mb-4">
+                  <Button 
+                    onClick={() => setShowExpandedLeaderboard(true)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105"
+                  >
+                    <Trophy className="h-5 w-5 mr-2" />
+                    View Full Leaderboard
+                  </Button>
+                </div>
+
+                <h3 className="font-heading font-bold text-lg mb-4">Leaderboard</h3>
+                <div className="space-y-1">
+                  {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
+                    <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
+                        ? 'bg-blue-100 border border-blue-300' 
+                        : 'bg-gray-50 hover:bg-gray-100'
+                    }`}>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-medium text-gray-500 w-6">#{index + 1}</span>
+                        </div>
+                        <span className="text-sm font-medium truncate">{entry.username}</span>
+                      </div>
+                      <span className="text-xs font-semibold text-gray-700">{entry.points} pts</span>
+                    </div>
+                  ))}
+                </div>
+
+                {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between p-3 bg-blue-100 border border-blue-300 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs font-medium text-blue-600 w-6">#{leaderboardData.currentUser.rank}</span>
+                        <span className="text-sm font-semibold text-blue-800">{leaderboardData.currentUser.username} (You)</span>
+                      </div>
+                      <span className="text-xs font-bold text-blue-800">{leaderboardData.currentUser.points} pts</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rewards" className="mt-4">
+              <RewardsHistory />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     );
@@ -850,12 +867,13 @@ export default function Dashboard() {
             {/* Mobile Navigation Tabs - Show at top on mobile */}
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-                <TabsList className="grid w-full grid-cols-7 h-auto">
+                <TabsList className="grid w-full grid-cols-8 h-auto">
                   <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
                   <TabsTrigger value="earn" className="text-xs px-1 py-2">Earn</TabsTrigger>
                   <TabsTrigger value="assessment" className="text-xs px-1 py-2">Quiz</TabsTrigger>
                   <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
                   <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
+                  <TabsTrigger value="rewards" className="text-xs px-1 py-2">Rewards</TabsTrigger>
                   <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
                   <TabsTrigger value="support" className="text-xs px-1 py-2">Support</TabsTrigger>
                 </TabsList>
@@ -1188,6 +1206,10 @@ export default function Dashboard() {
                     )}
                   </div>
                   <Leaderboard />
+                </TabsContent>
+
+                <TabsContent value="rewards">
+                  <RewardsHistory />
                 </TabsContent>
 
                 <TabsContent value="history">
