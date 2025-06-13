@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -158,7 +159,7 @@ export default function Dashboard() {
       });
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        setUser(userData.user || userData);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -167,11 +168,7 @@ export default function Dashboard() {
 
   const fetchLeaderboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/leaderboard', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include'
-      });
+      const response = await fetch('/api/leaderboard');
       if (response.ok) {
         const data = await response.json();
         setLeaderboardData(data);
@@ -195,11 +192,7 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/progress', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include'
-      });
+      const response = await fetch('/api/user/progress');
       if (response.ok) {
         const data = await response.json();
         console.log('Raw progress data:', data);
@@ -229,12 +222,12 @@ export default function Dashboard() {
   };
 
   // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = Array.isArray(lessonProgress) ? lessonProgress.map(progress => {
+  const completedLessonIds = lessonProgress.map(progress => {
     const lessonKey = Object.keys(educationContent).find(key => 
       educationContent[key].id === progress.moduleId
     );
     return lessonKey || progress.moduleId.toString();
-  }) : [];
+  });
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
   console.log('Total modules loaded:', Object.keys(educationContent).length);
