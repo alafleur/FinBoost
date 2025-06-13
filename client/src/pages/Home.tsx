@@ -48,11 +48,11 @@ export default function Home() {
         {/* 5. What You'll Learn */}
         <WhatYouLearn />
         
+        {/* 6. Prominent Email Capture Section - JOIN THE WAITLIST */}
+        <EmailCaptureSection onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
+        
         {/* Mini Trust Banner */}
         <TrustBanner />
-        
-        {/* 6. Prominent Email Capture Section */}
-        <EmailCaptureSection onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         
         {/* 7. Growth Chart + Waitlist CTA */}
         <GrowthCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
