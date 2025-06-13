@@ -128,7 +128,14 @@ The application features a modern React frontend with TypeScript, Express.js bac
 ## Changelog
 - June 13, 2025. Initial setup
 - June 13, 2025. Added Profile tab to mobile navigation with comprehensive subscription payment details display including amount, payment method, dates, and PayPal configuration for reward disbursements. Implemented admin endpoints for managing user payment information with automatic next billing date calculation (last day of month).
+- June 13, 2025. Session interrupted during desktop dashboard restoration work. Missing components identified include: LeaderboardSidebar positioning, community growth metrics, proper tier system (Tier 1/2/3), and complete desktop layout structure. Work in progress to restore full desktop dashboard functionality.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Current Issues
+- Desktop dashboard components missing/broken
+- LeaderboardSidebar visibility issues on desktop
+- Community growth metrics not displaying properly
+- Need to restore original desktop layout structure
