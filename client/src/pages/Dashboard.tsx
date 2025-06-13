@@ -229,12 +229,12 @@ export default function Dashboard() {
   };
 
   // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = lessonProgress.map(progress => {
+  const completedLessonIds = Array.isArray(lessonProgress) ? lessonProgress.map(progress => {
     const lessonKey = Object.keys(educationContent).find(key => 
       educationContent[key].id === progress.moduleId
     );
     return lessonKey || progress.moduleId.toString();
-  });
+  }) : [];
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
   console.log('Total modules loaded:', Object.keys(educationContent).length);
