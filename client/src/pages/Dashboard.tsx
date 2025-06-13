@@ -982,37 +982,21 @@ export default function Dashboard() {
           </div>
         </Tabs>
       ) : (
-        /* Desktop Layout */
-        <div className="flex">
-          {/* Main Content */}
-          <div className="flex-1 mr-80">
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-              {/* Welcome Section */}
-              <div className="mb-6 sm:mb-8">
-                <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                  Welcome to your FinBoost Dashboard! 🚀
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600">
-                  Track your progress, earn points, and win monthly rewards for building better financial habits.
-                </p>
-              </div>
-
-              {/* Desktop Stats Overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        /* Desktop Layout with Full Dashboard */
+        <div className="flex h-full">
+          {/* Main Content Area */}
+          <div className="flex-1 pr-80 overflow-y-auto">
+            <div className="max-w-6xl mx-auto p-6">
+              {/* Header Stats Row */}
+              <div className="grid grid-cols-4 gap-6 mb-8">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
                     <Trophy className="h-4 w-4 text-orange-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
-                        {getTierDisplayName(user?.tier || '')}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Monthly standing
-                    </p>
+                    <div className="text-2xl font-bold">{user?.tier || 'Tier 1'}</div>
+                    <p className="text-xs text-muted-foreground">Monthly standing</p>
                   </CardContent>
                 </Card>
 
@@ -1023,99 +1007,212 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-muted-foreground">
-                      +{user?.currentMonthPoints || 0} this month
-                    </p>
+                    <p className="text-xs text-muted-foreground">+{user?.currentMonthPoints || 0} this month</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{user?.currentMonthPoints || 0}</div>
+                    <p className="text-xs text-muted-foreground">Points earned</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+                    <Target className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{user?.currentStreak || 0}</div>
+                    <p className="text-xs text-muted-foreground">Days active</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {user && <PointsSummary user={user as User} />}
-
-              {/* Desktop Learning Modules Preview */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                  <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                    Continue Learning
-                  </h3>
-                  <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableLessons.map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    return (
-                      <Card 
-                        key={module.id}
-                        className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
-                          isCompleted 
-                            ? 'border-green-200 bg-green-50' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'border-yellow-200 bg-yellow-50'
-                            : 'hover:border-primary-200'
-                        }`}
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-sm leading-tight pr-2">{module.title}</h4>
-                            {isCompleted ? (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
-                                ✓ Completed
-                              </Badge>
-                            ) : isPremiumModule && !isUserPremium ? (
-                              <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300 shrink-0">
-                                Premium
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="shrink-0">
-                                {module.pointsReward} pts
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.description?.substring(0, 100)}...</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500 capitalize">{module.category}</span>
-                            <Button 
-                              size="sm" 
-                              variant={isCompleted ? "secondary" : isPremiumModule && !isUserPremium ? "outline" : "default"}
-                              className={isPremiumModule && !isUserPremium ? "border-yellow-400 text-yellow-700 hover:bg-yellow-50" : ""}
-                            >
-                              {isCompleted ? "Review" : isPremiumModule && !isUserPremium ? "Upgrade to Access" : "Start Lesson"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                <div className="text-center mt-4">
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    Showing {availableLessons.length} of {publishedLessons.length} available lessons
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setLocation('/education')}
-                    className="w-full sm:w-auto"
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    View All Learning Modules
-                  </Button>
-                </div>
+              {/* Tier Progress Section */}
+              <div className="mb-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      Tier Progress
+                    </CardTitle>
+                    <CardDescription>
+                      {user?.currentMonthPoints || 0} points this month
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                            Tier 1 50+
+                          </Badge>
+                          <span className="text-sm text-gray-600">50+ points</span>
+                        </div>
+                        {(user?.currentMonthPoints || 0) >= 50 && (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                            Tier 2 25+
+                          </Badge>
+                          <span className="text-sm text-gray-600">25+ points</span>
+                        </div>
+                        {(user?.currentMonthPoints || 0) >= 25 && (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+                            Tier 3 0+
+                          </Badge>
+                          <span className="text-sm text-gray-600">0+ points</span>
+                        </div>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      
+                      <Progress 
+                        value={Math.min(((user?.currentMonthPoints || 0) / 50) * 100, 100)} 
+                        className="h-2 mt-4"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Desktop Rewards Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
-                <RewardsHistory />
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-8">
+                  {/* Continue Learning */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold">Continue Learning</h3>
+                      <Badge variant="secondary">
+                        {completedLessonIds.length} of {publishedLessons.length} completed
+                      </Badge>
+                    </div>
+                    <div className="space-y-4">
+                      {availableLessons.slice(0, 3).map((module) => {
+                        const isCompleted = completedLessonIds.includes(module.id.toString());
+                        const isPremiumModule = module.accessType === 'premium';
+                        return (
+                          <Card 
+                            key={module.id}
+                            className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                              !user?.subscriptionStatus && isPremiumModule 
+                                ? 'border-orange-200 bg-orange-50' 
+                                : 'hover:border-blue-200'
+                            }`}
+                            onClick={() => setLocation(`/education/${module.id}`)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-medium text-sm leading-tight pr-2">{module.title}</h4>
+                                <div className="flex items-center space-x-1 flex-shrink-0">
+                                  {!user?.subscriptionStatus && isPremiumModule && (
+                                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                                      Premium
+                                    </Badge>
+                                  )}
+                                  {isCompleted && (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.description}</p>
+                              <div className="flex items-center justify-between">
+                                <Badge variant="outline" className="text-xs">
+                                  {module.category}
+                                </Badge>
+                                <span className="text-xs text-gray-500">
+                                  {module.pointValue} pts
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4">
+                      <Button 
+                        onClick={() => setLocation('/education')}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        View All Learning Modules
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-8">
+                  {/* Community Growth */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Community Growth
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-blue-600 mb-1">
+                            {poolStatus?.premiumUsers || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Active Members</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              ${poolStatus?.totalPool || 0}
+                            </div>
+                            <div className="text-xs text-gray-500">Total Pool</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {poolStatus?.premiumUsers || 0}
+                            </div>
+                            <div className="text-xs text-gray-500">Strength</div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Rewards Preview */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="h-5 w-5" />
+                        Rewards History
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <RewardsHistory />
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Desktop Leaderboard Sidebar */}
-          <div className="fixed right-0 top-0 h-full">
+          <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] z-30">
             <LeaderboardSidebar />
           </div>
         </div>
