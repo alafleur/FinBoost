@@ -213,20 +213,32 @@ export default function RewardsHistory() {
             
             {/* CTA based on user subscription status */}
             {user?.subscriptionStatus === 'active' ? (
-              <div className="bg-white rounded-lg p-4 border border-blue-200">
+              <div className="bg-white rounded-lg p-4 border border-green-200">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <h4 className="font-semibold text-blue-900">Grow the Community</h4>
+                  {user?.paypalEmail ? (
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <Target className="w-5 h-5 text-orange-600" />
+                  )}
+                  <h4 className="font-semibold text-gray-900">
+                    {user?.paypalEmail ? 'Payment Details Configured' : 'Setup Payment Details'}
+                  </h4>
                 </div>
                 <p className="text-gray-600 text-sm mb-3">
-                  Refer friends to increase the monthly rewards pool for everyone
+                  {user?.paypalEmail ? 
+                    `Rewards will be sent to ${user.paypalEmail}` : 
+                    'Configure your PayPal email to receive monthly rewards'
+                  }
                 </p>
                 <Button 
-                  onClick={handleReferralClick}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setLocation('/dashboard')}
+                  className={user?.paypalEmail ? 
+                    "bg-green-600 hover:bg-green-700 text-white" : 
+                    "bg-orange-600 hover:bg-orange-700 text-white"
+                  }
                 >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Referral Link
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  {user?.paypalEmail ? 'View Profile' : 'Setup Payment Info'}
                 </Button>
               </div>
             ) : (

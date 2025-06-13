@@ -393,43 +393,43 @@ export default function Dashboard() {
             <TabsList className="grid w-full grid-cols-4 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Dashboard overview tab"
               >
                 <Activity className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Overview</span>
+                <span className="font-medium text-[10px]">Overview</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="learn" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Learning modules tab"
               >
                 <BookOpen className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Learn</span>
+                <span className="font-medium text-[10px]">Learn</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="referrals" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Referral system tab"
               >
                 <Users className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Referrals</span>
+                <span className="font-medium text-[10px]">Referrals</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Rewards history tab"
               >
                 <Award className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Rewards</span>
+                <span className="font-medium text-[10px]">Rewards</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
-                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-1 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Leaderboard tab"
               >
                 <Trophy className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium">Board</span>
+                <span className="font-medium text-[10px]">Board</span>
               </TabsTrigger>
             </TabsList>
           </div>
