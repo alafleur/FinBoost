@@ -1902,9 +1902,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Create new winner selection cycle
-  app.post("/api/admin/winner-cycles/create", authenticateToken, async (req, res) => {
+  app.post("/api/admin/winner-cycles/create", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
@@ -1917,7 +1923,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cycleStartDate: new Date(cycleStartDate),
           cycleEndDate: new Date(cycleEndDate),
           poolSettings: JSON.stringify(poolSettings),
-          createdBy: req.user.id
+          createdBy: user.id
         })
         .returning();
 
@@ -1929,9 +1935,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Run random selection for a cycle
-  app.post("/api/admin/winner-cycles/:cycleId/run-selection", authenticateToken, async (req, res) => {
+  app.post("/api/admin/winner-cycles/:cycleId/run-selection", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
