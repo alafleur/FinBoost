@@ -299,19 +299,28 @@ export default function RewardsHistory() {
           {user?.subscriptionStatus === 'active' ? (
             <div className="text-center bg-white/10 rounded-lg p-4">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Users className="w-5 h-5" />
-                <h4 className="font-semibold">Grow the Rewards Pool</h4>
+                {user?.paypalEmail ? (
+                  <DollarSign className="w-5 h-5 text-green-300" />
+                ) : (
+                  <Target className="w-5 h-5 text-orange-300" />
+                )}
+                <h4 className="font-semibold">
+                  {user?.paypalEmail ? 'Payment Details Ready' : 'Setup Payment Info'}
+                </h4>
               </div>
               <p className="text-green-100 text-sm mb-3">
-                Refer friends to increase monthly rewards for everyone
+                {user?.paypalEmail ? 
+                  `Rewards will be sent to ${user.paypalEmail}` : 
+                  'Configure your PayPal email to receive monthly rewards'
+                }
               </p>
               <Button 
-                onClick={handleReferralClick}
+                onClick={() => setLocation('/dashboard')}
                 variant="secondary"
                 className="bg-white text-blue-600 hover:bg-gray-100"
               >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Referral Link
+                <DollarSign className="w-4 h-4 mr-2" />
+                {user?.paypalEmail ? 'View Profile' : 'Setup Payment Info'}
               </Button>
             </div>
           ) : (
