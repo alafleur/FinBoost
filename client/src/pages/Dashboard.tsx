@@ -377,11 +377,12 @@ export default function Dashboard() {
             {/* Dashboard Content - Only show tabs on mobile */}
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-auto">
-                  <TabsTrigger value="overview" className="text-xs px-2 py-2">Overview</TabsTrigger>
-                  <TabsTrigger value="referrals" className="text-xs px-2 py-2">Referrals</TabsTrigger>
-                  <TabsTrigger value="leaderboard" className="text-xs px-2 py-2">Board</TabsTrigger>
-                  <TabsTrigger value="history" className="text-xs px-2 py-2">Activity</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-5 h-auto">
+                  <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
+                  <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
+                  <TabsTrigger value="rewards" className="text-xs px-1 py-2">Rewards</TabsTrigger>
+                  <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
+                  <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -395,6 +396,10 @@ export default function Dashboard() {
 
                 <TabsContent value="referrals">
                   <ReferralSystem />
+                </TabsContent>
+
+                <TabsContent value="rewards">
+                  <RewardsHistory />
                 </TabsContent>
 
                 <TabsContent value="leaderboard">
@@ -419,6 +424,12 @@ export default function Dashboard() {
                   currentStreak={user?.currentStreak || 0}
                   longestStreak={user?.longestStreak || 0}
                 />
+                
+                {/* Desktop Rewards Section */}
+                <div className="mt-8">
+                  <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
+                  <RewardsHistory />
+                </div>
               </div>
             )}
           </div>
