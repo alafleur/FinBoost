@@ -1963,6 +1963,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Selection already completed for this cycle" });
       }
 
+      // Get current pool settings and calculate total reward pool
+      const poolSettings = await storage.getCurrentPoolSettingsForDate(new Date());
+      if (!poolSettings) {
+        return res.status(400).json({ error: "No active pool settings found for current date" });
+      }
+
+      // Calculate total reward pool from subscription revenue
+      const totalSubscribers = await storage.getUserCount();
+      const monthlyRevenue = totalSubscribers * (poolSettings.membershipFee / 100);
+      const totalRewardPool = Math.floor(monthlyRevenue * (poolSettings.rewardPoolPercentage / 100));
+
       // Get all premium users and calculate percentile-based tiers
       const premiumUsers = await storage.getPremiumUsersForRewards();
       
@@ -1982,16 +1993,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tier3: sortedUsers.slice(tier2Cutoff) // Bottom 33%
       };
 
+      // Calculate tier pool allocations (50% to tier1, 35% to tier2, 15% to tier3)
+      const tier1Pool = Math.floor(totalRewardPool * 0.50);
+      const tier2Pool = Math.floor(totalRewardPool * 0.35);
+      const tier3Pool = Math.floor(totalRewardPool * 0.15);
+
       // Perform random selection for each tier
       const tier1Winners = performRandomSelection(usersByTier.tier1);
       const tier2Winners = performRandomSelection(usersByTier.tier2);
       const tier3Winners = performRandomSelection(usersByTier.tier3);
 
-      // Insert winner selections into database
+      // Calculate individual reward amounts
+      const tier1RewardPerWinner = tier1Winners.length > 0 ? Math.floor(tier1Pool / tier1Winners.length) : 0;
+      const tier2RewardPerWinner = tier2Winners.length > 0 ? Math.floor(tier2Pool / tier2Winners.length) : 0;
+      const tier3RewardPerWinner = tier3Winners.length > 0 ? Math.floor(tier3Pool / tier3Winners.length) : 0;
+
+      // Insert winner selections into database with actual reward amounts
       const allWinners = [
-        ...tier1Winners.map(w => ({ ...w, tier: 'tier1', cycleId })),
-        ...tier2Winners.map(w => ({ ...w, tier: 'tier2', cycleId })),
-        ...tier3Winners.map(w => ({ ...w, tier: 'tier3', cycleId }))
+        ...tier1Winners.map((w, index) => ({ 
+          ...w, 
+          tier: 'tier1', 
+          cycleId, 
+          rewardAmount: tier1RewardPerWinner,
+          tierRank: index + 1
+        })),
+        ...tier2Winners.map((w, index) => ({ 
+          ...w, 
+          tier: 'tier2', 
+          cycleId, 
+          rewardAmount: tier2RewardPerWinner,
+          tierRank: index + 1
+        })),
+        ...tier3Winners.map((w, index) => ({ 
+          ...w, 
+          tier: 'tier3', 
+          cycleId, 
+          rewardAmount: tier3RewardPerWinner,
+          tierRank: index + 1
+        }))
       ];
 
       if (allWinners.length > 0) {
@@ -2001,11 +2040,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: winner.id,
             tier: winner.tier,
             tierRank: winner.tierRank,
-            rewardPercentage: winner.rewardPercentage,
+            rewardPercentage: 0, // Will be set during allocation
+            rewardAmount: winner.rewardAmount,
             paypalEmail: winner.paypalEmail
           }))
         );
       }
+
+      // Update cycle with pool information
+      await db
+        .update(winnerSelectionCycles)
+        .set({ 
+          selectionCompleted: true,
+          totalRewardPool: totalRewardPool,
+          tier1Pool: tier1Pool,
+          tier2Pool: tier2Pool,
+          tier3Pool: tier3Pool
+        })
+        .where(eq(winnerSelectionCycles.id, cycleId));
 
       // Mark cycle as selection completed
       await db
