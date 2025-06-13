@@ -163,7 +163,7 @@ export default function Dashboard() {
         }
 
         // Fetch published modules for proper lesson filtering
-        const modulesResponse = await fetch('/api/education/modules', {
+        const modulesResponse = await fetch('/api/modules', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
