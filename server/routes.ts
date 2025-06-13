@@ -153,6 +153,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google OAuth routes
+  app.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
+
+  app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/auth?error=oauth_failed' }),
+    async (req, res) => {
+      try {
+        const user = req.user as any;
+        if (user) {
+          const token = jwt.sign({ userId: user.id }, 'finboost-secret-key-2024', { expiresIn: '7d' });
+          
+          // Redirect to dashboard with token
+          res.redirect(`/dashboard?token=${token}&signup=success`);
+        } else {
+          res.redirect('/auth?error=oauth_failed');
+        }
+      } catch (error) {
+        res.redirect('/auth?error=oauth_failed');
+      }
+    }
+  );
+
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;

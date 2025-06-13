@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import QuizDialog from "@/components/QuizDialog";
+import EmailCaptureModal from "@/components/EmailCaptureModal";
 import { BarChart2, TrendingUp, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -12,10 +13,11 @@ interface HeroProps {
 export default function Hero({ onSubscribeSuccess }: HeroProps) {
   const [, navigate] = useLocation();
   const [memberCount] = useState("2,400+");
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   const handleStartLearning = () => {
     trackEvent("cta_click", "start_learning_hero");
-    navigate("/auth?mode=signup");
+    setIsEmailModalOpen(true);
   };
 
   return (
@@ -105,6 +107,14 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
           </div>
         </div>
       </div>
+      
+      <EmailCaptureModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        title="Start Your Financial Journey"
+        description="Enter your email to get started with FinBoost and begin earning rewards."
+        buttonText="Get Started"
+      />
     </section>
   );
 }

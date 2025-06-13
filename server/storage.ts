@@ -375,6 +375,26 @@ export class MemStorage implements IStorage {
     return user || null;
   }
 
+  async getUserByGoogleId(googleId: string): Promise<User | null> {
+    const [dbUser] = await db.select().from(users).where(eq(users.googleId, googleId));
+    if (dbUser) {
+      this.users.set(dbUser.id, dbUser);
+      return dbUser;
+    }
+    return null;
+  }
+
+  async updateUserGoogleId(userId: number, googleId: string): Promise<void> {
+    await db.update(users)
+      .set({ googleId })
+      .where(eq(users.id, userId));
+    
+    const user = this.users.get(userId);
+    if (user) {
+      user.googleId = googleId;
+    }
+  }
+
   async validatePassword(email: string, password: string): Promise<User | null> {
     // Check database first
     const [dbUser] = await db.select().from(users).where(eq(users.email, email));
