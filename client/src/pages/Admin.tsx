@@ -297,6 +297,10 @@ export default function Admin() {
 
 
 
+  // Subscribers state
+  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscriberSearchTerm, setSubscriberSearchTerm] = useState("");
+
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
     totalReferrers: 0,
@@ -405,6 +409,7 @@ export default function Admin() {
     fetchPendingProofs();
     fetchPointActions();
     fetchSupportTickets();
+    fetchSubscribers();
     fetchMonthlyPoolSettings();
     loadCycles();
   }, []);
@@ -493,6 +498,21 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching support tickets:', error);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/subscribers', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSubscribers(data.subscribers || []);
+      }
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
     }
   };
 
@@ -1399,6 +1419,7 @@ export default function Admin() {
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
+            <TabsTrigger value="subscribers">Email Subscribers</TabsTrigger>
             <TabsTrigger value="disbursements">PayPal Payouts</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>

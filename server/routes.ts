@@ -2179,6 +2179,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin route for viewing email subscribers
+  app.get("/api/admin/subscribers", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const allSubscribers = await storage.getAllSubscribers();
+      res.json({ success: true, subscribers: allSubscribers });
+    } catch (error) {
+      console.error("Error fetching subscribers:", error);
+      res.status(500).json({ error: "Failed to fetch subscribers" });
+    }
+  });
+
   // Enhanced Winner Selection and Disbursement System
   
   // Helper function for random selection within tiers
