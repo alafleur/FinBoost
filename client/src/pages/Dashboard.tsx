@@ -982,10 +982,87 @@ export default function Dashboard() {
           </div>
         </Tabs>
       ) : (
-        /* Desktop Layout */
-        <div className="flex">
-          {/* Main Content */}
-          <div className="flex-1 mr-80">
+        /* Desktop Layout - New Tab Structure */
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
+          {/* Desktop Tab Navigation */}
+          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
+                <TabsTrigger 
+                  value="overview" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Dashboard overview tab"
+                >
+                  <Activity className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Overview</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="learn" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Learning modules tab"
+                >
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Learn</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="referrals" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Referral system tab"
+                >
+                  <Users className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Referrals</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="rewards" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Rewards history tab"
+                >
+                  <Award className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Rewards</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="leaderboard" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Leaderboard tab"
+                >
+                  <Trophy className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Board</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="profile" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Profile and admin tab"
+                >
+                  <UserIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Profile</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+
+          {/* Desktop Tab Content */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            {/* Rewards Tab - Simplest Implementation */}
+            <TabsContent value="rewards" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
+                    <Award className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-2xl text-gray-900">Rewards History</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <RewardsHistory />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Fallback to old desktop layout for other tabs */}
+            <TabsContent value="overview" className="mt-0">
+              <div className="flex">
+                {/* Main Content */}
+                <div className="flex-1 mr-80">
             <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
               {/* Welcome Section */}
               <div className="mb-6 sm:mb-8">
