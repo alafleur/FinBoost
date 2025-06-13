@@ -65,6 +65,14 @@ interface User {
   subscriptionStatus?: string;
   paypalEmail?: string;
   payoutMethod?: string;
+  subscriptionAmount?: number;
+  subscriptionCurrency?: string;
+  subscriptionPaymentMethod?: string;
+  subscriptionStartDate?: string;
+  lastPaymentDate?: string;
+  nextBillingDate?: string;
+  lastPaymentAmount?: number;
+  lastPaymentStatus?: string;
 }
 
 export default function Dashboard() {
@@ -767,6 +775,112 @@ export default function Dashboard() {
                             {user?.subscriptionStatus === 'active' ? 'Premium Member' : 'Free User'}
                           </Badge>
                         </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Subscription Payment Details */}
+                {user?.subscriptionStatus === 'active' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <CreditCard className="h-5 w-5" />
+                        Subscription Details
+                      </CardTitle>
+                      <CardDescription>
+                        Your current membership plan and payment information
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly Amount</label>
+                          <p className="text-lg font-semibold text-gray-900">
+                            ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Payment Method</label>
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {user?.subscriptionPaymentMethod || 'Card'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Member Since</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.subscriptionStartDate 
+                              ? new Date(user.subscriptionStartDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'N/A'
+                            }
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Next Billing</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.nextBillingDate 
+                              ? new Date(user.nextBillingDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'End of month'
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      {user?.lastPaymentDate && (
+                        <div className="border-t pt-4">
+                          <h4 className="font-medium text-gray-900 mb-3">Recent Payment</h4>
+                          <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div>
+                              <p className="text-sm font-medium text-green-900">
+                                ${((user?.lastPaymentAmount || user?.subscriptionAmount || 2000) / 100).toFixed(2)} paid on{' '}
+                                {new Date(user.lastPaymentDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </p>
+                              <p className="text-xs text-green-700 capitalize">
+                                Status: {user?.lastPaymentStatus || 'Succeeded'}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                              ✓ Paid
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Account Information Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Account Information
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your account details and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Username</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
                       </div>
                     </div>
                   </CardContent>

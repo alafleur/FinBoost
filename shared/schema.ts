@@ -41,7 +41,14 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status").default("inactive"), // active, inactive, past_due, canceled
+  subscriptionAmount: integer("subscription_amount").default(2000), // Amount in cents (e.g., 2000 = $20.00)
+  subscriptionCurrency: text("subscription_currency").default("usd"),
+  subscriptionPaymentMethod: text("subscription_payment_method"), // card, paypal, etc.
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  lastPaymentDate: timestamp("last_payment_date"),
   nextBillingDate: timestamp("next_billing_date"),
+  lastPaymentAmount: integer("last_payment_amount"),
+  lastPaymentStatus: text("last_payment_status"), // succeeded, failed, pending
 
   // Stripe Connect Fields for Payouts
   stripeConnectAccountId: text("stripe_connect_account_id"),

@@ -281,7 +281,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payoutMethod: users.payoutMethod,
         totalPoints: users.totalPoints,
         currentMonthPoints: users.currentMonthPoints,
-        tier: users.tier
+        tier: users.tier,
+        subscriptionAmount: users.subscriptionAmount,
+        subscriptionCurrency: users.subscriptionCurrency,
+        subscriptionPaymentMethod: users.subscriptionPaymentMethod,
+        subscriptionStartDate: users.subscriptionStartDate,
+        lastPaymentDate: users.lastPaymentDate,
+        nextBillingDate: users.nextBillingDate,
+        lastPaymentAmount: users.lastPaymentAmount,
+        lastPaymentStatus: users.lastPaymentStatus
       })
       .from(users)
       .where(eq(users.subscriptionStatus, 'active'))
@@ -306,6 +314,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error fetching admin payment info:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch payment information' });
+    }
+  });
+
+  // Admin endpoint to update individual user subscription details
+  app.patch("/api/admin/users/:userId/subscription", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const {
+        subscriptionAmount,
+        subscriptionCurrency,
+        subscriptionPaymentMethod,
+        subscriptionStartDate,
+        lastPaymentDate,
+        nextBillingDate,
+        lastPaymentAmount,
+        lastPaymentStatus,
+        subscriptionStatus
+      } = req.body;
+
+      // Calculate next billing date as last day of month if not provided
+      let calculatedNextBilling = nextBillingDate;
+      if (!calculatedNextBilling && (subscriptionStatus === 'active' || lastPaymentDate)) {
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
+        calculatedNextBilling = nextMonth.toISOString();
+      }
+
+      // Update user subscription information
+      await db.update(users)
+        .set({
+          ...(subscriptionAmount !== undefined && { subscriptionAmount }),
+          ...(subscriptionCurrency !== undefined && { subscriptionCurrency }),
+          ...(subscriptionPaymentMethod !== undefined && { subscriptionPaymentMethod }),
+          ...(subscriptionStartDate !== undefined && { subscriptionStartDate: new Date(subscriptionStartDate) }),
+          ...(lastPaymentDate !== undefined && { lastPaymentDate: new Date(lastPaymentDate) }),
+          ...(calculatedNextBilling && { nextBillingDate: new Date(calculatedNextBilling) }),
+          ...(lastPaymentAmount !== undefined && { lastPaymentAmount }),
+          ...(lastPaymentStatus !== undefined && { lastPaymentStatus }),
+          ...(subscriptionStatus !== undefined && { subscriptionStatus })
+        })
+        .where(eq(users.id, parseInt(userId)));
+
+      res.json({ 
+        success: true, 
+        message: 'User subscription details updated successfully',
+        updatedFields: {
+          subscriptionAmount,
+          subscriptionCurrency,
+          subscriptionPaymentMethod,
+          subscriptionStartDate,
+          lastPaymentDate,
+          nextBillingDate: calculatedNextBilling,
+          lastPaymentAmount,
+          lastPaymentStatus,
+          subscriptionStatus
+        }
+      });
+    } catch (error: any) {
+      console.error('Error updating user subscription:', error);
+      res.status(500).json({ success: false, message: 'Failed to update user subscription details' });
     }
   });
 
