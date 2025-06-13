@@ -153,6 +153,10 @@ export default function Dashboard() {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setLocation('/auth');
+        return;
+      }
       const response = await fetch('/api/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include'
@@ -160,15 +164,24 @@ export default function Dashboard() {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData.user || userData);
+      } else if (response.status === 401) {
+        localStorage.removeItem('token');
+        setLocation('/auth');
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      localStorage.removeItem('token');
+      setLocation('/auth');
     }
   };
 
   const fetchLeaderboardData = async () => {
     try {
-      const response = await fetch('/api/leaderboard');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/leaderboard', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setLeaderboardData(data);
@@ -180,7 +193,11 @@ export default function Dashboard() {
 
   const fetchTierThresholds = async () => {
     try {
-      const response = await fetch('/api/tiers/thresholds');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/tiers/thresholds', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setTierThresholds(data);
@@ -192,7 +209,11 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
-      const response = await fetch('/api/user/progress');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/user/progress', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         console.log('Raw progress data:', data);
@@ -391,51 +412,230 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Dashboard Content - Only show tabs on mobile */}
+            {/* Mobile Layout with Bottom Navigation */}
             {isMobile ? (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-auto">
-                  <TabsTrigger value="overview" className="text-xs px-2 py-2">Overview</TabsTrigger>
-                  <TabsTrigger value="referrals" className="text-xs px-2 py-2">Referrals</TabsTrigger>
-                  <TabsTrigger value="leaderboard" className="text-xs px-2 py-2">Board</TabsTrigger>
-                  <TabsTrigger value="history" className="text-xs px-2 py-2">Activity</TabsTrigger>
-                </TabsList>
+              <div className="pb-20">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsContent value="overview" className="space-y-6">
+                    <div className="space-y-6">
+                      <StreakDisplay 
+                        currentStreak={user?.currentStreak || 0}
+                        longestStreak={user?.longestStreak || 0}
+                      />
+                      
+                      {/* Theoretical Points Section */}
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Theoretical Points</CardTitle>
+                          <BookOpen className="h-4 w-4 text-blue-500" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">0</div>
+                          <p className="text-xs text-orange-500">
+                            Upgrade to claim as real points
+                          </p>
+                        </CardContent>
+                      </Card>
 
-                <TabsContent value="overview" className="space-y-6">
-                  <div className="space-y-6">
-                    <StreakDisplay 
-                      currentStreak={user?.currentStreak || 0}
-                      longestStreak={user?.longestStreak || 0}
-                    />
+                      {/* Tier Progress */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Tier Progress</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                              <span>Tier 1 5+</span>
+                              <span>Tier 2 21+</span>
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Tier 3 0+</span>
+                            </div>
+                            <Progress value={100} className="h-2" />
+                            <p className="text-xs text-center text-gray-600">
+                              {user?.currentMonthPoints || 0} points this month
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Continue Learning */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Continue Learning</CardTitle>
+                          <p className="text-sm text-gray-600">0 of 51 completed</p>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {lessonProgress?.slice(0, 3).map((lesson: any) => (
+                              <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                  <h4 className="font-medium text-sm">{lesson.title}</h4>
+                                  <p className="text-xs text-gray-600">{lesson.category}</p>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-xs text-gray-500">20 pts</div>
+                                  <Button size="sm" className="mt-1">Start</Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="referrals">
+                    <ReferralSystem />
+                  </TabsContent>
+
+                  <TabsContent value="leaderboard">
+                    <Leaderboard />
+                  </TabsContent>
+
+                  <TabsContent value="history">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Points History</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <PointsHistory />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="profile">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile & Payment</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <UserIcon className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                            <h3 className="font-medium">{user?.firstName || user?.username}</h3>
+                            <p className="text-sm text-gray-600">{user?.email}</p>
+                          </div>
+                          
+                          <div className="border-t pt-4">
+                            <h4 className="font-medium mb-2">Subscription Status</h4>
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                              <p className="text-sm text-orange-800">Free Trial</p>
+                              <p className="text-xs text-orange-600 mt-1">
+                                Upgrade to claim points and compete for rewards
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Fixed Bottom Navigation */}
+                  <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
+                    <TabsList className="grid w-full grid-cols-5 h-16 bg-white rounded-none border-0">
+                      <TabsTrigger value="overview" className="flex flex-col items-center justify-center py-2 px-1 text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600">
+                        <Trophy className="h-5 w-5 mb-1" />
+                        Overview
+                      </TabsTrigger>
+                      <TabsTrigger value="referrals" className="flex flex-col items-center justify-center py-2 px-1 text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600">
+                        <Users className="h-5 w-5 mb-1" />
+                        Referrals
+                      </TabsTrigger>
+                      <TabsTrigger value="leaderboard" className="flex flex-col items-center justify-center py-2 px-1 text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600">
+                        <Award className="h-5 w-5 mb-1" />
+                        Board
+                      </TabsTrigger>
+                      <TabsTrigger value="history" className="flex flex-col items-center justify-center py-2 px-1 text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600">
+                        <Activity className="h-5 w-5 mb-1" />
+                        Activity
+                      </TabsTrigger>
+                      <TabsTrigger value="profile" className="flex flex-col items-center justify-center py-2 px-1 text-xs data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600">
+                        <UserIcon className="h-5 w-5 mb-1" />
+                        Profile
+                      </TabsTrigger>
+                    </TabsList>
                   </div>
-                </TabsContent>
-
-                <TabsContent value="referrals">
-                  <ReferralSystem />
-                </TabsContent>
-
-                <TabsContent value="leaderboard">
-                  <Leaderboard />
-                </TabsContent>
-
-                <TabsContent value="history">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Points History</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PointsHistory />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                </Tabs>
+              </div>
             ) : (
-              /* Desktop: Show overview content directly */
+              /* Desktop: Show full dashboard content */
               <div className="space-y-6">
                 <StreakDisplay 
                   currentStreak={user?.currentStreak || 0}
                   longestStreak={user?.longestStreak || 0}
                 />
+                
+                {/* Desktop content sections */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Theoretical Points</CardTitle>
+                      <BookOpen className="h-4 w-4 text-blue-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-orange-500">
+                        Upgrade to claim as real points
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{user?.currentMonthPoints || 0}</div>
+                      <p className="text-xs text-green-600">
+                        Theoretical points only
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Tier Progress */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tier Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>Tier 1 5+</span>
+                        <span>Tier 2 21+</span>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Tier 3 0+</span>
+                      </div>
+                      <Progress value={100} className="h-2" />
+                      <p className="text-xs text-center text-gray-600">
+                        {user?.currentMonthPoints || 0} points this month
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Continue Learning */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Continue Learning</CardTitle>
+                    <p className="text-sm text-gray-600">0 of 51 completed</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {lessonProgress?.slice(0, 5).map((lesson: any) => (
+                        <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{lesson.title}</h4>
+                            <p className="text-sm text-gray-600">{lesson.category}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-gray-500">20 pts</div>
+                            <Button size="sm" className="mt-1">Start Lesson</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
