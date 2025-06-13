@@ -1172,20 +1172,20 @@ export default function Dashboard() {
                       <div className="space-y-4">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-blue-600 mb-1">
-                            {poolStatus?.premiumUsers || 0}
+                            {poolData?.premiumUsers || 0}
                           </div>
                           <div className="text-sm text-gray-600">Active Members</div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-center">
                           <div>
                             <div className="text-lg font-semibold text-gray-900">
-                              ${poolStatus?.totalPool || 0}
+                              ${poolData?.totalPool || 0}
                             </div>
                             <div className="text-xs text-gray-500">Total Pool</div>
                           </div>
                           <div>
                             <div className="text-lg font-semibold text-gray-900">
-                              {poolStatus?.premiumUsers || 0}
+                              {poolData?.premiumUsers || 0}
                             </div>
                             <div className="text-xs text-gray-500">Strength</div>
                           </div>
