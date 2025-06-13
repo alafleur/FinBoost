@@ -1092,7 +1092,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-center mt-4">
                   <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    Showing {availableLessons.length} of {publishedLessons.length} available lessons
+                    Showing {Math.min(6, publishedLessons.length)} of {publishedLessons.length} available lessons
                   </p>
                   <Button 
                     variant="outline" 
