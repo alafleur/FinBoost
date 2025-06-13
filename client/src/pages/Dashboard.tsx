@@ -134,17 +134,7 @@ export default function Dashboard() {
     );
   };
 
-  // Add event listener for switching to profile tab
-  useEffect(() => {
-    const handleSwitchToProfile = () => {
-      setActiveTab('profile');
-    };
 
-    window.addEventListener('switchToProfile', handleSwitchToProfile);
-    return () => {
-      window.removeEventListener('switchToProfile', handleSwitchToProfile);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
