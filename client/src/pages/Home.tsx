@@ -13,6 +13,7 @@ import WhatYouLearn from "@/components/WhatYouLearn";
 import PowerOfCollective from "@/components/PowerOfCollective";
 import HowRewardsWork from "@/components/HowRewardsWork";
 import FlywheelGraphic from "@/components/FlywheelGraphic";
+import EmailCaptureSection from "@/components/EmailCaptureSection";
 import { trackPageView } from "@/lib/analytics";
 import { useEffect } from "react";
 import FlywheelFeatures from "@/components/FlywheelFeatures";
@@ -50,10 +51,13 @@ export default function Home() {
         {/* Mini Trust Banner */}
         <TrustBanner />
         
-        {/* 6. Growth Chart + Waitlist CTA */}
+        {/* 6. Prominent Email Capture Section */}
+        <EmailCaptureSection onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
+        
+        {/* 7. Growth Chart + Waitlist CTA */}
         <GrowthCTA onSubscribeSuccess={() => setIsSuccessModalOpen(true)} />
         
-        {/* 7. FAQs */}
+        {/* 8. FAQs */}
         <FAQ />
         
         {/* 8. Join the Waitlist (Final CTA) */}
