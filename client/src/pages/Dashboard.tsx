@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiRequest } from "@/lib/queryClient";
 import { 
   BookOpen, 
   Trophy, 
@@ -18,22 +17,16 @@ import {
   Activity,
   Crown,
   Medal,
-  User,
-  User as UserIcon,
-  Mail,
-  CreditCard,
-  Save,
-  CheckCircle
+  Settings,
+  User as UserIcon
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
-import RewardsHistory from "@/components/RewardsHistory";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
-import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -64,17 +57,6 @@ interface User {
   tier: string;
   currentStreak?: number;
   longestStreak?: number;
-  subscriptionStatus?: string;
-  paypalEmail?: string;
-  payoutMethod?: string;
-  subscriptionAmount?: number;
-  subscriptionCurrency?: string;
-  subscriptionPaymentMethod?: string;
-  subscriptionStartDate?: string;
-  lastPaymentDate?: string;
-  nextBillingDate?: string;
-  lastPaymentAmount?: number;
-  lastPaymentStatus?: string;
 }
 
 export default function Dashboard() {
@@ -87,12 +69,6 @@ export default function Dashboard() {
   const [tierThresholds, setTierThresholds] = useState<any>(null);
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  const [publishedModules, setPublishedModules] = useState<any[]>([]);
-  const [poolData, setPoolData] = useState({ totalPool: 0, premiumUsers: 0, totalUsers: 0 });
-  const [distributionInfo, setDistributionInfo] = useState<any>(null);
-  const [paypalEmail, setPaypalEmail] = useState('');
-  const [payoutMethod, setPayoutMethod] = useState('paypal');
-  const [savingPayment, setSavingPayment] = useState(false);
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
@@ -124,115 +100,103 @@ export default function Dashboard() {
             <div className="space-y-2">
               {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm truncate">{entry.username}</span>
+                  <span className="text-sm">{entry.username}</span>
                   <span className="text-xs text-gray-500">{entry.totalPoints}</span>
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <h3 className="font-heading font-bold text-lg mb-4">Full Leaderboard</h3>
+            <div className="space-y-2">
+              {leaderboardData.leaderboard?.slice(0, 10).map((entry: any, index: number) => (
+                <div key={entry.id} className={`flex items-center justify-between p-2 rounded ${
+                  leaderboardData.currentUser && entry.id === leaderboardData.currentUser.id 
+                    ? 'bg-blue-50 border border-blue-200' 
+                    : 'bg-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-500 w-6">#{index + 1}</span>
+                    <span className="text-sm">{entry.username}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">{entry.totalPoints}</span>
+                </div>
+              ))}
+            </div>
+            
+            {leaderboardData.currentUser && leaderboardData.currentUser.rank > 10 && (
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-500 w-6">#{leaderboardData.currentUser.rank}</span>
+                    <span className="text-sm font-medium">{leaderboardData.currentUser.username} (You)</span>
+                  </div>
+                  <span className="text-xs text-gray-500">{leaderboardData.currentUser.totalPoints}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
-
-
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setLocation('/login');
-          return;
-        }
+    fetchUserData();
+    fetchLeaderboardData();
+    fetchTierThresholds();
+    fetchLessonProgress();
+  }, []);
 
-        // Fetch user data
-        const userResponse = await fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUser(userData.user);
-          // Populate PayPal form with existing data
-          setPaypalEmail(userData.user.paypalEmail || '');
-          setPayoutMethod(userData.user.payoutMethod || 'paypal');
-        }
-
-        // Fetch lesson progress
-        const progressResponse = await fetch('/api/user/progress', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
-          setLessonProgress(progressData.progress || []);
-        }
-
-        // Fetch leaderboard data
-        const leaderboardResponse = await fetch('/api/leaderboard', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (leaderboardResponse.ok) {
-          const leaderboardData = await leaderboardResponse.json();
-          setLeaderboardData(leaderboardData);
-        }
-
-        // Fetch tier thresholds
-        const thresholdsResponse = await fetch('/api/tiers/thresholds');
-        if (thresholdsResponse.ok) {
-          const thresholdsData = await thresholdsResponse.json();
-          setTierThresholds(thresholdsData.thresholds);
-        }
-
-        // Fetch published modules for proper lesson filtering
-        const modulesResponse = await fetch('/api/modules', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (modulesResponse.ok) {
-          const modulesData = await modulesResponse.json();
-          setPublishedModules(modulesData.modules || []);
-        }
-
-        // Fetch pool data for CommunityGrowthDial
-        const poolResponse = await fetch('/api/pool/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (poolResponse.ok) {
-          const poolData = await poolResponse.json();
-          setPoolData(poolData);
-        }
-
-        // Fetch distribution info for CommunityGrowthDial
-        const distributionResponse = await fetch('/api/distribution/next', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (distributionResponse.ok) {
-          const distributionData = await distributionResponse.json();
-          setDistributionInfo(distributionData);
-        }
-
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-        // Only show error toast for authentication failures or critical errors
-        if (error instanceof Error && error.message.includes('401')) {
-          setLocation('/login');
-        } else {
-          // Suppress general errors since individual API calls handle their own error states
-          console.warn('Some dashboard data may not have loaded completely');
-        }
-      } finally {
-        setIsLoading(false);
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
-    fetchData();
-  }, [setLocation, toast]);
+  const fetchLeaderboardData = async () => {
+    try {
+      const response = await fetch('/api/leaderboard');
+      if (response.ok) {
+        const data = await response.json();
+        setLeaderboardData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard data:', error);
+    }
+  };
+
+  const fetchTierThresholds = async () => {
+    try {
+      const response = await fetch('/api/tiers/thresholds');
+      if (response.ok) {
+        const data = await response.json();
+        setTierThresholds(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tier thresholds:', error);
+    }
+  };
+
+  const fetchLessonProgress = async () => {
+    try {
+      const response = await fetch('/api/user/progress');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Raw progress data:', data);
+        setLessonProgress(data);
+      }
+    } catch (error) {
+      console.error('Error fetching lesson progress:', error);
+    }
+  };
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
@@ -252,114 +216,37 @@ export default function Dashboard() {
     return tier || 'Bronze';
   };
 
-  // Save PayPal payment information
-  const handleSavePaymentInfo = async () => {
-    if (!paypalEmail.trim()) {
-      toast({
-        title: "Error",
-        description: "PayPal email is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(paypalEmail)) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSavingPayment(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/user/payment-info', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          paypalEmail: paypalEmail.trim(),
-          payoutMethod
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Update user state with new payment info
-        setUser(prev => prev ? {
-          ...prev,
-          paypalEmail: data.paypalEmail,
-          payoutMethod: data.payoutMethod
-        } : null);
-
-        toast({
-          title: "Success",
-          description: "Payment information saved successfully",
-        });
-      } else {
-        const error = await response.json();
-        toast({
-          title: "Error",
-          description: error.message || "Failed to save payment information",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save payment information",
-        variant: "destructive",
-      });
-    } finally {
-      setSavingPayment(false);
-    }
-  };
-
   // Get the completed lesson IDs from lessonProgress
-  const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
-
-  // Filter lessons to show only published modules with proper access control
-  const publishedLessons = publishedModules.filter(module => module.isPublished);
-  const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
-  const allAvailableLessons = publishedLessons;
-
-  // Check if user is premium
-  const isUserPremium = user?.subscriptionStatus === 'active';
+  const completedLessonIds = lessonProgress.map(progress => {
+    const lessonKey = Object.keys(educationContent).find(key => 
+      educationContent[key].id === progress.moduleId
+    );
+    return lessonKey || progress.moduleId.toString();
+  });
 
   console.log('Fetched completed lesson IDs:', completedLessonIds);
-  console.log('Total published modules loaded:', publishedModules.length);
+  console.log('Total modules loaded:', Object.keys(educationContent).length);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center" role="status" aria-live="polite">
-        <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" aria-hidden="true" />
-          <div className="space-y-2">
-            <p className="text-lg font-semibold text-gray-900">Loading your dashboard...</p>
-            <p className="text-sm text-gray-600">Getting your latest progress and rewards</p>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with accessibility improvements */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50" role="banner">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" aria-hidden="true" />
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" />
               <h1 className="font-heading font-bold text-lg sm:text-2xl text-dark-800">FinBoost</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="text-right hidden sm:block" aria-label="User greeting">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
@@ -369,935 +256,193 @@ export default function Dashboard() {
                   size="sm"
                   onClick={() => setLocation('/admin')}
                   className="flex items-center space-x-1 text-purple-600 hover:text-purple-700"
-                  aria-label="Access admin dashboard"
                 >
                   <Settings className="h-4 w-4" />
                   <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveTab('profile')}
-                aria-label="View profile and subscription details"
-                className="flex items-center space-x-1"
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setLocation('/profile')}
               >
-                <UserIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  setLocation('/auth');
-                }}
-                aria-label="Logout from account"
-              >
-                Logout
+                Profile
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {isMobile ? (
-        /* Mobile Layout with Complete Feature Parity */
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
-          {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
-          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-0.5 rounded-none">
-              <TabsTrigger 
-                value="overview" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Dashboard overview tab"
-              >
-                <Activity className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Overview</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="learn" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Learning modules tab"
-              >
-                <BookOpen className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Learn</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="referrals" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Referral system tab"
-              >
-                <Users className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Referrals</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="rewards" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Rewards history tab"
-              >
-                <Award className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Rewards</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="leaderboard" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Leaderboard tab"
-              >
-                <Trophy className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Board</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      <div className="flex">
+        {/* Main Content */}
+        <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+            {/* Welcome Section */}
+            <div className="mb-6 sm:mb-8">
+              <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
+                Welcome to your FinBoost Dashboard! 🚀
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                Track your progress, earn points, and win monthly rewards for building better financial habits.
+              </p>
+            </div>
 
-          {/* Mobile Tab Content with Full Desktop Features */}
-          <div className="px-4 py-6 pb-20">
-            <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Welcome Section with improved typography */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
-                      Welcome back, {user?.firstName || user?.username}!
-                    </h2>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win monthly rewards for building better financial habits.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile Stats Cards with improved design */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Trophy className="h-4 w-4 text-orange-600" />
-                      </div>
-                      <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs font-medium shadow-sm`}>
-                        {getTierDisplayName(user?.tier || '')}
-                      </Badge>
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Current Tier</h3>
-                    <p className="text-xs text-gray-600">Monthly standing</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Star className="h-4 w-4 text-amber-600" />
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">{user?.totalPoints || 0}</div>
-                      </div>
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
-                    <p className="text-xs text-gray-600">+{user?.currentMonthPoints || 0} this month</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Mobile Points Summary - Same Component as Desktop */}
-              {user && <PointsSummary user={user as User} />}
-
-              {/* Mobile Streak Display - Same Component as Desktop */}
-              <StreakDisplay 
-                currentStreak={user?.currentStreak || 0}
-                longestStreak={user?.longestStreak || 0}
-              />
-
-              {/* Mobile Community Growth Dial - Same as Desktop */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-purple-100 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Community Growth</h3>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <CommunityGrowthDial 
-                    poolData={poolData}
-                    user={user as any}
-                    distributionInfo={distributionInfo}
-                    onUpgradeClick={() => setLocation('/subscribe')}
-                  />
-                </div>
-              </div>
-
-              {/* Mobile Learning Preview with enhanced design */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
+                  <Trophy className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
                   <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
+                    <Badge className={`${getTierColor(user?.tier)} text-white capitalize`}>
+                      {getTierDisplayName(user?.tier)}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
-                
-                <div className="space-y-3">
-                  {availableLessons.map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Monthly standing
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                  <Star className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    +{user?.currentMonthPoints || 0} this month
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <PointsSummary user={user as User} />
+
+            {/* Learning Modules Preview */}
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
+                  Continue Learning
+                </h3>
+                <Badge variant="secondary" className="w-fit">
+                  {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(educationContent)
+                  .slice(0, isMobile ? 3 : 6)
+                  .map(([key, lesson]) => {
+                    const isCompleted = completedLessonIds.includes(key);
                     return (
                       <Card 
-                        key={module.id} 
-                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                          isCompleted 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                            : 'bg-white hover:bg-gray-50 border-gray-100'
-                        }`} 
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        key={key}
+                        className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
+                          isCompleted ? 'border-green-200 bg-green-50' : 'hover:border-primary-200'
+                        }`}
+                        onClick={() => setLocation(`/lesson/${key}`)}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {module.category}
-                                </span>
-                                {!isCompleted && (
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremiumModule && !isUserPremium 
-                                      ? 'text-yellow-700 bg-yellow-100' 
-                                      : 'text-blue-600 bg-blue-100'
-                                  }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {isCompleted ? (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
-                                  ✓ Done
-                                </Badge>
-                              ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
-                                  Upgrade
-                                </Button>
-                              ) : (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
-                                  Start
-                                </Button>
-                              )}
-                            </div>
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-sm leading-tight pr-2">{lesson.title}</h4>
+                            {isCompleted ? (
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 shrink-0">
+                                ✓ Completed
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="shrink-0">
+                                {lesson.points} pts
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
+                            <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
+                              {isCompleted ? "Review" : "Start Lesson"}
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
                     );
                   })}
-                </div>
-                
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                  Showing {isMobile ? 3 : 6} of {Object.keys(educationContent).length} available lessons
+                </p>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  onClick={() => setLocation('/education')} 
-                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                  onClick={() => setLocation('/education')}
+                  className="w-full sm:w-auto"
+                  size={isMobile ? "sm" : "default"}
                 >
-                  <BookOpen className="w-4 h-4 mr-2" />
+                  <BookOpen className="h-4 w-4 mr-2" />
                   View All Learning Modules
                 </Button>
               </div>
+            </div>
 
-              {/* Mobile Rewards Preview with enhanced design */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Recent Rewards</h3>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <RewardsHistory />
-                </div>
-              </div>
-            </TabsContent>
+            {/* Dashboard Content - Only show tabs on mobile */}
+            {isMobile ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 h-auto">
+                  <TabsTrigger value="overview" className="text-xs px-2 py-2">Overview</TabsTrigger>
+                  <TabsTrigger value="referrals" className="text-xs px-2 py-2">Referrals</TabsTrigger>
+                  <TabsTrigger value="leaderboard" className="text-xs px-2 py-2">Board</TabsTrigger>
+                  <TabsTrigger value="history" className="text-xs px-2 py-2">Activity</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="learn" className="mt-0 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">All Learning Modules</h3>
+                <TabsContent value="overview" className="space-y-6">
+                  <div className="space-y-6">
+                    <StreakDisplay 
+                      currentStreak={user?.currentStreak || 0}
+                      longestStreak={user?.longestStreak || 0}
+                    />
                   </div>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
-                
-                {/* Progress Bar */}
-                <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Learning Progress</span>
-                    <span className="text-sm text-gray-500">
-                      {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
-                    </span>
-                  </div>
-                  <Progress 
-                    value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
-                    className="h-2"
-                  />
-                </div>
-                
-                <div className="space-y-3">
-                  {publishedLessons.map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    const isUserPremium = user?.subscriptionStatus === 'active';
-                    
-                    return (
-                      <Card 
-                        key={module.id} 
-                        className={`hover:shadow-lg transition-shadow cursor-pointer relative ${
-                          isCompleted ? 'border-green-200 bg-green-50' : 
-                          isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-xl border-2' : ''
-                        }`}
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
-                      >
-                        {isPremiumModule && (
-                          <div className="absolute top-3 left-3">
-                            <Crown className="w-5 h-5 text-yellow-600" />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                isCompleted ? 'bg-green-100' : 'bg-gray-100'
-                              }`}>
-                                {isCompleted ? (
-                                  <CheckCircle className="h-5 w-5 text-green-600" />
-                                ) : (
-                                  <BookOpen className="h-5 w-5 text-gray-600" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <CardTitle className="text-sm leading-tight">{module.title}</CardTitle>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              {isPremiumModule && (
-                                <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
-                                  Members
-                                </Badge>
-                              )}
-                              {isCompleted && (
-                                <Badge className="bg-green-100 text-green-700">
-                                  Completed
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <CardDescription className="mt-2">
-                            {module.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-1">
-                                <Star className="h-4 w-4 text-yellow-500" />
-                                <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button 
-                            className={`w-full ${(isPremiumModule && !isUserPremium) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
-                            variant={isCompleted ? "secondary" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocation(`/lesson/${module.id}`);
-                            }}
-                          >
-                            {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            </TabsContent>
+                </TabsContent>
 
-            <TabsContent value="referrals" className="mt-0 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-purple-100 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Referral System</h3>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <TabsContent value="referrals">
                   <ReferralSystem />
-                </div>
-              </div>
-            </TabsContent>
+                </TabsContent>
 
-            <TabsContent value="rewards" className="mt-0 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Rewards History</h3>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <RewardsHistory />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="leaderboard" className="mt-0 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-orange-100 rounded-lg">
-                    <Trophy className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Leaderboard</h3>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <TabsContent value="leaderboard">
                   <Leaderboard />
-                </div>
-              </div>
-            </TabsContent>
+                </TabsContent>
 
-            <TabsContent value="profile" className="mt-0 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-blue-100 rounded-lg">
-                    <UserIcon className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Profile Settings</h3>
-                </div>
-                
-                {/* Profile Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Mail className="h-5 w-5" />
-                      Account Information
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your account details and preferences
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Username</label>
-                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Email</label>
-                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Subscription Status</label>
-                        <div className="mt-1">
-                          <Badge variant={user?.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
-                            {user?.subscriptionStatus === 'active' ? 'Premium Member' : 'Free User'}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Subscription Payment Details */}
-                {user?.subscriptionStatus === 'active' && (
+                <TabsContent value="history">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <CreditCard className="h-5 w-5" />
-                        Subscription Details
-                      </CardTitle>
-                      <CardDescription>
-                        Your current membership plan and payment information
-                      </CardDescription>
+                      <CardTitle>Points History</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly Amount</label>
-                          <p className="text-lg font-semibold text-gray-900">
-                            ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
-                          </p>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Payment Method</label>
-                          <p className="text-sm font-medium text-gray-900 capitalize">
-                            {user?.subscriptionPaymentMethod || 'Card'}
-                          </p>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Member Since</label>
-                          <p className="text-sm font-medium text-gray-900">
-                            {user?.subscriptionStartDate 
-                              ? new Date(user.subscriptionStartDate).toLocaleDateString('en-US', { 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })
-                              : 'N/A'
-                            }
-                          </p>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Next Billing</label>
-                          <p className="text-sm font-medium text-gray-900">
-                            {user?.nextBillingDate 
-                              ? new Date(user.nextBillingDate).toLocaleDateString('en-US', { 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })
-                              : 'End of month'
-                            }
-                          </p>
-                        </div>
-                      </div>
-
-                      {user?.lastPaymentDate && (
-                        <div className="border-t pt-4">
-                          <h4 className="font-medium text-gray-900 mb-3">Recent Payment</h4>
-                          <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <div>
-                              <p className="text-sm font-medium text-green-900">
-                                ${((user?.lastPaymentAmount || user?.subscriptionAmount || 2000) / 100).toFixed(2)} paid on{' '}
-                                {new Date(user.lastPaymentDate).toLocaleDateString('en-US', { 
-                                  year: 'numeric', 
-                                  month: 'short', 
-                                  day: 'numeric' 
-                                })}
-                              </p>
-                              <p className="text-xs text-green-700 capitalize">
-                                Status: {user?.lastPaymentStatus || 'Succeeded'}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                              ✓ Paid
-                            </Badge>
-                          </div>
-                        </div>
-                      )}
+                    <CardContent>
+                      <PointsHistory />
                     </CardContent>
                   </Card>
-                )}
-
-                {/* Account Information Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Mail className="h-5 w-5" />
-                      Account Information
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your account details and preferences
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Username</label>
-                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Email</label>
-                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* PayPal Payment Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
-                      Payment Information
-                    </CardTitle>
-                    <CardDescription>
-                      Configure your PayPal email for reward disbursements
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-1 bg-blue-100 rounded">
-                          <CreditCard className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
-                          <p className="text-sm text-blue-700 mt-1">
-                            To receive monthly reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">PayPal Email Address</label>
-                        <input
-                          type="email"
-                          placeholder="your-paypal@email.com"
-                          value={paypalEmail}
-                          onChange={(e) => setPaypalEmail(e.target.value)}
-                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          This email must be associated with an active PayPal account to receive payments
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Payout Method</label>
-                        <select
-                          value={payoutMethod}
-                          onChange={(e) => setPayoutMethod(e.target.value)}
-                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="paypal">PayPal</option>
-                          <option value="bank_transfer" disabled>Bank Transfer (Coming Soon)</option>
-                        </select>
-                      </div>
-                      
-                      <Button 
-                        className="w-full" 
-                        size="sm" 
-                        onClick={handleSavePaymentInfo}
-                        disabled={savingPayment}
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        {savingPayment ? 'Saving...' : 'Save Payment Information'}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Account Statistics */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Account Statistics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
-                        <div className="text-sm text-gray-600">Total Points</div>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{user?.currentStreak || 0}</div>
-                        <div className="text-sm text-gray-600">Day Streak</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              /* Desktop: Show overview content directly */
+              <div className="space-y-6">
+                <StreakDisplay 
+                  currentStreak={user?.currentStreak || 0}
+                  longestStreak={user?.longestStreak || 0}
+                />
               </div>
-            </TabsContent>
-          </div>
-        </Tabs>
-      ) : (
-        /* Desktop Layout */
-        <div className="flex">
-          {/* Main Content */}
-          <div className="flex-1 mr-80">
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-              {/* Welcome Section */}
-              <div className="mb-6 sm:mb-8">
-                <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                  Welcome to your FinBoost Dashboard! 🚀
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600">
-                  Track your progress, earn points, and win monthly rewards for building better financial habits.
-                </p>
-              </div>
-
-              {/* Desktop Stats Overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                    <Trophy className="h-4 w-4 text-orange-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
-                        {getTierDisplayName(user?.tier || '')}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Monthly standing
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                    <Star className="h-4 w-4 text-yellow-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-muted-foreground">
-                      +{user?.currentMonthPoints || 0} this month
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {user && <PointsSummary user={user as User} />}
-
-              {/* Desktop Learning Modules Preview */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                  <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                    Continue Learning
-                  </h3>
-                  <Badge variant="secondary" className="w-fit">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {publishedLessons.slice(0, 6).map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    const isUserPremium = user?.subscriptionStatus === 'active';
-                    
-                    return (
-                      <Card 
-                        key={module.id}
-                        className={`hover:shadow-lg transition-shadow cursor-pointer relative ${
-                          isCompleted ? 'border-green-200 bg-green-50' : 
-                          isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-xl border-2' : ''
-                        }`}
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
-                      >
-                        {isPremiumModule && (
-                          <div className="absolute top-3 left-3">
-                            <Crown className="w-5 h-5 text-yellow-600" />
-                          </div>
-                        )}
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                isCompleted ? 'bg-green-100' : 'bg-gray-100'
-                              }`}>
-                                {isCompleted ? (
-                                  <Target className="h-5 w-5 text-green-600" />
-                                ) : (
-                                  <BookOpen className="h-5 w-5 text-gray-600" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <CardTitle className="text-sm leading-tight">{module.title}</CardTitle>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              {isPremiumModule && (
-                                <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 text-xs font-semibold border border-yellow-300">
-                                  Members
-                                </Badge>
-                              )}
-                              {isCompleted && (
-                                <Badge className="bg-green-100 text-green-700">
-                                  Completed
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <CardDescription className="mt-2">
-                            {module.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-1">
-                                <Star className="h-4 w-4 text-yellow-500" />
-                                <span className="text-sm text-gray-600">{module.pointsReward} pts</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button 
-                            className={`w-full ${(isPremiumModule && !isUserPremium) ? 'border-yellow-400 text-yellow-700 hover:bg-yellow-50' : ''}`}
-                            variant={isCompleted ? "secondary" : (isPremiumModule && !isUserPremium) ? "outline" : "default"}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocation(`/lesson/${module.id}`);
-                            }}
-                          >
-                            {isCompleted ? "Review" : (isPremiumModule && !isUserPremium) ? "Upgrade to Access" : "Start Lesson"}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                <div className="text-center mt-4">
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    Showing {Math.min(6, publishedLessons.length)} of {publishedLessons.length} available lessons
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setLocation('/education')}
-                    className="w-full sm:w-auto"
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    View All Learning Modules
-                  </Button>
-                </div>
-              </div>
-
-              {/* Desktop Rewards Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
-                <RewardsHistory />
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Right Sidebar */}
-          <div className="fixed right-0 top-16 w-80 h-full bg-white border-l border-gray-200 overflow-y-auto">
-            <div className="p-6 space-y-6">
-              {/* Tier Progress */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-orange-500" />
-                    Tier Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Tier 1</span>
-                      <span className="text-xs text-gray-500">0+</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Tier 2</span>
-                      <span className="text-xs text-gray-500">21+</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-blue-600">Tier 3</span>
-                      <span className="text-xs text-blue-600 font-medium">31%</span>
-                    </div>
-                    
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: '31%' }}
-                      />
-                    </div>
-                    
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>{user?.currentMonthPoints || 0} points this month</span>
-                      <span>Maximum tier reached</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* This Month Points */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-500" />
-                    This Month
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{user?.currentMonthPoints || 0}</div>
-                  <p className="text-xs text-muted-foreground">Monthly points earned</p>
-                </CardContent>
-              </Card>
-
-              {/* Community Growth */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Community Growth</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center space-y-2">
-                    <div className="text-3xl font-bold text-green-600">
-                      ${poolData.totalPool || 0}
-                    </div>
-                    <p className="text-sm text-gray-600">Current reward pool</p>
-                    <div className="grid grid-cols-3 gap-2 text-xs mt-4">
-                      <div className="text-center">
-                        <div className="font-semibold">{poolData.tier1Pool || 0}%</div>
-                        <div className="text-gray-500">Tier 1</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold">{poolData.tier2Pool || 0}%</div>
-                        <div className="text-gray-500">Tier 2</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold">{poolData.tier3Pool || 0}%</div>
-                        <div className="text-gray-500">Tier 3</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Leaderboard */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Leaderboard</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {leaderboardData?.leaderboard?.slice(0, 5).map((player: any, index: number) => (
-                      <div key={player.username} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            index === 0 ? 'bg-yellow-100 text-yellow-800' :
-                            index === 1 ? 'bg-gray-100 text-gray-800' :
-                            index === 2 ? 'bg-orange-100 text-orange-800' :
-                            'bg-gray-50 text-gray-600'
-                          }`}>
-                            {player.rank}
-                          </div>
-                          <span className="text-sm font-medium truncate">
-                            {player.username === user?.username ? 'You' : player.username}
-                          </span>
-                        </div>
-                        <span className="text-xs text-gray-500">{player.points}pts</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full mt-3"
-                    onClick={() => setLocation('/leaderboard')}
-                  >
-                    View Full Leaderboard
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Desktop Leaderboard Sidebar */}
+        {!isMobile && (
+          <div className="fixed right-0 top-0 h-full">
+            <LeaderboardSidebar />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
