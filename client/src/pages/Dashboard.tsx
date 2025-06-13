@@ -340,39 +340,39 @@ export default function Dashboard() {
                       </p>
                     </div>
 
-                    {/* Stats Overview for Mobile */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    {/* Mobile Stats Cards */}
+                    <div className="grid grid-cols-2 gap-3 mb-6">
                       <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                          <Trophy className="h-4 w-4 text-orange-500" />
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center justify-between">
+                            Current Tier
+                            <Trophy className="h-4 w-4 text-orange-500" />
+                          </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center space-x-2">
-                            <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
-                              {getTierDisplayName(user?.tier || '')}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Monthly standing
-                          </p>
+                        <CardContent className="pt-0">
+                          <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs`}>
+                            {getTierDisplayName(user?.tier || '')}
+                          </Badge>
+                          <p className="text-xs text-gray-500 mt-1">Monthly standing</p>
                         </CardContent>
                       </Card>
 
                       <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                          <Star className="h-4 w-4 text-yellow-500" />
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center justify-between">
+                            Points
+                            <Star className="h-4 w-4 text-yellow-500" />
+                          </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                          <p className="text-xs text-muted-foreground">
-                            +{user?.currentMonthPoints || 0} this month
-                          </p>
+                        <CardContent className="pt-0">
+                          <div className="text-xl font-bold">{user?.totalPoints || 0}</div>
+                          <p className="text-xs text-gray-500">+{user?.currentMonthPoints || 0} this month</p>
                         </CardContent>
                       </Card>
                     </div>
 
+                    {user && <PointsSummary user={user as User} />}
+                    
                     <StreakDisplay 
                       currentStreak={user?.currentStreak || 0}
                       longestStreak={user?.longestStreak || 0}

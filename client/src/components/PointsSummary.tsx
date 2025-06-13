@@ -122,8 +122,8 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   };
 
   // Safety check for user data
-  if (!user || typeof user.currentMonthPoints === 'undefined') {
-    return <div>Loading user data...</div>;
+  if (!user) {
+    return null;
   }
 
   const nextTierInfo = getNextTierInfo();
