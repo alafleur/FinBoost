@@ -277,6 +277,16 @@ export default function Dashboard() {
                 Overview
               </button>
               <button 
+                onClick={() => setActiveTab('learn')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'learn' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Learn
+              </button>
+              <button 
                 onClick={() => setActiveTab('referrals')}
                 className={`text-xs px-1 py-3 border-b-2 transition-colors ${
                   activeTab === 'referrals' 
@@ -306,16 +316,6 @@ export default function Dashboard() {
               >
                 Board
               </button>
-              <button 
-                onClick={() => setActiveTab('history')}
-                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
-                  activeTab === 'history' 
-                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Activity
-              </button>
             </div>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Stats Overview for Mobile */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                       <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                           <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
@@ -373,7 +373,6 @@ export default function Dashboard() {
                       </Card>
                     </div>
 
-                    <PointsSummary user={user as User} />
                     <StreakDisplay 
                       currentStreak={user?.currentStreak || 0}
                       longestStreak={user?.longestStreak || 0}
@@ -381,19 +380,60 @@ export default function Dashboard() {
                   </div>
                 )}
 
+                {activeTab === 'learn' && (
+                  <div className="space-y-6">
+                    <div className="mb-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <h3 className="font-heading font-bold text-lg mb-2 sm:mb-0">
+                          Continue Learning
+                        </h3>
+                        <Badge variant="secondary" className="w-fit">
+                          {completedLessonIds.length} of {Object.keys(educationContent).length} completed
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid gap-4">
+                        {Object.entries(educationContent).slice(0, 3).map(([key, lesson]) => (
+                          <Card key={key} className="border hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-sm mb-1">{lesson.title}</h4>
+                                  <div className="flex items-center text-xs text-gray-500 mb-2">
+                                    <span className="capitalize">{lesson.category}</span>
+                                    <span className="mx-2">•</span>
+                                    <span>{lesson.points} pts</span>
+                                  </div>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => window.location.href = `/learning/${key}`}
+                                  disabled={completedLessonIds.includes(key)}
+                                >
+                                  {completedLessonIds.includes(key) ? 'Completed' : 'Start Lesson'}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                      
+                      <div className="text-center mt-4">
+                        <p className="text-sm text-gray-500 mb-2">
+                          Showing 3 of {Object.keys(educationContent).length} available lessons
+                        </p>
+                        <Button variant="outline" size="sm" onClick={() => window.location.href = '/learning'}>
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          View All Learning Modules
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {activeTab === 'referrals' && <ReferralSystem />}
                 {activeTab === 'rewards' && <RewardsHistory />}
                 {activeTab === 'leaderboard' && <Leaderboard />}
-                {activeTab === 'history' && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Points History</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PointsHistory />
-                    </CardContent>
-                  </Card>
-                )}
               </div>
             ) : (
               /* Desktop: Show welcome section normally */
@@ -410,42 +450,47 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                  <Trophy className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={`${getTierColor(user?.tier)} text-white capitalize`}>
-                      {getTierDisplayName(user?.tier)}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Monthly standing
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Desktop Only: Stats Overview */}
+            {!isMobile && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
+                      <Trophy className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
+                          {getTierDisplayName(user?.tier || '')}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Monthly standing
+                      </p>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                  <Star className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    +{user?.currentMonthPoints || 0} this month
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                      <Star className="h-4 w-4 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
+                      <p className="text-xs text-muted-foreground">
+                        +{user?.currentMonthPoints || 0} this month
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-            <PointsSummary user={user as User} />
+                <PointsSummary user={user as User} />
+              </>
+            )}
 
-            {/* Learning Modules Preview */}
+            {/* Desktop Only: Learning Modules Preview */}
+            {!isMobile && (
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
@@ -481,7 +526,7 @@ export default function Dashboard() {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
+                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{lesson.content?.substring(0, 100)}...</p>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-500 capitalize">{lesson.category}</span>
                             <Button size="sm" variant={isCompleted ? "secondary" : "default"}>
@@ -508,52 +553,10 @@ export default function Dashboard() {
                 </Button>
               </div>
             </div>
+            )}
 
-            {/* Dashboard Content - Only show tabs on mobile */}
-            {isMobile ? (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-5 h-auto">
-                  <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
-                  <TabsTrigger value="referrals" className="text-xs px-1 py-2">Referrals</TabsTrigger>
-                  <TabsTrigger value="rewards" className="text-xs px-1 py-2">Rewards</TabsTrigger>
-                  <TabsTrigger value="leaderboard" className="text-xs px-1 py-2">Board</TabsTrigger>
-                  <TabsTrigger value="history" className="text-xs px-1 py-2">Activity</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="overview" className="space-y-6">
-                  <div className="space-y-6">
-                    <StreakDisplay 
-                      currentStreak={user?.currentStreak || 0}
-                      longestStreak={user?.longestStreak || 0}
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="referrals">
-                  <ReferralSystem />
-                </TabsContent>
-
-                <TabsContent value="rewards">
-                  <RewardsHistory />
-                </TabsContent>
-
-                <TabsContent value="leaderboard">
-                  <Leaderboard />
-                </TabsContent>
-
-                <TabsContent value="history">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Points History</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PointsHistory />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              /* Desktop: Show overview content directly */
+            {/* Desktop Only: Show overview content directly */}
+            {!isMobile && (
               <div className="space-y-6">
                 <StreakDisplay 
                   currentStreak={user?.currentStreak || 0}
