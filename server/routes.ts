@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
 import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
