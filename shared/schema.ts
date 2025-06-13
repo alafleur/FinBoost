@@ -303,7 +303,10 @@ export const winnerSelectionCycles = pgTable("winner_selection_cycles", {
   cycleName: text("cycle_name").notNull(), // e.g., "January 2025", "Custom Cycle 1"
   cycleStartDate: timestamp("cycle_start_date").notNull(),
   cycleEndDate: timestamp("cycle_end_date").notNull(),
-  poolSettings: text("pool_settings"), // JSON: tier allocations, winner percentages
+  poolSettings: text("pool_settings"), // JSON: tier thresholds, selection percentages, allocations
+  tier1Threshold: integer("tier1_threshold").default(33), // Top X% (default 33%)
+  tier2Threshold: integer("tier2_threshold").default(67), // Top X% (default 67%, so tier2 is 33-67%)
+  selectionPercentage: integer("selection_percentage").default(50), // % of each tier to select (default 50%)
   selectionCompleted: boolean("selection_completed").default(false).notNull(),
   disbursementCompleted: boolean("disbursement_completed").default(false).notNull(),
   totalPoolAmount: integer("total_pool_amount").default(0), // Total amount available for disbursement in cents

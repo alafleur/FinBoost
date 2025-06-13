@@ -257,6 +257,9 @@ export default function Admin() {
     cycleName: '',
     cycleStartDate: '',
     cycleEndDate: '',
+    tier1Threshold: 33,
+    tier2Threshold: 67,
+    selectionPercentage: 50,
     poolSettings: {}
   });
 
@@ -5380,6 +5383,44 @@ export default function Admin() {
                 />
               </div>
             </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="tier1Threshold">Tier 1 Threshold (%)</Label>
+                <Input
+                  id="tier1Threshold"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={newCycleForm.tier1Threshold || 33}
+                  onChange={(e) => setNewCycleForm(prev => ({ ...prev, tier1Threshold: parseInt(e.target.value) }))}
+                />
+                <div className="text-xs text-gray-500 mt-1">Top X% users</div>
+              </div>
+              <div>
+                <Label htmlFor="tier2Threshold">Tier 2 Threshold (%)</Label>
+                <Input
+                  id="tier2Threshold"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={newCycleForm.tier2Threshold || 67}
+                  onChange={(e) => setNewCycleForm(prev => ({ ...prev, tier2Threshold: parseInt(e.target.value) }))}
+                />
+                <div className="text-xs text-gray-500 mt-1">Top X% users (tier 2 ends here)</div>
+              </div>
+              <div>
+                <Label htmlFor="selectionPercentage">Selection Rate (%)</Label>
+                <Input
+                  id="selectionPercentage"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={newCycleForm.selectionPercentage || 50}
+                  onChange={(e) => setNewCycleForm(prev => ({ ...prev, selectionPercentage: parseInt(e.target.value) }))}
+                />
+                <div className="text-xs text-gray-500 mt-1">% of each tier selected</div>
+              </div>
+            </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCreateCycleDialog(false)}>
                 Cancel
@@ -5402,7 +5443,15 @@ export default function Admin() {
                       description: "New winner selection cycle created successfully"
                     });
                     setShowCreateCycleDialog(false);
-                    setNewCycleForm({ cycleName: '', cycleStartDate: '', cycleEndDate: '', poolSettings: {} });
+                    setNewCycleForm({ 
+                      cycleName: '', 
+                      cycleStartDate: '', 
+                      cycleEndDate: '', 
+                      tier1Threshold: 33,
+                      tier2Threshold: 67,
+                      selectionPercentage: 50,
+                      poolSettings: {} 
+                    });
                     loadCycles();
                   }
                 } catch (error) {

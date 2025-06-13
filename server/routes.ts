@@ -1983,14 +1983,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .sort((a, b) => b.points - a.points); // Highest to lowest
       
       const totalUsers = sortedUsers.length;
-      const tier1Cutoff = Math.floor(totalUsers * 0.33); // Top 33%
-      const tier2Cutoff = Math.floor(totalUsers * 0.67); // Top 67%
+      // Use admin-configurable tier thresholds
+      const tier1Cutoff = Math.floor(totalUsers * (cycle.tier1Threshold || 33) / 100);
+      const tier2Cutoff = Math.floor(totalUsers * (cycle.tier2Threshold || 67) / 100);
       
-      // Assign percentile-based tiers
+      // Assign percentile-based tiers using admin thresholds
       const usersByTier = {
-        tier1: sortedUsers.slice(0, tier1Cutoff), // Top 33%
-        tier2: sortedUsers.slice(tier1Cutoff, tier2Cutoff), // Middle 33%
-        tier3: sortedUsers.slice(tier2Cutoff) // Bottom 33%
+        tier1: sortedUsers.slice(0, tier1Cutoff),
+        tier2: sortedUsers.slice(tier1Cutoff, tier2Cutoff),
+        tier3: sortedUsers.slice(tier2Cutoff)
       };
 
       // Calculate tier pool allocations (50% to tier1, 35% to tier2, 15% to tier3)
@@ -1998,10 +1999,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tier2Pool = Math.floor(totalRewardPool * 0.35);
       const tier3Pool = Math.floor(totalRewardPool * 0.15);
 
-      // Perform random selection for each tier
-      const tier1Winners = performRandomSelection(usersByTier.tier1);
-      const tier2Winners = performRandomSelection(usersByTier.tier2);
-      const tier3Winners = performRandomSelection(usersByTier.tier3);
+      // Perform random selection for each tier using admin-configurable percentage
+      const selectionPercentage = cycle.selectionPercentage || 50;
+      const tier1Winners = performRandomSelection(usersByTier.tier1, selectionPercentage);
+      const tier2Winners = performRandomSelection(usersByTier.tier2, selectionPercentage);
+      const tier3Winners = performRandomSelection(usersByTier.tier3, selectionPercentage);
 
       // Calculate individual reward amounts
       const tier1RewardPerWinner = tier1Winners.length > 0 ? Math.floor(tier1Pool / tier1Winners.length) : 0;
