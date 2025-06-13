@@ -3799,15 +3799,29 @@ export default function Admin() {
                           ))}
                           
                           {winners[tier]?.length > 0 && (
-                            <div className="pt-2 border-t">
-                              <div className="flex justify-between text-sm font-medium">
-                                <span>Total:</span>
-                                <span className={`${
-                                  winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0) === 100 
-                                    ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0)}%
-                                </span>
+                            <div className="pt-2 border-t space-y-2">
+                              <div className="flex justify-between items-center">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newSet = new Set(selectedForDisbursement);
+                                    const tierWinners = winners[tier].filter((w: any) => w.user?.paypalEmail);
+                                    tierWinners.forEach((w: any) => newSet.add(w.id));
+                                    setSelectedForDisbursement(newSet);
+                                  }}
+                                >
+                                  Select All with PayPal
+                                </Button>
+                                <div className="flex justify-between text-sm font-medium">
+                                  <span>Total:</span>
+                                  <span className={`${
+                                    winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0) === 100 
+                                      ? 'text-green-600' : 'text-red-600'
+                                  }`}>
+                                    {winners[tier].reduce((sum: number, w: any) => sum + (w.rewardPercentage || 0), 0)}%
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           )}

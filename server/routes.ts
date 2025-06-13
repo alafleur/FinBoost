@@ -2100,6 +2100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const cycleId = parseInt(req.params.cycleId);
+      const { selectedWinnerIds } = req.body;
 
       // Get cycle and verify it's ready for disbursement
       const [cycle] = await db
@@ -2115,11 +2116,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Winner selection must be completed first" });
       }
 
-      if (cycle.disbursementCompleted) {
-        return res.status(400).json({ error: "Disbursements already processed for this cycle" });
+      // Build query conditions - either selected winners or all undisbursed winners
+      const baseConditions = [
+        eq(winnerSelections.cycleId, cycleId),
+        eq(winnerSelections.disbursed, false)
+      ];
+      
+      if (selectedWinnerIds && selectedWinnerIds.length > 0) {
+        baseConditions.push(inArray(winnerSelections.id, selectedWinnerIds));
       }
 
-      // Get all winners for this cycle with their reward amounts
+      // Get winners for this cycle with their reward amounts
       const winners = await db
         .select({
           id: winnerSelections.id,
@@ -2133,12 +2140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(winnerSelections)
         .innerJoin(users, eq(winnerSelections.userId, users.id))
-        .where(
-          and(
-            eq(winnerSelections.cycleId, cycleId),
-            eq(winnerSelections.disbursed, false)
-          )
-        );
+        .where(and(...baseConditions));
 
       if (winners.length === 0) {
         return res.status(400).json({ error: "No undisbursed winners found for this cycle" });
@@ -2195,13 +2197,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await db.insert(paypalPayouts).values(payoutRecords);
 
-      // Mark winners as disbursed
+      // Mark only the processed winners as disbursed
+      const winnerIds = winners.map(w => w.id);
       await db
         .update(winnerSelections)
         .set({ 
           disbursed: true, 
           disbursementId: payoutResult.batch_header?.payout_batch_id 
         })
+        .where(inArray(winnerSelections.id, winnerIds));
+
+      // Check if all winners for this cycle are now disbursed
+      const remainingWinners = await db
+        .select()
+        .from(winnerSelections)
         .where(
           and(
             eq(winnerSelections.cycleId, cycleId),
@@ -2209,14 +2218,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
 
-      // Mark cycle as disbursement completed
-      await db
-        .update(winnerSelectionCycles)
-        .set({ 
-          disbursementCompleted: true,
-          completedAt: new Date()
-        })
-        .where(eq(winnerSelectionCycles.id, cycleId));
+      // Mark cycle as disbursement completed only if all winners are disbursed
+      if (remainingWinners.length === 0) {
+        await db
+          .update(winnerSelectionCycles)
+          .set({ 
+            disbursementCompleted: true,
+            completedAt: new Date()
+          })
+          .where(eq(winnerSelectionCycles.id, cycleId));
+      }
 
       res.json({
         success: true,
