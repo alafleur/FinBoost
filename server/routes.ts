@@ -1909,7 +1909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Access token required" });
       }
 
-      const user = await getUserFromToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -1942,7 +1942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Access token required" });
       }
 
-      const user = await getUserFromToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -2021,9 +2021,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get cycle winners with current allocations
-  app.get("/api/admin/winner-cycles/:cycleId/winners", authenticateToken, async (req, res) => {
+  app.get("/api/admin/winner-cycles/:cycleId/winners", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
@@ -2062,9 +2068,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update winner percentages
-  app.post("/api/admin/winner-cycles/:cycleId/update-percentages", authenticateToken, async (req, res) => {
+  app.post("/api/admin/winner-cycles/:cycleId/update-percentages", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
