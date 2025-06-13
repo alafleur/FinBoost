@@ -363,6 +363,18 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
+              {user?.email === 'lafleur.andrew@gmail.com' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation('/admin')}
+                  className="flex items-center space-x-1 text-purple-600 hover:text-purple-700"
+                  aria-label="Access admin dashboard"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Admin</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -1162,9 +1174,127 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Desktop Leaderboard Sidebar */}
-          <div className="fixed right-0 top-0 h-full">
-            <LeaderboardSidebar />
+          {/* Desktop Right Sidebar */}
+          <div className="fixed right-0 top-16 w-80 h-full bg-white border-l border-gray-200 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              {/* Tier Progress */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-orange-500" />
+                    Tier Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Tier 1</span>
+                      <span className="text-xs text-gray-500">0+</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Tier 2</span>
+                      <span className="text-xs text-gray-500">21+</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-blue-600">Tier 3</span>
+                      <span className="text-xs text-blue-600 font-medium">31%</span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: '31%' }}
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between text-xs text-gray-500 mt-2">
+                      <span>{user?.currentMonthPoints || 0} points this month</span>
+                      <span>Maximum tier reached</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* This Month Points */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    This Month
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{user?.currentMonthPoints || 0}</div>
+                  <p className="text-xs text-muted-foreground">Monthly points earned</p>
+                </CardContent>
+              </Card>
+
+              {/* Community Growth */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Community Growth</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-2">
+                    <div className="text-3xl font-bold text-green-600">
+                      ${poolData.totalPool || 0}
+                    </div>
+                    <p className="text-sm text-gray-600">Current reward pool</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs mt-4">
+                      <div className="text-center">
+                        <div className="font-semibold">{poolData.tier1Pool || 0}%</div>
+                        <div className="text-gray-500">Tier 1</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold">{poolData.tier2Pool || 0}%</div>
+                        <div className="text-gray-500">Tier 2</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold">{poolData.tier3Pool || 0}%</div>
+                        <div className="text-gray-500">Tier 3</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Leaderboard */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Leaderboard</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {leaderboardData?.leaderboard?.slice(0, 5).map((player: any, index: number) => (
+                      <div key={player.username} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            index === 0 ? 'bg-yellow-100 text-yellow-800' :
+                            index === 1 ? 'bg-gray-100 text-gray-800' :
+                            index === 2 ? 'bg-orange-100 text-orange-800' :
+                            'bg-gray-50 text-gray-600'
+                          }`}>
+                            {player.rank}
+                          </div>
+                          <span className="text-sm font-medium truncate">
+                            {player.username === user?.username ? 'You' : player.username}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">{player.points}pts</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-3"
+                    onClick={() => setLocation('/leaderboard')}
+                  >
+                    View Full Leaderboard
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       )}
