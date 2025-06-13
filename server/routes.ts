@@ -54,11 +54,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       const newUser = await storage.createUser({
         username,
         email: email || '',
+        password: '', // Empty password for OAuth users
         firstName: profile.name?.givenName || '',
-        lastName: profile.name?.familyName || '',
-        googleId: profile.id,
-        isEmailVerified: true
+        lastName: profile.name?.familyName || ''
       });
+      
+      // Link Google ID to the new user
+      await storage.updateUserGoogleId(newUser.id, profile.id);
       
       return done(null, newUser);
     } catch (error) {
