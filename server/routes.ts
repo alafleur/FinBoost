@@ -2028,7 +2028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Access token required" });
       }
 
-      const user = await getUserFromToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -2075,7 +2075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Access token required" });
       }
 
-      const user = await getUserFromToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -2123,9 +2123,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export winner allocations to CSV
-  app.get("/api/admin/winner-cycles/:cycleId/export", authenticateToken, async (req, res) => {
+  app.get("/api/admin/winner-cycles/:cycleId/export", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
@@ -2164,9 +2170,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Import winner allocations from CSV
-  app.post("/api/admin/winner-cycles/:cycleId/import", authenticateToken, async (req, res) => {
+  app.post("/api/admin/winner-cycles/:cycleId/import", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
@@ -2225,9 +2237,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all winner cycles
-  app.get("/api/admin/winner-cycles", authenticateToken, async (req, res) => {
+  app.get("/api/admin/winner-cycles", async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ error: "Admin access required" });
       }
 
