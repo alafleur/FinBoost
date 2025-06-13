@@ -16,7 +16,11 @@ import {
   Target,
   Activity,
   Crown,
-  Medal
+  Medal,
+  User as UserIcon,
+  Mail,
+  CreditCard,
+  Save
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -331,6 +335,14 @@ export default function Dashboard() {
                 <Trophy className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Board</span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="profile" 
+                className="flex flex-col items-center gap-1 text-xs px-2 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-lg transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Profile settings tab"
+              >
+                <UserIcon className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium">Profile</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -638,6 +650,128 @@ export default function Dashboard() {
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <Leaderboard />
                 </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="profile" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <UserIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Profile Settings</h3>
+                </div>
+                
+                {/* Profile Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Account Information
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your account details and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Username</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Subscription Status</label>
+                        <div className="mt-1">
+                          <Badge variant={user?.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                            {user?.subscriptionStatus === 'active' ? 'Premium Member' : 'Free User'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* PayPal Payment Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Payment Information
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your PayPal email for reward disbursements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-1 bg-blue-100 rounded">
+                          <CreditCard className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            To receive monthly reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">PayPal Email Address</label>
+                        <input
+                          type="email"
+                          placeholder="your-paypal@email.com"
+                          defaultValue={user?.paypalEmail || ''}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          This email must be associated with an active PayPal account to receive payments
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Payout Method</label>
+                        <select
+                          defaultValue={user?.payoutMethod || 'paypal'}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="paypal">PayPal</option>
+                          <option value="bank_transfer" disabled>Bank Transfer (Coming Soon)</option>
+                        </select>
+                      </div>
+                      
+                      <Button className="w-full" size="sm">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Payment Information
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Account Statistics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Account Statistics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                        <div className="text-sm text-gray-600">Total Points</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.currentStreak || 0}</div>
+                        <div className="text-sm text-gray-600">Day Streak</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
           </div>
