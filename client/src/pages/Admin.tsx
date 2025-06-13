@@ -253,6 +253,7 @@ export default function Admin() {
   const [isProcessingDisbursements, setIsProcessingDisbursements] = useState(false);
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
+  const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
   const [newCycleForm, setNewCycleForm] = useState({
     cycleName: '',
     cycleStartDate: '',
@@ -1546,6 +1547,7 @@ export default function Admin() {
                           <TableHead>User</TableHead>
                           <TableHead>Points</TableHead>
                           <TableHead>Tier</TableHead>
+                          <TableHead>PayPal Email</TableHead>
                           <TableHead>Membership</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Joined</TableHead>
@@ -1590,6 +1592,15 @@ export default function Admin() {
                               }>
                                 {user.tier?.replace('tier', 'Tier ') || 'Tier 1'}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {user.paypalEmail ? (
+                                  <span className="text-green-600">{user.paypalEmail}</span>
+                                ) : (
+                                  <span className="text-red-500">No PayPal email</span>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -3747,9 +3758,30 @@ export default function Admin() {
                         <div className="space-y-3">
                           {winners[tier]?.map((winner: any, index: number) => (
                             <div key={winner.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                              <div>
-                                <div className="font-medium">#{winner.tierRank} {winner.username}</div>
-                                <div className="text-sm text-gray-600">{winner.email}</div>
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedForDisbursement.has(winner.id)}
+                                  onChange={(e) => {
+                                    const newSet = new Set(selectedForDisbursement);
+                                    if (e.target.checked) {
+                                      newSet.add(winner.id);
+                                    } else {
+                                      newSet.delete(winner.id);
+                                    }
+                                    setSelectedForDisbursement(newSet);
+                                  }}
+                                  className="w-4 h-4"
+                                />
+                                <div>
+                                  <div className="font-medium">#{winner.tierRank} {winner.username}</div>
+                                  <div className="text-sm text-gray-600">{winner.email}</div>
+                                  {winner.user?.paypalEmail ? (
+                                    <div className="text-xs text-green-600">PayPal: {winner.user.paypalEmail}</div>
+                                  ) : (
+                                    <div className="text-xs text-red-500">No PayPal email</div>
+                                  )}
+                                </div>
                               </div>
                               <div className="text-right">
                                 <Input
@@ -4156,6 +4188,17 @@ export default function Admin() {
                   <option value="tier2">Tier 2</option>
                   <option value="tier3">Tier 3</option>
                 </select>
+              </div>
+              <div>
+                <Label htmlFor="paypalEmail">PayPal Email</Label>
+                <Input 
+                  id="paypalEmail"
+                  type="email"
+                  value={editingUser?.paypalEmail || ''}
+                  onChange={(e) => setEditingUser({...editingUser, paypalEmail: e.target.value})}
+                  placeholder="paypal@example.com"
+                />
+                <div className="text-xs text-gray-500 mt-1">Required for PayPal disbursements</div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
