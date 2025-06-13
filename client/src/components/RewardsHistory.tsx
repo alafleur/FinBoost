@@ -170,19 +170,19 @@ export default function RewardsHistory() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold mb-1">
-                ${(rewardsData.totalEarned / 100).toFixed(2)}
+                ${((rewardsData?.totalEarned || 0) / 100).toFixed(2)}
               </div>
               <p className="text-green-100 text-sm">Total Earned</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold mb-1">
-                {rewardsData.totalCount}
+                {rewardsData?.totalCount || 0}
               </div>
               <p className="text-green-100 text-sm">Rewards Received</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold mb-1">
-                {rewardsData.disbursements.filter(d => d.status === 'success').length}
+                {rewardsData?.disbursements?.filter(d => d.status === 'success').length || 0}
               </div>
               <p className="text-green-100 text-sm">Successful Payouts</p>
             </div>
@@ -203,42 +203,52 @@ export default function RewardsHistory() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {rewardsData.disbursements.map((disbursement, index) => (
-              <div 
-                key={disbursement.id} 
-                className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {getTierIcon(disbursement.tier)}
-                    <div>
-                      <div className="font-semibold text-lg text-green-600">
-                        ${(disbursement.amount / 100).toFixed(2)}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {disbursement.cycleName}
+            {rewardsData?.disbursements?.length > 0 ? (
+              rewardsData.disbursements.map((disbursement, index) => (
+                <div 
+                  key={disbursement.id} 
+                  className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      {getTierIcon(disbursement.tier)}
+                      <div>
+                        <div className="font-semibold text-lg text-green-600">
+                          ${(disbursement.amount / 100).toFixed(2)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {disbursement.cycleName}
+                        </div>
                       </div>
                     </div>
+                    <div className="hidden md:block">
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {getTierIcon(disbursement.tier)}
+                        {getTierLabel(disbursement.tier)}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="hidden md:block">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      {getTierIcon(disbursement.tier)}
-                      {getTierLabel(disbursement.tier)}
+                  <div className="text-right">
+                    <Badge variant={getStatusColor(disbursement.status)}>
+                      {disbursement.status === 'success' ? 'Paid' : 
+                       disbursement.status === 'pending' ? 'Processing' : 
+                       'Failed'}
                     </Badge>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {new Date(disbursement.processedAt).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant={getStatusColor(disbursement.status)}>
-                    {disbursement.status === 'success' ? 'Paid' : 
-                     disbursement.status === 'pending' ? 'Processing' : 
-                     'Failed'}
-                  </Badge>
-                  <div className="text-sm text-gray-500 mt-1">
-                    {new Date(disbursement.processedAt).toLocaleDateString()}
-                  </div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-2">No rewards yet</p>
+                <p className="text-sm text-gray-500">
+                  Complete lessons and stay active to earn your first rewards!
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
