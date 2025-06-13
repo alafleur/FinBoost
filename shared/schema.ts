@@ -297,6 +297,76 @@ export const insertAdminSettingSchema = createInsertSchema(adminSettings).pick({
   category: true,
 });
 
+// Winner Selection Cycles
+export const winnerSelectionCycles = pgTable("winner_selection_cycles", {
+  id: serial("id").primaryKey(),
+  cycleName: text("cycle_name").notNull(), // e.g., "January 2025", "Custom Cycle 1"
+  cycleStartDate: timestamp("cycle_start_date").notNull(),
+  cycleEndDate: timestamp("cycle_end_date").notNull(),
+  poolSettings: text("pool_settings"), // JSON: tier allocations, winner percentages
+  selectionCompleted: boolean("selection_completed").default(false).notNull(),
+  disbursementCompleted: boolean("disbursement_completed").default(false).notNull(),
+  totalPoolAmount: integer("total_pool_amount").default(0), // Total amount available for disbursement in cents
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+  completedAt: timestamp("completed_at"),
+});
+
+// Winner Selections - stores the random selections and rankings for each cycle
+export const winnerSelections = pgTable("winner_selections", {
+  id: serial("id").primaryKey(),
+  cycleId: integer("cycle_id").references(() => winnerSelectionCycles.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  tier: text("tier").notNull(), // tier1, tier2, tier3
+  tierRank: integer("tier_rank").notNull(), // 1, 2, 3, ... up to 50% of tier size
+  rewardPercentage: integer("reward_percentage").default(0), // Percentage of tier pool (0-100)
+  rewardAmount: integer("reward_amount").default(0), // Calculated amount in cents
+  paypalEmail: text("paypal_email"), // User's PayPal email at time of selection
+  disbursed: boolean("disbursed").default(false).notNull(),
+  disbursementId: text("disbursement_id"), // PayPal payout batch ID
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Winner Allocation Templates - for CSV import/export
+export const winnerAllocationTemplates = pgTable("winner_allocation_templates", {
+  id: serial("id").primaryKey(),
+  templateName: text("template_name").notNull(),
+  tier: text("tier").notNull(), // tier1, tier2, tier3
+  tierRank: integer("tier_rank").notNull(),
+  rewardPercentage: integer("reward_percentage").notNull(), // Default percentage for this rank
+  description: text("description"),
+  isDefault: boolean("is_default").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+});
+
+export const insertWinnerSelectionCycleSchema = createInsertSchema(winnerSelectionCycles).pick({
+  cycleName: true,
+  cycleStartDate: true,
+  cycleEndDate: true,
+  poolSettings: true,
+  totalPoolAmount: true,
+});
+
+export const insertWinnerSelectionSchema = createInsertSchema(winnerSelections).pick({
+  cycleId: true,
+  userId: true,
+  tier: true,
+  tierRank: true,
+  rewardPercentage: true,
+  rewardAmount: true,
+  paypalEmail: true,
+});
+
+export const insertWinnerAllocationTemplateSchema = createInsertSchema(winnerAllocationTemplates).pick({
+  templateName: true,
+  tier: true,
+  tierRank: true,
+  rewardPercentage: true,
+  description: true,
+  isDefault: true,
+});
+
 export const insertLearningModuleSchema = createInsertSchema(learningModules).pick({
   title: true,
   description: true,
