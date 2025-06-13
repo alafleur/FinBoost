@@ -250,6 +250,12 @@ export default function Admin() {
   const [showCreateCycleDialog, setShowCreateCycleDialog] = useState(false);
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
+  const [newCycleForm, setNewCycleForm] = useState({
+    cycleName: '',
+    cycleStartDate: '',
+    cycleEndDate: '',
+    poolSettings: {}
+  });
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -5221,6 +5227,153 @@ export default function Admin() {
               </Button>
               <Button onClick={handleSavePoolSetting}>
                 {editingPoolSetting ? 'Update Cycle' : 'Create Cycle'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Winner Cycle Dialog */}
+      <Dialog open={showCreateCycleDialog} onOpenChange={setShowCreateCycleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Winner Selection Cycle</DialogTitle>
+            <DialogDescription>
+              Set up a new cycle for random winner selection and disbursement
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="cycleName">Cycle Name</Label>
+              <Input
+                id="cycleName"
+                placeholder="e.g., January 2024 Distribution"
+                value={newCycleForm.cycleName || ''}
+                onChange={(e) => setNewCycleForm(prev => ({ ...prev, cycleName: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startDate">Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={newCycleForm.cycleStartDate || ''}
+                  onChange={(e) => setNewCycleForm(prev => ({ ...prev, cycleStartDate: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="endDate">End Date</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={newCycleForm.cycleEndDate || ''}
+                  onChange={(e) => setNewCycleForm(prev => ({ ...prev, cycleEndDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateCycleDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={async () => {
+                try {
+                  const token = localStorage.getItem('token');
+                  const response = await fetch('/api/admin/winner-cycles/create', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(newCycleForm)
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                    toast({
+                      title: "Cycle Created",
+                      description: "New winner selection cycle created successfully"
+                    });
+                    setShowCreateCycleDialog(false);
+                    setNewCycleForm({ cycleName: '', cycleStartDate: '', cycleEndDate: '', poolSettings: {} });
+                    loadCycles();
+                  }
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to create cycle",
+                    variant: "destructive"
+                  });
+                }
+              }}>
+                Create Cycle
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* CSV Import Dialog */}
+      <Dialog open={showCsvImportDialog} onOpenChange={setShowCsvImportDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import CSV Allocation Data</DialogTitle>
+            <DialogDescription>
+              Upload a CSV file with UserID and Percentage columns to update winner allocations
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="csvData">CSV Data</Label>
+              <textarea
+                id="csvData"
+                className="w-full h-48 p-3 border rounded-md font-mono text-sm"
+                placeholder="UserID,Username,Email,PayPalEmail,Tier,TierRank,Percentage
+123,user1,user1@email.com,paypal@email.com,tier1,1,25
+124,user2,user2@email.com,paypal2@email.com,tier1,2,20"
+                value={csvImportData}
+                onChange={(e) => setCsvImportData(e.target.value)}
+              />
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>Expected format: UserID,Username,Email,PayPalEmail,Tier,TierRank,Percentage</p>
+              <p>Only UserID and Percentage columns are required for import.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCsvImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={async () => {
+                if (!selectedCycle) return;
+                
+                try {
+                  const token = localStorage.getItem('token');
+                  const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/import`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ csvData: csvImportData })
+                  });
+                  const data = await response.json();
+                  if (data.success) {
+                    toast({
+                      title: "Import Complete",
+                      description: data.message
+                    });
+                    setShowCsvImportDialog(false);
+                    setCsvImportData('');
+                    loadWinners();
+                  }
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to import CSV",
+                    variant: "destructive"
+                  });
+                }
+              }}>
+                Import CSV
               </Button>
             </div>
           </div>
