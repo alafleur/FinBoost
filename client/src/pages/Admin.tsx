@@ -43,7 +43,8 @@ import {
   MessageSquare,
   Timer,
   MoreHorizontal,
-  Crown
+  Crown,
+  Calendar
 } from 'lucide-react';
 
 interface LearningModule {
@@ -239,6 +240,10 @@ export default function Admin() {
     rewardPoolPercentage: 55,
     membershipFee: 2000
   });
+
+  // PayPal disbursement state
+  const [disbursementData, setDisbursementData] = useState<any>(null);
+  const [payoutHistory, setPayoutHistory] = useState<any[]>([]);
 
   // State for module form
   const [moduleForm, setModuleForm] = useState({
@@ -1198,6 +1203,7 @@ export default function Admin() {
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
+            <TabsTrigger value="disbursements">PayPal Payouts</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -3278,6 +3284,261 @@ export default function Admin() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="disbursements">
+            <div className="space-y-6">
+              {/* Disbursement Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Pool</CardTitle>
+                    <Target className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">${poolData?.totalPool ?? 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Available for disbursement
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Eligible Users</CardTitle>
+                    <Crown className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {users.filter((u: any) => u.subscriptionStatus === 'active' && u.paypalEmail).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      With PayPal emails
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                    <Calendar className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Current cycle
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Last Payout</CardTitle>
+                    <Clock className="h-4 w-4 text-purple-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">-</div>
+                    <p className="text-xs text-muted-foreground">
+                      No recent payouts
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Disbursement Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>PayPal Disbursements</CardTitle>
+                  <CardDescription>
+                    Process monthly reward payouts to premium members via PayPal
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Button 
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const response = await fetch('/api/admin/disbursements/calculate', {
+                              method: 'POST',
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                              toast({
+                                title: "Calculation Complete",
+                                description: `Found ${data.totalUsers} eligible users for disbursement`
+                              });
+                              setDisbursementData(data);
+                            }
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to calculate disbursements",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        Calculate Disbursements
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const response = await fetch('/api/admin/disbursements/history', {
+                              method: 'GET',
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                              setPayoutHistory(data.payouts);
+                            }
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to load payout history",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View History
+                      </Button>
+                    </div>
+
+                    {disbursementData && (
+                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="font-semibold mb-3">Disbursement Preview</h4>
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-yellow-600">
+                              {disbursementData.tierDistribution?.tier1?.users?.length || 0}
+                            </div>
+                            <div className="text-sm text-gray-600">Tier 1 Winners</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-gray-600">
+                              {disbursementData.tierDistribution?.tier2?.users?.length || 0}
+                            </div>
+                            <div className="text-sm text-gray-600">Tier 2 Winners</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-orange-600">
+                              {disbursementData.tierDistribution?.tier3?.users?.length || 0}
+                            </div>
+                            <div className="text-sm text-gray-600">Tier 3 Winners</div>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          onClick={async () => {
+                            try {
+                              const token = localStorage.getItem('token');
+                              const allWinners = [
+                                ...(disbursementData.tierDistribution?.tier1?.users || []),
+                                ...(disbursementData.tierDistribution?.tier2?.users || []),
+                                ...(disbursementData.tierDistribution?.tier3?.users || [])
+                              ];
+                              
+                              const response = await fetch('/api/admin/disbursements/process', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                  selectedUsers: allWinners,
+                                  totalAmount: poolData?.totalPool || 0
+                                })
+                              });
+                              
+                              const data = await response.json();
+                              if (data.success) {
+                                toast({
+                                  title: "Disbursement Initiated",
+                                  description: `Processing payouts to ${allWinners.length} users`
+                                });
+                                setDisbursementData(null);
+                              }
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to process disbursements",
+                                variant: "destructive"
+                              });
+                            }
+                          }}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          Process All Payouts
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payout History */}
+              {payoutHistory && payoutHistory.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Payouts</CardTitle>
+                    <CardDescription>PayPal disbursement transaction history</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Tier</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payoutHistory.slice(0, 10).map((payout: any) => (
+                          <TableRow key={payout.id}>
+                            <TableCell>{payout.username}</TableCell>
+                            <TableCell>{payout.recipientEmail}</TableCell>
+                            <TableCell>${payout.amount}</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                payout.tier === 'tier1' ? 'default' :
+                                payout.tier === 'tier2' ? 'secondary' : 'outline'
+                              }>
+                                {payout.tier}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                payout.status === 'SUCCESS' ? 'default' :
+                                payout.status === 'PENDING' ? 'secondary' : 'destructive'
+                              }>
+                                {payout.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(payout.processedAt || payout.createdAt).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
