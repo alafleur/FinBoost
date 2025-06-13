@@ -43,8 +43,17 @@ export default function Auth() {
     // Check for signup mode in URL
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
+    const email = urlParams.get('email');
+    
     if (mode === 'signup') {
       setDefaultTab('register');
+    }
+    
+    // Pre-fill email if provided from email capture
+    if (email) {
+      registerForm.setValue('email', decodeURIComponent(email));
+      loginForm.setValue('email', decodeURIComponent(email));
+      setDefaultTab('register'); // Default to signup for new emails
     }
 
     // Check for referral code in URL
@@ -198,15 +207,8 @@ export default function Auth() {
   };
 
   const handleGoogleSignIn = () => {
-    if (window.google && isGoogleLoaded) {
-      window.google.accounts.id.prompt();
-    } else {
-      toast({
-        title: "Google Sign-In not ready",
-        description: "Please try again in a moment.",
-        variant: "destructive",
-      });
-    }
+    trackEvent("oauth_attempt", "google_signin", "auth_page");
+    window.location.href = '/auth/google';
   };
 
   const onRegister = (data: RegisterForm) => {

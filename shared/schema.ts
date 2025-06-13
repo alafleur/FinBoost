@@ -63,6 +63,10 @@ export const users = pgTable("users", {
   paypalEmail: text("paypal_email"), // PayPal email for receiving payouts
   payoutMethod: text("payout_method").default("paypal"), // paypal, stripe, bank_transfer
 
+  // OAuth Integration
+  googleId: text("google_id").unique(), // Google OAuth ID
+  isEmailVerified: boolean("is_email_verified").default(false).notNull(),
+
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
