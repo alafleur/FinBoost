@@ -194,11 +194,13 @@ export default function Dashboard() {
 
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard data",
-          variant: "destructive"
-        });
+        // Only show error toast for authentication failures or critical errors
+        if (error instanceof Error && error.message.includes('401')) {
+          setLocation('/login');
+        } else {
+          // Suppress general errors since individual API calls handle their own error states
+          console.warn('Some dashboard data may not have loaded completely');
+        }
       } finally {
         setIsLoading(false);
       }

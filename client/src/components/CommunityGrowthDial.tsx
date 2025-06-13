@@ -186,10 +186,11 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                   </div>
                   <Button 
                     onClick={onUpgradeClick}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 text-sm"
                   >
                     <Crown className="w-4 h-4 mr-2" />
-                    Join Premium Members - $20/month
+                    <span className="hidden sm:inline">Join Premium Members - $20/month</span>
+                    <span className="sm:hidden">Upgrade to Premium - $20/mo</span>
                   </Button>
                 </>
               ) : (
