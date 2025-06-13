@@ -22,7 +22,8 @@ import {
   User as UserIcon,
   Mail,
   CreditCard,
-  Save
+  Save,
+  CheckCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
