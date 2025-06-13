@@ -261,19 +261,154 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Mobile Tab Navigation - At top of page */}
+      {isMobile && (
+        <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
+          <div className="px-4">
+            <div className="grid grid-cols-5 h-auto">
+              <button 
+                onClick={() => setActiveTab('overview')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'overview' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Overview
+              </button>
+              <button 
+                onClick={() => setActiveTab('referrals')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'referrals' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Referrals
+              </button>
+              <button 
+                onClick={() => setActiveTab('rewards')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'rewards' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Rewards
+              </button>
+              <button 
+                onClick={() => setActiveTab('leaderboard')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'leaderboard' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Board
+              </button>
+              <button 
+                onClick={() => setActiveTab('history')}
+                className={`text-xs px-1 py-3 border-b-2 transition-colors ${
+                  activeTab === 'history' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-700' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Activity
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex">
         {/* Main Content */}
         <div className={`flex-1 ${!isMobile ? 'mr-80' : ''}`}>
           <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-            {/* Welcome Section */}
-            <div className="mb-6 sm:mb-8">
-              <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                Welcome to your FinBoost Dashboard! 🚀
-              </h2>
-              <p className="text-sm sm:text-base text-gray-600">
-                Track your progress, earn points, and win monthly rewards for building better financial habits.
-              </p>
-            </div>
+            {/* Mobile Tab Content */}
+            {isMobile ? (
+              <div className="space-y-6">
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Welcome Section */}
+                    <div className="mb-6">
+                      <h2 className="font-heading font-bold text-xl mb-2">
+                        Welcome to your FinBoost Dashboard! 🚀
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        Track your progress, earn points, and win monthly rewards for building better financial habits.
+                      </p>
+                    </div>
+
+                    {/* Stats Overview for Mobile */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
+                          <Trophy className="h-4 w-4 text-orange-500" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
+                              {getTierDisplayName(user?.tier || '')}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Monthly standing
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                          <Star className="h-4 w-4 text-yellow-500" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
+                          <p className="text-xs text-muted-foreground">
+                            +{user?.currentMonthPoints || 0} this month
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <PointsSummary user={user as User} />
+                    <StreakDisplay 
+                      currentStreak={user?.currentStreak || 0}
+                      longestStreak={user?.longestStreak || 0}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'referrals' && <ReferralSystem />}
+                {activeTab === 'rewards' && <RewardsHistory />}
+                {activeTab === 'leaderboard' && <Leaderboard />}
+                {activeTab === 'history' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Points History</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <PointsHistory />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              /* Desktop: Show welcome section normally */
+              <div>
+                {/* Welcome Section */}
+                <div className="mb-6 sm:mb-8">
+                  <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
+                    Welcome to your FinBoost Dashboard! 🚀
+                  </h2>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Track your progress, earn points, and win monthly rewards for building better financial habits.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
