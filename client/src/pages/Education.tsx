@@ -219,7 +219,7 @@ export default function Education() {
                 onClick={() => {
                   localStorage.removeItem('token');
                   localStorage.removeItem('user');
-                  setLocation('/');
+                  setLocation('/auth');
                 }}
                 className="flex items-center gap-2"
               >

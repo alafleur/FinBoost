@@ -374,7 +374,7 @@ export default function Dashboard() {
                 size="sm"
                 onClick={() => {
                   localStorage.removeItem('token');
-                  setLocation('/login');
+                  setLocation('/auth');
                 }}
                 aria-label="Logout from account"
               >
