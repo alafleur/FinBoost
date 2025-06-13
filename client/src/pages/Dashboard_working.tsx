@@ -168,11 +168,7 @@ export default function Dashboard() {
 
   const fetchLeaderboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/leaderboard', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include'
-      });
+      const response = await fetch('/api/leaderboard');
       if (response.ok) {
         const data = await response.json();
         setLeaderboardData(data);
@@ -196,11 +192,7 @@ export default function Dashboard() {
 
   const fetchLessonProgress = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/progress', {
-        headers: { 'Authorization': `Bearer ${token}` },
-        credentials: 'include'
-      });
+      const response = await fetch('/api/user/progress');
       if (response.ok) {
         const data = await response.json();
         console.log('Raw progress data:', data);
