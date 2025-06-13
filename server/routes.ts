@@ -256,6 +256,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to view all users' payment information for disbursements
+  app.get("/api/admin/users/payment-info", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get all premium users with their payment information
+      const usersWithPaymentInfo = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        subscriptionStatus: users.subscriptionStatus,
+        paypalEmail: users.paypalEmail,
+        payoutMethod: users.payoutMethod,
+        totalPoints: users.totalPoints,
+        currentMonthPoints: users.currentMonthPoints,
+        tier: users.tier
+      })
+      .from(users)
+      .where(eq(users.subscriptionStatus, 'active'))
+      .orderBy(desc(users.currentMonthPoints));
+
+      // Add payment status information
+      const usersWithStatus = usersWithPaymentInfo.map(user => ({
+        ...user,
+        paymentStatus: user.paypalEmail ? 'configured' : 'missing',
+        paymentIssues: []
+      }));
+
+      res.json({ 
+        success: true, 
+        users: usersWithStatus,
+        summary: {
+          totalPremiumUsers: usersWithPaymentInfo.length,
+          usersWithPayment: usersWithPaymentInfo.filter(u => u.paypalEmail).length,
+          usersWithoutPayment: usersWithPaymentInfo.filter(u => !u.paypalEmail).length
+        }
+      });
+    } catch (error: any) {
+      console.error('Error fetching admin payment info:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch payment information' });
+    }
+  });
+
   // Get current rewards configuration
   app.get('/api/rewards/config', async (req, res) => {
     try {

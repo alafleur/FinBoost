@@ -240,6 +240,74 @@ export default function Dashboard() {
     return tier || 'Bronze';
   };
 
+  // Save PayPal payment information
+  const handleSavePaymentInfo = async () => {
+    if (!paypalEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "PayPal email is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(paypalEmail)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingPayment(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/user/payment-info', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          paypalEmail: paypalEmail.trim(),
+          payoutMethod
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update user state with new payment info
+        setUser(prev => prev ? {
+          ...prev,
+          paypalEmail: data.paypalEmail,
+          payoutMethod: data.payoutMethod
+        } : null);
+
+        toast({
+          title: "Success",
+          description: "Payment information saved successfully",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Failed to save payment information",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save payment information",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
@@ -736,7 +804,8 @@ export default function Dashboard() {
                         <input
                           type="email"
                           placeholder="your-paypal@email.com"
-                          defaultValue={user?.paypalEmail || ''}
+                          value={paypalEmail}
+                          onChange={(e) => setPaypalEmail(e.target.value)}
                           className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">
@@ -747,7 +816,8 @@ export default function Dashboard() {
                       <div>
                         <label className="text-sm font-medium text-gray-700">Payout Method</label>
                         <select
-                          defaultValue={user?.payoutMethod || 'paypal'}
+                          value={payoutMethod}
+                          onChange={(e) => setPayoutMethod(e.target.value)}
                           className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
                           <option value="paypal">PayPal</option>
@@ -755,9 +825,14 @@ export default function Dashboard() {
                         </select>
                       </div>
                       
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm" 
+                        onClick={handleSavePaymentInfo}
+                        disabled={savingPayment}
+                      >
                         <Save className="h-4 w-4 mr-2" />
-                        Save Payment Information
+                        {savingPayment ? 'Saving...' : 'Save Payment Information'}
                       </Button>
                     </div>
                   </CardContent>
