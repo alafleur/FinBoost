@@ -2273,10 +2273,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tierRank: winnerSelections.tierRank,
           rewardPercentage: winnerSelections.rewardPercentage,
           rewardAmount: winnerSelections.rewardAmount,
-          disbursed: winnerSelections.disbursed
+          disbursed: winnerSelections.disbursed,
+          disbursementDate: paypalPayouts.processedAt
         })
         .from(winnerSelections)
         .leftJoin(users, eq(winnerSelections.userId, users.id))
+        .leftJoin(paypalPayouts, and(
+          eq(paypalPayouts.userId, winnerSelections.userId),
+          eq(paypalPayouts.reason, "winner_cycle_reward")
+        ))
         .where(eq(winnerSelections.cycleId, cycleId))
         .orderBy(winnerSelections.tier, winnerSelections.tierRank);
 

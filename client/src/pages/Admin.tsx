@@ -1139,6 +1139,58 @@ export default function Admin() {
     }
   };
 
+  // Handle selective disbursement processing
+  const handleProcessSelectedDisbursements = async () => {
+    if (!selectedCycle || selectedForDisbursement.size === 0) {
+      toast({
+        title: "Error",
+        description: "Please select winners to process disbursements for",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsProcessingDisbursements(true);
+      const token = localStorage.getItem('token');
+      const selectedWinnerIds = Array.from(selectedForDisbursement);
+      
+      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selectedWinnerIds })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: "Disbursements Processed",
+          description: `Successfully processed ${selectedWinnerIds.length} disbursements`
+        });
+        // Clear selection and reload winners
+        setSelectedForDisbursement(new Set());
+        loadWinners();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to process disbursements",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to process disbursements",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingDisbursements(false);
+    }
+  };
+
   // Calculate Proportional Point Deduction Ratios
   const calculateProportionalRatios = () => {
     if (!poolData || !users.length) return;
