@@ -128,7 +128,6 @@ The application features a modern React frontend with TypeScript, Express.js bac
 ## Changelog
 - June 13, 2025. Initial setup
 - June 13, 2025. Added Profile tab to mobile navigation with comprehensive subscription payment details display including amount, payment method, dates, and PayPal configuration for reward disbursements. Implemented admin endpoints for managing user payment information with automatic next billing date calculation (last day of month).
-- June 13, 2025. Fixed critical dashboard authentication issues by restoring from latest commit (HEAD) and ensuring proper Bearer token headers are maintained. Preserved all mobile navigation improvements and dashboard features while resolving authentication errors.
 
 ## User Preferences
 

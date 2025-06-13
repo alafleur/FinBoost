@@ -231,13 +231,7 @@ export default function RewardsHistory() {
                   }
                 </p>
                 <Button 
-                  onClick={() => {
-                    // Use the header Profile button functionality
-                    const profileButton = document.querySelector('button[aria-label="View profile and subscription details"]') as HTMLButtonElement;
-                    if (profileButton) {
-                      profileButton.click();
-                    }
-                  }}
+                  onClick={() => setLocation('/dashboard')}
                   className={user?.paypalEmail ? 
                     "bg-green-600 hover:bg-green-700 text-white" : 
                     "bg-orange-600 hover:bg-orange-700 text-white"

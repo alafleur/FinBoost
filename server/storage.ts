@@ -28,8 +28,6 @@ export interface IStorage {
     // User Authentication Methods
     getUserByEmail(email: string): Promise<User | null>;
     getUserById(id: number): Promise<User | null>;
-    getUserByGoogleId(googleId: string): Promise<User | null>;
-    updateUserGoogleId(userId: number, googleId: string): Promise<void>;
     validateUser(email: string, password: string): Promise<User | null>;
     updateUserPoints(userId: number, totalPoints: number, currentMonthPoints: number): Promise<void>;
     getUserPointsHistory(userId: number): Promise<UserPointsHistory[]>;
@@ -373,26 +371,6 @@ export class MemStorage implements IStorage {
   async getUserById(id: number): Promise<User | null> {
     const user = this.users.get(id);
     return user || null;
-  }
-
-  async getUserByGoogleId(googleId: string): Promise<User | null> {
-    const [dbUser] = await db.select().from(users).where(eq(users.googleId, googleId));
-    if (dbUser) {
-      this.users.set(dbUser.id, dbUser);
-      return dbUser;
-    }
-    return null;
-  }
-
-  async updateUserGoogleId(userId: number, googleId: string): Promise<void> {
-    await db.update(users)
-      .set({ googleId })
-      .where(eq(users.id, userId));
-    
-    const user = this.users.get(userId);
-    if (user) {
-      user.googleId = googleId;
-    }
   }
 
   async validatePassword(email: string, password: string): Promise<User | null> {

@@ -5,8 +5,6 @@ import { storage } from "./storage";
 import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
 import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates } from "@shared/schema";
 import { db } from "./db";
@@ -17,68 +15,6 @@ let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2025-04-30.basil",
-  });
-}
-
-// Configure Google OAuth Strategy
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.NODE_ENV === 'production' 
-      ? "https://getfinboost.com/auth/google/callback"
-      : "http://localhost:5000/auth/google/callback"
-  },
-  async (accessToken, refreshToken, profile, done) => {
-    try {
-      // Check if user already exists with this Google ID
-      let user = await storage.getUserByGoogleId(profile.id);
-      
-      if (user) {
-        return done(null, user);
-      }
-      
-      // Check if user exists with same email
-      const email = profile.emails?.[0]?.value;
-      if (email) {
-        user = await storage.getUserByEmail(email);
-        if (user) {
-          // Link Google account to existing user
-          await storage.updateUserGoogleId(user.id, profile.id);
-          return done(null, user);
-        }
-      }
-      
-      // Create new user
-      const username = profile.displayName?.replace(/\s+/g, '').toLowerCase() + Math.random().toString(36).substring(7);
-      const newUser = await storage.createUser({
-        username,
-        email: email || '',
-        password: '', // Empty password for OAuth users
-        firstName: profile.name?.givenName || '',
-        lastName: profile.name?.familyName || ''
-      });
-      
-      // Link Google ID to the new user
-      await storage.updateUserGoogleId(newUser.id, profile.id);
-      
-      return done(null, newUser);
-    } catch (error) {
-      return done(error, null);
-    }
-  }));
-  
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser(async (id: any, done) => {
-    try {
-      const user = await storage.getUserById(id);
-      done(null, user);
-    } catch (error) {
-      done(error, null);
-    }
   });
 }
 
@@ -154,30 +90,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ success: false, message: error.message });
     }
   });
-
-  // Google OAuth routes
-  app.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
-
-  app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/auth?error=oauth_failed' }),
-    async (req, res) => {
-      try {
-        const user = req.user as any;
-        if (user) {
-          const token = jwt.sign({ userId: user.id }, 'finboost-secret-key-2024', { expiresIn: '7d' });
-          
-          // Redirect to dashboard with token
-          res.redirect(`/dashboard?token=${token}&signup=success`);
-        } else {
-          res.redirect('/auth?error=oauth_failed');
-        }
-      } catch (error) {
-        res.redirect('/auth?error=oauth_failed');
-      }
-    }
-  );
 
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -2176,21 +2088,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user payouts:", error);
       res.status(500).json({ error: "Failed to fetch payouts" });
-    }
-  });
-
-  // Admin route for viewing email subscribers
-  app.get("/api/admin/subscribers", authenticateToken, async (req, res) => {
-    try {
-      if (!req.user?.isAdmin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
-
-      const allSubscribers = await storage.getAllSubscribers();
-      res.json({ success: true, subscribers: allSubscribers });
-    } catch (error) {
-      console.error("Error fetching subscribers:", error);
-      res.status(500).json({ error: "Failed to fetch subscribers" });
     }
   });
 

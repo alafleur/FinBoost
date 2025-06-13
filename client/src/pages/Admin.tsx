@@ -28,7 +28,6 @@ import {
   Save,
   Eye,
   Star,
-  RefreshCw,
   Clock,
   Target,
   AlertCircle,
@@ -298,10 +297,6 @@ export default function Admin() {
 
 
 
-  // Subscribers state
-  const [subscribers, setSubscribers] = useState<any[]>([]);
-  const [subscriberSearchTerm, setSubscriberSearchTerm] = useState("");
-
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
     totalReferrers: 0,
@@ -410,7 +405,6 @@ export default function Admin() {
     fetchPendingProofs();
     fetchPointActions();
     fetchSupportTickets();
-    fetchSubscribers();
     fetchMonthlyPoolSettings();
     loadCycles();
   }, []);
@@ -499,21 +493,6 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching support tickets:', error);
-    }
-  };
-
-  const fetchSubscribers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/subscribers', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSubscribers(data.subscribers || []);
-      }
-    } catch (error) {
-      console.error('Error fetching subscribers:', error);
     }
   };
 
@@ -1420,7 +1399,6 @@ export default function Admin() {
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
-            <TabsTrigger value="subscribers">Email Subscribers</TabsTrigger>
             <TabsTrigger value="disbursements">PayPal Payouts</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -4054,93 +4032,6 @@ export default function Admin() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="subscribers">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Email Subscribers</CardTitle>
-                    <CardDescription>
-                      View all email addresses captured from the landing page and waitlist
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      placeholder="Search emails..." 
-                      value={subscriberSearchTerm}
-                      onChange={(e) => setSubscriberSearchTerm(e.target.value)}
-                      className="w-64" 
-                    />
-                    <Button
-                      onClick={fetchSubscribers}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Refresh
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Total Subscribers: <span className="font-medium">{subscribers.length}</span>
-                  </div>
-                </div>
-                
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Signup Date</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {subscribers
-                        .filter(subscriber => 
-                          !subscriberSearchTerm || 
-                          subscriber.email.toLowerCase().includes(subscriberSearchTerm.toLowerCase())
-                        )
-                        .map((subscriber) => (
-                          <TableRow key={subscriber.id}>
-                            <TableCell className="font-medium">
-                              {subscriber.email}
-                            </TableCell>
-                            <TableCell>
-                              {new Date(subscriber.createdAt).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="secondary">
-                                Waitlist
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                  
-                  {subscribers.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      No email subscribers yet. When users enter their email on the landing page, they will appear here.
-                    </div>
-                  )}
-                  
-                  {subscribers.length > 0 && subscriberSearchTerm && 
-                   subscribers.filter(subscriber => 
-                     subscriber.email.toLowerCase().includes(subscriberSearchTerm.toLowerCase())
-                   ).length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      No subscribers found matching "{subscriberSearchTerm}"
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="settings">
