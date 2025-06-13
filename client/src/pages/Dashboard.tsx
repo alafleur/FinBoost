@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -151,10 +152,14 @@ export default function Dashboard() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      });
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        setUser(userData.user || userData);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
