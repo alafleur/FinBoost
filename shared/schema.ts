@@ -207,6 +207,7 @@ export const paypalPayouts = pgTable("paypal_payouts", {
   adminNotes: text("admin_notes"),
   processedAt: timestamp("processed_at"),
   paypalResponse: text("paypal_response"), // JSON response from PayPal
+  cycleName: text("cycle_name"), // Name of the winner selection cycle
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

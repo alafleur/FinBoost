@@ -1350,6 +1350,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's reward disbursement history
+  app.get('/api/rewards/history', async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid token" });
+      }
+
+      const disbursements = await db
+        .select({
+          id: paypalPayouts.id,
+          amount: paypalPayouts.amount,
+          currency: paypalPayouts.currency,
+          status: paypalPayouts.status,
+          tier: paypalPayouts.tier,
+          processedAt: paypalPayouts.processedAt,
+          reason: paypalPayouts.reason,
+          cycleName: paypalPayouts.cycleName
+        })
+        .from(paypalPayouts)
+        .where(eq(paypalPayouts.userId, user.id))
+        .orderBy(desc(paypalPayouts.processedAt));
+
+      const totalEarned = disbursements
+        .filter(d => d.status === 'success' || d.status === 'pending')
+        .reduce((sum, d) => sum + d.amount, 0);
+
+      res.json({ 
+        success: true, 
+        disbursements,
+        totalEarned,
+        totalCount: disbursements.length
+      });
+    } catch (error) {
+      console.error('Error fetching reward history:', error);
+      res.status(500).json({ error: "Failed to fetch reward history" });
+    }
+  });
+
   // Stripe subscription routes
   app.post("/api/create-subscription", async (req, res) => {
     try {
