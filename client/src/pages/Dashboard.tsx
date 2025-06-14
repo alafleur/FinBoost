@@ -815,12 +815,11 @@ export default function Dashboard() {
 
             <TabsContent value="profile" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-blue-100 rounded-lg">
-                    <UserIcon className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Profile Settings</h3>
-                </div>
+                <SectionHeader 
+                  icon={UserIcon}
+                  iconColor="blue"
+                  title="Profile Settings"
+                />
                 
                 {/* Profile Information */}
                 <Card>
@@ -1327,12 +1326,11 @@ export default function Dashboard() {
 
               {/* Recent Rewards Section */}
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Recent Rewards</h3>
-                </div>
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Recent Rewards"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
                   <RewardsHistory />
                 </div>
@@ -1342,12 +1340,12 @@ export default function Dashboard() {
             {/* Referrals Tab */}
             <TabsContent value="referrals" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-purple-100 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-2xl text-gray-900">Referral System</h3>
-                </div>
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="purple"
+                  title="Referral System"
+                  titleSize="2xl"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <ReferralSystem />
                 </div>
@@ -1358,12 +1356,12 @@ export default function Dashboard() {
             <TabsContent value="learn" className="mt-0 space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-2xl text-gray-900">All Learning Modules</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="All Learning Modules"
+                    titleSize="2xl"
+                  />
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
@@ -1446,12 +1444,12 @@ export default function Dashboard() {
             {/* Leaderboard Tab */}
             <TabsContent value="leaderboard" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-orange-100 rounded-lg">
-                    <Trophy className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-2xl text-gray-900">Leaderboard</h3>
-                </div>
+                <SectionHeader 
+                  icon={Trophy}
+                  iconColor="orange"
+                  title="Leaderboard"
+                  titleSize="2xl"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <Leaderboard />
                 </div>
@@ -1461,12 +1459,12 @@ export default function Dashboard() {
             {/* Profile Tab - Desktop */}
             <TabsContent value="profile" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-blue-100 rounded-lg">
-                    <UserIcon className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-2xl text-gray-900">Profile Settings</h3>
-                </div>
+                <SectionHeader 
+                  icon={UserIcon}
+                  iconColor="blue"
+                  title="Profile Settings"
+                  titleSize="2xl"
+                />
                 
                 {/* Profile Information */}
                 <Card>
