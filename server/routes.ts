@@ -2967,6 +2967,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public cycle API endpoints (used by dashboard)
+  app.get("/api/cycles/current", async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.json(null);
+      }
+      res.json(currentCycle);
+    } catch (error) {
+      console.error("Error fetching current cycle:", error);
+      res.status(500).json({ error: "Failed to fetch current cycle" });
+    }
+  });
+
+  app.get("/api/cycles/leaderboard", async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.json([]);
+      }
+      
+      const leaderboard = await storage.getCycleLeaderboard(currentCycle.id, 50);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching cycle leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch cycle leaderboard" });
+    }
+  });
+
+  app.get("/api/cycles/leaderboard/expanded", async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.json([]);
+      }
+      
+      const leaderboard = await storage.getCycleLeaderboard(currentCycle.id);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching expanded cycle leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch expanded cycle leaderboard" });
+    }
+  });
+
+  app.get("/api/cycles/rewards/history", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      let userId = null;
+      
+      if (token) {
+        try {
+          const user = await getUserFromToken(token);
+          if (user) {
+            userId = user.id;
+          }
+        } catch (error) {
+          // Token invalid or expired, but we can still return empty history
+        }
+      }
+      
+      if (!userId) {
+        return res.json([]);
+      }
+      
+      const rewardsHistory = await storage.getUserCycleRewards(userId);
+      res.json(rewardsHistory);
+    } catch (error) {
+      console.error("Error fetching cycle rewards history:", error);
+      res.status(500).json({ error: "Failed to fetch cycle rewards history" });
+    }
+  });
+
+  app.get("/api/cycles/pool", async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.json({
+          totalPool: 0,
+          premiumUsers: 0,
+          totalUsers: 0
+        });
+      }
+      
+      const poolData = await storage.getCyclePoolData(currentCycle.id);
+      res.json(poolData);
+    } catch (error) {
+      console.error("Error fetching cycle pool data:", error);
+      res.status(500).json({ error: "Failed to fetch cycle pool data" });
+    }
+  });
+
+  app.get("/api/cycles/distribution", async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.json(null);
+      }
+      
+      const now = new Date();
+      const endDate = new Date(currentCycle.endDate);
+      const timeRemaining = endDate.getTime() - now.getTime();
+      
+      if (timeRemaining <= 0) {
+        return res.json({
+          nextDate: endDate.toISOString(),
+          timeRemaining: { days: 0, hours: 0, minutes: 0, totalMs: 0 }
+        });
+      }
+      
+      const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+      
+      res.json({
+        nextDate: endDate.toISOString(),
+        timeRemaining: { days, hours, minutes, totalMs: timeRemaining }
+      });
+    } catch (error) {
+      console.error("Error fetching cycle distribution info:", error);
+      res.status(500).json({ error: "Failed to fetch cycle distribution info" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
