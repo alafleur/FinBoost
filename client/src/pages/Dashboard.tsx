@@ -202,7 +202,7 @@ export default function Dashboard() {
         }
 
         // Fetch pool data for CommunityGrowthDial
-        const poolResponse = await fetch('/api/pool/monthly', {
+        const poolResponse = await fetch('/api/cycles/pool', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -504,7 +504,7 @@ export default function Dashboard() {
                       </Badge>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Current Tier</h3>
-                    <p className="text-xs text-gray-600">Monthly standing</p>
+                    <p className="text-xs text-gray-600">Cycle standing</p>
                   </CardContent>
                 </Card>
 
@@ -1155,7 +1155,7 @@ export default function Dashboard() {
                         {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-600 mt-2">Monthly standing</p>
+                    <p className="text-xs text-gray-600 mt-2">Cycle standing</p>
                   </CardContent>
                 </Card>
 
@@ -1179,7 +1179,7 @@ export default function Dashboard() {
                 <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-gray-900">This Month</CardTitle>
+                      <CardTitle className="text-base font-semibold text-gray-900">This Cycle</CardTitle>
                       <div className="p-2 bg-white rounded-lg shadow-sm">
                         <TrendingUp className="h-4 w-4 text-orange-600" />
                       </div>
