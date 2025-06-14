@@ -1055,6 +1055,167 @@ export default function Admin() {
     }
   };
 
+  // Cycle management API functions
+  const fetchCycleSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cycle-settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCycleSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching cycle settings:', error);
+    }
+  };
+
+  const fetchUserCyclePoints = async (cycleId?: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = cycleId ? `/api/admin/cycle-user-points/${cycleId}` : '/api/admin/cycle-user-points';
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserCyclePoints(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user cycle points:', error);
+    }
+  };
+
+  const fetchCycleWinnerSelections = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cycle-winner-selections', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCycleWinnerSelections(data);
+      }
+    } catch (error) {
+      console.error('Error fetching cycle winner selections:', error);
+    }
+  };
+
+  const handleSaveCycle = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = editingCycle 
+        ? `/api/admin/cycle-settings/${editingCycle.id}`
+        : '/api/admin/cycle-settings';
+      
+      const method = editingCycle ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(cycleForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: editingCycle ? "Cycle updated" : "Cycle created",
+          description: "Cycle configuration has been saved successfully.",
+        });
+        
+        setShowCycleDialog(false);
+        setEditingCycle(null);
+        setCycleForm({
+          cycleName: '',
+          cycleType: 'weekly',
+          cycleStartDate: '',
+          cycleEndDate: '',
+          paymentPeriodDays: 30,
+          membershipFee: 2000,
+          rewardPoolPercentage: 55,
+          tier1Threshold: 56,
+          tier2Threshold: 21,
+          isActive: true,
+          allowMidCycleJoining: true,
+          midCycleJoinThresholdDays: 3
+        });
+        
+        fetchCycleSettings();
+      } else {
+        throw new Error(`Failed to save cycle: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error saving cycle:', error);
+      toast({
+        title: "Error saving cycle",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCycle = async (cycleId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-settings/${cycleId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Cycle deleted",
+          description: "Cycle has been removed successfully.",
+        });
+        fetchCycleSettings();
+      } else {
+        throw new Error(`Failed to delete cycle: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting cycle:', error);
+      toast({
+        title: "Error deleting cycle",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRunWinnerSelection = async (cycleId: number) => {
+    setIsRunningSelection(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/run-cycle-winner-selection/${cycleId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const results = await response.json();
+        setSelectionResults(results);
+        toast({
+          title: "Winner selection completed",
+          description: `Selected ${results.totalWinners} winners for this cycle.`,
+        });
+        fetchCycleWinnerSelections();
+      } else {
+        throw new Error(`Failed to run winner selection: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error running winner selection:', error);
+      toast({
+        title: "Error running winner selection",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRunningSelection(false);
+    }
+  };
+
   const loadWinners = async () => {
     if (!selectedCycle) return;
     
@@ -4012,6 +4173,372 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          <TabsContent value="cycles">
+            <div className="space-y-6">
+              {/* Cycle Configuration Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Cycles</CardTitle>
+                    <Calendar className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {cycleSettings.filter(cycle => cycle.isActive).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Currently running cycles
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+                    <Users className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {userCyclePoints.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Users in current cycles
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Completed Selections</CardTitle>
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {cycleWinnerSelections.filter(selection => selection.isProcessed).length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Winner selections processed
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Cycle Management */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Cycle Configuration</CardTitle>
+                      <CardDescription>
+                        Manage reward cycles with flexible durations and configurable parameters
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => {
+                      setEditingCycle(null);
+                      setCycleForm({
+                        cycleName: '',
+                        cycleType: 'weekly',
+                        cycleStartDate: '',
+                        cycleEndDate: '',
+                        paymentPeriodDays: 30,
+                        membershipFee: 2000,
+                        rewardPoolPercentage: 55,
+                        tier1Threshold: 56,
+                        tier2Threshold: 21,
+                        isActive: true,
+                        allowMidCycleJoining: true,
+                        midCycleJoinThresholdDays: 3
+                      });
+                      setShowCycleDialog(true);
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Cycle
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {cycleSettings.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No cycles configured yet. Create your first cycle to enable flexible reward periods.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {cycleSettings.map((cycle) => (
+                          <div key={cycle.id} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-semibold">{cycle.cycleName}</h3>
+                                  <Badge variant={cycle.isActive ? "default" : "secondary"}>
+                                    {cycle.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <Badge variant="outline">{cycle.cycleType}</Badge>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-gray-500">Duration:</span>
+                                    <div className="font-medium">
+                                      {new Date(cycle.cycleStartDate).toLocaleDateString()} - {new Date(cycle.cycleEndDate).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Payment Period:</span>
+                                    <div className="font-medium">{cycle.paymentPeriodDays} days</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Membership Fee:</span>
+                                    <div className="font-medium">${(cycle.membershipFee / 100).toFixed(2)}</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Reward Pool:</span>
+                                    <div className="font-medium">{cycle.rewardPoolPercentage}%</div>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-2">
+                                  <div>
+                                    <span className="text-gray-500">Tier 1 Threshold:</span>
+                                    <div className="font-medium">{cycle.tier1Threshold}+ points</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Tier 2 Threshold:</span>
+                                    <div className="font-medium">{cycle.tier2Threshold}+ points</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Mid-cycle Joining:</span>
+                                    <div className="font-medium">
+                                      {cycle.allowMidCycleJoining 
+                                        ? `Allowed (${cycle.midCycleJoinThresholdDays}d threshold)`
+                                        : 'Disabled'
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 ml-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingCycle(cycle);
+                                    setCycleForm({
+                                      cycleName: cycle.cycleName,
+                                      cycleType: cycle.cycleType,
+                                      cycleStartDate: new Date(cycle.cycleStartDate).toISOString().split('T')[0],
+                                      cycleEndDate: new Date(cycle.cycleEndDate).toISOString().split('T')[0],
+                                      paymentPeriodDays: cycle.paymentPeriodDays,
+                                      membershipFee: cycle.membershipFee,
+                                      rewardPoolPercentage: cycle.rewardPoolPercentage,
+                                      tier1Threshold: cycle.tier1Threshold,
+                                      tier2Threshold: cycle.tier2Threshold,
+                                      isActive: cycle.isActive,
+                                      allowMidCycleJoining: cycle.allowMidCycleJoining,
+                                      midCycleJoinThresholdDays: cycle.midCycleJoinThresholdDays
+                                    });
+                                    setShowCycleDialog(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCycleForWinners(cycle);
+                                    setShowWinnerSelectionDialog(true);
+                                  }}
+                                >
+                                  <Trophy className="w-4 h-4" />
+                                </Button>
+                                
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteCycle(cycle.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* User Points Tracking */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Cycle Points</CardTitle>
+                  <CardDescription>
+                    Track user points across active cycles and tier assignments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {userCyclePoints.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No users have joined active cycles yet.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-2">User</th>
+                              <th className="text-left p-2">Cycle</th>
+                              <th className="text-left p-2">Current Points</th>
+                              <th className="text-left p-2">Theoretical Points</th>
+                              <th className="text-left p-2">Tier</th>
+                              <th className="text-left p-2">Joined</th>
+                              <th className="text-left p-2">Last Activity</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userCyclePoints.map((userPoints) => {
+                              const user = users.find(u => u.id === userPoints.userId);
+                              const cycle = cycleSettings.find(c => c.id === userPoints.cycleSettingId);
+                              return (
+                                <tr key={userPoints.id} className="border-b">
+                                  <td className="p-2">
+                                    <div className="font-medium">{user?.username || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-500">{user?.email}</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-medium">{cycle?.cycleName || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-500">{cycle?.cycleType}</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-bold text-green-600">
+                                      {userPoints.currentCyclePoints}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-medium text-blue-600">
+                                      {userPoints.theoreticalPoints}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <Badge variant={
+                                      userPoints.tier === 'tier1' ? 'default' :
+                                      userPoints.tier === 'tier2' ? 'secondary' : 'outline'
+                                    }>
+                                      {userPoints.tier.replace('tier', 'Tier ')}
+                                    </Badge>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-xs">
+                                      {new Date(userPoints.joinedCycleAt).toLocaleDateString()}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-xs">
+                                      {userPoints.lastActivityDate 
+                                        ? new Date(userPoints.lastActivityDate).toLocaleDateString()
+                                        : 'No activity'
+                                      }
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Winner Selection History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Winner Selection History</CardTitle>
+                  <CardDescription>
+                    View completed winner selections and reward distributions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {cycleWinnerSelections.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No winner selections have been completed yet.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {cycleWinnerSelections.map((selection) => {
+                          const cycle = cycleSettings.find(c => c.id === selection.cycleSettingId);
+                          return (
+                            <div key={selection.id} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <h3 className="font-semibold">{cycle?.cycleName || 'Unknown Cycle'}</h3>
+                                  <div className="text-sm text-gray-500">
+                                    Selection Date: {new Date(selection.selectionDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                                <Badge variant={selection.isProcessed ? "default" : "secondary"}>
+                                  {selection.isProcessed ? "Processed" : "Pending"}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-500">Total Pool:</span>
+                                  <div className="font-bold text-green-600">
+                                    ${(selection.totalRewardPool / 100).toFixed(2)}
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <span className="text-gray-500">Tier 1 Winners:</span>
+                                  <div className="font-medium">
+                                    {selection.tier1Winners} (${(selection.tier1RewardAmount / 100).toFixed(2)})
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <span className="text-gray-500">Tier 2 Winners:</span>
+                                  <div className="font-medium">
+                                    {selection.tier2Winners} (${(selection.tier2RewardAmount / 100).toFixed(2)})
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <span className="text-gray-500">Tier 3 Winners:</span>
+                                  <div className="font-medium">
+                                    {selection.tier3Winners} (${(selection.tier3RewardAmount / 100).toFixed(2)})
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {selection.processedAt && (
+                                <div className="text-xs text-gray-500 mt-2">
+                                  Processed: {new Date(selection.processedAt).toLocaleDateString()}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="pool-settings">
             <div className="space-y-6">
               <Card>
@@ -5716,6 +6243,271 @@ export default function Admin() {
                 Import CSV
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cycle Configuration Dialog */}
+      <Dialog open={showCycleDialog} onOpenChange={setShowCycleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCycle ? 'Edit Cycle' : 'Create New Cycle'}
+            </DialogTitle>
+            <DialogDescription>
+              Configure cycle parameters including duration, payment periods, and tier thresholds
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Cycle Name</label>
+                <Input
+                  value={cycleForm.cycleName}
+                  onChange={(e) => setCycleForm({...cycleForm, cycleName: e.target.value})}
+                  placeholder="e.g., Weekly Beta Test"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Cycle Type</label>
+                <Select 
+                  value={cycleForm.cycleType} 
+                  onValueChange={(value) => setCycleForm({...cycleForm, cycleType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly (7 days)</SelectItem>
+                    <SelectItem value="bi-weekly">Bi-weekly (14 days)</SelectItem>
+                    <SelectItem value="custom">Custom Duration</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Start Date</label>
+                <Input
+                  type="date"
+                  value={cycleForm.cycleStartDate}
+                  onChange={(e) => setCycleForm({...cycleForm, cycleStartDate: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">End Date</label>
+                <Input
+                  type="date"
+                  value={cycleForm.cycleEndDate}
+                  onChange={(e) => setCycleForm({...cycleForm, cycleEndDate: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Payment Period (days)</label>
+                <Input
+                  type="number"
+                  value={cycleForm.paymentPeriodDays}
+                  onChange={(e) => setCycleForm({...cycleForm, paymentPeriodDays: parseInt(e.target.value)})}
+                  placeholder="30"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Billing cycle containing multiple reward cycles
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Membership Fee (cents)</label>
+                <Input
+                  type="number"
+                  value={cycleForm.membershipFee}
+                  onChange={(e) => setCycleForm({...cycleForm, membershipFee: parseInt(e.target.value)})}
+                  placeholder="2000"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  ${(cycleForm.membershipFee / 100).toFixed(2)} per payment period
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Reward Pool %</label>
+                <Input
+                  type="number"
+                  value={cycleForm.rewardPoolPercentage}
+                  onChange={(e) => setCycleForm({...cycleForm, rewardPoolPercentage: parseInt(e.target.value)})}
+                  placeholder="55"
+                  min="0"
+                  max="100"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Tier 1 Threshold</label>
+                <Input
+                  type="number"
+                  value={cycleForm.tier1Threshold}
+                  onChange={(e) => setCycleForm({...cycleForm, tier1Threshold: parseInt(e.target.value)})}
+                  placeholder="56"
+                />
+                <div className="text-xs text-gray-500 mt-1">Minimum points for Tier 1</div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Tier 2 Threshold</label>
+                <Input
+                  type="number"
+                  value={cycleForm.tier2Threshold}
+                  onChange={(e) => setCycleForm({...cycleForm, tier2Threshold: parseInt(e.target.value)})}
+                  placeholder="21"
+                />
+                <div className="text-xs text-gray-500 mt-1">Minimum points for Tier 2</div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={cycleForm.isActive}
+                  onChange={(e) => setCycleForm({...cycleForm, isActive: e.target.checked})}
+                  className="rounded"
+                />
+                <label htmlFor="isActive" className="text-sm font-medium">
+                  Active Cycle
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="allowMidCycleJoining"
+                  checked={cycleForm.allowMidCycleJoining}
+                  onChange={(e) => setCycleForm({...cycleForm, allowMidCycleJoining: e.target.checked})}
+                  className="rounded"
+                />
+                <label htmlFor="allowMidCycleJoining" className="text-sm font-medium">
+                  Allow Mid-cycle Joining
+                </label>
+              </div>
+
+              {cycleForm.allowMidCycleJoining && (
+                <div>
+                  <label className="text-sm font-medium">Mid-cycle Join Threshold (days)</label>
+                  <Input
+                    type="number"
+                    value={cycleForm.midCycleJoinThresholdDays}
+                    onChange={(e) => setCycleForm({...cycleForm, midCycleJoinThresholdDays: parseInt(e.target.value)})}
+                    placeholder="3"
+                    className="w-32"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Users join current cycle if next cycle starts in more than this many days
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCycleDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveCycle}>
+              {editingCycle ? 'Update Cycle' : 'Create Cycle'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Winner Selection Dialog */}
+      <Dialog open={showWinnerSelectionDialog} onOpenChange={setShowWinnerSelectionDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Run Winner Selection</DialogTitle>
+            <DialogDescription>
+              {selectedCycleForWinners 
+                ? `Run winner selection for "${selectedCycleForWinners.cycleName}"`
+                : 'Select a cycle to run winner selection'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCycleForWinners && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Cycle Details</h4>
+                <div className="text-sm space-y-1">
+                  <div>Name: {selectedCycleForWinners.cycleName}</div>
+                  <div>Type: {selectedCycleForWinners.cycleType}</div>
+                  <div>Duration: {new Date(selectedCycleForWinners.cycleStartDate).toLocaleDateString()} - {new Date(selectedCycleForWinners.cycleEndDate).toLocaleDateString()}</div>
+                  <div>Reward Pool: {selectedCycleForWinners.rewardPoolPercentage}%</div>
+                  <div>Membership Fee: ${(selectedCycleForWinners.membershipFee / 100).toFixed(2)}</div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-blue-800">Selection Details</h4>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <div>• Winners selected based on tier performance</div>
+                  <div>• Tier 1: {selectedCycleForWinners.tier1Threshold}+ points</div>
+                  <div>• Tier 2: {selectedCycleForWinners.tier2Threshold}+ points</div>
+                  <div>• Tier 3: 0-{selectedCycleForWinners.tier2Threshold - 1} points</div>
+                </div>
+              </div>
+
+              {isRunningSelection && (
+                <div className="text-center py-4">
+                  <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                  <div className="text-sm text-gray-600">Running winner selection...</div>
+                </div>
+              )}
+
+              {selectionResults && (
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-green-800">Selection Results</h4>
+                  <div className="text-sm text-green-700 space-y-1">
+                    <div>Total Winners: {selectionResults.totalWinners}</div>
+                    <div>Tier 1 Winners: {selectionResults.tier1Winners}</div>
+                    <div>Tier 2 Winners: {selectionResults.tier2Winners}</div>
+                    <div>Tier 3 Winners: {selectionResults.tier3Winners}</div>
+                    <div>Total Reward Pool: ${(selectionResults.totalRewardPool / 100).toFixed(2)}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowWinnerSelectionDialog(false);
+                setSelectedCycleForWinners(null);
+                setSelectionResults(null);
+              }}
+            >
+              Close
+            </Button>
+            {selectedCycleForWinners && !isRunningSelection && (
+              <Button 
+                onClick={() => handleRunWinnerSelection(selectedCycleForWinners.id)}
+                disabled={isRunningSelection}
+              >
+                Run Winner Selection
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
