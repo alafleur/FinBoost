@@ -15,7 +15,7 @@ interface CommunityGrowthDialProps {
   user: {
     subscriptionStatus?: string;
     totalPoints: number;
-    currentMonthPoints: number;
+    currentCyclePoints: number;
   };
   distributionInfo?: {
     nextDate: string;
