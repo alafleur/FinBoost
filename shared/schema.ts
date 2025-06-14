@@ -26,8 +26,14 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true).notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
   totalPoints: integer("total_points").default(0).notNull(),
-  currentMonthPoints: integer("current_month_points").default(0).notNull(),
-  tier: text("tier").default("bronze").notNull(),
+  currentCyclePoints: integer("current_cycle_points").default(0).notNull(),
+  tier: text("tier").default("tier3").notNull(),
+  
+  // Cycle Management Fields
+  activeCycleId: integer("active_cycle_id"), // References the cycle they're currently participating in
+  cycleJoinDate: timestamp("cycle_join_date"), // When they joined their current cycle
+  paymentPeriodStart: timestamp("payment_period_start"), // Start of their current payment period
+  paymentPeriodEnd: timestamp("payment_period_end"), // End of their current payment period
   bio: text("bio"),
   location: text("location"),
   occupation: text("occupation"),
@@ -113,30 +119,60 @@ export const userProgress = pgTable("user_progress", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Monthly Rewards Tracking
-export const monthlyRewards = pgTable("monthly_rewards", {
+// Cycle Management - Unified table for flexible cycle configuration
+export const cycles = pgTable("cycles", {
   id: serial("id").primaryKey(),
-  month: text("month").notNull(), // Format: "2024-01"
-  totalRewardPool: integer("total_reward_pool").notNull(),
-  totalParticipants: integer("total_participants").notNull(),
-  goldTierParticipants: integer("gold_tier_participants").default(0).notNull(),
-  silverTierParticipants: integer("silver_tier_participants").default(0).notNull(),
-  bronzeTierParticipants: integer("bronze_tier_participants").default(0).notNull(),
-  goldRewardPercentage: integer("gold_reward_percentage").default(50).notNull(),
-  silverRewardPercentage: integer("silver_reward_percentage").default(30).notNull(),
-  bronzeRewardPercentage: integer("bronze_reward_percentage").default(20).notNull(),
-  pointDeductionPercentage: integer("point_deduction_percentage").default(75).notNull(), // How much of winner's points are deducted
-  status: text("status").default("pending").notNull(), // 'pending', 'distributed', 'cancelled'
-  distributedAt: timestamp("distributed_at"),
+  cycleName: text("cycle_name").notNull(), // e.g., "Weekly Cycle 1", "Bi-weekly March", etc.
+  cycleStartDate: timestamp("cycle_start_date").notNull(),
+  cycleEndDate: timestamp("cycle_end_date").notNull(),
+  
+  // Admin Configurable Settings
+  membershipFee: integer("membership_fee").default(2000).notNull(), // Amount in cents for payment period
+  paymentPeriodDays: integer("payment_period_days").default(30).notNull(), // How many days the payment covers
+  rewardPoolPercentage: integer("reward_pool_percentage").default(55).notNull(), // % of fees that go to rewards
+  
+  // Tier Configuration (Admin Flexible)
+  tier1Threshold: integer("tier1_threshold").default(33).notNull(), // Top X% = Tier 1
+  tier2Threshold: integer("tier2_threshold").default(67).notNull(), // Top X% = Tier 2 (remainder = Tier 3)
+  
+  // Pool Allocation (Admin Flexible)
+  tier1PoolPercentage: integer("tier1_pool_percentage").default(50).notNull(), // % of reward pool to Tier 1
+  tier2PoolPercentage: integer("tier2_pool_percentage").default(35).notNull(), // % of reward pool to Tier 2
+  tier3PoolPercentage: integer("tier3_pool_percentage").default(15).notNull(), // % of reward pool to Tier 3
+  
+  // Winner Selection (Admin Flexible)
+  selectionPercentage: integer("selection_percentage").default(50).notNull(), // % of each tier selected as winners
+  
+  // Point Deduction (Admin Flexible)
+  pointDeductionPercentage: integer("point_deduction_percentage").default(75).notNull(), // % of winner points deducted
+  
+  // Mid-cycle joining configuration
+  joinNextCycleThresholdDays: integer("join_next_cycle_threshold_days").default(3).notNull(), // If next cycle starts within X days, allow joining next cycle
+  
+  // Status and tracking
+  isActive: boolean("is_active").default(true).notNull(),
+  status: text("status").default("upcoming").notNull(), // 'upcoming', 'active', 'selection_phase', 'completed', 'cancelled'
+  selectionCompleted: boolean("selection_completed").default(false).notNull(),
+  disbursementCompleted: boolean("disbursement_completed").default(false).notNull(),
+  
+  // Calculated values (set when cycle runs)
+  totalParticipants: integer("total_participants").default(0).notNull(),
+  totalRewardPool: integer("total_reward_pool").default(0).notNull(),
+  tier1Pool: integer("tier1_pool").default(0).notNull(),
+  tier2Pool: integer("tier2_pool").default(0).notNull(),
+  tier3Pool: integer("tier3_pool").default(0).notNull(),
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by"), // References users.id but without foreign key to avoid circular dependency
+  completedAt: timestamp("completed_at"),
 });
 
-// User Monthly Rewards History
-export const userMonthlyRewards = pgTable("user_monthly_rewards", {
+// User Cycle Rewards History - Replaces userMonthlyRewards
+export const userCycleRewards = pgTable("user_cycle_rewards", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  monthlyRewardId: integer("monthly_reward_id").references(() => monthlyRewards.id).notNull(),
-  tier: text("tier").notNull(), // 'bronze', 'silver', 'gold'
+  cycleId: integer("cycle_id").references(() => cycles.id).notNull(),
+  tier: text("tier").notNull(), // 'tier1', 'tier2', 'tier3'
   pointsAtDistribution: integer("points_at_distribution").notNull(),
   rewardAmount: integer("reward_amount").default(0).notNull(), // In cents
   pointsDeducted: integer("points_deducted").default(0).notNull(),
@@ -451,8 +487,8 @@ export type InsertSupportRequest = typeof supportRequests.$inferInsert;
 export type UserPointsHistory = typeof userPointsHistory.$inferSelect;
 export type LearningModule = typeof learningModules.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
-export type MonthlyReward = typeof monthlyRewards.$inferSelect;
-export type UserMonthlyReward = typeof userMonthlyRewards.$inferSelect;
+export type Cycle = typeof cycles.$inferSelect;
+export type UserCycleReward = typeof userCycleRewards.$inferSelect;
 export type Referral = typeof referrals.$inferSelect;
 export type UserReferralCode = typeof userReferralCodes.$inferSelect;
 export type StripePayment = typeof stripePayments.$inferSelect;

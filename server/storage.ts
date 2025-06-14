@@ -1,5 +1,5 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout } from "@shared/schema";
-import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, cycles, userCycleRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout } from "@shared/schema";
+import type { UserPointsHistory, Cycle, UserCycleReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt, gte, ne, lte, between } from "drizzle-orm";
 import { db } from "./db";
