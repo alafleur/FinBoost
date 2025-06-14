@@ -311,7 +311,7 @@ export default function PointsManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{user.currentMonthPoints}</div>
-              <p className="text-xs text-muted-foreground">Monthly cycle</p>
+              <p className="text-xs text-muted-foreground">Current cycle</p>
             </CardContent>
           </Card>
 

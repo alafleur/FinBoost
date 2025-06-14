@@ -8,7 +8,7 @@ export default function FlywheelFeatures() {
           <span className="text-secondary-500"><Plus className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
-          <h3 className="font-heading font-medium text-lg">More members means a larger monthly rewards pool</h3>
+          <h3 className="font-heading font-medium text-lg">More members means a larger rewards pool</h3>
           <p className="text-gray-600 mt-1">The more members who join, the larger the rewards for everyone.</p>
         </div>
       </div>
@@ -19,7 +19,7 @@ export default function FlywheelFeatures() {
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Merit-based rewards system for everyone</h3>
-          <p className="text-gray-600 mt-1">The top 50% of members by points are guaranteed monthly cash rewards.</p>
+          <p className="text-gray-600 mt-1">The top 50% of members by points are guaranteed cash rewards each cycle.</p>
         </div>
       </div>
       

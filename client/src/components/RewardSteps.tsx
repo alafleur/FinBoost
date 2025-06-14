@@ -29,9 +29,9 @@ export default function RewardSteps() {
             <DollarSign className="h-6 w-6 text-green-600" />
           </div>
         </div>
-        <h3 className="text-xl font-semibold text-center mb-3">Monthly Rewards</h3>
+        <h3 className="text-xl font-semibold text-center mb-3">Cycle Rewards</h3>
         <p className="text-gray-600 mb-4">
-          Based on those points, members are placed into three tiers, and then 50% of users in each tier receive cash rewards each month.
+          Based on those points, members are placed into three tiers, and then 50% of users in each tier receive cash rewards each cycle.
         </p>
         <div className="flex items-center mt-auto pt-4 border-t border-gray-100">
           <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">

@@ -88,7 +88,7 @@ export default function WhyItWorks() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center mb-2">
                   <Award className="h-5 w-5 text-primary-600 mr-2" />
-                  <div className="font-semibold">Monthly Cash Rewards</div>
+                  <div className="font-semibold">Cycle Cash Rewards</div>
                 </div>
                 <p className="text-sm text-gray-600">Earn real money as you learn and participate</p>
               </div>
