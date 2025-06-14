@@ -594,19 +594,19 @@ export default function Dashboard() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
-                            <tr className={user?.tier === 'tier3' ? 'bg-orange-50 border-orange-200' : 'bg-white'}>
+                            <tr className={user?.tier === 'tier1' ? 'bg-green-50 border-green-200' : 'bg-white'}>
                               <td className="px-4 py-3 text-sm font-medium text-gray-900">
                                 <span className="flex items-center">
-                                  Tier 3
-                                  {user?.tier === 'tier3' && (
-                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                  Tier 1
+                                  {user?.tier === 'tier1' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                       Your Tier
                                     </span>
                                   )}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-sm text-gray-600">
-                                0 - {tierThresholds.tier2 - 1} points
+                                {tierThresholds.tier1}+ points
                               </td>
                             </tr>
                             <tr className={user?.tier === 'tier2' ? 'bg-yellow-50 border-yellow-200' : 'bg-white'}>
@@ -624,19 +624,19 @@ export default function Dashboard() {
                                 {tierThresholds.tier2} - {tierThresholds.tier1 - 1} points
                               </td>
                             </tr>
-                            <tr className={user?.tier === 'tier1' ? 'bg-green-50 border-green-200' : 'bg-white'}>
+                            <tr className={user?.tier === 'tier3' ? 'bg-orange-50 border-orange-200' : 'bg-white'}>
                               <td className="px-4 py-3 text-sm font-medium text-gray-900">
                                 <span className="flex items-center">
-                                  Tier 1
-                                  {user?.tier === 'tier1' && (
-                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Tier 3
+                                  {user?.tier === 'tier3' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                       Your Tier
                                     </span>
                                   )}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-sm text-gray-600">
-                                {tierThresholds.tier1}+ points
+                                0 - {tierThresholds.tier2 - 1} points
                               </td>
                             </tr>
                           </tbody>
