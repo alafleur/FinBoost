@@ -257,7 +257,7 @@ export default function Dashboard() {
       case 'tier3':
         return 'Tier 3';
       default:
-        return 'Tier 1';
+        return 'Tier 3';
     }
   };
 
