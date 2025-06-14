@@ -2992,7 +2992,7 @@ export class MemStorage implements IStorage {
       const [activeSetting] = await db.select()
         .from(cycleSettings)
         .where(eq(cycleSettings.isActive, true))
-        .orderBy(desc(cycleSettings.startDate))
+        .orderBy(desc(cycleSettings.cycleStartDate))
         .limit(1);
       return activeSetting || null;
     } catch (error) {
@@ -3007,8 +3007,8 @@ export class MemStorage implements IStorage {
         .from(cycleSettings)
         .where(
           and(
-            lte(cycleSettings.startDate, date),
-            gte(cycleSettings.endDate, date),
+            lte(cycleSettings.cycleStartDate, date),
+            gte(cycleSettings.cycleEndDate, date),
             eq(cycleSettings.isActive, true)
           )
         )
@@ -3037,7 +3037,7 @@ export class MemStorage implements IStorage {
     try {
       return await db.select()
         .from(cycleSettings)
-        .orderBy(desc(cycleSettings.startDate));
+        .orderBy(desc(cycleSettings.cycleStartDate));
     } catch (error) {
       console.error('Error getting all cycle settings:', error);
       return [];
@@ -3113,14 +3113,13 @@ export class MemStorage implements IStorage {
           userId,
           cycleSettingId,
           currentCyclePoints: points,
-          totalCyclePoints: points,
           tier: await this.calculateCycleTier(cycleSettingId, points),
-          joinedAt: new Date()
+          theoreticalPoints: 0,
+          pointsRolledOver: 0
         });
       } else {
         await this.updateUserCyclePoints(userId, cycleSettingId, {
           currentCyclePoints: userPoints.currentCyclePoints + points,
-          totalCyclePoints: userPoints.totalCyclePoints + points,
           tier: await this.calculateCycleTier(cycleSettingId, userPoints.currentCyclePoints + points)
         });
       }
@@ -3283,7 +3282,7 @@ export class MemStorage implements IStorage {
         return {
           tier1: setting.tier1Threshold,
           tier2: setting.tier2Threshold,
-          tier3: setting.tier3Threshold
+          tier3: 0 // tier3 starts at 0 by design
         };
       }
 
@@ -3431,7 +3430,7 @@ export class MemStorage implements IStorage {
       if (!setting[0]) return false;
 
       const now = new Date();
-      const cycleEnd = new Date(setting[0].endDate);
+      const cycleEnd = new Date(setting[0].cycleEndDate);
       const daysUntilEnd = Math.ceil((cycleEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       
       // Join current cycle if more than 3 days remain (configurable threshold)
@@ -3452,7 +3451,7 @@ export class MemStorage implements IStorage {
       if (!currentSetting[0]) return null;
 
       // Return the day after current cycle ends
-      const nextStart = new Date(currentSetting[0].endDate);
+      const nextStart = new Date(currentSetting[0].cycleEndDate);
       nextStart.setDate(nextStart.getDate() + 1);
       return nextStart;
     } catch (error) {
