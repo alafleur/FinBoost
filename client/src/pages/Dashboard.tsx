@@ -690,12 +690,11 @@ export default function Dashboard() {
             <TabsContent value="learn" className="mt-0 space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">All Learning Modules</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="All Learning Modules"
+                  />
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
@@ -777,12 +776,11 @@ export default function Dashboard() {
 
             <TabsContent value="referrals" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-purple-100 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Referral System</h3>
-                </div>
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="purple"
+                  title="Referral System"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <ReferralSystem />
                 </div>
@@ -791,12 +789,11 @@ export default function Dashboard() {
 
             <TabsContent value="rewards" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Rewards History</h3>
-                </div>
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Rewards History"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <RewardsHistory />
                 </div>
@@ -805,12 +802,11 @@ export default function Dashboard() {
 
             <TabsContent value="leaderboard" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-orange-100 rounded-lg">
-                    <Trophy className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Leaderboard</h3>
-                </div>
+                <SectionHeader 
+                  icon={Trophy}
+                  iconColor="orange"
+                  title="Leaderboard"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <Leaderboard />
                 </div>
@@ -1111,12 +1107,12 @@ export default function Dashboard() {
             {/* Rewards Tab - Simplest Implementation */}
             <TabsContent value="rewards" className="mt-0 space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-2xl text-gray-900">Rewards History</h3>
-                </div>
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Rewards History"
+                  titleSize="2xl"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <RewardsHistory />
                 </div>
@@ -1231,12 +1227,11 @@ export default function Dashboard() {
               {/* Tier Progress Bar */}
               {tierThresholds && user && (
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-yellow-100 rounded-lg">
-                      <Target className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">Tier Progress</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={Target}
+                    iconColor="yellow"
+                    title="Tier Progress"
+                  />
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <TierProgressTable 
                       tierThresholds={tierThresholds}
@@ -1250,12 +1245,11 @@ export default function Dashboard() {
               {/* Continue Learning Section */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="Continue Learning"
+                  />
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
