@@ -198,7 +198,12 @@ export default function Dashboard() {
         
         if (modulesResponse.ok) {
           const modulesData = await modulesResponse.json();
+          console.log('DASHBOARD: Raw modules response:', modulesData);
+          console.log('DASHBOARD: Modules array:', modulesData.modules);
+          console.log('DASHBOARD: Modules length:', modulesData.modules?.length || 0);
           setPublishedModules(modulesData.modules || []);
+        } else {
+          console.error('DASHBOARD: Failed to fetch modules:', modulesResponse.status, await modulesResponse.text());
         }
 
         // Fetch pool data for CommunityGrowthDial
