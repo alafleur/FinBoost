@@ -1414,7 +1414,168 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
+            {/* Profile Tab - Desktop */}
+            <TabsContent value="profile" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <UserIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-2xl text-gray-900">Profile Settings</h3>
+                </div>
+                
+                {/* Profile Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Account Information
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your account details and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Username</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Subscription Status</label>
+                        <div className="mt-1">
+                          <Badge variant={user?.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                            {user?.subscriptionStatus === 'active' ? 'Premium Member' : 'Free User'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
+                {/* Subscription Payment Details */}
+                {user?.subscriptionStatus === 'active' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <CreditCard className="h-5 w-5" />
+                        Subscription Details
+                      </CardTitle>
+                      <CardDescription>
+                        Your current membership plan and payment information
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly Amount</label>
+                          <p className="text-lg font-semibold text-gray-900">
+                            ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Payment Method</label>
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {user?.subscriptionPaymentMethod || 'Card'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Member Since</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.subscriptionStartDate 
+                              ? new Date(user.subscriptionStartDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'N/A'
+                            }
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Next Billing</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.nextBillingDate 
+                              ? new Date(user.nextBillingDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'End of month'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* PayPal Configuration for Rewards */}
+                {user?.subscriptionStatus === 'active' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Award className="h-5 w-5" />
+                        Reward Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Configure your PayPal email to receive monthly reward payouts
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Info className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium text-blue-900 mb-1">Important</h4>
+                            <p className="text-xs text-blue-700 leading-relaxed">
+                              Provide your PayPal email to receive monthly reward distributions. This email must match your PayPal account exactly.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">PayPal Email</label>
+                        <p className="text-sm text-gray-900 mt-1">
+                          {user?.paypalEmail || 'Not configured'}
+                        </p>
+                        {!user?.paypalEmail && (
+                          <p className="text-xs text-amber-600 mt-1">
+                            Please contact support to configure your PayPal email for reward disbursements.
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Account Statistics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Account Statistics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                        <div className="text-sm text-gray-600">Total Points</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.currentStreak || 0}</div>
+                        <div className="text-sm text-gray-600">Day Streak</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
           </div>
         </Tabs>
