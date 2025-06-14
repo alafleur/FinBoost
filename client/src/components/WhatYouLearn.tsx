@@ -56,23 +56,23 @@ export default function WhatYouLearn() {
   
   const topics = [
     {
-      title: "Boost Your Credit Score 100+ Points in 6 Months",
-      subtitle: "Simple strategies that actually work",
+      title: "Improve Your Credit Score with Smart Strategies",
+      subtitle: "Learn the tactics that have helped thousands boost their scores",
       icon: <CreditCard className="h-5 w-5" />,
     },
     {
-      title: "Build a Budget That Actually Works (and Stick to It)",
-      subtitle: "Even if you're living paycheck-to-paycheck",
+      title: "Create a Budget That Actually Fits Your Life",
+      subtitle: "Practical approaches that work even on tight budgets",
       icon: <Calculator className="h-5 w-5" />,
     },
     {
-      title: "Pay Off Debt 3x Faster with Proven Strategies",
-      subtitle: "Save thousands in interest payments",
+      title: "Accelerate Your Debt Payoff with Smart Planning",
+      subtitle: "Strategic methods to save on interest and get debt-free sooner",
       icon: <DollarSign className="h-5 w-5" />,
     },
     {
-      title: "Start Investing with Just $50 and Watch It Grow",
-      subtitle: "Beginner-friendly strategies that build wealth",
+      title: "Start Investing Even with Small Amounts",
+      subtitle: "Simple, low-risk ways to begin building wealth",
       icon: <TrendingUp className="h-5 w-5" />,
     },
   ];
@@ -87,17 +87,17 @@ export default function WhatYouLearn() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            Transform Your Financial Life in Just 10 Minutes a Day
+            Build Better Money Habits That Actually Stick
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto text-lg">
-            Join 1,000+ members who've already saved money, boosted credit scores, and started building wealth with our proven strategies.
+            Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
           </p>
         </div>
         
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-4 bg-blue-50 px-6 py-3 rounded-full border border-blue-200">
-              <span className="text-blue-600 font-semibold">92% of members see results within 30 days</span>
+              <span className="text-blue-600 font-semibold">Most members start seeing progress in their first month</span>
             </div>
           </div>
           
