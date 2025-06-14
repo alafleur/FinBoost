@@ -3090,6 +3090,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Analytics Dashboard API Endpoints
+  // User Engagement Metrics
+  app.get('/api/admin/analytics/users/engagement', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Active users (users with recent login activity)
+      const activeUsers = await storage.getActiveUsersCount(startDate);
+      
+      // Total user count
+      const totalUsers = await storage.getTotalUsersCount();
+      
+      // Premium subscriber count
+      const premiumUsers = await storage.getPremiumUsersCount();
+      
+      // Daily login activity for the timeframe
+      const dailyActivity = await storage.getDailyLoginActivity(startDate);
+      
+      // User registration trends
+      const registrationTrends = await storage.getRegistrationTrends(startDate);
+
+      res.json({
+        success: true,
+        data: {
+          totalUsers,
+          activeUsers,
+          premiumUsers,
+          freeUsers: totalUsers - premiumUsers,
+          dailyActivity,
+          registrationTrends,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching user engagement analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch user engagement analytics' });
+    }
+  });
+
+  // Learning Analytics
+  app.get('/api/admin/analytics/learning/performance', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Module completion rates
+      const moduleCompletionRates = await storage.getModuleCompletionRates();
+      
+      // Recent lesson completions
+      const recentCompletions = await storage.getRecentLessonCompletions(startDate);
+      
+      // Popular content categories
+      const categoryStats = await storage.getCategoryPerformanceStats();
+      
+      // Average time spent learning
+      const learningTimeStats = await storage.getLearningTimeStats(startDate);
+
+      res.json({
+        success: true,
+        data: {
+          moduleCompletionRates,
+          recentCompletions,
+          categoryStats,
+          learningTimeStats,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching learning analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch learning analytics' });
+    }
+  });
+
+  // Cycle Performance Analytics
+  app.get('/api/admin/analytics/cycles/performance', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '90' } = req.query;
+      const days = parseInt(timeframe as string);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Current cycle stats
+      const currentCycleStats = await storage.getCurrentCycleStats();
+      
+      // Historical cycle performance
+      const historicalCycles = await storage.getHistoricalCyclePerformance(startDate);
+      
+      // Participation trends
+      const participationTrends = await storage.getCycleParticipationTrends(startDate);
+      
+      // Points distribution analytics
+      const pointsDistribution = await storage.getPointsDistributionAnalytics();
+
+      res.json({
+        success: true,
+        data: {
+          currentCycleStats,
+          historicalCycles,
+          participationTrends,
+          pointsDistribution,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching cycle analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch cycle analytics' });
+    }
+  });
+
+  // Financial Analytics
+  app.get('/api/admin/analytics/financial/overview', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '90' } = req.query;
+      const days = parseInt(timeframe as string);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Revenue metrics
+      const revenueStats = await storage.getRevenueStats(startDate);
+      
+      // Subscription conversion rates
+      const conversionStats = await storage.getSubscriptionConversionStats(startDate);
+      
+      // Payout history
+      const payoutHistory = await storage.getPayoutHistory(startDate);
+      
+      // Financial forecasting data
+      const forecastData = await storage.getFinancialForecastData();
+
+      res.json({
+        success: true,
+        data: {
+          revenueStats,
+          conversionStats,
+          payoutHistory,
+          forecastData,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching financial analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch financial analytics' });
+    }
+  });
+
+  // Real-time Activity Feed
+  app.get('/api/admin/analytics/activity/recent', requireAdmin, async (req, res) => {
+    try {
+      const { limit = '20' } = req.query;
+      const maxResults = parseInt(limit as string);
+
+      // Recent user activities
+      const recentActivities = await storage.getRecentUserActivities(maxResults);
+      
+      // Recent registrations
+      const recentRegistrations = await storage.getRecentRegistrations(maxResults);
+      
+      // Recent lesson completions
+      const recentLessonCompletions = await storage.getRecentLessonCompletions(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+
+      res.json({
+        success: true,
+        data: {
+          activities: recentActivities,
+          registrations: recentRegistrations,
+          completions: recentLessonCompletions,
+          limit: maxResults
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      res.status(500).json({ error: 'Failed to fetch recent activity' });
+    }
+  });
+
+  // Key Performance Indicators (KPIs) Dashboard
+  app.get('/api/admin/analytics/kpis/overview', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Calculate key metrics
+      const totalUsers = await storage.getTotalUsersCount();
+      const activeUsers = await storage.getActiveUsersCount(startDate);
+      const premiumUsers = await storage.getPremiumUsersCount();
+      const totalRevenue = await storage.getTotalRevenue(startDate);
+      const avgCompletionRate = await storage.getAverageCompletionRate();
+      const cycleParticipation = await storage.getCurrentCycleParticipationRate();
+
+      // Calculate growth rates
+      const previousPeriodStart = new Date(startDate);
+      previousPeriodStart.setDate(previousPeriodStart.getDate() - days);
+      const previousPeriodUsers = await storage.getActiveUsersCount(previousPeriodStart);
+      const userGrowthRate = previousPeriodUsers > 0 ? ((activeUsers - previousPeriodUsers) / previousPeriodUsers) * 100 : 0;
+
+      res.json({
+        success: true,
+        data: {
+          totalUsers,
+          activeUsers,
+          premiumUsers,
+          totalRevenue,
+          avgCompletionRate,
+          cycleParticipation,
+          userGrowthRate,
+          conversionRate: totalUsers > 0 ? (premiumUsers / totalUsers) * 100 : 0,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching KPI overview:', error);
+      res.status(500).json({ error: 'Failed to fetch KPI overview' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

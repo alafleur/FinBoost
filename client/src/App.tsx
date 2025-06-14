@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
+import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/test-paypal" component={TestPayPal} />
       <Route path="/admin" component={Admin} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />

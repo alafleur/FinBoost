@@ -3609,6 +3609,489 @@ export class MemStorage implements IStorage {
       return { totalPool: 0, premiumUsers: 0, totalUsers: 0 };
     }
   }
+
+  // Analytics Methods for Admin Dashboard
+  async getTotalUsersCount(): Promise<number> {
+    try {
+      const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting total users count:', error);
+      return 0;
+    }
+  }
+
+  async getActiveUsersCount(startDate: Date): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(gte(users.lastLoginAt, startDate));
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting active users count:', error);
+      return 0;
+    }
+  }
+
+  async getPremiumUsersCount(): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'active'));
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting premium users count:', error);
+      return 0;
+    }
+  }
+
+  async getDailyLoginActivity(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          date: sql<string>`DATE(last_login_at)`,
+          count: sql<number>`count(*)`
+        })
+        .from(users)
+        .where(gte(users.lastLoginAt, startDate))
+        .groupBy(sql`DATE(last_login_at)`)
+        .orderBy(sql`DATE(last_login_at)`);
+      return result;
+    } catch (error) {
+      console.error('Error getting daily login activity:', error);
+      return [];
+    }
+  }
+
+  async getRegistrationTrends(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          date: sql<string>`DATE(created_at)`,
+          count: sql<number>`count(*)`
+        })
+        .from(users)
+        .where(gte(users.createdAt, startDate))
+        .groupBy(sql`DATE(created_at)`)
+        .orderBy(sql`DATE(created_at)`);
+      return result;
+    } catch (error) {
+      console.error('Error getting registration trends:', error);
+      return [];
+    }
+  }
+
+  async getModuleCompletionRates(): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          moduleId: lessonProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
+          completions: sql<number>`count(*)`,
+          completionRate: sql<number>`
+            (count(*) * 100.0) / (
+              SELECT count(*) FROM users WHERE subscription_status = 'active' OR subscription_status IS NULL
+            )
+          `
+        })
+        .from(lessonProgress)
+        .groupBy(lessonProgress.moduleId)
+        .orderBy(desc(sql`count(*)`));
+      return result;
+    } catch (error) {
+      console.error('Error getting module completion rates:', error);
+      return [];
+    }
+  }
+
+  async getRecentLessonCompletions(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: lessonProgress.id,
+          userId: lessonProgress.userId,
+          username: users.username,
+          moduleId: lessonProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
+          completedAt: lessonProgress.completedAt
+        })
+        .from(lessonProgress)
+        .innerJoin(users, eq(lessonProgress.userId, users.id))
+        .where(gte(lessonProgress.completedAt, startDate))
+        .orderBy(desc(lessonProgress.completedAt))
+        .limit(50);
+      return result;
+    } catch (error) {
+      console.error('Error getting recent lesson completions:', error);
+      return [];
+    }
+  }
+
+  async getCategoryPerformanceStats(): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          category: modules.category,
+          totalModules: sql<number>`count(DISTINCT modules.id)`,
+          totalCompletions: sql<number>`count(lesson_progress.id)`,
+          avgCompletionRate: sql<number>`
+            count(lesson_progress.id) * 100.0 / count(DISTINCT modules.id)
+          `
+        })
+        .from(modules)
+        .leftJoin(lessonProgress, eq(modules.id, lessonProgress.moduleId))
+        .where(eq(modules.isPublished, true))
+        .groupBy(modules.category)
+        .orderBy(desc(sql`count(lesson_progress.id)`));
+      return result;
+    } catch (error) {
+      console.error('Error getting category performance stats:', error);
+      return [];
+    }
+  }
+
+  async getLearningTimeStats(startDate: Date): Promise<any> {
+    try {
+      // Estimate learning time based on module estimated minutes and completions
+      const result = await db
+        .select({
+          totalEstimatedMinutes: sql<number>`sum(modules.estimated_minutes)`,
+          avgSessionTime: sql<number>`avg(modules.estimated_minutes)`,
+          totalSessions: sql<number>`count(lesson_progress.id)`
+        })
+        .from(lessonProgress)
+        .innerJoin(modules, eq(lessonProgress.moduleId, modules.id))
+        .where(gte(lessonProgress.completedAt, startDate));
+      return result[0] || { totalEstimatedMinutes: 0, avgSessionTime: 0, totalSessions: 0 };
+    } catch (error) {
+      console.error('Error getting learning time stats:', error);
+      return { totalEstimatedMinutes: 0, avgSessionTime: 0, totalSessions: 0 };
+    }
+  }
+
+  async getCurrentCycleStats(): Promise<any> {
+    try {
+      const currentCycle = await this.getCurrentCycle();
+      if (!currentCycle) {
+        return { cycleId: null, participants: 0, totalPoints: 0, poolSize: 0 };
+      }
+
+      const participants = await db
+        .select({ count: sql<number>`count(DISTINCT user_id)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+
+      const totalPoints = await db
+        .select({ total: sql<number>`sum(points)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+
+      const poolData = await this.getCyclePoolData(currentCycle.id);
+
+      return {
+        cycleId: currentCycle.id,
+        cycleName: currentCycle.cycleName,
+        participants: participants[0]?.count || 0,
+        totalPoints: totalPoints[0]?.total || 0,
+        poolSize: poolData.totalPool
+      };
+    } catch (error) {
+      console.error('Error getting current cycle stats:', error);
+      return { cycleId: null, participants: 0, totalPoints: 0, poolSize: 0 };
+    }
+  }
+
+  async getHistoricalCyclePerformance(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          cycleId: cycleSettings.id,
+          cycleName: cycleSettings.cycleName,
+          startDate: cycleSettings.cycleStartDate,
+          endDate: cycleSettings.cycleEndDate,
+          participants: sql<number>`(
+            SELECT count(DISTINCT user_id) 
+            FROM user_cycle_points 
+            WHERE cycle_id = cycle_settings.id
+          )`,
+          totalPoints: sql<number>`(
+            SELECT sum(points) 
+            FROM user_cycle_points 
+            WHERE cycle_id = cycle_settings.id
+          )`
+        })
+        .from(cycleSettings)
+        .where(gte(cycleSettings.cycleStartDate, startDate))
+        .orderBy(desc(cycleSettings.cycleStartDate));
+      return result;
+    } catch (error) {
+      console.error('Error getting historical cycle performance:', error);
+      return [];
+    }
+  }
+
+  async getCycleParticipationTrends(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          date: sql<string>`DATE(cycle_start_date)`,
+          cycleId: cycleSettings.id,
+          participants: sql<number>`(
+            SELECT count(DISTINCT user_id) 
+            FROM user_cycle_points 
+            WHERE cycle_id = cycle_settings.id
+          )`
+        })
+        .from(cycleSettings)
+        .where(gte(cycleSettings.cycleStartDate, startDate))
+        .orderBy(cycleSettings.cycleStartDate);
+      return result;
+    } catch (error) {
+      console.error('Error getting cycle participation trends:', error);
+      return [];
+    }
+  }
+
+  async getPointsDistributionAnalytics(): Promise<any> {
+    try {
+      const currentCycle = await this.getCurrentCycle();
+      if (!currentCycle) {
+        return { tiers: [], distribution: [] };
+      }
+
+      const thresholds = await this.getCycleTierThresholds(currentCycle.id);
+      const distribution = await db
+        .select({
+          userId: userCyclePoints.userId,
+          username: users.username,
+          totalPoints: sql<number>`sum(points)`
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(eq(userCyclePoints.cycleId, currentCycle.id))
+        .groupBy(userCyclePoints.userId, users.username)
+        .orderBy(desc(sql`sum(points)`));
+
+      return {
+        tiers: thresholds,
+        distribution
+      };
+    } catch (error) {
+      console.error('Error getting points distribution analytics:', error);
+      return { tiers: [], distribution: [] };
+    }
+  }
+
+  async getRevenueStats(startDate: Date): Promise<any> {
+    try {
+      const premiumUsers = await db
+        .select({
+          count: sql<number>`count(*)`,
+          totalRevenue: sql<number>`count(*) * 10` // Assuming $10/month subscription
+        })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'active'),
+            gte(users.subscriptionStartDate, startDate)
+          )
+        );
+
+      const monthlyRecurring = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'active'));
+
+      return {
+        newRevenue: premiumUsers[0]?.totalRevenue || 0,
+        monthlyRecurring: (monthlyRecurring[0]?.count || 0) * 10,
+        newSubscriptions: premiumUsers[0]?.count || 0
+      };
+    } catch (error) {
+      console.error('Error getting revenue stats:', error);
+      return { newRevenue: 0, monthlyRecurring: 0, newSubscriptions: 0 };
+    }
+  }
+
+  async getSubscriptionConversionStats(startDate: Date): Promise<any> {
+    try {
+      const totalUsers = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(gte(users.createdAt, startDate));
+
+      const convertedUsers = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            gte(users.createdAt, startDate),
+            eq(users.subscriptionStatus, 'active')
+          )
+        );
+
+      const conversionRate = totalUsers[0]?.count > 0 
+        ? (convertedUsers[0]?.count / totalUsers[0]?.count) * 100 
+        : 0;
+
+      return {
+        totalSignups: totalUsers[0]?.count || 0,
+        conversions: convertedUsers[0]?.count || 0,
+        conversionRate
+      };
+    } catch (error) {
+      console.error('Error getting subscription conversion stats:', error);
+      return { totalSignups: 0, conversions: 0, conversionRate: 0 };
+    }
+  }
+
+  async getPayoutHistory(startDate: Date): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          cycleId: cycleWinnerSelections.cycleId,
+          userId: cycleWinnerSelections.userId,
+          username: users.username,
+          payoutAmount: cycleWinnerSelections.payoutAmount,
+          selectionDate: cycleWinnerSelections.selectionDate
+        })
+        .from(cycleWinnerSelections)
+        .innerJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(gte(cycleWinnerSelections.selectionDate, startDate))
+        .orderBy(desc(cycleWinnerSelections.selectionDate));
+      return result;
+    } catch (error) {
+      console.error('Error getting payout history:', error);
+      return [];
+    }
+  }
+
+  async getFinancialForecastData(): Promise<any> {
+    try {
+      const activeSubs = await this.getPremiumUsersCount();
+      const avgGrowthRate = 5; // Placeholder - could be calculated from historical data
+      
+      return {
+        currentMRR: activeSubs * 10,
+        projectedMRR: activeSubs * 10 * (1 + avgGrowthRate / 100),
+        activeSubscriptions: activeSubs,
+        churnRate: 5 // Placeholder
+      };
+    } catch (error) {
+      console.error('Error getting financial forecast data:', error);
+      return { currentMRR: 0, projectedMRR: 0, activeSubscriptions: 0, churnRate: 0 };
+    }
+  }
+
+  async getRecentUserActivities(limit: number): Promise<any[]> {
+    try {
+      // Combine recent registrations and lesson completions
+      const recentActivities = await db
+        .select({
+          type: sql<string>`'registration'`,
+          userId: users.id,
+          username: users.username,
+          activity: sql<string>`'User registered'`,
+          timestamp: users.createdAt
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt))
+        .limit(limit / 2)
+        .union(
+          db.select({
+            type: sql<string>`'lesson_completion'`,
+            userId: lessonProgress.userId,
+            username: users.username,
+            activity: sql<string>`'Completed lesson'`,
+            timestamp: lessonProgress.completedAt
+          })
+          .from(lessonProgress)
+          .innerJoin(users, eq(lessonProgress.userId, users.id))
+          .orderBy(desc(lessonProgress.completedAt))
+          .limit(limit / 2)
+        );
+
+      return recentActivities.slice(0, limit);
+    } catch (error) {
+      console.error('Error getting recent user activities:', error);
+      return [];
+    }
+  }
+
+  async getRecentRegistrations(limit: number): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          createdAt: users.createdAt,
+          subscriptionStatus: users.subscriptionStatus
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt))
+        .limit(limit);
+      return result;
+    } catch (error) {
+      console.error('Error getting recent registrations:', error);
+      return [];
+    }
+  }
+
+  async getTotalRevenue(startDate: Date): Promise<number> {
+    try {
+      const result = await this.getRevenueStats(startDate);
+      return result.newRevenue + result.monthlyRecurring;
+    } catch (error) {
+      console.error('Error getting total revenue:', error);
+      return 0;
+    }
+  }
+
+  async getAverageCompletionRate(): Promise<number> {
+    try {
+      const totalUsers = await this.getTotalUsersCount();
+      const totalModules = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(modules)
+        .where(eq(modules.isPublished, true));
+
+      const totalCompletions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(lessonProgress);
+
+      const expectedCompletions = totalUsers * (totalModules[0]?.count || 0);
+      return expectedCompletions > 0 
+        ? ((totalCompletions[0]?.count || 0) / expectedCompletions) * 100 
+        : 0;
+    } catch (error) {
+      console.error('Error getting average completion rate:', error);
+      return 0;
+    }
+  }
+
+  async getCurrentCycleParticipationRate(): Promise<number> {
+    try {
+      const totalUsers = await this.getTotalUsersCount();
+      const currentCycle = await this.getCurrentCycle();
+      
+      if (!currentCycle) return 0;
+
+      const participants = await db
+        .select({ count: sql<number>`count(DISTINCT user_id)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+
+      return totalUsers > 0 
+        ? ((participants[0]?.count || 0) / totalUsers) * 100 
+        : 0;
+    } catch (error) {
+      console.error('Error getting current cycle participation rate:', error);
+      return 0;
+    }
+  }
 }
 
 export const storage = new MemStorage();
