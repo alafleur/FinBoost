@@ -652,13 +652,7 @@ export default function Dashboard() {
                           <div>
                             <h4 className="font-medium text-blue-900 text-sm">Your Current Position</h4>
                             <p className="text-sm text-blue-700 mt-1">
-                              You have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
-                              {user.tier === 'tier1' 
-                                ? ` Great job reaching the top tier!`
-                                : user.tier === 'tier2' 
-                                ? ` You need ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points to reach Tier 1.`
-                                : ` You need ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points to reach Tier 2.`
-                              }
+                              You currently have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
                             </p>
                           </div>
                         </div>
@@ -1385,13 +1379,7 @@ export default function Dashboard() {
                           <div>
                             <h4 className="font-medium text-blue-900 text-sm">Your Current Position</h4>
                             <p className="text-sm text-blue-700 mt-1">
-                              You have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
-                              {user.tier === 'tier1' 
-                                ? ` Great job reaching the top tier!`
-                                : user.tier === 'tier2' 
-                                ? ` You need ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points to reach Tier 1.`
-                                : ` You need ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points to reach Tier 2.`
-                              }
+                              You currently have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
                             </p>
                           </div>
                         </div>
