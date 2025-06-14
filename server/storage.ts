@@ -238,6 +238,11 @@ export interface IStorage {
     getCyclePointActions(): Promise<CyclePointsAction[]>;
     createOrUpdateCyclePointAction(actionData: InsertCyclePointsAction, adminUserId: number): Promise<CyclePointsAction>;
     deleteCyclePointAction(actionId: string): Promise<void>;
+    
+    // Missing cycle API methods needed by dashboard
+    getCurrentCycle(): Promise<CycleSetting | null>;
+    getUserCycleRewards(userId: number): Promise<any[]>;
+    getCyclePoolData(cycleId: number): Promise<{totalPool: number, premiumUsers: number, totalUsers: number}>;
 }
 
 import fs from 'fs/promises';
@@ -3515,6 +3520,93 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error deleting cycle point action:', error);
       throw error;
+    }
+  }
+
+  // Missing cycle API methods needed by dashboard
+  async getCurrentCycle(): Promise<CycleSetting | null> {
+    try {
+      const [currentCycle] = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.isActive, true))
+        .orderBy(desc(cycleSettings.createdAt))
+        .limit(1);
+      
+      return currentCycle || null;
+    } catch (error) {
+      console.error('Error getting current cycle:', error);
+      return null;
+    }
+  }
+
+  async getUserCycleRewards(userId: number): Promise<any[]> {
+    try {
+      const rewards = await db.select({
+        id: cycleWinnerSelections.id,
+        cycleId: cycleWinnerSelections.cycleSettingId,
+        cycleName: cycleSettings.cycleName,
+        tier: cycleWinnerSelections.tier,
+        pointsAtDistribution: cycleWinnerSelections.pointsAtDistribution,
+        rewardAmount: cycleWinnerSelections.rewardAmount,
+        pointsDeducted: cycleWinnerSelections.pointsDeducted,
+        pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
+        isWinner: cycleWinnerSelections.isWinner,
+        createdAt: cycleWinnerSelections.createdAt
+      })
+      .from(cycleWinnerSelections)
+      .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
+      .where(eq(cycleWinnerSelections.userId, userId))
+      .orderBy(desc(cycleWinnerSelections.createdAt));
+
+      return rewards;
+    } catch (error) {
+      console.error('Error getting user cycle rewards:', error);
+      return [];
+    }
+  }
+
+  async getCyclePoolData(cycleId: number): Promise<{totalPool: number, premiumUsers: number, totalUsers: number}> {
+    try {
+      // Get cycle settings
+      const [cycle] = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleId))
+        .limit(1);
+
+      if (!cycle) {
+        return { totalPool: 0, premiumUsers: 0, totalUsers: 0 };
+      }
+
+      // Count premium users in this cycle
+      const premiumUsersCount = await db.select({ count: sql<number>`count(*)` })
+        .from(userCyclePoints)
+        .leftJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(
+          and(
+            eq(userCyclePoints.cycleSettingId, cycleId),
+            eq(users.subscriptionStatus, 'active')
+          )
+        );
+
+      // Count total users in this cycle
+      const totalUsersCount = await db.select({ count: sql<number>`count(*)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleSettingId, cycleId));
+
+      const premiumUsers = premiumUsersCount[0]?.count || 0;
+      const totalUsers = totalUsersCount[0]?.count || 0;
+      
+      // Calculate total pool (premium users * membership fee * reward pool percentage)
+      const totalPool = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+
+      return {
+        totalPool,
+        premiumUsers,
+        totalUsers
+      };
+    } catch (error) {
+      console.error('Error getting cycle pool data:', error);
+      return { totalPool: 0, premiumUsers: 0, totalUsers: 0 };
     }
   }
 }
