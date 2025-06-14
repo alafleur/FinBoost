@@ -467,16 +467,17 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Mobile Stats Cards with improved design */}
+              {/* Mobile Stats Cards - 4 Cards Matching Desktop */}
               <div className="grid grid-cols-2 gap-4">
+                {/* 1. Current Tier */}
                 <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="p-2 bg-white rounded-lg shadow-sm">
                         <Trophy className="h-4 w-4 text-orange-600" />
                       </div>
-                      <Badge className={`${getTierColor(user?.tier || '')} text-white text-xs font-medium shadow-sm`}>
-                        {getTierDisplayName(user?.tier || '')}
+                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-xs font-medium shadow-sm`}>
+                        {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Current Tier</h3>
@@ -484,6 +485,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
+                {/* 2. Total Points */}
                 <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -495,19 +497,42 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
-                    <p className="text-xs text-gray-600">+{user?.currentMonthPoints || 0} this month</p>
+                    <p className="text-xs text-gray-600">All time earned</p>
+                  </CardContent>
+                </Card>
+
+                {/* 3. This Month */}
+                <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <TrendingUp className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">{user?.currentMonthPoints || 0}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">This Month</h3>
+                    <p className="text-xs text-gray-600">Theoretical points only</p>
+                  </CardContent>
+                </Card>
+
+                {/* 4. Lessons Completed */}
+                <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <BookOpen className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">{completedLessonIds.length}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Lessons</h3>
+                    <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Mobile Points Summary - Same Component as Desktop */}
-              {user && <PointsSummary user={user as User} />}
-
-              {/* Mobile Streak Display - Same Component as Desktop */}
-              <StreakDisplay 
-                currentStreak={user?.currentStreak || 0}
-                longestStreak={user?.longestStreak || 0}
-              />
 
               {/* Mobile Community Growth Dial - Same as Desktop */}
               <div className="space-y-4">
