@@ -1412,22 +1412,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // Monthly pool settings routes (admin only)
-  app.get("/api/admin/monthly-pool-settings", requireAdmin, async (req, res) => {
+  // Cycle settings routes (admin only) - consolidated from monthly
+  app.get("/api/admin/cycle-settings", requireAdmin, async (req, res) => {
     try {
-      const settings = await storage.getAllMonthlyPoolSettings();
+      const settings = await storage.getAllCycleSettings();
       res.json(settings);
     } catch (error) {
-      console.error('Error fetching monthly pool settings:', error);
-      res.status(500).json({ message: "Error fetching monthly pool settings" });
+      console.error('Error fetching cycle settings:', error);
+      res.status(500).json({ message: "Error fetching cycle settings" });
     }
   });
 
-  app.post("/api/admin/monthly-pool-settings", requireAdmin, async (req, res) => {
+  app.post("/api/admin/cycle-settings", requireAdmin, async (req, res) => {
     try {
       const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee } = req.body;
 
-      const newSetting = await storage.createMonthlyPoolSetting({
+      const newSetting = await storage.createCycleSetting({
         cycleName,
         cycleStartDate: new Date(cycleStartDate),
         cycleEndDate: new Date(cycleEndDate),
@@ -1438,12 +1438,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(newSetting);
     } catch (error) {
-      console.error('Error creating monthly pool setting:', error);
-      res.status(500).json({ message: "Error creating monthly pool setting" });
+      console.error('Error creating cycle setting:', error);
+      res.status(500).json({ message: "Error creating cycle setting" });
     }
   });
 
-  app.put("/api/admin/monthly-pool-settings/:id", requireAdmin, async (req, res) => {
+  app.put("/api/admin/cycle-settings/:id", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee, isActive } = req.body;
@@ -1456,11 +1456,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (membershipFee !== undefined) updates.membershipFee = parseInt(membershipFee);
       if (isActive !== undefined) updates.isActive = isActive;
 
-      const updated = await storage.updateMonthlyPoolSetting(parseInt(id), updates);
+      const updated = await storage.updateCycleSetting(parseInt(id), updates);
       res.json(updated);
     } catch (error) {
-      console.error('Error updating monthly pool setting:', error);
-      res.status(500).json({ message: "Error updating monthly pool setting" });
+      console.error('Error updating cycle setting:', error);
+      res.status(500).json({ message: "Error updating cycle setting" });
     }
   });
 

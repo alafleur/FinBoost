@@ -164,12 +164,12 @@ export interface IStorage {
     // Stripe payment methods
     addToRewardPool(amount: number): Promise<void>;
     
-    // Monthly pool settings methods
-    createMonthlyPoolSetting(setting: any): Promise<any>;
-    getActiveMonthlyPoolSetting(): Promise<any>;
+    // Cycle settings methods (consolidated from monthly)
+    createCycleSetting(setting: any): Promise<any>;
+    getActiveCycleSetting(): Promise<any>;
     getCurrentPoolSettingsForDate(date: Date): Promise<{ rewardPoolPercentage: number; membershipFee: number } | null>;
-    updateMonthlyPoolSetting(id: number, updates: any): Promise<any>;
-    getAllMonthlyPoolSettings(): Promise<any[]>;
+    updateCycleSetting(id: number, updates: any): Promise<any>;
+    getAllCycleSettings(): Promise<any[]>;
 
     awardPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
     deductPoints(userId: number, points: number, action: string, reason: string): Promise<void>;
@@ -2703,27 +2703,27 @@ export class MemStorage implements IStorage {
     // In a real implementation, this would update a reward pool table
   }
 
-  // Monthly pool settings methods
-  async createMonthlyPoolSetting(setting: any): Promise<any> {
+  // Cycle settings methods (consolidated from monthly)
+  async createCycleSetting(setting: any): Promise<any> {
     try {
-      const [newSetting] = await db.insert(monthlyPoolSettings).values(setting).returning();
+      const [newSetting] = await db.insert(cycleSettings).values(setting).returning();
       return newSetting;
     } catch (error) {
-      console.error('Error creating monthly pool setting:', error);
+      console.error('Error creating cycle setting:', error);
       throw error;
     }
   }
 
-  async getActiveMonthlyPoolSetting(): Promise<any> {
+  async getActiveCycleSetting(): Promise<any> {
     try {
       const [activeSetting] = await db.select()
-        .from(monthlyPoolSettings)
-        .where(eq(monthlyPoolSettings.isActive, true))
-        .orderBy(desc(monthlyPoolSettings.cycleStartDate))
+        .from(cycleSettings)
+        .where(eq(cycleSettings.isActive, true))
+        .orderBy(desc(cycleSettings.cycleStartDate))
         .limit(1);
       return activeSetting || null;
     } catch (error) {
-      console.error('Error getting active monthly pool setting:', error);
+      console.error('Error getting active cycle setting:', error);
       return null;
     }
   }
