@@ -65,9 +65,9 @@ export default function Leaderboard() {
         currentUserId = userData.user?.id;
       }
       
-      // Use expanded leaderboard endpoint for pagination
-      const timeFilter = activeTab === 'monthly' ? 'monthly' : 'alltime';
-      const expandedResponse = await fetch(`/api/leaderboard/expanded?timeFilter=${timeFilter}&page=${currentPage}&search=`, {
+      // Use cycle-based leaderboard endpoint for pagination
+      const timeFilter = activeTab === 'monthly' ? 'cycle' : 'alltime';
+      const expandedResponse = await fetch(`/api/cycles/leaderboard/expanded?timeFilter=${timeFilter}&page=${currentPage}&search=`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -52,7 +52,7 @@ export default function RewardsHistory() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/rewards/history', {
+      const response = await fetch('/api/cycles/rewards/history', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -61,7 +61,7 @@ export default function RewardsHistory() {
         setRewardsData(data);
       }
     } catch (error) {
-      console.error('Error fetching rewards history:', error);
+      console.error('Error fetching cycle rewards history:', error);
     } finally {
       setLoading(false);
     }

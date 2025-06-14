@@ -15,7 +15,7 @@ import {
 interface User {
   id: number;
   totalPoints: number;
-  currentMonthPoints: number;
+  currentCyclePoints: number;
   tier: string;
   subscriptionStatus?: string;
   theoreticalPoints?: number;
@@ -40,15 +40,15 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      // Fetch tier thresholds
-      const thresholdsResponse = await fetch('/api/tiers/thresholds');
+      // Fetch current cycle tier thresholds
+      const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds');
       if (thresholdsResponse.ok) {
         const thresholdsData = await thresholdsResponse.json();
         setTierThresholds(thresholdsData.thresholds);
       }
 
-      // Fetch recent activity (last 3 entries)
-      const historyResponse = await fetch('/api/points/history?limit=3', {
+      // Fetch recent cycle activity (last 3 entries)
+      const historyResponse = await fetch('/api/cycles/points/history?limit=3', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -57,8 +57,8 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         setRecentActivity(historyData.history.slice(0, 3));
       }
 
-      // Fetch suggested actions
-      const actionsResponse = await fetch('/api/points/actions', {
+      // Fetch suggested actions from current cycle
+      const actionsResponse = await fetch('/api/cycles/points/actions', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -71,7 +71,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         setNextActions(suggested);
       }
     } catch (error) {
-      console.error('Error fetching quick data:', error);
+      console.error('Error fetching cycle data:', error);
     }
   };
 
@@ -129,10 +129,10 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   const nextTierInfo = getNextTierInfo();
   const progressToNextTier = nextTierInfo.isMaxTier 
     ? 100 
-    : Math.min((user.currentMonthPoints / nextTierInfo.points) * 100, 100);
+    : Math.min((user.currentCyclePoints / nextTierInfo.points) * 100, 100);
   const pointsNeeded = nextTierInfo.isMaxTier 
     ? 0 
-    : Math.max(0, nextTierInfo.points - user.currentMonthPoints);
+    : Math.max(0, nextTierInfo.points - user.currentCyclePoints);
 
   return (
     <div className="space-y-4">
@@ -164,9 +164,9 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
-              <span className="text-sm font-medium">This Month</span>
+              <span className="text-sm font-medium">This Cycle</span>
             </div>
-            <div className="text-2xl font-bold">{user.currentMonthPoints}</div>
+            <div className="text-2xl font-bold">{user.currentCyclePoints}</div>
             {user.subscriptionStatus !== 'active' && (
               <p className="text-xs text-orange-600 mt-1">
                 Theoretical points only
@@ -213,13 +213,13 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min((user.currentMonthPoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
+                style={{ width: `${Math.min((user.currentCyclePoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>
 
             {/* Current Status */}
             <div className="text-center text-xs text-gray-500">
-              {user.currentMonthPoints} points this month
+              {user.currentCyclePoints} points this cycle
               {nextTierInfo.isMaxTier ? ' • Maximum tier reached!' : pointsNeeded > 0 && ` • ${pointsNeeded} to ${nextTierInfo.name}`}
             </div>
           </div>
