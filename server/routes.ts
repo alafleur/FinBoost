@@ -2725,6 +2725,248 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === NEW CYCLE-BASED API ROUTES (Phase 2) ===
+  
+  // Cycle Settings Management
+  app.post("/api/admin/cycle-settings", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const setting = await storage.createCycleSetting(req.body);
+      res.json({ success: true, setting });
+    } catch (error) {
+      console.error("Error creating cycle setting:", error);
+      res.status(500).json({ error: "Failed to create cycle setting" });
+    }
+  });
+
+  app.get("/api/cycle-settings/active", async (req, res) => {
+    try {
+      const setting = await storage.getActiveCycleSetting();
+      res.json({ success: true, setting });
+    } catch (error) {
+      console.error("Error getting active cycle setting:", error);
+      res.status(500).json({ error: "Failed to get active cycle setting" });
+    }
+  });
+
+  app.get("/api/admin/cycle-settings", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const settings = await storage.getAllCycleSettings();
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error getting cycle settings:", error);
+      res.status(500).json({ error: "Failed to get cycle settings" });
+    }
+  });
+
+  app.put("/api/admin/cycle-settings/:id", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const setting = await storage.updateCycleSetting(parseInt(req.params.id), req.body);
+      res.json({ success: true, setting });
+    } catch (error) {
+      console.error("Error updating cycle setting:", error);
+      res.status(500).json({ error: "Failed to update cycle setting" });
+    }
+  });
+
+  // User Cycle Points
+  app.get("/api/user/cycle-points/:cycleId", authenticateToken, async (req, res) => {
+    try {
+      const points = await storage.getUserCyclePoints(req.user.id, parseInt(req.params.cycleId));
+      res.json({ success: true, points });
+    } catch (error) {
+      console.error("Error getting user cycle points:", error);
+      res.status(500).json({ error: "Failed to get user cycle points" });
+    }
+  });
+
+  app.get("/api/cycle/:cycleId/users", authenticateToken, async (req, res) => {
+    try {
+      const users = await storage.getUsersInCurrentCycle(parseInt(req.params.cycleId));
+      res.json({ success: true, users });
+    } catch (error) {
+      console.error("Error getting cycle users:", error);
+      res.status(500).json({ error: "Failed to get cycle users" });
+    }
+  });
+
+  // Cycle Points System
+  app.post("/api/user/cycle-points/award", authenticateToken, async (req, res) => {
+    try {
+      const { cycleSettingId, actionId, points, description, metadata } = req.body;
+      
+      // Check limits
+      const canAwardDaily = await storage.checkCycleDailyActionLimit(req.user.id, cycleSettingId, actionId);
+      const canAwardCycle = await storage.checkCycleActionLimit(req.user.id, cycleSettingId, actionId);
+      
+      if (!canAwardDaily || !canAwardCycle) {
+        return res.status(400).json({ error: "Action limit exceeded" });
+      }
+
+      const history = await storage.awardCyclePoints(req.user.id, cycleSettingId, actionId, points, description, metadata);
+      res.json({ success: true, history });
+    } catch (error) {
+      console.error("Error awarding cycle points:", error);
+      res.status(500).json({ error: "Failed to award cycle points" });
+    }
+  });
+
+  app.post("/api/user/cycle-points/award-with-proof", authenticateToken, async (req, res) => {
+    try {
+      const { cycleSettingId, actionId, points, description, proofUrl, metadata } = req.body;
+      
+      const history = await storage.awardCyclePointsWithProof(req.user.id, cycleSettingId, actionId, points, description, proofUrl, metadata);
+      res.json({ success: true, history });
+    } catch (error) {
+      console.error("Error awarding cycle points with proof:", error);
+      res.status(500).json({ error: "Failed to award cycle points with proof" });
+    }
+  });
+
+  app.get("/api/user/cycle-points/history/:cycleId", authenticateToken, async (req, res) => {
+    try {
+      const history = await storage.getCyclePointHistory(req.user.id, parseInt(req.params.cycleId));
+      res.json({ success: true, history });
+    } catch (error) {
+      console.error("Error getting cycle point history:", error);
+      res.status(500).json({ error: "Failed to get cycle point history" });
+    }
+  });
+
+  // Cycle Leaderboard and Analytics
+  app.get("/api/cycle/:cycleId/leaderboard", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const leaderboard = await storage.getCycleLeaderboard(parseInt(req.params.cycleId), limit);
+      res.json({ success: true, leaderboard });
+    } catch (error) {
+      console.error("Error getting cycle leaderboard:", error);
+      res.status(500).json({ error: "Failed to get cycle leaderboard" });
+    }
+  });
+
+  app.get("/api/cycle/:cycleId/stats", authenticateToken, async (req, res) => {
+    try {
+      const stats = await storage.getCycleStats(parseInt(req.params.cycleId));
+      res.json({ success: true, stats });
+    } catch (error) {
+      console.error("Error getting cycle stats:", error);
+      res.status(500).json({ error: "Failed to get cycle stats" });
+    }
+  });
+
+  // Cycle Winner Selection
+  app.post("/api/admin/cycle/:cycleId/select-winners", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const winners = await storage.performCycleWinnerSelection(parseInt(req.params.cycleId));
+      res.json({ success: true, winners });
+    } catch (error) {
+      console.error("Error selecting cycle winners:", error);
+      res.status(500).json({ error: "Failed to select cycle winners" });
+    }
+  });
+
+  app.get("/api/cycle/:cycleId/winners", authenticateToken, async (req, res) => {
+    try {
+      const winners = await storage.getCycleWinners(parseInt(req.params.cycleId));
+      res.json({ success: true, winners });
+    } catch (error) {
+      console.error("Error getting cycle winners:", error);
+      res.status(500).json({ error: "Failed to get cycle winners" });
+    }
+  });
+
+  // Mid-cycle Joining Logic
+  app.get("/api/cycle/:cycleId/should-join", authenticateToken, async (req, res) => {
+    try {
+      const shouldJoin = await storage.shouldJoinCurrentCycle(parseInt(req.params.cycleId));
+      const nextStart = await storage.getNextCycleStartDate(parseInt(req.params.cycleId));
+      res.json({ success: true, shouldJoin, nextStart });
+    } catch (error) {
+      console.error("Error checking cycle join status:", error);
+      res.status(500).json({ error: "Failed to check cycle join status" });
+    }
+  });
+
+  // Cycle Points Actions Management
+  app.get("/api/cycle-points-actions", async (req, res) => {
+    try {
+      const actions = await storage.getCyclePointActions();
+      res.json({ success: true, actions });
+    } catch (error) {
+      console.error("Error getting cycle point actions:", error);
+      res.status(500).json({ error: "Failed to get cycle point actions" });
+    }
+  });
+
+  app.post("/api/admin/cycle-points-actions", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const action = await storage.createOrUpdateCyclePointAction(req.body, req.user.id);
+      res.json({ success: true, action });
+    } catch (error) {
+      console.error("Error creating/updating cycle point action:", error);
+      res.status(500).json({ error: "Failed to create/update cycle point action" });
+    }
+  });
+
+  app.delete("/api/admin/cycle-points-actions/:actionId", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      await storage.deleteCyclePointAction(req.params.actionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting cycle point action:", error);
+      res.status(500).json({ error: "Failed to delete cycle point action" });
+    }
+  });
+
+  // Cycle Tier Management
+  app.get("/api/cycle/:cycleId/tier-thresholds", async (req, res) => {
+    try {
+      const thresholds = await storage.getCycleTierThresholds(parseInt(req.params.cycleId));
+      res.json({ success: true, thresholds });
+    } catch (error) {
+      console.error("Error getting cycle tier thresholds:", error);
+      res.status(500).json({ error: "Failed to get cycle tier thresholds" });
+    }
+  });
+
+  app.post("/api/admin/cycle/:cycleId/recalculate-tiers", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      await storage.recalculateAllCycleTiers(parseInt(req.params.cycleId));
+      res.json({ success: true, message: "All cycle tiers recalculated" });
+    } catch (error) {
+      console.error("Error recalculating cycle tiers:", error);
+      res.status(500).json({ error: "Failed to recalculate cycle tiers" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

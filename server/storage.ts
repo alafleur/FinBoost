@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt, gte, ne, lte, between } from "drizzle-orm";
@@ -193,6 +193,51 @@ export interface IStorage {
       description: string;
     }, adminUserId: number): Promise<any>;
     deletePointAction(actionId: string): Promise<void>;
+
+    // === NEW CYCLE-BASED METHODS (Phase 2) ===
+    
+    // Cycle Settings Management
+    createCycleSetting(setting: InsertCycleSetting): Promise<CycleSetting>;
+    getActiveCycleSetting(): Promise<CycleSetting | null>;
+    getCurrentCycleSettingForDate(date: Date): Promise<CycleSetting | null>;
+    updateCycleSetting(id: number, updates: Partial<CycleSetting>): Promise<CycleSetting>;
+    getAllCycleSettings(): Promise<CycleSetting[]>;
+    
+    // User Cycle Points Management
+    createUserCyclePoints(data: InsertUserCyclePoints): Promise<UserCyclePoints>;
+    getUserCyclePoints(userId: number, cycleSettingId: number): Promise<UserCyclePoints | null>;
+    updateUserCyclePoints(userId: number, cycleSettingId: number, updates: Partial<UserCyclePoints>): Promise<UserCyclePoints>;
+    getUsersInCurrentCycle(cycleSettingId: number): Promise<UserCyclePoints[]>;
+    
+    // Cycle-based Points System
+    awardCyclePoints(userId: number, cycleSettingId: number, actionId: string, points: number, description: string, metadata?: any): Promise<CyclePointHistory>;
+    awardCyclePointsWithProof(userId: number, cycleSettingId: number, actionId: string, points: number, description: string, proofUrl: string, metadata?: any): Promise<CyclePointHistory>;
+    checkCycleDailyActionLimit(userId: number, cycleSettingId: number, actionId: string): Promise<boolean>;
+    checkCycleActionLimit(userId: number, cycleSettingId: number, actionId: string): Promise<boolean>;
+    getCyclePointHistory(userId: number, cycleSettingId: number): Promise<CyclePointHistory[]>;
+    
+    // Cycle Tier Calculations
+    calculateCycleTier(cycleSettingId: number, currentCyclePoints: number): Promise<string>;
+    recalculateAllCycleTiers(cycleSettingId: number): Promise<void>;
+    getCycleTierThresholds(cycleSettingId: number): Promise<{ tier1: number, tier2: number, tier3: number }>;
+    
+    // Cycle Winner Selection
+    createCycleWinnerSelection(data: InsertCycleWinnerSelection): Promise<CycleWinnerSelection>;
+    getCycleWinners(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
+    performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
+    
+    // Cycle Analytics and Reporting
+    getCycleLeaderboard(cycleSettingId: number, limit?: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>>;
+    getCycleStats(cycleSettingId: number): Promise<{totalUsers: number, averagePoints: number, tierDistribution: any}>;
+    
+    // Mid-cycle Joining Logic
+    shouldJoinCurrentCycle(cycleSettingId: number): Promise<boolean>;
+    getNextCycleStartDate(cycleSettingId: number): Promise<Date | null>;
+    
+    // Cycle Points Actions (cycle-specific limits)
+    getCyclePointActions(): Promise<CyclePointsAction[]>;
+    createOrUpdateCyclePointAction(actionData: InsertCyclePointsAction, adminUserId: number): Promise<CyclePointsAction>;
+    deleteCyclePointAction(actionId: string): Promise<void>;
 }
 
 import fs from 'fs/promises';
@@ -2926,6 +2971,551 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting eligible users for rewards:', error);
       return [];
+    }
+  }
+
+  // === NEW CYCLE-BASED METHODS (Phase 2) ===
+  
+  // Cycle Settings Management
+  async createCycleSetting(setting: InsertCycleSetting): Promise<CycleSetting> {
+    try {
+      const [newSetting] = await db.insert(cycleSettings).values(setting).returning();
+      return newSetting;
+    } catch (error) {
+      console.error('Error creating cycle setting:', error);
+      throw error;
+    }
+  }
+
+  async getActiveCycleSetting(): Promise<CycleSetting | null> {
+    try {
+      const [activeSetting] = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.isActive, true))
+        .orderBy(desc(cycleSettings.startDate))
+        .limit(1);
+      return activeSetting || null;
+    } catch (error) {
+      console.error('Error getting active cycle setting:', error);
+      return null;
+    }
+  }
+
+  async getCurrentCycleSettingForDate(date: Date): Promise<CycleSetting | null> {
+    try {
+      const [setting] = await db.select()
+        .from(cycleSettings)
+        .where(
+          and(
+            lte(cycleSettings.startDate, date),
+            gte(cycleSettings.endDate, date),
+            eq(cycleSettings.isActive, true)
+          )
+        )
+        .limit(1);
+      return setting || null;
+    } catch (error) {
+      console.error('Error getting current cycle setting for date:', error);
+      return null;
+    }
+  }
+
+  async updateCycleSetting(id: number, updates: Partial<CycleSetting>): Promise<CycleSetting> {
+    try {
+      const [updated] = await db.update(cycleSettings)
+        .set(updates)
+        .where(eq(cycleSettings.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating cycle setting:', error);
+      throw error;
+    }
+  }
+
+  async getAllCycleSettings(): Promise<CycleSetting[]> {
+    try {
+      return await db.select()
+        .from(cycleSettings)
+        .orderBy(desc(cycleSettings.startDate));
+    } catch (error) {
+      console.error('Error getting all cycle settings:', error);
+      return [];
+    }
+  }
+
+  // User Cycle Points Management
+  async createUserCyclePoints(data: InsertUserCyclePoints): Promise<UserCyclePoints> {
+    try {
+      const [newPoints] = await db.insert(userCyclePoints).values(data).returning();
+      return newPoints;
+    } catch (error) {
+      console.error('Error creating user cycle points:', error);
+      throw error;
+    }
+  }
+
+  async getUserCyclePoints(userId: number, cycleSettingId: number): Promise<UserCyclePoints | null> {
+    try {
+      const [points] = await db.select()
+        .from(userCyclePoints)
+        .where(
+          and(
+            eq(userCyclePoints.userId, userId),
+            eq(userCyclePoints.cycleSettingId, cycleSettingId)
+          )
+        )
+        .limit(1);
+      return points || null;
+    } catch (error) {
+      console.error('Error getting user cycle points:', error);
+      return null;
+    }
+  }
+
+  async updateUserCyclePoints(userId: number, cycleSettingId: number, updates: Partial<UserCyclePoints>): Promise<UserCyclePoints> {
+    try {
+      const [updated] = await db.update(userCyclePoints)
+        .set(updates)
+        .where(
+          and(
+            eq(userCyclePoints.userId, userId),
+            eq(userCyclePoints.cycleSettingId, cycleSettingId)
+          )
+        )
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating user cycle points:', error);
+      throw error;
+    }
+  }
+
+  async getUsersInCurrentCycle(cycleSettingId: number): Promise<UserCyclePoints[]> {
+    try {
+      return await db.select()
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleSettingId, cycleSettingId))
+        .orderBy(desc(userCyclePoints.currentCyclePoints));
+    } catch (error) {
+      console.error('Error getting users in current cycle:', error);
+      return [];
+    }
+  }
+
+  // Cycle-based Points System
+  async awardCyclePoints(userId: number, cycleSettingId: number, actionId: string, points: number, description: string, metadata?: any): Promise<CyclePointHistory> {
+    try {
+      // Create or update user cycle points
+      let userPoints = await this.getUserCyclePoints(userId, cycleSettingId);
+      if (!userPoints) {
+        userPoints = await this.createUserCyclePoints({
+          userId,
+          cycleSettingId,
+          currentCyclePoints: points,
+          totalCyclePoints: points,
+          tier: await this.calculateCycleTier(cycleSettingId, points),
+          joinedAt: new Date()
+        });
+      } else {
+        await this.updateUserCyclePoints(userId, cycleSettingId, {
+          currentCyclePoints: userPoints.currentCyclePoints + points,
+          totalCyclePoints: userPoints.totalCyclePoints + points,
+          tier: await this.calculateCycleTier(cycleSettingId, userPoints.currentCyclePoints + points)
+        });
+      }
+
+      // Record in cycle point history
+      const [history] = await db.insert(cyclePointHistory).values({
+        userId,
+        cycleSettingId,
+        points,
+        action: actionId,
+        description,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+        status: 'approved'
+      }).returning();
+
+      return history;
+    } catch (error) {
+      console.error('Error awarding cycle points:', error);
+      throw error;
+    }
+  }
+
+  async awardCyclePointsWithProof(userId: number, cycleSettingId: number, actionId: string, points: number, description: string, proofUrl: string, metadata?: any): Promise<CyclePointHistory> {
+    try {
+      // Record in cycle point history with pending status
+      const [history] = await db.insert(cyclePointHistory).values({
+        userId,
+        cycleSettingId,
+        points,
+        action: actionId,
+        description,
+        proofUrl,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+        status: 'pending'
+      }).returning();
+
+      return history;
+    } catch (error) {
+      console.error('Error awarding cycle points with proof:', error);
+      throw error;
+    }
+  }
+
+  async checkCycleDailyActionLimit(userId: number, cycleSettingId: number, actionId: string): Promise<boolean> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const [action] = await db.select()
+        .from(cyclePointsActions)
+        .where(eq(cyclePointsActions.actionId, actionId))
+        .limit(1);
+
+      if (!action || !action.maxDaily) return true;
+
+      const todayCount = await db.select({ count: sql<number>`count(*)` })
+        .from(cyclePointHistory)
+        .where(
+          and(
+            eq(cyclePointHistory.userId, userId),
+            eq(cyclePointHistory.cycleSettingId, cycleSettingId),
+            eq(cyclePointHistory.action, actionId),
+            eq(cyclePointHistory.status, 'approved'),
+            gte(cyclePointHistory.createdAt, today),
+            lt(cyclePointHistory.createdAt, tomorrow)
+          )
+        );
+
+      return (todayCount[0]?.count || 0) < action.maxDaily;
+    } catch (error) {
+      console.error('Error checking cycle daily action limit:', error);
+      return false;
+    }
+  }
+
+  async checkCycleActionLimit(userId: number, cycleSettingId: number, actionId: string): Promise<boolean> {
+    try {
+      const [action] = await db.select()
+        .from(cyclePointsActions)
+        .where(eq(cyclePointsActions.actionId, actionId))
+        .limit(1);
+
+      if (!action || !action.maxPerCycle) return true;
+
+      const cycleCount = await db.select({ count: sql<number>`count(*)` })
+        .from(cyclePointHistory)
+        .where(
+          and(
+            eq(cyclePointHistory.userId, userId),
+            eq(cyclePointHistory.cycleSettingId, cycleSettingId),
+            eq(cyclePointHistory.action, actionId),
+            eq(cyclePointHistory.status, 'approved')
+          )
+        );
+
+      return (cycleCount[0]?.count || 0) < action.maxPerCycle;
+    } catch (error) {
+      console.error('Error checking cycle action limit:', error);
+      return false;
+    }
+  }
+
+  async getCyclePointHistory(userId: number, cycleSettingId: number): Promise<CyclePointHistory[]> {
+    try {
+      return await db.select()
+        .from(cyclePointHistory)
+        .where(
+          and(
+            eq(cyclePointHistory.userId, userId),
+            eq(cyclePointHistory.cycleSettingId, cycleSettingId)
+          )
+        )
+        .orderBy(desc(cyclePointHistory.createdAt));
+    } catch (error) {
+      console.error('Error getting cycle point history:', error);
+      return [];
+    }
+  }
+
+  // Cycle Tier Calculations
+  async calculateCycleTier(cycleSettingId: number, currentCyclePoints: number): Promise<string> {
+    try {
+      const thresholds = await this.getCycleTierThresholds(cycleSettingId);
+      
+      if (currentCyclePoints >= thresholds.tier1) return 'Tier 1';
+      if (currentCyclePoints >= thresholds.tier2) return 'Tier 2';
+      return 'Tier 3';
+    } catch (error) {
+      console.error('Error calculating cycle tier:', error);
+      return 'Tier 3';
+    }
+  }
+
+  async recalculateAllCycleTiers(cycleSettingId: number): Promise<void> {
+    try {
+      const users = await this.getUsersInCurrentCycle(cycleSettingId);
+      
+      for (const user of users) {
+        const newTier = await this.calculateCycleTier(cycleSettingId, user.currentCyclePoints);
+        if (user.tier !== newTier) {
+          await this.updateUserCyclePoints(user.userId, cycleSettingId, { tier: newTier });
+        }
+      }
+    } catch (error) {
+      console.error('Error recalculating all cycle tiers:', error);
+      throw error;
+    }
+  }
+
+  async getCycleTierThresholds(cycleSettingId: number): Promise<{ tier1: number, tier2: number, tier3: number }> {
+    try {
+      const [setting] = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId))
+        .limit(1);
+
+      if (setting) {
+        return {
+          tier1: setting.tier1Threshold,
+          tier2: setting.tier2Threshold,
+          tier3: setting.tier3Threshold
+        };
+      }
+
+      // Default thresholds
+      return { tier1: 56, tier2: 21, tier3: 0 };
+    } catch (error) {
+      console.error('Error getting cycle tier thresholds:', error);
+      return { tier1: 56, tier2: 21, tier3: 0 };
+    }
+  }
+
+  // Cycle Winner Selection
+  async createCycleWinnerSelection(data: InsertCycleWinnerSelection): Promise<CycleWinnerSelection> {
+    try {
+      const [winner] = await db.insert(cycleWinnerSelections).values(data).returning();
+      return winner;
+    } catch (error) {
+      console.error('Error creating cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  async getCycleWinners(cycleSettingId: number): Promise<CycleWinnerSelection[]> {
+    try {
+      return await db.select()
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+        .orderBy(cycleWinnerSelections.tierRank);
+    } catch (error) {
+      console.error('Error getting cycle winners:', error);
+      return [];
+    }
+  }
+
+  async performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]> {
+    try {
+      const users = await this.getUsersInCurrentCycle(cycleSettingId);
+      const winners: CycleWinnerSelection[] = [];
+
+      // Group users by tier
+      const tierGroups = {
+        'Tier 1': users.filter(u => u.tier === 'Tier 1').sort((a, b) => b.currentCyclePoints - a.currentCyclePoints),
+        'Tier 2': users.filter(u => u.tier === 'Tier 2').sort((a, b) => b.currentCyclePoints - a.currentCyclePoints),
+        'Tier 3': users.filter(u => u.tier === 'Tier 3').sort((a, b) => b.currentCyclePoints - a.currentCyclePoints)
+      };
+
+      // Select winners from each tier (top performer per tier for now)
+      for (const [tier, tierUsers] of Object.entries(tierGroups)) {
+        if (tierUsers.length > 0) {
+          const topUser = tierUsers[0];
+          const winner = await this.createCycleWinnerSelection({
+            cycleSettingId,
+            userId: topUser.userId,
+            tier,
+            tierRank: 1,
+            pointsAtSelection: topUser.currentCyclePoints,
+            rewardAmount: this.calculateRewardAmount(tier, topUser.currentCyclePoints),
+            pointsDeducted: Math.floor(topUser.currentCyclePoints * 0.5), // Deduct 50%
+            pointsRolledOver: Math.floor(topUser.currentCyclePoints * 0.5) // Roll over 50%
+          });
+          winners.push(winner);
+        }
+      }
+
+      return winners;
+    } catch (error) {
+      console.error('Error performing cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  private calculateRewardAmount(tier: string, points: number): number {
+    // Simple reward calculation - can be made configurable
+    const baseReward = {
+      'Tier 1': 2000, // $20
+      'Tier 2': 1000, // $10
+      'Tier 3': 500   // $5
+    };
+    return baseReward[tier as keyof typeof baseReward] || 0;
+  }
+
+  // Cycle Analytics and Reporting
+  async getCycleLeaderboard(cycleSettingId: number, limit?: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>> {
+    try {
+      const query = db.select({
+        userId: userCyclePoints.userId,
+        username: users.username,
+        points: userCyclePoints.currentCyclePoints,
+        tier: userCyclePoints.tier
+      })
+      .from(userCyclePoints)
+      .leftJoin(users, eq(userCyclePoints.userId, users.id))
+      .where(eq(userCyclePoints.cycleSettingId, cycleSettingId))
+      .orderBy(desc(userCyclePoints.currentCyclePoints));
+
+      if (limit) {
+        query.limit(limit);
+      }
+
+      const results = await query;
+      return results.map((result, index) => ({
+        rank: index + 1,
+        userId: result.userId,
+        username: result.username || 'Unknown',
+        points: result.points,
+        tier: result.tier
+      }));
+    } catch (error) {
+      console.error('Error getting cycle leaderboard:', error);
+      return [];
+    }
+  }
+
+  async getCycleStats(cycleSettingId: number): Promise<{totalUsers: number, averagePoints: number, tierDistribution: any}> {
+    try {
+      const users = await this.getUsersInCurrentCycle(cycleSettingId);
+      const totalUsers = users.length;
+      const totalPoints = users.reduce((sum, user) => sum + user.currentCyclePoints, 0);
+      const averagePoints = totalUsers > 0 ? totalPoints / totalUsers : 0;
+
+      const tierDistribution = users.reduce((dist, user) => {
+        dist[user.tier] = (dist[user.tier] || 0) + 1;
+        return dist;
+      }, {} as any);
+
+      return {
+        totalUsers,
+        averagePoints,
+        tierDistribution
+      };
+    } catch (error) {
+      console.error('Error getting cycle stats:', error);
+      return { totalUsers: 0, averagePoints: 0, tierDistribution: {} };
+    }
+  }
+
+  // Mid-cycle Joining Logic
+  async shouldJoinCurrentCycle(cycleSettingId: number): Promise<boolean> {
+    try {
+      const setting = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId))
+        .limit(1);
+
+      if (!setting[0]) return false;
+
+      const now = new Date();
+      const cycleEnd = new Date(setting[0].endDate);
+      const daysUntilEnd = Math.ceil((cycleEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Join current cycle if more than 3 days remain (configurable threshold)
+      return daysUntilEnd > 3;
+    } catch (error) {
+      console.error('Error checking if should join current cycle:', error);
+      return false;
+    }
+  }
+
+  async getNextCycleStartDate(cycleSettingId: number): Promise<Date | null> {
+    try {
+      const currentSetting = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId))
+        .limit(1);
+
+      if (!currentSetting[0]) return null;
+
+      // Return the day after current cycle ends
+      const nextStart = new Date(currentSetting[0].endDate);
+      nextStart.setDate(nextStart.getDate() + 1);
+      return nextStart;
+    } catch (error) {
+      console.error('Error getting next cycle start date:', error);
+      return null;
+    }
+  }
+
+  // Cycle Points Actions (cycle-specific limits)
+  async getCyclePointActions(): Promise<CyclePointsAction[]> {
+    try {
+      return await db.select()
+        .from(cyclePointsActions)
+        .where(eq(cyclePointsActions.isActive, true))
+        .orderBy(cyclePointsActions.category, cyclePointsActions.name);
+    } catch (error) {
+      console.error('Error getting cycle point actions:', error);
+      return [];
+    }
+  }
+
+  async createOrUpdateCyclePointAction(actionData: InsertCyclePointsAction, adminUserId: number): Promise<CyclePointsAction> {
+    try {
+      // Check if action exists
+      const [existing] = await db.select()
+        .from(cyclePointsActions)
+        .where(eq(cyclePointsActions.actionId, actionData.actionId))
+        .limit(1);
+
+      if (existing) {
+        // Update existing
+        const [updated] = await db.update(cyclePointsActions)
+          .set({
+            ...actionData,
+            updatedAt: new Date(),
+            updatedBy: adminUserId
+          })
+          .where(eq(cyclePointsActions.actionId, actionData.actionId))
+          .returning();
+        return updated;
+      } else {
+        // Create new
+        const [created] = await db.insert(cyclePointsActions)
+          .values({
+            ...actionData,
+            updatedBy: adminUserId
+          })
+          .returning();
+        return created;
+      }
+    } catch (error) {
+      console.error('Error creating/updating cycle point action:', error);
+      throw error;
+    }
+  }
+
+  async deleteCyclePointAction(actionId: string): Promise<void> {
+    try {
+      await db.delete(cyclePointsActions)
+        .where(eq(cyclePointsActions.actionId, actionId));
+    } catch (error) {
+      console.error('Error deleting cycle point action:', error);
+      throw error;
     }
   }
 }
