@@ -8,7 +8,7 @@ interface TierThresholds {
 
 interface User {
   tier: string;
-  currentMonthPoints: number;
+  currentCyclePoints: number;
 }
 
 interface TierProgressTableProps {

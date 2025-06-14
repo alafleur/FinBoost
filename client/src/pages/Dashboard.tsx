@@ -64,7 +64,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   totalPoints: number;
-  currentMonthPoints: number;
+  currentCyclePoints: number;
   tier: string;
   currentStreak?: number;
   longestStreak?: number;
@@ -174,8 +174,8 @@ export default function Dashboard() {
           setLessonProgress(progressData.progress || []);
         }
 
-        // Fetch leaderboard data
-        const leaderboardResponse = await fetch('/api/leaderboard', {
+        // Fetch cycle-based leaderboard data
+        const leaderboardResponse = await fetch('/api/cycles/leaderboard', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -184,8 +184,8 @@ export default function Dashboard() {
           setLeaderboardData(leaderboardData);
         }
 
-        // Fetch tier thresholds
-        const thresholdsResponse = await fetch('/api/tiers/thresholds');
+        // Fetch current cycle tier thresholds
+        const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds');
         if (thresholdsResponse.ok) {
           const thresholdsData = await thresholdsResponse.json();
           setTierThresholds(thresholdsData.thresholds);
@@ -524,7 +524,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                {/* 3. This Month */}
+                {/* 3. This Cycle */}
                 <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -532,11 +532,11 @@ export default function Dashboard() {
                         <TrendingUp className="h-4 w-4 text-orange-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">{user?.currentMonthPoints || 0}</div>
+                        <div className="text-lg font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">This Month</h3>
-                    <p className="text-xs text-gray-600">Theoretical points only</p>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">This Cycle</h3>
+                    <p className="text-xs text-gray-600">Current cycle points</p>
                   </CardContent>
                 </Card>
 
@@ -1186,8 +1186,8 @@ export default function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-2xl font-bold text-gray-900">{user?.currentMonthPoints || 0}</div>
-                    <p className="text-xs text-gray-600">Theoretical points only</p>
+                    <div className="text-2xl font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
+                    <p className="text-xs text-gray-600">Current cycle points</p>
                   </CardContent>
                 </Card>
 
@@ -1216,7 +1216,7 @@ export default function Dashboard() {
                     user={{
                       subscriptionStatus: user.subscriptionStatus,
                       totalPoints: user.totalPoints || 0,
-                      currentMonthPoints: user.currentMonthPoints || 0
+                      currentCyclePoints: user.currentCyclePoints || 0
                     }}
                     onUpgradeClick={() => setActiveTab('profile')}
                   />
