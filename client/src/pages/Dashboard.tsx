@@ -151,6 +151,21 @@ export default function Dashboard() {
           return;
         }
 
+        // Fetch published modules first (no auth required)
+        try {
+          const modulesResponse = await fetch('/api/modules');
+          
+          if (modulesResponse.ok) {
+            const modulesData = await modulesResponse.json();
+            if (modulesData.success && modulesData.modules) {
+              setPublishedModules(modulesData.modules);
+            }
+          }
+        } catch (modulesError) {
+          console.error('Modules fetch failed:', modulesError);
+          setPublishedModules([]);
+        }
+
         // Fetch user data
         const userResponse = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -191,15 +206,7 @@ export default function Dashboard() {
           setTierThresholds(thresholdsData.thresholds);
         }
 
-        // Fetch published modules for proper lesson filtering
-        const modulesResponse = await fetch('/api/modules');
-        
-        if (modulesResponse.ok) {
-          const modulesData = await modulesResponse.json();
-          if (modulesData.success && modulesData.modules) {
-            setPublishedModules(modulesData.modules);
-          }
-        }
+
 
         // Fetch pool data for CommunityGrowthDial
         const poolResponse = await fetch('/api/cycles/pool', {
