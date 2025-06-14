@@ -116,6 +116,52 @@ interface SupportTicket {
   resolvedAt?: string;
 }
 
+interface CycleSetting {
+  id: number;
+  cycleName: string;
+  cycleType: string;
+  cycleStartDate: Date;
+  cycleEndDate: Date;
+  paymentPeriodDays: number;
+  membershipFee: number;
+  rewardPoolPercentage: number;
+  tier1Threshold: number;
+  tier2Threshold: number;
+  isActive: boolean;
+  allowMidCycleJoining: boolean;
+  midCycleJoinThresholdDays: number;
+  createdAt: Date;
+  createdBy?: number;
+}
+
+interface UserCyclePoints {
+  id: number;
+  userId: number;
+  cycleSettingId: number;
+  currentCyclePoints: number;
+  theoreticalPoints: number;
+  pointsRolledOver: number;
+  tier: string;
+  isActive: boolean;
+  joinedCycleAt: Date;
+  lastActivityDate?: Date;
+}
+
+interface CycleWinnerSelection {
+  id: number;
+  cycleSettingId: number;
+  selectionDate: Date;
+  totalRewardPool: number;
+  tier1Winners: number;
+  tier2Winners: number;
+  tier3Winners: number;
+  tier1RewardAmount: number;
+  tier2RewardAmount: number;
+  tier3RewardAmount: number;
+  isProcessed: boolean;
+  processedAt?: Date;
+}
+
 export default function Admin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -303,6 +349,31 @@ export default function Admin() {
     topReferrers: []
   });
 
+  // Cycle management state
+  const [cycleSettings, setCycleSettings] = useState<CycleSetting[]>([]);
+  const [userCyclePoints, setUserCyclePoints] = useState<UserCyclePoints[]>([]);
+  const [cycleWinnerSelections, setCycleWinnerSelections] = useState<CycleWinnerSelection[]>([]);
+  const [showCycleDialog, setShowCycleDialog] = useState(false);
+  const [editingCycle, setEditingCycle] = useState<CycleSetting | null>(null);
+  const [showWinnerSelectionDialog, setShowWinnerSelectionDialog] = useState(false);
+  const [selectedCycleForWinners, setSelectedCycleForWinners] = useState<CycleSetting | null>(null);
+  
+  // Cycle form state
+  const [cycleForm, setCycleForm] = useState({
+    cycleName: '',
+    cycleType: 'weekly',
+    cycleStartDate: '',
+    cycleEndDate: '',
+    paymentPeriodDays: 30,
+    membershipFee: 2000,
+    rewardPoolPercentage: 55,
+    tier1Threshold: 56,
+    tier2Threshold: 21,
+    isActive: true,
+    allowMidCycleJoining: true,
+    midCycleJoinThresholdDays: 3
+  });
+
   // Pending proof state
   const [pendingProofs, setPendingProofs] = useState<PendingProof[]>([]);
 
@@ -407,6 +478,8 @@ export default function Admin() {
     fetchSupportTickets();
     fetchMonthlyPoolSettings();
     loadCycles();
+    fetchCycleSettings();
+    fetchCycleWinnerSelections();
   }, []);
 
   // Load winners when selected cycle changes
@@ -1389,12 +1462,13 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-12">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="quiz">Quiz</TabsTrigger>
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
+            <TabsTrigger value="cycles">Cycles</TabsTrigger>
             <TabsTrigger value="pool-settings">Pool Settings</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
