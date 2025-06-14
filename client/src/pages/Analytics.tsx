@@ -39,12 +39,19 @@ export default function Analytics() {
     queryFn: async () => {
       const token = localStorage.getItem('token');
       const response = await fetch('/api/admin/cycle-settings', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      if (!response.ok) throw new Error('Failed to fetch cycle data');
+      if (!response.ok) {
+        console.warn('Could not fetch cycle data - using fallback');
+        return { cycles: [] };
+      }
       const data = await response.json();
       return data;
-    }
+    },
+    retry: false
   });
 
   // Set current cycle when data loads
@@ -238,16 +245,10 @@ export default function Analytics() {
               <SelectValue placeholder="Select timeframe" />
             </SelectTrigger>
             <SelectContent>
-              {currentCycle && (
-                <>
-                  <SelectItem value="current-cycle">Current Cycle</SelectItem>
-                  {cycleData?.cycles?.find((c: any) => !c.isActive) && (
-                    <SelectItem value="previous-cycle">Previous Cycle</SelectItem>
-                  )}
-                  <SelectItem value="all-cycles">All Cycles</SelectItem>
-                  <div className="h-px bg-gray-200 my-1" />
-                </>
-              )}
+              <SelectItem value="current-cycle">Current Cycle</SelectItem>
+              <SelectItem value="previous-cycle">Previous Cycle</SelectItem>
+              <SelectItem value="all-cycles">All Cycles</SelectItem>
+              <div className="h-px bg-gray-200 my-1" />
               <SelectItem value="7">Last 7 days</SelectItem>
               <SelectItem value="30">Last 30 days</SelectItem>
               <SelectItem value="90">Last 90 days</SelectItem>
