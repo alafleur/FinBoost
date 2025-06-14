@@ -263,6 +263,10 @@ export default function Dashboard() {
     }
   };
 
+  const isAdmin = (user: User | null) => {
+    return user?.email === 'lafleur.andrew@gmail.com';
+  };
+
   // Save PayPal payment information
   const handleSavePaymentInfo = async () => {
     if (!paypalEmail.trim()) {
@@ -378,6 +382,17 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600">Welcome back,</p>
                 <p className="font-semibold">{user?.firstName || user?.username}</p>
               </div>
+              {isAdmin(user) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation('/admin')}
+                  aria-label="Access admin portal"
+                  className="flex items-center space-x-1"
+                >
+                  <span>Admin</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
