@@ -1051,134 +1051,198 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
-            {/* Fallback to old desktop layout for other tabs */}
-            <TabsContent value="overview" className="mt-0">
-              <div className="flex">
-                {/* Main Content */}
-                <div className="flex-1 mr-80">
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+            {/* Overview Tab - Complete Content from Mobile */}
+            <TabsContent value="overview" className="mt-0 space-y-6">
               {/* Welcome Section */}
-              <div className="mb-6 sm:mb-8">
-                <h2 className="font-heading font-bold text-xl sm:text-2xl lg:text-3xl mb-2">
-                  Welcome to your FinBoost Dashboard! 🚀
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600">
-                  Track your progress, earn points, and win monthly rewards for building better financial habits.
-                </p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
+                      Welcome back, {user?.firstName || user?.username}!
+                    </h2>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Track your progress, earn points, and win monthly rewards for building better financial habits.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Desktop Stats Overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Current Tier</CardTitle>
-                    <Trophy className="h-4 w-4 text-orange-500" />
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Current Tier</CardTitle>
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Trophy className="h-4 w-4 text-green-600" />
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={`${getTierColor(user?.tier || '')} text-white capitalize`}>
-                        {getTierDisplayName(user?.tier || '')}
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-sm font-medium px-3 py-1`}>
+                        {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Monthly standing
-                    </p>
+                    <p className="text-xs text-gray-600 mt-2">Monthly standing</p>
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Points</CardTitle>
-                    <Star className="h-4 w-4 text-yellow-500" />
+                <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Total Points</CardTitle>
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Star className="h-4 w-4 text-blue-600" />
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-muted-foreground">
-                      +{user?.currentMonthPoints || 0} this month
-                    </p>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                    <p className="text-xs text-gray-600">+{user?.currentMonthPoints || 0} this month</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <BookOpen className="h-4 w-4 text-purple-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{completedLessonIds.length}</div>
+                    <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {user && <PointsSummary user={user as User} />}
+              {/* Points Summary and Community Growth */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {user && (
+                  <div>
+                    <PointsSummary user={user as User} />
+                  </div>
+                )}
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Users className="h-5 w-5 text-green-600" />
+                      <span>Community Growth</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CommunityGrowthDial 
+                      user={user}
+                      poolData={poolData}
+                      distributionInfo={distributionInfo}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* Desktop Learning Modules Preview */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                  <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 sm:mb-0">
-                    Continue Learning
-                  </h3>
-                  <Badge variant="secondary" className="w-fit">
+              {/* Continue Learning Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <BookOpen className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableLessons.map((module) => {
+                  {availableLessons.slice(0, 6).map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
+                    const isUserPremium = user?.subscriptionStatus === 'active';
                     return (
                       <Card 
-                        key={module.id}
-                        className={`group cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          !user?.subscriptionStatus && isPremiumModule 
-                            ? 'border-orange-200 bg-orange-50' 
-                            : 'hover:border-blue-200'
-                        }`}
+                        key={module.id} 
+                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
                         onClick={() => setLocation(`/education/${module.id}`)}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-sm leading-tight pr-2">{module.title}</h4>
-                            <div className="flex items-center space-x-1 flex-shrink-0">
-                              {!user?.subscriptionStatus && isPremiumModule && (
-                                <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
-                                  Premium
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-3">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
+                                  {module.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
+                                  ✓ Done
                                 </Badge>
-                              )}
-                              {isCompleted && (
-                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
+                              ) : (
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
                               )}
                             </div>
-                          </div>
-                          <p className="text-xs text-gray-600 mb-3 line-clamp-2">{module.description}</p>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
-                              {module.category}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {module.pointValue} pts
-                            </span>
                           </div>
                         </CardContent>
                       </Card>
                     );
                   })}
                 </div>
-                <div className="mt-6 text-center">
-                  <Button 
-                    onClick={() => setLocation('/education')}
-                    variant="outline"
-                    className="w-full sm:w-auto"
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    View All Learning Modules
-                  </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setLocation('/education')} 
+                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View All Learning Modules
+                </Button>
+              </div>
+
+              {/* Recent Rewards Section */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
+                    <Award className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="font-heading font-bold text-lg text-gray-900">Recent Rewards</h3>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <RewardsHistory />
                 </div>
               </div>
-
-              {/* Desktop Rewards Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">Your Rewards History</h3>
-                <RewardsHistory />
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Leaderboard Sidebar */}
-          <div className="fixed right-0 top-0 h-full z-20">
-            <LeaderboardSidebar />
-          </div>
-        </div>
             </TabsContent>
 
             {/* Referrals Tab */}
