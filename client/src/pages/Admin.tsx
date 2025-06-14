@@ -119,7 +119,6 @@ interface SupportTicket {
 interface CycleSetting {
   id: number;
   cycleName: string;
-  cycleType: string;
   cycleStartDate: Date;
   cycleEndDate: Date;
   paymentPeriodDays: number;
@@ -361,7 +360,6 @@ export default function Admin() {
   // Cycle form state
   const [cycleForm, setCycleForm] = useState({
     cycleName: '',
-    cycleType: 'weekly',
     cycleStartDate: '',
     cycleEndDate: '',
     paymentPeriodDays: 30,
@@ -4237,7 +4235,6 @@ export default function Admin() {
                       setEditingCycle(null);
                       setCycleForm({
                         cycleName: '',
-                        cycleType: 'weekly',
                         cycleStartDate: '',
                         cycleEndDate: '',
                         paymentPeriodDays: 30,
@@ -4273,7 +4270,7 @@ export default function Admin() {
                                   <Badge variant={cycle.isActive ? "default" : "secondary"}>
                                     {cycle.isActive ? "Active" : "Inactive"}
                                   </Badge>
-                                  <Badge variant="outline">{cycle.cycleType}</Badge>
+
                                 </div>
                                 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -4331,7 +4328,6 @@ export default function Admin() {
                                     setEditingCycle(cycle);
                                     setCycleForm({
                                       cycleName: cycle.cycleName,
-                                      cycleType: cycle.cycleType,
                                       cycleStartDate: new Date(cycle.cycleStartDate).toISOString().split('T')[0],
                                       cycleEndDate: new Date(cycle.cycleEndDate).toISOString().split('T')[0],
                                       paymentPeriodDays: cycle.paymentPeriodDays,
