@@ -56,19 +56,23 @@ export default function WhatYouLearn() {
   
   const topics = [
     {
-      title: "How to boost your credit score",
+      title: "Boost Your Credit Score 100+ Points in 6 Months",
+      subtitle: "Simple strategies that actually work",
       icon: <CreditCard className="h-5 w-5" />,
     },
     {
-      title: "Budgeting when you live paycheck-to-paycheck",
+      title: "Build a Budget That Actually Works (and Stick to It)",
+      subtitle: "Even if you're living paycheck-to-paycheck",
       icon: <Calculator className="h-5 w-5" />,
     },
     {
-      title: "Which debt to pay off first",
+      title: "Pay Off Debt 3x Faster with Proven Strategies",
+      subtitle: "Save thousands in interest payments",
       icon: <DollarSign className="h-5 w-5" />,
     },
     {
-      title: "Investing basics (even if you're broke)",
+      title: "Start Investing with Just $50 and Watch It Grow",
+      subtitle: "Beginner-friendly strategies that build wealth",
       icon: <TrendingUp className="h-5 w-5" />,
     },
   ];
@@ -83,34 +87,54 @@ export default function WhatYouLearn() {
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
-            <span className="text-primary-500">📘</span> What You'll Learn
+            Transform Your Financial Life in Just 10 Minutes a Day
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            <span className="text-accent-500 font-medium">💡</span> Quick, Practical Lessons — No Jargon.
+          <p className="text-gray-600 max-w-3xl mx-auto text-lg">
+            Join 1,000+ members who've already saved money, boosted credit scores, and started building wealth with our proven strategies.
           </p>
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          <p className="text-gray-600 mb-8 text-center">
-            Get smarter about your money in just minutes a week. Our bite-sized tutorials are designed to help you make smarter financial decisions fast.
-          </p>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-4 bg-blue-50 px-6 py-3 rounded-full border border-blue-200">
+              <span className="text-blue-600 font-semibold">92% of members see results within 30 days</span>
+            </div>
+          </div>
           
-          <h3 className="font-heading font-semibold text-xl mb-6 text-center">Popular Topics:</h3>
+          <h3 className="font-heading font-semibold text-2xl mb-8 text-center">What You'll Master:</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {topics.map((topic, index) => (
-              <div key={index} className="flex items-center bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mr-4">
-                  {topic.icon}
+              <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    {topic.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">{topic.title}</h4>
+                    <p className="text-gray-600 text-sm">{topic.subtitle}</p>
+                  </div>
                 </div>
-                <span className="text-gray-700">{topic.title}</span>
               </div>
             ))}
           </div>
           
-          <p className="text-gray-600 text-center mb-8">
-            <span className="text-accent-500 font-medium">⏱</span> Most lessons take 3–5 minutes and include quick quizzes that help you earn points.
-          </p>
+          <div className="text-center mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span>3-5 minute lessons</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span>Interactive quizzes</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                <span>Real-world applications</span>
+              </div>
+            </div>
+          </div>
           
           <div className="flex justify-center">
             <Dialog>
