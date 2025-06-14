@@ -40,11 +40,13 @@ export default function Leaderboard() {
   const [allTimeData, setAllTimeData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('monthly');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [currentPage, activeTab]);
 
   const fetchLeaderboard = async () => {
     try {
@@ -63,32 +65,27 @@ export default function Leaderboard() {
         currentUserId = userData.user?.id;
       }
       
-      // Fetch monthly leaderboard
-      const monthlyResponse = await fetch('/api/leaderboard?period=monthly&limit=20', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      // Fetch all-time leaderboard
-      const allTimeResponse = await fetch('/api/leaderboard?period=allTime&limit=20', {
+      // Use expanded leaderboard endpoint for pagination
+      const timeFilter = activeTab === 'monthly' ? 'monthly' : 'alltime';
+      const expandedResponse = await fetch(`/api/leaderboard/expanded?timeFilter=${timeFilter}&page=${currentPage}&search=`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      if (monthlyResponse.ok && allTimeResponse.ok) {
-        const monthlyResult = await monthlyResponse.json();
-        const allTimeResult = await allTimeResponse.json();
+      if (expandedResponse.ok) {
+        const result = await expandedResponse.json();
         
-        // Process the data to add isCurrentUser flag and normalize rank
-        const processLeaderboardData = (data: any) => {
-          if (!data.success || !data.leaderboard) return null;
+        // Process the expanded leaderboard data
+        const processExpandedData = (data: any) => {
+          if (!data.success || !data.users) return null;
           
-          const leaderboard = data.leaderboard.map((entry: any) => ({
-            ...entry,
+          const leaderboard = data.users.map((entry: any, index: number) => ({
             rank: parseInt(entry.rank),
-            isCurrentUser: currentUserId && entry.userId === currentUserId
+            username: entry.username,
+            points: parseInt(entry.points),
+            tier: entry.tier,
+            isCurrentUser: currentUserId && entry.username === currentUserId // Note: expanded API uses username comparison
           }));
           
           // Find current user's position
@@ -104,13 +101,24 @@ export default function Leaderboard() {
           };
           
           return {
-            leaderboard: leaderboard.slice(0, 20), // Limit to top 20
+            leaderboard: leaderboard,
             currentUser
           };
         };
         
-        setMonthlyData(processLeaderboardData(monthlyResult));
-        setAllTimeData(processLeaderboardData(allTimeResult));
+        const processedData = processExpandedData(result);
+        
+        // Set data for the active tab
+        if (activeTab === 'monthly') {
+          setMonthlyData(processedData);
+        } else {
+          setAllTimeData(processedData);
+        }
+        
+        // Update pagination info
+        if (result.pagination) {
+          setTotalPages(result.pagination.totalPages || 1);
+        }
       } else {
         throw new Error('Failed to fetch leaderboard data');
       }
