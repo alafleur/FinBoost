@@ -77,11 +77,27 @@ export default function MembershipValue() {
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
             Strength in Numbers
           </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto">
+          <p className="text-gray-600 max-w-3xl mx-auto mb-6">
             The more members who join, the larger the monthly rewards pool.
             <br />
             <span className="font-medium text-primary-600">Real people. Real money. Real financial progress.</span>
           </p>
+          
+          {/* Membership Fee Breakdown - Integrated */}
+          <div className="inline-flex items-center gap-6 bg-white px-8 py-4 rounded-xl border border-gray-200 shadow-sm">
+            <span className="text-gray-600 font-medium">Your $20/month goes to:</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                <span className="font-medium text-blue-700">Learn</span>
+              </div>
+              <span className="text-gray-400">+</span>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-500 rounded"></div>
+                <span className="font-medium text-green-700">Earn</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-8">
@@ -208,44 +224,28 @@ export default function MembershipValue() {
           </div>
         </div>
 
-        {/* Membership Fee Breakdown */}
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">Your Membership Fee Goes To:</h3>
-          <div className="flex items-center justify-center gap-4 text-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-500 rounded"></div>
-              <span className="font-medium text-blue-700">Learn</span>
-            </div>
-            <span className="text-gray-400">+</span>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-green-500 rounded"></div>
-              <span className="font-medium text-green-700">Earn</span>
-            </div>
-          </div>
-        </div>
-
-        {/* What You Get Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-white" />
+        {/* What You Get Section - Compact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-blue-800">Learn</h3>
+              <h3 className="text-lg font-bold text-blue-800">Learn</h3>
             </div>
-            <p className="text-blue-700">
+            <p className="text-blue-700 text-sm">
               Access to high-quality, bite-sized financial education that fits into your busy life.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                <Gift className="h-6 w-6 text-white" />
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                <Gift className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-green-800">Earn</h3>
+              <h3 className="text-lg font-bold text-green-800">Earn</h3>
             </div>
-            <p className="text-green-700">
+            <p className="text-green-700 text-sm">
               Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.
             </p>
           </div>
