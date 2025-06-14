@@ -3565,6 +3565,157 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // Auto-enrollment function for subscription-cycle integration
+  async autoEnrollUserInCycle(userId: number): Promise<void> {
+    try {
+      const user = await this.getUser(userId);
+      if (!user || user.subscriptionStatus !== 'active') {
+        return; // Only enroll active subscribers
+      }
+
+      const currentCycle = await this.getCurrentCycle();
+      if (!currentCycle) {
+        console.warn(`No active cycle found for user ${userId} enrollment`);
+        return;
+      }
+
+      // Check if user is already enrolled in this cycle
+      const existingEnrollment = await db.select()
+        .from(userCyclePoints)
+        .where(
+          and(
+            eq(userCyclePoints.userId, userId),
+            eq(userCyclePoints.cycleSettingId, currentCycle.id)
+          )
+        )
+        .limit(1);
+
+      if (existingEnrollment.length > 0) {
+        return; // Already enrolled
+      }
+
+      // Check mid-cycle joining threshold
+      const now = new Date();
+      const cycleStart = new Date(currentCycle.cycleStartDate);
+      const daysSinceStart = Math.floor((now.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+      
+      let targetCycle = currentCycle;
+      
+      // If joining too late in current cycle, enroll in next cycle
+      if (daysSinceStart > currentCycle.midCycleJoinThresholdDays) {
+        // Try to find next cycle, otherwise create enrollment for current cycle anyway
+        const nextCycle = await db.select()
+          .from(cycleSettings)
+          .where(
+            and(
+              gte(cycleSettings.cycleStartDate, currentCycle.cycleEndDate),
+              eq(cycleSettings.isActive, true)
+            )
+          )
+          .orderBy(asc(cycleSettings.cycleStartDate))
+          .limit(1);
+        
+        if (nextCycle.length > 0) {
+          targetCycle = nextCycle[0];
+        }
+      }
+
+      // Enroll user in cycle
+      await db.insert(userCyclePoints).values({
+        userId,
+        cycleSettingId: targetCycle.id,
+        currentCyclePoints: 0,
+        theoreticalPoints: 0,
+        tier: 'tier3',
+        joinedCycleAt: now,
+        isActive: true
+      });
+
+      console.log(`User ${userId} auto-enrolled in cycle ${targetCycle.id} (${targetCycle.cycleName})`);
+    } catch (error) {
+      console.error(`Error auto-enrolling user ${userId} in cycle:`, error);
+    }
+  }
+
+  // Backfill function to enroll all existing premium subscribers
+  async backfillPremiumSubscribersInCycles(): Promise<{success: number, errors: number, message: string}> {
+    try {
+      const currentCycle = await this.getCurrentCycle();
+      if (!currentCycle) {
+        return {
+          success: 0,
+          errors: 0,
+          message: 'No active cycle found. Create a cycle first before running backfill.'
+        };
+      }
+
+      // Get all premium subscribers who are not enrolled in any cycle
+      const premiumSubscribers = await db.select({
+        id: users.id,
+        username: users.username,
+        subscriptionStatus: users.subscriptionStatus
+      })
+      .from(users)
+      .where(eq(users.subscriptionStatus, 'active'));
+
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+
+      console.log(`Starting backfill for ${premiumSubscribers.length} premium subscribers...`);
+
+      for (const subscriber of premiumSubscribers) {
+        try {
+          // Check if already enrolled in current cycle
+          const existingEnrollment = await db.select()
+            .from(userCyclePoints)
+            .where(
+              and(
+                eq(userCyclePoints.userId, subscriber.id),
+                eq(userCyclePoints.cycleSettingId, currentCycle.id)
+              )
+            )
+            .limit(1);
+
+          if (existingEnrollment.length === 0) {
+            // Enroll user in current cycle
+            await db.insert(userCyclePoints).values({
+              userId: subscriber.id,
+              cycleSettingId: currentCycle.id,
+              currentCyclePoints: 0,
+              theoreticalPoints: 0,
+              tier: 'tier3',
+              joinedCycleAt: new Date(),
+              isActive: true
+            });
+
+            console.log(`Backfilled user ${subscriber.username} (ID: ${subscriber.id}) into cycle ${currentCycle.cycleName}`);
+            successCount++;
+          } else {
+            console.log(`User ${subscriber.username} already enrolled in current cycle, skipping`);
+          }
+        } catch (error) {
+          console.error(`Error backfilling user ${subscriber.username}:`, error);
+          errors.push(`${subscriber.username}: ${error}`);
+          errorCount++;
+        }
+      }
+
+      return {
+        success: successCount,
+        errors: errorCount,
+        message: `Backfill completed. ${successCount} users enrolled, ${errorCount} errors. ${errors.length > 0 ? 'Errors: ' + errors.slice(0, 3).join('; ') : ''}`
+      };
+    } catch (error) {
+      console.error('Error in backfill process:', error);
+      return {
+        success: 0,
+        errors: 1,
+        message: `Backfill failed: ${error}`
+      };
+    }
+  }
+
   async getCyclePoolData(cycleId: number): Promise<{totalPool: number, premiumUsers: number, totalUsers: number}> {
     try {
       // Get cycle settings
@@ -3577,13 +3728,14 @@ export class MemStorage implements IStorage {
         return { totalPool: 0, premiumUsers: 0, totalUsers: 0 };
       }
 
-      // Count premium users in this cycle
+      // Count premium users in this cycle (unified approach: active subscribers in cycle)
       const premiumUsersCount = await db.select({ count: sql<number>`count(*)` })
         .from(userCyclePoints)
         .leftJoin(users, eq(userCyclePoints.userId, users.id))
         .where(
           and(
             eq(userCyclePoints.cycleSettingId, cycleId),
+            eq(userCyclePoints.isActive, true),
             eq(users.subscriptionStatus, 'active')
           )
         );
@@ -3591,7 +3743,12 @@ export class MemStorage implements IStorage {
       // Count total users in this cycle
       const totalUsersCount = await db.select({ count: sql<number>`count(*)` })
         .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleSettingId, cycleId));
+        .where(
+          and(
+            eq(userCyclePoints.cycleSettingId, cycleId),
+            eq(userCyclePoints.isActive, true)
+          )
+        );
 
       const premiumUsers = premiumUsersCount[0]?.count || 0;
       const totalUsers = totalUsersCount[0]?.count || 0;

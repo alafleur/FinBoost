@@ -1323,6 +1323,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 nextBillingDate: new Date(subscription.current_period_end * 1000)
               });
 
+              // Auto-enroll user in current/next cycle
+              await storage.autoEnrollUserInCycle(parseInt(userId));
+
               // Get current pool settings for dynamic percentage calculation
               const poolSettings = await storage.getCurrentPoolSettingsForDate(new Date());
               if (poolSettings) {
@@ -3087,6 +3090,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching cycle distribution info:", error);
       res.status(500).json({ error: "Failed to fetch cycle distribution info" });
+    }
+  });
+
+  // Admin subscription-cycle backfill endpoint
+  app.post('/api/admin/backfill-cycle-enrollment', requireAdmin, async (req, res) => {
+    try {
+      const result = await storage.backfillPremiumSubscribersInCycles();
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error in backfill endpoint:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to execute backfill process'
+      });
     }
   });
 

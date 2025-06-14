@@ -1682,6 +1682,72 @@ export default function Admin() {
 
               <Card>
                 <CardHeader>
+                  <CardTitle>System Health</CardTitle>
+                  <CardDescription>Subscription-Cycle Integration</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-sm font-medium">Premium Subscribers</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {users.filter((u: any) => u.subscriptionStatus === 'active').length}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">Cycle Participants</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {poolData?.premiumUsers ?? 0}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {users.filter((u: any) => u.subscriptionStatus === 'active').length !== (poolData?.premiumUsers ?? 0) && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <div className="text-sm text-yellow-800">
+                        <strong>Data Mismatch Detected:</strong> {users.filter((u: any) => u.subscriptionStatus === 'active').length - (poolData?.premiumUsers ?? 0)} premium subscribers not enrolled in cycles
+                      </div>
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/admin/backfill-cycle-enrollment', {
+                              method: 'POST',
+                              headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json'
+                              }
+                            });
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                              alert(`Backfill completed: ${result.data.message}`);
+                              window.location.reload();
+                            } else {
+                              alert(`Backfill failed: ${result.error}`);
+                            }
+                          } catch (error) {
+                            alert('Failed to execute backfill process');
+                          }
+                        }}
+                      >
+                        Fix Enrollment Issue
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {users.filter((u: any) => u.subscriptionStatus === 'active').length === (poolData?.premiumUsers ?? 0) && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="text-sm text-green-800">
+                        ✓ All premium subscribers are enrolled in cycles
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle>Tier Thresholds</CardTitle>
                   <CardDescription>Dynamic percentile-based point thresholds</CardDescription>
                 </CardHeader>
