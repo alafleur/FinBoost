@@ -1128,7 +1128,6 @@ export default function Admin() {
         setEditingCycle(null);
         setCycleForm({
           cycleName: '',
-          cycleType: 'weekly',
           cycleStartDate: '',
           cycleEndDate: '',
           paymentPeriodDays: 30,
@@ -4413,7 +4412,9 @@ export default function Admin() {
                                   </td>
                                   <td className="p-2">
                                     <div className="font-medium">{cycle?.cycleName || 'Unknown'}</div>
-                                    <div className="text-xs text-gray-500">{cycle?.cycleType}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {cycle && new Date(cycle.cycleStartDate).toLocaleDateString()} - {cycle && new Date(cycle.cycleEndDate).toLocaleDateString()}
+                                    </div>
                                   </td>
                                   <td className="p-2">
                                     <div className="font-bold text-green-600">
@@ -6256,32 +6257,13 @@ export default function Admin() {
           </DialogHeader>
           
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Cycle Name</label>
-                <Input
-                  value={cycleForm.cycleName}
-                  onChange={(e) => setCycleForm({...cycleForm, cycleName: e.target.value})}
-                  placeholder="e.g., Weekly Beta Test"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Cycle Type</label>
-                <Select 
-                  value={cycleForm.cycleType} 
-                  onValueChange={(value) => setCycleForm({...cycleForm, cycleType: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">Weekly (7 days)</SelectItem>
-                    <SelectItem value="bi-weekly">Bi-weekly (14 days)</SelectItem>
-                    <SelectItem value="custom">Custom Duration</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <label className="text-sm font-medium">Cycle Name</label>
+              <Input
+                value={cycleForm.cycleName}
+                onChange={(e) => setCycleForm({...cycleForm, cycleName: e.target.value})}
+                placeholder="e.g., Weekly Beta Test, Bi-weekly Jan 1-14"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -6446,7 +6428,6 @@ export default function Admin() {
                 <h4 className="font-medium mb-2">Cycle Details</h4>
                 <div className="text-sm space-y-1">
                   <div>Name: {selectedCycleForWinners.cycleName}</div>
-                  <div>Type: {selectedCycleForWinners.cycleType}</div>
                   <div>Duration: {new Date(selectedCycleForWinners.cycleStartDate).toLocaleDateString()} - {new Date(selectedCycleForWinners.cycleEndDate).toLocaleDateString()}</div>
                   <div>Reward Pool: {selectedCycleForWinners.rewardPoolPercentage}%</div>
                   <div>Membership Fee: ${(selectedCycleForWinners.membershipFee / 100).toFixed(2)}</div>
