@@ -37,6 +37,7 @@ import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
 import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import TierProgressTable from "@/components/TierProgressTable";
+import SectionHeader from "@/components/SectionHeader";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -558,12 +559,11 @@ export default function Dashboard() {
 
               {/* Mobile Community Growth Dial - Same as Desktop */}
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-purple-100 rounded-lg">
-                    <Users className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Community Growth</h3>
-                </div>
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="purple"
+                  title="Community Growth"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   <CommunityGrowthDial 
                     poolData={poolData}
@@ -577,12 +577,11 @@ export default function Dashboard() {
               {/* Tier Progress Bar */}
               {tierThresholds && user && (
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-yellow-100 rounded-lg">
-                      <Target className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">Tier Progress</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={Target}
+                    iconColor="yellow"
+                    title="Tier Progress"
+                  />
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <TierProgressTable 
                       tierThresholds={tierThresholds}
@@ -596,12 +595,11 @@ export default function Dashboard() {
               {/* Mobile Learning Preview with enhanced design */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <h3 className="font-heading font-bold text-lg text-gray-900">Continue Learning</h3>
-                  </div>
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="Continue Learning"
+                  />
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
@@ -678,12 +676,11 @@ export default function Dashboard() {
 
               {/* Mobile Rewards Preview with enhanced design */}
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-green-100 rounded-lg">
-                    <Award className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-gray-900">Recent Rewards</h3>
-                </div>
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Recent Rewards"
+                />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
                   <RewardsHistory />
                 </div>
