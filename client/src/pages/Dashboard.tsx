@@ -200,13 +200,13 @@ export default function Dashboard() {
         }
 
         // Fetch pool data for CommunityGrowthDial
-        const poolResponse = await fetch('/api/pool/status', {
+        const poolResponse = await fetch('/api/pool/monthly', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (poolResponse.ok) {
           const poolData = await poolResponse.json();
-          setPoolData(poolData);
+          setPoolData(poolData.pool);
         }
 
         // Fetch distribution info for CommunityGrowthDial
