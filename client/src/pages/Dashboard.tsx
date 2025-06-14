@@ -869,7 +869,7 @@ export default function Dashboard() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly Amount</label>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Subscription Amount</label>
                           <p className="text-lg font-semibold text-gray-900">
                             ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
                           </p>
@@ -1514,7 +1514,7 @@ export default function Dashboard() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly Amount</label>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Subscription Amount</label>
                           <p className="text-lg font-semibold text-gray-900">
                             ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
                           </p>

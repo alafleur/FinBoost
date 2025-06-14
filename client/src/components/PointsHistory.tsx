@@ -82,9 +82,9 @@ export default function PointsHistory() {
         return <TrendingUp className="h-4 w-4 text-green-500" />;
       case 'referral_signup':
         return <Users className="h-4 w-4 text-blue-500" />;
-      case 'monthly_reward_deduction':
+      case 'cycle_reward_deduction':
         return <TrendingDown className="h-4 w-4 text-red-500" />;
-      case 'monthly_rollover':
+      case 'cycle_rollover':
         return <CalendarDays className="h-4 w-4 text-gray-500" />;
       default:
         return <Star className="h-4 w-4 text-gray-500" />;
