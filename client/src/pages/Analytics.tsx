@@ -58,18 +58,16 @@ export default function Analytics() {
   // Calculate timeframe based on selection
   const getTimeframeParams = () => {
     if (timeframe === 'current-cycle' && currentCycle) {
-      const cycleStart = new Date(currentCycle.cycleStartDate);
-      const daysSinceStart = Math.ceil((Date.now() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
-      return `timeframe=${daysSinceStart}&cycleId=${currentCycle.id}`;
+      return `timeframe=current-cycle&cycleId=${currentCycle.id}`;
     }
     if (timeframe === 'previous-cycle' && cycleData?.cycles?.length > 1) {
       const previousCycle = cycleData.cycles.find((c: any) => !c.isActive);
       if (previousCycle) {
-        const cycleStart = new Date(previousCycle.cycleStartDate);
-        const cycleEnd = new Date(previousCycle.cycleEndDate);
-        const cycleDays = Math.ceil((cycleEnd.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
-        return `timeframe=${cycleDays}&cycleId=${previousCycle.id}`;
+        return `timeframe=previous-cycle&cycleId=${previousCycle.id}`;
       }
+    }
+    if (timeframe === 'all-cycles') {
+      return `timeframe=all-cycles`;
     }
     return `timeframe=${timeframe}`;
   };

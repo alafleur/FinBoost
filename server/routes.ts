@@ -3094,10 +3094,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Engagement Metrics
   app.get('/api/admin/analytics/users/engagement', requireAdmin, async (req, res) => {
     try {
-      const { timeframe = '30' } = req.query;
-      const days = parseInt(timeframe as string);
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
+      const { timeframe = '30', cycleId } = req.query;
+      
+      let startDate: Date;
+      let endDate: Date = new Date();
+      
+      let days = parseInt(timeframe as string);
+      
+      // Handle cycle-based filtering
+      if (cycleId && cycleId !== 'undefined') {
+        try {
+          const cycles = await storage.getAllCycles();
+          const cycle = cycles.find(c => c.id === parseInt(cycleId as string));
+          if (cycle) {
+            startDate = new Date(cycle.cycleStartDate);
+            endDate = new Date(cycle.cycleEndDate);
+          } else {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+          }
+        } catch (error) {
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - days);
+        }
+      } else {
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+      }
 
       // Active users (users with recent login activity)
       const activeUsers = await storage.getActiveUsersCount(startDate);
@@ -3123,7 +3146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           freeUsers: totalUsers - premiumUsers,
           dailyActivity,
           registrationTrends,
-          timeframe: days
+          timeframe: cycleId ? `Cycle ${cycleId}` : `${parseInt(timeframe as string)} days`,
+          cycleContext: cycleId ? { cycleId, startDate, endDate } : null
         }
       });
     } catch (error) {
