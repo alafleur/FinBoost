@@ -16,7 +16,7 @@ interface PointsHistoryEntry {
   metadata?: any;
 }
 
-interface MonthlyRewardEntry {
+interface CycleRewardEntry {
   id: number;
   month: number;
   tier: string;
@@ -30,7 +30,7 @@ interface MonthlyRewardEntry {
 
 export default function PointsHistory() {
   const [pointsHistory, setPointsHistory] = useState<PointsHistoryEntry[]>([]);
-  const [rewardsHistory, setRewardsHistory] = useState<MonthlyRewardEntry[]>([]);
+  const [rewardsHistory, setRewardsHistory] = useState<CycleRewardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -157,7 +157,7 @@ export default function PointsHistory() {
         <Tabs defaultValue="points" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="points">Points Activity</TabsTrigger>
-            <TabsTrigger value="rewards">Monthly Rewards</TabsTrigger>
+            <TabsTrigger value="rewards">Cycle Rewards</TabsTrigger>
           </TabsList>
 
           <TabsContent value="points" className="space-y-4">
@@ -191,7 +191,7 @@ export default function PointsHistory() {
           <TabsContent value="rewards" className="space-y-4">
             {rewardsHistory.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No monthly rewards history yet. Keep earning points to participate in rewards!
+                No cycle rewards history yet. Keep earning points to participate in rewards!
               </div>
             ) : (
               <div className="space-y-3">

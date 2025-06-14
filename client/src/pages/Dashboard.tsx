@@ -484,7 +484,7 @@ export default function Dashboard() {
                       Welcome back, {user?.firstName || user?.username}!
                     </h2>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win monthly rewards for building better financial habits.
+                      Track your progress, earn points, and win cycle rewards for building better financial habits.
                     </p>
                   </div>
                 </div>
@@ -980,7 +980,7 @@ export default function Dashboard() {
                         <div>
                           <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
                           <p className="text-sm text-blue-700 mt-1">
-                            To receive monthly reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
+                            To receive cycle reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
                           </p>
                         </div>
                       </div>
@@ -1131,7 +1131,7 @@ export default function Dashboard() {
                       Welcome back, {user?.firstName || user?.username}!
                     </h2>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win monthly rewards for building better financial habits.
+                      Track your progress, earn points, and win cycle rewards for building better financial habits.
                     </p>
                   </div>
                 </div>
@@ -1576,7 +1576,7 @@ export default function Dashboard() {
                         <div>
                           <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
                           <p className="text-sm text-blue-700 mt-1">
-                            To receive monthly reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
+                            To receive cycle reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
                           </p>
                         </div>
                       </div>

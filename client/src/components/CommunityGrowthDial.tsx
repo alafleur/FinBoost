@@ -163,7 +163,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               </div>
 
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center">
-                <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
+                <div className="text-sm text-green-600 font-medium mb-1">Cycle Pool Size</div>
                 <div className="text-xl sm:text-2xl font-bold text-green-700 mb-1">
                   <span className="hidden sm:inline">{formatCurrency(poolData.totalPool)}</span>
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
