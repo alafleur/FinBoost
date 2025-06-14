@@ -23,7 +23,8 @@ import {
   Mail,
   CreditCard,
   Save,
-  CheckCircle
+  CheckCircle,
+  Info
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
