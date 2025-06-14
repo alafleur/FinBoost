@@ -1034,7 +1034,7 @@ export default function Dashboard() {
           </div>
 
           {/* Desktop Tab Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
             
             {/* Rewards Tab - Simplest Implementation */}
             <TabsContent value="rewards" className="mt-0 space-y-6">
@@ -1146,9 +1146,9 @@ export default function Dashboard() {
                           currentMonthPoints: user.currentMonthPoints || 0
                         }}
                         poolData={{
-                          totalPool: poolData.currentAmount || 0,
-                          premiumUsers: poolData.premiumUsers || 0,
-                          totalUsers: poolData.totalUsers || 0
+                          totalPool: (poolData as any).currentAmount || 0,
+                          premiumUsers: (poolData as any).premiumUsers || 0,
+                          totalUsers: (poolData as any).totalUsers || 0
                         }}
                         distributionInfo={distributionInfo ? {
                           nextDate: distributionInfo.nextDistribution,
