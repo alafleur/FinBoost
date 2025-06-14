@@ -565,3 +565,82 @@ export type StripePayout = typeof stripePayouts.$inferSelect;
 export type PaypalPayout = typeof paypalPayouts.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type AdminPointsAction = typeof adminPointsActions.$inferSelect;
+
+// Insert schemas for new cycle-based tables
+export const insertCycleSettingSchema = createInsertSchema(cycleSettings).pick({
+  cycleName: true,
+  cycleType: true,
+  cycleStartDate: true,
+  cycleEndDate: true,
+  paymentPeriodDays: true,
+  membershipFee: true,
+  rewardPoolPercentage: true,
+  tier1Threshold: true,
+  tier2Threshold: true,
+  tier1PoolPercentage: true,
+  tier2PoolPercentage: true,
+  tier3PoolPercentage: true,
+  selectionPercentage: true,
+  winnerPointDeductionPercentage: true,
+  midCycleJoinThresholdDays: true,
+});
+
+export const insertUserCyclePointsSchema = createInsertSchema(userCyclePoints).pick({
+  userId: true,
+  cycleSettingId: true,
+  currentCyclePoints: true,
+  theoreticalPoints: true,
+  tier: true,
+  pointsRolledOver: true,
+});
+
+export const insertCycleWinnerSelectionSchema = createInsertSchema(cycleWinnerSelections).pick({
+  cycleSettingId: true,
+  userId: true,
+  tier: true,
+  tierRank: true,
+  pointsAtSelection: true,
+  rewardAmount: true,
+  pointsDeducted: true,
+  pointsRolledOver: true,
+});
+
+export const insertCyclePointHistorySchema = createInsertSchema(cyclePointHistory).pick({
+  userId: true,
+  cycleSettingId: true,
+  points: true,
+  action: true,
+  description: true,
+  relatedId: true,
+  status: true,
+  proofUrl: true,
+  metadata: true,
+});
+
+export const insertCyclePointsActionSchema = createInsertSchema(cyclePointsActions).pick({
+  actionId: true,
+  name: true,
+  basePoints: true,
+  maxDaily: true,
+  maxPerCycle: true,
+  maxTotal: true,
+  requiresProof: true,
+  category: true,
+  description: true,
+});
+
+// Types for new cycle-based tables
+export type InsertCycleSetting = z.infer<typeof insertCycleSettingSchema>;
+export type CycleSetting = typeof cycleSettings.$inferSelect;
+
+export type InsertUserCyclePoints = z.infer<typeof insertUserCyclePointsSchema>;
+export type UserCyclePoints = typeof userCyclePoints.$inferSelect;
+
+export type InsertCycleWinnerSelection = z.infer<typeof insertCycleWinnerSelectionSchema>;
+export type CycleWinnerSelection = typeof cycleWinnerSelections.$inferSelect;
+
+export type InsertCyclePointHistory = z.infer<typeof insertCyclePointHistorySchema>;
+export type CyclePointHistory = typeof cyclePointHistory.$inferSelect;
+
+export type InsertCyclePointsAction = z.infer<typeof insertCyclePointsActionSchema>;
+export type CyclePointsAction = typeof cyclePointsActions.$inferSelect;
