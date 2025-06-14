@@ -1515,47 +1515,71 @@ export default function Dashboard() {
                   </Card>
                 )}
 
-                {/* PayPal Configuration for Rewards */}
-                {user?.subscriptionStatus === 'active' && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Award className="h-5 w-5" />
-                        Reward Configuration
-                      </CardTitle>
-                      <CardDescription>
-                        Configure your PayPal email to receive monthly reward payouts
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-start space-x-3">
-                          <div className="p-1 bg-blue-100 rounded">
-                            <Info className="h-4 w-4 text-blue-600" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-sm font-medium text-blue-900 mb-1">Important</h4>
-                            <p className="text-xs text-blue-700 leading-relaxed">
-                              Provide your PayPal email to receive monthly reward distributions. This email must match your PayPal account exactly.
-                            </p>
-                          </div>
+                {/* PayPal Payment Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Payment Information
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your PayPal email for reward disbursements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-1 bg-blue-100 rounded">
+                          <CreditCard className="h-4 w-4 text-blue-600" />
                         </div>
+                        <div>
+                          <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            To receive monthly reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">PayPal Email Address</label>
+                        <input
+                          type="email"
+                          placeholder="your-paypal@email.com"
+                          value={paypalEmail}
+                          onChange={(e) => setPaypalEmail(e.target.value)}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          This email must be associated with an active PayPal account to receive payments
+                        </p>
                       </div>
                       
                       <div>
-                        <label className="text-sm font-medium text-gray-700">PayPal Email</label>
-                        <p className="text-sm text-gray-900 mt-1">
-                          {user?.paypalEmail || 'Not configured'}
-                        </p>
-                        {!user?.paypalEmail && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            Please contact support to configure your PayPal email for reward disbursements.
-                          </p>
-                        )}
+                        <label className="text-sm font-medium text-gray-700">Payout Method</label>
+                        <select
+                          value={payoutMethod}
+                          onChange={(e) => setPayoutMethod(e.target.value)}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="paypal">PayPal</option>
+                          <option value="bank_transfer" disabled>Bank Transfer (Coming Soon)</option>
+                        </select>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      
+                      <Button 
+                        className="w-full" 
+                        size="sm" 
+                        onClick={handleSavePaymentInfo}
+                        disabled={savingPayment}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {savingPayment ? 'Saving...' : 'Save Payment Information'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Account Statistics */}
                 <Card>
