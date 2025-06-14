@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import finboostLogo from "@/assets/finboost-logo.png";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
 import RewardsHistory from "@/components/RewardsHistory";
@@ -364,8 +365,12 @@ export default function Dashboard() {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" aria-hidden="true" />
-              <h1 className="font-heading font-bold text-lg sm:text-2xl text-dark-800">FinBoost</h1>
+              <img 
+                src={finboostLogo} 
+                alt="FinBoost Logo" 
+                className="h-8 w-auto sm:h-10 object-contain"
+                aria-label="FinBoost financial education platform logo"
+              />
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="text-right hidden sm:block" aria-label="User greeting">
