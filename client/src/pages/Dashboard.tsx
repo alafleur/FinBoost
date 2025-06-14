@@ -192,18 +192,13 @@ export default function Dashboard() {
         }
 
         // Fetch published modules for proper lesson filtering
-        const modulesResponse = await fetch('/api/modules', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const modulesResponse = await fetch('/api/modules');
         
         if (modulesResponse.ok) {
           const modulesData = await modulesResponse.json();
-          console.log('DASHBOARD: Raw modules response:', modulesData);
-          console.log('DASHBOARD: Modules array:', modulesData.modules);
-          console.log('DASHBOARD: Modules length:', modulesData.modules?.length || 0);
-          setPublishedModules(modulesData.modules || []);
-        } else {
-          console.error('DASHBOARD: Failed to fetch modules:', modulesResponse.status, await modulesResponse.text());
+          if (modulesData.success && modulesData.modules) {
+            setPublishedModules(modulesData.modules);
+          }
         }
 
         // Fetch pool data for CommunityGrowthDial
