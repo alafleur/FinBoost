@@ -347,8 +347,8 @@ export default function Dashboard() {
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
-  // Filter lessons to show only published modules with proper access control
-  const publishedLessons = publishedModules.filter(module => module.isPublished);
+  // Use published modules directly since API already filters for published only
+  const publishedLessons = publishedModules;
   const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
   const allAvailableLessons = publishedLessons;
 
