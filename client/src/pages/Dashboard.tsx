@@ -1079,8 +1079,9 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Stats Grid - Clean Layout */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Stats Grid - 4 Column Layout Matching Mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {/* 1. Current Tier */}
                 <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -1100,6 +1101,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
+                {/* 2. Total Points */}
                 <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -1111,16 +1113,33 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-gray-600">+{user?.currentMonthPoints || 0} this month</p>
+                    <p className="text-xs text-gray-600">All time earned</p>
                   </CardContent>
                 </Card>
 
+                {/* 3. Current Points (This Month) */}
                 <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">This Month</CardTitle>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <TrendingUp className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{user?.currentMonthPoints || 0}</div>
+                    <p className="text-xs text-gray-600">Theoretical points only</p>
+                  </CardContent>
+                </Card>
+
+                {/* 4. Lessons Completed */}
+                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
                       <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <BookOpen className="h-4 w-4 text-orange-600" />
+                        <BookOpen className="h-4 w-4 text-amber-600" />
                       </div>
                     </div>
                   </CardHeader>
