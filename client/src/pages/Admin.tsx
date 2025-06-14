@@ -1608,6 +1608,15 @@ export default function Admin() {
             <Button 
               variant="outline" 
               onClick={() => {
+                window.location.href = '/analytics';
+              }}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 window.location.href = '/auth';
