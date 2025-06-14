@@ -1079,8 +1079,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Stats Grid - Desktop Optimized */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {/* Stats Grid - Clean Layout */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -1129,25 +1129,10 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
-
-                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-gray-900">This Month</CardTitle>
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <TrendingUp className="h-4 w-4 text-amber-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-2xl font-bold text-gray-900">{user?.currentMonthPoints || 0}</div>
-                    <p className="text-xs text-gray-600">Theoretical points only</p>
-                  </CardContent>
-                </Card>
               </div>
 
-              {/* Community Growth and Points Summary */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Community Growth Only */}
+              <div className="w-full">
                 {user && poolData && (
                   <CommunityGrowthDial 
                     poolData={poolData}
@@ -1158,9 +1143,6 @@ export default function Dashboard() {
                     }}
                     onUpgradeClick={() => setActiveTab('profile')}
                   />
-                )}
-                {user && (
-                  <PointsSummary user={user} />
                 )}
               </div>
 
