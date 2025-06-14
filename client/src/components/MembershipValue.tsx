@@ -83,18 +83,25 @@ export default function MembershipValue() {
             <span className="font-medium text-primary-600">Real people. Real money. Real financial progress.</span>
           </p>
           
-          {/* Membership Fee Breakdown - Integrated */}
-          <div className="inline-flex items-center gap-6 bg-white px-8 py-4 rounded-xl border border-gray-200 shadow-sm">
-            <span className="text-gray-600 font-medium">Your $20/month goes to:</span>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                <span className="font-medium text-blue-700">Learn</span>
+          {/* Membership Fee Breakdown - Integrated with Descriptions */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
+            <div className="text-center mb-4">
+              <span className="text-gray-600 font-medium">Your $20/month goes to:</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-start gap-3">
+                <div className="w-4 h-4 bg-blue-500 rounded mt-1"></div>
+                <div>
+                  <span className="font-medium text-blue-700 block mb-1">Learn</span>
+                  <p className="text-sm text-blue-600">Access to high-quality, bite-sized financial education that fits into your busy life.</p>
+                </div>
               </div>
-              <span className="text-gray-400">+</span>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500 rounded"></div>
-                <span className="font-medium text-green-700">Earn</span>
+              <div className="flex items-start gap-3">
+                <div className="w-4 h-4 bg-green-500 rounded mt-1"></div>
+                <div>
+                  <span className="font-medium text-green-700 block mb-1">Earn</span>
+                  <p className="text-sm text-green-600">Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -224,32 +231,7 @@ export default function MembershipValue() {
           </div>
         </div>
 
-        {/* What You Get Section - Compact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-4 w-4 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-blue-800">Learn</h3>
-            </div>
-            <p className="text-blue-700 text-sm">
-              Access to high-quality, bite-sized financial education that fits into your busy life.
-            </p>
-          </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <Gift className="h-4 w-4 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-green-800">Earn</h3>
-            </div>
-            <p className="text-green-700 text-sm">
-              Monthly chance to receive real cash rewards, with top rewards reaching thousands of dollars.
-            </p>
-          </div>
-        </div>
 
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
