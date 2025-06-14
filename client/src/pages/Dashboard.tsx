@@ -1138,11 +1138,25 @@ export default function Dashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CommunityGrowthDial 
-                      user={user}
-                      poolData={poolData}
-                      distributionInfo={distributionInfo}
-                    />
+                    {user && poolData && (
+                      <CommunityGrowthDial 
+                        user={{
+                          subscriptionStatus: user.subscriptionStatus,
+                          totalPoints: user.totalPoints || 0,
+                          currentMonthPoints: user.currentMonthPoints || 0
+                        }}
+                        poolData={{
+                          totalPool: poolData.currentAmount || 0,
+                          premiumUsers: poolData.premiumUsers || 0,
+                          totalUsers: poolData.totalUsers || 0
+                        }}
+                        distributionInfo={distributionInfo ? {
+                          nextDate: distributionInfo.nextDistribution,
+                          timeRemaining: distributionInfo.timeRemaining || { days: 0, hours: 0, minutes: 0, totalMs: 0 }
+                        } : null}
+                        onUpgradeClick={() => setLocation('/subscribe')}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </div>
