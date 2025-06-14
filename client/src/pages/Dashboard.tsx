@@ -584,81 +584,84 @@ export default function Dashboard() {
                   </div>
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div className="space-y-4">
-                      {/* Tier Labels */}
-                      <div className="flex justify-between text-sm font-medium">
-                        <span className="text-orange-600">Tier 3</span>
-                        <span className="text-yellow-600">Tier 2</span>
-                        <span className="text-green-600">Tier 1</span>
+                      {/* Tier Table */}
+                      <div className="overflow-hidden rounded-lg border border-gray-200">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Point Range</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr className={user?.tier === 'tier3' ? 'bg-orange-50 border-orange-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 3
+                                  {user?.tier === 'tier3' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                0 - {tierThresholds.tier2 - 1} points
+                              </td>
+                            </tr>
+                            <tr className={user?.tier === 'tier2' ? 'bg-yellow-50 border-yellow-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 2
+                                  {user?.tier === 'tier2' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {tierThresholds.tier2} - {tierThresholds.tier1 - 1} points
+                              </td>
+                            </tr>
+                            <tr className={user?.tier === 'tier1' ? 'bg-green-50 border-green-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 1
+                                  {user?.tier === 'tier1' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {tierThresholds.tier1}+ points
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                       
-                      {/* Progress Bar Container */}
-                      <div className="relative">
-                        {/* Base Progress Bar */}
-                        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                          {/* Tier 3 Section (0 to tier2Threshold) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-orange-400 to-orange-500 absolute left-0"
-                            style={{ 
-                              width: tierThresholds.tier1 > 0 ? `${(tierThresholds.tier2 / tierThresholds.tier1) * 100}%` : '33.33%' 
-                            }}
-                          />
-                          {/* Tier 2 Section (tier2Threshold to tier1Threshold) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 absolute"
-                            style={{ 
-                              left: tierThresholds.tier1 > 0 ? `${(tierThresholds.tier2 / tierThresholds.tier1) * 100}%` : '33.33%',
-                              width: tierThresholds.tier1 > 0 ? `${((tierThresholds.tier1 - tierThresholds.tier2) / tierThresholds.tier1) * 100}%` : '33.33%'
-                            }}
-                          />
-                          {/* Tier 1 Section (tier1Threshold+) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-green-400 to-green-500 absolute right-0"
-                            style={{ 
-                              width: '16.67%' // Visual representation for Tier 1 extension
-                            }}
-                          />
-                        </div>
-                        
-                        {/* User Position Indicator */}
-                        <div 
-                          className="absolute top-0 transform -translate-x-1/2"
-                          style={{ 
-                            left: `${Math.min(
-                              Math.max(
-                                ((user.currentMonthPoints || 0) / Math.max(tierThresholds.tier1 * 1.2, 1)) * 100, 
-                                2
-                              ), 
-                              98
-                            )}%` 
-                          }}
-                        >
-                          <div className="w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-md" />
-                          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                            <div className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded shadow-lg">
-                              {user.currentMonthPoints || 0} pts
-                            </div>
+                      {/* User Position Details */}
+                      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Trophy className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-blue-900 text-sm">Your Current Position</h4>
+                            <p className="text-sm text-blue-700 mt-1">
+                              You have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
+                              {user.tier === 'tier1' 
+                                ? ` Great job reaching the top tier!`
+                                : user.tier === 'tier2' 
+                                ? ` You need ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points to reach Tier 1.`
+                                : ` You need ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points to reach Tier 2.`
+                              }
+                            </p>
                           </div>
                         </div>
-                      </div>
-                      
-                      {/* Threshold Values */}
-                      <div className="flex justify-between text-xs text-gray-600">
-                        <span>0 pts</span>
-                        <span>{tierThresholds.tier2} pts</span>
-                        <span>{tierThresholds.tier1} pts</span>
-                      </div>
-                      
-                      {/* Current Status */}
-                      <div className="text-center pt-2">
-                        <p className="text-sm text-gray-700">
-                          You are currently in <span className="font-semibold text-blue-600">{getTierDisplayName(user.tier)}</span>
-                          {user.tier === 'tier1' 
-                            ? ` with ${user.currentMonthPoints || 0} points this month`
-                            : user.tier === 'tier2' 
-                            ? `. ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points needed for Tier 1`
-                            : `. ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points needed for Tier 2`
-                          }
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -1314,81 +1317,84 @@ export default function Dashboard() {
                   </div>
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <div className="space-y-4">
-                      {/* Tier Labels */}
-                      <div className="flex justify-between text-sm font-medium">
-                        <span className="text-orange-600">Tier 3</span>
-                        <span className="text-yellow-600">Tier 2</span>
-                        <span className="text-green-600">Tier 1</span>
+                      {/* Tier Table */}
+                      <div className="overflow-hidden rounded-lg border border-gray-200">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Point Range</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            <tr className={user?.tier === 'tier3' ? 'bg-orange-50 border-orange-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 3
+                                  {user?.tier === 'tier3' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                0 - {tierThresholds.tier2 - 1} points
+                              </td>
+                            </tr>
+                            <tr className={user?.tier === 'tier2' ? 'bg-yellow-50 border-yellow-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 2
+                                  {user?.tier === 'tier2' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {tierThresholds.tier2} - {tierThresholds.tier1 - 1} points
+                              </td>
+                            </tr>
+                            <tr className={user?.tier === 'tier1' ? 'bg-green-50 border-green-200' : 'bg-white'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                <span className="flex items-center">
+                                  Tier 1
+                                  {user?.tier === 'tier1' && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      Your Tier
+                                    </span>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {tierThresholds.tier1}+ points
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                       
-                      {/* Progress Bar Container */}
-                      <div className="relative">
-                        {/* Base Progress Bar */}
-                        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                          {/* Tier 3 Section (0 to tier2Threshold) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-orange-400 to-orange-500 absolute left-0"
-                            style={{ 
-                              width: tierThresholds.tier1 > 0 ? `${(tierThresholds.tier2 / tierThresholds.tier1) * 100}%` : '33.33%' 
-                            }}
-                          />
-                          {/* Tier 2 Section (tier2Threshold to tier1Threshold) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 absolute"
-                            style={{ 
-                              left: tierThresholds.tier1 > 0 ? `${(tierThresholds.tier2 / tierThresholds.tier1) * 100}%` : '33.33%',
-                              width: tierThresholds.tier1 > 0 ? `${((tierThresholds.tier1 - tierThresholds.tier2) / tierThresholds.tier1) * 100}%` : '33.33%'
-                            }}
-                          />
-                          {/* Tier 1 Section (tier1Threshold+) */}
-                          <div 
-                            className="h-full bg-gradient-to-r from-green-400 to-green-500 absolute right-0"
-                            style={{ 
-                              width: '16.67%' // Visual representation for Tier 1 extension
-                            }}
-                          />
-                        </div>
-                        
-                        {/* User Position Indicator */}
-                        <div 
-                          className="absolute top-0 transform -translate-x-1/2"
-                          style={{ 
-                            left: `${Math.min(
-                              Math.max(
-                                ((user.currentMonthPoints || 0) / Math.max(tierThresholds.tier1 * 1.2, 1)) * 100, 
-                                2
-                              ), 
-                              98
-                            )}%` 
-                          }}
-                        >
-                          <div className="w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-md" />
-                          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                            <div className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded shadow-lg">
-                              {user.currentMonthPoints || 0} pts
-                            </div>
+                      {/* User Position Details */}
+                      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-1 bg-blue-100 rounded">
+                            <Trophy className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-blue-900 text-sm">Your Current Position</h4>
+                            <p className="text-sm text-blue-700 mt-1">
+                              You have <span className="font-semibold">{user.currentMonthPoints || 0} points</span> this month and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
+                              {user.tier === 'tier1' 
+                                ? ` Great job reaching the top tier!`
+                                : user.tier === 'tier2' 
+                                ? ` You need ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points to reach Tier 1.`
+                                : ` You need ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points to reach Tier 2.`
+                              }
+                            </p>
                           </div>
                         </div>
-                      </div>
-                      
-                      {/* Threshold Values */}
-                      <div className="flex justify-between text-xs text-gray-600">
-                        <span>0 pts</span>
-                        <span>{tierThresholds.tier2} pts</span>
-                        <span>{tierThresholds.tier1} pts</span>
-                      </div>
-                      
-                      {/* Current Status */}
-                      <div className="text-center pt-2">
-                        <p className="text-sm text-gray-700">
-                          You are currently in <span className="font-semibold text-blue-600">{getTierDisplayName(user.tier)}</span>
-                          {user.tier === 'tier1' 
-                            ? ` with ${user.currentMonthPoints || 0} points this month`
-                            : user.tier === 'tier2' 
-                            ? `. ${Math.max(0, tierThresholds.tier1 - (user.currentMonthPoints || 0))} more points needed for Tier 1`
-                            : `. ${Math.max(0, tierThresholds.tier2 - (user.currentMonthPoints || 0))} more points needed for Tier 2`
-                          }
-                        </p>
                       </div>
                     </div>
                   </div>
