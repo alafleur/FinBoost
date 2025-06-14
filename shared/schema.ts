@@ -256,18 +256,7 @@ export const adminPointsActions = pgTable("admin_points_actions", {
   updatedBy: integer("updated_by").references(() => users.id),
 });
 
-// Monthly reward pool settings controlled by admin
-export const monthlyPoolSettings = pgTable("monthly_pool_settings", {
-  id: serial("id").primaryKey(),
-  cycleName: text("cycle_name").notNull(), // e.g., "January 2025", "February 2025"
-  cycleStartDate: timestamp("cycle_start_date").notNull(),
-  cycleEndDate: timestamp("cycle_end_date").notNull(),
-  rewardPoolPercentage: integer("reward_pool_percentage").notNull(), // Percentage of subscription fee going to rewards (0-100)
-  membershipFee: integer("membership_fee").notNull(), // Monthly fee in cents ($20 = 2000)
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  createdBy: integer("created_by").references(() => users.id),
-});
+// Historical table kept for data integrity - use cycleSettings for new cycles
 
 // Admin settings for membership and bonuses
 export const adminSettings = pgTable("admin_settings", {
@@ -288,13 +277,7 @@ export const insertRewardDistributionSettingSchema = createInsertSchema(rewardDi
   description: true,
 });
 
-export const insertMonthlyPoolSettingSchema = createInsertSchema(monthlyPoolSettings).pick({
-  cycleName: true,
-  cycleStartDate: true,
-  cycleEndDate: true,
-  rewardPoolPercentage: true,
-  membershipFee: true,
-});
+// Removed - use cycle-based schemas instead
 
 // New Cycle-Based Tables (Phase 1: Add alongside existing monthly tables)
 

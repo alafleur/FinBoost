@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, monthlyPoolSettings, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, and, lt, gte, ne, lte, between } from "drizzle-orm";
@@ -2731,12 +2731,12 @@ export class MemStorage implements IStorage {
   async getCurrentPoolSettingsForDate(date: Date): Promise<{ rewardPoolPercentage: number; membershipFee: number } | null> {
     try {
       const [setting] = await db.select()
-        .from(monthlyPoolSettings)
+        .from(cycleSettings)
         .where(
           and(
-            sql`${monthlyPoolSettings.cycleStartDate} <= ${date.toISOString().split('T')[0]}`,
-            sql`${monthlyPoolSettings.cycleEndDate} >= ${date.toISOString().split('T')[0]}`,
-            eq(monthlyPoolSettings.isActive, true)
+            sql`${cycleSettings.cycleStartDate} <= ${date.toISOString().split('T')[0]}`,
+            sql`${cycleSettings.cycleEndDate} >= ${date.toISOString().split('T')[0]}`,
+            eq(cycleSettings.isActive, true)
           )
         )
         .limit(1);
@@ -2762,26 +2762,26 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async updateMonthlyPoolSetting(id: number, updates: any): Promise<any> {
+  async updateCycleSetting(id: number, updates: any): Promise<any> {
     try {
-      const [updated] = await db.update(monthlyPoolSettings)
+      const [updated] = await db.update(cycleSettings)
         .set(updates)
-        .where(eq(monthlyPoolSettings.id, id))
+        .where(eq(cycleSettings.id, id))
         .returning();
       return updated;
     } catch (error) {
-      console.error('Error updating monthly pool setting:', error);
+      console.error('Error updating cycle setting:', error);
       throw error;
     }
   }
 
-  async getAllMonthlyPoolSettings(): Promise<any[]> {
+  async getAllCycleSettings(): Promise<any[]> {
     try {
       return await db.select()
-        .from(monthlyPoolSettings)
-        .orderBy(desc(monthlyPoolSettings.cycleStartDate));
+        .from(cycleSettings)
+        .orderBy(desc(cycleSettings.cycleStartDate));
     } catch (error) {
-      console.error('Error getting all monthly pool settings:', error);
+      console.error('Error getting all cycle settings:', error);
       return [];
     }
   }
