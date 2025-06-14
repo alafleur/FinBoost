@@ -296,6 +296,111 @@ export const insertMonthlyPoolSettingSchema = createInsertSchema(monthlyPoolSett
   membershipFee: true,
 });
 
+// New Cycle-Based Tables (Phase 1: Add alongside existing monthly tables)
+
+// Flexible Cycle Settings - replaces monthlyPoolSettings with full flexibility
+export const cycleSettings = pgTable("cycle_settings", {
+  id: serial("id").primaryKey(),
+  cycleName: text("cycle_name").notNull(), // e.g., "Weekly Cycle 1", "Bi-weekly Jan 1-14"
+  cycleType: text("cycle_type").notNull(), // 'weekly', 'biweekly', 'monthly', 'custom'
+  cycleStartDate: timestamp("cycle_start_date").notNull(),
+  cycleEndDate: timestamp("cycle_end_date").notNull(),
+  
+  // Payment Period Configuration
+  paymentPeriodDays: integer("payment_period_days").notNull(), // 7, 14, 30, custom
+  membershipFee: integer("membership_fee").notNull(), // Fee for the payment period in cents
+  
+  // Reward Pool Configuration
+  rewardPoolPercentage: integer("reward_pool_percentage").notNull(), // 0-100
+  
+  // Tier Distribution (admin configurable percentiles)
+  tier1Threshold: integer("tier1_threshold").default(33).notNull(), // Top X%
+  tier2Threshold: integer("tier2_threshold").default(67).notNull(), // Middle X%
+  // tier3 is everyone else (100% - tier2Threshold)
+  
+  // Pool Distribution Among Tiers
+  tier1PoolPercentage: integer("tier1_pool_percentage").default(50).notNull(),
+  tier2PoolPercentage: integer("tier2_pool_percentage").default(35).notNull(),
+  tier3PoolPercentage: integer("tier3_pool_percentage").default(15).notNull(),
+  
+  // Winner Selection Configuration
+  selectionPercentage: integer("selection_percentage").default(50).notNull(), // % of each tier that wins
+  
+  // Point Deduction for Winners (admin configurable)
+  winnerPointDeductionPercentage: integer("winner_point_deduction_percentage").default(80).notNull(),
+  
+  // Mid-cycle joining threshold
+  midCycleJoinThresholdDays: integer("mid_cycle_join_threshold_days").default(3).notNull(),
+  
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by").references(() => users.id),
+});
+
+// User Cycle Points - tracks points per cycle instead of monthly
+export const userCyclePoints = pgTable("user_cycle_points", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
+  currentCyclePoints: integer("current_cycle_points").default(0).notNull(),
+  theoreticalPoints: integer("theoretical_points").default(0).notNull(), // For non-premium users
+  tier: text("tier").default("tier3").notNull(), // tier1, tier2, tier3
+  joinedCycleAt: timestamp("joined_cycle_at").defaultNow().notNull(),
+  lastActivityDate: timestamp("last_activity_date"),
+  pointsRolledOver: integer("points_rolled_over").default(0).notNull(), // From previous cycle
+  isActive: boolean("is_active").default(true).notNull(),
+});
+
+// Cycle Winner Selections - replaces winnerSelectionCycles
+export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
+  id: serial("id").primaryKey(),
+  cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  tier: text("tier").notNull(), // tier1, tier2, tier3
+  tierRank: integer("tier_rank").notNull(), // Position within tier
+  pointsAtSelection: integer("points_at_selection").notNull(),
+  rewardAmount: integer("reward_amount").notNull(), // In cents
+  pointsDeducted: integer("points_deducted").notNull(),
+  pointsRolledOver: integer("points_rolled_over").notNull(),
+  payoutStatus: text("payout_status").default("pending").notNull(), // pending, processing, completed, failed
+  selectionDate: timestamp("selection_date").defaultNow().notNull(),
+});
+
+// Cycle Point History - enhanced version of userPointsHistory with cycle tracking
+export const cyclePointHistory = pgTable("cycle_point_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
+  points: integer("points").notNull(),
+  action: text("action").notNull(), // Same actions as userPointsHistory
+  description: text("description").notNull(),
+  relatedId: integer("related_id"), // Reference to lesson, quiz, etc.
+  status: text("status").default("approved").notNull(), // pending, approved, rejected
+  proofUrl: text("proof_url"),
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  metadata: text("metadata"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Admin-configurable point actions with cycle limits instead of monthly
+export const cyclePointsActions = pgTable("cycle_points_actions", {
+  id: serial("id").primaryKey(),
+  actionId: text("action_id").notNull().unique(),
+  name: text("name").notNull(),
+  basePoints: integer("base_points").notNull(),
+  maxDaily: integer("max_daily"),
+  maxPerCycle: integer("max_per_cycle"), // Replaces maxMonthly with cycle-based limit
+  maxTotal: integer("max_total"),
+  requiresProof: boolean("requires_proof").default(false).notNull(),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
 export const insertAdminSettingSchema = createInsertSchema(adminSettings).pick({
   settingKey: true,
   settingValue: true,
