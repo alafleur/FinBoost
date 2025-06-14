@@ -249,7 +249,16 @@ export default function Dashboard() {
   };
 
   const getTierDisplayName = (tier: string) => {
-    return tier || 'Bronze';
+    switch (tier?.toLowerCase()) {
+      case 'tier1':
+        return 'Tier 1';
+      case 'tier2':
+        return 'Tier 2';
+      case 'tier3':
+        return 'Tier 3';
+      default:
+        return 'Tier 1';
+    }
   };
 
   // Save PayPal payment information
