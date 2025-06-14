@@ -36,10 +36,10 @@ interface LeaderboardData {
 }
 
 export default function Leaderboard() {
-  const [monthlyData, setMonthlyData] = useState<LeaderboardData | null>(null);
+  const [cycleData, setCycleData] = useState<LeaderboardData | null>(null);
   const [allTimeData, setAllTimeData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('monthly');
+  const [activeTab, setActiveTab] = useState('cycle');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const { toast } = useToast();
@@ -109,8 +109,8 @@ export default function Leaderboard() {
         const processedData = processExpandedData(result);
         
         // Set data for the active tab
-        if (activeTab === 'monthly') {
-          setMonthlyData(processedData);
+        if (activeTab === 'cycle') {
+          setCycleData(processedData);
         } else {
           setAllTimeData(processedData);
         }
@@ -263,9 +263,9 @@ export default function Leaderboard() {
         setCurrentPage(1); // Reset to first page when switching tabs
       }}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="monthly" className="flex items-center space-x-2">
+          <TabsTrigger value="cycle" className="flex items-center space-x-2">
             <Star className="h-4 w-4" />
-            <span>This Month</span>
+            <span>This Cycle</span>
           </TabsTrigger>
           <TabsTrigger value="allTime" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
@@ -273,8 +273,8 @@ export default function Leaderboard() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="monthly">
-          {renderLeaderboard(monthlyData)}
+        <TabsContent value="cycle">
+          {renderLeaderboard(cycleData)}
         </TabsContent>
 
         <TabsContent value="allTime">
