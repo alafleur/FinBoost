@@ -986,7 +986,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="w-full">
               <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
@@ -1034,7 +1034,7 @@ export default function Dashboard() {
           </div>
 
           {/* Desktop Tab Content */}
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="w-full py-6">
             
             {/* Rewards Tab - Simplest Implementation */}
             <TabsContent value="rewards" className="mt-0 space-y-6">
