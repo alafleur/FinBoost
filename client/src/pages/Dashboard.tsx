@@ -1169,11 +1169,7 @@ export default function Dashboard() {
               {/* Points Summary */}
               <div className="space-y-6">
                 {user && (
-                  <PointsSummary 
-                    user={user} 
-                    actions={actions} 
-                    isLoading={false}
-                  />
+                  <PointsSummary user={user} />
                 )}
               </div>
 
