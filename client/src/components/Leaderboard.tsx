@@ -170,37 +170,42 @@ export default function Leaderboard() {
           </Card>
         )}
 
-        {/* Top 3 Podium */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {data.leaderboard.slice(0, 3).map((entry, index) => (
-            <Card key={entry.rank} className={`text-center ${entry.isCurrentUser ? 'ring-2 ring-primary-500' : ''} ${index === 0 ? 'transform scale-105' : ''}`}>
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center space-y-2">
-                  {getRankIcon(entry.rank)}
-                  <p className={`font-semibold ${entry.isCurrentUser ? 'text-primary-600' : ''}`}>
-                    {entry.username}
-                  </p>
-                  <p className="text-sm text-gray-600">{entry.points} pts</p>
-                  <Badge className={getTierColor(entry.tier)}>
-                    {entry.tier}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Rest of Leaderboard */}
+        {/* All Members - Uniform List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Trophy className="h-5 w-5" />
-              <span>Full Rankings</span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5" />
+                <span>All Members</span>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="space-y-1">
-              {data.leaderboard.slice(3).map((entry) => (
+              {data.leaderboard.map((entry) => (
                 <div
                   key={entry.rank}
                   className={`flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 ${
@@ -253,7 +258,10 @@ export default function Leaderboard() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(tab) => {
+        setActiveTab(tab);
+        setCurrentPage(1); // Reset to first page when switching tabs
+      }}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="monthly" className="flex items-center space-x-2">
             <Star className="h-4 w-4" />
