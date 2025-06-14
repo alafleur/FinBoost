@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,57 +31,117 @@ interface AnalyticsData {
 
 export default function Analytics() {
   const [timeframe, setTimeframe] = useState('30');
+  const [currentCycle, setCurrentCycle] = useState<any>(null);
+
+  // Fetch current cycle data for context
+  const { data: cycleData } = useQuery({
+    queryKey: ['/api/admin/cycle-settings'],
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cycle-settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch cycle data');
+      const data = await response.json();
+      return data;
+    }
+  });
+
+  // Set current cycle when data loads
+  useEffect(() => {
+    if (cycleData?.cycles?.length > 0) {
+      const activeCycle = cycleData.cycles.find((c: any) => c.isActive);
+      setCurrentCycle(activeCycle);
+    }
+  }, [cycleData]);
+
+  // Calculate timeframe based on selection
+  const getTimeframeParams = () => {
+    if (timeframe === 'current-cycle' && currentCycle) {
+      const cycleStart = new Date(currentCycle.cycleStartDate);
+      const daysSinceStart = Math.ceil((Date.now() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+      return `timeframe=${daysSinceStart}&cycleId=${currentCycle.id}`;
+    }
+    if (timeframe === 'previous-cycle' && cycleData?.cycles?.length > 1) {
+      const previousCycle = cycleData.cycles.find((c: any) => !c.isActive);
+      if (previousCycle) {
+        const cycleStart = new Date(previousCycle.cycleStartDate);
+        const cycleEnd = new Date(previousCycle.cycleEndDate);
+        const cycleDays = Math.ceil((cycleEnd.getTime() - cycleStart.getTime()) / (1000 * 60 * 60 * 24));
+        return `timeframe=${cycleDays}&cycleId=${previousCycle.id}`;
+      }
+    }
+    return `timeframe=${timeframe}`;
+  };
 
   // Fetch analytics data
   const { data: userEngagement, isLoading: loadingUsers } = useQuery({
-    queryKey: ['/api/admin/analytics/users/engagement', timeframe],
+    queryKey: ['/api/admin/analytics/users/engagement', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/analytics/users/engagement?timeframe=${timeframe}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/users/engagement?${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch user engagement data');
       return response.json();
     }
   });
 
   const { data: learningPerformance, isLoading: loadingLearning } = useQuery({
-    queryKey: ['/api/admin/analytics/learning/performance', timeframe],
+    queryKey: ['/api/admin/analytics/learning/performance', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/analytics/learning/performance?timeframe=${timeframe}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/learning/performance?${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch learning performance data');
       return response.json();
     }
   });
 
   const { data: cyclePerformance, isLoading: loadingCycles } = useQuery({
-    queryKey: ['/api/admin/analytics/cycles/performance', timeframe],
+    queryKey: ['/api/admin/analytics/cycles/performance', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/analytics/cycles/performance?timeframe=${timeframe}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/cycles/performance?${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch cycle performance data');
       return response.json();
     }
   });
 
   const { data: financialOverview, isLoading: loadingFinancial } = useQuery({
-    queryKey: ['/api/admin/analytics/financial/overview', timeframe],
+    queryKey: ['/api/admin/analytics/financial/overview', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/analytics/financial/overview?timeframe=${timeframe}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/financial/overview?${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch financial overview data');
       return response.json();
     }
   });
 
   const { data: recentActivity, isLoading: loadingActivity } = useQuery({
-    queryKey: ['/api/admin/analytics/activity/recent'],
+    queryKey: ['/api/admin/analytics/activity/recent', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch('/api/admin/analytics/activity/recent?limit=20');
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/activity/recent?limit=20&${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch recent activity data');
       return response.json();
     }
   });
 
   const { data: kpis, isLoading: loadingKPIs } = useQuery({
-    queryKey: ['/api/admin/analytics/kpis/overview', timeframe],
+    queryKey: ['/api/admin/analytics/kpis/overview', timeframe, currentCycle?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/analytics/kpis/overview?timeframe=${timeframe}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/analytics/kpis/overview?${getTimeframeParams()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch KPI data');
       return response.json();
     }
@@ -163,6 +223,16 @@ export default function Analytics() {
           <p className="text-muted-foreground">
             Comprehensive insights into platform performance and user engagement
           </p>
+          {currentCycle && (
+            <div className="mt-2 p-2 bg-blue-50 rounded-md">
+              <p className="text-sm text-blue-700">
+                <strong>Current Cycle:</strong> {currentCycle.cycleName} 
+                <span className="text-blue-600 ml-2">
+                  ({new Date(currentCycle.cycleStartDate).toLocaleDateString()} - {new Date(currentCycle.cycleEndDate).toLocaleDateString()})
+                </span>
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <Select value={timeframe} onValueChange={setTimeframe}>
@@ -170,6 +240,16 @@ export default function Analytics() {
               <SelectValue placeholder="Select timeframe" />
             </SelectTrigger>
             <SelectContent>
+              {currentCycle && (
+                <>
+                  <SelectItem value="current-cycle">Current Cycle</SelectItem>
+                  {cycleData?.cycles?.find((c: any) => !c.isActive) && (
+                    <SelectItem value="previous-cycle">Previous Cycle</SelectItem>
+                  )}
+                  <SelectItem value="all-cycles">All Cycles</SelectItem>
+                  <div className="h-px bg-gray-200 my-1" />
+                </>
+              )}
               <SelectItem value="7">Last 7 days</SelectItem>
               <SelectItem value="30">Last 30 days</SelectItem>
               <SelectItem value="90">Last 90 days</SelectItem>
