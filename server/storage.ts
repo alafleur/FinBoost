@@ -4498,7 +4498,7 @@ export class MemStorage implements IStorage {
           .where(
             and(
               eq(userProgress.moduleId, module.id),
-              eq(userProgress.isCompleted, true),
+              eq(userProgress.completed, true),
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
@@ -4544,7 +4544,7 @@ export class MemStorage implements IStorage {
           .where(
             and(
               eq(userProgress.moduleId, module.id),
-              eq(userProgress.isCompleted, true),
+              eq(userProgress.completed, true),
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
