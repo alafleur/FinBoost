@@ -30,7 +30,7 @@ interface AnalyticsData {
 }
 
 export default function Analytics() {
-  const [timeframe, setTimeframe] = useState('30');
+  const [timeframe, setTimeframe] = useState('current-cycle');
   const [currentCycle, setCurrentCycle] = useState<any>(null);
 
   // Fetch current cycle data for context

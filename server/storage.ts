@@ -3933,7 +3933,7 @@ export class MemStorage implements IStorage {
     try {
       const currentCycle = await this.getCurrentCycle();
       if (!currentCycle) {
-        return { cycleId: null, participants: 0, totalPoints: 0, poolSize: 0 };
+        return { cycleId: null, cycleName: 'No Active Cycle', participants: 0, totalPoints: 0, poolSize: 0 };
       }
 
       const participants = await db
@@ -3957,7 +3957,7 @@ export class MemStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error getting current cycle stats:', error);
-      return { cycleId: null, participants: 0, totalPoints: 0, poolSize: 0 };
+      return { cycleId: null, cycleName: 'Error Loading Cycle', participants: 0, totalPoints: 0, poolSize: 0 };
     }
   }
 
