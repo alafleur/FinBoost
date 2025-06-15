@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
@@ -3558,5 +3559,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // WebSocket Server for Real-time Analytics (separate port to avoid Vite conflicts)
+  const wss = new WebSocketServer({ port: 5001 });
+  
+  // Store authenticated WebSocket connections
+  const authenticatedClients = new Map<WebSocket, { userId: number; isAdmin: boolean }>();
+  
+  wss.on('connection', async (ws, req) => {
+    console.log('WebSocket connection attempt');
+    
+    // Extract token from query params or headers
+    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    const token = url.searchParams.get('token') || req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      ws.close(1008, 'Authentication required');
+      return;
+    }
+    
+    try {
+      // Verify token and get user
+      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      const user = await storage.getUserById(decoded.userId);
+      
+      if (!user) {
+        ws.close(1008, 'Invalid token');
+        return;
+      }
+      
+      // Store authenticated connection
+      authenticatedClients.set(ws, { userId: user.id, isAdmin: user.isAdmin || user.email === 'lafleur.andrew@gmail.com' });
+      
+      console.log(`WebSocket authenticated: User ${user.id} (Admin: ${user.isAdmin})`);
+      
+      // Send initial connection success message
+      ws.send(JSON.stringify({
+        type: 'connection_established',
+        data: { userId: user.id, isAdmin: user.isAdmin }
+      }));
+      
+      // Handle client messages
+      ws.on('message', async (message) => {
+        try {
+          const data = JSON.parse(message.toString());
+          
+          switch (data.type) {
+            case 'subscribe_analytics':
+              if (authenticatedClients.get(ws)?.isAdmin) {
+                // Admin subscribed to real-time analytics
+                ws.send(JSON.stringify({
+                  type: 'analytics_subscription_confirmed',
+                  data: { subscribed: true }
+                }));
+              } else {
+                ws.send(JSON.stringify({
+                  type: 'error',
+                  data: { message: 'Admin access required for analytics' }
+                }));
+              }
+              break;
+              
+            case 'request_live_data':
+              if (authenticatedClients.get(ws)?.isAdmin) {
+                // Send current analytics data
+                const liveData = await getLiveAnalyticsData();
+                ws.send(JSON.stringify({
+                  type: 'live_analytics_data',
+                  data: liveData,
+                  timestamp: new Date().toISOString()
+                }));
+              }
+              break;
+              
+            default:
+              ws.send(JSON.stringify({
+                type: 'error',
+                data: { message: 'Unknown message type' }
+              }));
+          }
+        } catch (error) {
+          console.error('WebSocket message handling error:', error);
+          ws.send(JSON.stringify({
+            type: 'error',
+            data: { message: 'Invalid message format' }
+          }));
+        }
+      });
+      
+      // Handle connection close
+      ws.on('close', () => {
+        authenticatedClients.delete(ws);
+        console.log(`WebSocket disconnected: User ${user.id}`);
+      });
+      
+    } catch (error) {
+      console.error('WebSocket authentication error:', error);
+      ws.close(1008, 'Authentication failed');
+    }
+  });
+  
+  // Function to get live analytics data
+  async function getLiveAnalyticsData() {
+    try {
+      const now = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const [
+        totalUsers,
+        activeUsers,
+        premiumUsers,
+        currentCycleStats,
+        recentActivity
+      ] = await Promise.all([
+        storage.getTotalUsersCount(),
+        storage.getActiveUsersCount(thirtyDaysAgo),
+        storage.getPremiumUsersCount(),
+        storage.getCurrentCycleStats(),
+        storage.getRecentUserActivities(10)
+      ]);
+      
+      return {
+        kpis: {
+          totalUsers,
+          activeUsers,
+          premiumUsers,
+          cycleParticipants: currentCycleStats?.participants || 0,
+          timestamp: now.toISOString()
+        },
+        activity: recentActivity.slice(0, 5), // Latest 5 activities
+        cycleStats: currentCycleStats
+      };
+    } catch (error) {
+      console.error('Error generating live analytics data:', error);
+      return { error: 'Failed to fetch live data' };
+    }
+  }
+  
+  // Function to broadcast analytics updates to admin clients
+  function broadcastAnalyticsUpdate(data: any) {
+    const message = JSON.stringify({
+      type: 'analytics_update',
+      data,
+      timestamp: new Date().toISOString()
+    });
+    
+    authenticatedClients.forEach((clientInfo, ws) => {
+      if (clientInfo.isAdmin && ws.readyState === WebSocket.OPEN) {
+        ws.send(message);
+      }
+    });
+  }
+  
+  // Function to broadcast activity updates
+  function broadcastActivityUpdate(activity: any) {
+    const message = JSON.stringify({
+      type: 'activity_update',
+      data: activity,
+      timestamp: new Date().toISOString()
+    });
+    
+    authenticatedClients.forEach((clientInfo, ws) => {
+      if (clientInfo.isAdmin && ws.readyState === WebSocket.OPEN) {
+        ws.send(message);
+      }
+    });
+  }
+  
+  // Periodic analytics updates (every 30 seconds)
+  const analyticsUpdateInterval = setInterval(async () => {
+    if (authenticatedClients.size > 0) {
+      const hasAdminClients = Array.from(authenticatedClients.values()).some(client => client.isAdmin);
+      if (hasAdminClients) {
+        const liveData = await getLiveAnalyticsData();
+        broadcastAnalyticsUpdate(liveData);
+      }
+    }
+  }, 30000); // 30 seconds
+  
+  // Cleanup interval on server shutdown
+  process.on('SIGTERM', () => {
+    clearInterval(analyticsUpdateInterval);
+    wss.close();
+  });
+  
+  // Expose broadcast functions for use in other routes
+  (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;
+  (httpServer as any).broadcastActivityUpdate = broadcastActivityUpdate;
+  
   return httpServer;
 }
