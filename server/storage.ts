@@ -3980,18 +3980,18 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          category: modules.category,
-          totalModules: sql<number>`count(DISTINCT modules.id)`,
-          totalCompletions: sql<number>`count(lesson_progress.id)`,
+          category: learningModules.category,
+          totalModules: sql<number>`count(DISTINCT learning_modules.id)`,
+          totalCompletions: sql<number>`count(user_progress.id)`,
           avgCompletionRate: sql<number>`
-            count(lesson_progress.id) * 100.0 / count(DISTINCT modules.id)
+            count(user_progress.id) * 100.0 / count(DISTINCT learning_modules.id)
           `
         })
-        .from(modules)
-        .leftJoin(userProgress, eq(modules.id, userProgress.moduleId))
-        .where(eq(modules.isPublished, true))
-        .groupBy(modules.category)
-        .orderBy(desc(sql`count(lesson_progress.id)`));
+        .from(learningModules)
+        .leftJoin(userProgress, eq(learningModules.id, userProgress.moduleId))
+        .where(eq(learningModules.isPublished, true))
+        .groupBy(learningModules.category)
+        .orderBy(desc(sql`count(user_progress.id)`));
       return result;
     } catch (error) {
       console.error('Error getting category performance stats:', error);
@@ -4004,12 +4004,12 @@ export class MemStorage implements IStorage {
       // Estimate learning time based on module estimated minutes and completions
       const result = await db
         .select({
-          totalEstimatedMinutes: sql<number>`sum(modules.estimated_minutes)`,
-          avgSessionTime: sql<number>`avg(modules.estimated_minutes)`,
-          totalSessions: sql<number>`count(lesson_progress.id)`
+          totalEstimatedMinutes: sql<number>`sum(learning_modules.estimated_minutes)`,
+          avgSessionTime: sql<number>`avg(learning_modules.estimated_minutes)`,
+          totalSessions: sql<number>`count(user_progress.id)`
         })
         .from(userProgress)
-        .innerJoin(modules, eq(userProgress.moduleId, modules.id))
+        .innerJoin(learningModules, eq(userProgress.moduleId, learningModules.id))
         .where(gte(userProgress.completedAt, startDate));
       return result[0] || { totalEstimatedMinutes: 0, avgSessionTime: 0, totalSessions: 0 };
     } catch (error) {
@@ -4302,8 +4302,8 @@ export class MemStorage implements IStorage {
       const totalUsers = await this.getTotalUsersCount();
       const totalModules = await db
         .select({ count: sql<number>`count(*)` })
-        .from(modules)
-        .where(eq(modules.isPublished, true));
+        .from(learningModules)
+        .where(eq(learningModules.isPublished, true));
 
       const totalCompletions = await db
         .select({ count: sql<number>`count(*)` })
