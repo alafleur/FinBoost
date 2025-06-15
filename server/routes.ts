@@ -103,8 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last login
       await storage.updateUserLastLogin(user.id);
 
-      // Generate token
-      const token = await storage.generateToken(user.id);
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: user.id },
+        'finboost-secret-key-2024',
+        { expiresIn: '24h' }
+      );
 
       res.json({ 
         success: true, 
