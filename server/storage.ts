@@ -4499,6 +4499,7 @@ export class MemStorage implements IStorage {
             and(
               eq(userProgress.moduleId, module.id),
               eq(userProgress.completed, true),
+              sql`${userProgress.completedAt} IS NOT NULL`,
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
@@ -4545,6 +4546,7 @@ export class MemStorage implements IStorage {
             and(
               eq(userProgress.moduleId, module.id),
               eq(userProgress.completed, true),
+              sql`${userProgress.completedAt} IS NOT NULL`,
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
@@ -4583,14 +4585,14 @@ export class MemStorage implements IStorage {
         .select({
           category: learningModules.category,
           completions: sql<number>`count(*)`,
-          uniqueUsers: sql<number>`count(DISTINCT ${userProgress.userId})`,
-          averageScore: sql<number>`avg(${userProgress.score})`
+          uniqueUsers: sql<number>`count(DISTINCT ${userProgress.userId})`
         })
         .from(userProgress)
         .innerJoin(learningModules, eq(userProgress.moduleId, learningModules.id))
         .where(
           and(
-            eq(userProgress.isCompleted, true),
+            eq(userProgress.completed, true),
+            sql`${userProgress.completedAt} IS NOT NULL`,
             gte(userProgress.completedAt, startDate),
             lte(userProgress.completedAt, endDate)
           )
@@ -4601,7 +4603,7 @@ export class MemStorage implements IStorage {
         category: stat.category,
         completions: Number(stat.completions),
         uniqueUsers: Number(stat.uniqueUsers),
-        averageScore: Math.round((Number(stat.averageScore) || 0) * 100) / 100
+        averageScore: 0 // No score column in current schema
       })).sort((a, b) => b.completions - a.completions);
     } catch (error) {
       console.error('Error getting popular content categories:', error);
