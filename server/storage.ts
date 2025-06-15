@@ -3913,12 +3913,26 @@ export class MemStorage implements IStorage {
     activeUsers: number;
     premiumUsers: number;
     freeUsers: number;
+    performanceMetrics?: {
+      queryTime: number;
+      cached: boolean;
+    };
   }> {
+    const startTime = Date.now();
+    
     try {
       // Check cache first
       const cacheKey = `batch_user_metrics_${startDate.toISOString().split('T')[0]}`;
       const cached = this.getCachedData(cacheKey);
-      if (cached !== null) return cached;
+      if (cached !== null) {
+        return {
+          ...cached,
+          performanceMetrics: {
+            queryTime: Date.now() - startTime,
+            cached: true
+          }
+        };
+      }
 
       // Single optimized query to get all user metrics at once
       const result = await db.execute(sql`
@@ -3935,7 +3949,11 @@ export class MemStorage implements IStorage {
         totalUsers: Number(metrics.total_users) || 0,
         activeUsers: Number(metrics.active_users) || 0,
         premiumUsers: Number(metrics.premium_users) || 0,
-        freeUsers: Number(metrics.total_users) - Number(metrics.premium_users) || 0
+        freeUsers: Number(metrics.total_users) - Number(metrics.premium_users) || 0,
+        performanceMetrics: {
+          queryTime: Date.now() - startTime,
+          cached: false
+        }  
       };
 
       // Cache for 10 minutes
@@ -3948,7 +3966,11 @@ export class MemStorage implements IStorage {
         totalUsers: 0,
         activeUsers: 0,
         premiumUsers: 0,
-        freeUsers: 0
+        freeUsers: 0,
+        performanceMetrics: {
+          queryTime: Date.now() - startTime,
+          cached: false
+        }
       };
     }
   }

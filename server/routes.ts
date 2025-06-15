@@ -3504,7 +3504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+      if (!user || !user.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -3535,7 +3535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+      if (!user || !user.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
