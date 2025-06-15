@@ -105,15 +105,20 @@ export default function Analytics() {
   });
 
   const { data: cyclePerformance, isLoading: loadingCycles } = useQuery({
-    queryKey: ['/api/admin/analytics/cycles/performance', timeframe, currentCycle?.id],
+    queryKey: ['/api/admin/analytics/cycles/performance', timeframe, currentCycle?.id, Date.now()],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/analytics/cycles/performance?${getTimeframeParams()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(`/api/admin/analytics/cycles/performance?${getTimeframeParams()}&_t=${Date.now()}`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
       });
       if (!response.ok) throw new Error('Failed to fetch cycle performance data');
       return response.json();
-    }
+    },
+    staleTime: 0,
+    cacheTime: 0
   });
 
   const { data: financialOverview, isLoading: loadingFinancial } = useQuery({
