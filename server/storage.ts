@@ -4616,6 +4616,274 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // === COMPARATIVE ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 5) ===
+
+  async getComparativeAnalytics(timeframe: number): Promise<{
+    periodComparison: {
+      currentPeriod: {
+        startDate: string;
+        endDate: string;
+        activeUsers: number;
+        completedLessons: number;
+        newSubscriptions: number;
+        revenue: number;
+      };
+      previousPeriod: {
+        startDate: string;
+        endDate: string;
+        activeUsers: number;
+        completedLessons: number;
+        newSubscriptions: number;
+        revenue: number;
+      };
+      growthRates: {
+        activeUsersGrowth: number;
+        lessonCompletionGrowth: number;
+        subscriptionGrowth: number;
+        revenueGrowth: number;
+      };
+    };
+    trendAnalysis: {
+      weeklyTrends: Array<{
+        week: string;
+        activeUsers: number;
+        completions: number;
+        subscriptions: number;
+      }>;
+      performanceScore: number;
+    };
+    timeframe: number;
+  }> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date(endDate.getTime() - (timeframe * 24 * 60 * 60 * 1000));
+      
+      // Calculate previous period dates
+      const previousEndDate = new Date(startDate);
+      const previousStartDate = new Date(previousEndDate.getTime() - (timeframe * 24 * 60 * 60 * 1000));
+
+      // Current period metrics
+      const currentActiveUsers = await db
+        .select({ count: sql<number>`count(distinct user_id)` })
+        .from(lessonProgress)
+        .where(
+          and(
+            gte(lessonProgress.completedAt, startDate),
+            lte(lessonProgress.completedAt, endDate)
+          )
+        );
+
+      const currentCompletions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(lessonProgress)
+        .where(
+          and(
+            gte(lessonProgress.completedAt, startDate),
+            lte(lessonProgress.completedAt, endDate)
+          )
+        );
+
+      const currentSubscriptions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'premium'),
+            gte(users.subscriptionStartDate, startDate),
+            lte(users.subscriptionStartDate, endDate)
+          )
+        );
+
+      const currentRevenue = await db
+        .select({ revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN subscription_amount ELSE 0 END)` })
+        .from(users)
+        .where(
+          and(
+            gte(users.subscriptionStartDate, startDate),
+            lte(users.subscriptionStartDate, endDate)
+          )
+        );
+
+      // Previous period metrics
+      const previousActiveUsers = await db
+        .select({ count: sql<number>`count(distinct user_id)` })
+        .from(lessonProgress)
+        .where(
+          and(
+            gte(lessonProgress.completedAt, previousStartDate),
+            lte(lessonProgress.completedAt, previousEndDate)
+          )
+        );
+
+      const previousCompletions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(lessonProgress)
+        .where(
+          and(
+            gte(lessonProgress.completedAt, previousStartDate),
+            lte(lessonProgress.completedAt, previousEndDate)
+          )
+        );
+
+      const previousSubscriptions = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'premium'),
+            gte(users.subscriptionStartDate, previousStartDate),
+            lte(users.subscriptionStartDate, previousEndDate)
+          )
+        );
+
+      const previousRevenue = await db
+        .select({ revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN subscription_amount ELSE 0 END)` })
+        .from(users)
+        .where(
+          and(
+            gte(users.subscriptionStartDate, previousStartDate),
+            lte(users.subscriptionStartDate, previousEndDate)
+          )
+        );
+
+      // Calculate growth rates
+      const currentActiveUsersCount = currentActiveUsers[0]?.count || 0;
+      const previousActiveUsersCount = previousActiveUsers[0]?.count || 0;
+      const currentCompletionsCount = currentCompletions[0]?.count || 0;
+      const previousCompletionsCount = previousCompletions[0]?.count || 0;
+      const currentSubscriptionsCount = currentSubscriptions[0]?.count || 0;
+      const previousSubscriptionsCount = previousSubscriptions[0]?.count || 0;
+      const currentRevenueAmount = (currentRevenue[0]?.revenue || 0) / 100;
+      const previousRevenueAmount = (previousRevenue[0]?.revenue || 0) / 100;
+
+      const calculateGrowthRate = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Math.round(((current - previous) / previous) * 100 * 100) / 100;
+      };
+
+      // Weekly trends for the current period
+      const weeklyTrends = [];
+      const weeksInPeriod = Math.ceil(timeframe / 7);
+      
+      for (let i = 0; i < weeksInPeriod; i++) {
+        const weekStart = new Date(startDate.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
+        const weekEnd = new Date(Math.min(
+          weekStart.getTime() + (7 * 24 * 60 * 60 * 1000),
+          endDate.getTime()
+        ));
+
+        const weekActiveUsers = await db
+          .select({ count: sql<number>`count(distinct user_id)` })
+          .from(lessonProgress)
+          .where(
+            and(
+              gte(lessonProgress.completedAt, weekStart),
+              lte(lessonProgress.completedAt, weekEnd)
+            )
+          );
+
+        const weekCompletions = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(lessonProgress)
+          .where(
+            and(
+              gte(lessonProgress.completedAt, weekStart),
+              lte(lessonProgress.completedAt, weekEnd)
+            )
+          );
+
+        const weekSubscriptions = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(users)
+          .where(
+            and(
+              eq(users.subscriptionStatus, 'premium'),
+              gte(users.subscriptionStartDate, weekStart),
+              lte(users.subscriptionStartDate, weekEnd)
+            )
+          );
+
+        weeklyTrends.push({
+          week: `${weekStart.toISOString().split('T')[0]} - ${weekEnd.toISOString().split('T')[0]}`,
+          activeUsers: weekActiveUsers[0]?.count || 0,
+          completions: weekCompletions[0]?.count || 0,
+          subscriptions: weekSubscriptions[0]?.count || 0
+        });
+      }
+
+      // Calculate performance score (composite metric)
+      const userGrowthScore = Math.min(Math.max(calculateGrowthRate(currentActiveUsersCount, previousActiveUsersCount) / 10, 0), 10);
+      const engagementScore = Math.min(Math.max(calculateGrowthRate(currentCompletionsCount, previousCompletionsCount) / 10, 0), 10);
+      const revenueScore = Math.min(Math.max(calculateGrowthRate(currentRevenueAmount, previousRevenueAmount) / 10, 0), 10);
+      const performanceScore = Math.round(((userGrowthScore + engagementScore + revenueScore) / 3) * 10) / 10;
+
+      return {
+        periodComparison: {
+          currentPeriod: {
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0],
+            activeUsers: currentActiveUsersCount,
+            completedLessons: currentCompletionsCount,
+            newSubscriptions: currentSubscriptionsCount,
+            revenue: currentRevenueAmount
+          },
+          previousPeriod: {
+            startDate: previousStartDate.toISOString().split('T')[0],
+            endDate: previousEndDate.toISOString().split('T')[0],
+            activeUsers: previousActiveUsersCount,
+            completedLessons: previousCompletionsCount,
+            newSubscriptions: previousSubscriptionsCount,
+            revenue: previousRevenueAmount
+          },
+          growthRates: {
+            activeUsersGrowth: calculateGrowthRate(currentActiveUsersCount, previousActiveUsersCount),
+            lessonCompletionGrowth: calculateGrowthRate(currentCompletionsCount, previousCompletionsCount),
+            subscriptionGrowth: calculateGrowthRate(currentSubscriptionsCount, previousSubscriptionsCount),
+            revenueGrowth: calculateGrowthRate(currentRevenueAmount, previousRevenueAmount)
+          }
+        },
+        trendAnalysis: {
+          weeklyTrends,
+          performanceScore
+        },
+        timeframe
+      };
+    } catch (error) {
+      console.error('Error getting comparative analytics:', error);
+      return {
+        periodComparison: {
+          currentPeriod: {
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+            activeUsers: 0,
+            completedLessons: 0,
+            newSubscriptions: 0,
+            revenue: 0
+          },
+          previousPeriod: {
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+            activeUsers: 0,
+            completedLessons: 0,
+            newSubscriptions: 0,
+            revenue: 0
+          },
+          growthRates: {
+            activeUsersGrowth: 0,
+            lessonCompletionGrowth: 0,
+            subscriptionGrowth: 0,
+            revenueGrowth: 0
+          }
+        },
+        trendAnalysis: {
+          weeklyTrends: [],
+          performanceScore: 0
+        },
+        timeframe
+      };
+    }
+  }
+
   // === FINANCIAL METRICS ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 4) ===
 
   async getRevenueMetrics(startDate: Date, endDate: Date): Promise<{

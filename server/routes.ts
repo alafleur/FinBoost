@@ -3474,6 +3474,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comparative Analytics API - Phase 1.1 Step 5
+  app.get('/api/admin/analytics/comparative', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+
+      // Get comparative analytics data
+      const comparativeData = await storage.getComparativeAnalytics(days);
+
+      res.json({
+        success: true,
+        data: comparativeData
+      });
+    } catch (error) {
+      console.error('Error fetching comparative analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch comparative analytics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
