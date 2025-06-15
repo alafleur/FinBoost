@@ -3754,7 +3754,8 @@ export class MemStorage implements IStorage {
       const totalUsers = totalUsersCount[0]?.count || 0;
       
       // Calculate total pool (premium users * membership fee * reward pool percentage)
-      const totalPool = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+      // Note: membershipFee is in cents, so divide by 100 to convert to dollars
+      const totalPool = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100 / 100);
 
       return {
         totalPool,
