@@ -3936,20 +3936,27 @@ export class MemStorage implements IStorage {
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
-      const result = await db
-        .select({
-          date: sql<string>`DATE(joined_at)`,
-          count: sql<number>`count(*)`
-        })
-        .from(users)
-        .where(gte(users.joinedAt, startDate))
-        .groupBy(sql`DATE(joined_at)`)
-        .orderBy(sql`DATE(joined_at)`);
+      // Use raw SQL to avoid Drizzle ORM date comparison issues
+      const result = await db.execute(sql`
+        SELECT 
+          DATE(joined_at) as date,
+          COUNT(*)::int as count
+        FROM users 
+        WHERE joined_at >= ${startDate}
+        GROUP BY DATE(joined_at)
+        ORDER BY DATE(joined_at)
+      `);
+      
+      // Transform result to match expected format
+      const formattedResult = result.map((row: any) => ({
+        date: row.date,
+        count: row.count
+      }));
       
       // Cache for 30 minutes (registration trends change less frequently)
-      this.setCachedData(cacheKey, result, 30);
+      this.setCachedData(cacheKey, formattedResult, 30);
       
-      return result;
+      return formattedResult;
     } catch (error) {
       console.error('Error getting registration trends:', error);
       return [];
@@ -3958,21 +3965,40 @@ export class MemStorage implements IStorage {
 
   async getModuleCompletionRates(): Promise<any[]> {
     try {
-      const result = await db
-        .select({
-          moduleId: userProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM modules WHERE id = user_progress.module_id)`,
-          completions: sql<number>`count(*)`,
-          completionRate: sql<number>`
-            (count(*) * 100.0) / (
-              SELECT count(*) FROM users WHERE subscription_status = 'active' OR subscription_status IS NULL
-            )
-          `
-        })
-        .from(userProgress)
-        .groupBy(userProgress.moduleId)
-        .orderBy(desc(sql`count(*)`));
-      return result;
+      // Check cache first
+      const cacheKey = 'module_completion_rates';
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
+      // Use raw SQL to avoid table reference issues
+      const result = await db.execute(sql`
+        SELECT 
+          up.module_id as "moduleId",
+          lm.title as "moduleName",
+          COUNT(*)::int as completions,
+          ROUND((COUNT(*) * 100.0) / (
+            SELECT COUNT(*) FROM users WHERE is_active = true
+          ), 2) as "completionRate"
+        FROM user_progress up
+        JOIN learning_modules lm ON up.module_id = lm.id
+        WHERE up.completed = true
+        GROUP BY up.module_id, lm.title
+        ORDER BY COUNT(*) DESC
+        LIMIT 20
+      `);
+
+      // Transform result to match expected format
+      const formattedResult = result.map((row: any) => ({
+        moduleId: row.moduleId,
+        moduleName: row.moduleName,
+        completions: row.completions,
+        completionRate: row.completionRate
+      }));
+
+      // Cache for 15 minutes
+      this.setCachedData(cacheKey, formattedResult, 15);
+      
+      return formattedResult;
     } catch (error) {
       console.error('Error getting module completion rates:', error);
       return [];
@@ -3981,21 +4007,43 @@ export class MemStorage implements IStorage {
 
   async getRecentLessonCompletions(startDate: Date): Promise<any[]> {
     try {
-      const result = await db
-        .select({
-          id: userProgress.id,
-          userId: userProgress.userId,
-          username: users.username,
-          moduleId: userProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM modules WHERE id = user_progress.module_id)`,
-          completedAt: userProgress.completedAt
-        })
-        .from(userProgress)
-        .innerJoin(users, eq(userProgress.userId, users.id))
-        .where(gte(userProgress.completedAt, startDate))
-        .orderBy(desc(userProgress.completedAt))
-        .limit(50);
-      return result;
+      // Check cache first
+      const cacheKey = `recent_lesson_completions_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
+      // Use raw SQL to fix table reference issues
+      const result = await db.execute(sql`
+        SELECT 
+          up.id,
+          up.user_id as "userId",
+          u.username,
+          up.module_id as "moduleId",
+          lm.title as "moduleName",
+          up.completed_at as "completedAt"
+        FROM user_progress up
+        JOIN users u ON up.user_id = u.id
+        JOIN learning_modules lm ON up.module_id = lm.id
+        WHERE up.completed_at >= ${startDate}
+          AND up.completed = true
+        ORDER BY up.completed_at DESC
+        LIMIT 50
+      `);
+
+      // Transform result to match expected format
+      const formattedResult = result.map((row: any) => ({
+        id: row.id,
+        userId: row.userId,
+        username: row.username,
+        moduleId: row.moduleId,
+        moduleName: row.moduleName,
+        completedAt: row.completedAt
+      }));
+
+      // Cache for 10 minutes
+      this.setCachedData(cacheKey, formattedResult, 10);
+      
+      return formattedResult;
     } catch (error) {
       console.error('Error getting recent lesson completions:', error);
       return [];
