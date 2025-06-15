@@ -4482,30 +4482,48 @@ export class MemStorage implements IStorage {
     completedUsers: number;
   }>> {
     try {
-      // Simplified implementation for Phase 1.1 - return sample data structure
-      return [
-        {
-          moduleId: 1,
-          moduleName: "Budgeting Basics",
-          completionRate: 85.5,
-          totalUsers: 72,
-          completedUsers: 62
-        },
-        {
-          moduleId: 2, 
-          moduleName: "Emergency Fund",
-          completionRate: 72.3,
-          totalUsers: 72,
-          completedUsers: 52
-        },
-        {
-          moduleId: 3,
-          moduleName: "Debt Management", 
-          completionRate: 68.1,
-          totalUsers: 72,
-          completedUsers: 49
-        }
-      ];
+      // Get all learning modules
+      const modules = await db.select().from(learningModules);
+      
+      // Get total premium users (who can complete modules)
+      const totalUsersResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'premium'));
+      
+      const totalUsers = totalUsersResult[0]?.count || 0;
+      
+      const moduleStats = [];
+      
+      for (const module of modules) {
+        // Count unique users who completed this module in the timeframe
+        const completedUsersResult = await db
+          .select({ count: sql<number>`count(DISTINCT user_id)` })
+          .from(userProgress)
+          .where(
+            and(
+              eq(userProgress.moduleId, module.id),
+              eq(userProgress.completed, true),
+              isNotNull(userProgress.completedAt),
+              gte(userProgress.completedAt, startDate),
+              lte(userProgress.completedAt, endDate)
+            )
+          );
+        
+        const completed = completedUsersResult[0]?.count || 0;
+        const completionRate = totalUsers > 0 ? (completed / totalUsers) * 100 : 0;
+        
+        moduleStats.push({
+          moduleId: module.id,
+          moduleName: module.title,
+          completionRate: Math.round(completionRate * 100) / 100,
+          totalUsers,
+          completedUsers: completed
+        });
+      }
+      
+      // Sort by completion rate descending
+      return moduleStats.sort((a, b) => b.completionRate - a.completionRate);
     } catch (error) {
       console.error('Error getting module completion rates:', error);
       return [];
@@ -4579,7 +4597,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(userProgress.completed, true),
-            sql`${userProgress.completedAt} IS NOT NULL`,
+            isNotNull(userProgress.completedAt),
             gte(userProgress.completedAt, startDate),
             lte(userProgress.completedAt, endDate)
           )
@@ -4595,6 +4613,328 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting popular content categories:', error);
       return [];
+    }
+  }
+
+  // === CYCLE PERFORMANCE ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 3) ===
+
+  async getCurrentCycleStats(): Promise<{
+    participants: number;
+    totalPoolAmount: number;
+    averagePoints: number;
+    topPerformer: { username: string; points: number } | null;
+  }> {
+    try {
+      // Get active cycle
+      const activeCycle = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.isActive, true))
+        .limit(1);
+
+      if (!activeCycle.length) {
+        return {
+          participants: 0,
+          totalPoolAmount: 0,
+          averagePoints: 0,
+          topPerformer: null
+        };
+      }
+
+      const cycle = activeCycle[0];
+
+      // Get participants count
+      const participantsResult = await db
+        .select({ count: sql<number>`count(DISTINCT user_id)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+
+      const participants = participantsResult[0]?.count || 0;
+
+      // Calculate total pool amount
+      const totalPoolAmount = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+
+      // Get average points
+      const avgPointsResult = await db
+        .select({ avg: sql<number>`avg(points)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+
+      const averagePoints = Math.round(avgPointsResult[0]?.avg || 0);
+
+      // Get top performer
+      const topPerformerResult = await db
+        .select({
+          username: users.username,
+          points: userCyclePoints.points
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(eq(userCyclePoints.cycleSettingId, cycle.id))
+        .orderBy(desc(userCyclePoints.points))
+        .limit(1);
+
+      const topPerformer = topPerformerResult.length > 0 
+        ? { username: topPerformerResult[0].username, points: topPerformerResult[0].points }
+        : null;
+
+      return {
+        participants,
+        totalPoolAmount,
+        averagePoints,
+        topPerformer
+      };
+    } catch (error) {
+      console.error('Error getting current cycle stats:', error);
+      return {
+        participants: 0,
+        totalPoolAmount: 0,
+        averagePoints: 0,
+        topPerformer: null
+      };
+    }
+  }
+
+  async getHistoricalCyclePerformance(startDate: Date): Promise<Array<{
+    cycleName: string;
+    participants: number;
+    totalPayout: number;
+    avgPointsPerUser: number;
+    completionDate: Date;
+  }>> {
+    try {
+      // Get completed cycles since startDate
+      const completedCycles = await db
+        .select()
+        .from(cycleSettings)
+        .where(
+          and(
+            eq(cycleSettings.isActive, false),
+            gte(cycleSettings.cycleEndDate, startDate)
+          )
+        )
+        .orderBy(desc(cycleSettings.cycleEndDate));
+
+      const cyclePerformance = [];
+
+      for (const cycle of completedCycles) {
+        // Get participants for this cycle
+        const participantsResult = await db
+          .select({ count: sql<number>`count(DISTINCT user_id)` })
+          .from(userCyclePoints)
+          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+
+        const participants = participantsResult[0]?.count || 0;
+
+        // Calculate total payout
+        const totalPayout = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+
+        // Get average points
+        const avgPointsResult = await db
+          .select({ avg: sql<number>`avg(points)` })
+          .from(userCyclePoints)
+          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+
+        const avgPointsPerUser = Math.round(avgPointsResult[0]?.avg || 0);
+
+        cyclePerformance.push({
+          cycleName: cycle.cycleName,
+          participants,
+          totalPayout,
+          avgPointsPerUser,
+          completionDate: cycle.cycleEndDate
+        });
+      }
+
+      return cyclePerformance;
+    } catch (error) {
+      console.error('Error getting historical cycle performance:', error);
+      return [];
+    }
+  }
+
+  async getCycleParticipationTrends(startDate: Date): Promise<Array<{
+    cycleName: string;
+    newParticipants: number;
+    returningParticipants: number;
+    totalParticipants: number;
+    retentionRate: number;
+  }>> {
+    try {
+      // Get cycles since startDate
+      const cycles = await db
+        .select()
+        .from(cycleSettings)
+        .where(gte(cycleSettings.cycleStartDate, startDate))
+        .orderBy(asc(cycleSettings.cycleStartDate));
+
+      const participationTrends = [];
+
+      for (const cycle of cycles) {
+        // Get all participants for this cycle
+        const currentParticipants = await db
+          .select({ userId: userCyclePoints.userId })
+          .from(userCyclePoints)
+          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+
+        const currentUserIds = currentParticipants.map(p => p.userId);
+        const totalParticipants = currentUserIds.length;
+
+        // Get previous cycle participants
+        const previousCycles = await db
+          .select()
+          .from(cycleSettings)
+          .where(
+            and(
+              lt(cycleSettings.cycleEndDate, cycle.cycleStartDate),
+              eq(cycleSettings.isActive, false)
+            )
+          )
+          .orderBy(desc(cycleSettings.cycleEndDate))
+          .limit(1);
+
+        let returningParticipants = 0;
+        let retentionRate = 0;
+
+        if (previousCycles.length > 0) {
+          const previousCycle = previousCycles[0];
+          
+          const previousParticipants = await db
+            .select({ userId: userCyclePoints.userId })
+            .from(userCyclePoints)
+            .where(eq(userCyclePoints.cycleSettingId, previousCycle.id));
+
+          const previousUserIds = previousParticipants.map(p => p.userId);
+          
+          // Count returning users
+          returningParticipants = currentUserIds.filter(id => previousUserIds.includes(id)).length;
+          
+          // Calculate retention rate
+          retentionRate = previousUserIds.length > 0 
+            ? Math.round((returningParticipants / previousUserIds.length) * 100 * 100) / 100
+            : 0;
+        }
+
+        const newParticipants = totalParticipants - returningParticipants;
+
+        participationTrends.push({
+          cycleName: cycle.cycleName,
+          newParticipants,
+          returningParticipants,
+          totalParticipants,
+          retentionRate
+        });
+      }
+
+      return participationTrends;
+    } catch (error) {
+      console.error('Error getting cycle participation trends:', error);
+      return [];
+    }
+  }
+
+  async getPointsDistributionAnalytics(): Promise<{
+    tierDistribution: Array<{ tier: string; userCount: number; avgPoints: number }>;
+    pointsRange: { min: number; max: number; median: number };
+    topPerformers: Array<{ username: string; points: number; tier: string }>;
+  }> {
+    try {
+      // Get active cycle
+      const activeCycle = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.isActive, true))
+        .limit(1);
+
+      if (!activeCycle.length) {
+        return {
+          tierDistribution: [],
+          pointsRange: { min: 0, max: 0, median: 0 },
+          topPerformers: []
+        };
+      }
+
+      const cycle = activeCycle[0];
+
+      // Get all user points for active cycle
+      const userPoints = await db
+        .select({
+          userId: userCyclePoints.userId,
+          username: users.username,
+          points: userCyclePoints.points
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(eq(userCyclePoints.cycleSettingId, cycle.id))
+        .orderBy(desc(userCyclePoints.points));
+
+      if (userPoints.length === 0) {
+        return {
+          tierDistribution: [],
+          pointsRange: { min: 0, max: 0, median: 0 },
+          topPerformers: []
+        };
+      }
+
+      // Calculate tier distribution
+      const totalUsers = userPoints.length;
+      const tier1Count = Math.ceil(totalUsers * cycle.tier1Threshold / 100);
+      const tier2Count = Math.ceil(totalUsers * (cycle.tier2Threshold - cycle.tier1Threshold) / 100);
+      const tier3Count = totalUsers - tier1Count - tier2Count;
+
+      const tier1Users = userPoints.slice(0, tier1Count);
+      const tier2Users = userPoints.slice(tier1Count, tier1Count + tier2Count);
+      const tier3Users = userPoints.slice(tier1Count + tier2Count);
+
+      const tierDistribution = [
+        {
+          tier: 'Tier 1',
+          userCount: tier1Users.length,
+          avgPoints: tier1Users.length > 0 ? Math.round(tier1Users.reduce((sum, u) => sum + u.points, 0) / tier1Users.length) : 0
+        },
+        {
+          tier: 'Tier 2', 
+          userCount: tier2Users.length,
+          avgPoints: tier2Users.length > 0 ? Math.round(tier2Users.reduce((sum, u) => sum + u.points, 0) / tier2Users.length) : 0
+        },
+        {
+          tier: 'Tier 3',
+          userCount: tier3Users.length,
+          avgPoints: tier3Users.length > 0 ? Math.round(tier3Users.reduce((sum, u) => sum + u.points, 0) / tier3Users.length) : 0
+        }
+      ];
+
+      // Calculate points range
+      const points = userPoints.map(u => u.points).sort((a, b) => a - b);
+      const min = points[0] || 0;
+      const max = points[points.length - 1] || 0;
+      const median = points.length > 0 ? points[Math.floor(points.length / 2)] : 0;
+
+      // Top performers with tier assignment
+      const topPerformers = userPoints.slice(0, 10).map((user, index) => {
+        let tier = 'Tier 3';
+        if (index < tier1Count) tier = 'Tier 1';
+        else if (index < tier1Count + tier2Count) tier = 'Tier 2';
+        
+        return {
+          username: user.username,
+          points: user.points,
+          tier
+        };
+      });
+
+      return {
+        tierDistribution,
+        pointsRange: { min, max, median },
+        topPerformers
+      };
+    } catch (error) {
+      console.error('Error getting points distribution analytics:', error);
+      return {
+        tierDistribution: [],
+        pointsRange: { min: 0, max: 0, median: 0 },
+        topPerformers: []
+      };
     }
   }
 }
