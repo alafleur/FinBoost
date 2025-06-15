@@ -3412,6 +3412,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Learning Analytics API - Phase 1.1 Step 2
+  app.get('/api/admin/analytics/learning', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Lesson completion rates by module
+      const moduleCompletionRates = await storage.getModuleCompletionRates(startDate, endDate);
+
+      // Average time spent per module
+      const averageTimePerModule = await storage.getAverageTimePerModule(startDate, endDate);
+
+      // Popular content categories ranking
+      const popularCategories = await storage.getPopularContentCategories(startDate, endDate);
+
+      res.json({
+        success: true,
+        data: {
+          moduleCompletionRates,
+          averageTimePerModule,
+          popularCategories,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching learning analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch learning analytics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
