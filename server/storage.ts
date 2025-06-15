@@ -513,6 +513,9 @@ export class MemStorage implements IStorage {
     await db.update(users)
       .set({ lastLoginAt: new Date() })
       .where(eq(users.id, userId));
+    
+    // Invalidate active users cache since login activity affects it
+    this.invalidateCacheByPattern('active_users');
   }
 
   async updateUserProfile(userId: number, profileData: Partial<{firstName: string, lastName: string, bio: string, location: string, occupation: string, financialGoals: string}>): Promise<void> {
