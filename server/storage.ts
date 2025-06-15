@@ -3937,12 +3937,12 @@ export class MemStorage implements IStorage {
       }
 
       const participants = await db
-        .select({ count: sql<number>`count(DISTINCT user_id)` })
+        .select({ count: sql<number>`count(DISTINCT ${userCyclePoints.userId})` })
         .from(userCyclePoints)
         .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
 
       const totalPoints = await db
-        .select({ total: sql<number>`sum(current_cycle_points)` })
+        .select({ total: sql<number>`sum(${userCyclePoints.currentCyclePoints})` })
         .from(userCyclePoints)
         .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
 

@@ -39,6 +39,7 @@ function Router() {
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/test-paypal" component={TestPayPal} />
       <Route path="/admin" component={Admin} />
+      <Route path="/admin/analytics" component={Analytics} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
