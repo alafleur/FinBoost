@@ -3896,15 +3896,32 @@ export class MemStorage implements IStorage {
 
   async getDailyLoginActivity(startDate: Date): Promise<any[]> {
     try {
+      // Check cache first
+      const cacheKey = `daily_login_activity_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
+      // Optimized query with proper WHERE conditions and LIMIT
       const result = await db
         .select({
           date: sql<string>`DATE(last_login_at)`,
           count: sql<number>`count(*)`
         })
         .from(users)
-        .where(gte(users.lastLoginAt, startDate))
+        .where(
+          and(
+            isNotNull(users.lastLoginAt),
+            gte(users.lastLoginAt, startDate),
+            eq(users.isActive, true)
+          )
+        )
         .groupBy(sql`DATE(last_login_at)`)
-        .orderBy(sql`DATE(last_login_at)`);
+        .orderBy(sql`DATE(last_login_at)`)
+        .limit(31); // Performance optimization
+
+      // Cache for 20 minutes
+      this.setCachedData(cacheKey, result, 20);
+      
       return result;
     } catch (error) {
       console.error('Error getting daily login activity:', error);
