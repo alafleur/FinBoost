@@ -3977,12 +3977,12 @@ export class MemStorage implements IStorage {
           participants: sql<number>`(
             SELECT count(DISTINCT user_id) 
             FROM user_cycle_points 
-            WHERE cycle_id = cycle_settings.id
+            WHERE cycle_setting_id = cycle_settings.id
           )`,
           totalPoints: sql<number>`(
-            SELECT sum(points) 
+            SELECT sum(current_cycle_points) 
             FROM user_cycle_points 
-            WHERE cycle_id = cycle_settings.id
+            WHERE cycle_setting_id = cycle_settings.id
           )`
         })
         .from(cycleSettings)
@@ -4004,7 +4004,7 @@ export class MemStorage implements IStorage {
           participants: sql<number>`(
             SELECT count(DISTINCT user_id) 
             FROM user_cycle_points 
-            WHERE cycle_id = cycle_settings.id
+            WHERE cycle_setting_id = cycle_settings.id
           )`
         })
         .from(cycleSettings)
@@ -4029,13 +4029,13 @@ export class MemStorage implements IStorage {
         .select({
           userId: userCyclePoints.userId,
           username: users.username,
-          totalPoints: sql<number>`sum(points)`
+          totalPoints: sql<number>`sum(current_cycle_points)`
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
-        .where(eq(userCyclePoints.cycleId, currentCycle.id))
+        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id))
         .groupBy(userCyclePoints.userId, users.username)
-        .orderBy(desc(sql`sum(points)`));
+        .orderBy(desc(sql`sum(current_cycle_points)`));
 
       return {
         tiers: thresholds,
