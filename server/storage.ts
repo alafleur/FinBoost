@@ -3873,17 +3873,17 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          id: lessonProgress.id,
-          userId: lessonProgress.userId,
+          id: userProgress.id,
+          userId: userProgress.userId,
           username: users.username,
-          moduleId: lessonProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
-          completedAt: lessonProgress.completedAt
+          moduleId: userProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM learning_modules WHERE id = user_progress.module_id)`,
+          completedAt: userProgress.completedAt
         })
-        .from(lessonProgress)
-        .innerJoin(users, eq(lessonProgress.userId, users.id))
-        .where(gte(lessonProgress.completedAt, startDate))
-        .orderBy(desc(lessonProgress.completedAt))
+        .from(userProgress)
+        .innerJoin(users, eq(userProgress.userId, users.id))
+        .where(and(eq(userProgress.completed, true), gte(userProgress.completedAt, startDate)))
+        .orderBy(desc(userProgress.completedAt))
         .limit(50);
       return result;
     } catch (error) {
@@ -4157,22 +4157,23 @@ export class MemStorage implements IStorage {
           userId: users.id,
           username: users.username,
           activity: sql<string>`'User registered'`,
-          timestamp: users.createdAt
+          timestamp: users.joinedAt
         })
         .from(users)
-        .orderBy(desc(users.createdAt))
+        .orderBy(desc(users.joinedAt))
         .limit(limit / 2)
         .union(
           db.select({
             type: sql<string>`'lesson_completion'`,
-            userId: lessonProgress.userId,
+            userId: userProgress.userId,
             username: users.username,
             activity: sql<string>`'Completed lesson'`,
-            timestamp: lessonProgress.completedAt
+            timestamp: userProgress.completedAt
           })
-          .from(lessonProgress)
-          .innerJoin(users, eq(lessonProgress.userId, users.id))
-          .orderBy(desc(lessonProgress.completedAt))
+          .from(userProgress)
+          .innerJoin(users, eq(userProgress.userId, users.id))
+          .where(eq(userProgress.completed, true))
+          .orderBy(desc(userProgress.completedAt))
           .limit(limit / 2)
         );
 
@@ -4190,11 +4191,11 @@ export class MemStorage implements IStorage {
           id: users.id,
           username: users.username,
           email: users.email,
-          createdAt: users.createdAt,
+          createdAt: users.joinedAt,
           subscriptionStatus: users.subscriptionStatus
         })
         .from(users)
-        .orderBy(desc(users.createdAt))
+        .orderBy(desc(users.joinedAt))
         .limit(limit);
       return result;
     } catch (error) {
@@ -4218,12 +4219,13 @@ export class MemStorage implements IStorage {
       const totalUsers = await this.getTotalUsersCount();
       const totalModules = await db
         .select({ count: sql<number>`count(*)` })
-        .from(modules)
-        .where(eq(modules.isPublished, true));
+        .from(learningModules)
+        .where(eq(learningModules.isActive, true));
 
       const totalCompletions = await db
         .select({ count: sql<number>`count(*)` })
-        .from(lessonProgress);
+        .from(userProgress)
+        .where(eq(userProgress.completed, true));
 
       const expectedCompletions = totalUsers * (totalModules[0]?.count || 0);
       return expectedCompletions > 0 
