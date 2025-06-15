@@ -3825,8 +3825,18 @@ export class MemStorage implements IStorage {
   // Analytics Methods for Admin Dashboard
   async getTotalUsersCount(): Promise<number> {
     try {
+      // Check cache first
+      const cacheKey = 'total_users_count';
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
       const result = await db.select({ count: sql<number>`count(*)` }).from(users);
-      return result[0]?.count || 0;
+      const count = result[0]?.count || 0;
+      
+      // Cache for 10 minutes (user count changes less frequently)
+      this.setCachedData(cacheKey, count, 10);
+      
+      return count;
     } catch (error) {
       console.error('Error getting total users count:', error);
       return 0;
@@ -3835,11 +3845,22 @@ export class MemStorage implements IStorage {
 
   async getActiveUsersCount(startDate: Date): Promise<number> {
     try {
+      // Check cache first
+      const cacheKey = `active_users_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
         .where(gte(users.lastLoginAt, startDate));
-      return result[0]?.count || 0;
+      
+      const count = result[0]?.count || 0;
+      
+      // Cache for 15 minutes
+      this.setCachedData(cacheKey, count, 15);
+      
+      return count;
     } catch (error) {
       console.error('Error getting active users count:', error);
       return 0;
@@ -3848,11 +3869,22 @@ export class MemStorage implements IStorage {
 
   async getPremiumUsersCount(): Promise<number> {
     try {
+      // Check cache first
+      const cacheKey = 'premium_users_count';
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
         .where(eq(users.subscriptionStatus, 'active'));
-      return result[0]?.count || 0;
+      
+      const count = result[0]?.count || 0;
+      
+      // Cache for 10 minutes (subscription changes less frequently)
+      this.setCachedData(cacheKey, count, 10);
+      
+      return count;
     } catch (error) {
       console.error('Error getting premium users count:', error);
       return 0;
@@ -4643,6 +4675,36 @@ export class MemStorage implements IStorage {
 
   private clearAnalyticsCache(): void {
     this.analyticsCache.clear();
+  }
+
+  // Cache invalidation methods
+  invalidateCacheByPattern(pattern: string): void {
+    const keysToDelete: string[] = [];
+    for (const [key] of this.analyticsCache) {
+      if (key.includes(pattern)) {
+        keysToDelete.push(key);
+      }
+    }
+    keysToDelete.forEach(key => this.analyticsCache.delete(key));
+  }
+
+  // Cache warming for dashboard startup
+  async warmAnalyticsCache(): Promise<void> {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+
+      // Pre-load frequently accessed metrics
+      await Promise.all([
+        this.getTotalUsersCount(),
+        this.getPremiumUsersCount(),
+        this.getActiveUsersCount(startDate),
+        this.getDailyLoginActivity(startDate),
+        this.getRegistrationTrends(startDate)
+      ]);
+    } catch (error) {
+      console.error('Error warming analytics cache:', error);
+    }
   }
 
   // === COMPARATIVE ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 5) ===
