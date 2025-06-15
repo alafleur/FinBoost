@@ -4645,14 +4645,15 @@ export class MemStorage implements IStorage {
 
       // Get participants count
       const participantsResult = await db
-        .select({ count: sql<number>`count(DISTINCT user_id)` })
+        .select({ count: sql<number>`count(DISTINCT user_id)::int` })
         .from(userCyclePoints)
         .where(eq(userCyclePoints.cycleSettingId, cycle.id));
 
-      const participants = participantsResult[0]?.count || 0;
+      const participants = Number(participantsResult[0]?.count) || 0;
 
-      // Calculate total pool amount
-      const totalPoolAmount = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+      // Calculate total pool amount (convert from cents to dollars)
+      const totalPoolAmountCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+      const totalPoolAmount = totalPoolAmountCents / 100;
 
       // Get average points
       const avgPointsResult = await db
@@ -4720,14 +4721,15 @@ export class MemStorage implements IStorage {
       for (const cycle of completedCycles) {
         // Get participants for this cycle
         const participantsResult = await db
-          .select({ count: sql<number>`count(DISTINCT user_id)` })
+          .select({ count: sql<number>`count(DISTINCT user_id)::int` })
           .from(userCyclePoints)
           .where(eq(userCyclePoints.cycleSettingId, cycle.id));
 
-        const participants = participantsResult[0]?.count || 0;
+        const participants = Number(participantsResult[0]?.count) || 0;
 
-        // Calculate total payout
-        const totalPayout = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+        // Calculate total payout (convert from cents to dollars)
+        const totalPayoutCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+        const totalPayout = totalPayoutCents / 100;
 
         // Get average points
         const avgPointsResult = await db
