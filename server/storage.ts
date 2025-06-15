@@ -1,7 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and, lt, gte, ne, lte, between, isNotNull } from "drizzle-orm";
+import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -4656,7 +4656,7 @@ export class MemStorage implements IStorage {
 
       // Get average points
       const avgPointsResult = await db
-        .select({ avg: sql<number>`avg(points)` })
+        .select({ avg: sql<number>`avg(current_cycle_points)` })
         .from(userCyclePoints)
         .where(eq(userCyclePoints.cycleSettingId, cycle.id));
 
@@ -4666,12 +4666,12 @@ export class MemStorage implements IStorage {
       const topPerformerResult = await db
         .select({
           username: users.username,
-          points: userCyclePoints.points
+          points: userCyclePoints.currentCyclePoints
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
         .where(eq(userCyclePoints.cycleSettingId, cycle.id))
-        .orderBy(desc(userCyclePoints.points))
+        .orderBy(desc(userCyclePoints.currentCyclePoints))
         .limit(1);
 
       const topPerformer = topPerformerResult.length > 0 
@@ -4731,7 +4731,7 @@ export class MemStorage implements IStorage {
 
         // Get average points
         const avgPointsResult = await db
-          .select({ avg: sql<number>`avg(points)` })
+          .select({ avg: sql<number>`avg(current_cycle_points)` })
           .from(userCyclePoints)
           .where(eq(userCyclePoints.cycleSettingId, cycle.id));
 
@@ -4861,12 +4861,12 @@ export class MemStorage implements IStorage {
         .select({
           userId: userCyclePoints.userId,
           username: users.username,
-          points: userCyclePoints.points
+          points: userCyclePoints.currentCyclePoints
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
         .where(eq(userCyclePoints.cycleSettingId, cycle.id))
-        .orderBy(desc(userCyclePoints.points));
+        .orderBy(desc(userCyclePoints.currentCyclePoints));
 
       if (userPoints.length === 0) {
         return {
