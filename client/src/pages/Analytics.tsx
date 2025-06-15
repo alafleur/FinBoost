@@ -317,9 +317,166 @@ export default function Analytics() {
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value="overview" className="space-y-6">
+          {/* Enhanced KPI Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Total Users"
+              value={kpis?.data?.totalUsers || 0}
+              subtitle={`${kpis?.data?.activeUsers || 0} active users`}
+              icon={Users}
+              trend={{
+                value: kpis?.data?.userGrowthRate || 0,
+                positive: (kpis?.data?.userGrowthRate || 0) >= 0
+              }}
+              isLoading={loadingKPIs}
+            />
+            <StatCard
+              title="Cycle Participants"
+              value={cyclePerformance?.data?.currentCycleStats?.participants || 0}
+              subtitle={`${formatPercentage(kpis?.data?.participationRate || 0)} participation rate`}
+              icon={Target}
+              isLoading={loadingCycles}
+            />
+            <StatCard
+              title="Cycle Revenue"
+              value={formatCurrency(cyclePerformance?.data?.currentCycleStats?.poolSize || 0)}
+              subtitle={`${formatCurrency(kpis?.data?.totalRevenue || 0)} total revenue`}
+              icon={DollarSign}
+              isLoading={loadingCycles}
+            />
+            <StatCard
+              title="Learning Progress"
+              value={formatPercentage(kpis?.data?.avgCompletionRate || 0)}
+              subtitle={`${kpis?.data?.totalCompletions || 0} completions`}
+              icon={BookOpen}
+              isLoading={loadingKPIs}
+            />
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Real-time Activity Feed */}
+            <Card className="md:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Real-time Activity Feed
+                  </CardTitle>
+                  <CardDescription>
+                    Live updates on user actions and system events
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {loadingRecentActivity ? (
+                  <div className="space-y-3">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-1 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {recentActivity?.data?.slice(0, 10).map((activity: any, index: number) => (
+                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className={cn(
+                          "h-10 w-10 rounded-full flex items-center justify-center",
+                          activity.type === 'signup' && "bg-green-100 text-green-600",
+                          activity.type === 'completion' && "bg-blue-100 text-blue-600",
+                          activity.type === 'subscription' && "bg-purple-100 text-purple-600",
+                          activity.type === 'payout' && "bg-orange-100 text-orange-600"
+                        )}>
+                          {activity.type === 'signup' && <Users className="h-5 w-5" />}
+                          {activity.type === 'completion' && <BookOpen className="h-5 w-5" />}
+                          {activity.type === 'subscription' && <Target className="h-5 w-5" />}
+                          {activity.type === 'payout' && <DollarSign className="h-5 w-5" />}
+                          {!['signup', 'completion', 'subscription', 'payout'].includes(activity.type) && 
+                            <Activity className="h-5 w-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                        </div>
+                        <Badge 
+                          variant={activity.type === 'subscription' ? 'default' : 'outline'} 
+                          className="text-xs whitespace-nowrap"
+                        >
+                          {activity.type}
+                        </Badge>
+                      </div>
+                    )) || (
+                      <div className="text-center py-8">
+                        <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground">No recent activity available</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions Panel */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>
+                  Common administrative tasks
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start" variant="outline">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Start New Cycle
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Target className="h-4 w-4 mr-2" />
+                  Approve Pending Proofs
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  Send Announcement
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Process Payouts
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <PieChart className="h-4 w-4 mr-2" />
+                  Generate Reports
+                </Button>
+                <div className="pt-3 border-t">
+                  <p className="text-xs text-muted-foreground mb-2">Current Cycle Status</p>
+                  {currentCycle ? (
+                    <div className="p-2 bg-blue-50 rounded text-xs">
+                      <p className="font-medium text-blue-900">{currentCycle.cycleName}</p>
+                      <p className="text-blue-700">
+                        {new Date(currentCycle.cycleStartDate).toLocaleDateString()} - 
+                        {new Date(currentCycle.cycleEndDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500">No active cycle</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Current Cycle Status */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {/* Current Cycle Status */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -492,42 +649,57 @@ export default function Analytics() {
           </div>
         </TabsContent>
 
-        <TabsContent value="learning" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+        <TabsContent value="learning" className="space-y-6">
+          {/* Module Analytics and Popular Content */}
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Module Completion Rates</CardTitle>
-                <CardDescription>Performance across all learning modules</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Module Analytics
+                </CardTitle>
+                <CardDescription>Completion rates, scores, and time spent per lesson</CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingLearning ? (
                   <div className="space-y-3">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(6)].map((_, i) => (
                       <div key={i} className="space-y-2">
                         <Skeleton className="h-4 w-3/4" />
                         <Skeleton className="h-2 w-full" />
+                        <div className="flex justify-between">
+                          <Skeleton className="h-3 w-16" />
+                          <Skeleton className="h-3 w-12" />
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {learningPerformance?.data?.moduleCompletionRates?.slice(0, 5).map((module: any) => (
-                      <div key={module.moduleId} className="space-y-2">
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    {learningPerformance?.data?.moduleCompletionRates?.map((module: any, index: number) => (
+                      <div key={module.moduleId || index} className="space-y-2 p-3 border rounded-lg">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium">{module.moduleName}</span>
-                          <span>{formatPercentage(module.completionRate || 0)}</span>
+                          <span className="font-medium truncate">{module.moduleName || `Module ${index + 1}`}</span>
+                          <span className="text-green-600 font-semibold">{formatPercentage(module.completionRate || 0)}</span>
                         </div>
                         <div className="w-full bg-secondary rounded-full h-2">
                           <div 
-                            className="bg-primary h-2 rounded-full" 
+                            className="bg-primary h-2 rounded-full transition-all duration-300" 
                             style={{ width: `${Math.min(module.completionRate || 0, 100)}%` }}
                           />
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {module.completions || 0} completions
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{module.completions || 0} completions</span>
+                          <span>Avg: {formatPercentage(module.averageScore || 0)}</span>
+                          <span>{module.avgTimeSpent || '0m'}</span>
                         </div>
                       </div>
-                    )) || <div className="text-sm text-muted-foreground">No completion data available</div>}
+                    )) || (
+                      <div className="text-center py-8">
+                        <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground">No module analytics available</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -535,37 +707,251 @@ export default function Analytics() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Category Performance</CardTitle>
-                <CardDescription>Learning engagement by category</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Popular Content Rankings
+                </CardTitle>
+                <CardDescription>Most and least completed modules</CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingLearning ? (
-                  <div className="space-y-3">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="flex justify-between items-center">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-6 w-12" />
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex justify-between items-center py-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2" />
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex justify-between items-center py-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-8" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {learningPerformance?.data?.categoryStats?.map((category: any) => (
-                      <div key={category.category} className="flex justify-between items-center">
-                        <span className="text-sm font-medium capitalize">{category.category}</span>
-                        <div className="text-right">
-                          <div className="text-sm font-bold">{category.totalCompletions || 0}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {category.totalModules || 0} modules
-                          </div>
-                        </div>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-medium text-green-600 mb-3 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        Most Popular
+                      </h4>
+                      <div className="space-y-2">
+                        {learningPerformance?.data?.moduleCompletionRates
+                          ?.sort((a: any, b: any) => (b.completionRate || 0) - (a.completionRate || 0))
+                          ?.slice(0, 3)
+                          ?.map((module: any, index: number) => (
+                            <div key={module.moduleId || index} className="flex justify-between items-center py-2 px-3 bg-green-50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-green-600">#{index + 1}</span>
+                                <span className="text-sm truncate">{module.moduleName}</span>
+                              </div>
+                              <Badge variant="outline" className="text-green-600">
+                                {formatPercentage(module.completionRate || 0)}
+                              </Badge>
+                            </div>
+                          )) || <p className="text-sm text-muted-foreground">No popular content data</p>}
                       </div>
-                    )) || <div className="text-sm text-muted-foreground">No category data available</div>}
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium text-orange-600 mb-3 flex items-center gap-2">
+                        <Activity className="h-4 w-4" />
+                        Needs Attention
+                      </h4>
+                      <div className="space-y-2">
+                        {learningPerformance?.data?.moduleCompletionRates
+                          ?.sort((a: any, b: any) => (a.completionRate || 0) - (b.completionRate || 0))
+                          ?.slice(0, 3)
+                          ?.map((module: any, index: number) => (
+                            <div key={module.moduleId || index} className="flex justify-between items-center py-2 px-3 bg-orange-50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-orange-600">⚠</span>
+                                <span className="text-sm truncate">{module.moduleName}</span>
+                              </div>
+                              <Badge variant="outline" className="text-orange-600">
+                                {formatPercentage(module.completionRate || 0)}
+                              </Badge>
+                            </div>
+                          )) || <p className="text-sm text-muted-foreground">No low-performing content</p>}
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
+
+          {/* Learning Path Analysis and Drop-off Points */}
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Learning Path Analysis
+                </CardTitle>
+                <CardDescription>Common progression patterns through content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingLearning ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-6 w-full" />
+                    <div className="flex gap-2">
+                      {[...Array(8)].map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-16 rounded-lg" />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-sm text-muted-foreground">
+                      Most common learning progression path
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {learningPerformance?.data?.learningPath?.progression?.map((step: any, index: number) => (
+                        <div key={index} className="flex items-center">
+                          <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg text-sm font-medium">
+                            {step.moduleName}
+                            <div className="text-xs text-blue-600">
+                              {formatPercentage(step.completionRate || 0)} complete
+                            </div>
+                          </div>
+                          {index < (learningPerformance?.data?.learningPath?.progression?.length || 0) - 1 && (
+                            <div className="mx-2 text-gray-400">→</div>
+                          )}
+                        </div>
+                      )) || (
+                        <div className="text-center py-8">
+                          <Target className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-sm text-muted-foreground">No learning path data available</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {learningPerformance?.data?.learningPath?.alternativePaths && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="text-sm text-muted-foreground mb-2">Alternative pathways</div>
+                        <div className="space-y-2">
+                          {learningPerformance.data.learningPath.alternativePaths.map((path: any, index: number) => (
+                            <div key={index} className="text-xs bg-gray-50 p-2 rounded">
+                              {path.modules.join(' → ')} ({formatPercentage(path.frequency)} of users)
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Drop-off Points
+                </CardTitle>
+                <CardDescription>Where users typically stop engaging</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingLearning ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-2 w-3/4" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {learningPerformance?.data?.dropOffPoints?.map((point: any, index: number) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium truncate">{point.moduleName}</span>
+                          <span className="text-red-600 font-semibold">{formatPercentage(point.dropOffRate || 0)}</span>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div 
+                            className="bg-red-500 h-2 rounded-full" 
+                            style={{ width: `${Math.min(point.dropOffRate || 0, 100)}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-muted-foreground flex justify-between">
+                          <span>{point.dropOffCount || 0} users dropped off</span>
+                          <span>At {point.averageProgressPoint || 0}% progress</span>
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-center py-8">
+                        <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground">No drop-off data available</p>
+                      </div>
+                    )}
+                    
+                    {learningPerformance?.data?.dropOffPoints?.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="text-xs text-muted-foreground">
+                          <strong>Insights:</strong> High drop-off rates may indicate content difficulty or engagement issues.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Category Performance */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Performance</CardTitle>
+              <CardDescription>Learning engagement by category</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingLearning ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-2 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {learningPerformance?.data?.categoryPerformance?.map((category: any, index: number) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium">{category.categoryName}</span>
+                        <div className="text-right">
+                          <span>{formatPercentage(category.completionRate || 0)}</span>
+                          <div className="text-xs text-muted-foreground">
+                            {category.moduleCount} modules
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ width: `${Math.min(category.completionRate || 0, 100)}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {category.totalCompletions || 0} completions • Avg score: {formatPercentage(category.averageScore || 0)}
+                      </div>
+                    </div>
+                  )) || <div className="text-sm text-muted-foreground">No category performance data available</div>}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="cycles" className="space-y-4">
