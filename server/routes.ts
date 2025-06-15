@@ -3339,13 +3339,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      // Calculate key metrics
-      const totalUsers = await storage.getTotalUsersCount();
-      const activeUsers = await storage.getActiveUsersCount(startDate);
-      const premiumUsers = await storage.getPremiumUsersCount();
-      const totalRevenue = await storage.getTotalRevenue(startDate);
-      const avgCompletionRate = await storage.getAverageCompletionRate();
-      const cycleParticipation = await storage.getCurrentCycleParticipationRate();
+      // Calculate key metrics using simplified analytics
+      const { analyticsStorage } = await import('./analytics-storage');
+      const kpiData = await analyticsStorage.getKPIOverview();
+      
+      const totalUsers = kpiData.totalUsers;
+      const activeUsers = kpiData.activeSubscribers;
+      const premiumUsers = kpiData.activeSubscribers;
+      const totalRevenue = kpiData.rewardPool * 100; // Convert back to cents for display
+      const avgCompletionRate = kpiData.averageCompletionRate;
+      const cycleParticipation = kpiData.cycleParticipants;
 
       // Calculate growth rates
       const previousPeriodStart = new Date(startDate);
