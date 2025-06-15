@@ -16,9 +16,12 @@ import {
   Calendar,
   BarChart3,
   PieChart,
-  RefreshCw
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAnalyticsWebSocket } from '@/hooks/useWebSocket';
 
 interface AnalyticsData {
   userEngagement?: any;
@@ -32,6 +35,18 @@ interface AnalyticsData {
 export default function Analytics() {
   const [timeframe, setTimeframe] = useState('current-cycle');
   const [currentCycle, setCurrentCycle] = useState<any>(null);
+  const [liveData, setLiveData] = useState<any>(null);
+
+  // WebSocket connection for real-time analytics
+  const token = localStorage.getItem('token');
+  const { 
+    isConnected, 
+    isConnecting, 
+    error: wsError, 
+    analyticsData, 
+    activityFeed,
+    requestLiveData 
+  } = useAnalyticsWebSocket(token || undefined);
 
   // Fetch current cycle data for context
   const { data: cycleData } = useQuery({
@@ -174,7 +189,8 @@ export default function Analytics() {
     subtitle, 
     icon: Icon, 
     trend, 
-    isLoading 
+    isLoading,
+    isLive = false
   }: {
     title: string;
     value: string | number;
@@ -182,6 +198,7 @@ export default function Analytics() {
     icon: any;
     trend?: { value: number; positive: boolean };
     isLoading?: boolean;
+    isLive?: boolean;
   }) => {
     if (isLoading) {
       return (
@@ -201,9 +218,17 @@ export default function Analytics() {
     }
 
     return (
-      <Card>
+      <Card className={cn(isLive && "ring-2 ring-green-200 bg-green-50/50")}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            {title}
+            {isLive && (
+              <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs px-1 py-0">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 animate-pulse" />
+                Live
+              </Badge>
+            )}
+          </CardTitle>
           <Icon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -245,6 +270,26 @@ export default function Analytics() {
           )}
         </div>
         <div className="flex items-center gap-4">
+          {/* Real-time Connection Status */}
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
+                <Wifi className="h-3 w-3 mr-1" />
+                Live
+              </Badge>
+            ) : isConnecting ? (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                Connecting
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-red-100 text-red-700 border-red-200">
+                <WifiOff className="h-3 w-3 mr-1" />
+                Offline
+              </Badge>
+            )}
+          </div>
+          
           <Select value={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select timeframe" />
@@ -260,43 +305,48 @@ export default function Analytics() {
               <SelectItem value="365">Last year</SelectItem>
             </SelectContent>
           </Select>
+          
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => window.location.reload()}
+            onClick={isConnected ? requestLiveData : () => window.location.reload()}
+            disabled={isConnecting}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            <RefreshCw className={cn("h-4 w-4 mr-2", isConnecting && "animate-spin")} />
+            {isConnected ? "Update Live" : "Refresh"}
           </Button>
         </div>
       </div>
 
-      {/* Key Performance Indicators */}
+      {/* Key Performance Indicators - Real-time Data Integration */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
-          value={kpis?.data?.totalUsers || 0}
-          subtitle={`${kpis?.data?.activeUsers || 0} active users`}
+          value={analyticsData?.kpis?.totalUsers || kpis?.data?.totalUsers || 0}
+          subtitle={`${analyticsData?.kpis?.activeUsers || kpis?.data?.activeUsers || 0} active users`}
           icon={Users}
           trend={{
             value: kpis?.data?.userGrowthRate || 0,
             positive: (kpis?.data?.userGrowthRate || 0) >= 0
           }}
-          isLoading={loadingKPIs}
+          isLoading={loadingKPIs && !analyticsData?.kpis}
+          isLive={!!analyticsData?.kpis}
         />
         <StatCard
           title="Premium Subscribers"
-          value={kpis?.data?.premiumUsers || 0}
+          value={analyticsData?.kpis?.premiumUsers || kpis?.data?.premiumUsers || 0}
           subtitle={`${formatPercentage(kpis?.data?.conversionRate || 0)} conversion rate`}
           icon={Target}
-          isLoading={loadingKPIs}
+          isLoading={loadingKPIs && !analyticsData?.kpis}
+          isLive={!!analyticsData?.kpis}
         />
         <StatCard
-          title="Total Revenue"
-          value={formatCurrency(kpis?.data?.totalRevenue || 0)}
-          subtitle={`Last ${timeframe} days`}
-          icon={DollarSign}
-          isLoading={loadingKPIs}
+          title="Cycle Participants"
+          value={analyticsData?.kpis?.cycleParticipants || analyticsData?.cycleStats?.participants || 0}
+          subtitle="Current active cycle"
+          icon={Activity}
+          isLoading={loadingKPIs && !analyticsData?.cycleStats}
+          isLive={!!analyticsData?.cycleStats}
         />
         <StatCard
           title="Completion Rate"
