@@ -4635,8 +4635,8 @@ export class MemStorage implements IStorage {
         .from(users)
         .where(
           and(
-            gte(users.subscriptionDate, startDate),
-            lte(users.subscriptionDate, endDate)
+            gte(users.subscriptionStartDate, startDate),
+            lte(users.subscriptionStartDate, endDate)
           )
         );
 
@@ -4652,8 +4652,8 @@ export class MemStorage implements IStorage {
         .from(users)
         .where(
           and(
-            gte(users.subscriptionDate, previousStartDate),
-            lte(users.subscriptionDate, startDate)
+            gte(users.subscriptionStartDate, previousStartDate),
+            lte(users.subscriptionStartDate, startDate)
           )
         );
 
@@ -4802,8 +4802,8 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(users.subscriptionStatus, 'premium'),
-            gte(users.subscriptionDate, startDate),
-            lte(users.subscriptionDate, endDate)
+            gte(users.subscriptionStartDate, startDate),
+            lte(users.subscriptionStartDate, endDate)
           )
         );
 
@@ -4816,7 +4816,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(users.subscriptionStatus, 'free'),
-            isNotNull(users.subscriptionDate), // Had a subscription before
+            isNotNull(users.subscriptionStartDate), // Had a subscription before
             gte(users.lastLoginAt, startDate), // Were active during period
             lte(users.lastLoginAt, endDate)
           )
@@ -4836,7 +4836,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(users.subscriptionStatus, 'premium'),
-            lte(users.subscriptionDate, startDate)
+            lte(users.subscriptionStartDate, startDate)
           )
         );
 
@@ -4847,10 +4847,10 @@ export class MemStorage implements IStorage {
       const avgSubDurationResult = await db
         .select({ 
           avgRevenue: sql<number>`avg(membership_fee)`,
-          avgMonths: sql<number>`avg(EXTRACT(EPOCH FROM (COALESCE(subscription_end_date, NOW()) - subscription_date)) / 2629746)` // seconds to months
+          avgMonths: sql<number>`avg(EXTRACT(EPOCH FROM (COALESCE(subscription_end_date, NOW()) - subscription_start_date)) / 2629746)` // seconds to months
         })
         .from(users)
-        .where(isNotNull(users.subscriptionDate));
+        .where(isNotNull(users.subscriptionStartDate));
 
       const avgMonthlyRevenue = (avgSubDurationResult[0]?.avgRevenue || 0) / 100;
       const avgSubscriptionMonths = avgSubDurationResult[0]?.avgMonths || 0;

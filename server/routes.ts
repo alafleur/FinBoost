@@ -3270,6 +3270,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { timeframe = '90' } = req.query;
       const days = parseInt(timeframe as string);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Get comprehensive financial metrics
+      const revenueMetrics = await storage.getRevenueMetrics(startDate, endDate);
+      const payoutMetrics = await storage.getPayoutMetrics(startDate, endDate);
+      const subscriptionMetrics = await storage.getSubscriptionMetrics(startDate, endDate);
+
+      res.json({
+        success: true,
+        data: {
+          revenueMetrics,
+          payoutMetrics,
+          subscriptionMetrics,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching financial analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch financial analytics' });
+    }
+  });
+
+  // Test endpoint for individual financial metric validation
+  app.get('/api/admin/analytics/financial/test', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '90' } = req.query;
+      const days = parseInt(timeframe as string);
+      const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
