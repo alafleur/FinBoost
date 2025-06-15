@@ -4629,7 +4629,7 @@ export class MemStorage implements IStorage {
       // Get all premium subscription payments in the timeframe
       const subscriptionRevenueResult = await db
         .select({ 
-          revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN membership_fee ELSE 0 END)`,
+          revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN subscription_amount ELSE 0 END)`,
           count: sql<number>`count(CASE WHEN subscription_status = 'premium' THEN 1 END)`
         })
         .from(users)
@@ -4648,7 +4648,7 @@ export class MemStorage implements IStorage {
       const previousStartDate = new Date(startDate.getTime() - periodLength);
       
       const previousRevenueResult = await db
-        .select({ revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN membership_fee ELSE 0 END)` })
+        .select({ revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN subscription_amount ELSE 0 END)` })
         .from(users)
         .where(
           and(
@@ -4667,7 +4667,7 @@ export class MemStorage implements IStorage {
       // Get current MRR (all active premium subscribers)
       const mrrResult = await db
         .select({ 
-          mrr: sql<number>`sum(membership_fee)`,
+          mrr: sql<number>`sum(subscription_amount)`,
           count: sql<number>`count(*)`
         })
         .from(users)
@@ -4753,8 +4753,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             gte(cycleWinnerSelections.selectionDate, previousStartDate),
-            lte(cycleWinnerSelections.selectionDate, startDate),
-            eq(cycleWinnerSelections.isWinner, true)
+            lte(cycleWinnerSelections.selectionDate, startDate)
           )
         );
 
