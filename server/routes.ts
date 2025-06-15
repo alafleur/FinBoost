@@ -1392,22 +1392,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin middleware
+  // Admin middleware - using JWT authentication
   const requireAdmin = async (req: any, res: any, next: any) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
       }
 
-      const user = await storage.getUserByToken(token);
-      if (!user || (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com')) {
+      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      const user = await storage.getUserById(decoded.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      if (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
       req.user = user;
       next();
     } catch (error) {
+      console.error('Admin auth error:', error);
       res.status(401).json({ message: "Unauthorized" });
     }
   };
