@@ -3938,12 +3938,12 @@ export class MemStorage implements IStorage {
       const participants = await db
         .select({ count: sql<number>`count(DISTINCT user_id)` })
         .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
 
       const totalPoints = await db
-        .select({ total: sql<number>`sum(points)` })
+        .select({ total: sql<number>`sum(current_cycle_points)` })
         .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
 
       const poolData = await this.getCyclePoolData(currentCycle.id);
 
@@ -4239,7 +4239,7 @@ export class MemStorage implements IStorage {
       const participants = await db
         .select({ count: sql<number>`count(DISTINCT user_id)` })
         .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleId, currentCycle.id));
+        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
 
       return totalUsers > 0 
         ? ((participants[0]?.count || 0) / totalUsers) * 100 
