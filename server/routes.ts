@@ -3373,6 +3373,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Engagement Metrics API - Phase 1.1 Step 1
+  app.get('/api/admin/analytics/user-engagement', requireAdmin, async (req, res) => {
+    try {
+      const { timeframe = '30' } = req.query;
+      const days = parseInt(timeframe as string);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // Active users (daily/weekly/cycle)
+      const dailyActiveUsers = await storage.getDailyActiveUsers(startDate, endDate);
+      const weeklyActiveUsers = await storage.getWeeklyActiveUsers(startDate, endDate);
+      const cycleActiveUsers = await storage.getCycleActiveUsers();
+
+      // Login frequency statistics
+      const loginFrequencyStats = await storage.getLoginFrequencyStats(startDate, endDate);
+
+      // Session duration averages
+      const sessionDurationStats = await storage.getSessionDurationStats(startDate, endDate);
+
+      res.json({
+        success: true,
+        data: {
+          activeUsers: {
+            daily: dailyActiveUsers,
+            weekly: weeklyActiveUsers,
+            cycle: cycleActiveUsers
+          },
+          loginFrequency: loginFrequencyStats,
+          sessionDuration: sessionDurationStats,
+          timeframe: days
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching user engagement metrics:', error);
+      res.status(500).json({ error: 'Failed to fetch user engagement metrics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
