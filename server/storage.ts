@@ -4719,8 +4719,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             gte(cycleWinnerSelections.selectionDate, startDate),
-            lte(cycleWinnerSelections.selectionDate, endDate),
-            eq(cycleWinnerSelections.isWinner, true)
+            lte(cycleWinnerSelections.selectionDate, endDate)
           )
         );
 
@@ -4739,10 +4738,7 @@ export class MemStorage implements IStorage {
         .select({ pendingAmount: sql<number>`sum(reward_amount)` })
         .from(cycleWinnerSelections)
         .where(
-          and(
-            eq(cycleWinnerSelections.isWinner, true),
-            eq(cycleWinnerSelections.payoutStatus, 'pending')
-          )
+          eq(cycleWinnerSelections.payoutStatus, 'pending')
         );
 
       const pendingPayouts = (pendingResult[0]?.pendingAmount || 0) / 100;
@@ -4846,8 +4842,8 @@ export class MemStorage implements IStorage {
       // Calculate average lifetime value (simplified)
       const avgSubDurationResult = await db
         .select({ 
-          avgRevenue: sql<number>`avg(membership_fee)`,
-          avgMonths: sql<number>`avg(EXTRACT(EPOCH FROM (COALESCE(subscription_end_date, NOW()) - subscription_start_date)) / 2629746)` // seconds to months
+          avgRevenue: sql<number>`avg(subscription_amount)`,
+          avgMonths: sql<number>`avg(EXTRACT(EPOCH FROM (COALESCE(next_billing_date, NOW()) - subscription_start_date)) / 2629746)` // seconds to months
         })
         .from(users)
         .where(isNotNull(users.subscriptionStartDate));

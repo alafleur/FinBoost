@@ -3294,16 +3294,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test endpoint for individual financial metric validation
-  app.get('/api/admin/analytics/financial/test', requireAdmin, async (req, res) => {
+  // Legacy financial endpoint (keeping for backward compatibility)
+  app.get('/api/admin/analytics/financial/legacy', requireAdmin, async (req, res) => {
     try {
       const { timeframe = '90' } = req.query;
       const days = parseInt(timeframe as string);
-      const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      // Revenue metrics
+      // Legacy revenue stats
       const revenueStats = await storage.getRevenueStats(startDate);
       
       // Subscription conversion rates
