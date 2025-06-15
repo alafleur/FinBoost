@@ -4616,6 +4616,35 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // === ANALYTICS CACHING LAYER IMPLEMENTATION (Phase 1.2) ===
+
+  private analyticsCache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+
+  private getCachedData(key: string): any | null {
+    const cached = this.analyticsCache.get(key);
+    if (!cached) return null;
+    
+    const now = Date.now();
+    if (now - cached.timestamp > cached.ttl) {
+      this.analyticsCache.delete(key);
+      return null;
+    }
+    
+    return cached.data;
+  }
+
+  private setCachedData(key: string, data: any, ttlMinutes: number = 15): void {
+    this.analyticsCache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttlMinutes * 60 * 1000
+    });
+  }
+
+  private clearAnalyticsCache(): void {
+    this.analyticsCache.clear();
+  }
+
   // === COMPARATIVE ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 5) ===
 
   async getComparativeAnalytics(timeframe: number): Promise<{
@@ -4665,21 +4694,21 @@ export class MemStorage implements IStorage {
       // Current period metrics
       const currentActiveUsers = await db
         .select({ count: sql<number>`count(distinct user_id)` })
-        .from(lessonProgress)
+        .from(userProgress)
         .where(
           and(
-            gte(lessonProgress.completedAt, startDate),
-            lte(lessonProgress.completedAt, endDate)
+            gte(userProgress.completedAt, startDate),
+            lte(userProgress.completedAt, endDate)
           )
         );
 
       const currentCompletions = await db
         .select({ count: sql<number>`count(*)` })
-        .from(lessonProgress)
+        .from(userProgress)
         .where(
           and(
-            gte(lessonProgress.completedAt, startDate),
-            lte(lessonProgress.completedAt, endDate)
+            gte(userProgress.completedAt, startDate),
+            lte(userProgress.completedAt, endDate)
           )
         );
 
@@ -4707,21 +4736,21 @@ export class MemStorage implements IStorage {
       // Previous period metrics
       const previousActiveUsers = await db
         .select({ count: sql<number>`count(distinct user_id)` })
-        .from(lessonProgress)
+        .from(userProgress)
         .where(
           and(
-            gte(lessonProgress.completedAt, previousStartDate),
-            lte(lessonProgress.completedAt, previousEndDate)
+            gte(userProgress.completedAt, previousStartDate),
+            lte(userProgress.completedAt, previousEndDate)
           )
         );
 
       const previousCompletions = await db
         .select({ count: sql<number>`count(*)` })
-        .from(lessonProgress)
+        .from(userProgress)
         .where(
           and(
-            gte(lessonProgress.completedAt, previousStartDate),
-            lte(lessonProgress.completedAt, previousEndDate)
+            gte(userProgress.completedAt, previousStartDate),
+            lte(userProgress.completedAt, previousEndDate)
           )
         );
 
@@ -4774,21 +4803,21 @@ export class MemStorage implements IStorage {
 
         const weekActiveUsers = await db
           .select({ count: sql<number>`count(distinct user_id)` })
-          .from(lessonProgress)
+          .from(userProgress)
           .where(
             and(
-              gte(lessonProgress.completedAt, weekStart),
-              lte(lessonProgress.completedAt, weekEnd)
+              gte(userProgress.completedAt, weekStart),
+              lte(userProgress.completedAt, weekEnd)
             )
           );
 
         const weekCompletions = await db
           .select({ count: sql<number>`count(*)` })
-          .from(lessonProgress)
+          .from(userProgress)
           .where(
             and(
-              gte(lessonProgress.completedAt, weekStart),
-              lte(lessonProgress.completedAt, weekEnd)
+              gte(userProgress.completedAt, weekStart),
+              lte(userProgress.completedAt, weekEnd)
             )
           );
 
