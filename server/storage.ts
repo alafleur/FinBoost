@@ -1,7 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, and, lt, gte, ne, lte, between } from "drizzle-orm";
+import { eq, sql, desc, and, lt, gte, ne, lte, between, isNotNull } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -4499,7 +4499,7 @@ export class MemStorage implements IStorage {
             and(
               eq(userProgress.moduleId, module.id),
               eq(userProgress.completed, true),
-              sql`${userProgress.completedAt} IS NOT NULL`,
+              isNotNull(userProgress.completedAt),
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
@@ -4546,7 +4546,7 @@ export class MemStorage implements IStorage {
             and(
               eq(userProgress.moduleId, module.id),
               eq(userProgress.completed, true),
-              sql`${userProgress.completedAt} IS NOT NULL`,
+              isNotNull(userProgress.completedAt),
               gte(userProgress.completedAt, startDate),
               lte(userProgress.completedAt, endDate)
             )
