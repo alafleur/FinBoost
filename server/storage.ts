@@ -4616,6 +4616,265 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // === FINANCIAL METRICS ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 4) ===
+
+  async getRevenueMetrics(startDate: Date, endDate: Date): Promise<{
+    totalRevenue: number;
+    subscriptionRevenue: number;
+    averageRevenuePerUser: number;
+    revenueGrowthRate: number;
+    monthlyRecurringRevenue: number;
+  }> {
+    try {
+      // Get all premium subscription payments in the timeframe
+      const subscriptionRevenueResult = await db
+        .select({ 
+          revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN membership_fee ELSE 0 END)`,
+          count: sql<number>`count(CASE WHEN subscription_status = 'premium' THEN 1 END)`
+        })
+        .from(users)
+        .where(
+          and(
+            gte(users.subscriptionDate, startDate),
+            lte(users.subscriptionDate, endDate)
+          )
+        );
+
+      const currentRevenue = subscriptionRevenueResult[0]?.revenue || 0;
+      const subscriptionCount = subscriptionRevenueResult[0]?.count || 0;
+      
+      // Calculate previous period for growth rate
+      const periodLength = endDate.getTime() - startDate.getTime();
+      const previousStartDate = new Date(startDate.getTime() - periodLength);
+      
+      const previousRevenueResult = await db
+        .select({ revenue: sql<number>`sum(CASE WHEN subscription_status = 'premium' THEN membership_fee ELSE 0 END)` })
+        .from(users)
+        .where(
+          and(
+            gte(users.subscriptionDate, previousStartDate),
+            lte(users.subscriptionDate, startDate)
+          )
+        );
+
+      const previousRevenue = previousRevenueResult[0]?.revenue || 0;
+      
+      // Calculate growth rate
+      const revenueGrowthRate = previousRevenue > 0 
+        ? ((currentRevenue - previousRevenue) / previousRevenue) * 100
+        : currentRevenue > 0 ? 100 : 0;
+
+      // Get current MRR (all active premium subscribers)
+      const mrrResult = await db
+        .select({ 
+          mrr: sql<number>`sum(membership_fee)`,
+          count: sql<number>`count(*)`
+        })
+        .from(users)
+        .where(eq(users.subscriptionStatus, 'premium'));
+
+      const monthlyRecurringRevenue = (mrrResult[0]?.mrr || 0) / 100; // Convert to dollars
+      const totalActiveUsers = mrrResult[0]?.count || 0;
+      
+      // Calculate ARPU
+      const averageRevenuePerUser = totalActiveUsers > 0 
+        ? (currentRevenue / 100) / totalActiveUsers 
+        : 0;
+
+      return {
+        totalRevenue: currentRevenue / 100, // Convert to dollars
+        subscriptionRevenue: currentRevenue / 100,
+        averageRevenuePerUser: Math.round(averageRevenuePerUser * 100) / 100,
+        revenueGrowthRate: Math.round(revenueGrowthRate * 100) / 100,
+        monthlyRecurringRevenue: Math.round(monthlyRecurringRevenue * 100) / 100
+      };
+    } catch (error) {
+      console.error('Error getting revenue metrics:', error);
+      return {
+        totalRevenue: 0,
+        subscriptionRevenue: 0,
+        averageRevenuePerUser: 0,
+        revenueGrowthRate: 0,
+        monthlyRecurringRevenue: 0
+      };
+    }
+  }
+
+  async getPayoutMetrics(startDate: Date, endDate: Date): Promise<{
+    totalPayouts: number;
+    averagePayoutPerWinner: number;
+    payoutSuccessRate: number;
+    pendingPayouts: number;
+    payoutGrowthRate: number;
+  }> {
+    try {
+      // Get completed payouts in the timeframe
+      const payoutsResult = await db
+        .select({
+          totalAmount: sql<number>`sum(reward_amount)`,
+          totalCount: sql<number>`count(*)`,
+          successCount: sql<number>`count(CASE WHEN payout_status = 'completed' THEN 1 END)`
+        })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            gte(cycleWinnerSelections.selectionDate, startDate),
+            lte(cycleWinnerSelections.selectionDate, endDate),
+            eq(cycleWinnerSelections.isWinner, true)
+          )
+        );
+
+      const totalPayouts = (payoutsResult[0]?.totalAmount || 0) / 100; // Convert to dollars
+      const totalCount = payoutsResult[0]?.totalCount || 0;
+      const successCount = payoutsResult[0]?.successCount || 0;
+
+      // Calculate success rate
+      const payoutSuccessRate = totalCount > 0 ? (successCount / totalCount) * 100 : 0;
+      
+      // Average payout per winner
+      const averagePayoutPerWinner = totalCount > 0 ? totalPayouts / totalCount : 0;
+
+      // Get pending payouts
+      const pendingResult = await db
+        .select({ pendingAmount: sql<number>`sum(reward_amount)` })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            eq(cycleWinnerSelections.isWinner, true),
+            eq(cycleWinnerSelections.payoutStatus, 'pending')
+          )
+        );
+
+      const pendingPayouts = (pendingResult[0]?.pendingAmount || 0) / 100;
+
+      // Calculate previous period for growth rate
+      const periodLength = endDate.getTime() - startDate.getTime();
+      const previousStartDate = new Date(startDate.getTime() - periodLength);
+      
+      const previousPayoutsResult = await db
+        .select({ totalAmount: sql<number>`sum(reward_amount)` })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            gte(cycleWinnerSelections.selectionDate, previousStartDate),
+            lte(cycleWinnerSelections.selectionDate, startDate),
+            eq(cycleWinnerSelections.isWinner, true)
+          )
+        );
+
+      const previousPayouts = (previousPayoutsResult[0]?.totalAmount || 0) / 100;
+      
+      const payoutGrowthRate = previousPayouts > 0 
+        ? ((totalPayouts - previousPayouts) / previousPayouts) * 100
+        : totalPayouts > 0 ? 100 : 0;
+
+      return {
+        totalPayouts: Math.round(totalPayouts * 100) / 100,
+        averagePayoutPerWinner: Math.round(averagePayoutPerWinner * 100) / 100,
+        payoutSuccessRate: Math.round(payoutSuccessRate * 100) / 100,
+        pendingPayouts: Math.round(pendingPayouts * 100) / 100,
+        payoutGrowthRate: Math.round(payoutGrowthRate * 100) / 100
+      };
+    } catch (error) {
+      console.error('Error getting payout metrics:', error);
+      return {
+        totalPayouts: 0,
+        averagePayoutPerWinner: 0,
+        payoutSuccessRate: 0,
+        pendingPayouts: 0,
+        payoutGrowthRate: 0
+      };
+    }
+  }
+
+  async getSubscriptionMetrics(startDate: Date, endDate: Date): Promise<{
+    newSubscriptions: number;
+    canceledSubscriptions: number;
+    subscriptionGrowthRate: number;
+    churnRate: number;
+    lifetimeValue: number;
+  }> {
+    try {
+      // Get new subscriptions in timeframe
+      const newSubsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'premium'),
+            gte(users.subscriptionDate, startDate),
+            lte(users.subscriptionDate, endDate)
+          )
+        );
+
+      const newSubscriptions = newSubsResult[0]?.count || 0;
+
+      // Get canceled subscriptions (users who became free in this period)
+      const canceledSubsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'free'),
+            isNotNull(users.subscriptionDate), // Had a subscription before
+            gte(users.lastLoginAt, startDate), // Were active during period
+            lte(users.lastLoginAt, endDate)
+          )
+        );
+
+      const canceledSubscriptions = canceledSubsResult[0]?.count || 0;
+
+      // Calculate subscription growth rate
+      const subscriptionGrowthRate = canceledSubscriptions > 0 
+        ? ((newSubscriptions - canceledSubscriptions) / canceledSubscriptions) * 100
+        : newSubscriptions > 0 ? 100 : 0;
+
+      // Calculate churn rate
+      const totalActiveAtStart = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'premium'),
+            lte(users.subscriptionDate, startDate)
+          )
+        );
+
+      const activeAtStart = totalActiveAtStart[0]?.count || 0;
+      const churnRate = activeAtStart > 0 ? (canceledSubscriptions / activeAtStart) * 100 : 0;
+
+      // Calculate average lifetime value (simplified)
+      const avgSubDurationResult = await db
+        .select({ 
+          avgRevenue: sql<number>`avg(membership_fee)`,
+          avgMonths: sql<number>`avg(EXTRACT(EPOCH FROM (COALESCE(subscription_end_date, NOW()) - subscription_date)) / 2629746)` // seconds to months
+        })
+        .from(users)
+        .where(isNotNull(users.subscriptionDate));
+
+      const avgMonthlyRevenue = (avgSubDurationResult[0]?.avgRevenue || 0) / 100;
+      const avgSubscriptionMonths = avgSubDurationResult[0]?.avgMonths || 0;
+      const lifetimeValue = avgMonthlyRevenue * avgSubscriptionMonths;
+
+      return {
+        newSubscriptions,
+        canceledSubscriptions,
+        subscriptionGrowthRate: Math.round(subscriptionGrowthRate * 100) / 100,
+        churnRate: Math.round(churnRate * 100) / 100,
+        lifetimeValue: Math.round(lifetimeValue * 100) / 100
+      };
+    } catch (error) {
+      console.error('Error getting subscription metrics:', error);
+      return {
+        newSubscriptions: 0,
+        canceledSubscriptions: 0,
+        subscriptionGrowthRate: 0,
+        churnRate: 0,
+        lifetimeValue: 0
+      };
+    }
+  }
+
   // === CYCLE PERFORMANCE ANALYTICS METHODS IMPLEMENTATION (Phase 1.1 Step 3) ===
 
   async getCurrentCycleStats(): Promise<{
