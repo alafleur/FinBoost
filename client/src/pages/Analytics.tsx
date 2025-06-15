@@ -16,9 +16,11 @@ import {
   Calendar,
   BarChart3,
   PieChart,
-  RefreshCw
+  RefreshCw,
+  ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Link } from 'wouter';
 
 interface AnalyticsData {
   userEngagement?: any;
@@ -229,6 +231,14 @@ export default function Analytics() {
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex justify-between items-center">
         <div>
+          <div className="flex items-center gap-4 mb-2">
+            <Link href="/admin">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Admin Dashboard
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
           <p className="text-muted-foreground">
             Comprehensive insights into platform performance and user engagement
