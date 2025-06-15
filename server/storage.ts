@@ -3899,8 +3899,8 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          moduleId: lessonProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
+          moduleId: userProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM modules WHERE id = user_progress.module_id)`,
           completions: sql<number>`count(*)`,
           completionRate: sql<number>`
             (count(*) * 100.0) / (
@@ -3908,8 +3908,8 @@ export class MemStorage implements IStorage {
             )
           `
         })
-        .from(lessonProgress)
-        .groupBy(lessonProgress.moduleId)
+        .from(userProgress)
+        .groupBy(userProgress.moduleId)
         .orderBy(desc(sql`count(*)`));
       return result;
     } catch (error) {
@@ -3922,17 +3922,17 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          id: lessonProgress.id,
-          userId: lessonProgress.userId,
+          id: userProgress.id,
+          userId: userProgress.userId,
           username: users.username,
-          moduleId: lessonProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
-          completedAt: lessonProgress.completedAt
+          moduleId: userProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM modules WHERE id = user_progress.module_id)`,
+          completedAt: userProgress.completedAt
         })
-        .from(lessonProgress)
-        .innerJoin(users, eq(lessonProgress.userId, users.id))
-        .where(gte(lessonProgress.completedAt, startDate))
-        .orderBy(desc(lessonProgress.completedAt))
+        .from(userProgress)
+        .innerJoin(users, eq(userProgress.userId, users.id))
+        .where(gte(userProgress.completedAt, startDate))
+        .orderBy(desc(userProgress.completedAt))
         .limit(50);
       return result;
     } catch (error) {
@@ -3953,7 +3953,7 @@ export class MemStorage implements IStorage {
           `
         })
         .from(modules)
-        .leftJoin(lessonProgress, eq(modules.id, lessonProgress.moduleId))
+        .leftJoin(userProgress, eq(modules.id, userProgress.moduleId))
         .where(eq(modules.isPublished, true))
         .groupBy(modules.category)
         .orderBy(desc(sql`count(lesson_progress.id)`));
@@ -3973,9 +3973,9 @@ export class MemStorage implements IStorage {
           avgSessionTime: sql<number>`avg(modules.estimated_minutes)`,
           totalSessions: sql<number>`count(lesson_progress.id)`
         })
-        .from(lessonProgress)
-        .innerJoin(modules, eq(lessonProgress.moduleId, modules.id))
-        .where(gte(lessonProgress.completedAt, startDate));
+        .from(userProgress)
+        .innerJoin(modules, eq(userProgress.moduleId, modules.id))
+        .where(gte(userProgress.completedAt, startDate));
       return result[0] || { totalEstimatedMinutes: 0, avgSessionTime: 0, totalSessions: 0 };
     } catch (error) {
       console.error('Error getting learning time stats:', error);
