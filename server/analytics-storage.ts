@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, cycleSettings, userCycleEnrollments, learningModules, userProgress } from "@shared/schema";
+import { users, cycleSettings, learningModules, userProgress } from "@shared/schema";
 import { sql, eq, and, gte, desc, count } from "drizzle-orm";
 
 /**
