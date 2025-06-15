@@ -1,7 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull } from "drizzle-orm";
+import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -3914,15 +3914,24 @@ export class MemStorage implements IStorage {
 
   async getRegistrationTrends(startDate: Date): Promise<any[]> {
     try {
+      // Check cache first
+      const cacheKey = `registration_trends_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
       const result = await db
         .select({
-          date: sql<string>`DATE(created_at)`,
+          date: sql<string>`DATE(joined_at)`,
           count: sql<number>`count(*)`
         })
         .from(users)
-        .where(gte(users.createdAt, startDate))
-        .groupBy(sql`DATE(created_at)`)
-        .orderBy(sql`DATE(created_at)`);
+        .where(gte(users.joinedAt, startDate))
+        .groupBy(sql`DATE(joined_at)`)
+        .orderBy(sql`DATE(joined_at)`);
+      
+      // Cache for 30 minutes (registration trends change less frequently)
+      this.setCachedData(cacheKey, result, 30);
+      
       return result;
     } catch (error) {
       console.error('Error getting registration trends:', error);
