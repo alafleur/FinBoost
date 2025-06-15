@@ -419,8 +419,13 @@ export class MemStorage implements IStorage {
   }
 
   async getUserById(id: number): Promise<User | null> {
-    const user = this.users.get(id);
-    return user || null;
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user || null;
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return null;
+    }
   }
 
   async validatePassword(email: string, password: string): Promise<User | null> {
