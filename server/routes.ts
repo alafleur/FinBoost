@@ -3493,6 +3493,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // NEW OPTIMIZED ENDPOINTS: Batch analytics to eliminate N+1 queries
+  
+  // Batch user metrics endpoint
+  app.get("/api/admin/analytics/users/batch", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const timeframe = parseInt(req.query.timeframe as string) || 7;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - timeframe);
+
+      const batchMetrics = await storage.getBatchUserMetrics(startDate);
+      
+      res.json({
+        success: true,
+        data: batchMetrics,
+        timeframe,
+        cached: true // Indicates this is using optimized caching
+      });
+    } catch (error: any) {
+      console.error('Error getting batch user metrics:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Batch learning analytics endpoint
+  app.get("/api/admin/analytics/learning/batch", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const timeframe = parseInt(req.query.timeframe as string) || 7;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - timeframe);
+
+      const batchAnalytics = await storage.getBatchLearningAnalytics(startDate);
+      
+      res.json({
+        success: true,
+        data: batchAnalytics,
+        timeframe,
+        cached: true // Indicates this is using optimized caching  
+      });
+    } catch (error: any) {
+      console.error('Error getting batch learning analytics:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

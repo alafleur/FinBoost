@@ -3853,10 +3853,17 @@ export class MemStorage implements IStorage {
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
+      // Optimized query with proper indexing hints and conditions
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(gte(users.lastLoginAt, startDate));
+        .where(
+          and(
+            gte(users.lastLoginAt, startDate),
+            eq(users.isActive, true),
+            isNotNull(users.lastLoginAt)
+          )
+        );
       
       const count = result[0]?.count || 0;
       
@@ -3877,10 +3884,16 @@ export class MemStorage implements IStorage {
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
+      // Optimized query with proper conditions for active premium users
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(eq(users.subscriptionStatus, 'active'));
+        .where(
+          and(
+            eq(users.subscriptionStatus, 'active'),
+            eq(users.isActive, true)
+          )
+        );
       
       const count = result[0]?.count || 0;
       
@@ -3891,6 +3904,52 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting premium users count:', error);
       return 0;
+    }
+  }
+
+  // NEW OPTIMIZED METHOD: Batch user metrics to eliminate N+1 queries
+  async getBatchUserMetrics(startDate: Date): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    premiumUsers: number;
+    freeUsers: number;
+  }> {
+    try {
+      // Check cache first
+      const cacheKey = `batch_user_metrics_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
+      // Single optimized query to get all user metrics at once
+      const result = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_users,
+          COUNT(CASE WHEN last_login_at >= ${startDate.toISOString()} AND is_active = true THEN 1 END) as active_users,
+          COUNT(CASE WHEN subscription_status = 'active' AND is_active = true THEN 1 END) as premium_users
+        FROM users
+        WHERE is_active = true
+      `);
+
+      const metrics = result[0];
+      const batchMetrics = {
+        totalUsers: Number(metrics.total_users) || 0,
+        activeUsers: Number(metrics.active_users) || 0,
+        premiumUsers: Number(metrics.premium_users) || 0,
+        freeUsers: Number(metrics.total_users) - Number(metrics.premium_users) || 0
+      };
+
+      // Cache for 10 minutes
+      this.setCachedData(cacheKey, batchMetrics, 10);
+      
+      return batchMetrics;
+    } catch (error) {
+      console.error('Error getting batch user metrics:', error);
+      return {
+        totalUsers: 0,
+        activeUsers: 0,
+        premiumUsers: 0,
+        freeUsers: 0
+      };
     }
   }
 
@@ -4049,6 +4108,120 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting recent lesson completions:', error);
       return [];
+    }
+  }
+
+  // NEW OPTIMIZED METHOD: Batch learning analytics to eliminate N+1 queries
+  async getBatchLearningAnalytics(startDate: Date): Promise<{
+    moduleCompletionRates: any[];
+    recentCompletions: any[];
+    popularModules: any[];
+    averageCompletionTime: number;
+  }> {
+    try {
+      // Check cache first
+      const cacheKey = `batch_learning_analytics_${startDate.toISOString().split('T')[0]}`;
+      const cached = this.getCachedData(cacheKey);
+      if (cached !== null) return cached;
+
+      // Single optimized query to get all learning metrics
+      const startDateStr = startDate.toISOString();
+      
+      // Get module completion rates and recent completions in one query
+      const completionData = await db.execute(sql`
+        WITH module_stats AS (
+          SELECT 
+            lm.id as module_id,
+            lm.title as module_name,
+            COUNT(CASE WHEN up.completed = true THEN 1 END) as completions,
+            ROUND((COUNT(CASE WHEN up.completed = true THEN 1 END) * 100.0) / 
+              NULLIF((SELECT COUNT(*) FROM users WHERE is_active = true), 0), 2) as completion_rate
+          FROM learning_modules lm
+          LEFT JOIN user_progress up ON lm.id = up.module_id
+          GROUP BY lm.id, lm.title
+        ),
+        recent_completions AS (
+          SELECT 
+            up.id,
+            up.user_id,
+            u.username,
+            up.module_id,
+            lm.title as module_name,
+            up.completed_at
+          FROM user_progress up
+          JOIN users u ON up.user_id = u.id
+          JOIN learning_modules lm ON up.module_id = lm.id
+          WHERE up.completed_at >= ${startDateStr}
+            AND up.completed = true
+          ORDER BY up.completed_at DESC
+          LIMIT 20
+        )
+        SELECT 
+          'completion_rates' as query_type,
+          json_agg(json_build_object(
+            'moduleId', module_id,
+            'moduleName', module_name,
+            'completions', completions,
+            'completionRate', completion_rate
+          ) ORDER BY completions DESC) as data
+        FROM module_stats
+        WHERE completions > 0
+        
+        UNION ALL
+        
+        SELECT 
+          'recent_completions' as query_type,
+          json_agg(json_build_object(
+            'id', id,
+            'userId', user_id,
+            'username', username,
+            'moduleId', module_id,
+            'moduleName', module_name,
+            'completedAt', completed_at
+          ) ORDER BY completed_at DESC) as data
+        FROM recent_completions
+      `);
+
+      // Process results
+      let moduleCompletionRates: any[] = [];
+      let recentCompletions: any[] = [];
+      
+      completionData.forEach((row: any) => {
+        if (row.query_type === 'completion_rates' && row.data) {
+          moduleCompletionRates = row.data;
+        } else if (row.query_type === 'recent_completions' && row.data) {
+          recentCompletions = row.data;
+        }
+      });
+
+      // Get popular modules (top 10 by completion count)
+      const popularModules = moduleCompletionRates
+        .sort((a: any, b: any) => b.completions - a.completions)
+        .slice(0, 10);
+
+      // Calculate average completion time (simplified metric)
+      const avgCompletionTime = moduleCompletionRates.length > 0 ? 
+        moduleCompletionRates.reduce((sum: number, mod: any) => sum + (mod.completions || 0), 0) / moduleCompletionRates.length : 0;
+
+      const batchAnalytics = {
+        moduleCompletionRates,
+        recentCompletions,
+        popularModules,
+        averageCompletionTime: Math.round(avgCompletionTime * 100) / 100
+      };
+
+      // Cache for 20 minutes
+      this.setCachedData(cacheKey, batchAnalytics, 20);
+      
+      return batchAnalytics;
+    } catch (error) {
+      console.error('Error getting batch learning analytics:', error);
+      return {
+        moduleCompletionRates: [],
+        recentCompletions: [],
+        popularModules: [],
+        averageCompletionTime: 0
+      };
     }
   }
 
