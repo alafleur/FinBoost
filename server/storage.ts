@@ -4012,8 +4012,9 @@ export class MemStorage implements IStorage {
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
-      // Use raw SQL to fix table reference issues
-      const result = await db.execute(sql`
+      // Use native string concatenation to avoid parameter serialization issues
+      const startDateStr = startDate.toISOString();
+      const query = `
         SELECT 
           up.id,
           up.user_id as "userId",
@@ -4024,11 +4025,12 @@ export class MemStorage implements IStorage {
         FROM user_progress up
         JOIN users u ON up.user_id = u.id
         JOIN learning_modules lm ON up.module_id = lm.id
-        WHERE up.completed_at >= ${startDate}
+        WHERE up.completed_at >= '${startDateStr}'
           AND up.completed = true
         ORDER BY up.completed_at DESC
         LIMIT 50
-      `);
+      `;
+      const result = await db.execute(sql.raw(query));
 
       // Transform result to match expected format
       const formattedResult = result.map((row: any) => ({
