@@ -3873,17 +3873,17 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          id: userProgress.id,
-          userId: userProgress.userId,
+          id: lessonProgress.id,
+          userId: lessonProgress.userId,
           username: users.username,
-          moduleId: userProgress.moduleId,
-          moduleName: sql<string>`(SELECT title FROM learning_modules WHERE id = user_progress.module_id)`,
-          completedAt: userProgress.completedAt
+          moduleId: lessonProgress.moduleId,
+          moduleName: sql<string>`(SELECT title FROM modules WHERE id = lesson_progress.module_id)`,
+          completedAt: lessonProgress.completedAt
         })
-        .from(userProgress)
-        .innerJoin(users, eq(userProgress.userId, users.id))
-        .where(and(eq(userProgress.completed, true), gte(userProgress.completedAt, startDate)))
-        .orderBy(desc(userProgress.completedAt))
+        .from(lessonProgress)
+        .innerJoin(users, eq(lessonProgress.userId, users.id))
+        .where(gte(lessonProgress.completedAt, startDate))
+        .orderBy(desc(lessonProgress.completedAt))
         .limit(50);
       return result;
     } catch (error) {
@@ -3977,12 +3977,12 @@ export class MemStorage implements IStorage {
           participants: sql<number>`(
             SELECT count(DISTINCT user_id) 
             FROM user_cycle_points 
-            WHERE cycle_setting_id = cycle_settings.id
+            WHERE cycle_id = cycle_settings.id
           )`,
           totalPoints: sql<number>`(
-            SELECT sum(current_cycle_points) 
+            SELECT sum(points) 
             FROM user_cycle_points 
-            WHERE cycle_setting_id = cycle_settings.id
+            WHERE cycle_id = cycle_settings.id
           )`
         })
         .from(cycleSettings)
@@ -4004,7 +4004,7 @@ export class MemStorage implements IStorage {
           participants: sql<number>`(
             SELECT count(DISTINCT user_id) 
             FROM user_cycle_points 
-            WHERE cycle_setting_id = cycle_settings.id
+            WHERE cycle_id = cycle_settings.id
           )`
         })
         .from(cycleSettings)
@@ -4029,13 +4029,13 @@ export class MemStorage implements IStorage {
         .select({
           userId: userCyclePoints.userId,
           username: users.username,
-          totalPoints: sql<number>`sum(current_cycle_points)`
+          totalPoints: sql<number>`sum(points)`
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
-        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id))
+        .where(eq(userCyclePoints.cycleId, currentCycle.id))
         .groupBy(userCyclePoints.userId, users.username)
-        .orderBy(desc(sql`sum(current_cycle_points)`));
+        .orderBy(desc(sql`sum(points)`));
 
       return {
         tiers: thresholds,
@@ -4157,23 +4157,22 @@ export class MemStorage implements IStorage {
           userId: users.id,
           username: users.username,
           activity: sql<string>`'User registered'`,
-          timestamp: users.joinedAt
+          timestamp: users.createdAt
         })
         .from(users)
-        .orderBy(desc(users.joinedAt))
+        .orderBy(desc(users.createdAt))
         .limit(limit / 2)
         .union(
           db.select({
             type: sql<string>`'lesson_completion'`,
-            userId: userProgress.userId,
+            userId: lessonProgress.userId,
             username: users.username,
             activity: sql<string>`'Completed lesson'`,
-            timestamp: userProgress.completedAt
+            timestamp: lessonProgress.completedAt
           })
-          .from(userProgress)
-          .innerJoin(users, eq(userProgress.userId, users.id))
-          .where(eq(userProgress.completed, true))
-          .orderBy(desc(userProgress.completedAt))
+          .from(lessonProgress)
+          .innerJoin(users, eq(lessonProgress.userId, users.id))
+          .orderBy(desc(lessonProgress.completedAt))
           .limit(limit / 2)
         );
 
@@ -4191,11 +4190,11 @@ export class MemStorage implements IStorage {
           id: users.id,
           username: users.username,
           email: users.email,
-          createdAt: users.joinedAt,
+          createdAt: users.createdAt,
           subscriptionStatus: users.subscriptionStatus
         })
         .from(users)
-        .orderBy(desc(users.joinedAt))
+        .orderBy(desc(users.createdAt))
         .limit(limit);
       return result;
     } catch (error) {
@@ -4219,13 +4218,12 @@ export class MemStorage implements IStorage {
       const totalUsers = await this.getTotalUsersCount();
       const totalModules = await db
         .select({ count: sql<number>`count(*)` })
-        .from(learningModules)
-        .where(eq(learningModules.isActive, true));
+        .from(modules)
+        .where(eq(modules.isPublished, true));
 
       const totalCompletions = await db
         .select({ count: sql<number>`count(*)` })
-        .from(userProgress)
-        .where(eq(userProgress.completed, true));
+        .from(lessonProgress);
 
       const expectedCompletions = totalUsers * (totalModules[0]?.count || 0);
       return expectedCompletions > 0 
