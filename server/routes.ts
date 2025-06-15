@@ -3202,7 +3202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       startDate.setDate(startDate.getDate() - days);
 
       // Module completion rates
-      const moduleCompletionRates = await storage.getModuleCompletionRates();
+      const moduleCompletionRates = await storage.getModuleCompletionRates(startDate, new Date());
       
       // Recent lesson completions
       const recentCompletions = await storage.getRecentLessonCompletions(startDate);
