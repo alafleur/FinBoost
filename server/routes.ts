@@ -1418,7 +1418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid token" });
       }
 
-      if (!user.is_admin && user.email !== 'lafleur.andrew@gmail.com') {
+      if (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
