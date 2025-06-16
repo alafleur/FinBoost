@@ -1407,18 +1407,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authHeader = req.headers['authorization'];
       const token = authHeader && authHeader.split(' ')[1];
 
+      console.log('Auth header:', authHeader);
+      console.log('Extracted token:', token);
+
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
       }
 
       const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      console.log('Decoded token:', decoded);
+      
       const user = await storage.getUserById(decoded.userId);
+      console.log('Found user:', user ? { id: user.id, email: user.email, isAdmin: user.isAdmin } : 'not found');
       
       if (!user) {
         return res.status(401).json({ message: "Invalid token" });
       }
 
       if (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com') {
+        console.log('Access denied - not admin:', { isAdmin: user.isAdmin, email: user.email });
         return res.status(403).json({ message: "Admin access required" });
       }
 
