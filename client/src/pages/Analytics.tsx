@@ -36,40 +36,9 @@ export default function Analytics() {
   const [timeframe, setTimeframe] = useState('current-cycle');
   const [currentCycle, setCurrentCycle] = useState<any>(null);
   const [liveData, setLiveData] = useState<any>(null);
-  const [authError, setAuthError] = useState(false);
-
-  // Check authentication status
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  // If no admin token, show authentication notice
-  if (!token || !user.isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Admin Access Required</CardTitle>
-            <CardDescription>
-              Please authenticate as an admin to access the Analytics dashboard.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              onClick={() => window.location.href = '/set-admin-token.html'}
-              className="w-full"
-            >
-              Set Admin Token
-            </Button>
-            <p className="text-sm text-muted-foreground text-center">
-              Or login with admin credentials: lafleur.andrew@gmail.com
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // WebSocket connection for real-time analytics
+  const token = localStorage.getItem('token');
   const { 
     isConnected, 
     isConnecting, 
