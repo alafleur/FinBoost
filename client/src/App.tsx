@@ -11,6 +11,7 @@ import Education from "./pages/Education";
 import Lesson from "./pages/Lesson";
 import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
+import SimpleAnalytics from "./pages/SimpleAnalytics";
 import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/admin/analytics" component={Analytics} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/simple-analytics" component={SimpleAnalytics} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
