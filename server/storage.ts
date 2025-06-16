@@ -4323,6 +4323,11 @@ export class MemStorage implements IStorage {
 
   async getHistoricalCyclePerformance(startDate: Date): Promise<any[]> {
     try {
+      // Safe date handling to prevent Invalid time value errors
+      const safeStartDate = startDate instanceof Date && !isNaN(startDate.getTime()) 
+        ? startDate 
+        : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // Default to 90 days ago
+
       const result = await db
         .select({
           cycleId: cycleSettings.id,
@@ -4341,9 +4346,25 @@ export class MemStorage implements IStorage {
           )`
         })
         .from(cycleSettings)
-        .where(gte(cycleSettings.cycleStartDate, startDate))
+        .where(gte(cycleSettings.cycleStartDate, safeStartDate))
         .orderBy(desc(cycleSettings.cycleStartDate));
-      return result;
+
+      // Filter out records with invalid dates before returning
+      const filteredResult = result.filter(cycle => {
+        const startDateValid = cycle.startDate instanceof Date && !isNaN(cycle.startDate.getTime());
+        const endDateValid = cycle.endDate instanceof Date && !isNaN(cycle.endDate.getTime());
+        
+        if (!startDateValid || !endDateValid) {
+          console.warn(`Filtering out cycle ${cycle.cycleId} with invalid dates:`, {
+            startDate: cycle.startDate,
+            endDate: cycle.endDate
+          });
+          return false;
+        }
+        return true;
+      });
+
+      return filteredResult;
     } catch (error) {
       console.error('Error getting historical cycle performance:', error);
       return [];
@@ -5606,6 +5627,11 @@ export class MemStorage implements IStorage {
     completionDate: Date;
   }>> {
     try {
+      // Safe date handling to prevent Invalid time value errors
+      const safeStartDate = startDate instanceof Date && !isNaN(startDate.getTime()) 
+        ? startDate 
+        : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // Default to 90 days ago
+
       // Get completed cycles since startDate
       const completedCycles = await db
         .select()
@@ -5613,7 +5639,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(cycleSettings.isActive, false),
-            gte(cycleSettings.cycleEndDate, startDate)
+            gte(cycleSettings.cycleEndDate, safeStartDate)
           )
         )
         .orderBy(desc(cycleSettings.cycleEndDate));
@@ -5621,6 +5647,12 @@ export class MemStorage implements IStorage {
       const cyclePerformance = [];
 
       for (const cycle of completedCycles) {
+        // Skip cycles with invalid dates
+        if (!cycle.cycleEndDate || !(cycle.cycleEndDate instanceof Date) || isNaN(cycle.cycleEndDate.getTime())) {
+          console.warn(`Skipping cycle ${cycle.id} with invalid end date:`, cycle.cycleEndDate);
+          continue;
+        }
+
         // Get participants for this cycle
         const participantsResult = await db
           .select({ count: sql<number>`count(DISTINCT user_id)::int` })
