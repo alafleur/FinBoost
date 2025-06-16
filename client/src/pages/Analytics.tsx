@@ -135,10 +135,10 @@ export default function Analytics() {
   });
 
   const { data: cyclePerformance, isLoading: loadingCycles } = useQuery({
-    queryKey: ['/api/admin/analytics/cycles/performance', timeframe, currentCycle?.id, Date.now()],
+    queryKey: ['/api/admin/analytics/cycles/performance', timeframe, currentCycle?.id],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/analytics/cycles/performance?${getTimeframeParams()}&_t=${Date.now()}`, {
+      const response = await fetch(`/api/admin/analytics/cycles/performance?${getTimeframeParams()}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
