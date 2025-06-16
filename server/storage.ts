@@ -3848,8 +3848,13 @@ export class MemStorage implements IStorage {
 
   async getActiveUsersCount(startDate: Date): Promise<number> {
     try {
+      // Safe date handling to prevent Invalid time value errors
+      const safeStartDate = startDate instanceof Date && !isNaN(startDate.getTime()) 
+        ? startDate 
+        : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to 30 days ago
+
       // Check cache first
-      const cacheKey = `active_users_${startDate.toISOString().split('T')[0]}`;
+      const cacheKey = `active_users_${safeStartDate.toISOString().split('T')[0]}`;
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
@@ -3859,7 +3864,7 @@ export class MemStorage implements IStorage {
         .from(users)
         .where(
           and(
-            gte(users.lastLoginAt, startDate),
+            gte(users.lastLoginAt, safeStartDate),
             eq(users.isActive, true),
             isNotNull(users.lastLoginAt)
           )
@@ -4088,13 +4093,18 @@ export class MemStorage implements IStorage {
 
   async getRecentLessonCompletions(startDate: Date): Promise<any[]> {
     try {
+      // Safe date handling to prevent Invalid time value errors
+      const safeStartDate = startDate instanceof Date && !isNaN(startDate.getTime()) 
+        ? startDate 
+        : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to 30 days ago
+
       // Check cache first
-      const cacheKey = `recent_lesson_completions_${startDate.toISOString().split('T')[0]}`;
+      const cacheKey = `recent_lesson_completions_${safeStartDate.toISOString().split('T')[0]}`;
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
       // Use native string concatenation to avoid parameter serialization issues
-      const startDateStr = startDate.toISOString();
+      const startDateStr = safeStartDate.toISOString();
       const query = `
         SELECT 
           up.id,
