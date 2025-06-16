@@ -133,7 +133,7 @@ export default function Analytics() {
       return response.json();
     },
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   const { data: financialOverview, isLoading: loadingFinancial } = useQuery({

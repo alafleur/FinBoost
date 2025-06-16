@@ -4359,7 +4359,7 @@ export class MemStorage implements IStorage {
           participants: sql<number>`(
             SELECT count(DISTINCT user_id) 
             FROM user_cycle_points 
-            WHERE cycle_id = cycle_settings.id
+            WHERE cycle_setting_id = cycle_settings.id
           )`
         })
         .from(cycleSettings)
@@ -5642,85 +5642,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async getCycleParticipationTrends(startDate: Date): Promise<Array<{
-    cycleName: string;
-    newParticipants: number;
-    returningParticipants: number;
-    totalParticipants: number;
-    retentionRate: number;
-  }>> {
-    try {
-      // Get cycles since startDate
-      const cycles = await db
-        .select()
-        .from(cycleSettings)
-        .where(gte(cycleSettings.cycleStartDate, startDate))
-        .orderBy(asc(cycleSettings.cycleStartDate));
 
-      const participationTrends = [];
-
-      for (const cycle of cycles) {
-        // Get all participants for this cycle
-        const currentParticipants = await db
-          .select({ userId: userCyclePoints.userId })
-          .from(userCyclePoints)
-          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
-
-        const currentUserIds = currentParticipants.map(p => p.userId);
-        const totalParticipants = currentUserIds.length;
-
-        // Get previous cycle participants
-        const previousCycles = await db
-          .select()
-          .from(cycleSettings)
-          .where(
-            and(
-              lt(cycleSettings.cycleEndDate, cycle.cycleStartDate),
-              eq(cycleSettings.isActive, false)
-            )
-          )
-          .orderBy(desc(cycleSettings.cycleEndDate))
-          .limit(1);
-
-        let returningParticipants = 0;
-        let retentionRate = 0;
-
-        if (previousCycles.length > 0) {
-          const previousCycle = previousCycles[0];
-          
-          const previousParticipants = await db
-            .select({ userId: userCyclePoints.userId })
-            .from(userCyclePoints)
-            .where(eq(userCyclePoints.cycleSettingId, previousCycle.id));
-
-          const previousUserIds = previousParticipants.map(p => p.userId);
-          
-          // Count returning users
-          returningParticipants = currentUserIds.filter(id => previousUserIds.includes(id)).length;
-          
-          // Calculate retention rate
-          retentionRate = previousUserIds.length > 0 
-            ? Math.round((returningParticipants / previousUserIds.length) * 100 * 100) / 100
-            : 0;
-        }
-
-        const newParticipants = totalParticipants - returningParticipants;
-
-        participationTrends.push({
-          cycleName: cycle.cycleName,
-          newParticipants,
-          returningParticipants,
-          totalParticipants,
-          retentionRate
-        });
-      }
-
-      return participationTrends;
-    } catch (error) {
-      console.error('Error getting cycle participation trends:', error);
-      return [];
-    }
-  }
 
   async getPointsDistributionAnalytics(): Promise<{
     tierDistribution: Array<{ tier: string; userCount: number; avgPoints: number }>;
