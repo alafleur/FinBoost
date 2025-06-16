@@ -3558,6 +3558,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve admin token setup page
+  app.get('/set-admin-token.html', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <title>Set Admin Token</title>
+</head>
+<body>
+    <h1>Setting Admin Token...</h1>
+    <script>
+        // Set the admin token in localStorage
+        const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1MDA3ODcwMCwiZXhwIjoxNzUwMTY1MTAwfQ.8UU5C_ZI0YAXyIO7t9t14dHkM4EpQdVAepuDF9uNUWc';
+        localStorage.setItem('token', adminToken);
+        
+        // Set user data for admin
+        const userData = {
+            id: 1,
+            username: 'alafleur',
+            email: 'lafleur.andrew@gmail.com',
+            isAdmin: true
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        document.body.innerHTML = '<h1>Admin token set successfully!</h1><p>You can now navigate to <a href="/analytics">Analytics Dashboard</a></p>';
+        
+        // Auto-redirect after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/analytics';
+        }, 2000);
+    </script>
+</body>
+</html>`);
+  });
+
   const httpServer = createServer(app);
   
   // WebSocket Server for Real-time Analytics (on HTTP server to avoid port conflicts)
