@@ -152,7 +152,7 @@ export function useWebSocket(options: UseWebSocketOptions) {
 
 // Specialized hook for admin analytics WebSocket
 export function useAnalyticsWebSocket(token?: string) {
-  const wsUrl = `ws://localhost:5001`;
+  const wsUrl = `ws://localhost:5000/ws`;
   
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [activityFeed, setActivityFeed] = useState<any[]>([]);

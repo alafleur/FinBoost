@@ -3560,8 +3560,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // WebSocket Server for Real-time Analytics (separate port to avoid Vite conflicts)
-  const wss = new WebSocketServer({ port: 5001 });
+  // WebSocket Server for Real-time Analytics (on HTTP server to avoid port conflicts)
+  const wss = new WebSocketServer({ 
+    server: httpServer,
+    path: '/ws'
+  });
   
   // Store authenticated WebSocket connections
   const authenticatedClients = new Map<WebSocket, { userId: number; isAdmin: boolean }>();

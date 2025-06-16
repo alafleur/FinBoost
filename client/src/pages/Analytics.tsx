@@ -422,7 +422,7 @@ export default function Analytics() {
                 </Button>
               </CardHeader>
               <CardContent>
-                {loadingRecentActivity ? (
+                {loadingActivity ? (
                   <div className="space-y-3">
                     {[...Array(6)].map((_, i) => (
                       <div key={i} className="flex items-center gap-3">
