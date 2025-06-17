@@ -62,6 +62,11 @@ export default function Lesson() {
   } | null>(null);
   const [user, setUser] = useState<UserForAccess | null>(null);
   const [accessBlocked, setAccessBlocked] = useState(false);
+  const [completionData, setCompletionData] = useState<{
+    pointsEarned: number;
+    streakBonus: number;
+    newStreak: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -206,6 +211,13 @@ export default function Lesson() {
 
         if (completionResponse.ok) {
           const completionResult = await completionResponse.json();
+
+          // Store completion data for display in quiz results
+          setCompletionData({
+            pointsEarned: completionResult.pointsEarned,
+            streakBonus: completionResult.streakBonus || 0,
+            newStreak: completionResult.newStreak || 1
+          });
 
           // Update completed lessons in localStorage
           const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
@@ -621,7 +633,18 @@ export default function Lesson() {
                           <p className="text-green-600 text-sm mt-1">You've successfully completed this lesson.</p>
                           <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
                             <p className="text-blue-800 font-medium">🎁 Points Earned!</p>
-                            <p className="text-blue-600 text-sm">Lesson completion: +10 points | Quiz completion: +15 points</p>
+                            <p className="text-blue-600 text-sm">
+                              {completionData ? (
+                                <>
+                                  Total: +{completionData.pointsEarned} points
+                                  {completionData.streakBonus > 0 && (
+                                    <> | Streak bonus: +{completionData.streakBonus} points</>
+                                  )}
+                                </>
+                              ) : (
+                                `Total: +${lesson.points} points`
+                              )}
+                            </p>
                           </div>
                         </div>
                       ) : (
