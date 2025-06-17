@@ -637,7 +637,7 @@ export default function Admin() {
           isActive: true
         });
         
-        fetchMonthlyPoolSettings();
+        fetchCyclePoolSettings();
         fetchCurrentPoolSettings();
       } else {
         throw new Error(`Failed to save pool setting: ${response.status} ${responseData}`);
@@ -1574,7 +1574,7 @@ export default function Admin() {
     fetchPendingProofs();
     fetchPointActions();
     fetchSupportTickets();
-    fetchMonthlyPoolSettings();
+    fetchCyclePoolSettings();
     fetchCurrentPoolSettings();
 
     // Removed automatic polling to improve performance
@@ -4628,7 +4628,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {monthlyPoolSettings.map((setting: any) => (
+                    {cyclePoolSettings.map((setting: any) => (
                       <div key={setting.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between">
                           <div>
