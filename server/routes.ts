@@ -506,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ success: false, message: "No token provided" });
       }
 
-      const user = await storage.validateToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ success: false, message: "Invalid token" });
       }
@@ -793,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ success: false, message: "No token provided" });
       }
 
-      const user = await storage.validateToken(token);
+      const user = await storage.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ success: false, message: "Invalid token" });
       }
