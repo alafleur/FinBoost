@@ -39,7 +39,7 @@ interface UserProfile {
   occupation?: string;
   financialGoals?: string;
   totalPoints: number;
-  currentMonthPoints: number;
+  currentCyclePoints: number;
   tier: string;
   joinedAt: string;
   lastLoginAt?: string;
@@ -214,7 +214,7 @@ export default function Profile() {
     // Calculate progress from current tier threshold to next tier threshold
     const currentThreshold = currentTier.threshold;
     const nextThreshold = currentTier.nextTier.threshold;
-    const pointsInCurrentTier = user.currentMonthPoints - currentThreshold;
+    const pointsInCurrentTier = user.currentCyclePoints - currentThreshold;
     const pointsNeededForNextTier = nextThreshold - currentThreshold;
 
     const progress = (pointsInCurrentTier / pointsNeededForNextTier) * 100;
@@ -226,7 +226,7 @@ export default function Profile() {
     const currentTier = getCurrentTierInfo();
     if (!currentTier.nextTier) return 0;
 
-    return Math.max(0, currentTier.nextTier.threshold - user.currentMonthPoints);
+    return Math.max(0, currentTier.nextTier.threshold - user.currentCyclePoints);
   };
 
   if (loading) {
@@ -298,8 +298,8 @@ export default function Profile() {
                   <div className="text-sm text-gray-600">Total Points</div>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{user.currentMonthPoints}</div>
-                  <div className="text-sm text-gray-600">This Month</div>
+                  <div className="text-2xl font-bold text-green-600">{user.currentCyclePoints}</div>
+                  <div className="text-sm text-gray-600">This Cycle</div>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">
@@ -502,7 +502,7 @@ export default function Profile() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-xl font-bold">Current: {currentTier.name} Tier</h3>
-                        <p className="opacity-90">{user.currentMonthPoints} points this month</p>
+                        <p className="opacity-90">{user.currentCyclePoints} points this cycle</p>
                       </div>
                       <TierIcon className="h-12 w-12 opacity-80" />
                     </div>
@@ -519,7 +519,7 @@ export default function Profile() {
                       </div>
                       <Progress value={getProgressToNextTier()} className="h-3" />
                       <p className="text-sm text-gray-600 mt-2">
-                        {user.currentMonthPoints} / {currentTier.nextTier.threshold} points
+                        {user.currentCyclePoints} / {currentTier.nextTier.threshold} points
                       </p>
                     </div>
                   )}
