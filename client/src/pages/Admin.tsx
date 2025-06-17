@@ -601,8 +601,8 @@ export default function Admin() {
     try {
       const token = localStorage.getItem('token');
       const url = editingPoolSetting 
-        ? `/api/admin/monthly-pool-settings/${editingPoolSetting.id}`
-        : '/api/admin/monthly-pool-settings';
+        ? `/api/admin/cycle-settings/${editingPoolSetting.id}`
+        : '/api/admin/cycle-settings';
       
       const method = editingPoolSetting ? 'PUT' : 'POST';
       
@@ -622,8 +622,8 @@ export default function Admin() {
 
       if (response.ok) {
         toast({
-          title: editingPoolSetting ? "Pool setting updated" : "Pool setting created",
-          description: "Monthly pool configuration has been saved successfully.",
+          title: editingPoolSetting ? "Cycle setting updated" : "Cycle setting created",
+          description: "Cycle configuration has been saved successfully.",
         });
         
         setShowPoolSettingDialog(false);
@@ -645,7 +645,7 @@ export default function Admin() {
     } catch (error) {
       console.error('Error saving pool setting:', error);
       toast({
-        title: "Error saving pool setting",
+        title: "Error saving cycle setting",
         description: error.message || "Please try again later.",
         variant: "destructive",
       });
@@ -4616,14 +4616,14 @@ export default function Admin() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    Monthly Pool Settings
+                    Cycle Management
                     <Button onClick={() => setShowPoolSettingDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add New Cycle
                     </Button>
                   </CardTitle>
                   <CardDescription>
-                    Configure reward pool percentages for each monthly cycle. Changes affect how much of each $20 subscription goes to rewards.
+                    Configure reward pool percentages for each cycle. Changes affect how much of each membership fee goes to rewards.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4669,9 +4669,9 @@ export default function Admin() {
                         </div>
                       </div>
                     ))}
-                    {monthlyPoolSettings.length === 0 && (
+                    {cyclePoolSettings.length === 0 && (
                       <div className="text-center py-8 text-gray-500">
-                        No monthly cycles configured. Create your first cycle to start managing dynamic pool settings.
+                        No cycles configured. Create your first cycle to start managing dynamic pool settings.
                       </div>
                     )}
                   </div>
@@ -6020,13 +6020,13 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-      {/* Monthly Pool Setting Dialog */}
+      {/* Cycle Setting Dialog */}
       <Dialog open={showPoolSettingDialog} onOpenChange={setShowPoolSettingDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingPoolSetting ? 'Edit Monthly Cycle' : 'Add New Monthly Cycle'}</DialogTitle>
+            <DialogTitle>{editingPoolSetting ? 'Edit Cycle' : 'Add New Cycle'}</DialogTitle>
             <DialogDescription>
-              Configure reward pool percentage and membership fee for a specific monthly cycle.
+              Configure reward pool percentage and membership fee for a specific cycle.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
