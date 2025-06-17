@@ -1698,6 +1698,24 @@ export class MemStorage implements IStorage {
       })
       .where(eq(users.id, userId));
 
+    // Also update cycle points for current active cycle
+    try {
+      await db.update(userCyclePoints)
+        .set({
+          currentCyclePoints: sql`${userCyclePoints.currentCyclePoints} + ${pointsEarned}`,
+          lastActivityDate: new Date()
+        })
+        .where(and(
+          eq(userCyclePoints.userId, userId),
+          eq(userCyclePoints.isActive, true)
+        ));
+      
+      console.log(`Updated cycle points for user ${userId}: +${pointsEarned} points`);
+    } catch (error) {
+      console.error('Error updating cycle points:', error);
+      // Continue even if cycle update fails
+    }
+
     // Record points history for lesson completion
     try {
       await db.insert(userPointsHistory).values({
