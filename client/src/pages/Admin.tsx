@@ -327,8 +327,8 @@ export default function Admin() {
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
 
-  // Monthly Pool Settings state
-  const [monthlyPoolSettings, setMonthlyPoolSettings] = useState([]);
+  // Cycle Settings state
+  const [cyclePoolSettings, setCyclePoolSettings] = useState([]);
   const [showPoolSettingDialog, setShowPoolSettingDialog] = useState(false);
   const [editingPoolSetting, setEditingPoolSetting] = useState(null);
   const [poolSettingForm, setPoolSettingForm] = useState({
@@ -474,7 +474,7 @@ export default function Admin() {
     fetchPendingProofs();
     fetchPointActions();
     fetchSupportTickets();
-    fetchMonthlyPoolSettings();
+    fetchCyclePoolSettings();
     loadCycles();
     fetchCycleSettings();
     fetchCycleWinnerSelections();
@@ -567,18 +567,18 @@ export default function Admin() {
     }
   };
 
-  const fetchMonthlyPoolSettings = async () => {
+  const fetchCyclePoolSettings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/monthly-pool-settings', {
+      const response = await fetch('/api/admin/cycle-settings', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setMonthlyPoolSettings(data);
+        setCyclePoolSettings(data);
       }
     } catch (error) {
-      console.error('Error fetching monthly pool settings:', error);
+      console.error('Error fetching cycle pool settings:', error);
     }
   };
 
