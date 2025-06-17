@@ -12,7 +12,7 @@ async function testAuthenticationFlow() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'f5l5@email.com',
+        email: 'testadmin@test.com',
         password: 'password123'
       })
     });
