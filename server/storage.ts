@@ -1699,11 +1699,30 @@ export class MemStorage implements IStorage {
       .where(eq(users.id, userId));
 
     // Record points history for lesson completion
-    await this.awardPoints(userId, 'lesson_complete', pointsEarned, `Completed lesson: ${lessonId}`, { moduleId, lessonId });
+    try {
+      await db.insert(userPointsHistory).values({
+        userId: userId,
+        action: 'lesson_complete',
+        points: pointsEarned,
+        description: `Completed lesson: ${lessonId}`,
+        status: 'approved',
+        metadata: JSON.stringify({ moduleId, lessonId })
+      });
 
-    // Record streak bonus in history if any
-    if (bonusPoints > 0) {
-      await this.awardPoints(userId, 'streak_bonus', bonusPoints, `${newStreak}-day streak bonus`);
+      // Record streak bonus in history if any
+      if (bonusPoints > 0) {
+        await db.insert(userPointsHistory).values({
+          userId: userId,
+          action: 'streak_bonus',
+          points: bonusPoints,
+          description: `${newStreak}-day streak bonus`,
+          status: 'approved',
+          metadata: JSON.stringify({ streakDays: newStreak })
+        });
+      }
+    } catch (error) {
+      console.error('Error recording points history:', error);
+      // Continue even if history recording fails
     }
 
     return { pointsEarned, streakBonus: bonusPoints, newStreak };
