@@ -301,7 +301,7 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="text-2xl font-bold">{user?.totalPoints || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    +{user?.currentMonthPoints || 0} this month
+                    +{user?.currentCyclePoints || 0} this cycle
                   </p>
                 </CardContent>
               </Card>
