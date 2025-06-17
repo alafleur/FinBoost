@@ -3080,15 +3080,15 @@ export default function Admin() {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                    <CardTitle className="text-sm font-medium">This Cycle</CardTitle>
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {users.reduce((sum: number, u: any) => sum + (u.currentMonthPoints || 0), 0).toLocaleString()}
+                      {users.reduce((sum: number, u: any) => sum + (u.currentCyclePoints || 0), 0).toLocaleString()}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Current month activity
+                      Current cycle activity
                     </p>
                   </CardContent>
                 </Card>
@@ -3174,7 +3174,7 @@ export default function Admin() {
                             </div>
                             <div className="text-right">
                               <div className="text-sm font-bold">{(user.totalPoints || 0).toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">{user.currentMonthPoints || 0} this month</div>
+                              <div className="text-xs text-gray-500">{user.currentCyclePoints || 0} this cycle</div>
                             </div>
                           </div>
                       ))}

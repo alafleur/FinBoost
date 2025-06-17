@@ -6,18 +6,18 @@ import { useLocation } from "wouter";
 
 interface UpgradePromptProps {
   theoreticalPoints: number;
-  currentMonthPoints: number;
+  currentCyclePoints: number;
   membershipJoinBonus?: number;
 }
 
 export default function UpgradePrompt({ 
   theoreticalPoints, 
-  currentMonthPoints,
+  currentCyclePoints,
   membershipJoinBonus = 100 
 }: UpgradePromptProps) {
   const [, setLocation] = useLocation();
 
-  const totalClaimablePoints = theoreticalPoints + currentMonthPoints;
+  const totalClaimablePoints = theoreticalPoints + currentCyclePoints;
 
   return (
     <Card className="border-2 border-gradient-to-r from-yellow-400 to-orange-500 bg-gradient-to-br from-yellow-50 to-orange-50">

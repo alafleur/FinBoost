@@ -384,7 +384,7 @@ export default function Lesson() {
 
           <UpgradePrompt 
             theoreticalPoints={user.theoreticalPoints || 0}
-            currentMonthPoints={user.currentMonthPoints || 0}
+            currentCyclePoints={user.currentCyclePoints || 0}
           />
         </div>
       </div>
