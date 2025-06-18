@@ -148,8 +148,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get actual current cycle points from user_cycle_points table
-      const userCycleData = await storage.getUserCyclePoints(user.id);
-      const actualCyclePoints = userCycleData?.currentCyclePoints || 0;
+      const currentCycle = await storage.getActiveCycleSetting();
+      let actualCyclePoints = 0;
+      if (currentCycle) {
+        const userCycleData = await storage.getUserCyclePoints(user.id, currentCycle.id);
+        actualCyclePoints = userCycleData?.currentCyclePoints || 0;
+      }
 
       res.json({ 
         success: true, 
