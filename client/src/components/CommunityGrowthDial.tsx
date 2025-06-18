@@ -159,7 +159,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Stats Display */}
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-4 text-center">
                 <div className="text-sm text-primary-600 font-medium mb-1">Rewards Allocation</div>
                 <div className="text-2xl sm:text-3xl font-bold text-primary-700 mb-1">
@@ -175,15 +175,32 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
                 </div>
                 <div className="text-xs text-green-500">available for rewards</div>
-                {poolData.tierBreakdown && (
-                  <div className="mt-2 text-xs text-green-600 space-y-0.5">
-                    <div>Tier 1: {formatCurrency(poolData.tierBreakdown.tier1)}</div>
-                    <div>Tier 2: {formatCurrency(poolData.tierBreakdown.tier2)}</div>
-                    <div>Tier 3: {formatCurrency(poolData.tierBreakdown.tier3)}</div>
-                  </div>
-                )}
               </div>
             </div>
+
+            {/* Tier Breakdown - Separate Row */}
+            {poolData.tierBreakdown && (
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-3 text-center border border-yellow-200">
+                  <div className="text-xs text-yellow-600 font-medium mb-1">Tier 1</div>
+                  <div className="text-sm font-bold text-yellow-700">
+                    {formatCurrency(poolData.tierBreakdown.tier1)}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 text-center border border-gray-200">
+                  <div className="text-xs text-gray-600 font-medium mb-1">Tier 2</div>
+                  <div className="text-sm font-bold text-gray-700">
+                    {formatCurrency(poolData.tierBreakdown.tier2)}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 text-center border border-orange-200">
+                  <div className="text-xs text-orange-600 font-medium mb-1">Tier 3</div>
+                  <div className="text-sm font-bold text-orange-700">
+                    {formatCurrency(poolData.tierBreakdown.tier3)}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Call to Action */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -304,32 +321,35 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
 
             {/* Community Stats */}
             <div className="text-center space-y-4">
-              <div>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Users className="w-5 h-5 text-green-600" />
-                  <span className="text-2xl font-bold text-green-900">
-                    {formatNumber(memberCount)}
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-green-800">Premium Members</p>
-                <p className="text-xs text-green-600">Building wealth together</p>
-              </div>
-
-              {/* Days to Distribution with Enhanced Info */}
-              {distributionInfo && (
-                <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                  <div className="text-2xl font-bold text-orange-900 mb-1">
-                    {distributionInfo.timeRemaining?.days || 0}
+              <div className="grid grid-cols-1 gap-4">
+                {/* Premium Members */}
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Users className="w-5 h-5 text-green-600" />
+                    <span className="text-2xl font-bold text-green-900">
+                      {formatNumber(memberCount)}
+                    </span>
                   </div>
-                  <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">
-                    Days to Cycle End
-                  </p>
-                  <p className="text-xs text-orange-600 mt-1">
-                    {distributionInfo.formattedEndDate || 
-                     (distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Next cycle')}
-                  </p>
+                  <p className="text-sm font-medium text-green-800">Premium Members</p>
+                  <p className="text-xs text-green-600">Building wealth together</p>
                 </div>
-              )}
+
+                {/* Days to Cycle End */}
+                {distributionInfo && (
+                  <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                    <div className="text-2xl font-bold text-orange-900 mb-2">
+                      {distributionInfo.timeRemaining?.days || 0}
+                    </div>
+                    <p className="text-sm font-medium text-orange-800">
+                      Days to Cycle End
+                    </p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      {distributionInfo.formattedEndDate || 
+                       (distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Next cycle')}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
