@@ -748,28 +748,32 @@ export default function Dashboard() {
                   className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                   onClick={() => setLocation("/education")}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <BookOpen className="h-6 w-6 text-blue-600" />
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                      <div className="flex items-start space-x-3 flex-1">
+                        <div className="p-3 bg-white rounded-lg shadow-sm flex-shrink-0">
+                          <BookOpen className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                            Explore All Lessons
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Continue your financial education journey with {publishedLessons.length} available lessons.
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          Explore All Lessons
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          Continue your financial education journey with {publishedLessons.length} available lessons.
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
-                        </p>
+                      <div className="flex-shrink-0 w-full sm:w-auto">
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm w-full sm:w-auto"
+                          size="default"
+                        >
+                          {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
+                        </Button>
                       </div>
-                      <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                        size="default"
-                      >
-                        {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
