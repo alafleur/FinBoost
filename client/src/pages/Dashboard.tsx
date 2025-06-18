@@ -215,7 +215,7 @@ export default function Dashboard() {
         
         if (poolResponse.ok) {
           const poolData = await poolResponse.json();
-          setPoolData(poolData.pool);
+          setPoolData(poolData);
         }
 
         // Fetch cycle distribution info for CommunityGrowthDial
