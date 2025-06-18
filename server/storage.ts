@@ -3640,17 +3640,17 @@ export class MemStorage implements IStorage {
         cycleId: cycleWinnerSelections.cycleSettingId,
         cycleName: sql<string>`COALESCE(${cycleSettings.cycleName}, 'Unknown Cycle')`,
         tier: cycleWinnerSelections.tier,
-        pointsAtDistribution: cycleWinnerSelections.pointsAtDistribution,
+        pointsAtDistribution: cycleWinnerSelections.pointsAtSelection,
         rewardAmount: cycleWinnerSelections.rewardAmount,
         pointsDeducted: cycleWinnerSelections.pointsDeducted,
         pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
-        isWinner: cycleWinnerSelections.isWinner,
-        createdAt: cycleWinnerSelections.createdAt
+        isWinner: sql<boolean>`true`, // All records in this table are winners
+        createdAt: cycleWinnerSelections.selectionDate
       })
       .from(cycleWinnerSelections)
       .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
       .where(eq(cycleWinnerSelections.userId, userId))
-      .orderBy(desc(cycleWinnerSelections.createdAt));
+      .orderBy(desc(cycleWinnerSelections.selectionDate));
 
       return rewards;
     } catch (error) {
