@@ -644,14 +644,15 @@ export default function Dashboard() {
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
                         onClick={() => {
-                          console.log(`Overview module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                          console.log(`OVERVIEW CARD CLICKED - Module ID: ${module.id}, Title: ${module.title}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}, accessType: ${module.accessType}`);
                           
                           if (isPremiumModule && !isUserPremium) {
-                            console.log('Redirecting to upgrade page for premium content');
+                            console.log('OVERVIEW CARD: Premium module clicked by non-premium user - redirecting to /subscribe');
                             setLocation('/subscribe');
                             return;
                           }
                           
+                          console.log(`OVERVIEW CARD: Regular module clicked - navigating to /lesson/${module.id}`);
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
@@ -681,7 +682,7 @@ export default function Dashboard() {
                                   ✓ Done
                                 </Badge>
                               ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors" onClick={(e) => { e.stopPropagation(); setLocation("/subscribe"); }}>
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors" onClick={(e) => { e.stopPropagation(); console.log('OVERVIEW UPGRADE BUTTON CLICKED - redirecting to /subscribe'); setLocation("/subscribe"); }}>
                                   Upgrade
                                 </Button>
                               ) : (
