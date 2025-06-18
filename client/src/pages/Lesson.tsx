@@ -124,8 +124,14 @@ export default function Lesson() {
         
         if (data.success) {
           console.log('🔄 LESSON: Looking for module with ID:', lessonId);
-          // Find the specific module by ID
-          const moduleData = data.modules.find((m: any) => m.id.toString() === lessonId);
+          console.log('🔄 LESSON: Available module IDs:', data.modules.map((m: any) => `${m.id} (${typeof m.id})`));
+          
+          // Find the specific module by ID with robust comparison
+          const moduleData = data.modules.find((m: any) => 
+            m.id.toString() === lessonId.toString() || 
+            m.id === parseInt(lessonId) || 
+            m.id === lessonId
+          );
           console.log('🔄 LESSON: Found module data:', moduleData);
           
           if (moduleData) {
