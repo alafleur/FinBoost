@@ -838,25 +838,25 @@ export class MemStorage implements IStorage {
       return 'tier1'; // Only user with points
     }
 
-    // Sort points in ascending order for percentile calculation
-    const allActivePoints = activeUsersWithPoints
-      .map(u => u.currentCyclePoints || 0)
-      .sort((a, b) => a - b);
+    // Get unique point values and sort in descending order (highest to lowest)
+    const uniquePoints = [...new Set(activeUsersWithPoints.map(u => u.currentCyclePoints || 0))]
+      .sort((a, b) => b - a);
 
-    // Calculate percentile rank among active users only
-    const userRank = allActivePoints.filter(points => points < currentCyclePoints).length;
-    const percentileFromBottom = (userRank / allActivePoints.length) * 100;
+    // Find position of current user's points in the unique rankings
+    const pointRank = uniquePoints.indexOf(currentCyclePoints) + 1;
+    const totalUniqueRanks = uniquePoints.length;
 
-    const tier1PercentileThreshold = currentCycle.tier1Threshold; // 33
-    const tier2PercentileThreshold = currentCycle.tier2Threshold; // 67
+    // Calculate position as percentage from top (1 = best, totalUniqueRanks = worst)
+    const positionFromTop = ((pointRank - 1) / (totalUniqueRanks - 1)) * 100;
 
-    // Assign tier based on performance among engaged users
-    if (percentileFromBottom >= tier2PercentileThreshold) {
-      return 'tier1'; // Top performers among active users
-    } else if (percentileFromBottom >= tier1PercentileThreshold) {
-      return 'tier2'; // Middle performers among active users
+    // Assign tiers based on position from top
+    // Top 33%: tier1, Middle 33%: tier2, Bottom 33%: tier3
+    if (positionFromTop <= 33) {
+      return 'tier1';
+    } else if (positionFromTop <= 67) {
+      return 'tier2';
     } else {
-      return 'tier3'; // Lower performers among active users
+      return 'tier3';
     }
   }
 
@@ -3543,7 +3543,7 @@ export class MemStorage implements IStorage {
         userId: userCyclePoints.userId,
         username: users.username,
         points: userCyclePoints.currentCyclePoints,
-        tier: userCyclePoints.tier
+        tier: users.tier
       })
       .from(userCyclePoints)
       .leftJoin(users, eq(userCyclePoints.userId, users.id))
@@ -3560,7 +3560,7 @@ export class MemStorage implements IStorage {
         userId: result.userId,
         username: result.username || 'Unknown',
         points: result.points,
-        tier: result.tier
+        tier: result.tier || 'tier3'
       }));
     } catch (error) {
       console.error('Error getting cycle leaderboard:', error);
@@ -3584,7 +3584,7 @@ export class MemStorage implements IStorage {
           userId: userCyclePoints.userId,
           username: users.username,
           points: userCyclePoints.currentCyclePoints,
-          tier: userCyclePoints.tier
+          tier: users.tier
         })
         .from(userCyclePoints)
         .leftJoin(users, eq(userCyclePoints.userId, users.id))
@@ -3599,7 +3599,7 @@ export class MemStorage implements IStorage {
         userId: result.userId,
         username: result.username || 'Unknown',
         points: result.points,
-        tier: result.tier
+        tier: result.tier || 'tier3'
       }));
 
       return {
