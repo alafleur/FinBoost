@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import TierStats from "@/components/TierStats";
 import finboostLogo from "@/assets/finboost-logo.png";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
@@ -205,7 +206,9 @@ export default function Dashboard() {
 
         // Fetch current cycle tier thresholds
         try {
-          const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds');
+          const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
           if (thresholdsResponse.ok) {
             const thresholdsData = await thresholdsResponse.json();
             setTierThresholds(thresholdsData.thresholds);
