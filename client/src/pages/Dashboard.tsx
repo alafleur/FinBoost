@@ -364,37 +364,13 @@ export default function Dashboard() {
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
-  // Validate module data integrity before rendering
-  const validateModule = (module) => {
-    return module && 
-           module.id && 
-           module.title && 
-           typeof module.id === 'number' &&
-           typeof module.title === 'string';
-  };
-
-  // Filter out invalid modules and log validation results
-  const validPublishedModules = publishedModules.filter(validateModule);
-  const invalidModules = publishedModules.filter(module => !validateModule(module));
-  
-  if (invalidModules.length > 0) {
-    console.warn('Invalid modules detected:', invalidModules);
-  }
-
-  // Use validated modules only
-  const publishedLessons = validPublishedModules;
-  const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
-  const allAvailableLessons = publishedLessons;
+  // Use published modules directly for Overview tab
+  const publishedLessons = publishedModules;
 
   // Check if user is premium
   const isUserPremium = user?.subscriptionStatus === 'active';
 
-  console.log('Module validation results:');
-  console.log('- Total fetched modules:', publishedModules.length);
-  console.log('- Valid modules:', validPublishedModules.length);
-  console.log('- Invalid modules:', invalidModules.length);
-  console.log('- Available lessons for Overview:', availableLessons.length);
-  console.log('- Completed lesson IDs:', completedLessonIds);
+  
 
   if (isLoading) {
     return (
@@ -637,7 +613,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Mobile Learning Preview with enhanced design */}
+              {/* Mobile Learning CTA Card - Simplified Design */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
@@ -650,84 +626,46 @@ export default function Dashboard() {
                   </Badge>
                 </div>
                 
-                <div className="space-y-3">
-                  {availableLessons.map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    return (
-                      <Card 
-                        key={module.id} 
-                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                          isCompleted 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                            : 'bg-white hover:bg-gray-50 border-gray-100'
-                        }`} 
-                        onClick={() => {
-                          console.log(`Overview tab - Module clicked: ID=${module.id}, Title=${module.title}`);
-                          console.log(`Overview tab - Module validation:`, validateModule(module));
-                          console.log(`Overview tab - Route being used: /lesson/${module.id}`);
-                          
-                          if (!validateModule(module)) {
-                            console.error('Overview tab - Invalid module data, preventing navigation:', module);
-                            return;
-                          }
-                          
-                          setLocation(`/lesson/${module.id}`);
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {module.category}
-                                </span>
-                                {!isCompleted && (
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremiumModule && !isUserPremium 
-                                      ? 'text-yellow-700 bg-yellow-100' 
-                                      : 'text-blue-600 bg-blue-100'
-                                  }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {isCompleted ? (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
-                                  ✓ Done
-                                </Badge>
-                              ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
-                                  Upgrade
-                                </Button>
-                              ) : (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
-                                  Start
-                                </Button>
-                              )}
-                            </div>
+                {/* Single Learning CTA Card */}
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 via-blue-50 to-indigo-100 hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={() => setLocation('/education')}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-white rounded-xl shadow-sm">
+                        <BookOpen className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-heading font-bold text-lg text-gray-900 mb-2">
+                          Explore All Learning Modules
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Access {publishedLessons.length} financial education lessons, earn points, and build better money habits.
+                        </p>
+                        
+                        {/* Progress Display */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-gray-700">Your Progress</span>
+                            <span className="text-xs text-gray-600">
+                              {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setLocation('/education')} 
-                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  View All Learning Modules
-                </Button>
+                          <Progress 
+                            value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
+                            className="h-2 bg-blue-100"
+                          />
+                        </div>
+                        
+                        <Button 
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors group-hover:bg-blue-700"
+                        >
+                          Start Learning Journey
+                          <TrendingUp className="w-4 h-4 ml-2" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Mobile Rewards Preview with enhanced design */}
@@ -1308,7 +1246,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Continue Learning Section */}
+              {/* Desktop Learning CTA Card - Enhanced Design */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
@@ -1316,79 +1254,51 @@ export default function Dashboard() {
                     iconColor="blue"
                     title="Continue Learning"
                   />
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableLessons.slice(0, 6).map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    const isUserPremium = user?.subscriptionStatus === 'active';
-                    return (
-                      <Card 
-                        key={module.id} 
-                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                          isCompleted 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                            : 'bg-white hover:bg-gray-50 border-gray-100'
-                        }`} 
-                        onClick={() => setLocation(`/education/${module.id}`)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {module.category}
-                                </span>
-                                {!isCompleted && (
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremiumModule && !isUserPremium 
-                                      ? 'text-yellow-700 bg-yellow-100' 
-                                      : 'text-blue-600 bg-blue-100'
-                                  }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {isCompleted ? (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
-                                  ✓ Done
-                                </Badge>
-                              ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
-                                  Upgrade
-                                </Button>
-                              ) : (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
-                                  Start
-                                </Button>
-                              )}
-                            </div>
+                {/* Single Learning CTA Card */}
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 via-blue-50 to-indigo-100 hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={() => setLocation('/education')}>
+                  <CardContent className="p-8">
+                    <div className="flex items-center space-x-6">
+                      <div className="p-4 bg-white rounded-2xl shadow-md">
+                        <BookOpen className="h-8 w-8 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-heading font-bold text-2xl text-gray-900 mb-3">
+                          Explore All Learning Modules
+                        </h3>
+                        <p className="text-gray-600 mb-4 text-lg leading-relaxed">
+                          Access {publishedLessons.length} comprehensive financial education lessons, earn points for each completion, and build stronger money management skills.
+                        </p>
+                        
+                        {/* Progress Display */}
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-medium text-gray-700">Your Learning Progress</span>
+                            <span className="text-sm text-gray-600 font-medium">
+                              {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}% Complete
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setLocation('/education')} 
-                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  View All Learning Modules
-                </Button>
+                          <Progress 
+                            value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
+                            className="h-3 bg-blue-100"
+                          />
+                        </div>
+                        
+                        <Button 
+                          size="lg"
+                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all duration-200 group-hover:bg-blue-700 group-hover:shadow-lg"
+                        >
+                          Start Learning Journey
+                          <TrendingUp className="w-5 h-5 ml-2" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent Rewards Section */}
