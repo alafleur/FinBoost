@@ -190,42 +190,59 @@ export default function Dashboard() {
         }
 
         // Fetch cycle-based leaderboard data
-        const leaderboardResponse = await fetch('/api/cycles/leaderboard', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (leaderboardResponse.ok) {
-          const leaderboardData = await leaderboardResponse.json();
-          setLeaderboardData(leaderboardData);
+        try {
+          const leaderboardResponse = await fetch('/api/cycles/leaderboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (leaderboardResponse.ok) {
+            const leaderboardData = await leaderboardResponse.json();
+            setLeaderboardData(leaderboardData);
+          }
+        } catch (leaderboardError) {
+          console.error('Leaderboard fetch failed:', leaderboardError);
         }
 
         // Fetch current cycle tier thresholds
-        const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds');
-        if (thresholdsResponse.ok) {
-          const thresholdsData = await thresholdsResponse.json();
-          setTierThresholds(thresholdsData.thresholds);
+        try {
+          const thresholdsResponse = await fetch('/api/cycles/current/tier-thresholds');
+          if (thresholdsResponse.ok) {
+            const thresholdsData = await thresholdsResponse.json();
+            setTierThresholds(thresholdsData.thresholds);
+          }
+        } catch (thresholdsError) {
+          console.error('Thresholds fetch failed:', thresholdsError);
         }
 
-
-
         // Fetch pool data for CommunityGrowthDial
-        const poolResponse = await fetch('/api/cycles/pool', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (poolResponse.ok) {
-          const poolData = await poolResponse.json();
-          setPoolData(poolData);
+        try {
+          const poolResponse = await fetch('/api/cycles/pool', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (poolResponse.ok) {
+            const poolData = await poolResponse.json();
+            console.log('Pool data received:', poolData);
+            setPoolData(poolData);
+          } else {
+            console.error('Pool fetch failed with status:', poolResponse.status);
+          }
+        } catch (poolError) {
+          console.error('Pool fetch error:', poolError);
         }
 
         // Fetch cycle distribution info for CommunityGrowthDial
-        const distributionResponse = await fetch('/api/cycles/distribution', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (distributionResponse.ok) {
-          const distributionData = await distributionResponse.json();
-          setDistributionInfo(distributionData);
+        try {
+          const distributionResponse = await fetch('/api/cycles/distribution', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (distributionResponse.ok) {
+            const distributionData = await distributionResponse.json();
+            setDistributionInfo(distributionData);
+          }
+        } catch (distributionError) {
+          console.error('Distribution fetch failed:', distributionError);
         }
 
       } catch (error) {
