@@ -1883,10 +1883,11 @@ export class MemStorage implements IStorage {
       return this.tierThresholdCache;
     }
 
-    // Get all active premium users' current cycle points to calculate percentiles
+    // Get all active premium users' actual cycle points to calculate percentiles
     const allUsers = await db.select({
-      currentCyclePoints: users.currentMonthPoints
+      currentCyclePoints: userCyclePoints.currentCyclePoints
     }).from(users)
+    .leftJoin(userCyclePoints, eq(users.id, userCyclePoints.userId))
     .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
     if (allUsers.length === 0) {

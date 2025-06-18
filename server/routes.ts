@@ -147,6 +147,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid token" });
       }
 
+      // Get actual current cycle points from user_cycle_points table
+      const userCycleData = await storage.getUserCyclePoints(user.id);
+      const actualCyclePoints = userCycleData?.currentCyclePoints || 0;
+
       res.json({ 
         success: true, 
         user: { 
@@ -157,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName,
           totalPoints: user.totalPoints || 0,
           currentMonthPoints: user.currentMonthPoints || 0,
-          currentCyclePoints: user.currentCyclePoints || 0,
+          currentCyclePoints: actualCyclePoints,
           tier: user.tier,
           currentStreak: user.currentStreak || 0,
           longestStreak: user.longestStreak || 0,
