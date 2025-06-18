@@ -324,7 +324,17 @@ export default function Education() {
                           isPremiumModule ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-amber-50 shadow-xl border-2' : ''
                         }`}
                         onClick={() => {
-                          console.log(`Card clicked - navigating to lesson ${module.id}`);
+                          console.log(`Card clicked - module ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                          
+                          // If it's a premium module and user is not premium, redirect to upgrade
+                          if (isPremiumModule && !isUserPremium) {
+                            console.log('Redirecting to upgrade page for premium content');
+                            setLocation('/subscribe');
+                            return;
+                          }
+                          
+                          // Otherwise, navigate to lesson normally
+                          console.log(`Navigating to lesson ${module.id}`);
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
@@ -382,6 +392,16 @@ export default function Education() {
                             disabled={false}
                             onClick={(e) => {
                               e.stopPropagation();
+                              console.log(`Button clicked - module ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                              
+                              // If it's a premium module and user is not premium, redirect to upgrade
+                              if (isPremiumModule && !isUserPremium) {
+                                console.log('Redirecting to upgrade page for premium content');
+                                setLocation('/subscribe');
+                                return;
+                              }
+                              
+                              // Otherwise, navigate to lesson normally
                               console.log(`Navigating to lesson ${module.id}`);
                               setLocation(`/lesson/${module.id}`);
                             }}
