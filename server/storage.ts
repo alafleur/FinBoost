@@ -3620,7 +3620,26 @@ export class MemStorage implements IStorage {
   // Missing cycle API methods needed by dashboard
   async getCurrentCycle(): Promise<CycleSetting | null> {
     try {
-      const [currentCycle] = await db.select()
+      const [currentCycle] = await db.select({
+        id: cycleSettings.id,
+        cycleName: cycleSettings.cycleName,
+        cycleStartDate: cycleSettings.cycleStartDate,
+        cycleEndDate: cycleSettings.cycleEndDate,
+        paymentPeriodDays: cycleSettings.paymentPeriodDays,
+        membershipFee: cycleSettings.membershipFee,
+        rewardPoolPercentage: cycleSettings.rewardPoolPercentage,
+        tier1Threshold: cycleSettings.tier1Threshold,
+        tier2Threshold: cycleSettings.tier2Threshold,
+        tier1PoolPercentage: cycleSettings.tier1PoolPercentage,
+        tier2PoolPercentage: cycleSettings.tier2PoolPercentage,
+        tier3PoolPercentage: cycleSettings.tier3PoolPercentage,
+        selectionPercentage: cycleSettings.selectionPercentage,
+        winnerPointDeductionPercentage: cycleSettings.winnerPointDeductionPercentage,
+        midCycleJoinThresholdDays: cycleSettings.midCycleJoinThresholdDays,
+        isActive: cycleSettings.isActive,
+        createdAt: cycleSettings.createdAt,
+        createdBy: cycleSettings.createdBy
+      })
         .from(cycleSettings)
         .where(eq(cycleSettings.isActive, true))
         .orderBy(desc(cycleSettings.createdAt))
