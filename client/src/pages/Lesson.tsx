@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -45,6 +45,7 @@ import { educationContent } from '../data/educationContent';
 
 export default function Lesson() {
   const [, setLocation] = useLocation();
+  const params = useParams();
   const [currentStep, setCurrentStep] = useState<'content' | 'quiz'>('content');
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -72,16 +73,14 @@ export default function Lesson() {
     const fetchLesson = async () => {
       try {
         console.log('🔄 LESSON: Starting lesson fetch...');
-        // Get lesson ID from URL params
-        const pathParts = window.location.pathname.split('/');
-        const lessonId = pathParts[pathParts.length - 1];
-        console.log('🔄 LESSON: Lesson ID from URL:', lessonId);
+        // Get lesson ID from wouter URL params
+        const lessonId = params.id;
+        console.log('🔄 LESSON: Lesson ID from params:', lessonId);
+        console.log('🔄 LESSON: Full params object:', params);
         
-        if (!lessonId || lessonId === 'lesson') {
-          console.log('❌ LESSON: No lesson ID found, redirecting to education');
+        if (!lessonId) {
+          console.log('❌ LESSON: No lesson ID found in params, redirecting to education');
           console.log('❌ LESSON: Current pathname:', window.location.pathname);
-          console.log('❌ LESSON: Path parts:', pathParts);
-          console.log('❌ LESSON: This redirect may be causing 404 errors!');
           setLocation('/education');
           return;
         }
