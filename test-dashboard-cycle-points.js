@@ -4,13 +4,13 @@ async function testDashboardCyclePoints() {
   try {
     console.log('🔄 Testing dashboard cycle points display fix...');
     
-    // Step 1: Login as user with 40 cycle points
-    console.log('1. Logging in as alafleur...');
+    // Step 1: Test API directly with existing test user
+    console.log('1. Testing with test user f3l3...');
     const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'lafleur.andrew@gmail.com',
+        email: 'f3l3@example.com',
         password: 'password123'
       })
     });
