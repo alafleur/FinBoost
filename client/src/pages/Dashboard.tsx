@@ -681,7 +681,7 @@ export default function Dashboard() {
                                   ✓ Done
                                 </Badge>
                               ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors" onClick={(e) => { e.stopPropagation(); setLocation("/subscribe"); }}>
                                   Upgrade
                                 </Button>
                               ) : (
