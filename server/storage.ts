@@ -1902,12 +1902,12 @@ export class MemStorage implements IStorage {
 
     // Calculate percentile thresholds for tier boundaries
     // Top 33% = Tier 1, Middle 33% = Tier 2, Bottom 33% = Tier 3
-    const tier1Index = Math.floor(allPoints.length * 0.33); // 33rd percentile cutoff
-    const tier2Index = Math.floor(allPoints.length * 0.67); // 67th percentile cutoff
+    const tier1Index = Math.floor(allPoints.length * 0.33); // Top 33% cutoff
+    const tier2Index = Math.floor(allPoints.length * 0.67); // Middle 33% cutoff
 
     const thresholds = {
-      tier1: allPoints[tier1Index - 1] || allPoints[0] || 0, // Minimum points for top 33%
-      tier2: allPoints[tier2Index - 1] || 0, // Minimum points for middle 33%
+      tier1: allPoints[tier1Index] || allPoints[0] || 0, // Minimum points for top 33% (highest tier)
+      tier2: allPoints[tier2Index] || 0, // Minimum points for middle 33%
       tier3: 0 // Bottom 33% starts at 0
     };
 
