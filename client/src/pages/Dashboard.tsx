@@ -643,7 +643,17 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        onClick={() => {
+                          console.log(`Overview module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                          
+                          if (isPremiumModule && !isUserPremium) {
+                            console.log('Redirecting to upgrade page for premium content');
+                            setLocation('/subscribe');
+                            return;
+                          }
+                          
+                          setLocation(`/lesson/${module.id}`);
+                        }}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -752,7 +762,17 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        onClick={() => {
+                          console.log(`Learn preview module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                          
+                          if (isPremiumModule && !isUserPremium) {
+                            console.log('Redirecting to upgrade page for premium content');
+                            setLocation('/subscribe');
+                            return;
+                          }
+                          
+                          setLocation(`/lesson/${module.id}`);
+                        }}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -1419,7 +1439,17 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        onClick={() => {
+                          console.log(`Learn tab module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
+                          
+                          if (isPremiumModule && !isUserPremium) {
+                            console.log('Redirecting to upgrade page for premium content');
+                            setLocation('/subscribe');
+                            return;
+                          }
+                          
+                          setLocation(`/lesson/${module.id}`);
+                        }}
                       >
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
