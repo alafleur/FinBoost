@@ -11,6 +11,11 @@ interface CommunityGrowthDialProps {
     totalPool: number;
     premiumUsers: number;
     totalUsers: number;
+    tierBreakdown?: {
+      tier1: number;
+      tier2: number;
+      tier3: number;
+    };
   };
   user: {
     subscriptionStatus?: string;
@@ -19,6 +24,7 @@ interface CommunityGrowthDialProps {
   };
   distributionInfo?: {
     nextDate: string;
+    formattedEndDate?: string;
     timeRemaining: { days: number; hours: number; minutes: number; totalMs: number };
   } | null;
   onUpgradeClick: () => void;
@@ -169,6 +175,13 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
                 </div>
                 <div className="text-xs text-green-500">available for rewards</div>
+                {poolData.tierBreakdown && (
+                  <div className="mt-2 text-xs text-green-600 space-y-0.5">
+                    <div>Tier 1: {formatCurrency(poolData.tierBreakdown.tier1)}</div>
+                    <div>Tier 2: {formatCurrency(poolData.tierBreakdown.tier2)}</div>
+                    <div>Tier 3: {formatCurrency(poolData.tierBreakdown.tier3)}</div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -302,17 +315,18 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                 <p className="text-xs text-green-600">Building wealth together</p>
               </div>
 
-              {/* Days to Distribution */}
+              {/* Days to Distribution with Enhanced Info */}
               {distributionInfo && (
                 <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
                   <div className="text-2xl font-bold text-orange-900 mb-1">
                     {distributionInfo.timeRemaining?.days || 0}
                   </div>
                   <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">
-                    💰 Days to Distribution
+                    Days to Cycle End
                   </p>
                   <p className="text-xs text-orange-600 mt-1">
-                    {distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'Next month'}
+                    {distributionInfo.formattedEndDate || 
+                     (distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Next cycle')}
                   </p>
                 </div>
               )}

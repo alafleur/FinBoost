@@ -3099,12 +3099,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({
           totalPool: 0,
           premiumUsers: 0,
-          totalUsers: 0
+          totalUsers: 0,
+          tierBreakdown: {
+            tier1: 0,
+            tier2: 0,
+            tier3: 0
+          }
         });
       }
       
       const poolData = await storage.getCyclePoolData(currentCycle.id);
-      res.json(poolData);
+      
+      // Calculate tier-specific pool breakdown
+      const tierBreakdown = {
+        tier1: Math.floor(poolData.totalPool * 0.50), // 50% to Tier 1
+        tier2: Math.floor(poolData.totalPool * 0.30), // 30% to Tier 2  
+        tier3: Math.floor(poolData.totalPool * 0.20)  // 20% to Tier 3
+      };
+      
+      res.json({
+        ...poolData,
+        tierBreakdown
+      });
     } catch (error) {
       console.error("Error fetching cycle pool data:", error);
       res.status(500).json({ error: "Failed to fetch cycle pool data" });
@@ -3145,8 +3161,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
       
+      // Format cycle end date as "December 31, 2025"
+      const formattedEndDate = endDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
       res.json({
         nextDate: endDate.toISOString(),
+        formattedEndDate,
         timeRemaining: { days, hours, minutes, totalMs: timeRemaining }
       });
     } catch (error) {
