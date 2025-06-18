@@ -99,8 +99,16 @@ export default function Lesson() {
         
         console.log('🔄 LESSON: User response status:', userResponse.status);
         if (!userResponse.ok) {
-          console.log('❌ LESSON: User fetch failed, redirecting to auth');
-          setLocation('/auth');
+          console.log('❌ LESSON: User fetch failed');
+          // Only redirect to auth for actual authentication failures (401/403)
+          // Other errors (like 500) should not redirect to auth
+          if (userResponse.status === 401 || userResponse.status === 403) {
+            console.log('❌ LESSON: Authentication failed, redirecting to auth');
+            setLocation('/auth');
+          } else {
+            console.log('❌ LESSON: Server error, redirecting to education');
+            setLocation('/education');
+          }
           return;
         }
 

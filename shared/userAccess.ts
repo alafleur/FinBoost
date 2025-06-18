@@ -14,6 +14,7 @@ export interface UserForAccess {
   theoreticalPoints?: number;
   totalPoints?: number;
   currentMonthPoints?: number;
+  currentCyclePoints?: number;
 }
 
 export function getUserAccessInfo(user: UserForAccess): UserAccessInfo {
