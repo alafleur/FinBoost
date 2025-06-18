@@ -11,6 +11,7 @@ interface CommunityGrowthDialProps {
     totalPool: number;
     premiumUsers: number;
     totalUsers: number;
+    rewardPoolPercentage?: number;
     tierBreakdown?: {
       tier1: number;
       tier2: number;
@@ -31,7 +32,6 @@ interface CommunityGrowthDialProps {
 }
 
 export default function CommunityGrowthDial({ poolData, user, distributionInfo, onUpgradeClick }: CommunityGrowthDialProps) {
-  const [rewardsPercentage, setRewardsPercentage] = useState(75);
   const [referralPoints, setReferralPoints] = useState(20);
   const { toast } = useToast();
   
@@ -39,6 +39,9 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
   // All other statuses (inactive, past_due, canceled, etc.) see upgrade prompts
   const isPremiumUser = user.subscriptionStatus === 'active';
   const memberCount = poolData.premiumUsers || 0;
+  
+  // Use dynamic reward pool percentage from API, fallback to 50%
+  const rewardsPercentage = poolData.rewardPoolPercentage || 50;
   
   // Fetch current referral points from admin configuration
   useEffect(() => {
@@ -64,27 +67,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
     fetchReferralPoints();
   }, []);
 
-  // Calculate percentage based on member count (similar to landing page logic)
-  useEffect(() => {
-    const count = memberCount;
-    let percentage;
 
-    if (count <= 1000) {
-      percentage = 50;
-    } else if (count <= 10000) {
-      percentage = 50 + ((count - 1000) / 9000) * 10;
-    } else if (count <= 25000) {
-      percentage = 60 + ((count - 10000) / 15000) * 10;
-    } else if (count <= 50000) {
-      percentage = 70 + ((count - 25000) / 25000) * 5;
-    } else if (count <= 100000) {
-      percentage = 75 + ((count - 50000) / 50000) * 5;
-    } else {
-      percentage = 80 + Math.min(((count - 100000) / 100000) * 5, 5);
-    }
-
-    setRewardsPercentage(Math.round(percentage));
-  }, [memberCount]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
