@@ -1326,6 +1326,23 @@ export default function Dashboard() {
                 </Card>
               </div>
 
+              {/* Tier Thresholds */}
+              {tierThresholds && user && (
+                <div className="space-y-4">
+                  <SectionHeader 
+                    icon={Target}
+                    iconColor="yellow"
+                    title="Tier Thresholds"
+                    titleSize="lg"
+                  />
+                  <TierStats 
+                    tierThresholds={tierThresholds}
+                    user={user}
+                    getTierDisplayName={getTierDisplayName}
+                  />
+                </div>
+              )}
+
               {/* Community Growth Only */}
               <div className="w-full">
                 {user && poolData && (
