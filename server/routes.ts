@@ -3007,11 +3007,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const currentCycle = await storage.getCurrentCycle();
       if (!currentCycle) {
-        return res.json([]);
+        return res.json({
+          leaderboard: [],
+          pagination: { page: 1, pageSize: 20, totalUsers: 0, totalPages: 0 }
+        });
       }
       
-      const leaderboard = await storage.getCycleLeaderboard(currentCycle.id, 50);
-      res.json(leaderboard);
+      // Parse pagination parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 20;
+      const offset = (page - 1) * pageSize;
+      
+      console.log(`Fetching leaderboard: page=${page}, pageSize=${pageSize}, offset=${offset}`);
+      
+      // Get paginated leaderboard data
+      const { leaderboard, totalUsers } = await storage.getCycleLeaderboardPaginated(
+        currentCycle.id, 
+        pageSize, 
+        offset
+      );
+      
+      const totalPages = Math.ceil(totalUsers / pageSize);
+      
+      // Return paginated response
+      res.json({
+        leaderboard,
+        pagination: {
+          page,
+          pageSize,
+          totalUsers,
+          totalPages
+        }
+      });
     } catch (error) {
       console.error("Error fetching cycle leaderboard:", error);
       res.status(500).json({ error: "Failed to fetch cycle leaderboard" });

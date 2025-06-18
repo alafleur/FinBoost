@@ -3545,6 +3545,53 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getCycleLeaderboardPaginated(cycleSettingId: number, pageSize: number, offset: number): Promise<{leaderboard: Array<{rank: number, userId: number, username: string, points: number, tier: string}>, totalUsers: number}> {
+    try {
+      // Get total count of users in cycle
+      const countResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(userCyclePoints)
+        .where(eq(userCyclePoints.cycleSettingId, cycleSettingId));
+      
+      const totalUsers = countResult[0]?.count || 0;
+
+      // Get paginated results
+      const results = await db
+        .select({
+          userId: userCyclePoints.userId,
+          username: users.username,
+          points: userCyclePoints.currentCyclePoints,
+          tier: userCyclePoints.tier
+        })
+        .from(userCyclePoints)
+        .leftJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(eq(userCyclePoints.cycleSettingId, cycleSettingId))
+        .orderBy(desc(userCyclePoints.currentCyclePoints))
+        .limit(pageSize)
+        .offset(offset);
+
+      // Calculate ranks based on offset
+      const leaderboard = results.map((result, index) => ({
+        rank: offset + index + 1,
+        userId: result.userId,
+        username: result.username || 'Unknown',
+        points: result.points,
+        tier: result.tier
+      }));
+
+      return {
+        leaderboard,
+        totalUsers
+      };
+    } catch (error) {
+      console.error('Error getting paginated cycle leaderboard:', error);
+      return {
+        leaderboard: [],
+        totalUsers: 0
+      };
+    }
+  }
+
   async getCycleStats(cycleSettingId: number): Promise<{totalUsers: number, averagePoints: number, tierDistribution: any}> {
     try {
       const users = await this.getUsersInCurrentCycle(cycleSettingId);
