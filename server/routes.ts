@@ -3082,12 +3082,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cycles/distribution", async (req, res) => {
     try {
       const currentCycle = await storage.getCurrentCycle();
+      console.log("Current cycle data:", currentCycle);
+      
       if (!currentCycle) {
         return res.json(null);
       }
       
       const now = new Date();
-      const endDate = new Date(currentCycle.endDate);
+      console.log("Raw endDate from database:", currentCycle.endDate, typeof currentCycle.endDate);
+      
+      // Handle different date formats from database
+      let endDate;
+      if (currentCycle.endDate instanceof Date) {
+        endDate = currentCycle.endDate;
+      } else if (typeof currentCycle.endDate === 'string') {
+        endDate = new Date(currentCycle.endDate);
+      } else {
+        console.error("Unexpected endDate type:", currentCycle.endDate, typeof currentCycle.endDate);
+        return res.json({
+          nextDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          timeRemaining: { days: 1, hours: 0, minutes: 0, totalMs: 24 * 60 * 60 * 1000 }
+        });
+      }
+      
+      console.log("Processed endDate:", endDate, endDate.getTime());
+      
+      // Validate the date
+      if (isNaN(endDate.getTime())) {
+        console.error("Invalid end date after processing:", endDate, currentCycle.endDate);
+        return res.json({
+          nextDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          timeRemaining: { days: 1, hours: 0, minutes: 0, totalMs: 24 * 60 * 60 * 1000 }
+        });
+      }
+      
       const timeRemaining = endDate.getTime() - now.getTime();
       
       if (timeRemaining <= 0) {
