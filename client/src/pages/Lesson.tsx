@@ -88,8 +88,20 @@ export default function Lesson() {
         // Fetch user data first
         const token = localStorage.getItem('token');
         console.log('🔄 LESSON: Token exists:', !!token);
+        
+        // Validate token format before using it
         if (!token) {
           console.log('❌ LESSON: No token, redirecting to auth');
+          setLocation('/auth');
+          return;
+        }
+        
+        // Check if token is malformed (basic JWT validation)
+        const tokenParts = token.split('.');
+        if (tokenParts.length !== 3) {
+          console.log('❌ LESSON: Malformed token detected, cleaning up and redirecting');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
           setLocation('/auth');
           return;
         }
@@ -101,7 +113,13 @@ export default function Lesson() {
         
         console.log('🔄 LESSON: User response status:', userResponse.status);
         if (!userResponse.ok) {
-          console.log('❌ LESSON: User fetch failed, redirecting to auth');
+          console.log('❌ LESSON: User fetch failed, status:', userResponse.status);
+          // Handle specific authentication errors
+          if (userResponse.status === 401 || userResponse.status === 500) {
+            console.log('❌ LESSON: Authentication error, cleaning up token and redirecting');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
           setLocation('/auth');
           return;
         }

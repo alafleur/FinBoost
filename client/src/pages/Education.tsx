@@ -118,6 +118,16 @@ export default function Education() {
         return;
       }
 
+      // Validate token format before using it
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        console.log('❌ EDUCATION: Malformed token detected, cleaning up');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setCompletedLessons([]);
+        return;
+      }
+
       // Fetch user progress
       const progressResponse = await fetch('/api/user/progress', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -135,7 +145,8 @@ export default function Education() {
 
         setCompletedLessons(completedModuleIds);
         localStorage.setItem('completedLessons', JSON.stringify(completedModuleIds));
-      } else if (progressResponse.status === 401) {
+      } else if (progressResponse.status === 401 || progressResponse.status === 500) {
+        console.log('❌ EDUCATION: Authentication error, cleaning up token');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setCompletedLessons([]);
