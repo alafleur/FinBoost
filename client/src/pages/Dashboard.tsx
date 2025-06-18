@@ -605,6 +605,23 @@ export default function Dashboard() {
                 </Card>
               </div>
 
+              {/* Tier Stats */}
+              {tierThresholds && user && (
+                <div className="space-y-4">
+                  <SectionHeader 
+                    icon={Target}
+                    iconColor="yellow"
+                    title="Tier Thresholds"
+                  />
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <TierStats 
+                      tierThresholds={tierThresholds}
+                      user={user}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Mobile Community Growth Dial - Same as Desktop */}
               <div className="space-y-4">
                 <SectionHeader 
