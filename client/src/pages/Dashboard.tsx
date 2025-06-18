@@ -211,7 +211,7 @@ export default function Dashboard() {
           });
           if (thresholdsResponse.ok) {
             const thresholdsData = await thresholdsResponse.json();
-            setTierThresholds(thresholdsData.thresholds);
+            setTierThresholds(thresholdsData);
           }
         } catch (thresholdsError) {
           console.error('Thresholds fetch failed:', thresholdsError);
