@@ -633,6 +633,11 @@ export default function Dashboard() {
                   {availableLessons.map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
+                    
+                    // Debug logging for premium detection
+                    if (module.id === 1) {
+                      console.log(`MODULE ID 1 DEBUG: accessType="${module.accessType}", isPremiumModule=${isPremiumModule}, userPremium=${isUserPremium}`);
+                    }
                     return (
                       <Card 
                         key={module.id} 
@@ -646,13 +651,19 @@ export default function Dashboard() {
                         onClick={() => {
                           console.log(`OVERVIEW CARD CLICKED - Module ID: ${module.id}, Title: ${module.title}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}, accessType: ${module.accessType}`);
                           
-                          if (isPremiumModule && !isUserPremium) {
-                            console.log('OVERVIEW CARD: Premium module clicked by non-premium user - redirecting to /subscribe');
+                          // Enhanced premium detection with multiple checks
+                          const isModulePremium = module.accessType === 'premium' || module.accessType === 'Premium';
+                          const isUserNonPremium = !isUserPremium;
+                          
+                          console.log(`ENHANCED CHECKS: isModulePremium=${isModulePremium}, isUserNonPremium=${isUserNonPremium}`);
+                          
+                          if (isModulePremium && isUserNonPremium) {
+                            console.log('OVERVIEW CARD: Premium module detected - FORCING redirect to /subscribe');
                             setLocation('/subscribe');
                             return;
                           }
                           
-                          console.log(`OVERVIEW CARD: Regular module clicked - navigating to /lesson/${module.id}`);
+                          console.log(`OVERVIEW CARD: Non-premium module - navigating to /lesson/${module.id}`);
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
