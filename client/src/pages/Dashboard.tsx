@@ -639,24 +639,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Tier Progress Bar */}
-              {tierThresholds && user && (
-                <div className="space-y-4">
-                  <SectionHeader 
-                    icon={Target}
-                    iconColor="yellow"
-                    title="Tier Progress"
-                  />
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <TierProgressTable 
-                      tierThresholds={tierThresholds}
-                      user={user}
-                      getTierDisplayName={getTierDisplayName}
-                    />
-                  </div>
-                </div>
-              )}
-
               {/* BACKUP: Mobile Learning Preview with enhanced design - COMMENTED OUT FOR CTA REPLACEMENT
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -1359,24 +1341,6 @@ export default function Dashboard() {
                   />
                 )}
               </div>
-
-              {/* Tier Progress Bar */}
-              {tierThresholds && user && (
-                <div className="space-y-4">
-                  <SectionHeader 
-                    icon={Target}
-                    iconColor="yellow"
-                    title="Tier Progress"
-                  />
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <TierProgressTable 
-                      tierThresholds={tierThresholds}
-                      user={user}
-                      getTierDisplayName={getTierDisplayName}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* BACKUP: Desktop Continue Learning Section - COMMENTED OUT FOR CTA REPLACEMENT
               <div className="space-y-4">
