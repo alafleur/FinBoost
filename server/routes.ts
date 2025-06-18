@@ -2979,6 +2979,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Current cycle tier thresholds endpoint for Dashboard
+  app.get("/api/cycles/current/tier-thresholds", authenticateToken, async (req, res) => {
+    try {
+      const currentCycle = await storage.getCurrentCycle();
+      if (!currentCycle) {
+        return res.status(404).json({ error: "No active cycle found" });
+      }
+      
+      const thresholds = await storage.getCycleTierThresholds(currentCycle.id);
+      res.json(thresholds);
+    } catch (error) {
+      console.error("Error getting current cycle tier thresholds:", error);
+      res.status(500).json({ error: "Failed to get current cycle tier thresholds" });
+    }
+  });
+
   app.post("/api/admin/cycle/:cycleId/recalculate-tiers", authenticateToken, async (req, res) => {
     try {
       if (!req.user.isAdmin) {

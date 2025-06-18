@@ -606,7 +606,7 @@ export default function Dashboard() {
               </div>
 
               {/* Tier Stats */}
-              {tierThresholds && user && (
+              {user && (
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
@@ -615,7 +615,7 @@ export default function Dashboard() {
                   />
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <TierStats 
-                      tierThresholds={tierThresholds}
+                      tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
                       user={user}
                     />
                   </div>

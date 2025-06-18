@@ -24,7 +24,7 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
     return 'tier3';
   };
 
-  const currentTier = getCurrentTier();
+  const currentTier = user.tier || getCurrentTier();
 
   const tiers = [
     {
