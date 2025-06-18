@@ -153,6 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName,
           totalPoints: user.totalPoints || 0,
           currentMonthPoints: user.currentMonthPoints || 0,
+          currentCyclePoints: user.currentCyclePoints || 0,
           tier: user.tier,
           currentStreak: user.currentStreak || 0,
           longestStreak: user.longestStreak || 0,

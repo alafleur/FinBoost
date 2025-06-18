@@ -469,8 +469,58 @@ export class MemStorage implements IStorage {
 
   async getUserById(id: number): Promise<User | null> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user || null;
+      // Get user data with current cycle points
+      const [userResult] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          username: users.username,
+          password: users.password,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          isActive: users.isActive,
+          isAdmin: users.isAdmin,
+          totalPoints: users.totalPoints,
+          currentMonthPoints: users.currentMonthPoints,
+          theoreticalPoints: users.theoreticalPoints,
+          tier: users.tier,
+          currentStreak: users.currentStreak,
+          longestStreak: users.longestStreak,
+          subscriptionStatus: users.subscriptionStatus,
+          stripeCustomerId: users.stripeCustomerId,
+          stripeSubscriptionId: users.stripeSubscriptionId,
+          subscriptionStartDate: users.subscriptionStartDate,
+          nextBillingDate: users.nextBillingDate,
+          paypalEmail: users.paypalEmail,
+          payoutMethod: users.payoutMethod,
+          referredBy: users.referredBy,
+          bio: users.bio,
+          location: users.location,
+          joinedAt: users.joinedAt,
+          lastLoginAt: users.lastLoginAt,
+          // Add current cycle points from joined table
+          currentCyclePoints: userCyclePoints.currentCyclePoints
+        })
+        .from(users)
+        .leftJoin(
+          userCyclePoints,
+          and(
+            eq(users.id, userCyclePoints.userId),
+            eq(userCyclePoints.isActive, true)
+          )
+        )
+        .where(eq(users.id, id))
+        .limit(1);
+
+      if (!userResult) {
+        return null;
+      }
+
+      // If no cycle points found, set to 0
+      return {
+        ...userResult,
+        currentCyclePoints: userResult.currentCyclePoints || 0
+      };
     } catch (error) {
       console.error('Error getting user by ID:', error);
       return null;
