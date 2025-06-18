@@ -30,9 +30,17 @@ interface UserRank {
   tier: string;
 }
 
+interface PaginationData {
+  page: number;
+  pageSize: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
 interface LeaderboardData {
   leaderboard: LeaderboardEntry[];
   currentUser: UserRank;
+  pagination?: PaginationData;
 }
 
 export default function Leaderboard() {
@@ -65,16 +73,26 @@ export default function Leaderboard() {
         currentUserId = userData.user?.id;
       }
       
-      // Use the correct leaderboard endpoint
-      const response = await fetch('/api/cycles/leaderboard', {
+      // Build pagination URL parameters
+      const pageSize = 20;
+      const paginationParams = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: pageSize.toString()
+      });
+      
+      // Use the paginated leaderboard endpoint
+      const response = await fetch(`/api/cycles/leaderboard?${paginationParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
-        const leaderboardEntries = await response.json();
-        console.log('Leaderboard data received:', leaderboardEntries);
+        const apiResponse = await response.json();
+        console.log('Leaderboard API response:', apiResponse);
+        
+        // Handle new paginated response format
+        const { leaderboard: leaderboardEntries, pagination } = apiResponse;
         
         // Process the leaderboard data
         const processLeaderboardData = (entries: any[]) => {
@@ -103,7 +121,8 @@ export default function Leaderboard() {
           
           return {
             leaderboard: leaderboard,
-            currentUser
+            currentUser,
+            pagination
           };
         };
         
@@ -114,8 +133,10 @@ export default function Leaderboard() {
         setCycleData(processedData);
         setAllTimeData(processedData);
         
-        // Set total pages (all data in one page for now)
-        setTotalPages(1);
+        // Update pagination state
+        if (pagination) {
+          setTotalPages(pagination.totalPages);
+        }
       } else {
         throw new Error('Failed to fetch leaderboard data');
       }
