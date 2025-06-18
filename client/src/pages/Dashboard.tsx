@@ -116,7 +116,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{entry.username}</p>
-                    <p className="text-xs text-gray-500">{entry.totalPoints} points</p>
+                    <p className="text-xs text-gray-500">{entry.currentCyclePoints} points</p>
                   </div>
                 </div>
               ))}
@@ -129,7 +129,7 @@ export default function Dashboard() {
               {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm truncate">{entry.username}</span>
-                  <span className="text-xs text-gray-500">{entry.totalPoints}</span>
+                  <span className="text-xs text-gray-500">{entry.currentCyclePoints}</span>
                 </div>
               ))}
             </div>
@@ -218,8 +218,8 @@ export default function Dashboard() {
           setPoolData(poolData.pool);
         }
 
-        // Fetch distribution info for CommunityGrowthDial
-        const distributionResponse = await fetch('/api/distribution/next', {
+        // Fetch cycle distribution info for CommunityGrowthDial
+        const distributionResponse = await fetch('/api/cycles/distribution/next', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
