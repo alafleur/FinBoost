@@ -11,7 +11,7 @@ async function testCyclePointsDataFlow() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'testadmin@test.com',
+        email: 'f3l3@email.com',
         password: 'password123'
       })
     });
