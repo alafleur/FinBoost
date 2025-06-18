@@ -99,16 +99,8 @@ export default function Lesson() {
         
         console.log('🔄 LESSON: User response status:', userResponse.status);
         if (!userResponse.ok) {
-          console.log('❌ LESSON: User fetch failed');
-          // Only redirect to auth for actual authentication failures (401/403)
-          // Other errors (like 500) should not redirect to auth
-          if (userResponse.status === 401 || userResponse.status === 403) {
-            console.log('❌ LESSON: Authentication failed, redirecting to auth');
-            setLocation('/auth');
-          } else {
-            console.log('❌ LESSON: Server error, redirecting to education');
-            setLocation('/education');
-          }
+          console.log('❌ LESSON: User fetch failed, redirecting to auth');
+          setLocation('/auth');
           return;
         }
 
@@ -124,22 +116,14 @@ export default function Lesson() {
         
         if (data.success) {
           console.log('🔄 LESSON: Looking for module with ID:', lessonId);
-          console.log('🔄 LESSON: Available module IDs:', data.modules.map((m: any) => `${m.id} (${typeof m.id})`));
-          
-          // Find the specific module by ID with robust comparison
-          const moduleData = data.modules.find((m: any) => 
-            m.id.toString() === lessonId.toString() || 
-            m.id === parseInt(lessonId) || 
-            m.id === lessonId
-          );
+          // Find the specific module by ID
+          const moduleData = data.modules.find((m: any) => m.id.toString() === lessonId);
           console.log('🔄 LESSON: Found module data:', moduleData);
           
           if (moduleData) {
             // Check if user can access this module
             const canAccess = canAccessModule(userData.user, moduleData);
             console.log('🔄 LESSON: Can access module:', canAccess);
-            
-
             
             if (!canAccess) {
               console.log('❌ LESSON: Access blocked for module');

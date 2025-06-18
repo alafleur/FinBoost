@@ -633,11 +633,6 @@ export default function Dashboard() {
                   {availableLessons.map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
                     const isPremiumModule = module.accessType === 'premium';
-                    
-                    // Debug logging for premium detection
-                    if (module.id === 1) {
-                      console.log(`MODULE ID 1 DEBUG: accessType="${module.accessType}", isPremiumModule=${isPremiumModule}, userPremium=${isUserPremium}`);
-                    }
                     return (
                       <Card 
                         key={module.id} 
@@ -648,24 +643,7 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => {
-                          console.log(`OVERVIEW CARD CLICKED - Module ID: ${module.id}, Title: ${module.title}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}, accessType: ${module.accessType}`);
-                          
-                          // Enhanced premium detection with multiple checks
-                          const isModulePremium = module.accessType === 'premium' || module.accessType === 'Premium';
-                          const isUserNonPremium = !isUserPremium;
-                          
-                          console.log(`ENHANCED CHECKS: isModulePremium=${isModulePremium}, isUserNonPremium=${isUserNonPremium}`);
-                          
-                          if (isModulePremium && isUserNonPremium) {
-                            console.log('OVERVIEW CARD: Premium module detected - FORCING redirect to /subscribe');
-                            setLocation('/subscribe');
-                            return;
-                          }
-                          
-                          console.log(`OVERVIEW CARD: Non-premium module - navigating to /lesson/${module.id}`);
-                          setLocation(`/lesson/${module.id}`);
-                        }}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -693,7 +671,7 @@ export default function Dashboard() {
                                   ✓ Done
                                 </Badge>
                               ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors" onClick={(e) => { e.stopPropagation(); console.log('OVERVIEW UPGRADE BUTTON CLICKED - redirecting to /subscribe'); setLocation("/subscribe"); }}>
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
                                   Upgrade
                                 </Button>
                               ) : (
@@ -774,17 +752,7 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => {
-                          console.log(`Learn preview module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
-                          
-                          if (isPremiumModule && !isUserPremium) {
-                            console.log('Redirecting to upgrade page for premium content');
-                            setLocation('/subscribe');
-                            return;
-                          }
-                          
-                          setLocation(`/lesson/${module.id}`);
-                        }}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -1451,17 +1419,7 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => {
-                          console.log(`Learn tab module clicked - ID: ${module.id}, isPremium: ${isPremiumModule}, userPremium: ${isUserPremium}`);
-                          
-                          if (isPremiumModule && !isUserPremium) {
-                            console.log('Redirecting to upgrade page for premium content');
-                            setLocation('/subscribe');
-                            return;
-                          }
-                          
-                          setLocation(`/lesson/${module.id}`);
-                        }}
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
                       >
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
