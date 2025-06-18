@@ -17,11 +17,17 @@ interface TierStatsProps {
 }
 
 export default function TierStats({ tierThresholds, user }: TierStatsProps) {
+  // Fix the tier logic: tier1 should be highest, tier3 should be lowest
+  // Current API returns: {"tier1":33,"tier2":67,"tier3":0}
+  // But tier1 should require the MOST points (67+), not the least
+  const highestThreshold = Math.max(tierThresholds.tier1, tierThresholds.tier2);
+  const lowestThreshold = Math.min(tierThresholds.tier1, tierThresholds.tier2);
+  
   const getCurrentTier = () => {
     const points = user.currentCyclePoints || 0;
-    if (points >= tierThresholds.tier1) return 'tier1';
-    if (points >= tierThresholds.tier2) return 'tier2';
-    return 'tier3';
+    if (points >= highestThreshold) return 'tier1'; // Tier 1 = highest points
+    if (points >= lowestThreshold) return 'tier2';  // Tier 2 = middle points
+    return 'tier3'; // Tier 3 = lowest points (0 to lowestThreshold-1)
   };
 
   const currentTier = user.tier || getCurrentTier();
@@ -30,7 +36,7 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
     {
       id: 'tier1',
       name: 'Tier 1',
-      range: `${tierThresholds.tier1}+`,
+      range: `${highestThreshold}+`,
       icon: Crown,
       bgColor: currentTier === 'tier1' ? 'bg-gradient-to-br from-green-50 to-green-100' : 'bg-gray-50',
       borderColor: currentTier === 'tier1' ? 'border-green-200' : 'border-gray-200',
@@ -40,7 +46,7 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
     {
       id: 'tier2',
       name: 'Tier 2',
-      range: `${tierThresholds.tier2}-${tierThresholds.tier1 - 1}`,
+      range: `${lowestThreshold}-${highestThreshold - 1}`,
       icon: Medal,
       bgColor: currentTier === 'tier2' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100' : 'bg-gray-50',
       borderColor: currentTier === 'tier2' ? 'border-yellow-200' : 'border-gray-200',
@@ -50,7 +56,7 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
     {
       id: 'tier3',
       name: 'Tier 3',
-      range: `0-${tierThresholds.tier2 - 1}`,
+      range: `0-${lowestThreshold - 1}`,
       icon: Trophy,
       bgColor: currentTier === 'tier3' ? 'bg-gradient-to-br from-orange-50 to-orange-100' : 'bg-gray-50',
       borderColor: currentTier === 'tier3' ? 'border-orange-200' : 'border-gray-200',
