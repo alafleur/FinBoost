@@ -770,12 +770,11 @@ export default function Dashboard() {
                                 </span>
                                 {!isCompleted && (
                                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremium```text
-Module && !isUserPremium 
+                                    isPremiumModule && !isUserPremium 
                                       ? 'text-yellow-700 bg-yellow-100' 
                                       : 'text-blue-600 bg-blue-100'
                                   }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : (module.pointsReward + ' pts')}
                                   </span>
                                 )}
                               </div>
