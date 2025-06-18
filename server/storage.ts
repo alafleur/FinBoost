@@ -812,7 +812,13 @@ export class MemStorage implements IStorage {
   }
 
   async calculateUserTier(currentCyclePoints: number): Promise<string> {
-    // Get all active premium users' actual cycle points for percentile calculation
+    // Get tier percentile thresholds from current cycle settings
+    const currentCycle = await this.getCurrentCycle();
+    if (!currentCycle) {
+      return 'tier3';
+    }
+
+    // Get all active users' cycle points to calculate this user's percentile
     const allUsers = await db.select({
       currentCyclePoints: userCyclePoints.currentCyclePoints
     }).from(users)
@@ -823,22 +829,25 @@ export class MemStorage implements IStorage {
       return 'tier3';
     }
 
-    // Sort all points in descending order (highest to lowest)
+    // Sort all points in ascending order (lowest to highest) for proper percentile calculation
     const allPoints = allUsers
       .map(u => u.currentCyclePoints || 0)
-      .sort((a, b) => b - a);
+      .sort((a, b) => a - b);
 
-    // Calculate percentile rank for this user's points
-    const userRank = allPoints.filter(points => points > currentCyclePoints).length;
-    const percentile = (userRank / allPoints.length) * 100;
+    // Calculate this user's percentile rank from bottom (0% = worst, 100% = best)
+    const userRank = allPoints.filter(points => points < currentCyclePoints).length;
+    const percentileFromBottom = (userRank / allPoints.length) * 100;
 
-    // Assign tier based on percentile (top 33% = tier1, middle 33% = tier2, bottom 33% = tier3)
-    if (percentile <= 33) {
-      return 'tier1'; // Top 33%
-    } else if (percentile <= 67) {
-      return 'tier2'; // Middle 33%
+    const tier1PercentileThreshold = currentCycle.tier1Threshold; // 33
+    const tier2PercentileThreshold = currentCycle.tier2Threshold; // 67
+
+    // Assign tier based on configured percentile thresholds
+    if (percentileFromBottom >= tier2PercentileThreshold) {
+      return 'tier1'; // Top 33% (67-100th percentile)
+    } else if (percentileFromBottom >= tier1PercentileThreshold) {
+      return 'tier2'; // Middle 33% (33-67th percentile)
     } else {
-      return 'tier3'; // Bottom 33%
+      return 'tier3'; // Bottom 33% (0-33rd percentile)
     }
   }
 
