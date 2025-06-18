@@ -139,12 +139,7 @@ export default function Lesson() {
             const canAccess = canAccessModule(userData.user, moduleData);
             console.log('🔄 LESSON: Can access module:', canAccess);
             
-            // If it's a premium module and user doesn't have premium access, redirect to upgrade
-            if (moduleData.accessType === 'premium' && !userData.user.isPremium) {
-              console.log('❌ LESSON: Premium module accessed by non-premium user - redirecting to /subscribe');
-              setLocation('/subscribe');
-              return;
-            }
+
             
             if (!canAccess) {
               console.log('❌ LESSON: Access blocked for module');
