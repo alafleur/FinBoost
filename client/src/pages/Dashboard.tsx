@@ -637,7 +637,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Mobile Learning Preview with enhanced design */}
+              {/* BACKUP: Mobile Learning Preview with enhanced design - COMMENTED OUT FOR CTA REPLACEMENT
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
@@ -728,6 +728,51 @@ export default function Dashboard() {
                   <BookOpen className="w-4 h-4 mr-2" />
                   View All Learning Modules
                 </Button>
+              </div>
+              END BACKUP COMMENT */}
+
+              {/* Mobile Learning CTA - Replacing Module Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="Continue Learning"
+                  />
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                    {completedLessonIds.length} of {publishedLessons.length} completed
+                  </Badge>
+                </div>
+                
+                <Card
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => setLocation("/education")}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-white rounded-lg shadow-sm">
+                        <BookOpen className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          Explore All Lessons
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Continue your financial education journey with {publishedLessons.length} available lessons.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
+                        </p>
+                      </div>
+                      <Button
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                        size="default"
+                      >
+                        {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Mobile Rewards Preview with enhanced design */}
@@ -1308,7 +1353,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Continue Learning Section */}
+              {/* BACKUP: Desktop Continue Learning Section - COMMENTED OUT FOR CTA REPLACEMENT
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
@@ -1389,6 +1434,51 @@ export default function Dashboard() {
                   <BookOpen className="w-4 h-4 mr-2" />
                   View All Learning Modules
                 </Button>
+              </div>
+              END BACKUP COMMENT */}
+
+              {/* Desktop Learning CTA - Replacing Module Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="Continue Learning"
+                  />
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                    {completedLessonIds.length} of {publishedLessons.length} completed
+                  </Badge>
+                </div>
+                
+                <Card
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => setLocation("/education")}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-white rounded-lg shadow-sm">
+                        <BookOpen className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          Explore All Lessons
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Continue your financial education journey with {publishedLessons.length} available lessons.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
+                        </p>
+                      </div>
+                      <Button
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                        size="default"
+                      >
+                        {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent Rewards Section */}
