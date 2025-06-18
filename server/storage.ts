@@ -814,7 +814,7 @@ export class MemStorage implements IStorage {
   async calculateUserTier(currentCyclePoints: number): Promise<string> {
     // Get all active premium users' cycle points for percentile calculation
     const allUsers = await db.select({
-      currentCyclePoints: users.currentCyclePoints
+      currentCyclePoints: users.currentMonthPoints
     }).from(users)
     .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
