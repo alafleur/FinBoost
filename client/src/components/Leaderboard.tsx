@@ -197,26 +197,41 @@ export default function Leaderboard() {
                 <span>All Members</span>
               </div>
               {totalPages > 1 && (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-600">
+                <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:items-center">
+                  {/* Mobile: Page info on top */}
+                  <span className="text-xs text-gray-600 text-center md:hidden">
                     Page {currentPage} of {totalPages}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
+                  
+                  {/* Navigation buttons */}
+                  <div className="flex items-center justify-center space-x-2 md:space-x-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="text-xs md:text-sm px-2 md:px-3"
+                    >
+                      <span className="md:hidden">Prev</span>
+                      <span className="hidden md:inline">Previous</span>
+                    </Button>
+                    
+                    {/* Desktop: Page info between buttons */}
+                    <span className="hidden md:block text-sm text-gray-600 px-2">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="text-xs md:text-sm px-2 md:px-3"
+                    >
+                      <span className="md:hidden">Next</span>
+                      <span className="hidden md:inline">Next</span>
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardTitle>
