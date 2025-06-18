@@ -105,9 +105,9 @@ export default function Dashboard() {
       <div className="w-80 bg-white border-l border-gray-200 h-full overflow-y-auto p-6">
         <div className="space-y-6">
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Top Performers</h3>
+            <h3 className="font-heading font-bold text-lg mb-4">Tier 1 - Top Performers</h3>
             <div className="space-y-3">
-              {leaderboardData.tier2?.slice(0, 3).map((entry: any, index: number) => (
+              {leaderboardData.tier1?.slice(0, 3).map((entry: any, index: number) => (
                 <div key={entry.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-shrink-0">
                     {index === 0 && <Crown className="h-5 w-5 text-yellow-500" />}
@@ -124,9 +124,9 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Tier 3</h3>
+            <h3 className="font-heading font-bold text-lg mb-4">Tier 2</h3>
             <div className="space-y-2">
-              {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
+              {leaderboardData.tier2?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm truncate">{entry.username}</span>
                   <span className="text-xs text-gray-500">{entry.currentCyclePoints}</span>
