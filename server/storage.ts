@@ -812,42 +812,51 @@ export class MemStorage implements IStorage {
   }
 
   async calculateUserTier(currentCyclePoints: number): Promise<string> {
+    // Simple rule: 0 points = tier3 (no engagement)
+    if (currentCyclePoints === 0) {
+      return 'tier3';
+    }
+
     // Get tier percentile thresholds from current cycle settings
     const currentCycle = await this.getCurrentCycle();
     if (!currentCycle) {
       return 'tier3';
     }
 
-    // Get all active users' cycle points to calculate this user's percentile
-    const allUsers = await db.select({
+    // Get all active users with points > 0 to calculate percentiles among engaged users only
+    const activeUsersWithPoints = await db.select({
       currentCyclePoints: userCyclePoints.currentCyclePoints
     }).from(users)
     .leftJoin(userCyclePoints, eq(users.id, userCyclePoints.userId))
-    .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
+    .where(and(
+      eq(users.isActive, true), 
+      eq(users.subscriptionStatus, 'active'),
+      gt(userCyclePoints.currentCyclePoints, 0)
+    ));
 
-    if (allUsers.length === 0) {
-      return 'tier3';
+    if (activeUsersWithPoints.length === 0) {
+      return 'tier1'; // Only user with points
     }
 
-    // Sort all points in ascending order (lowest to highest) for proper percentile calculation
-    const allPoints = allUsers
+    // Sort points in ascending order for percentile calculation
+    const allActivePoints = activeUsersWithPoints
       .map(u => u.currentCyclePoints || 0)
       .sort((a, b) => a - b);
 
-    // Calculate this user's percentile rank from bottom (0% = worst, 100% = best)
-    const userRank = allPoints.filter(points => points < currentCyclePoints).length;
-    const percentileFromBottom = (userRank / allPoints.length) * 100;
+    // Calculate percentile rank among active users only
+    const userRank = allActivePoints.filter(points => points < currentCyclePoints).length;
+    const percentileFromBottom = (userRank / allActivePoints.length) * 100;
 
     const tier1PercentileThreshold = currentCycle.tier1Threshold; // 33
     const tier2PercentileThreshold = currentCycle.tier2Threshold; // 67
 
-    // Assign tier based on configured percentile thresholds
+    // Assign tier based on performance among engaged users
     if (percentileFromBottom >= tier2PercentileThreshold) {
-      return 'tier1'; // Top 33% (67-100th percentile)
+      return 'tier1'; // Top performers among active users
     } else if (percentileFromBottom >= tier1PercentileThreshold) {
-      return 'tier2'; // Middle 33% (33-67th percentile)
+      return 'tier2'; // Middle performers among active users
     } else {
-      return 'tier3'; // Bottom 33% (0-33rd percentile)
+      return 'tier3'; // Lower performers among active users
     }
   }
 
