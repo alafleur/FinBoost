@@ -73,8 +73,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: 'inactive' // All new users start as free
       });
 
-      // Automatically generate token and log in the user
-      const token = await storage.generateToken(user.id);
+      // Generate JWT token (same as login)
+      const token = jwt.sign(
+        { userId: user.id },
+        'finboost-secret-key-2024',
+        { expiresIn: '24h' }
+      );
       
       res.json({ 
         success: true, 
