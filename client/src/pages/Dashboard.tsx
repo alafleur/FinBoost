@@ -100,7 +100,7 @@ export default function Dashboard() {
 
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
-
+    
     return (
       <div className="w-80 bg-white border-l border-gray-200 h-full overflow-y-auto p-6">
         <div className="space-y-6">
@@ -154,7 +154,7 @@ export default function Dashboard() {
         // Fetch published modules first (no auth required)
         try {
           const modulesResponse = await fetch('/api/modules');
-
+          
           if (modulesResponse.ok) {
             const modulesData = await modulesResponse.json();
             if (modulesData.success && modulesData.modules) {
@@ -170,7 +170,7 @@ export default function Dashboard() {
         const userResponse = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
+        
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setUser(userData.user);
@@ -183,7 +183,7 @@ export default function Dashboard() {
         const progressResponse = await fetch('/api/user/progress', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
+        
         if (progressResponse.ok) {
           const progressData = await progressResponse.json();
           setLessonProgress(progressData.progress || []);
@@ -194,7 +194,7 @@ export default function Dashboard() {
           const leaderboardResponse = await fetch('/api/cycles/leaderboard', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-
+          
           if (leaderboardResponse.ok) {
             const leaderboardData = await leaderboardResponse.json();
             setLeaderboardData(leaderboardData);
@@ -219,7 +219,7 @@ export default function Dashboard() {
           const poolResponse = await fetch('/api/cycles/pool', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-
+          
           if (poolResponse.ok) {
             const poolData = await poolResponse.json();
             console.log('Pool data received:', poolData);
@@ -236,7 +236,7 @@ export default function Dashboard() {
           const distributionResponse = await fetch('/api/cycles/distribution', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-
+          
           if (distributionResponse.ok) {
             const distributionData = await distributionResponse.json();
             setDistributionInfo(distributionData);
@@ -364,37 +364,37 @@ export default function Dashboard() {
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
-  // Use published modules directly for Overview tab
-  const publishedLessons = publishedModules;
+  // Validate module data integrity before rendering
+  const validateModule = (module) => {
+    return module && 
+           module.id && 
+           module.title && 
+           typeof module.id === 'number' &&
+           typeof module.title === 'string';
+  };
+
+  // Filter out invalid modules and log validation results
+  const validPublishedModules = publishedModules.filter(validateModule);
+  const invalidModules = publishedModules.filter(module => !validateModule(module));
+  
+  if (invalidModules.length > 0) {
+    console.warn('Invalid modules detected:', invalidModules);
+  }
+
+  // Use validated modules only
+  const publishedLessons = validPublishedModules;
+  const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
+  const allAvailableLessons = publishedLessons;
 
   // Check if user is premium
   const isUserPremium = user?.subscriptionStatus === 'active';
 
-  // Function to validate if a module object has the required properties
-  const validateModule = (module: any) => {
-    if (!module) {
-      console.warn('validateModule - Module is null or undefined');
-      return false;
-    }
-
-    if (!module.id) {
-      console.warn('validateModule - Module ID is missing:', module);
-      return false;
-    }
-
-    if (!module.title) {
-      console.warn('validateModule - Module title is missing:', module);
-      return false;
-    }
-
-    if (typeof module.id !== 'number') {
-      console.warn('validateModule - Module ID is not a number:', module);
-      return false;
-    }
-
-    return true;
-  };
-
+  console.log('Module validation results:');
+  console.log('- Total fetched modules:', publishedModules.length);
+  console.log('- Valid modules:', validPublishedModules.length);
+  console.log('- Invalid modules:', invalidModules.length);
+  console.log('- Available lessons for Overview:', availableLessons.length);
+  console.log('- Completed lesson IDs:', completedLessonIds);
 
   if (isLoading) {
     return (
@@ -637,7 +637,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Mobile Learning CTA Card - Simplified Design */}
+              {/* Mobile Learning Preview with enhanced design */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
@@ -649,47 +649,85 @@ export default function Dashboard() {
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
-
-                {/* Single Learning CTA Card */}
-                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 via-blue-50 to-indigo-100 hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={() => setLocation('/education')}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-white rounded-xl shadow-sm">
-                        <BookOpen className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-heading font-bold text-lg text-gray-900 mb-2">
-                          Explore All Learning Modules
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          Access {publishedLessons.length} financial education lessons, earn points, and build better money habits.
-                        </p>
-
-                        {/* Progress Display */}
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-medium text-gray-700">Your Progress</span>
-                            <span className="text-xs text-gray-600">
-                              {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
-                            </span>
+                
+                <div className="space-y-3">
+                  {availableLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
+                    return (
+                      <Card 
+                        key={module.id} 
+                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => {
+                          console.log(`Overview tab - Module clicked: ID=${module.id}, Title=${module.title}`);
+                          console.log(`Overview tab - Module validation:`, validateModule(module));
+                          console.log(`Overview tab - Route being used: /lesson/${module.id}`);
+                          
+                          if (!validateModule(module)) {
+                            console.error('Overview tab - Invalid module data, preventing navigation:', module);
+                            return;
+                          }
+                          
+                          setLocation(`/lesson/${module.id}`);
+                        }}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-3">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
+                                  {module.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
+                              ) : (
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <Progress 
-                            value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
-                            className="h-2 bg-blue-100"
-                          />
-                        </div>
-
-                        <Button 
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors group-hover:bg-blue-700"
-                        >
-                          Start Learning Journey
-                          <TrendingUp className="w-4 h-4 ml-2" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setLocation('/education')} 
+                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View All Learning Modules
+                </Button>
               </div>
 
               {/* Mobile Rewards Preview with enhanced design */}
@@ -717,7 +755,7 @@ export default function Dashboard() {
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
-
+                
                 {/* Progress Bar */}
                 <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
@@ -731,7 +769,7 @@ export default function Dashboard() {
                     className="h-2"
                   />
                 </div>
-
+                
                 <div className="space-y-3">
                   {publishedLessons.map((module) => {
                     const isCompleted = completedLessonIds.includes(module.id.toString());
@@ -750,12 +788,12 @@ export default function Dashboard() {
                           console.log(`Learning tab - Module clicked: ID=${module.id}, Title=${module.title}`);
                           console.log(`Learning tab - Module validation:`, validateModule(module));
                           console.log(`Learning tab - Route being used: /lesson/${module.id}`);
-
+                          
                           if (!validateModule(module)) {
                             console.error('Learning tab - Invalid module data, preventing navigation:', module);
                             return;
                           }
-
+                          
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
@@ -774,7 +812,7 @@ export default function Dashboard() {
                                       ? 'text-yellow-700 bg-yellow-100' 
                                       : 'text-blue-600 bg-blue-100'
                                   }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : (module.pointsReward + ' pts')}
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
                                   </span>
                                 )}
                               </div>
@@ -849,7 +887,7 @@ export default function Dashboard() {
                   iconColor="blue"
                   title="Profile Settings"
                 />
-
+                
                 {/* Profile Information */}
                 <Card>
                   <CardHeader>
@@ -1014,7 +1052,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-
+                    
                     <div className="space-y-3">
                       <div>
                         <label className="text-sm font-medium text-gray-700">PayPal Email Address</label>
@@ -1029,7 +1067,7 @@ export default function Dashboard() {
                           This email must be associated with an active PayPal account to receive payments
                         </p>
                       </div>
-
+                      
                       <div>
                         <label className="text-sm font-medium text-gray-700">Payout Method</label>
                         <select
@@ -1041,7 +1079,603 @@ export default function Dashboard() {
                           <option value="bank_transfer" disabled>Bank Transfer (Coming Soon)</option>
                         </select>
                       </div>
+                      
+                      <Button 
+                        className="w-full" 
+                        size="sm" 
+                        onClick={handleSavePaymentInfo}
+                        disabled={savingPayment}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {savingPayment ? 'Saving...' : 'Save Payment Information'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
+                {/* Account Statistics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Account Statistics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                        <div className="text-sm text-gray-600">Total Points</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{user?.currentStreak || 0}</div>
+                        <div className="text-sm text-gray-600">Day Streak</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
+      ) : (
+        /* Desktop Layout - New Tab Structure */
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
+          {/* Desktop Tab Navigation */}
+          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
+            <div className="w-full">
+              <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
+                <TabsTrigger 
+                  value="overview" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Dashboard overview tab"
+                >
+                  <Activity className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Overview</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="learn" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Learning modules tab"
+                >
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Learn</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="referrals" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Referral system tab"
+                >
+                  <Users className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Referrals</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="rewards" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Rewards history tab"
+                >
+                  <Award className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Rewards</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="leaderboard" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Leaderboard tab"
+                >
+                  <Trophy className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Board</span>
+                </TabsTrigger>
+
+              </TabsList>
+            </div>
+          </div>
+
+          {/* Desktop Tab Content */}
+          <div className="w-full py-6">
+            
+            {/* Rewards Tab - Simplest Implementation */}
+            <TabsContent value="rewards" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Rewards History"
+                  titleSize="2xl"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <RewardsHistory />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Overview Tab - Complete Content from Mobile */}
+            <TabsContent value="overview" className="mt-0 space-y-6">
+              {/* Welcome Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
+                      Welcome back, {user?.firstName || user?.username}!
+                    </h2>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Track your progress, earn points, and win cycle rewards for building better financial habits.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid - 4 Column Layout Matching Mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {/* 1. Current Tier */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Current Tier</CardTitle>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Trophy className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-sm font-medium px-3 py-1`}>
+                        {getTierDisplayName(user?.tier || 'tier1')}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">Cycle standing</p>
+                  </CardContent>
+                </Card>
+
+                {/* 2. Total Points */}
+                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Total Points</CardTitle>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Star className="h-4 w-4 text-amber-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                    <p className="text-xs text-gray-600">All time earned</p>
+                  </CardContent>
+                </Card>
+
+                {/* 3. Current Points (This Month) */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">This Cycle</CardTitle>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <TrendingUp className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
+                    <p className="text-xs text-gray-600">Current cycle points</p>
+                  </CardContent>
+                </Card>
+
+                {/* 4. Lessons Completed */}
+                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <BookOpen className="h-4 w-4 text-amber-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold text-gray-900">{completedLessonIds.length}</div>
+                    <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Community Growth Only */}
+              <div className="w-full">
+                {user && poolData && (
+                  <CommunityGrowthDial 
+                    poolData={poolData}
+                    user={{
+                      subscriptionStatus: user.subscriptionStatus,
+                      totalPoints: user.totalPoints || 0,
+                      currentCyclePoints: user.currentCyclePoints || 0
+                    }}
+                    onUpgradeClick={() => setActiveTab('profile')}
+                  />
+                )}
+              </div>
+
+              {/* Tier Progress Bar */}
+              {tierThresholds && user && (
+                <div className="space-y-4">
+                  <SectionHeader 
+                    icon={Target}
+                    iconColor="yellow"
+                    title="Tier Progress"
+                  />
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <TierProgressTable 
+                      tierThresholds={tierThresholds}
+                      user={user}
+                      getTierDisplayName={getTierDisplayName}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Continue Learning Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="Continue Learning"
+                  />
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                    {completedLessonIds.length} of {publishedLessons.length} completed
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {availableLessons.slice(0, 6).map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
+                    const isUserPremium = user?.subscriptionStatus === 'active';
+                    return (
+                      <Card 
+                        key={module.id} 
+                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => setLocation(`/education/${module.id}`)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-3">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
+                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
+                                  {module.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
+                              ) : (
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setLocation('/education')} 
+                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View All Learning Modules
+                </Button>
+              </div>
+
+              {/* Recent Rewards Section */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Recent Rewards"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <RewardsHistory />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Referrals Tab */}
+            <TabsContent value="referrals" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="purple"
+                  title="Referral System"
+                  titleSize="2xl"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <ReferralSystem />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Learn Tab */}
+            <TabsContent value="learn" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <SectionHeader 
+                    icon={BookOpen}
+                    iconColor="blue"
+                    title="All Learning Modules"
+                    titleSize="2xl"
+                  />
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium">
+                    {completedLessonIds.length} of {publishedLessons.length} completed
+                  </Badge>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-medium text-gray-700">Learning Progress</span>
+                    <span className="text-sm text-gray-500">
+                      {publishedLessons.length > 0 ? Math.round((completedLessonIds.length / publishedLessons.length) * 100) : 0}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={publishedLessons.length > 0 ? (completedLessonIds.length / publishedLessons.length) * 100 : 0} 
+                    className="h-3"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {publishedLessons.map((module) => {
+                    const isCompleted = completedLessonIds.includes(module.id.toString());
+                    const isPremiumModule = module.accessType === 'premium';
+                    return (
+                      <Card 
+                        key={module.id} 
+                        className={`group border-0 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer ${
+                          isCompleted 
+                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                            : isPremiumModule && !isUserPremium
+                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`} 
+                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 pr-4">
+                              <h4 className="font-semibold text-lg text-gray-900 leading-tight mb-2">{module.title}</h4>
+                              <p className="text-sm text-gray-600 line-clamp-3 mb-3">{module.description?.substring(0, 150)}...</p>
+                              <div className="flex items-center space-x-3">
+                                <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full capitalize font-medium">
+                                  {module.category}
+                                </span>
+                                {!isCompleted && (
+                                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                                    isPremiumModule && !isUserPremium 
+                                      ? 'text-yellow-700 bg-yellow-100' 
+                                      : 'text-blue-600 bg-blue-100'
+                                  }`}>
+                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-3">
+                              {isCompleted ? (
+                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm">
+                                  ✓ Done
+                                </Badge>
+                              ) : isPremiumModule && !isUserPremium ? (
+                                <Button size="lg" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
+                                  Upgrade
+                                </Button>
+                              ) : (
+                                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                                  Start
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Leaderboard Tab */}
+            <TabsContent value="leaderboard" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Trophy}
+                  iconColor="orange"
+                  title="Leaderboard"
+                  titleSize="2xl"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <Leaderboard />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Profile Tab - Desktop */}
+            <TabsContent value="profile" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={UserIcon}
+                  iconColor="blue"
+                  title="Profile Settings"
+                  titleSize="2xl"
+                />
+                
+                {/* Profile Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Account Information
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your account details and preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Username</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.username}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-sm text-gray-900 mt-1">{user?.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Subscription Status</label>
+                        <div className="mt-1">
+                          <Badge variant={user?.subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                            {user?.subscriptionStatus === 'active' ? 'Premium Member' : 'Free User'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Subscription Payment Details */}
+                {user?.subscriptionStatus === 'active' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <CreditCard className="h-5 w-5" />
+                        Subscription Details
+                      </CardTitle>
+                      <CardDescription>
+                        Your current membership plan and payment information
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Subscription Amount</label>
+                          <p className="text-lg font-semibold text-gray-900">
+                            ${((user?.subscriptionAmount || 2000) / 100).toFixed(2)} {(user?.subscriptionCurrency || 'USD').toUpperCase()}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Payment Method</label>
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {user?.subscriptionPaymentMethod || 'Card'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Member Since</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.subscriptionStartDate 
+                              ? new Date(user.subscriptionStartDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'N/A'
+                            }
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Next Billing</label>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.nextBillingDate 
+                              ? new Date(user.nextBillingDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })
+                              : 'End of month'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* PayPal Payment Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Payment Information
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your PayPal email for reward disbursements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-1 bg-blue-100 rounded">
+                          <CreditCard className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-blue-900">PayPal Email Required</h4>
+                          <p className="text-sm text-blue-700 mt-1">
+                            To receive cycle reward disbursements, please provide your PayPal email address. This must match your active PayPal account.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">PayPal Email Address</label>
+                        <input
+                          type="email"
+                          placeholder="your-paypal@email.com"
+                          value={paypalEmail}
+                          onChange={(e) => setPaypalEmail(e.target.value)}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          This email must be associated with an active PayPal account to receive payments
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Payout Method</label>
+                        <select
+                          value={payoutMethod}
+                          onChange={(e) => setPayoutMethod(e.target.value)}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="paypal">PayPal</option>
+                          <option value="bank_transfer" disabled>Bank Transfer (Coming Soon)</option>
+                        </select>
+                      </div>
+                      
                       <Button 
                         className="w-full" 
                         size="sm" 
