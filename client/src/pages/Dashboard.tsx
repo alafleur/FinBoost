@@ -218,8 +218,8 @@ export default function Dashboard() {
           setPoolData(poolData.pool);
         }
 
-        // Fetch distribution info for CommunityGrowthDial
-        const distributionResponse = await fetch('/api/distribution/next', {
+        // Fetch cycle distribution info for CommunityGrowthDial
+        const distributionResponse = await fetch('/api/cycles/distribution', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
