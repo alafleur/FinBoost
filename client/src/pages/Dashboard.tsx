@@ -1338,7 +1338,6 @@ export default function Dashboard() {
                   <TierStats 
                     tierThresholds={tierThresholds}
                     user={user}
-                    getTierDisplayName={getTierDisplayName}
                   />
                 </div>
               )}

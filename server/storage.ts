@@ -811,10 +811,10 @@ export class MemStorage implements IStorage {
       .where(eq(userPointsHistory.id, historyId));
   }
 
-  async calculateUserTier(currentMonthPoints: number): Promise<string> {
-    // Get all active premium users' points for percentile calculation
+  async calculateUserTier(currentCyclePoints: number): Promise<string> {
+    // Get all active premium users' cycle points for percentile calculation
     const allUsers = await db.select({
-      currentMonthPoints: users.currentMonthPoints
+      currentCyclePoints: users.currentCyclePoints
     }).from(users)
     .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
@@ -824,11 +824,11 @@ export class MemStorage implements IStorage {
 
     // Sort all points in descending order (highest to lowest)
     const allPoints = allUsers
-      .map(u => u.currentMonthPoints || 0)
+      .map(u => u.currentCyclePoints || 0)
       .sort((a, b) => b - a);
 
     // Calculate percentile rank for this user's points
-    const userRank = allPoints.filter(points => points > currentMonthPoints).length;
+    const userRank = allPoints.filter(points => points > currentCyclePoints).length;
     const percentile = (userRank / allPoints.length) * 100;
 
     // Assign tier based on percentile (top 33% = tier1, middle 33% = tier2, bottom 33% = tier3)
@@ -849,17 +849,16 @@ export class MemStorage implements IStorage {
 
     console.log(`Recalculating tiers for ${allUsers.length} users`);
 
-    // Update each user's tier based on their current points
+    // Update each user's tier based on their current cycle points
     for (const user of allUsers) {
-      const newTier = await this.calculateUserTier(user.currentMonthPoints || 0);
+      const newTier = await this.calculateUserTier(user.currentCyclePoints || 0);
 
       if (user.tier !== newTier) {
-        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentMonthPoints} points)`);
+        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentCyclePoints} cycle points)`);
 
         await db.update(users)
           .set({ 
-            tier: newTier,
-            updatedAt: new Date()
+            tier: newTier
           })
           .where(eq(users.id, user.id));
 
@@ -1879,9 +1878,9 @@ export class MemStorage implements IStorage {
       return this.tierThresholdCache;
     }
 
-    // Get all active premium users' current month points to calculate percentiles
+    // Get all active premium users' current cycle points to calculate percentiles
     const allUsers = await db.select({
-      currentMonthPoints: users.currentMonthPoints
+      currentCyclePoints: users.currentCyclePoints
     }).from(users)
     .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
@@ -1894,7 +1893,7 @@ export class MemStorage implements IStorage {
 
     // Sort points in descending order (highest to lowest)
     const allPoints = allUsers
-      .map(u => u.currentMonthPoints || 0)
+      .map(u => u.currentCyclePoints || 0)
       .sort((a, b) => b - a);
 
     // Calculate percentile thresholds for tier boundaries
