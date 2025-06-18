@@ -24,7 +24,7 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
   const lowestThreshold = Math.min(tierThresholds.tier1, tierThresholds.tier2);
   
   const getCurrentTier = () => {
-    const points = user.currentCyclePoints || 0;
+    const points = user.currentCyclePoints || user.currentMonthPoints || 0;
     if (points >= highestThreshold) return 'tier1'; // Tier 1 = highest points
     if (points >= lowestThreshold) return 'tier2';  // Tier 2 = middle points
     return 'tier3'; // Tier 3 = lowest points (0 to lowestThreshold-1)

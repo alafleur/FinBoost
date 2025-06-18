@@ -844,6 +844,10 @@ export class MemStorage implements IStorage {
   async recalculateAllUserTiers(): Promise<void> {
     console.log("Starting tier recalculation for all users...");
 
+    // Clear tier threshold cache to force recalculation
+    this.tierThresholdCache = null;
+    this.tierThresholdCacheTime = null;
+
     // Get all active users
     const allUsers = await db.select().from(users).where(eq(users.isActive, true));
 
@@ -851,10 +855,10 @@ export class MemStorage implements IStorage {
 
     // Update each user's tier based on their current cycle points
     for (const user of allUsers) {
-      const newTier = await this.calculateUserTier(user.currentCyclePoints || 0);
+      const newTier = await this.calculateUserTier(user.currentMonthPoints || 0);
 
       if (user.tier !== newTier) {
-        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentCyclePoints} cycle points)`);
+        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentMonthPoints} cycle points)`);
 
         await db.update(users)
           .set({ 
@@ -1880,7 +1884,7 @@ export class MemStorage implements IStorage {
 
     // Get all active premium users' current cycle points to calculate percentiles
     const allUsers = await db.select({
-      currentCyclePoints: users.currentCyclePoints
+      currentCyclePoints: users.currentMonthPoints
     }).from(users)
     .where(and(eq(users.isActive, true), eq(users.subscriptionStatus, 'active')));
 
