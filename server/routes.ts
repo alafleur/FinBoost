@@ -3115,9 +3115,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cycleSettings = await storage.getCurrentPoolSettingsForDate(new Date());
       const rewardPoolPercentage = cycleSettings?.rewardPoolPercentage || 50;
       
-      console.log('Cycle settings:', cycleSettings);
-      console.log('Reward pool percentage:', rewardPoolPercentage);
-      
       // Calculate tier-specific pool breakdown
       const tierBreakdown = {
         tier1: Math.floor(poolData.totalPool * 0.50), // 50% to Tier 1
@@ -3125,14 +3122,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tier3: Math.floor(poolData.totalPool * 0.20)  // 20% to Tier 3
       };
       
-      const response = {
+      res.json({
         ...poolData,
         rewardPoolPercentage,
         tierBreakdown
-      };
-      
-      console.log('Pool API response:', response);
-      res.json(response);
+      });
     } catch (error) {
       console.error("Error fetching cycle pool data:", error);
       res.status(500).json({ error: "Failed to fetch cycle pool data" });
