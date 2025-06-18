@@ -1330,6 +1330,7 @@ export default function Dashboard() {
                       totalPoints: user.totalPoints || 0,
                       currentCyclePoints: user.currentCyclePoints || 0
                     }}
+                    distributionInfo={distributionInfo}
                     onUpgradeClick={() => setActiveTab('profile')}
                   />
                 )}
