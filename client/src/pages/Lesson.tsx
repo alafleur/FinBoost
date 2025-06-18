@@ -79,6 +79,9 @@ export default function Lesson() {
         
         if (!lessonId || lessonId === 'lesson') {
           console.log('❌ LESSON: No lesson ID found, redirecting to education');
+          console.log('❌ LESSON: Current pathname:', window.location.pathname);
+          console.log('❌ LESSON: Path parts:', pathParts);
+          console.log('❌ LESSON: This redirect may be causing 404 errors!');
           setLocation('/education');
           return;
         }
