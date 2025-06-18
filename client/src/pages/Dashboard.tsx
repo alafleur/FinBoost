@@ -643,7 +643,12 @@ export default function Dashboard() {
                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`} 
-                        onClick={() => setLocation(`/lesson/${module.id}`)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log(`Overview tab - navigating to lesson ${module.id}`);
+                          setLocation(`/lesson/${module.id}`);
+                        }}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
