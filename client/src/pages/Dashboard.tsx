@@ -124,7 +124,7 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4">Silver Tier</h3>
+            <h3 className="font-heading font-bold text-lg mb-4">Tier 3</h3>
             <div className="space-y-2">
               {leaderboardData.tier3?.slice(0, 5).map((entry: any) => (
                 <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
@@ -218,8 +218,8 @@ export default function Dashboard() {
           setPoolData(poolData.pool);
         }
 
-        // Fetch cycle distribution info for CommunityGrowthDial
-        const distributionResponse = await fetch('/api/cycles/distribution/next', {
+        // Fetch distribution info for CommunityGrowthDial
+        const distributionResponse = await fetch('/api/distribution/next', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         

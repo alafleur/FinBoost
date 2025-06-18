@@ -135,9 +135,9 @@ export default function RewardsHistory() {
 
   const getTierLabel = (tier: string) => {
     switch (tier) {
-      case 'tier3': return 'Gold Tier';
-      case 'tier2': return 'Silver Tier';
-      case 'tier1': return 'Bronze Tier';
+      case 'tier1': return 'Tier 1';
+      case 'tier2': return 'Tier 2';
+      case 'tier3': return 'Tier 3';
       default: return 'Member';
     }
   };

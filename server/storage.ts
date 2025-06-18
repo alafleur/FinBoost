@@ -3638,7 +3638,7 @@ export class MemStorage implements IStorage {
       const rewards = await db.select({
         id: cycleWinnerSelections.id,
         cycleId: cycleWinnerSelections.cycleSettingId,
-        cycleName: cycleSettings.cycleName,
+        cycleName: sql<string>`COALESCE(${cycleSettings.cycleName}, 'Unknown Cycle')`,
         tier: cycleWinnerSelections.tier,
         pointsAtDistribution: cycleWinnerSelections.pointsAtDistribution,
         rewardAmount: cycleWinnerSelections.rewardAmount,
