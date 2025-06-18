@@ -65,27 +65,28 @@ export default function Leaderboard() {
         currentUserId = userData.user?.id;
       }
       
-      // Use cycle-based leaderboard endpoint for pagination
-      const timeFilter = activeTab === 'monthly' ? 'cycle' : 'alltime';
-      const expandedResponse = await fetch(`/api/cycles/leaderboard/expanded?timeFilter=${timeFilter}&page=${currentPage}&search=`, {
+      // Use the correct leaderboard endpoint
+      const response = await fetch('/api/cycles/leaderboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      if (expandedResponse.ok) {
-        const result = await expandedResponse.json();
+      if (response.ok) {
+        const leaderboardEntries = await response.json();
+        console.log('Leaderboard data received:', leaderboardEntries);
         
-        // Process the expanded leaderboard data
-        const processExpandedData = (data: any) => {
-          if (!data.success || !data.users) return null;
+        // Process the leaderboard data
+        const processLeaderboardData = (entries: any[]) => {
+          if (!entries || !Array.isArray(entries)) return null;
           
-          const leaderboard = data.users.map((entry: any, index: number) => ({
-            rank: parseInt(entry.rank),
+          const leaderboard = entries.map((entry: any) => ({
+            rank: entry.rank,
             username: entry.username,
-            points: parseInt(entry.points),
+            points: entry.points,
             tier: entry.tier,
-            isCurrentUser: currentUserId && entry.username === currentUserId // Note: expanded API uses username comparison
+            isCurrentUser: currentUserId && entry.userId === currentUserId,
+            userId: entry.userId
           }));
           
           // Find current user's position
@@ -97,7 +98,7 @@ export default function Leaderboard() {
           } : {
             rank: null,
             points: 0,
-            tier: 'tier1'
+            tier: 'Tier 3'
           };
           
           return {
@@ -106,19 +107,15 @@ export default function Leaderboard() {
           };
         };
         
-        const processedData = processExpandedData(result);
+        const processedData = processLeaderboardData(leaderboardEntries);
+        console.log('Processed leaderboard data:', processedData);
         
-        // Set data for the active tab
-        if (activeTab === 'cycle') {
-          setCycleData(processedData);
-        } else {
-          setAllTimeData(processedData);
-        }
+        // Set data for both tabs (same data for now)
+        setCycleData(processedData);
+        setAllTimeData(processedData);
         
-        // Update pagination info
-        if (result.pagination) {
-          setTotalPages(result.pagination.totalPages || 1);
-        }
+        // Set total pages (all data in one page for now)
+        setTotalPages(1);
       } else {
         throw new Error('Failed to fetch leaderboard data');
       }
