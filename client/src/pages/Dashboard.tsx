@@ -364,16 +364,37 @@ export default function Dashboard() {
   // Get the completed lesson IDs from lessonProgress
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
-  // Use published modules directly since API already filters for published only
-  const publishedLessons = publishedModules;
+  // Validate module data integrity before rendering
+  const validateModule = (module) => {
+    return module && 
+           module.id && 
+           module.title && 
+           typeof module.id === 'number' &&
+           typeof module.title === 'string';
+  };
+
+  // Filter out invalid modules and log validation results
+  const validPublishedModules = publishedModules.filter(validateModule);
+  const invalidModules = publishedModules.filter(module => !validateModule(module));
+  
+  if (invalidModules.length > 0) {
+    console.warn('Invalid modules detected:', invalidModules);
+  }
+
+  // Use validated modules only
+  const publishedLessons = validPublishedModules;
   const availableLessons = publishedLessons.slice(0, isMobile ? 3 : 6);
   const allAvailableLessons = publishedLessons;
 
   // Check if user is premium
   const isUserPremium = user?.subscriptionStatus === 'active';
 
-  console.log('Fetched completed lesson IDs:', completedLessonIds);
-  console.log('Total published modules loaded:', publishedModules.length);
+  console.log('Module validation results:');
+  console.log('- Total fetched modules:', publishedModules.length);
+  console.log('- Valid modules:', validPublishedModules.length);
+  console.log('- Invalid modules:', invalidModules.length);
+  console.log('- Available lessons for Overview:', availableLessons.length);
+  console.log('- Completed lesson IDs:', completedLessonIds);
 
   if (isLoading) {
     return (
@@ -645,7 +666,14 @@ export default function Dashboard() {
                         }`} 
                         onClick={() => {
                           console.log(`Overview tab - Module clicked: ID=${module.id}, Title=${module.title}`);
+                          console.log(`Overview tab - Module validation:`, validateModule(module));
                           console.log(`Overview tab - Route being used: /lesson/${module.id}`);
+                          
+                          if (!validateModule(module)) {
+                            console.error('Overview tab - Invalid module data, preventing navigation:', module);
+                            return;
+                          }
+                          
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
@@ -758,7 +786,14 @@ export default function Dashboard() {
                         }`} 
                         onClick={() => {
                           console.log(`Learning tab - Module clicked: ID=${module.id}, Title=${module.title}`);
+                          console.log(`Learning tab - Module validation:`, validateModule(module));
                           console.log(`Learning tab - Route being used: /lesson/${module.id}`);
+                          
+                          if (!validateModule(module)) {
+                            console.error('Learning tab - Invalid module data, preventing navigation:', module);
+                            return;
+                          }
+                          
                           setLocation(`/lesson/${module.id}`);
                         }}
                       >
