@@ -1101,8 +1101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true, 
-        history:<replit_final_file>
- history.map(h => ({
+        history: history.map(h => ({
           id: h.id,
           points: h.points,
           action: h.action,
