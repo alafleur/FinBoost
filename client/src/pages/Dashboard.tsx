@@ -33,6 +33,7 @@ import finboostLogo from "@/assets/finboost-logo.png";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
 import RewardsHistory from "@/components/RewardsHistory";
+import RewardsSummary from "@/components/RewardsSummary";
 import Leaderboard from "@/components/Leaderboard";
 import ReferralSystem from "@/components/ReferralSystem";
 import StreakDisplay from "@/components/StreakDisplay";
