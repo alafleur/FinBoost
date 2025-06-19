@@ -6260,6 +6260,298 @@ export class MemStorage implements IStorage {
       };
     }
   }
+
+  // === FLEXIBLE WINNER SELECTION METHODS ===
+
+  async executeCycleWinnerSelection(params: {
+    cycleSettingId: number;
+    selectionMode: 'weighted_random' | 'top_performers' | 'random' | 'manual';
+    tierSettings: any;
+    customWinnerIds?: number[];
+    pointDeductionPercentage: number;
+    rolloverPercentage: number;
+  }): Promise<any> {
+    const { cycleSettingId, selectionMode, tierSettings } = params;
+    
+    try {
+      // Get eligible users and pool info
+      const eligibleUsers = await this.getEligibleUsersForSelection(cycleSettingId);
+      const poolInfo = await this.getCyclePoolInfo(cycleSettingId);
+      
+      // Calculate tier pools
+      const tier1Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier1.poolPercentage / 100));
+      const tier2Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier2.poolPercentage / 100));
+      const tier3Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier3.poolPercentage / 100));
+
+      // Group users by tier
+      const usersByTier = {
+        tier1: eligibleUsers.filter(u => u.tier === 'tier1'),
+        tier2: eligibleUsers.filter(u => u.tier === 'tier2'),
+        tier3: eligibleUsers.filter(u => u.tier === 'tier3')
+      };
+
+      let selectedWinners: any[] = [];
+
+      // Execute selection based on mode (point-weighted random as baseline)
+      switch (selectionMode) {
+        case 'weighted_random':
+          selectedWinners = this.selectWeightedRandomWinners(usersByTier, tierSettings);
+          break;
+        case 'top_performers':
+          selectedWinners = this.selectTopPerformers(usersByTier, tierSettings);
+          break;
+        case 'random':
+          selectedWinners = this.selectPureRandomWinners(usersByTier, tierSettings);
+          break;
+        case 'manual':
+          selectedWinners = this.selectManualWinners(eligibleUsers, params.customWinnerIds || []);
+          break;
+        default:
+          selectedWinners = this.selectWeightedRandomWinners(usersByTier, tierSettings);
+      }
+
+      // Calculate individual rewards
+      const winnersWithRewards = selectedWinners.map(winner => {
+        const tier = winner.tier;
+        const tierPool = { tier1: tier1Pool, tier2: tier2Pool, tier3: tier3Pool }[tier];
+        const winnerCount = tierSettings[tier].winnerCount;
+        const individualReward = winnerCount > 0 ? Math.floor(tierPool / winnerCount) : 0;
+
+        return {
+          ...winner,
+          rewardAmount: individualReward,
+          payoutPercentage: 100,
+          payoutStatus: 'pending'
+        };
+      });
+
+      // Save winners to database
+      const savedWinners = await this.saveCycleWinnerSelection(
+        cycleSettingId,
+        winnersWithRewards,
+        selectionMode,
+        poolInfo.totalPool
+      );
+
+      return {
+        selectionMode,
+        winnersSelected: savedWinners.length,
+        totalRewardPool: poolInfo.totalPool,
+        winners: savedWinners,
+        tierBreakdown: {
+          tier1: { winners: savedWinners.filter(w => w.tier === 'tier1').length, pool: tier1Pool },
+          tier2: { winners: savedWinners.filter(w => w.tier === 'tier2').length, pool: tier2Pool },
+          tier3: { winners: savedWinners.filter(w => w.tier === 'tier3').length, pool: tier3Pool }
+        }
+      };
+    } catch (error) {
+      console.error('Error executing cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  // Point-weighted random selection (baseline method)
+  private selectWeightedRandomWinners(usersByTier: any, tierSettings: any): any[] {
+    const winners: any[] = [];
+
+    ['tier1', 'tier2', 'tier3'].forEach(tier => {
+      const users = usersByTier[tier] || [];
+      const winnerCount = tierSettings[tier].winnerCount;
+
+      if (users.length === 0 || winnerCount === 0) return;
+
+      const totalWeight = users.reduce((sum: number, user: any) => sum + Math.max(1, user.currentCyclePoints), 0);
+      const tierWinners = [];
+      const availableUsers = [...users];
+
+      for (let i = 0; i < Math.min(winnerCount, availableUsers.length); i++) {
+        let randomWeight = Math.random() * totalWeight;
+        let selectedUser = null;
+        let selectedIndex = -1;
+
+        for (let j = 0; j < availableUsers.length; j++) {
+          randomWeight -= Math.max(1, availableUsers[j].currentCyclePoints);
+          if (randomWeight <= 0) {
+            selectedUser = availableUsers[j];
+            selectedIndex = j;
+            break;
+          }
+        }
+
+        if (selectedUser) {
+          tierWinners.push({ ...selectedUser, tier });
+          availableUsers.splice(selectedIndex, 1);
+        }
+      }
+
+      winners.push(...tierWinners);
+    });
+
+    return winners;
+  }
+
+  private selectTopPerformers(usersByTier: any, tierSettings: any): any[] {
+    const winners: any[] = [];
+
+    ['tier1', 'tier2', 'tier3'].forEach(tier => {
+      const users = usersByTier[tier] || [];
+      const winnerCount = tierSettings[tier].winnerCount;
+
+      if (users.length === 0 || winnerCount === 0) return;
+
+      const topPerformers = users
+        .sort((a: any, b: any) => b.currentCyclePoints - a.currentCyclePoints)
+        .slice(0, winnerCount)
+        .map(user => ({ ...user, tier }));
+
+      winners.push(...topPerformers);
+    });
+
+    return winners;
+  }
+
+  private selectPureRandomWinners(usersByTier: any, tierSettings: any): any[] {
+    const winners: any[] = [];
+
+    ['tier1', 'tier2', 'tier3'].forEach(tier => {
+      const users = usersByTier[tier] || [];
+      const winnerCount = tierSettings[tier].winnerCount;
+
+      if (users.length === 0 || winnerCount === 0) return;
+
+      const shuffled = [...users].sort(() => Math.random() - 0.5);
+      const randomWinners = shuffled
+        .slice(0, winnerCount)
+        .map(user => ({ ...user, tier }));
+
+      winners.push(...randomWinners);
+    });
+
+    return winners;
+  }
+
+  private selectManualWinners(eligibleUsers: any[], customWinnerIds: number[]): any[] {
+    return customWinnerIds
+      .map(userId => {
+        const user = eligibleUsers.find(u => u.id === userId);
+        return user ? { ...user } : null;
+      })
+      .filter(user => user);
+  }
+
+  private async saveCycleWinnerSelection(
+    cycleSettingId: number,
+    winners: any[],
+    selectionMode: string,
+    totalPool: number
+  ): Promise<any[]> {
+    const savedWinners = [];
+
+    for (const winner of winners) {
+      try {
+        const [saved] = await db
+          .insert(cycleWinnerSelections)
+          .values({
+            cycleSettingId,
+            userId: winner.id,
+            tier: winner.tier,
+            pointsAtSelection: winner.currentCyclePoints,
+            rewardAmount: winner.rewardAmount,
+            payoutPercentage: winner.payoutPercentage,
+            payoutStatus: winner.payoutStatus,
+            selectionMethod: selectionMode,
+            selectionDate: new Date()
+          })
+          .returning();
+
+        savedWinners.push({
+          ...saved,
+          username: winner.username,
+          email: winner.email
+        });
+      } catch (error) {
+        console.error('Error saving winner:', error);
+      }
+    }
+
+    return savedWinners;
+  }
+
+  async getEligibleUsersForSelection(cycleSettingId: number): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          tier: users.tier,
+          currentCyclePoints: sql<number>`COALESCE(${userCyclePoints.points}, 0)`,
+          isActive: users.isActive,
+          isPremium: users.isPremium
+        })
+        .from(users)
+        .leftJoin(userCyclePoints, 
+          and(
+            eq(userCyclePoints.userId, users.id),
+            eq(userCyclePoints.cycleSettingId, cycleSettingId)
+          )
+        )
+        .where(
+          and(
+            eq(users.isActive, true),
+            eq(users.isPremium, true)
+          )
+        );
+
+      return result.map(user => ({
+        ...user,
+        currentCyclePoints: user.currentCyclePoints || 0
+      }));
+    } catch (error) {
+      console.error('Error getting eligible users:', error);
+      return [];
+    }
+  }
+
+  async getCycleWinnerDetails(cycleSettingId: number): Promise<any> {
+    try {
+      const winners = await db
+        .select({
+          id: cycleWinnerSelections.id,
+          userId: cycleWinnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          tier: cycleWinnerSelections.tier,
+          pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
+          rewardAmount: cycleWinnerSelections.rewardAmount,
+          payoutPercentage: cycleWinnerSelections.payoutPercentage,
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          selectionMethod: cycleWinnerSelections.selectionMethod,
+          adjustmentReason: cycleWinnerSelections.adjustmentReason,
+          selectionDate: cycleWinnerSelections.selectionDate
+        })
+        .from(cycleWinnerSelections)
+        .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+        .orderBy(cycleWinnerSelections.selectionDate);
+
+      return { winners };
+    } catch (error) {
+      console.error('Error getting cycle winner details:', error);
+      return { winners: [] };
+    }
+  }
+
+  async clearCycleWinnerSelection(cycleSettingId: number): Promise<void> {
+    try {
+      await db
+        .delete(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+    } catch (error) {
+      console.error('Error clearing cycle winner selection:', error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new MemStorage();

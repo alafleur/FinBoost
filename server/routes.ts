@@ -3930,7 +3930,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get winner details for adjustment
-  app.get('/api/admin/cycle-winner-details/:cycleSettingId', requireAuth, requireAdmin, async (req, res) => {
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const details = await storage.getCycleWinnerDetails(cycleSettingId);
@@ -3942,7 +3945,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update winner payout percentage or status
-  app.patch('/api/admin/winner-payout/:winnerId', requireAuth, requireAdmin, async (req, res) => {
+  app.patch('/api/admin/winner-payout/:winnerId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
     try {
       const winnerId = parseInt(req.params.winnerId);
       const updates = req.body;
@@ -3955,7 +3961,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clear winner selection for re-running
-  app.delete('/api/admin/cycle-winner-selection/:cycleSettingId', requireAuth, requireAdmin, async (req, res) => {
+  app.delete('/api/admin/cycle-winner-selection/:cycleSettingId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       await storage.clearCycleWinnerSelection(cycleSettingId);
