@@ -251,6 +251,20 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
   return (
     <div className="space-y-6">
+      {/* Workflow Breadcrumb */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-sm">
+            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">1. Setup</span>
+            <span className="text-gray-400">→</span>
+            <span className="bg-green-600 text-white px-2 py-1 rounded">2. Monitor</span>
+            <span className="text-green-600">→</span>
+            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">3. Execute</span>
+          </div>
+          <div className="text-xs text-green-600 font-medium">Monitor Phase: Track cycle performance and execute operations</div>
+        </div>
+      </div>
+
       {/* Current Cycle Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>

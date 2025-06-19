@@ -128,13 +128,27 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
 
   return (
     <div className="space-y-6">
+      {/* Workflow Breadcrumb */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-sm">
+            <span className="bg-blue-600 text-white px-2 py-1 rounded">1. Setup</span>
+            <span className="text-blue-600">→</span>
+            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">2. Monitor</span>
+            <span className="text-gray-400">→</span>
+            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">3. Execute</span>
+          </div>
+          <div className="text-xs text-blue-600 font-medium">Setup Phase: Configure cycle parameters</div>
+        </div>
+      </div>
+
       {/* Cycle Configuration Header */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
+                <Settings className="w-5 h-5 text-blue-600" />
                 Cycle Configuration
               </CardTitle>
               <CardDescription>

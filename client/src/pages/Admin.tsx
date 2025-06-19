@@ -2680,6 +2680,20 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="cycle-management">
+            <CycleManagementTab 
+              cycleSettings={cycleSettings} 
+              onRefresh={fetchData}
+            />
+          </TabsContent>
+
+          <TabsContent value="cycle-operations">
+            <CycleOperationsTab 
+              cycleSettings={cycleSettings} 
+              onRefresh={fetchData}
+            />
+          </TabsContent>
+
+          <TabsContent value="legacy-cycle-management">
             <div className="space-y-6">
               {/* Cycle Creation and Configuration */}
               <Card>
