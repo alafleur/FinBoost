@@ -6276,7 +6276,17 @@ export class MemStorage implements IStorage {
     try {
       // Get eligible users and pool info
       const eligibleUsers = await this.getEligibleUsersForSelection(cycleSettingId);
-      const poolInfo = await this.getCyclePoolInfo(cycleSettingId);
+      
+      // Calculate pool info from cycle settings
+      const cycleSetting = await this.getCycleSetting(cycleSettingId);
+      if (!cycleSetting) {
+        throw new Error('Cycle setting not found');
+      }
+      
+      // Get premium user count for pool calculation
+      const premiumUserCount = eligibleUsers.length;
+      const totalPoolCents = Math.floor((premiumUserCount * cycleSetting.membershipFee * cycleSetting.rewardPoolPercentage) / 100);
+      const poolInfo = { totalPool: totalPoolCents / 100 }; // Convert to dollars
       
       // Calculate tier pools
       const tier1Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier1.poolPercentage / 100));
@@ -6479,23 +6489,17 @@ export class MemStorage implements IStorage {
 
   async getEligibleUsersForSelection(cycleSettingId: number): Promise<any[]> {
     try {
-      const result = await db
+      // Get premium users first
+      const premiumUsers = await db
         .select({
           id: users.id,
           username: users.username,
           email: users.email,
           tier: users.tier,
-          currentCyclePoints: sql<number>`COALESCE(${userCyclePoints.points}, 0)`,
           isActive: users.isActive,
           isPremium: users.isPremium
         })
         .from(users)
-        .leftJoin(userCyclePoints, 
-          and(
-            eq(userCyclePoints.userId, users.id),
-            eq(userCyclePoints.cycleSettingId, cycleSettingId)
-          )
-        )
         .where(
           and(
             eq(users.isActive, true),
@@ -6503,10 +6507,27 @@ export class MemStorage implements IStorage {
           )
         );
 
-      return result.map(user => ({
-        ...user,
-        currentCyclePoints: user.currentCyclePoints || 0
-      }));
+      // Get their cycle points separately
+      const result = [];
+      for (const user of premiumUsers) {
+        const cyclePoints = await db
+          .select({ points: userCyclePoints.points })
+          .from(userCyclePoints)
+          .where(
+            and(
+              eq(userCyclePoints.userId, user.id),
+              eq(userCyclePoints.cycleSettingId, cycleSettingId)
+            )
+          )
+          .limit(1);
+
+        result.push({
+          ...user,
+          currentCyclePoints: cyclePoints[0]?.points || 0
+        });
+      }
+
+      return result;
     } catch (error) {
       console.error('Error getting eligible users:', error);
       return [];

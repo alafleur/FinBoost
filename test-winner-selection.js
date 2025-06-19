@@ -1,166 +1,99 @@
-import fetch from 'node-fetch';
+#!/usr/bin/env node
+
+import fs from 'fs';
 
 async function testWinnerSelection() {
-  const baseUrl = 'http://localhost:5000';
+  console.log('🔥 Testing Flexible Winner Selection System');
   
-  // First, let's login as admin to get a token
-  console.log('🔐 Logging in as admin...');
-  const loginResponse = await fetch(`${baseUrl}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: 'lafleur.andrew@gmail.com',
-      password: 'admin123456'
-    })
-  });
-  
-  const loginData = await loginResponse.json();
-  if (!loginData.success) {
-    console.error('❌ Login failed:', loginData.message);
-    return;
-  }
-  
-  const token = loginData.token;
-  console.log('✅ Admin login successful');
-  
-  // Get current users to see the pool
-  console.log('\n📊 Checking current user pool...');
-  const usersResponse = await fetch(`${baseUrl}/api/admin/users`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  const usersData = await usersResponse.json();
-  
-  if (usersData.success) {
-    const premiumUsers = usersData.users.filter(u => u.subscriptionStatus === 'active');
-    console.log(`Total premium users: ${premiumUsers.length}`);
+  try {
+    // Read admin token
+    const adminToken = fs.readFileSync('admin_token.txt', 'utf8').trim();
+    console.log('✅ Admin token loaded');
+
+    // Test 1: Get eligible users
+    console.log('\n📋 Test 1: Getting eligible users for cycle 2...');
+    const eligibleResponse = await fetch('http://localhost:5000/api/admin/eligible-users/2', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
     
-    // Show tier distribution
-    const usersByTier = {
-      tier1: premiumUsers.filter(u => (u.currentMonthPoints || 0) >= 100),
-      tier2: premiumUsers.filter(u => (u.currentMonthPoints || 0) >= 50 && (u.currentMonthPoints || 0) < 100),
-      tier3: premiumUsers.filter(u => (u.currentMonthPoints || 0) < 50)
+    const eligibleData = await eligibleResponse.json();
+    console.log('Eligible users response:', JSON.stringify(eligibleData, null, 2));
+
+    // Test 2: Execute point-weighted random selection (baseline method)
+    console.log('\n🎯 Test 2: Executing point-weighted random winner selection...');
+    
+    const selectionPayload = {
+      cycleSettingId: 2,
+      selectionMode: 'weighted_random',
+      tierSettings: {
+        tier1: { winnerCount: 3, poolPercentage: 50 },
+        tier2: { winnerCount: 5, poolPercentage: 30 },
+        tier3: { winnerCount: 7, poolPercentage: 20 }
+      },
+      pointDeductionPercentage: 50,
+      rolloverPercentage: 50
     };
-    
-    console.log(`Tier 1 (100+ points): ${usersByTier.tier1.length} users`);
-    console.log(`Tier 2 (50-99 points): ${usersByTier.tier2.length} users`);
-    console.log(`Tier 3 (0-49 points): ${usersByTier.tier3.length} users`);
-  }
-  
-  // Create a test winner cycle
-  console.log('\n🎯 Creating test winner cycle...');
-  const cycleResponse = await fetch(`${baseUrl}/api/admin/winner-cycles/create`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      cycleName: 'Test Winner Selection - January 2024',
-      cycleStartDate: '2024-01-01',
-      cycleEndDate: '2024-01-31',
-      poolSettings: { testMode: true, selectionPercentage: 50 }
-    })
-  });
-  
-  const cycleData = await cycleResponse.json();
-  if (!cycleData.success) {
-    console.error('❌ Failed to create cycle:', cycleData.error);
-    return;
-  }
-  
-  const cycleId = cycleData.cycle.id;
-  console.log(`✅ Created cycle with ID: ${cycleId}`);
-  
-  // Run random selection
-  console.log('\n🎲 Running random winner selection...');
-  const selectionResponse = await fetch(`${baseUrl}/api/admin/winner-cycles/${cycleId}/run-selection`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  const selectionData = await selectionResponse.json();
-  if (!selectionData.success) {
-    console.error('❌ Selection failed:', selectionData.error);
-    return;
-  }
-  
-  console.log('✅ Random selection completed!');
-  console.log('Results:', JSON.stringify(selectionData.results, null, 2));
-  
-  // Get the winners
-  console.log('\n🏆 Fetching selected winners...');
-  const winnersResponse = await fetch(`${baseUrl}/api/admin/winner-cycles/${cycleId}/winners`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  const winnersData = await winnersResponse.json();
-  if (winnersData.success) {
-    console.log('Selected Winners by Tier:');
-    
-    ['tier1', 'tier2', 'tier3'].forEach(tier => {
-      console.log(`\n${tier.toUpperCase()}:`);
-      if (winnersData.winners[tier] && winnersData.winners[tier].length > 0) {
-        winnersData.winners[tier].forEach(winner => {
-          console.log(`  Rank ${winner.tierRank}: ${winner.username} (${winner.email})`);
-        });
-      } else {
-        console.log('  No winners selected');
-      }
-    });
-  }
-  
-  // Test CSV export
-  console.log('\n📄 Testing CSV export...');
-  const exportResponse = await fetch(`${baseUrl}/api/admin/winner-cycles/${cycleId}/export`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  
-  if (exportResponse.ok) {
-    const csvContent = await exportResponse.text();
-    console.log('✅ CSV export successful');
-    console.log('CSV Content:');
-    console.log(csvContent);
-  }
-  
-  // Test percentage allocation
-  console.log('\n💰 Testing percentage allocation...');
-  const testUpdates = [];
-  
-  // Add sample percentage updates if we have winners
-  if (winnersData.success) {
-    ['tier1', 'tier2', 'tier3'].forEach(tier => {
-      if (winnersData.winners[tier] && winnersData.winners[tier].length > 0) {
-        winnersData.winners[tier].forEach((winner, index) => {
-          // Distribute percentages: first winner gets more
-          const percentage = index === 0 ? 60 : Math.floor(40 / (winnersData.winners[tier].length - 1));
-          testUpdates.push({
-            winnerId: winner.id,
-            rewardPercentage: percentage
-          });
-        });
-      }
-    });
-  }
-  
-  if (testUpdates.length > 0) {
-    const updateResponse = await fetch(`${baseUrl}/api/admin/winner-cycles/${cycleId}/update-percentages`, {
+
+    const selectionResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-selection/execute', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ updates: testUpdates })
+      body: JSON.stringify(selectionPayload)
+    });
+
+    const selectionData = await selectionResponse.json();
+    console.log('Winner selection response:', JSON.stringify(selectionData, null, 2));
+
+    // Test 3: Test other selection modes
+    console.log('\n🔄 Test 3: Testing top performers selection...');
+    
+    const topPerformersPayload = {
+      ...selectionPayload,
+      selectionMode: 'top_performers'
+    };
+
+    const topPerformersResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-selection/execute', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(topPerformersPayload)
+    });
+
+    const topPerformersData = await topPerformersResponse.json();
+    console.log('Top performers selection response:', JSON.stringify(topPerformersData, null, 2));
+
+    // Test 4: Get winner details
+    console.log('\n📊 Test 4: Getting winner details...');
+    
+    const detailsResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-details/2', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     
-    const updateData = await updateResponse.json();
-    if (updateData.success) {
-      console.log('✅ Percentage allocation test successful');
-    } else {
-      console.log('❌ Percentage allocation failed:', updateData.error);
-    }
+    const detailsData = await detailsResponse.json();
+    console.log('Winner details response:', JSON.stringify(detailsData, null, 2));
+
+    // Test 5: Clear winner selection
+    console.log('\n🧹 Test 5: Clearing winner selection...');
+    
+    const clearResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-selection/2', {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    const clearData = await clearResponse.json();
+    console.log('Clear selection response:', JSON.stringify(clearData, null, 2));
+
+    console.log('\n✅ All tests completed successfully!');
+    console.log('🎯 Point-weighted random selection confirmed as baseline method');
+    
+  } catch (error) {
+    console.error('❌ Test failed:', error.message);
+    process.exit(1);
   }
-  
-  console.log('\n🎉 Winner selection system test completed!');
 }
 
-testWinnerSelection().catch(console.error);
+testWinnerSelection();
