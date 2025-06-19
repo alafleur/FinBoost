@@ -782,6 +782,17 @@ export default function Dashboard() {
                 </Card>
               </div>
 
+              {/* Mobile Rewards Summary */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Rewards Summary"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <RewardsSummary />
+                </div>
+              </div>
 
             </TabsContent>
 
@@ -1477,6 +1488,17 @@ export default function Dashboard() {
                 </Card>
               </div>
 
+              {/* Desktop Rewards Summary */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Award}
+                  iconColor="green"
+                  title="Rewards Summary"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <RewardsSummary />
+                </div>
+              </div>
 
             </TabsContent>
 
