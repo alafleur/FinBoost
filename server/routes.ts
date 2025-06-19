@@ -3879,6 +3879,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     wss.close();
   });
   
+  // Execute flexible winner selection with point-weighted random as baseline
+  app.post('/api/admin/cycle-winner-selection/execute', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const { 
+        cycleSettingId, 
+        selectionMode, 
+        tierSettings,
+        customWinnerIds,
+        pointDeductionPercentage,
+        rolloverPercentage
+      } = req.body;
+
+      const results = await storage.executeCycleWinnerSelection({
+        cycleSettingId,
+        selectionMode: selectionMode || 'weighted_random',
+        tierSettings: tierSettings || {
+          tier1: { winnerCount: 3, poolPercentage: 50 },
+          tier2: { winnerCount: 5, poolPercentage: 30 },
+          tier3: { winnerCount: 7, poolPercentage: 20 }
+        },
+        customWinnerIds,
+        pointDeductionPercentage: pointDeductionPercentage || 50,
+        rolloverPercentage: rolloverPercentage || 50
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error('Error executing cycle winner selection:', error);
+      res.status(500).json({ error: 'Failed to execute winner selection' });
+    }
+  });
+
+  // Get eligible users for manual selection
+  app.get('/api/admin/eligible-users/:cycleSettingId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const users = await storage.getEligibleUsersForSelection(cycleSettingId);
+      res.json({ users });
+    } catch (error) {
+      console.error('Error getting eligible users:', error);
+      res.status(500).json({ error: 'Failed to get eligible users' });
+    }
+  });
+
+  // Get winner details for adjustment
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const details = await storage.getCycleWinnerDetails(cycleSettingId);
+      res.json(details);
+    } catch (error) {
+      console.error('Error getting winner details:', error);
+      res.status(500).json({ error: 'Failed to get winner details' });
+    }
+  });
+
+  // Update winner payout percentage or status
+  app.patch('/api/admin/winner-payout/:winnerId', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const winnerId = parseInt(req.params.winnerId);
+      const updates = req.body;
+      await storage.updateWinnerPayout(winnerId, updates);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating winner payout:', error);
+      res.status(500).json({ error: 'Failed to update winner payout' });
+    }
+  });
+
+  // Clear winner selection for re-running
+  app.delete('/api/admin/cycle-winner-selection/:cycleSettingId', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      await storage.clearCycleWinnerSelection(cycleSettingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing winner selection:', error);
+      res.status(500).json({ error: 'Failed to clear winner selection' });
+    }
+  });
+
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;
   (httpServer as any).broadcastActivityUpdate = broadcastActivityUpdate;
