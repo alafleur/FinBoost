@@ -1629,18 +1629,16 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12">
+          <TabsList className="grid w-full grid-cols-11">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="quiz">Quiz</TabsTrigger>
-            <TabsTrigger value="rewards">Rewards</TabsTrigger>
-            <TabsTrigger value="cycles">Cycles</TabsTrigger>
-            <TabsTrigger value="pool-settings">Pool Settings</TabsTrigger>
+            <TabsTrigger value="cycle-management">Cycle Management</TabsTrigger>
+            <TabsTrigger value="cycle-operations">Cycle Operations</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
-            <TabsTrigger value="disbursements">PayPal Payouts</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -2510,240 +2508,247 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          <TabsContent value="rewards">
+          <TabsContent value="cycle-management">
             <div className="space-y-6">
-              {/* Current Month Configuration (Locked) */}
+              {/* Cycle Creation and Configuration */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        <Lock className="w-5 h-5" />
-                        Current Month Configuration
+                        <Settings className="w-5 h-5" />
+                        Cycle Configuration
                       </CardTitle>
                       <CardDescription>
-                        Locked settings for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        Create and manage reward cycles with flexible durations and parameters
                       </CardDescription>
                     </div>
-                    <Badge variant="secondary">Locked</Badge>
+                    <Button onClick={() => {
+                      setEditingCycle(null);
+                      setCycleForm({
+                        cycleName: '',
+                        cycleStartDate: '',
+                        cycleEndDate: '',
+                        paymentPeriodDays: 30,
+                        membershipFee: 2000,
+                        rewardPoolPercentage: 55,
+                        tier1Threshold: 56,
+                        tier2Threshold: 21,
+                        isActive: true,
+                        allowMidCycleJoining: true,
+                        midCycleJoinThresholdDays: 3
+                      });
+                      setShowCycleDialog(true);
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Cycle
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Pool Allocation</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Total Pool:</span>
-                          <span className="font-mono">${poolData?.totalPool || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Pool Percentage:</span>
-                          <span className="font-mono">{currentRewardsConfig.poolPercentage}%</span>
-                        </div>
+                  <div className="space-y-4">
+                    {cycleSettings.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No cycles configured yet. Create your first cycle to enable flexible reward periods.
                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Tier Distribution</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 3:</span>
-                          <span className="font-mono">{currentRewardsConfig.tierAllocations.tier3}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 2:</span>
-                          <span className="font-mono">{currentRewardsConfig.tierAllocations.tier2}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 1:</span>
-                          <span className="font-mono">{currentRewardsConfig.tierAllocations.tier1}%</span>
-                        </div>
-                      </div>
-                    </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {cycleSettings.map((cycle) => (
+                          <div key={cycle.id} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-semibold">{cycle.cycleName}</h3>
+                                  <Badge variant={cycle.isActive ? "default" : "secondary"}>
+                                    {cycle.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-gray-500">Duration:</span>
+                                    <div className="font-medium">
+                                      {new Date(cycle.cycleStartDate).toLocaleDateString()} - {new Date(cycle.cycleEndDate).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Payment Period:</span>
+                                    <div className="font-medium">{cycle.paymentPeriodDays} days</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Membership Fee:</span>
+                                    <div className="font-medium">${(cycle.membershipFee / 100).toFixed(2)}</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Reward Pool:</span>
+                                    <div className="font-medium">{cycle.rewardPoolPercentage}%</div>
+                                  </div>
+                                </div>
 
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Winner Percentages</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 3:</span>
-                          <span className="font-mono">{currentRewardsConfig.winnerPercentages.tier3}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 2:</span>
-                          <span className="font-mono">{currentRewardsConfig.winnerPercentages.tier2}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Tier 1:</span>
-                          <span className="font-mono">{currentRewardsConfig.winnerPercentages.tier1}%</span>
-                        </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-2">
+                                  <div>
+                                    <span className="text-gray-500">Tier 1 Threshold:</span>
+                                    <div className="font-medium">{cycle.tier1Threshold}+ points</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Tier 2 Threshold:</span>
+                                    <div className="font-medium">{cycle.tier2Threshold}+ points</div>
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="text-gray-500">Mid-cycle Joining:</span>
+                                    <div className="font-medium">
+                                      {cycle.allowMidCycleJoining 
+                                        ? `Allowed (${cycle.midCycleJoinThresholdDays}d threshold)`
+                                        : 'Disabled'
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 ml-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingCycle(cycle);
+                                    setCycleForm({
+                                      cycleName: cycle.cycleName,
+                                      cycleStartDate: new Date(cycle.cycleStartDate).toISOString().split('T')[0],
+                                      cycleEndDate: new Date(cycle.cycleEndDate).toISOString().split('T')[0],
+                                      paymentPeriodDays: cycle.paymentPeriodDays,
+                                      membershipFee: cycle.membershipFee,
+                                      rewardPoolPercentage: cycle.rewardPoolPercentage,
+                                      tier1Threshold: cycle.tier1Threshold,
+                                      tier2Threshold: cycle.tier2Threshold,
+                                      isActive: cycle.isActive,
+                                      allowMidCycleJoining: cycle.allowMidCycleJoining,
+                                      midCycleJoinThresholdDays: cycle.midCycleJoinThresholdDays
+                                    });
+                                    setShowCycleDialog(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteCycle(cycle.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-orange-50 rounded-lg">
-                      <div className="text-sm font-medium text-orange-800">Tier 3 Pool</div>
-                      <div className="text-2xl font-bold text-orange-900">
-                        ${poolData?.tier3Pool || 0}
-                      </div>
-                    </div>
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <div className="text-sm font-medium text-blue-800">Tier 2 Pool</div>
-                      <div className="text-2xl font-bold text-blue-900">
-                        ${poolData?.tier2Pool || 0}
-                      </div>
-                    </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <div className="text-sm font-medium text-green-800">Tier 1 Pool</div>
-                      <div className="text-2xl font-bold text-green-900">
-                        ${poolData?.tier1Pool || 0}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Proportional Point Deduction System */}
+              {/* Tier Thresholds Configuration */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5" />
-                    Proportional Point Deduction System
+                    <Target className="w-5 h-5" />
+                    Tier Threshold Configuration
                   </CardTitle>
                   <CardDescription>
-                    Automatic fair point deduction based on tier-specific reward ratios
+                    Set point thresholds for tier assignments within cycles
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">System Formula</h4>
-                      <div className="text-sm text-blue-800 space-y-1">
-                        <div>1. Tier Ratio = Average Reward Amount ÷ Average Points</div>
-                        <div>2. Points Deducted = Winner Reward Amount × Tier Ratio</div>
-                        <div className="mt-2 font-medium">This ensures fair deductions proportional to the reward received</div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm font-medium text-orange-800">Tier 3 Ratio</div>
-                        <div className="text-2xl font-bold text-orange-900">
-                          {tierRatios.tier3.toFixed(4)}
+                      <h4 className="font-medium text-blue-900 mb-2">Current Tier Thresholds</h4>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <div className="font-medium text-green-800">Tier 1 (Highest)</div>
+                          <div className="text-2xl font-bold text-green-900">{tierThresholds.tier1}+</div>
+                          <div className="text-xs text-gray-600">Top performers</div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          ${poolData?.tier3Pool || 0} pool ÷ avg points
+                        <div>
+                          <div className="font-medium text-blue-800">Tier 2 (Middle)</div>
+                          <div className="text-2xl font-bold text-blue-900">{tierThresholds.tier2} - {tierThresholds.tier1 - 1}</div>
+                          <div className="text-xs text-gray-600">Average performers</div>
                         </div>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm font-medium text-blue-800">Tier 2 Ratio</div>
-                        <div className="text-2xl font-bold text-blue-900">
-                          {tierRatios.tier2.toFixed(4)}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          ${poolData?.tier2Pool || 0} pool ÷ avg points
-                        </div>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm font-medium text-green-800">Tier 1 Ratio</div>
-                        <div className="text-2xl font-bold text-green-900">
-                          {tierRatios.tier1.toFixed(4)}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          ${poolData?.tier1Pool || 0} pool ÷ avg points
+                        <div>
+                          <div className="font-medium text-orange-800">Tier 3 (Entry)</div>
+                          <div className="text-2xl font-bold text-orange-900">0 - {tierThresholds.tier2 - 1}</div>
+                          <div className="text-xs text-gray-600">New/inactive users</div>
                         </div>
                       </div>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-medium mb-3">Example Calculations</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium text-orange-800">Tier 3 Example</div>
-                          <div>$100 reward × {tierRatios.tier3.toFixed(4)} = {calculateProportionalDeduction(100, 'tier3')} points</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-blue-800">Tier 2 Example</div>
-                          <div>$50 reward × {tierRatios.tier2.toFixed(4)} = {calculateProportionalDeduction(50, 'tier2')} points</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-green-800">Tier 1 Example</div>
-                          <div>$25 reward × {tierRatios.tier1.toFixed(4)} = {calculateProportionalDeduction(25, 'tier1')} points</div>
-                        </div>
+                      <div className="text-sm text-gray-700">
+                        <strong>Note:</strong> Tier thresholds are calculated dynamically based on user performance percentiles. 
+                        Tier assignments update automatically as users earn points throughout the cycle.
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Manual Point Deduction (Separate from Proportional System) */}
+              {/* Pool Allocation Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Manual Point Deduction</CardTitle>
-                  <CardDescription>Administrative point deductions with rationale tracking</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="w-5 h-5" />
+                    Pool Allocation Settings
+                  </CardTitle>
+                  <CardDescription>
+                    Configure how membership fees are distributed across reward pools
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Deduct Points</h4>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="targetUser">Target User</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select user" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {users.slice(0, 10).map((user: any) => (
-                                  <SelectItem key={user.id} value={user.id.toString()}>
-                                    {user.username} ({user.points} points)
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="deductionAmount">Points to Deduct</Label>
-                            <Input
-                              id="deductionAmount"
-                              type="number"
-                              min="1"
-                              placeholder="Enter amount"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="deductionReason">Rationale</Label>
-                            <Textarea
-                              id="deductionReason"
-                              placeholder="Provide detailed reason for point deduction..."
-                              rows={3}
-                            />
-                          </div>
-                          <Button className="w-full">
-                            Deduct Points
-                          </Button>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{currentPoolSettings.rewardPoolPercentage}%</div>
+                      <div className="text-sm text-gray-500">To Rewards</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">${((currentPoolSettings.membershipFee / 100) * (currentPoolSettings.rewardPoolPercentage / 100)).toFixed(2)}</div>
+                      <div className="text-sm text-gray-500">Per Member</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">${(currentPoolSettings.membershipFee / 100).toFixed(2)}</div>
+                      <div className="text-sm text-gray-500">Monthly Fee</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">${((currentPoolSettings.membershipFee / 100) * ((100 - currentPoolSettings.rewardPoolPercentage) / 100)).toFixed(2)}</div>
+                      <div className="text-sm text-gray-500">To Operations</div>
+                    </div>
+                  </div>
 
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Recent Manual Deductions</h4>
-                        <div className="space-y-3 max-h-80 overflow-y-auto">
-                          <div className="p-3 border rounded-lg">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="font-medium text-sm">Sample User</div>
-                                <div className="text-xs text-gray-500">50 points deducted</div>
-                              </div>
-                              <div className="text-xs text-gray-400">2 hours ago</div>
-                            </div>
-                            <div className="mt-2 text-xs text-gray-600">
-                              Violation of community guidelines - inappropriate content posted
-                            </div>
-                          </div>
-                        </div>
+                  <div className="mt-6 grid grid-cols-3 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg border">
+                      <div className="text-sm font-medium text-green-800">Tier 1 Pool</div>
+                      <div className="text-2xl font-bold text-green-900">
+                        ${poolData?.tier1Pool || 0}
                       </div>
+                      <div className="text-xs text-green-600">Highest tier rewards</div>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg border">
+                      <div className="text-sm font-medium text-blue-800">Tier 2 Pool</div>
+                      <div className="text-2xl font-bold text-blue-900">
+                        ${poolData?.tier2Pool || 0}
+                      </div>
+                      <div className="text-xs text-blue-600">Middle tier rewards</div>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg border">
+                      <div className="text-sm font-medium text-orange-800">Tier 3 Pool</div>
+                      <div className="text-2xl font-bold text-orange-900">
+                        ${poolData?.tier3Pool || 0}
+                      </div>
+                      <div className="text-xs text-orange-600">Entry tier rewards</div>
                     </div>
                   </div>
                 </CardContent>
