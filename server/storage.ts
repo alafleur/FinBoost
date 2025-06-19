@@ -3489,6 +3489,285 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // Enhanced Winner Selection with Flexible Admin Controls
+  async executeFlexibleWinnerSelection(cycleSettingId: number, options: {
+    selectionMode: 'random' | 'top_performers' | 'weighted_random' | 'manual';
+    tierSettings: {
+      tier1: { winnerCount: number; poolPercentage: number };
+      tier2: { winnerCount: number; poolPercentage: number };
+      tier3: { winnerCount: number; poolPercentage: number };
+    };
+    customWinnerIds?: number[];
+    pointDeductionPercentage?: number;
+    rolloverPercentage?: number;
+  }): Promise<any> {
+    try {
+      // Get cycle setting
+      const [cycleSetting] = await db.select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId))
+        .limit(1);
+
+      if (!cycleSetting) {
+        throw new Error('Cycle setting not found');
+      }
+
+      // Get all eligible users with their cycle points
+      const eligibleUsers = await db.select({
+        userId: userCyclePoints.userId,
+        currentCyclePoints: userCyclePoints.currentCyclePoints,
+        tier: users.tier,
+        username: users.username,
+        email: users.email,
+        paypalEmail: users.paypalEmail
+      })
+      .from(userCyclePoints)
+      .innerJoin(users, eq(userCyclePoints.userId, users.id))
+      .where(
+        and(
+          eq(userCyclePoints.cycleSettingId, cycleSettingId),
+          eq(userCyclePoints.isActive, true),
+          gt(userCyclePoints.currentCyclePoints, 0)
+        )
+      )
+      .orderBy(desc(userCyclePoints.currentCyclePoints));
+
+      // Calculate total reward pool
+      const totalSubscribers = await db.select({ count: sql<number>`count(*)` })
+        .from(userCyclePoints)
+        .where(
+          and(
+            eq(userCyclePoints.cycleSettingId, cycleSettingId),
+            eq(userCyclePoints.isActive, true)
+          )
+        );
+
+      const totalRewardPool = Math.floor(
+        (totalSubscribers[0].count * cycleSetting.membershipFee * cycleSetting.rewardPoolPercentage) / 100
+      );
+
+      // Calculate tier pools based on admin settings
+      const tier1Pool = Math.floor(totalRewardPool * (options.tierSettings.tier1.poolPercentage / 100));
+      const tier2Pool = Math.floor(totalRewardPool * (options.tierSettings.tier2.poolPercentage / 100));
+      const tier3Pool = Math.floor(totalRewardPool * (options.tierSettings.tier3.poolPercentage / 100));
+
+      // Separate users by tier
+      const tier1Users = eligibleUsers.filter(u => u.tier === 'tier1');
+      const tier2Users = eligibleUsers.filter(u => u.tier === 'tier2');
+      const tier3Users = eligibleUsers.filter(u => u.tier === 'tier3');
+
+      // Winner selection based on mode
+      let selectedWinners: any[] = [];
+
+      if (options.selectionMode === 'manual' && options.customWinnerIds) {
+        selectedWinners = eligibleUsers.filter(u => options.customWinnerIds!.includes(u.userId));
+      } else {
+        const selectWinnersByMode = (users: any[], count: number, mode: string) => {
+          if (users.length === 0) return [];
+          if (users.length <= count) return users;
+
+          switch (mode) {
+            case 'top_performers':
+              return users.slice(0, count);
+            
+            case 'random':
+              const shuffled = [...users].sort(() => Math.random() - 0.5);
+              return shuffled.slice(0, count);
+            
+            case 'weighted_random':
+              const totalPoints = users.reduce((sum, user) => sum + user.currentCyclePoints, 0);
+              const winners = [];
+              const usersCopy = [...users];
+
+              for (let i = 0; i < count; i++) {
+                if (usersCopy.length === 0) break;
+                
+                const currentTotal = usersCopy.reduce((sum, user) => sum + user.currentCyclePoints, 0);
+                const randomPoint = Math.random() * currentTotal;
+                let cumulative = 0;
+                let selectedIndex = 0;
+
+                for (let j = 0; j < usersCopy.length; j++) {
+                  cumulative += usersCopy[j].currentCyclePoints;
+                  if (randomPoint <= cumulative) {
+                    selectedIndex = j;
+                    break;
+                  }
+                }
+
+                winners.push(usersCopy[selectedIndex]);
+                usersCopy.splice(selectedIndex, 1);
+              }
+              return winners;
+            
+            default:
+              return users.slice(0, count);
+          }
+        };
+
+        const tier1Winners = selectWinnersByMode(tier1Users, options.tierSettings.tier1.winnerCount, options.selectionMode);
+        const tier2Winners = selectWinnersByMode(tier2Users, options.tierSettings.tier2.winnerCount, options.selectionMode);
+        const tier3Winners = selectWinnersByMode(tier3Users, options.tierSettings.tier3.winnerCount, options.selectionMode);
+
+        selectedWinners = [
+          ...tier1Winners.map(w => ({ ...w, tier: 'tier1', poolAmount: tier1Pool })),
+          ...tier2Winners.map(w => ({ ...w, tier: 'tier2', poolAmount: tier2Pool })),
+          ...tier3Winners.map(w => ({ ...w, tier: 'tier3', poolAmount: tier3Pool }))
+        ];
+      }
+
+      // Calculate individual rewards and point adjustments
+      const processedWinners = selectedWinners.map(winner => {
+        const tierWinners = selectedWinners.filter(w => w.tier === winner.tier);
+        const rewardAmount = tierWinners.length > 0 ? Math.floor(winner.poolAmount / tierWinners.length) : 0;
+        
+        const pointsToDeduct = Math.floor(winner.currentCyclePoints * ((options.pointDeductionPercentage || 50) / 100));
+        const pointsToRollover = Math.floor(winner.currentCyclePoints * ((options.rolloverPercentage || 50) / 100));
+
+        return {
+          ...winner,
+          rewardAmount,
+          pointsDeducted: pointsToDeduct,
+          pointsRolledOver: pointsToRollover,
+          payoutPercentage: 100, // Default, can be adjusted
+          adjustmentReason: null
+        };
+      });
+
+      // Store winner selection results
+      const winnerRecords = [];
+      for (let i = 0; i < processedWinners.length; i++) {
+        const winner = processedWinners[i];
+        const tierRank = processedWinners.filter(w => w.tier === winner.tier).indexOf(winner) + 1;
+
+        const [record] = await db.insert(cycleWinnerSelections).values({
+          cycleSettingId,
+          userId: winner.userId,
+          tier: winner.tier,
+          tierRank,
+          pointsAtSelection: winner.currentCyclePoints,
+          rewardAmount: winner.rewardAmount,
+          pointsDeducted: winner.pointsDeducted,
+          pointsRolledOver: winner.pointsRolledOver,
+          payoutStatus: 'pending'
+        }).returning();
+
+        winnerRecords.push({
+          ...record,
+          username: winner.username,
+          email: winner.email,
+          paypalEmail: winner.paypalEmail,
+          payoutPercentage: 100
+        });
+      }
+
+      return {
+        success: true,
+        selectionMode: options.selectionMode,
+        totalRewardPool,
+        winnersSelected: winnerRecords.length,
+        winners: winnerRecords,
+        tierBreakdown: {
+          tier1: {
+            pool: tier1Pool,
+            winners: winnerRecords.filter(w => w.tier === 'tier1').length,
+            perWinner: tier1Pool / Math.max(1, winnerRecords.filter(w => w.tier === 'tier1').length)
+          },
+          tier2: {
+            pool: tier2Pool,
+            winners: winnerRecords.filter(w => w.tier === 'tier2').length,
+            perWinner: tier2Pool / Math.max(1, winnerRecords.filter(w => w.tier === 'tier2').length)
+          },
+          tier3: {
+            pool: tier3Pool,
+            winners: winnerRecords.filter(w => w.tier === 'tier3').length,
+            perWinner: tier3Pool / Math.max(1, winnerRecords.filter(w => w.tier === 'tier3').length)
+          }
+        }
+      };
+    } catch (error) {
+      console.error('Error executing flexible winner selection:', error);
+      throw error;
+    }
+  }
+
+  async getWinnerSelectionDetails(cycleSettingId: number): Promise<any[]> {
+    try {
+      return await db.select({
+        id: cycleWinnerSelections.id,
+        userId: cycleWinnerSelections.userId,
+        username: users.username,
+        email: users.email,
+        paypalEmail: users.paypalEmail,
+        tier: cycleWinnerSelections.tier,
+        tierRank: cycleWinnerSelections.tierRank,
+        pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
+        rewardAmount: cycleWinnerSelections.rewardAmount,
+        pointsDeducted: cycleWinnerSelections.pointsDeducted,
+        pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
+        payoutStatus: cycleWinnerSelections.payoutStatus,
+        selectionDate: cycleWinnerSelections.selectionDate
+      })
+      .from(cycleWinnerSelections)
+      .innerJoin(users, eq(cycleWinnerSelections.userId, users.id))
+      .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+      .orderBy(cycleWinnerSelections.tier, cycleWinnerSelections.tierRank);
+    } catch (error) {
+      console.error('Error getting winner selection details:', error);
+      return [];
+    }
+  }
+
+  async updateWinnerPayout(winnerId: number, updates: {
+    payoutPercentage?: number;
+    adjustmentReason?: string;
+    payoutStatus?: string;
+  }): Promise<void> {
+    try {
+      const [winner] = await db.select()
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.id, winnerId))
+        .limit(1);
+
+      if (!winner) {
+        throw new Error('Winner record not found');
+      }
+
+      const updateData: any = {};
+
+      if (updates.payoutPercentage !== undefined) {
+        // Calculate new reward amount based on percentage
+        const newRewardAmount = Math.floor((winner.rewardAmount * updates.payoutPercentage) / 100);
+        updateData.rewardAmount = newRewardAmount;
+      }
+
+      if (updates.adjustmentReason !== undefined) {
+        updateData.adjustmentReason = updates.adjustmentReason;
+      }
+
+      if (updates.payoutStatus !== undefined) {
+        updateData.payoutStatus = updates.payoutStatus;
+      }
+
+      await db.update(cycleWinnerSelections)
+        .set(updateData)
+        .where(eq(cycleWinnerSelections.id, winnerId));
+    } catch (error) {
+      console.error('Error updating winner payout:', error);
+      throw error;
+    }
+  }
+
+  async clearWinnerSelection(cycleSettingId: number): Promise<void> {
+    try {
+      await db.delete(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+    } catch (error) {
+      console.error('Error clearing winner selection:', error);
+      throw error;
+    }
+  }
+
   async performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]> {
     try {
       const users = await this.getUsersInCurrentCycle(cycleSettingId);
