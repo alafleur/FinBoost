@@ -22,17 +22,20 @@ async function testCompleteWinnerSelection() {
 
     // Step 2: Test point-weighted random selection
     console.log('\n2️⃣ Testing point-weighted random selection...');
-    const selectionResponse = await fetch('http://localhost:5000/api/admin/winner-selection/2', {
+    const selectionResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-selection/execute', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${adminToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        selectionMode: 'point-weighted-random',
-        tier1Winners: 2,
-        tier2Winners: 3,
-        tier3Winners: 5
+        cycleSettingId: 2,
+        selectionMode: 'weighted_random',
+        tierSettings: {
+          tier1: { winnerCount: 2, poolPercentage: 50 },
+          tier2: { winnerCount: 3, poolPercentage: 30 },
+          tier3: { winnerCount: 5, poolPercentage: 20 }
+        }
       })
     });
     
@@ -55,15 +58,17 @@ async function testCompleteWinnerSelection() {
     }
 
     // Step 3: Get winner details
-    if (selectionData.winners && selectionData.winners.length > 0) {
+    if (selectionData.success) {
       console.log('\n3️⃣ Getting winner details...');
-      const winnerId = selectionData.winners[0].id;
-      const detailsResponse = await fetch(`http://localhost:5000/api/admin/winner-details/2/${winnerId}`, {
+      const detailsResponse = await fetch(`http://localhost:5000/api/admin/cycle-winner-details/2`, {
         headers: { 'Authorization': `Bearer ${adminToken}` }
       });
       const detailsData = await detailsResponse.json();
-      console.log(`   ✅ Winner details retrieved for user ${detailsData.username}`);
-      console.log(`   💰 Payout amount: $${detailsData.payoutAmount}`);
+      console.log(`   ✅ Winner details retrieved: ${detailsData.length || 0} winners`);
+      
+      if (detailsData.length > 0) {
+        console.log(`   💰 First winner: ${detailsData[0].username} - $${detailsData[0].payoutAmount}`);
+      }
     }
 
     // Step 4: Test algorithm fairness
@@ -71,22 +76,25 @@ async function testCompleteWinnerSelection() {
     const fairnessResults = {};
     
     for (let i = 0; i < 5; i++) {
-      const testResponse = await fetch('http://localhost:5000/api/admin/winner-selection/2', {
+      const testResponse = await fetch('http://localhost:5000/api/admin/cycle-winner-selection/execute', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${adminToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          selectionMode: 'point-weighted-random',
-          tier1Winners: 1,
-          tier2Winners: 1,
-          tier3Winners: 1
+          cycleSettingId: 2,
+          selectionMode: 'weighted_random',
+          tierSettings: {
+            tier1: { winnerCount: 1, poolPercentage: 50 },
+            tier2: { winnerCount: 1, poolPercentage: 30 },
+            tier3: { winnerCount: 1, poolPercentage: 20 }
+          }
         })
       });
       
       const testData = await testResponse.json();
-      if (testData.winners) {
+      if (testData.success && testData.winners) {
         testData.winners.forEach(winner => {
           if (!fairnessResults[winner.username]) {
             fairnessResults[winner.username] = { wins: 0, points: winner.currentCyclePoints };
@@ -96,8 +104,8 @@ async function testCompleteWinnerSelection() {
       }
       
       // Clear selections for next test
-      await fetch(`http://localhost:5000/api/admin/clear-winner-selection/2`, {
-        method: 'POST',
+      await fetch(`http://localhost:5000/api/admin/cycle-winner-selection/2`, {
+        method: 'DELETE',
         headers: { 'Authorization': `Bearer ${adminToken}` }
       });
     }

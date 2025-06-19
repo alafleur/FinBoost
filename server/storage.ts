@@ -6461,20 +6461,31 @@ export class MemStorage implements IStorage {
   ): Promise<any[]> {
     const savedWinners = [];
 
+    // Group winners by tier to calculate tier ranks
+    const winnersByTier = {
+      tier1: winners.filter(w => w.tier === 'tier1'),
+      tier2: winners.filter(w => w.tier === 'tier2'),
+      tier3: winners.filter(w => w.tier === 'tier3')
+    };
+
     for (const winner of winners) {
       try {
+        // Calculate tier rank based on position within tier
+        const tierWinners = winnersByTier[winner.tier as keyof typeof winnersByTier] || [];
+        const tierRank = tierWinners.findIndex(w => w.id === winner.id) + 1;
+
         const [saved] = await db
           .insert(cycleWinnerSelections)
           .values({
             cycleSettingId,
             userId: winner.id,
             tier: winner.tier,
+            tierRank,
             pointsAtSelection: winner.currentCyclePoints,
-            rewardAmount: winner.rewardAmount,
-            payoutPercentage: winner.payoutPercentage,
-            payoutStatus: winner.payoutStatus,
-            selectionMethod: selectionMode,
-            selectionDate: new Date()
+            rewardAmount: winner.rewardAmount * 100, // Convert to cents
+            pointsDeducted: 0,
+            pointsRolledOver: 0,
+            payoutStatus: winner.payoutStatus || 'pending'
           })
           .returning();
 
