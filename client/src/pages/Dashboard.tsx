@@ -781,17 +781,7 @@ export default function Dashboard() {
                 </Card>
               </div>
 
-              {/* Mobile Rewards Preview with enhanced design */}
-              <div className="space-y-4">
-                <SectionHeader 
-                  icon={Award}
-                  iconColor="green"
-                  title="Recent Rewards"
-                />
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <RewardsHistory />
-                </div>
-              </div>
+
             </TabsContent>
 
             <TabsContent value="learn" className="mt-0 space-y-6">
@@ -1486,17 +1476,7 @@ export default function Dashboard() {
                 </Card>
               </div>
 
-              {/* Recent Rewards Section */}
-              <div className="space-y-4">
-                <SectionHeader 
-                  icon={Award}
-                  iconColor="green"
-                  title="Recent Rewards"
-                />
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <RewardsHistory />
-                </div>
-              </div>
+
             </TabsContent>
 
             {/* Referrals Tab */}
