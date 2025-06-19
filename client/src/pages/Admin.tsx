@@ -296,6 +296,15 @@ export default function Admin() {
   const [isRunningSelection, setIsRunningSelection] = useState(false);
   const [selectionResults, setSelectionResults] = useState<any>(null);
   const [isProcessingDisbursements, setIsProcessingDisbursements] = useState(false);
+  const [winnerSelectionMode, setWinnerSelectionMode] = useState('weighted_random');
+  const [tierSettings, setTierSettings] = useState({
+    tier1: { winnerCount: 3, poolPercentage: 50 },
+    tier2: { winnerCount: 5, poolPercentage: 30 },
+    tier3: { winnerCount: 7, poolPercentage: 20 }
+  });
+  const [eligibleUsers, setEligibleUsers] = useState<any[]>([]);
+  const [customWinnerIds, setCustomWinnerIds] = useState<number[]>([]);
+  const [winnerDetails, setWinnerDetails] = useState<any[]>([]);
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
@@ -1186,35 +1195,190 @@ export default function Admin() {
 
 
 
-  const handleRunWinnerSelection = async (cycleId: number) => {
+  // Flexible winner selection with point-weighted random as baseline
+  const handleExecuteWinnerSelection = async () => {
     setIsRunningSelection(true);
     try {
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (!activeCycle) {
+        throw new Error('No active cycle found');
+      }
+
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/run-cycle-winner-selection/${cycleId}`, {
+      const response = await fetch('/api/admin/cycle-winner-selection/execute', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cycleSettingId: activeCycle.id,
+          selectionMode: winnerSelectionMode,
+          tierSettings,
+          customWinnerIds: winnerSelectionMode === 'manual' ? customWinnerIds : undefined,
+          pointDeductionPercentage: 50,
+          rolloverPercentage: 50
+        })
       });
 
       if (response.ok) {
         const results = await response.json();
         setSelectionResults(results);
+        await loadWinnerDetails(activeCycle.id);
         toast({
           title: "Winner selection completed",
-          description: `Selected ${results.totalWinners} winners for this cycle.`,
+          description: `Selected ${results.winnersSelected} winners using ${winnerSelectionMode} method.`,
         });
         fetchCycleWinnerSelections();
       } else {
-        throw new Error(`Failed to run winner selection: ${response.status}`);
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to execute winner selection');
       }
     } catch (error) {
-      console.error('Error running winner selection:', error);
+      console.error('Error executing winner selection:', error);
       toast({
-        title: "Error running winner selection",
-        description: "Please try again later.",
+        title: "Error executing winner selection",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     } finally {
       setIsRunningSelection(false);
+    }
+  };
+
+  // Load winner details for display and adjustment
+  const loadWinnerDetails = async (cycleSettingId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-details/${cycleSettingId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWinnerDetails(data.winners);
+      }
+    } catch (error) {
+      console.error('Error loading winner details:', error);
+    }
+  };
+
+  // Load eligible users for manual selection
+  const loadEligibleUsers = async (cycleSettingId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/eligible-users/${cycleSettingId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEligibleUsers(data.users);
+      }
+    } catch (error) {
+      console.error('Error loading eligible users:', error);
+    }
+  };
+
+  // Update individual winner payout percentage
+  const handleUpdateWinnerPayout = async (winnerId: number, payoutPercentage: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`/api/admin/winner-payout/${winnerId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ payoutPercentage })
+      });
+
+      // Refresh winner details
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (activeCycle) {
+        await loadWinnerDetails(activeCycle.id);
+      }
+    } catch (error) {
+      console.error('Error updating winner payout:', error);
+    }
+  };
+
+  // Update winner adjustment reason
+  const handleUpdateWinnerReason = async (winnerId: number, adjustmentReason: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`/api/admin/winner-payout/${winnerId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ adjustmentReason })
+      });
+    } catch (error) {
+      console.error('Error updating winner reason:', error);
+    }
+  };
+
+  // Remove winner from selection
+  const handleRemoveWinner = async (winnerId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`/api/admin/winner-payout/${winnerId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ payoutStatus: 'removed' })
+      });
+
+      // Refresh winner details
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (activeCycle) {
+        await loadWinnerDetails(activeCycle.id);
+      }
+
+      toast({
+        title: "Winner removed",
+        description: "Winner has been removed from the selection.",
+      });
+    } catch (error) {
+      console.error('Error removing winner:', error);
+      toast({
+        title: "Error removing winner",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Clear winner selection for re-running
+  const handleClearWinnerSelection = async () => {
+    try {
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (!activeCycle) return;
+
+      const token = localStorage.getItem('token');
+      await fetch(`/api/admin/cycle-winner-selection/${activeCycle.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      setSelectionResults(null);
+      setWinnerDetails([]);
+      
+      toast({
+        title: "Winner selection cleared",
+        description: "You can now run a new winner selection.",
+      });
+    } catch (error) {
+      console.error('Error clearing winner selection:', error);
+      toast({
+        title: "Error clearing selection",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -3001,7 +3165,7 @@ export default function Admin() {
                           </div>
                         </div>
                         
-                        {/* Individual Winner Adjustments Table */}
+                        {/* Real Winner Adjustments Table */}
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
@@ -3013,41 +3177,67 @@ export default function Admin() {
                                 <th className="text-left p-2">Payout %</th>
                                 <th className="text-left p-2">Final Amount</th>
                                 <th className="text-left p-2">Reason</th>
+                                <th className="text-left p-2">Actions</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {/* Sample winner data - would be populated from actual selection results */}
-                              <tr className="border-b">
-                                <td className="p-2">
-                                  <div className="font-medium">Sample Winner 1</div>
-                                  <div className="text-xs text-gray-500">winner1@example.com</div>
-                                </td>
-                                <td className="p-2">
-                                  <Badge variant="default">Tier 1</Badge>
-                                </td>
-                                <td className="p-2">
-                                  <div className="font-bold text-green-600">85</div>
-                                </td>
-                                <td className="p-2">$150.00</td>
-                                <td className="p-2">
-                                  <Input 
-                                    type="number" 
-                                    defaultValue="100" 
-                                    min="0" 
-                                    max="100" 
-                                    className="w-20"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <div className="font-bold">$150.00</div>
-                                </td>
-                                <td className="p-2">
-                                  <Input 
-                                    placeholder="Optional reason..." 
-                                    className="w-32"
-                                  />
-                                </td>
-                              </tr>
+                              {selectionResults?.winners?.map((winner: any) => (
+                                <tr key={winner.id} className="border-b">
+                                  <td className="p-2">
+                                    <div className="font-medium">{winner.username}</div>
+                                    <div className="text-xs text-gray-500">{winner.email}</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <Badge variant={
+                                      winner.tier === 'tier1' ? 'default' : 
+                                      winner.tier === 'tier2' ? 'secondary' : 'outline'
+                                    }>
+                                      {winner.tier === 'tier1' ? 'Tier 1' : 
+                                       winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
+                                    </Badge>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-bold text-green-600">{winner.pointsAtSelection}</div>
+                                  </td>
+                                  <td className="p-2">${(winner.rewardAmount / 100).toFixed(2)}</td>
+                                  <td className="p-2">
+                                    <Input 
+                                      type="number" 
+                                      defaultValue="100" 
+                                      min="0" 
+                                      max="100" 
+                                      className="w-20"
+                                      onChange={(e) => {
+                                        const percentage = parseInt(e.target.value) || 100;
+                                        handleUpdateWinnerPayout(winner.id, percentage);
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-bold">${(winner.rewardAmount / 100).toFixed(2)}</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <Input 
+                                      placeholder="Optional reason..." 
+                                      className="w-32"
+                                      onBlur={(e) => {
+                                        if (e.target.value) {
+                                          handleUpdateWinnerReason(winner.id, e.target.value);
+                                        }
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => handleRemoveWinner(winner.id)}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
