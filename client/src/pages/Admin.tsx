@@ -3118,26 +3118,78 @@ export default function Admin() {
                     </div>
 
                     <div className="flex justify-end space-x-3">
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedCycleForWinners(cycleSettings.find(c => c.isActive) || null);
-                          setShowWinnerSelectionDialog(true);
-                        }}
-                        disabled={!cycleSettings.some(c => c.isActive)}
-                      >
-                        Preview Winner Selection
-                      </Button>
-                      <Button 
-                        className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                        onClick={() => {
-                          setSelectedCycleForWinners(cycleSettings.find(c => c.isActive) || null);
-                          setIsRunningSelection(true);
-                        }}
-                        disabled={!cycleSettings.some(c => c.isActive)}
-                      >
-                        Execute Winner Selection
-                      </Button>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Label>Selection Mode:</Label>
+                          <Select value={winnerSelectionMode} onValueChange={setWinnerSelectionMode}>
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weighted_random">Point-Weighted Random (Default)</SelectItem>
+                              <SelectItem value="top_performers">Top Performers</SelectItem>
+                              <SelectItem value="random">Pure Random</SelectItem>
+                              <SelectItem value="manual">Manual Selection</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label>Tier 1 Winners</Label>
+                            <Input 
+                              type="number" 
+                              value={tierSettings.tier1.winnerCount}
+                              onChange={(e) => setTierSettings(prev => ({
+                                ...prev,
+                                tier1: { ...prev.tier1, winnerCount: parseInt(e.target.value) || 0 }
+                              }))}
+                              className="w-full"
+                            />
+                          </div>
+                          <div>
+                            <Label>Tier 2 Winners</Label>
+                            <Input 
+                              type="number" 
+                              value={tierSettings.tier2.winnerCount}
+                              onChange={(e) => setTierSettings(prev => ({
+                                ...prev,
+                                tier2: { ...prev.tier2, winnerCount: parseInt(e.target.value) || 0 }
+                              }))}
+                              className="w-full"
+                            />
+                          </div>
+                          <div>
+                            <Label>Tier 3 Winners</Label>
+                            <Input 
+                              type="number" 
+                              value={tierSettings.tier3.winnerCount}
+                              onChange={(e) => setTierSettings(prev => ({
+                                ...prev,
+                                tier3: { ...prev.tier3, winnerCount: parseInt(e.target.value) || 0 }
+                              }))}
+                              className="w-full"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <Button 
+                          variant="outline"
+                          onClick={handleClearWinnerSelection}
+                          disabled={!selectionResults}
+                        >
+                          Clear Selection
+                        </Button>
+                        <Button 
+                          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                          onClick={handleExecuteWinnerSelection}
+                          disabled={!cycleSettings.some(c => c.isActive) || isRunningSelection}
+                        >
+                          {isRunningSelection ? 'Running Selection...' : 'Execute Winner Selection'}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -3165,81 +3217,105 @@ export default function Admin() {
                           </div>
                         </div>
                         
-                        {/* Real Winner Adjustments Table */}
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="text-left p-2">Winner</th>
-                                <th className="text-left p-2">Tier</th>
-                                <th className="text-left p-2">Points</th>
-                                <th className="text-left p-2">Base Reward</th>
-                                <th className="text-left p-2">Payout %</th>
-                                <th className="text-left p-2">Final Amount</th>
-                                <th className="text-left p-2">Reason</th>
-                                <th className="text-left p-2">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selectionResults?.winners?.map((winner: any) => (
-                                <tr key={winner.id} className="border-b">
-                                  <td className="p-2">
-                                    <div className="font-medium">{winner.username}</div>
-                                    <div className="text-xs text-gray-500">{winner.email}</div>
-                                  </td>
-                                  <td className="p-2">
-                                    <Badge variant={
-                                      winner.tier === 'tier1' ? 'default' : 
-                                      winner.tier === 'tier2' ? 'secondary' : 'outline'
-                                    }>
-                                      {winner.tier === 'tier1' ? 'Tier 1' : 
-                                       winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
-                                    </Badge>
-                                  </td>
-                                  <td className="p-2">
-                                    <div className="font-bold text-green-600">{winner.pointsAtSelection}</div>
-                                  </td>
-                                  <td className="p-2">${(winner.rewardAmount / 100).toFixed(2)}</td>
-                                  <td className="p-2">
-                                    <Input 
-                                      type="number" 
-                                      defaultValue="100" 
-                                      min="0" 
-                                      max="100" 
-                                      className="w-20"
-                                      onChange={(e) => {
-                                        const percentage = parseInt(e.target.value) || 100;
-                                        handleUpdateWinnerPayout(winner.id, percentage);
-                                      }}
-                                    />
-                                  </td>
-                                  <td className="p-2">
-                                    <div className="font-bold">${(winner.rewardAmount / 100).toFixed(2)}</div>
-                                  </td>
-                                  <td className="p-2">
-                                    <Input 
-                                      placeholder="Optional reason..." 
-                                      className="w-32"
-                                      onBlur={(e) => {
-                                        if (e.target.value) {
-                                          handleUpdateWinnerReason(winner.id, e.target.value);
-                                        }
-                                      }}
-                                    />
-                                  </td>
-                                  <td className="p-2">
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      onClick={() => handleRemoveWinner(winner.id)}
-                                    >
-                                      Remove
-                                    </Button>
-                                  </td>
+                        {/* Flexible Winner Selection Results */}
+                        <div className="space-y-4">
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-medium text-blue-900 mb-2">Selection Summary</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <div className="text-blue-600 font-medium">Selection Mode</div>
+                                <div className="capitalize">{selectionResults.selectionMode.replace('_', ' ')}</div>
+                              </div>
+                              <div>
+                                <div className="text-blue-600 font-medium">Total Winners</div>
+                                <div>{selectionResults.winnersSelected}</div>
+                              </div>
+                              <div>
+                                <div className="text-blue-600 font-medium">Total Pool</div>
+                                <div>${(selectionResults.totalRewardPool / 100).toFixed(2)}</div>
+                              </div>
+                              <div>
+                                <div className="text-blue-600 font-medium">Method</div>
+                                <div>Point-Weighted Random</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left p-2">Winner</th>
+                                  <th className="text-left p-2">Tier</th>
+                                  <th className="text-left p-2">Points</th>
+                                  <th className="text-left p-2">Base Reward</th>
+                                  <th className="text-left p-2">Payout %</th>
+                                  <th className="text-left p-2">Final Amount</th>
+                                  <th className="text-left p-2">Reason</th>
+                                  <th className="text-left p-2">Actions</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {selectionResults?.winners?.map((winner: any) => (
+                                  <tr key={winner.id} className="border-b">
+                                    <td className="p-2">
+                                      <div className="font-medium">{winner.username}</div>
+                                      <div className="text-xs text-gray-500">{winner.email}</div>
+                                    </td>
+                                    <td className="p-2">
+                                      <Badge variant={
+                                        winner.tier === 'tier1' ? 'default' : 
+                                        winner.tier === 'tier2' ? 'secondary' : 'outline'
+                                      }>
+                                        {winner.tier === 'tier1' ? 'Tier 1' : 
+                                         winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
+                                      </Badge>
+                                    </td>
+                                    <td className="p-2">
+                                      <div className="font-bold text-green-600">{winner.pointsAtSelection}</div>
+                                    </td>
+                                    <td className="p-2">${(winner.rewardAmount / 100).toFixed(2)}</td>
+                                    <td className="p-2">
+                                      <Input 
+                                        type="number" 
+                                        defaultValue="100" 
+                                        min="0" 
+                                        max="100" 
+                                        className="w-20"
+                                        onChange={(e) => {
+                                          const percentage = parseInt(e.target.value) || 100;
+                                          handleUpdateWinnerPayout(winner.id, percentage);
+                                        }}
+                                      />
+                                    </td>
+                                    <td className="p-2">
+                                      <div className="font-bold">${(winner.rewardAmount / 100).toFixed(2)}</div>
+                                    </td>
+                                    <td className="p-2">
+                                      <Input 
+                                        placeholder="Optional reason..." 
+                                        className="w-32"
+                                        onBlur={(e) => {
+                                          if (e.target.value) {
+                                            handleUpdateWinnerReason(winner.id, e.target.value);
+                                          }
+                                        }}
+                                      />
+                                    </td>
+                                    <td className="p-2">
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => handleRemoveWinner(winner.id)}
+                                      >
+                                        Remove
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
 
                         <div className="flex justify-end space-x-3">
