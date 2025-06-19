@@ -6502,7 +6502,7 @@ export class MemStorage implements IStorage {
           u.tier,
           u.is_active as "isActive",
           CASE WHEN u.subscription_status = 'active' THEN true ELSE false END as "isPremium",
-          COALESCE(ucp.points, 0) as "currentCyclePoints"
+          COALESCE(ucp.current_cycle_points, 0) as "currentCyclePoints"
         FROM users u
         LEFT JOIN user_cycle_points ucp 
           ON u.id = ucp.user_id 
