@@ -469,15 +469,17 @@ export default function Admin() {
     }
   }, [editingModule]);
 
-  // Load initial data including winner cycles
+  // Load initial data including cycle data
   useEffect(() => {
     fetchData();
     fetchPendingProofs();
     fetchPointActions();
     fetchSupportTickets();
     fetchCyclePoolSettings();
-    loadCycles();
+    fetchCurrentPoolSettings();
     fetchCycleSettings();
+    fetchUserCyclePoints();
+    fetchCycleWinnerSelections();
     fetchCycleWinnerSelections();
   }, []);
 
@@ -1182,86 +1184,7 @@ export default function Admin() {
 
 
 
-  const handleSaveCycle = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const url = editingCycle 
-        ? `/api/admin/cycle-settings/${editingCycle.id}`
-        : '/api/admin/cycle-settings';
-      
-      const method = editingCycle ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(cycleForm)
-      });
 
-      if (response.ok) {
-        toast({
-          title: editingCycle ? "Cycle updated" : "Cycle created",
-          description: "Cycle configuration has been saved successfully.",
-        });
-        
-        setShowCycleDialog(false);
-        setEditingCycle(null);
-        setCycleForm({
-          cycleName: '',
-          cycleStartDate: '',
-          cycleEndDate: '',
-          paymentPeriodDays: 30,
-          membershipFee: 2000,
-          rewardPoolPercentage: 55,
-          tier1Threshold: 56,
-          tier2Threshold: 21,
-          isActive: true,
-          allowMidCycleJoining: true,
-          midCycleJoinThresholdDays: 3
-        });
-        
-        fetchCycleSettings();
-      } else {
-        throw new Error(`Failed to save cycle: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error saving cycle:', error);
-      toast({
-        title: "Error saving cycle",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteCycle = async (cycleId: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/cycle-settings/${cycleId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Cycle deleted",
-          description: "Cycle has been removed successfully.",
-        });
-        fetchCycleSettings();
-      } else {
-        throw new Error(`Failed to delete cycle: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error deleting cycle:', error);
-      toast({
-        title: "Error deleting cycle",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleRunWinnerSelection = async (cycleId: number) => {
     setIsRunningSelection(true);
@@ -6786,6 +6709,184 @@ export default function Admin() {
                 Run Winner Selection
               </Button>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cycle Management Dialog */}
+      <Dialog open={showCycleDialog} onOpenChange={setShowCycleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCycle ? "Edit Cycle" : "Create New Cycle"}
+            </DialogTitle>
+            <DialogDescription>
+              Configure cycle parameters including duration, membership fees, and tier thresholds
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cycleName">Cycle Name</Label>
+                <Input
+                  id="cycleName"
+                  value={cycleForm.cycleName}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, cycleName: e.target.value }))}
+                  placeholder="e.g., Q1 2025 Cycle"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="paymentPeriodDays">Payment Period (Days)</Label>
+                <Input
+                  id="paymentPeriodDays"
+                  type="number"
+                  value={cycleForm.paymentPeriodDays}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, paymentPeriodDays: parseInt(e.target.value) }))}
+                  placeholder="30"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cycleStartDate">Start Date</Label>
+                <Input
+                  id="cycleStartDate"
+                  type="date"
+                  value={cycleForm.cycleStartDate}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, cycleStartDate: e.target.value }))}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="cycleEndDate">End Date</Label>
+                <Input
+                  id="cycleEndDate"
+                  type="date"
+                  value={cycleForm.cycleEndDate}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, cycleEndDate: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="membershipFee">Membership Fee (cents)</Label>
+                <Input
+                  id="membershipFee"
+                  type="number"
+                  value={cycleForm.membershipFee}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, membershipFee: parseInt(e.target.value) }))}
+                  placeholder="2000"
+                />
+                <p className="text-xs text-gray-500 mt-1">${(cycleForm.membershipFee / 100).toFixed(2)}</p>
+              </div>
+              
+              <div>
+                <Label htmlFor="rewardPoolPercentage">Reward Pool (%)</Label>
+                <Input
+                  id="rewardPoolPercentage"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={cycleForm.rewardPoolPercentage}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, rewardPoolPercentage: parseInt(e.target.value) }))}
+                  placeholder="55"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="tier1Threshold">Tier 1 Threshold (points)</Label>
+                <Input
+                  id="tier1Threshold"
+                  type="number"
+                  value={cycleForm.tier1Threshold}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, tier1Threshold: parseInt(e.target.value) }))}
+                  placeholder="67"
+                />
+                <p className="text-xs text-gray-500 mt-1">Top tier threshold</p>
+              </div>
+              
+              <div>
+                <Label htmlFor="tier2Threshold">Tier 2 Threshold (points)</Label>
+                <Input
+                  id="tier2Threshold"
+                  type="number"
+                  value={cycleForm.tier2Threshold}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, tier2Threshold: parseInt(e.target.value) }))}
+                  placeholder="33"
+                />
+                <p className="text-xs text-gray-500 mt-1">Middle tier threshold</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="allowMidCycleJoining"
+                  checked={cycleForm.allowMidCycleJoining}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, allowMidCycleJoining: e.target.checked }))}
+                />
+                <Label htmlFor="allowMidCycleJoining">Allow Mid-Cycle Joining</Label>
+              </div>
+              
+              {cycleForm.allowMidCycleJoining && (
+                <div>
+                  <Label htmlFor="midCycleJoinThresholdDays">Mid-Cycle Join Threshold (Days)</Label>
+                  <Input
+                    id="midCycleJoinThresholdDays"
+                    type="number"
+                    value={cycleForm.midCycleJoinThresholdDays}
+                    onChange={(e) => setCycleForm(prev => ({ ...prev, midCycleJoinThresholdDays: parseInt(e.target.value) }))}
+                    placeholder="14"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Users can join up to this many days before cycle end</p>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={cycleForm.isActive}
+                  onChange={(e) => setCycleForm(prev => ({ ...prev, isActive: e.target.checked }))}
+                />
+                <Label htmlFor="isActive">Set as Active Cycle</Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCycleDialog(false);
+                setEditingCycle(null);
+                setCycleForm({
+                  cycleName: '',
+                  cycleStartDate: '',
+                  cycleEndDate: '',
+                  paymentPeriodDays: 30,
+                  membershipFee: 2000,
+                  rewardPoolPercentage: 55,
+                  tier1Threshold: 67,
+                  tier2Threshold: 33,
+                  isActive: false,
+                  allowMidCycleJoining: true,
+                  midCycleJoinThresholdDays: 14
+                });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveCycle}>
+              {editingCycle ? "Update Cycle" : "Create Cycle"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
