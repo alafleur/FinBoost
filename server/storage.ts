@@ -6501,17 +6501,17 @@ export class MemStorage implements IStorage {
           u.email,
           u.tier,
           u.is_active as "isActive",
-          u.is_premium as "isPremium",
+          CASE WHEN u.subscription_status = 'active' THEN true ELSE false END as "isPremium",
           COALESCE(ucp.points, 0) as "currentCyclePoints"
         FROM users u
         LEFT JOIN user_cycle_points ucp 
           ON u.id = ucp.user_id 
           AND ucp.cycle_setting_id = ${cycleSettingId}
         WHERE u.is_active = true 
-          AND u.is_premium = true
+          AND u.subscription_status = 'active'
       `);
 
-      return result.rows;
+      return result;
     } catch (error) {
       console.error('Error getting eligible users:', error);
       return [];
