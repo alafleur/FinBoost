@@ -340,15 +340,7 @@ export default function Admin() {
     isActive: true
   });
 
-
-
-  const [referralStats, setReferralStats] = useState({
-    totalReferrals: 0,
-    totalReferrers: 0,
-    topReferrers: []
-  });
-
-  // Cycle management state
+  // New Cycle Management and Operations state
   const [cycleSettings, setCycleSettings] = useState<CycleSetting[]>([]);
   const [userCyclePoints, setUserCyclePoints] = useState<UserCyclePoints[]>([]);
   const [cycleWinnerSelections, setCycleWinnerSelections] = useState<CycleWinnerSelection[]>([]);
@@ -357,7 +349,6 @@ export default function Admin() {
   const [showWinnerSelectionDialog, setShowWinnerSelectionDialog] = useState(false);
   const [selectedCycleForWinners, setSelectedCycleForWinners] = useState<CycleSetting | null>(null);
   
-  // Cycle form state
   const [cycleForm, setCycleForm] = useState({
     cycleName: '',
     cycleStartDate: '',
@@ -365,12 +356,22 @@ export default function Admin() {
     paymentPeriodDays: 30,
     membershipFee: 2000,
     rewardPoolPercentage: 55,
-    tier1Threshold: 56,
-    tier2Threshold: 21,
-    isActive: true,
+    tier1Threshold: 67,
+    tier2Threshold: 33,
+    isActive: false,
     allowMidCycleJoining: true,
-    midCycleJoinThresholdDays: 3
+    midCycleJoinThresholdDays: 14
   });
+
+
+
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    totalReferrers: 0,
+    topReferrers: []
+  });
+
+
 
   // Pending proof state
   const [pendingProofs, setPendingProofs] = useState<PendingProof[]>([]);
@@ -594,6 +595,132 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error fetching current pool settings:', error);
+    }
+  };
+
+  const fetchCycleSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cycle-settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCycleSettings(data.settings || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cycle settings:', error);
+    }
+  };
+
+  const fetchUserCyclePoints = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/user-cycle-points', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserCyclePoints(data.userCyclePoints || []);
+      }
+    } catch (error) {
+      console.error('Error fetching user cycle points:', error);
+    }
+  };
+
+  const fetchCycleWinnerSelections = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cycle-winner-selections', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCycleWinnerSelections(data.selections || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cycle winner selections:', error);
+    }
+  };
+
+  const handleSaveCycle = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = editingCycle 
+        ? `/api/admin/cycle-settings/${editingCycle.id}`
+        : '/api/admin/cycle-settings';
+      
+      const method = editingCycle ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(cycleForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: editingCycle ? "Cycle updated" : "Cycle created",
+          description: "Cycle configuration has been saved successfully.",
+        });
+        
+        setShowCycleDialog(false);
+        setEditingCycle(null);
+        setCycleForm({
+          cycleName: '',
+          cycleStartDate: '',
+          cycleEndDate: '',
+          paymentPeriodDays: 30,
+          membershipFee: 2000,
+          rewardPoolPercentage: 55,
+          tier1Threshold: 67,
+          tier2Threshold: 33,
+          isActive: false,
+          allowMidCycleJoining: true,
+          midCycleJoinThresholdDays: 14
+        });
+        
+        fetchCycleSettings();
+      } else {
+        throw new Error(`Failed to save cycle: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error saving cycle:', error);
+      toast({
+        title: "Error saving cycle",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCycle = async (cycleId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-settings/${cycleId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Cycle deleted",
+          description: "Cycle has been removed successfully.",
+        });
+        fetchCycleSettings();
+      } else {
+        throw new Error('Failed to delete cycle');
+      }
+    } catch (error) {
+      console.error('Error deleting cycle:', error);
+      toast({
+        title: "Error deleting cycle",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -1053,52 +1180,7 @@ export default function Admin() {
     }
   };
 
-  // Cycle management API functions
-  const fetchCycleSettings = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-settings', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCycleSettings(data);
-      }
-    } catch (error) {
-      console.error('Error fetching cycle settings:', error);
-    }
-  };
 
-  const fetchUserCyclePoints = async (cycleId?: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      const url = cycleId ? `/api/admin/cycle-user-points/${cycleId}` : '/api/admin/cycle-user-points';
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserCyclePoints(data);
-      }
-    } catch (error) {
-      console.error('Error fetching user cycle points:', error);
-    }
-  };
-
-  const fetchCycleWinnerSelections = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-winner-selections', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCycleWinnerSelections(data);
-      }
-    } catch (error) {
-      console.error('Error fetching cycle winner selections:', error);
-    }
-  };
 
   const handleSaveCycle = async () => {
     try {
@@ -2754,310 +2836,449 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Next Month Configuration (Editable) */}
+
+            </div>
+          </TabsContent>
+
+          <TabsContent value="cycle-operations">
+            <div className="space-y-6">
+              {/* Current Cycle Dashboard */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Cycle</CardTitle>
+                    <Calendar className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {cycleSettings.filter(cycle => cycle.isActive).length > 0 ? 
+                        cycleSettings.find(cycle => cycle.isActive)?.cycleName : 
+                        'No Active Cycle'
+                      }
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {cycleSettings.filter(cycle => cycle.isActive).length > 0 ? 
+                        `${new Date(cycleSettings.find(cycle => cycle.isActive)?.cycleStartDate || '').toLocaleDateString()} - ${new Date(cycleSettings.find(cycle => cycle.isActive)?.cycleEndDate || '').toLocaleDateString()}` :
+                        'Create a cycle to begin operations'
+                      }
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Enrolled Users</CardTitle>
+                    <Users className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {userCyclePoints.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Users participating in current cycle
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Pool</CardTitle>
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      ${poolData?.totalPool || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Available for reward distribution
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* User Enrollment Management */}
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="w-5 h-5" />
-                        Next Month Configuration
-                      </CardTitle>
-                      <CardDescription>
-                        Configure settings for {new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="default">Editable</Badge>
-                  </div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    User Enrollment Management
+                  </CardTitle>
+                  <CardDescription>
+                    Monitor and manage user participation in active cycles
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Pool Settings</h4>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="nextPoolPercentage">Pool Percentage</Label>
-                          <Input
-                            id="nextPoolPercentage"
-                            type="number"
-                            min="1"
-                            max="100"
-                            defaultValue={55}
-                            className="mt-1"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">% of total revenue for rewards</p>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label htmlFor="nextTier3">Tier 3 %</Label>
-                            <Input
-                              id="nextTier3"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={50}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="nextTier2">Tier 2 %</Label>
-                            <Input
-                              id="nextTier2"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={30}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="nextTier1">Tier 1 %</Label>
-                            <Input
-                              id="nextTier1"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={20}
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
+                  <div className="space-y-4">
+                    {userCyclePoints.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No users enrolled in active cycles yet.
                       </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Winner Selection</h4>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <Label htmlFor="nextWinnerTier3">Tier 3 Winners %</Label>
-                            <Input
-                              id="nextWinnerTier3"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={10}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="nextWinnerTier2">Tier 2 Winners %</Label>
-                            <Input
-                              id="nextWinnerTier2"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={15}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="nextWinnerTier1">Tier 1 Winners %</Label>
-                            <Input
-                              id="nextWinnerTier1"
-                              type="number"
-                              min="1"
-                              max="100"
-                              defaultValue={20}
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="deductionMethod">Point Deduction Method</Label>
-                          <Select defaultValue="proportional">
-                            <SelectTrigger className="mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="proportional">Proportional (Recommended)</SelectItem>
-                              <SelectItem value="fixed">Fixed Percentage</SelectItem>
-                              <SelectItem value="none">No Deduction</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-2">User</th>
+                              <th className="text-left p-2">Current Points</th>
+                              <th className="text-left p-2">Tier</th>
+                              <th className="text-left p-2">Joined</th>
+                              <th className="text-left p-2">Last Activity</th>
+                              <th className="text-left p-2">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userCyclePoints.slice(0, 10).map((userPoints) => {
+                              const user = users.find(u => u.id === userPoints.userId);
+                              return (
+                                <tr key={userPoints.id} className="border-b">
+                                  <td className="p-2">
+                                    <div className="font-medium">{user?.username || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-500">{user?.email}</div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="font-bold text-green-600">
+                                      {userPoints.currentCyclePoints}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <Badge variant={
+                                      userPoints.tier === 'tier1' ? 'default' :
+                                      userPoints.tier === 'tier2' ? 'secondary' : 'outline'
+                                    }>
+                                      {userPoints.tier.replace('tier', 'Tier ')}
+                                    </Badge>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-xs">
+                                      {new Date(userPoints.joinedCycleAt).toLocaleDateString()}
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <div className="text-xs">
+                                      {userPoints.lastActivityDate 
+                                        ? new Date(userPoints.lastActivityDate).toLocaleDateString()
+                                        : 'No activity'
+                                      }
+                                    </div>
+                                  </td>
+                                  <td className="p-2">
+                                    <Button variant="ghost" size="sm">
+                                      <Settings className="w-4 h-4" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <Button variant="outline">Reset to Default</Button>
-                    <Button>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Configuration
-                    </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Winner Selection & Distribution System */}
+              {/* Winner Selection Interface */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Trophy className="w-5 h-5" />
-                    Monthly Winner Selection
+                    Winner Selection & Distribution
                   </CardTitle>
                   <CardDescription>
-                    Select winners and distribute monthly rewards
+                    Execute winner selection algorithm and manage reward distribution
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {['tier3', 'tier2', 'tier1'].map((tier) => {
-                        const tierUsers = users.filter((u: any) => u.tier === tier && u.subscriptionStatus === 'active');
-                        const tierName = tier.replace('tier', 'Tier ');
-                        const tierPool = poolData?.[`${tier}Pool` as keyof typeof poolData] || 0;
-                        
-                        return (
-                          <div key={tier} className="space-y-4">
-                            <div className="p-4 border rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium">{tierName}</h4>
-                                <Badge variant={tier === 'tier3' ? 'default' : tier === 'tier2' ? 'secondary' : 'outline'}>
-                                  {tierUsers.length} users
-                                </Badge>
-                              </div>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span>Pool Amount:</span>
-                                  <span className="font-mono">${tierPool}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Winners (10%):</span>
-                                  <span className="font-mono">{Math.ceil(tierUsers.length * 0.1)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Per Winner:</span>
-                                  <span className="font-mono">
-                                    ${tierUsers.length > 0 ? Math.floor(tierPool / Math.ceil(tierUsers.length * 0.1)) : 0}
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-4">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="w-full"
-                                >
-                                  <Upload className="w-4 h-4 mr-2" />
-                                  Select Winners
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Selection Process</h4>
+                      <div className="text-sm text-blue-800 space-y-1">
+                        <div>1. Point-weighted selection within each tier (higher points = better odds)</div>
+                        <div>2. Configurable percentage of users selected as winners per tier</div>
+                        <div>3. Individual payout adjustment capability before disbursement</div>
+                        <div>4. PayPal integration for automated reward distribution</div>
+                      </div>
                     </div>
 
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Distribution Process</h4>
-                      <div className="text-sm text-blue-800 space-y-1">
-                        <div>1. Winners selected based on highest points within each tier</div>
-                        <div>2. Proportional point deduction applied to winners automatically</div>
-                        <div>3. Rewards distributed via Stripe to user payment methods</div>
-                        <div>4. Non-winners keep all points and roll over to next month</div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 border rounded-lg">
+                        <div className="text-sm font-medium text-green-800">Tier 1 Pool</div>
+                        <div className="text-2xl font-bold text-green-900">
+                          ${poolData?.tier1Pool || 0}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Top performers pool
+                        </div>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <div className="text-sm font-medium text-blue-800">Tier 2 Pool</div>
+                        <div className="text-2xl font-bold text-blue-900">
+                          ${poolData?.tier2Pool || 0}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Middle performers pool
+                        </div>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <div className="text-sm font-medium text-orange-800">Tier 3 Pool</div>
+                        <div className="text-2xl font-bold text-orange-900">
+                          ${poolData?.tier3Pool || 0}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Entry level pool
+                        </div>
                       </div>
                     </div>
 
                     <div className="flex justify-end space-x-3">
-                      <Button variant="outline">Preview Distribution</Button>
-                      <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
-                        Execute Monthly Distribution
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedCycleForWinners(cycleSettings.find(c => c.isActive) || null);
+                          setShowWinnerSelectionDialog(true);
+                        }}
+                        disabled={!cycleSettings.some(c => c.isActive)}
+                      >
+                        Preview Winner Selection
+                      </Button>
+                      <Button 
+                        className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                        onClick={() => {
+                          setSelectedCycleForWinners(cycleSettings.find(c => c.isActive) || null);
+                          setIsRunningSelection(true);
+                        }}
+                        disabled={!cycleSettings.some(c => c.isActive)}
+                      >
+                        Execute Winner Selection
                       </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Distribution History */}
+              {/* Individual Payout Adjustments */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Distribution History</CardTitle>
-                  <CardDescription>Previous monthly reward distributions</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="w-5 h-5" />
+                    Payout Adjustments
+                  </CardTitle>
+                  <CardDescription>
+                    Adjust individual winner payout percentages before processing disbursements
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Month</TableHead>
-                          <TableHead>Total Pool</TableHead>
-                          <TableHead>Winners</TableHead>
-                          <TableHead>Avg Reward</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {[...Array(6)].map((_, index) => {
-                          const date = new Date();
-                          date.setMonth(date.getMonth() - index - 1);
+                  <div className="space-y-4">
+                    {selectionResults ? (
+                      <div className="space-y-4">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-green-900 mb-2">Winner Selection Complete</h4>
+                          <div className="text-sm text-green-800">
+                            Winners have been selected. You can now adjust individual payout percentages before processing disbursements.
+                          </div>
+                        </div>
+                        
+                        {/* Individual Winner Adjustments Table */}
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left p-2">Winner</th>
+                                <th className="text-left p-2">Tier</th>
+                                <th className="text-left p-2">Points</th>
+                                <th className="text-left p-2">Base Reward</th>
+                                <th className="text-left p-2">Payout %</th>
+                                <th className="text-left p-2">Final Amount</th>
+                                <th className="text-left p-2">Reason</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {/* Sample winner data - would be populated from actual selection results */}
+                              <tr className="border-b">
+                                <td className="p-2">
+                                  <div className="font-medium">Sample Winner 1</div>
+                                  <div className="text-xs text-gray-500">winner1@example.com</div>
+                                </td>
+                                <td className="p-2">
+                                  <Badge variant="default">Tier 1</Badge>
+                                </td>
+                                <td className="p-2">
+                                  <div className="font-bold text-green-600">85</div>
+                                </td>
+                                <td className="p-2">$150.00</td>
+                                <td className="p-2">
+                                  <Input 
+                                    type="number" 
+                                    defaultValue="100" 
+                                    min="0" 
+                                    max="100" 
+                                    className="w-20"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <div className="font-bold">$150.00</div>
+                                </td>
+                                <td className="p-2">
+                                  <Input 
+                                    placeholder="Optional reason..." 
+                                    className="w-32"
+                                  />
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div className="flex justify-end space-x-3">
+                          <Button variant="outline">Reset All to 100%</Button>
+                          <Button>Save Adjustments</Button>
+                          <Button className="bg-green-600 hover:bg-green-700">
+                            Process PayPal Disbursements
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        Run winner selection first to enable payout adjustments.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Point Deduction Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Point Deduction Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manual point deductions and proportional point system controls
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Manual Point Deduction</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="targetUser">Target User</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select user" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {users.slice(0, 10).map((user: any) => (
+                                <SelectItem key={user.id} value={user.id.toString()}>
+                                  {user.username} ({user.totalPoints} points)
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="deductionAmount">Points to Deduct</Label>
+                          <Input
+                            id="deductionAmount"
+                            type="number"
+                            min="1"
+                            placeholder="Enter amount"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="deductionReason">Rationale</Label>
+                          <Textarea
+                            id="deductionReason"
+                            placeholder="Provide detailed reason for point deduction..."
+                            rows={3}
+                          />
+                        </div>
+                        <Button className="w-full">
+                          Apply Deduction
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Proportional Deduction System</h4>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="text-sm text-blue-800 space-y-2">
+                          <div><strong>Tier 1 Ratio:</strong> {tierRatios.tier1.toFixed(4)}</div>
+                          <div><strong>Tier 2 Ratio:</strong> {tierRatios.tier2.toFixed(4)}</div>
+                          <div><strong>Tier 3 Ratio:</strong> {tierRatios.tier3.toFixed(4)}</div>
+                        </div>
+                        <div className="mt-3 text-xs text-gray-600">
+                          Automatic proportional deduction applied to winners based on reward amount and tier performance.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Winner Selection History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cycle Operations History</CardTitle>
+                  <CardDescription>
+                    Track completed cycles, winner selections, and disbursements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {cycleWinnerSelections.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        No completed winner selections yet.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {cycleWinnerSelections.slice(0, 5).map((selection) => {
+                          const cycle = cycleSettings.find(c => c.id === selection.cycleSettingId);
                           return (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">
-                                {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                              </TableCell>
-                              <TableCell>${(2240 - index * 100).toLocaleString()}</TableCell>
-                              <TableCell>{28 - index}</TableCell>
-                              <TableCell>${Math.floor((2240 - index * 100) / (28 - index))}</TableCell>
-                              <TableCell>
-                                <Badge variant="default">Distributed</Badge>
-                              </TableCell>
-                              <TableCell>
-                                {new Date(date.getTime() + 32 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm">
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="sm">
-                                    <Upload className="w-4 h-4" />
-                                  </Button>
+                            <div key={selection.id} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className="font-semibold">{cycle?.cycleName || 'Unknown Cycle'}</h3>
+                                  <div className="text-sm text-gray-500">
+                                    Selection Date: {new Date(selection.selectionDate).toLocaleDateString()}
+                                  </div>
+                                  <div className="text-sm">
+                                    Total Pool: <span className="font-mono">${selection.totalRewardPool}</span>
+                                  </div>
                                 </div>
-                              </TableCell>
-                            </TableRow>
+                                
+                                <div className="text-right">
+                                  <Badge variant={selection.isProcessed ? "default" : "secondary"}>
+                                    {selection.isProcessed ? "Processed" : "Pending"}
+                                  </Badge>
+                                  {selection.processedAt && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {new Date(selection.processedAt).toLocaleDateString()}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+                                <div>
+                                  <span className="text-gray-500">Tier 1:</span>
+                                  <div className="font-medium">{selection.tier1Winners} winners, ${selection.tier1RewardAmount} each</div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Tier 2:</span>
+                                  <div className="font-medium">{selection.tier2Winners} winners, ${selection.tier2RewardAmount} each</div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Tier 3:</span>
+                                  <div className="font-medium">{selection.tier3Winners} winners, ${selection.tier3RewardAmount} each</div>
+                                </div>
+                              </div>
+                            </div>
                           );
                         })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  
-                  {/* Pagination Controls */}
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm text-gray-600">
-                      {(() => {
-                        const start = Math.min((currentModulePage - 1) * modulesPerPage + 1, modules.length);
-                        const end = Math.min(currentModulePage * modulesPerPage, modules.length);
-                        return `Showing ${start} to ${end} of ${modules.length} modules`;
-                      })()}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentModulePage(Math.max(1, currentModulePage - 1))}
-                        disabled={currentModulePage === 1}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm">
-                        Page {currentModulePage} of {Math.ceil(modules.length / modulesPerPage)}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentModulePage(currentModulePage + 1)}
-                        disabled={currentModulePage >= Math.ceil(modules.length / modulesPerPage)}
-                      >
-                        Next
-                      </Button>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
