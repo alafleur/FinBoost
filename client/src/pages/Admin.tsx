@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { educationContent } from "@/data/educationContent";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import CycleManagementTab from "@/components/admin/CycleManagementTab";
+import CycleOperationsTab from "@/components/admin/CycleOperationsTab";
 import {
   Settings,
   Plus,
