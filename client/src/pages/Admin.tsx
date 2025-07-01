@@ -619,7 +619,7 @@ export default function Admin() {
       });
       if (response.ok) {
         const data = await response.json();
-        setCycleSettings(data.settings || []);
+        setCycleSettings(data || []);
       }
     } catch (error) {
       console.error('Error fetching cycle settings:', error);
