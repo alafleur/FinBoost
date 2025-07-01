@@ -1454,25 +1454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/cycle-settings", requireAdmin, async (req, res) => {
-    try {
-      const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee } = req.body;
-
-      const newSetting = await storage.createCycleSetting({
-        cycleName,
-        cycleStartDate: new Date(cycleStartDate),
-        cycleEndDate: new Date(cycleEndDate),
-        rewardPoolPercentage: parseInt(rewardPoolPercentage),
-        membershipFee: parseInt(membershipFee),
-        createdBy: req.user?.id
-      });
-
-      res.json(newSetting);
-    } catch (error) {
-      console.error('Error creating cycle setting:', error);
-      res.status(500).json({ message: "Error creating cycle setting" });
-    }
-  });
+  // Removed duplicate endpoint - using the complete one at line 2765
 
   app.put("/api/admin/cycle-settings/:id", requireAdmin, async (req, res) => {
     try {
@@ -2770,7 +2752,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate the request body against the schema
       console.log("Request body:", req.body);
-      const validatedData = insertCycleSettingSchema.parse(req.body);
+      
+      // Convert date strings to Date objects before validation
+      const processedBody = {
+        ...req.body,
+        cycleStartDate: new Date(req.body.cycleStartDate),
+        cycleEndDate: new Date(req.body.cycleEndDate)
+      };
+      
+      const validatedData = insertCycleSettingSchema.parse(processedBody);
       console.log("Validated data:", validatedData);
       const setting = await storage.createCycleSetting({
         ...validatedData,
