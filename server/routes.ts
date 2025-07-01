@@ -3229,14 +3229,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple admin stats endpoint for dashboard overview
   app.get("/api/admin/stats", async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      
       if (!token) {
-        return res.status(401).json({ message: "Invalid token" });
+        return res.status(401).json({ message: "No token provided" });
       }
 
-      const user = await storage.getUserByToken(token);
-      console.log('Admin stats - user:', user);
-      console.log('Admin stats - user.isAdmin:', user?.isAdmin);
+      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      const user = await storage.getUserById(decoded.userId);
+      
       if (!user || !user.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
