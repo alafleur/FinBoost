@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Settings, Plus, Edit, Trash2, Calendar, DollarSign, Users, Target } from 'lucide-react';
 
 interface CycleSetting {
   id: number;
   cycleName: string;
+  cycleType: string;
   cycleStartDate: Date;
   cycleEndDate: Date;
   paymentPeriodDays: number;
@@ -160,13 +162,14 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
               setEditingCycle(null);
               setCycleForm({
                 cycleName: '',
+                cycleType: 'monthly',
                 cycleStartDate: '',
                 cycleEndDate: '',
                 paymentPeriodDays: 30,
                 membershipFee: 2000,
                 rewardPoolPercentage: 55,
-                tier1Threshold: 56,
-                tier2Threshold: 21,
+                tier1Threshold: 33,
+                tier2Threshold: 67,
                 isActive: true,
                 allowMidCycleJoining: true,
                 midCycleJoinThresholdDays: 3
@@ -197,7 +200,11 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                           </Badge>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Type:</span>
+                            <div className="font-medium capitalize">{cycle.cycleType || 'monthly'}</div>
+                          </div>
                           <div>
                             <span className="text-gray-500">Duration:</span>
                             <div className="font-medium">
@@ -244,6 +251,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                             setEditingCycle(cycle);
                             setCycleForm({
                               cycleName: cycle.cycleName,
+                              cycleType: cycle.cycleType || 'monthly',
                               cycleStartDate: new Date(cycle.cycleStartDate).toISOString().split('T')[0],
                               cycleEndDate: new Date(cycle.cycleEndDate).toISOString().split('T')[0],
                               paymentPeriodDays: cycle.paymentPeriodDays,
@@ -293,7 +301,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="font-medium">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="cycleName">Cycle Name</Label>
                   <Input
@@ -302,6 +310,20 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                     onChange={(e) => setCycleForm({...cycleForm, cycleName: e.target.value})}
                     placeholder="e.g., December 2024 Cycle"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="cycleType">Cycle Type</Label>
+                  <Select value={cycleForm.cycleType} onValueChange={(value) => setCycleForm({...cycleForm, cycleType: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cycle type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="paymentPeriodDays">Payment Period (Days)</Label>
