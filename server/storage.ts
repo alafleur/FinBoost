@@ -4330,6 +4330,28 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getTotalUsersCount(): Promise<number> {
+    try {
+      const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting total users count:', error);
+      return 0;
+    }
+  }
+
+  async getActiveUsersCount(since: Date): Promise<number> {
+    try {
+      const result = await db.select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(sql`last_login_at >= ${since}`);
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting active users count:', error);
+      return 0;
+    }
+  }
+
   async getAveragePointsPerUser(): Promise<number> {
     try {
       const result = await db.select({ avg: sql<number>`avg(total_points)` }).from(users);
