@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 
@@ -2768,11 +2768,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Admin access required" });
       }
 
-      const setting = await storage.createCycleSetting(req.body);
+      // Validate the request body against the schema
+      console.log("Request body:", req.body);
+      const validatedData = insertCycleSettingSchema.parse(req.body);
+      console.log("Validated data:", validatedData);
+      const setting = await storage.createCycleSetting({
+        ...validatedData,
+        createdBy: req.user.id
+      });
       res.json({ success: true, setting });
     } catch (error) {
       console.error("Error creating cycle setting:", error);
-      res.status(500).json({ error: "Failed to create cycle setting" });
+      res.status(500).json({ message: "Error creating cycle setting" });
     }
   });
 
