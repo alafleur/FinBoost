@@ -2811,6 +2811,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/cycle-settings/:id", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      await storage.deleteCycleSetting(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting cycle setting:", error);
+      res.status(500).json({ error: "Failed to delete cycle setting" });
+    }
+  });
+
   // User Cycle Points
   app.get("/api/user/cycle-points/:cycleId", authenticateToken, async (req, res) => {
     try {

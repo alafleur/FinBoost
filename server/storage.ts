@@ -3198,6 +3198,16 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async deleteCycleSetting(id: number): Promise<void> {
+    try {
+      await db.delete(cycleSettings)
+        .where(eq(cycleSettings.id, id));
+    } catch (error) {
+      console.error('Error deleting cycle setting:', error);
+      throw error;
+    }
+  }
+
   async getAllCycleSettings(): Promise<CycleSetting[]> {
     try {
       return await db.select()
