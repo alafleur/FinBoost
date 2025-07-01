@@ -37,6 +37,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
   const [editingCycle, setEditingCycle] = useState<CycleSetting | null>(null);
   const [cycleForm, setCycleForm] = useState({
     cycleName: '',
+    cycleType: 'monthly',
     cycleStartDate: '',
     cycleEndDate: '',
     paymentPeriodDays: 30,

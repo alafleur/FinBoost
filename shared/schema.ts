@@ -285,6 +285,7 @@ export const insertRewardDistributionSettingSchema = createInsertSchema(rewardDi
 export const cycleSettings = pgTable("cycle_settings", {
   id: serial("id").primaryKey(),
   cycleName: text("cycle_name").notNull(), // e.g., "Weekly Cycle 1", "Bi-weekly Jan 1-14"
+  cycleType: text("cycle_type").notNull(), // "weekly", "bi-weekly", "monthly", "custom"
   cycleStartDate: timestamp("cycle_start_date").notNull(),
   cycleEndDate: timestamp("cycle_end_date").notNull(),
   
@@ -551,6 +552,7 @@ export type AdminPointsAction = typeof adminPointsActions.$inferSelect;
 // Insert schemas for new cycle-based tables
 export const insertCycleSettingSchema = createInsertSchema(cycleSettings).pick({
   cycleName: true,
+  cycleType: true,
   cycleStartDate: true,
   cycleEndDate: true,
   paymentPeriodDays: true,
