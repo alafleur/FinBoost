@@ -4337,6 +4337,16 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getAveragePointsPerUser(): Promise<number> {
+    try {
+      const result = await db.select({ avg: sql<number>`avg(total_points)` }).from(users);
+      return result[0]?.avg || 0;
+    } catch (error) {
+      console.error('Error getting average points per user:', error);
+      return 0;
+    }
+  }
+
   async getPremiumUsersCount(): Promise<number> {
     try {
       // Check cache first

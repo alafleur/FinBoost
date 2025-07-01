@@ -3226,6 +3226,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple admin stats endpoint for dashboard overview
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || !user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get basic stats
+      const totalUsers = await storage.getTotalUsersCount();
+      const activeUsers = await storage.getActiveUsersCount(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+      const premiumUsers = await storage.getPremiumUsersCount();
+      const avgPoints = await storage.getAveragePointsPerUser();
+
+      res.json({
+        success: true,
+        totalUsers,
+        activeUsers,
+        members: premiumUsers,
+        avgPoints: Math.round(avgPoints || 0)
+      });
+    } catch (error: any) {
+      console.error('Error fetching admin stats:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin Analytics Dashboard API Endpoints
   // User Engagement Metrics
   app.get('/api/admin/analytics/users/engagement', requireAdmin, async (req, res) => {
