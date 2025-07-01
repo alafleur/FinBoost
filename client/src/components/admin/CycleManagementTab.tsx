@@ -42,8 +42,8 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
     paymentPeriodDays: 30,
     membershipFee: 2000,
     rewardPoolPercentage: 55,
-    tier1Threshold: 56,
-    tier2Threshold: 21,
+    tier1Threshold: 33, // Top 33% percentile
+    tier2Threshold: 67, // Up to 67% percentile 
     isActive: true,
     allowMidCycleJoining: true,
     midCycleJoinThresholdDays: 3
@@ -367,26 +367,39 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
 
             {/* Tier Configuration */}
             <div className="space-y-4">
-              <h3 className="font-medium">Tier Thresholds</h3>
+              <h3 className="font-medium">Tier Thresholds (Percentile-Based)</h3>
+              <p className="text-sm text-gray-600">Set percentiles that automatically calculate point thresholds based on community performance</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="tier1Threshold">Tier 1 Threshold (points)</Label>
+                  <Label htmlFor="tier1Threshold">Tier 1 Threshold (%)</Label>
                   <Input
                     id="tier1Threshold"
                     type="number"
+                    min="1"
+                    max="99"
                     value={cycleForm.tier1Threshold}
                     onChange={(e) => setCycleForm({...cycleForm, tier1Threshold: parseInt(e.target.value)})}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Top performers (e.g., 33 = top 33%)</p>
                 </div>
                 <div>
-                  <Label htmlFor="tier2Threshold">Tier 2 Threshold (points)</Label>
+                  <Label htmlFor="tier2Threshold">Tier 2 Threshold (%)</Label>
                   <Input
                     id="tier2Threshold"
                     type="number"
+                    min="1"
+                    max="99"
                     value={cycleForm.tier2Threshold}
                     onChange={(e) => setCycleForm({...cycleForm, tier2Threshold: parseInt(e.target.value)})}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Up to this percentile (e.g., 67 = top 67%)</p>
                 </div>
+              </div>
+              <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+                <strong>Example:</strong> If Tier 1 = 33% and Tier 2 = 67%, then:<br/>
+                • Tier 1: Top 33% of performers<br/>
+                • Tier 2: Next 34% (34th-67th percentile)<br/>
+                • Tier 3: Bottom 33% (68th-100th percentile)
               </div>
             </div>
 

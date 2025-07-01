@@ -3436,23 +3436,85 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async getCycleTierThresholds(cycleSettingId: number): Promise<{ tier1: number, tier2: number, tier3: number }> {
+  async calculateDynamicTierThresholds(cycleSettingId: number): Promise<{ 
+    tier1: number, 
+    tier2: number, 
+    tier3: number,
+    percentiles: { tier1: number, tier2: number }
+  }> {
     try {
+      // Get cycle settings to get percentile configuration
       const [setting] = await db.select()
         .from(cycleSettings)
         .where(eq(cycleSettings.id, cycleSettingId))
         .limit(1);
 
-      if (setting) {
-        return {
-          tier1: setting.tier1Threshold,
-          tier2: setting.tier2Threshold,
-          tier3: 0 // tier3 starts at 0 by design
+      if (!setting) {
+        return { 
+          tier1: 56, 
+          tier2: 21, 
+          tier3: 0,
+          percentiles: { tier1: 33, tier2: 67 }
         };
       }
 
-      // Default thresholds
-      return { tier1: 56, tier2: 21, tier3: 0 };
+      // Get all active users' cycle points for this cycle
+      const userPoints = await db.select({
+        currentCyclePoints: userCyclePoints.currentCyclePoints
+      })
+        .from(userCyclePoints)
+        .where(and(
+          eq(userCyclePoints.cycleSettingId, cycleSettingId),
+          eq(userCyclePoints.isActive, true),
+          sql`${userCyclePoints.currentCyclePoints} > 0`
+        ))
+        .orderBy(sql`${userCyclePoints.currentCyclePoints} DESC`);
+
+      // If no users have points yet, return default point thresholds
+      if (userPoints.length === 0) {
+        return {
+          tier1: 50, // Reasonable defaults when no data available
+          tier2: 25,
+          tier3: 0,
+          percentiles: { tier1: setting.tier1Threshold, tier2: setting.tier2Threshold }
+        };
+      }
+
+      const totalUsers = userPoints.length;
+      const points = userPoints.map(u => u.currentCyclePoints).sort((a, b) => b - a);
+
+      // Calculate tier boundaries based on percentiles
+      const tier1Index = Math.floor((setting.tier1Threshold / 100) * totalUsers);
+      const tier2Index = Math.floor((setting.tier2Threshold / 100) * totalUsers);
+
+      const tier1Threshold = tier1Index > 0 ? points[tier1Index - 1] : points[0];
+      const tier2Threshold = tier2Index < totalUsers ? points[tier2Index] : 0;
+
+      return {
+        tier1: tier1Threshold,
+        tier2: tier2Threshold,
+        tier3: 0,
+        percentiles: { tier1: setting.tier1Threshold, tier2: setting.tier2Threshold }
+      };
+    } catch (error) {
+      console.error('Error calculating dynamic tier thresholds:', error);
+      return { 
+        tier1: 56, 
+        tier2: 21, 
+        tier3: 0,
+        percentiles: { tier1: 33, tier2: 67 }
+      };
+    }
+  }
+
+  async getCycleTierThresholds(cycleSettingId: number): Promise<{ tier1: number, tier2: number, tier3: number }> {
+    try {
+      const dynamicThresholds = await this.calculateDynamicTierThresholds(cycleSettingId);
+      return {
+        tier1: dynamicThresholds.tier1,
+        tier2: dynamicThresholds.tier2,
+        tier3: dynamicThresholds.tier3
+      };
     } catch (error) {
       console.error('Error getting cycle tier thresholds:', error);
       return { tier1: 56, tier2: 21, tier3: 0 };

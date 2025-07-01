@@ -296,9 +296,9 @@ export const cycleSettings = pgTable("cycle_settings", {
   rewardPoolPercentage: integer("reward_pool_percentage").notNull(), // 0-100
   
   // Tier Distribution (admin configurable percentiles)
-  tier1Threshold: integer("tier1_threshold").default(33).notNull(), // Top X%
-  tier2Threshold: integer("tier2_threshold").default(67).notNull(), // Middle X%
-  // tier3 is everyone else (100% - tier2Threshold)
+  tier1Threshold: integer("tier1_threshold").default(33).notNull(), // Top X% (e.g., 33 = top 33%)
+  tier2Threshold: integer("tier2_threshold").default(67).notNull(), // Up to X% (e.g., 67 = top 67%, so middle 34%)
+  // tier3 is everyone else (100% - tier2Threshold = bottom 33%)
   
   // Pool Distribution Among Tiers
   tier1PoolPercentage: integer("tier1_pool_percentage").default(50).notNull(),

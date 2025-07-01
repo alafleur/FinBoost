@@ -3003,6 +3003,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint to get dynamic tier thresholds with percentile info
+  app.get("/api/admin/cycle/:cycleId/dynamic-thresholds", authenticateToken, async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      
+      if (!token) {
+        return res.status(401).json({ message: "No token provided" });
+      }
+
+      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      const user = await storage.getUserById(decoded.userId);
+      
+      if (!user || !user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const dynamicThresholds = await storage.calculateDynamicTierThresholds(parseInt(req.params.cycleId));
+      res.json(dynamicThresholds);
+    } catch (error) {
+      console.error("Error getting dynamic tier thresholds:", error);
+      res.status(500).json({ error: "Failed to get dynamic tier thresholds" });
+    }
+  });
+
   app.post("/api/admin/cycle/:cycleId/recalculate-tiers", authenticateToken, async (req, res) => {
     try {
       if (!req.user.isAdmin) {
