@@ -222,12 +222,12 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
 
                         <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
                           <div>
-                            <span className="text-gray-500">Tier 1 Threshold:</span>
-                            <div className="font-medium">{cycle.tier1Threshold}+ points</div>
+                            <span className="text-gray-500">Tier 1 (Top %):</span>
+                            <div className="font-medium">Top {cycle.tier1Threshold}%</div>
                           </div>
                           <div>
-                            <span className="text-gray-500">Tier 2 Threshold:</span>
-                            <div className="font-medium">{cycle.tier2Threshold}+ points</div>
+                            <span className="text-gray-500">Tier 2 (Up to %):</span>
+                            <div className="font-medium">Up to {cycle.tier2Threshold}%</div>
                           </div>
                           <div>
                             <span className="text-gray-500">Payment Period:</span>
