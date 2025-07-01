@@ -3235,6 +3235,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByToken(token);
+      console.log('Admin stats - user:', user);
+      console.log('Admin stats - user.isAdmin:', user?.isAdmin);
       if (!user || !user.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }

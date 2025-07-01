@@ -2020,17 +2020,10 @@ export class MemStorage implements IStorage {
 
   async getUserByToken(token: string): Promise<User | null> {
     try {
-      const tokenData = this.tokens.get(token);
-      if (!tokenData) return null;
-
-      // Check if token is expired (24 hours)
-      const tokenAge = Date.now() - tokenData.createdAt.getTime();
-      if (tokenAge > 24 * 60 * 60 * 1000) {
-        this.tokens.delete(token);
-        return null;
-      }
-
-      return await this.getUser(tokenData.userId) || null;
+      // Use JWT verification instead of token storage
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+      return await this.getUserById(decoded.userId);
     } catch (error) {
       console.error('Error getting user by token:', error);
       return null;
