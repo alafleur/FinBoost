@@ -3468,22 +3468,21 @@ export class MemStorage implements IStorage {
         };
       }
 
-      // Get all active users' cycle points for this cycle
+      // Get all active users' cycle points for this cycle (including 0 points for percentile calculation)
       const userPoints = await db.select({
         currentCyclePoints: userCyclePoints.currentCyclePoints
       })
         .from(userCyclePoints)
         .where(and(
           eq(userCyclePoints.cycleSettingId, cycleSettingId),
-          eq(userCyclePoints.isActive, true),
-          sql`${userCyclePoints.currentCyclePoints} > 0`
+          eq(userCyclePoints.isActive, true)
         ))
         .orderBy(sql`${userCyclePoints.currentCyclePoints} DESC`);
 
-      // If no users have points yet, return default point thresholds
+      // If no users enrolled, return defaults
       if (userPoints.length === 0) {
         return {
-          tier1: 50, // Reasonable defaults when no data available
+          tier1: 50,
           tier2: 25,
           tier3: 0,
           percentiles: { tier1: setting.tier1Threshold, tier2: setting.tier2Threshold }
