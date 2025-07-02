@@ -2831,8 +2831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Admin access required" });
       }
 
-      const cycleId = parseInt(req.params.cycleId);
-      const result = await storage.backfillPremiumSubscribersInCycle(cycleId);
+      const result = await storage.backfillPremiumSubscribersInCycles();
       res.json(result);
     } catch (error) {
       console.error("Error enrolling premium users:", error);
