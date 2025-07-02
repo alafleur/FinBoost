@@ -2825,6 +2825,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/cycles/:cycleId/enroll-premium-users", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      const result = await storage.backfillPremiumSubscribersInCycle(cycleId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error enrolling premium users:", error);
+      res.status(500).json({ error: "Failed to enroll premium users" });
+    }
+  });
+
   // User Cycle Points
   app.get("/api/user/cycle-points/:cycleId", authenticateToken, async (req, res) => {
     try {
