@@ -3489,20 +3489,33 @@ export class MemStorage implements IStorage {
         };
       }
 
-      const totalUsers = userPoints.length;
-      const points = userPoints.map(u => u.currentCyclePoints).sort((a, b) => b - a);
+      // Filter users with points > 0 for percentile calculation
+      const usersWithPoints = userPoints.filter(u => u.currentCyclePoints > 0);
+      
+      // If no users have points yet, everyone is in Tier 3
+      if (usersWithPoints.length === 0) {
+        return {
+          tier1: 1, // Impossible threshold - no one can reach Tier 1
+          tier2: 1, // Impossible threshold - no one can reach Tier 2  
+          tier3: 0, // Everyone with 0 points gets Tier 3
+          percentiles: { tier1: setting.tier1Threshold, tier2: setting.tier2Threshold }
+        };
+      }
 
-      // Calculate tier boundaries based on percentiles
-      const tier1Index = Math.floor((setting.tier1Threshold / 100) * totalUsers);
-      const tier2Index = Math.floor((setting.tier2Threshold / 100) * totalUsers);
+      const totalUsersWithPoints = usersWithPoints.length;
+      const points = usersWithPoints.map(u => u.currentCyclePoints).sort((a, b) => b - a);
+
+      // Calculate tier boundaries based on percentiles from users with points
+      const tier1Index = Math.floor((setting.tier1Threshold / 100) * totalUsersWithPoints);
+      const tier2Index = Math.floor((setting.tier2Threshold / 100) * totalUsersWithPoints);
 
       const tier1Threshold = tier1Index > 0 ? points[tier1Index - 1] : points[0];
-      const tier2Threshold = tier2Index < totalUsers ? points[tier2Index] : 0;
+      const tier2Threshold = tier2Index < totalUsersWithPoints ? points[tier2Index] : 1;
 
       return {
         tier1: tier1Threshold,
         tier2: tier2Threshold,
-        tier3: 0,
+        tier3: 0, // Users with 0 points automatically get Tier 3
         percentiles: { tier1: setting.tier1Threshold, tier2: setting.tier2Threshold }
       };
     } catch (error) {
@@ -3518,7 +3531,9 @@ export class MemStorage implements IStorage {
 
   async getCycleTierThresholds(cycleSettingId: number): Promise<{ tier1: number, tier2: number, tier3: number }> {
     try {
+      console.log('Getting tier thresholds for cycle:', cycleSettingId);
       const dynamicThresholds = await this.calculateDynamicTierThresholds(cycleSettingId);
+      console.log('Dynamic thresholds calculated:', dynamicThresholds);
       return {
         tier1: dynamicThresholds.tier1,
         tier2: dynamicThresholds.tier2,
@@ -3526,7 +3541,7 @@ export class MemStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error getting cycle tier thresholds:', error);
-      return { tier1: 56, tier2: 21, tier3: 0 };
+      return { tier1: 50, tier2: 25, tier3: 0 }; // Updated to match current fallback
     }
   }
 
