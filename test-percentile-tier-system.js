@@ -83,7 +83,7 @@ async function testPercentileTierSystem() {
     // Step 4: Test Percentile Recalculation
     console.log('🔄 STEP 4: Testing Percentile Recalculation');
     
-    const recalcResponse = await fetch('http://localhost:5000/api/admin/recalculate-tiers', {
+    const recalcResponse = await fetch(`http://localhost:5000/api/admin/cycle/${activeCycle.id}/recalculate-tiers`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
