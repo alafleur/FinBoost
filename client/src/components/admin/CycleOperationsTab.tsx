@@ -127,21 +127,13 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     setIsRunningSelection(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-winner-selection/execute', {
+      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/execute-selection`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          cycleSettingId: selectedCycle.id,
-          selectionMode,
-          tierSettings: {
-            tier1: { winnerCount: 3, poolPercentage: 50 },
-            tier2: { winnerCount: 5, poolPercentage: 30 },
-            tier3: { winnerCount: 7, poolPercentage: 20 }
-          }
-        })
+        body: JSON.stringify({ selectionMode })
       });
 
       const data = await response.json();
