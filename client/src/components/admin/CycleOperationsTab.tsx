@@ -66,7 +66,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [winners, setWinners] = useState<WinnerSelection[]>([]);
   const [isRunningSelection, setIsRunningSelection] = useState(false);
   const [isProcessingPayouts, setIsProcessingPayouts] = useState(false);
-  const [selectionMode, setSelectionMode] = useState('point-weighted-random');
+  const [selectionMode, setSelectionMode] = useState('weighted_random');
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
 
   // Get active cycle on component mount
@@ -127,13 +127,21 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     setIsRunningSelection(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/execute-selection`, {
+      const response = await fetch('/api/admin/cycle-winner-selection/execute', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selectionMode })
+        body: JSON.stringify({ 
+          cycleSettingId: selectedCycle.id,
+          selectionMode,
+          tierSettings: {
+            tier1: { winnerCount: 3, poolPercentage: 50 },
+            tier2: { winnerCount: 5, poolPercentage: 30 },
+            tier3: { winnerCount: 7, poolPercentage: 20 }
+          }
+        })
       });
 
       const data = await response.json();
@@ -374,9 +382,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="point-weighted-random">Point-Weighted Random</SelectItem>
-                        <SelectItem value="top-performers">Top Performers</SelectItem>
-                        <SelectItem value="pure-random">Pure Random</SelectItem>
+                        <SelectItem value="weighted_random">Point-Weighted Random</SelectItem>
+                        <SelectItem value="top_performers">Top Performers</SelectItem>
+                        <SelectItem value="random">Pure Random</SelectItem>
                         <SelectItem value="manual">Manual Selection</SelectItem>
                       </SelectContent>
                     </Select>
