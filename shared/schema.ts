@@ -632,3 +632,105 @@ export type CyclePointHistory = typeof cyclePointHistory.$inferSelect;
 
 export type InsertCyclePointsAction = z.infer<typeof insertCyclePointsActionSchema>;
 export type CyclePointsAction = typeof cyclePointsActions.$inferSelect;
+
+// ========================================
+// PREDICTION SYSTEM TABLES (Phase 1)
+// ========================================
+
+// Prediction Questions - Mid-cycle engagement questions
+export const predictionQuestions = pgTable("prediction_questions", {
+  id: serial("id").primaryKey(),
+  cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
+  questionText: text("question_text").notNull(),
+  options: text("options").notNull(), // JSON array of choice options
+  submissionDeadline: timestamp("submission_deadline").notNull(),
+  resultDeterminationTime: timestamp("result_determination_time").notNull(),
+  
+  // Status and Results
+  status: text("status").default("draft").notNull(), // "draft", "active", "closed", "completed"
+  correctAnswerIndex: integer("correct_answer_index"), // Index of correct option (set by admin)
+  pointAwards: text("point_awards"), // JSON array of points for each option
+  
+  // Historical tracking
+  totalSubmissions: integer("total_submissions").default(0).notNull(),
+  resultsPublished: boolean("results_published").default(false).notNull(),
+  pointsDistributed: boolean("points_distributed").default(false).notNull(),
+  
+  // Admin tracking
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  publishedAt: timestamp("published_at"),
+  closedAt: timestamp("closed_at"),
+  completedAt: timestamp("completed_at"),
+  completedBy: integer("completed_by").references(() => users.id),
+});
+
+// User Predictions - Individual user answers
+export const userPredictions = pgTable("user_predictions", {
+  id: serial("id").primaryKey(),
+  predictionQuestionId: integer("prediction_question_id").references(() => predictionQuestions.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  selectedOptionIndex: integer("selected_option_index").notNull(),
+  pointsAwarded: integer("points_awarded").default(0).notNull(),
+  
+  // Tracking
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  lastUpdatedAt: timestamp("last_updated_at").defaultNow().notNull(),
+  pointsDistributedAt: timestamp("points_distributed_at"),
+});
+
+// Prediction Results - Historical archive of question outcomes
+export const predictionResults = pgTable("prediction_results", {
+  id: serial("id").primaryKey(),
+  predictionQuestionId: integer("prediction_question_id").references(() => predictionQuestions.id).notNull(),
+  
+  // Final Results
+  correctAnswerIndex: integer("correct_answer_index").notNull(),
+  totalParticipants: integer("total_participants").notNull(),
+  optionStats: text("option_stats").notNull(), // JSON: submissions per option with percentages
+  
+  // Point Distribution Summary
+  totalPointsAwarded: integer("total_points_awarded").notNull(),
+  pointsPerOption: text("points_per_option").notNull(), // JSON: points awarded per option
+  
+  // Admin tracking
+  determinedAt: timestamp("determined_at").defaultNow().notNull(),
+  determinedBy: integer("determined_by").references(() => users.id).notNull(),
+  pointsDistributedAt: timestamp("points_distributed_at"),
+  notes: text("notes"), // Admin notes about the determination
+});
+
+// Insert schemas for prediction system
+export const insertPredictionQuestionSchema = createInsertSchema(predictionQuestions).pick({
+  cycleSettingId: true,
+  questionText: true,
+  options: true,
+  submissionDeadline: true,
+  resultDeterminationTime: true,
+});
+
+export const insertUserPredictionSchema = createInsertSchema(userPredictions).pick({
+  predictionQuestionId: true,
+  userId: true,
+  selectedOptionIndex: true,
+});
+
+export const insertPredictionResultSchema = createInsertSchema(predictionResults).pick({
+  predictionQuestionId: true,
+  correctAnswerIndex: true,
+  totalParticipants: true,
+  optionStats: true,
+  totalPointsAwarded: true,
+  pointsPerOption: true,
+  notes: true,
+});
+
+// Types for prediction system
+export type InsertPredictionQuestion = z.infer<typeof insertPredictionQuestionSchema>;
+export type PredictionQuestion = typeof predictionQuestions.$inferSelect;
+
+export type InsertUserPrediction = z.infer<typeof insertUserPredictionSchema>;
+export type UserPrediction = typeof userPredictions.$inferSelect;
+
+export type InsertPredictionResult = z.infer<typeof insertPredictionResultSchema>;
+export type PredictionResult = typeof predictionResults.$inferSelect;

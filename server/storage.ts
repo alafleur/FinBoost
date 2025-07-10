@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt } from "drizzle-orm";
@@ -297,6 +297,67 @@ export interface IStorage {
     completeCycle(cycleId: number, completedBy: number): Promise<void>;
     resetUserCyclePoints(cycleId: number): Promise<void>;
     archiveCycleData(cycleId: number): Promise<void>;
+    
+    // ========================================
+    // PREDICTION SYSTEM METHODS (Phase 1)
+    // ========================================
+    
+    // Prediction Questions Management
+    createPredictionQuestion(data: InsertPredictionQuestion & { createdBy: number }): Promise<PredictionQuestion>;
+    getPredictionQuestion(questionId: number): Promise<PredictionQuestion | null>;
+    updatePredictionQuestion(questionId: number, updates: Partial<PredictionQuestion>): Promise<PredictionQuestion>;
+    deletePredictionQuestion(questionId: number): Promise<void>;
+    
+    // Prediction Questions by Cycle
+    getPredictionQuestionsByCycle(cycleSettingId: number): Promise<PredictionQuestion[]>;
+    getActivePredictionQuestions(cycleSettingId: number): Promise<PredictionQuestion[]>;
+    getCompletedPredictionQuestions(cycleSettingId: number): Promise<PredictionQuestion[]>;
+    
+    // Prediction Question Status Management
+    publishPredictionQuestion(questionId: number): Promise<void>;
+    closePredictionQuestion(questionId: number): Promise<void>;
+    completePredictionQuestion(questionId: number, completedBy: number): Promise<void>;
+    
+    // User Predictions Management
+    submitUserPrediction(data: InsertUserPrediction): Promise<UserPrediction>;
+    getUserPrediction(predictionQuestionId: number, userId: number): Promise<UserPrediction | null>;
+    updateUserPrediction(predictionId: number, selectedOptionIndex: number): Promise<UserPrediction>;
+    getUserPredictions(userId: number): Promise<UserPrediction[]>;
+    getUserPredictionsByQuestion(predictionQuestionId: number): Promise<UserPrediction[]>;
+    
+    // Prediction Results Management
+    createPredictionResult(data: InsertPredictionResult & { determinedBy: number }): Promise<PredictionResult>;
+    getPredictionResult(predictionQuestionId: number): Promise<PredictionResult | null>;
+    updatePredictionResult(resultId: number, updates: Partial<PredictionResult>): Promise<PredictionResult>;
+    
+    // Prediction Statistics
+    getPredictionQuestionStats(predictionQuestionId: number): Promise<{
+      totalSubmissions: number;
+      optionCounts: number[];
+      optionPercentages: number[];
+    }>;
+    
+    // Prediction Points Distribution
+    distributePredictionPoints(predictionQuestionId: number): Promise<{
+      totalPointsAwarded: number;
+      usersAwarded: number;
+    }>;
+    
+    // Prediction Analytics
+    getPredictionAnalyticsByCycle(cycleSettingId: number): Promise<{
+      totalQuestions: number;
+      activeQuestions: number;
+      completedQuestions: number;
+      totalParticipants: number;
+      averageParticipationRate: number;
+    }>;
+    
+    getUserPredictionStats(userId: number): Promise<{
+      totalPredictions: number;
+      correctPredictions: number;
+      totalPointsEarned: number;
+      accuracyRate: number;
+    }>;
 }
 
 import fs from 'fs/promises';
@@ -6741,6 +6802,477 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error archiving cycle:', error);
       throw error;
+    }
+  }
+
+  // ========================================
+  // PREDICTION SYSTEM METHODS (Phase 1)
+  // ========================================
+
+  // Prediction Questions Management
+  async createPredictionQuestion(data: InsertPredictionQuestion & { createdBy: number }): Promise<PredictionQuestion> {
+    try {
+      const [question] = await db.insert(predictionQuestions).values(data).returning();
+      return question;
+    } catch (error) {
+      console.error('Error creating prediction question:', error);
+      throw error;
+    }
+  }
+
+  async getPredictionQuestion(questionId: number): Promise<PredictionQuestion | null> {
+    try {
+      const [question] = await db.select()
+        .from(predictionQuestions)
+        .where(eq(predictionQuestions.id, questionId))
+        .limit(1);
+      return question || null;
+    } catch (error) {
+      console.error('Error getting prediction question:', error);
+      return null;
+    }
+  }
+
+  async updatePredictionQuestion(questionId: number, updates: Partial<PredictionQuestion>): Promise<PredictionQuestion> {
+    try {
+      const [updated] = await db.update(predictionQuestions)
+        .set(updates)
+        .where(eq(predictionQuestions.id, questionId))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating prediction question:', error);
+      throw error;
+    }
+  }
+
+  async deletePredictionQuestion(questionId: number): Promise<void> {
+    try {
+      await db.delete(predictionQuestions)
+        .where(eq(predictionQuestions.id, questionId));
+    } catch (error) {
+      console.error('Error deleting prediction question:', error);
+      throw error;
+    }
+  }
+
+  // Prediction Questions by Cycle
+  async getPredictionQuestionsByCycle(cycleSettingId: number): Promise<PredictionQuestion[]> {
+    try {
+      return await db.select()
+        .from(predictionQuestions)
+        .where(eq(predictionQuestions.cycleSettingId, cycleSettingId))
+        .orderBy(desc(predictionQuestions.createdAt));
+    } catch (error) {
+      console.error('Error getting prediction questions by cycle:', error);
+      return [];
+    }
+  }
+
+  async getActivePredictionQuestions(cycleSettingId: number): Promise<PredictionQuestion[]> {
+    try {
+      const now = new Date();
+      return await db.select()
+        .from(predictionQuestions)
+        .where(
+          and(
+            eq(predictionQuestions.cycleSettingId, cycleSettingId),
+            eq(predictionQuestions.status, 'active'),
+            gte(predictionQuestions.submissionDeadline, now)
+          )
+        )
+        .orderBy(asc(predictionQuestions.submissionDeadline));
+    } catch (error) {
+      console.error('Error getting active prediction questions:', error);
+      return [];
+    }
+  }
+
+  async getCompletedPredictionQuestions(cycleSettingId: number): Promise<PredictionQuestion[]> {
+    try {
+      return await db.select()
+        .from(predictionQuestions)
+        .where(
+          and(
+            eq(predictionQuestions.cycleSettingId, cycleSettingId),
+            eq(predictionQuestions.status, 'completed')
+          )
+        )
+        .orderBy(desc(predictionQuestions.completedAt));
+    } catch (error) {
+      console.error('Error getting completed prediction questions:', error);
+      return [];
+    }
+  }
+
+  // Prediction Question Status Management
+  async publishPredictionQuestion(questionId: number): Promise<void> {
+    try {
+      await db.update(predictionQuestions)
+        .set({
+          status: 'active',
+          publishedAt: new Date()
+        })
+        .where(eq(predictionQuestions.id, questionId));
+    } catch (error) {
+      console.error('Error publishing prediction question:', error);
+      throw error;
+    }
+  }
+
+  async closePredictionQuestion(questionId: number): Promise<void> {
+    try {
+      await db.update(predictionQuestions)
+        .set({
+          status: 'closed',
+          closedAt: new Date()
+        })
+        .where(eq(predictionQuestions.id, questionId));
+    } catch (error) {
+      console.error('Error closing prediction question:', error);
+      throw error;
+    }
+  }
+
+  async completePredictionQuestion(questionId: number, completedBy: number): Promise<void> {
+    try {
+      await db.update(predictionQuestions)
+        .set({
+          status: 'completed',
+          completedAt: new Date(),
+          completedBy,
+          resultsPublished: true
+        })
+        .where(eq(predictionQuestions.id, questionId));
+    } catch (error) {
+      console.error('Error completing prediction question:', error);
+      throw error;
+    }
+  }
+
+  // User Predictions Management
+  async submitUserPrediction(data: InsertUserPrediction): Promise<UserPrediction> {
+    try {
+      // Check if user already has a prediction for this question
+      const existing = await this.getUserPrediction(data.predictionQuestionId, data.userId);
+      
+      if (existing) {
+        // Update existing prediction
+        return await this.updateUserPrediction(existing.id, data.selectedOptionIndex);
+      } else {
+        // Create new prediction
+        const [prediction] = await db.insert(userPredictions).values(data).returning();
+        
+        // Update total submissions count
+        await db.update(predictionQuestions)
+          .set({
+            totalSubmissions: sql`${predictionQuestions.totalSubmissions} + 1`
+          })
+          .where(eq(predictionQuestions.id, data.predictionQuestionId));
+        
+        return prediction;
+      }
+    } catch (error) {
+      console.error('Error submitting user prediction:', error);
+      throw error;
+    }
+  }
+
+  async getUserPrediction(predictionQuestionId: number, userId: number): Promise<UserPrediction | null> {
+    try {
+      const [prediction] = await db.select()
+        .from(userPredictions)
+        .where(
+          and(
+            eq(userPredictions.predictionQuestionId, predictionQuestionId),
+            eq(userPredictions.userId, userId)
+          )
+        )
+        .limit(1);
+      return prediction || null;
+    } catch (error) {
+      console.error('Error getting user prediction:', error);
+      return null;
+    }
+  }
+
+  async updateUserPrediction(predictionId: number, selectedOptionIndex: number): Promise<UserPrediction> {
+    try {
+      const [updated] = await db.update(userPredictions)
+        .set({
+          selectedOptionIndex,
+          lastUpdatedAt: new Date()
+        })
+        .where(eq(userPredictions.id, predictionId))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating user prediction:', error);
+      throw error;
+    }
+  }
+
+  async getUserPredictions(userId: number): Promise<UserPrediction[]> {
+    try {
+      return await db.select()
+        .from(userPredictions)
+        .where(eq(userPredictions.userId, userId))
+        .orderBy(desc(userPredictions.submittedAt));
+    } catch (error) {
+      console.error('Error getting user predictions:', error);
+      return [];
+    }
+  }
+
+  async getUserPredictionsByQuestion(predictionQuestionId: number): Promise<UserPrediction[]> {
+    try {
+      return await db.select()
+        .from(userPredictions)
+        .where(eq(userPredictions.predictionQuestionId, predictionQuestionId))
+        .orderBy(desc(userPredictions.submittedAt));
+    } catch (error) {
+      console.error('Error getting user predictions by question:', error);
+      return [];
+    }
+  }
+
+  // Prediction Results Management
+  async createPredictionResult(data: InsertPredictionResult & { determinedBy: number }): Promise<PredictionResult> {
+    try {
+      const [result] = await db.insert(predictionResults).values(data).returning();
+      return result;
+    } catch (error) {
+      console.error('Error creating prediction result:', error);
+      throw error;
+    }
+  }
+
+  async getPredictionResult(predictionQuestionId: number): Promise<PredictionResult | null> {
+    try {
+      const [result] = await db.select()
+        .from(predictionResults)
+        .where(eq(predictionResults.predictionQuestionId, predictionQuestionId))
+        .limit(1);
+      return result || null;
+    } catch (error) {
+      console.error('Error getting prediction result:', error);
+      return null;
+    }
+  }
+
+  async updatePredictionResult(resultId: number, updates: Partial<PredictionResult>): Promise<PredictionResult> {
+    try {
+      const [updated] = await db.update(predictionResults)
+        .set(updates)
+        .where(eq(predictionResults.id, resultId))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Error updating prediction result:', error);
+      throw error;
+    }
+  }
+
+  // Prediction Statistics
+  async getPredictionQuestionStats(predictionQuestionId: number): Promise<{
+    totalSubmissions: number;
+    optionCounts: number[];
+    optionPercentages: number[];
+  }> {
+    try {
+      const [question] = await db.select()
+        .from(predictionQuestions)
+        .where(eq(predictionQuestions.id, predictionQuestionId));
+      
+      if (!question) {
+        throw new Error('Prediction question not found');
+      }
+
+      const options = JSON.parse(question.options);
+      const optionCounts = new Array(options.length).fill(0);
+
+      const predictions = await this.getUserPredictionsByQuestion(predictionQuestionId);
+      const totalSubmissions = predictions.length;
+
+      // Count submissions for each option
+      predictions.forEach(prediction => {
+        if (prediction.selectedOptionIndex >= 0 && prediction.selectedOptionIndex < options.length) {
+          optionCounts[prediction.selectedOptionIndex]++;
+        }
+      });
+
+      // Calculate percentages
+      const optionPercentages = optionCounts.map(count => 
+        totalSubmissions > 0 ? Math.round((count / totalSubmissions) * 100) : 0
+      );
+
+      return {
+        totalSubmissions,
+        optionCounts,
+        optionPercentages
+      };
+    } catch (error) {
+      console.error('Error getting prediction question stats:', error);
+      return {
+        totalSubmissions: 0,
+        optionCounts: [],
+        optionPercentages: []
+      };
+    }
+  }
+
+  // Prediction Points Distribution
+  async distributePredictionPoints(predictionQuestionId: number): Promise<{
+    totalPointsAwarded: number;
+    usersAwarded: number;
+  }> {
+    try {
+      const question = await this.getPredictionQuestion(predictionQuestionId);
+      if (!question || question.correctAnswerIndex === null) {
+        throw new Error('Question not found or correct answer not set');
+      }
+
+      const pointAwards = JSON.parse(question.pointAwards || '[]');
+      const predictions = await this.getUserPredictionsByQuestion(predictionQuestionId);
+      
+      let totalPointsAwarded = 0;
+      let usersAwarded = 0;
+
+      // Award points to users based on their predictions
+      for (const prediction of predictions) {
+        const pointsToAward = pointAwards[prediction.selectedOptionIndex] || 0;
+        
+        if (pointsToAward > 0) {
+          // Update user prediction with points awarded
+          await db.update(userPredictions)
+            .set({
+              pointsAwarded: pointsToAward,
+              pointsDistributedAt: new Date()
+            })
+            .where(eq(userPredictions.id, prediction.id));
+
+          // Award cycle points to the user
+          const activeCycle = await this.getActiveCycleSetting();
+          if (activeCycle) {
+            await this.awardCyclePoints(
+              prediction.userId,
+              activeCycle.id,
+              'prediction_question',
+              pointsToAward,
+              `Prediction question: ${question.questionText.substring(0, 50)}...`,
+              { predictionQuestionId }
+            );
+          }
+
+          totalPointsAwarded += pointsToAward;
+          usersAwarded++;
+        }
+      }
+
+      // Mark question as points distributed
+      await db.update(predictionQuestions)
+        .set({ pointsDistributed: true })
+        .where(eq(predictionQuestions.id, predictionQuestionId));
+
+      return {
+        totalPointsAwarded,
+        usersAwarded
+      };
+    } catch (error) {
+      console.error('Error distributing prediction points:', error);
+      throw error;
+    }
+  }
+
+  // Prediction Analytics
+  async getPredictionAnalyticsByCycle(cycleSettingId: number): Promise<{
+    totalQuestions: number;
+    activeQuestions: number;
+    completedQuestions: number;
+    totalParticipants: number;
+    averageParticipationRate: number;
+  }> {
+    try {
+      const allQuestions = await this.getPredictionQuestionsByCycle(cycleSettingId);
+      const activeQuestions = await this.getActivePredictionQuestions(cycleSettingId);
+      const completedQuestions = await this.getCompletedPredictionQuestions(cycleSettingId);
+
+      // Get unique participants across all questions in this cycle
+      const allPredictions = await db.select({ userId: userPredictions.userId })
+        .from(userPredictions)
+        .innerJoin(predictionQuestions, eq(userPredictions.predictionQuestionId, predictionQuestions.id))
+        .where(eq(predictionQuestions.cycleSettingId, cycleSettingId));
+
+      const uniqueParticipants = new Set(allPredictions.map(p => p.userId));
+      const totalParticipants = uniqueParticipants.size;
+
+      // Calculate average participation rate
+      const cycleUsers = await this.getUsersInCurrentCycle(cycleSettingId);
+      const totalCycleUsers = cycleUsers.length;
+      const averageParticipationRate = totalCycleUsers > 0 
+        ? Math.round((totalParticipants / totalCycleUsers) * 100) 
+        : 0;
+
+      return {
+        totalQuestions: allQuestions.length,
+        activeQuestions: activeQuestions.length,
+        completedQuestions: completedQuestions.length,
+        totalParticipants,
+        averageParticipationRate
+      };
+    } catch (error) {
+      console.error('Error getting prediction analytics by cycle:', error);
+      return {
+        totalQuestions: 0,
+        activeQuestions: 0,
+        completedQuestions: 0,
+        totalParticipants: 0,
+        averageParticipationRate: 0
+      };
+    }
+  }
+
+  async getUserPredictionStats(userId: number): Promise<{
+    totalPredictions: number;
+    correctPredictions: number;
+    totalPointsEarned: number;
+    accuracyRate: number;
+  }> {
+    try {
+      const userPredictions = await this.getUserPredictions(userId);
+      const totalPredictions = userPredictions.length;
+      
+      let correctPredictions = 0;
+      let totalPointsEarned = 0;
+
+      for (const prediction of userPredictions) {
+        totalPointsEarned += prediction.pointsAwarded;
+
+        // Check if this was a correct prediction
+        const question = await this.getPredictionQuestion(prediction.predictionQuestionId);
+        if (question && question.correctAnswerIndex === prediction.selectedOptionIndex) {
+          correctPredictions++;
+        }
+      }
+
+      const accuracyRate = totalPredictions > 0 
+        ? Math.round((correctPredictions / totalPredictions) * 100) 
+        : 0;
+
+      return {
+        totalPredictions,
+        correctPredictions,
+        totalPointsEarned,
+        accuracyRate
+      };
+    } catch (error) {
+      console.error('Error getting user prediction stats:', error);
+      return {
+        totalPredictions: 0,
+        correctPredictions: 0,
+        totalPointsEarned: 0,
+        accuracyRate: 0
+      };
     }
   }
 }
