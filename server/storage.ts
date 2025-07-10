@@ -292,6 +292,11 @@ export interface IStorage {
     getCurrentCycle(): Promise<CycleSetting | null>;
     getUserCycleRewards(userId: number): Promise<any[]>;
     getCyclePoolData(cycleId: number): Promise<{totalPool: number, premiumUsers: number, totalUsers: number}>;
+    
+    // Cycle Completion Methods
+    completeCycle(cycleId: number, completedBy: number): Promise<void>;
+    resetUserCyclePoints(cycleId: number): Promise<void>;
+    archiveCycleData(cycleId: number): Promise<void>;
 }
 
 import fs from 'fs/promises';
@@ -6676,6 +6681,65 @@ export class MemStorage implements IStorage {
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
     } catch (error) {
       console.error('Error clearing cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  // Cycle Completion Methods
+  async completeCycle(cycleId: number, completedBy: number): Promise<void> {
+    try {
+      // Mark cycle as completed
+      await db
+        .update(cycleSettings)
+        .set({
+          status: 'completed',
+          completedAt: new Date(),
+          completedBy,
+          isActive: false
+        })
+        .where(eq(cycleSettings.id, cycleId));
+
+      // Reset all user cycle points for this cycle
+      await this.resetUserCyclePoints(cycleId);
+
+      console.log(`Cycle ${cycleId} completed successfully by user ${completedBy}`);
+    } catch (error) {
+      console.error('Error completing cycle:', error);
+      throw error;
+    }
+  }
+
+  async resetUserCyclePoints(cycleId: number): Promise<void> {
+    try {
+      // Reset all users' current cycle points to 0
+      await db
+        .update(userCyclePoints)
+        .set({
+          currentCyclePoints: 0,
+          tier: 'tier3' // Reset to lowest tier
+        })
+        .where(eq(userCyclePoints.cycleSettingId, cycleId));
+
+      console.log(`Reset cycle points for all users in cycle ${cycleId}`);
+    } catch (error) {
+      console.error('Error resetting user cycle points:', error);
+      throw error;
+    }
+  }
+
+  async archiveCycleData(cycleId: number): Promise<void> {
+    try {
+      // Mark cycle as archived (preserves all data but marks as historical)
+      await db
+        .update(cycleSettings)
+        .set({
+          status: 'archived'
+        })
+        .where(eq(cycleSettings.id, cycleId));
+
+      console.log(`Cycle ${cycleId} archived successfully`);
+    } catch (error) {
+      console.error('Error archiving cycle:', error);
       throw error;
     }
   }
