@@ -361,7 +361,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                               </span>
                             </div>
                             <p className="text-lg">
-                              {question.options[userPrediction.selectedOptionIndex]}
+                              {question.options?.[userPrediction.selectedOptionIndex] || 'Unknown option'}
                             </p>
                             {userPrediction.pointsAwarded && (
                               <p className="text-sm text-green-600 mt-2">
@@ -377,7 +377,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                                 <span className="font-medium text-blue-900">Correct Answer:</span>
                               </div>
                               <p className="text-blue-900">
-                                {question.options[question.correctOptionIndex]}
+                                {question.options?.[question.correctOptionIndex] || 'Unknown option'}
                               </p>
                             </div>
                           )}
@@ -385,7 +385,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                       ) : (
                         <div className="space-y-4">
                           <div className="grid gap-3">
-                            {question.options.map((option, index) => (
+                            {question.options?.map((option, index) => (
                               <div
                                 key={index}
                                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
@@ -404,7 +404,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                                 <div className="flex items-center justify-between">
                                   <span className={isExpired ? 'text-gray-500' : ''}>{option}</span>
                                   <span className="text-sm text-gray-600">
-                                    +{question.pointAwards[index]} pts
+                                    +{question.pointAwards?.[index] || 0} pts
                                   </span>
                                 </div>
                               </div>
@@ -448,7 +448,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                       <div className="flex-1">
                         <h3 className="font-medium mb-2">{prediction.question.questionText}</h3>
                         <p className="text-gray-600 mb-2">
-                          Your prediction: <span className="font-medium">{prediction.question.options[prediction.selectedOptionIndex]}</span>
+                          Your prediction: <span className="font-medium">{prediction.question.options?.[prediction.selectedOptionIndex] || 'Unknown option'}</span>
                         </p>
                         <p className="text-sm text-gray-500">
                           Submitted {formatDate(prediction.submittedAt)}
@@ -463,7 +463,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                       <div className="bg-gray-50 p-3 rounded-lg">
                         <p className="text-sm">
                           <span className="text-gray-600">Correct answer:</span>{' '}
-                          <span className="font-medium">{prediction.question.options[prediction.question.correctOptionIndex]}</span>
+                          <span className="font-medium">{prediction.question.options?.[prediction.question.correctOptionIndex] || 'Unknown option'}</span>
                         </p>
                       </div>
                     )}
@@ -496,10 +496,10 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                 <h4 className="font-medium mb-2">Your Prediction:</h4>
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                   <p className="font-medium text-blue-900">
-                    {selectedQuestion.options[selectedOptionIndex]}
+                    {selectedQuestion.options?.[selectedOptionIndex] || 'Unknown option'}
                   </p>
                   <p className="text-sm text-blue-700 mt-1">
-                    Potential reward: +{selectedQuestion.pointAwards[selectedOptionIndex]} points
+                    Potential reward: +{selectedQuestion.pointAwards?.[selectedOptionIndex] || 0} points
                   </p>
                 </div>
               </div>

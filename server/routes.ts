@@ -4311,13 +4311,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await storage.getActivePredictionQuestions(activeCycle.id);
       
       // Parse JSON strings and hide admin-only data
-      const userQuestions = questions.map(q => ({
-        id: q.id,
-        questionText: q.questionText,
-        options: JSON.parse(q.options),
-        submissionDeadline: q.submissionDeadline,
-        status: q.status,
-        totalSubmissions: q.totalSubmissions
+      const userQuestions = await Promise.all(questions.map(async (q) => {
+        // Get user's prediction for this question if exists
+        const userPrediction = await storage.getUserPrediction(q.id, req.user.id);
+        
+        return {
+          id: q.id,
+          questionText: q.questionText,
+          options: JSON.parse(q.options),
+          pointAwards: JSON.parse(q.pointAwards || '[]'),
+          submissionDeadline: q.submissionDeadline,
+          resultDeterminationTime: q.resultDeterminationTime,
+          isPublished: q.isPublished,
+          isResultDetermined: q.resultsPublished || false,
+          correctOptionIndex: q.resultsPublished ? q.correctAnswerIndex : undefined,
+          status: q.status,
+          totalSubmissions: q.totalSubmissions,
+          userPrediction: userPrediction ? {
+            id: userPrediction.id,
+            selectedOptionIndex: userPrediction.selectedOptionIndex,
+            submittedAt: userPrediction.submittedAt,
+            pointsAwarded: userPrediction.pointsAwarded
+          } : undefined
+        };
       }));
 
       res.json({ questions: userQuestions });
@@ -4412,11 +4428,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               questionText: question.questionText,
               options: JSON.parse(question.options),
               submissionDeadline: question.submissionDeadline,
-              status: question.status
-            } : null,
-            result: result ? {
-              correctAnswerIndex: result.correctAnswerIndex,
-              resultsPublished: question?.resultsPublished || false
+              status: question.status,
+              isResultDetermined: question.resultsPublished || false,
+              correctOptionIndex: result?.correctAnswerIndex
             } : null,
             isCorrect: result ? result.correctAnswerIndex === prediction.selectedOptionIndex : null
           };
