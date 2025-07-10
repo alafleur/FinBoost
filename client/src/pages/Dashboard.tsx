@@ -12,9 +12,9 @@ import {
   Users, 
   Upload, 
   Star,
+  Target,
   DollarSign,
   Award,
-  Target,
   Activity,
   Crown,
   Medal,
@@ -40,6 +40,7 @@ import StreakDisplay from "@/components/StreakDisplay";
 import CommunityGrowthDial from "@/components/CommunityGrowthDial";
 import TierProgressTable from "@/components/TierProgressTable";
 import SectionHeader from "@/components/SectionHeader";
+import PredictionsContent from "@/components/PredictionsContent";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -475,7 +476,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-0.5 rounded-none">
+            <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-0.5 rounded-none">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -499,6 +500,14 @@ export default function Dashboard() {
               >
                 <Users className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium text-[10px]">Referrals</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="predictions" 
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Predictions tab"
+              >
+                <Target className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Predict</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
@@ -907,6 +916,20 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
+            <TabsContent value="predictions" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Target}
+                  iconColor="blue"
+                  title="Prediction Questions"
+                />
+                <PredictionsContent 
+                  user={user} 
+                  onUpgradeClick={() => setLocation('/subscribe')}
+                />
+              </div>
+            </TabsContent>
+
             <TabsContent value="rewards" className="mt-0 space-y-6">
               <div className="space-y-4">
                 <SectionHeader 
@@ -1174,7 +1197,7 @@ export default function Dashboard() {
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
             <div className="w-full">
-              <TabsList className="grid w-full grid-cols-5 h-auto bg-transparent border-0 p-1 rounded-none">
+              <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -1200,6 +1223,14 @@ export default function Dashboard() {
                   <span className="font-medium">Referrals</span>
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="predictions" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Predictions tab"
+                >
+                  <Target className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Predictions</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="rewards" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Rewards history tab"
@@ -1223,6 +1254,22 @@ export default function Dashboard() {
           {/* Desktop Tab Content */}
           <div className="w-full py-6">
             
+            {/* Predictions Tab - Single Component Implementation */}
+            <TabsContent value="predictions" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Target}
+                  iconColor="blue"
+                  title="Prediction Questions"
+                  titleSize="2xl"
+                />
+                <PredictionsContent 
+                  user={user} 
+                  onUpgradeClick={() => setLocation('/subscribe')}
+                />
+              </div>
+            </TabsContent>
+
             {/* Rewards Tab - Simplest Implementation */}
             <TabsContent value="rewards" className="mt-0 space-y-6">
               <div className="space-y-4">
