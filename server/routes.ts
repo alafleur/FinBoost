@@ -4100,6 +4100,390 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // PREDICTION SYSTEM API ENDPOINTS (Phase 2)
+  // ========================================
+
+  // === ADMIN PREDICTION QUESTION MANAGEMENT ===
+
+  // Create new prediction question
+  app.post('/api/admin/prediction-questions', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const {
+        cycleSettingId,
+        questionText,
+        options,
+        submissionDeadline,
+        resultDeterminationTime,
+        pointAwards
+      } = req.body;
+
+      const question = await storage.createPredictionQuestion({
+        cycleSettingId,
+        questionText,
+        options: JSON.stringify(options), // Store as JSON string
+        submissionDeadline: new Date(submissionDeadline),
+        resultDeterminationTime: new Date(resultDeterminationTime),
+        pointAwards: pointAwards ? JSON.stringify(pointAwards) : null,
+        status: 'draft',
+        createdBy: req.user.id
+      });
+
+      res.json({ success: true, question });
+    } catch (error) {
+      console.error('Error creating prediction question:', error);
+      res.status(500).json({ error: 'Failed to create prediction question' });
+    }
+  });
+
+  // Get prediction questions for a cycle
+  app.get('/api/admin/prediction-questions/:cycleSettingId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const questions = await storage.getPredictionQuestionsByCycle(cycleSettingId);
+      
+      // Parse JSON strings back to objects for frontend
+      const parsedQuestions = questions.map(q => ({
+        ...q,
+        options: JSON.parse(q.options),
+        pointAwards: q.pointAwards ? JSON.parse(q.pointAwards) : null
+      }));
+
+      res.json({ questions: parsedQuestions });
+    } catch (error) {
+      console.error('Error getting prediction questions:', error);
+      res.status(500).json({ error: 'Failed to get prediction questions' });
+    }
+  });
+
+  // Update prediction question
+  app.put('/api/admin/prediction-questions/:questionId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      const updates = { ...req.body };
+      
+      // Convert arrays to JSON strings for storage
+      if (updates.options) {
+        updates.options = JSON.stringify(updates.options);
+      }
+      if (updates.pointAwards) {
+        updates.pointAwards = JSON.stringify(updates.pointAwards);
+      }
+      if (updates.submissionDeadline) {
+        updates.submissionDeadline = new Date(updates.submissionDeadline);
+      }
+      if (updates.resultDeterminationTime) {
+        updates.resultDeterminationTime = new Date(updates.resultDeterminationTime);
+      }
+
+      const question = await storage.updatePredictionQuestion(questionId, updates);
+      
+      // Parse JSON strings back for response
+      const parsedQuestion = {
+        ...question,
+        options: JSON.parse(question.options),
+        pointAwards: question.pointAwards ? JSON.parse(question.pointAwards) : null
+      };
+
+      res.json({ success: true, question: parsedQuestion });
+    } catch (error) {
+      console.error('Error updating prediction question:', error);
+      res.status(500).json({ error: 'Failed to update prediction question' });
+    }
+  });
+
+  // Publish prediction question (make it live)
+  app.post('/api/admin/prediction-questions/:questionId/publish', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      await storage.publishPredictionQuestion(questionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error publishing prediction question:', error);
+      res.status(500).json({ error: 'Failed to publish prediction question' });
+    }
+  });
+
+  // Close prediction question (stop accepting submissions)
+  app.post('/api/admin/prediction-questions/:questionId/close', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      await storage.closePredictionQuestion(questionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error closing prediction question:', error);
+      res.status(500).json({ error: 'Failed to close prediction question' });
+    }
+  });
+
+  // Get prediction question statistics
+  app.get('/api/admin/prediction-questions/:questionId/stats', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      const stats = await storage.getPredictionQuestionStats(questionId);
+      res.json({ stats });
+    } catch (error) {
+      console.error('Error getting prediction question stats:', error);
+      res.status(500).json({ error: 'Failed to get prediction question stats' });
+    }
+  });
+
+  // === ADMIN PREDICTION RESULTS MANAGEMENT ===
+
+  // Set prediction question result and award points
+  app.post('/api/admin/prediction-questions/:questionId/results', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      const { correctAnswerIndex, notes } = req.body;
+
+      // Get question statistics for result creation
+      const stats = await storage.getPredictionQuestionStats(questionId);
+      const question = await storage.getPredictionQuestion(questionId);
+
+      if (!question) {
+        return res.status(404).json({ error: 'Prediction question not found' });
+      }
+
+      // Create prediction result
+      const pointsPerOption = Array(stats.optionCounts.length).fill(0);
+      pointsPerOption[correctAnswerIndex] = 10; // Default 10 points for correct answer
+
+      const result = await storage.createPredictionResult({
+        predictionQuestionId: questionId,
+        correctAnswerIndex,
+        totalParticipants: stats.totalSubmissions,
+        optionStats: JSON.stringify(stats.optionCounts),
+        totalPointsAwarded: 0, // Will be updated after distribution
+        pointsPerOption: JSON.stringify(pointsPerOption),
+        notes: notes || null,
+        determinedBy: req.user.id
+      });
+
+      // Distribute points to users who answered correctly
+      const distributionResult = await storage.distributePredictionPoints(questionId);
+
+      // Mark question as completed
+      await storage.completePredictionQuestion(questionId, req.user.id);
+
+      res.json({ 
+        success: true, 
+        result,
+        distributionResult
+      });
+    } catch (error) {
+      console.error('Error setting prediction results:', error);
+      res.status(500).json({ error: 'Failed to set prediction results' });
+    }
+  });
+
+  // === USER PREDICTION ENDPOINTS ===
+
+  // Get active prediction questions for current cycle
+  app.get('/api/predictions/active', authenticateToken, async (req, res) => {
+    try {
+      // Get current active cycle
+      const activeCycle = await storage.getActiveCycleSetting();
+      if (!activeCycle) {
+        return res.json({ questions: [] });
+      }
+
+      const questions = await storage.getActivePredictionQuestions(activeCycle.id);
+      
+      // Parse JSON strings and hide admin-only data
+      const userQuestions = questions.map(q => ({
+        id: q.id,
+        questionText: q.questionText,
+        options: JSON.parse(q.options),
+        submissionDeadline: q.submissionDeadline,
+        status: q.status,
+        totalSubmissions: q.totalSubmissions
+      }));
+
+      res.json({ questions: userQuestions });
+    } catch (error) {
+      console.error('Error getting active prediction questions:', error);
+      res.status(500).json({ error: 'Failed to get prediction questions' });
+    }
+  });
+
+  // Submit user prediction
+  app.post('/api/predictions/:questionId/submit', authenticateToken, async (req, res) => {
+    try {
+      const questionId = parseInt(req.params.questionId);
+      const { selectedOptionIndex } = req.body;
+
+      // Check if user already submitted for this question
+      const existingPrediction = await storage.getUserPrediction(questionId, req.user.id);
+      if (existingPrediction) {
+        return res.status(400).json({ error: 'You have already submitted a prediction for this question' });
+      }
+
+      // Check if question is still accepting submissions
+      const question = await storage.getPredictionQuestion(questionId);
+      if (!question || question.status !== 'active') {
+        return res.status(400).json({ error: 'This prediction question is not accepting submissions' });
+      }
+
+      if (new Date() > question.submissionDeadline) {
+        return res.status(400).json({ error: 'Submission deadline has passed' });
+      }
+
+      // Submit prediction
+      const prediction = await storage.submitUserPrediction({
+        predictionQuestionId: questionId,
+        userId: req.user.id,
+        selectedOptionIndex,
+        pointsAwarded: 0 // Will be set when results are determined
+      });
+
+      res.json({ success: true, prediction });
+    } catch (error) {
+      console.error('Error submitting prediction:', error);
+      res.status(500).json({ error: 'Failed to submit prediction' });
+    }
+  });
+
+  // Update user prediction (if allowed)
+  app.put('/api/predictions/:predictionId', authenticateToken, async (req, res) => {
+    try {
+      const predictionId = parseInt(req.params.predictionId);
+      const { selectedOptionIndex } = req.body;
+
+      // Get existing prediction to verify ownership
+      const existingPrediction = await storage.getUserPrediction(predictionId, req.user.id);
+      if (!existingPrediction) {
+        return res.status(404).json({ error: 'Prediction not found' });
+      }
+
+      // Check if question is still accepting changes
+      const question = await storage.getPredictionQuestion(existingPrediction.predictionQuestionId);
+      if (!question || question.status !== 'active') {
+        return res.status(400).json({ error: 'Cannot modify prediction for this question' });
+      }
+
+      if (new Date() > question.submissionDeadline) {
+        return res.status(400).json({ error: 'Submission deadline has passed' });
+      }
+
+      const updatedPrediction = await storage.updateUserPrediction(predictionId, selectedOptionIndex);
+
+      res.json({ success: true, prediction: updatedPrediction });
+    } catch (error) {
+      console.error('Error updating prediction:', error);
+      res.status(500).json({ error: 'Failed to update prediction' });
+    }
+  });
+
+  // Get user's prediction history
+  app.get('/api/predictions/my-predictions', authenticateToken, async (req, res) => {
+    try {
+      const predictions = await storage.getUserPredictions(req.user.id);
+      
+      // Enrich with question data
+      const enrichedPredictions = await Promise.all(
+        predictions.map(async (prediction) => {
+          const question = await storage.getPredictionQuestion(prediction.predictionQuestionId);
+          const result = await storage.getPredictionResult(prediction.predictionQuestionId);
+          
+          return {
+            ...prediction,
+            question: question ? {
+              questionText: question.questionText,
+              options: JSON.parse(question.options),
+              submissionDeadline: question.submissionDeadline,
+              status: question.status
+            } : null,
+            result: result ? {
+              correctAnswerIndex: result.correctAnswerIndex,
+              resultsPublished: question?.resultsPublished || false
+            } : null,
+            isCorrect: result ? result.correctAnswerIndex === prediction.selectedOptionIndex : null
+          };
+        })
+      );
+
+      res.json({ predictions: enrichedPredictions });
+    } catch (error) {
+      console.error('Error getting user predictions:', error);
+      res.status(500).json({ error: 'Failed to get prediction history' });
+    }
+  });
+
+  // Get user prediction statistics
+  app.get('/api/predictions/my-stats', authenticateToken, async (req, res) => {
+    try {
+      const stats = await storage.getUserPredictionStats(req.user.id);
+      res.json({ stats });
+    } catch (error) {
+      console.error('Error getting user prediction stats:', error);
+      res.status(500).json({ error: 'Failed to get prediction statistics' });
+    }
+  });
+
+  // === PREDICTION ANALYTICS ENDPOINTS ===
+
+  // Get prediction analytics for current cycle (admin)
+  app.get('/api/admin/predictions/analytics/:cycleSettingId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const analytics = await storage.getPredictionAnalyticsByCycle(cycleSettingId);
+      res.json({ analytics });
+    } catch (error) {
+      console.error('Error getting prediction analytics:', error);
+      res.status(500).json({ error: 'Failed to get prediction analytics' });
+    }
+  });
+
+  // Delete prediction question (admin only)
+  app.delete('/api/admin/prediction-questions/:questionId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      
+      // Only allow deletion of draft questions
+      const question = await storage.getPredictionQuestion(questionId);
+      if (!question) {
+        return res.status(404).json({ error: 'Prediction question not found' });
+      }
+      
+      if (question.status !== 'draft') {
+        return res.status(400).json({ error: 'Can only delete draft questions' });
+      }
+
+      await storage.deletePredictionQuestion(questionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting prediction question:', error);
+      res.status(500).json({ error: 'Failed to delete prediction question' });
+    }
+  });
+
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;
   (httpServer as any).broadcastActivityUpdate = broadcastActivityUpdate;
