@@ -4139,8 +4139,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get a single prediction question by ID
+  app.get('/api/admin/prediction-questions/question/:questionId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      const question = await storage.getPredictionQuestion(questionId);
+      
+      if (!question) {
+        return res.status(404).json({ error: 'Prediction question not found' });
+      }
+
+      // Parse JSON strings back to objects for frontend
+      const parsedQuestion = {
+        ...question,
+        options: JSON.parse(question.options),
+        pointAwards: question.pointAwards ? JSON.parse(question.pointAwards) : null
+      };
+
+      res.json({ question: parsedQuestion });
+    } catch (error) {
+      console.error('Error getting prediction question:', error);
+      res.status(500).json({ error: 'Failed to get prediction question' });
+    }
+  });
+
   // Get prediction questions for a cycle
-  app.get('/api/admin/prediction-questions/:cycleSettingId', authenticateToken, async (req, res) => {
+  app.get('/api/admin/prediction-questions/cycle/:cycleSettingId', authenticateToken, async (req, res) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
     }
@@ -4255,7 +4282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const questionId = parseInt(req.params.questionId);
-      const { correctAnswerIndex, notes } = req.body;
+      const { correctAnswerIndex, pointsPerOption, notes } = req.body;
 
       // Get question statistics for result creation
       const stats = await storage.getPredictionQuestionStats(questionId);
@@ -4265,13 +4292,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Prediction question not found' });
       }
 
-      // Update the prediction question with the correct answer index first
-      await storage.setPredictionQuestionResult(questionId, correctAnswerIndex);
+      // Validate pointsPerOption array matches the number of options
+      const options = JSON.parse(question.options);
+      if (!pointsPerOption || pointsPerOption.length !== options.length) {
+        return res.status(400).json({ 
+          error: `pointsPerOption must be an array with ${options.length} values (one for each answer option)` 
+        });
+      }
+
+      // Update the prediction question with the correct answer index and custom point awards
+      await storage.setPredictionQuestionResult(questionId, correctAnswerIndex, pointsPerOption);
 
       // Create prediction result
-      const pointsPerOption = Array(stats.optionCounts.length).fill(0);
-      pointsPerOption[correctAnswerIndex] = 10; // Default 10 points for correct answer
-
       const result = await storage.createPredictionResult({
         predictionQuestionId: questionId,
         correctAnswerIndex,
@@ -4283,7 +4315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         determinedBy: req.user.id
       });
 
-      // Distribute points to users who answered correctly
+      // Distribute points to users based on admin's custom point allocation
       const distributionResult = await storage.distributePredictionPoints(questionId);
 
       // Mark question as completed
@@ -4314,7 +4346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Prediction question not found' });
       }
       
-      if (!question.isResultDetermined) {
+      if (question.correctAnswerIndex === null || question.correctAnswerIndex === undefined) {
         return res.status(400).json({ error: 'Cannot distribute points before result is determined' });
       }
       

@@ -192,7 +192,8 @@ async function setQuestionResult(questionId) {
         'Authorization': `Bearer ${adminToken}`
       },
       body: JSON.stringify({
-        correctAnswerIndex: 0 // User chose correctly
+        correctAnswerIndex: 0, // User chose correctly
+        pointsPerOption: [15, 5] // 15 points for correct answer, 5 points for incorrect
       })
     });
     
@@ -211,7 +212,33 @@ async function setQuestionResult(questionId) {
   }
 }
 
+async function checkQuestionStatus(questionId) {
+  console.log('🔍 Checking question status after distribution...');
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/prediction-questions/question/${questionId}`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📊 Question status:', {
+        pointsDistributed: data.question?.pointsDistributed,
+        correctAnswerIndex: data.question?.correctAnswerIndex,
+        pointAwards: data.question?.pointAwards
+      });
+      return data.question;
+    }
+  } catch (error) {
+    console.log('⚠️  Could not check question status:', error.message);
+  }
+  return null;
+}
+
 async function testDistributePointsEndpoint(questionId) {
+  // Add small delay to ensure database updates are complete
+  console.log('⏱️  Waiting for database to sync...');
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   console.log('🔄 Testing separate distribute points endpoint...');
   try {
     const response = await fetch(`${BASE_URL}/api/admin/prediction-questions/${questionId}/distribute-points`, {
@@ -223,7 +250,7 @@ async function testDistributePointsEndpoint(questionId) {
     });
     
     const data = await response.json();
-    if (response.status === 400 && data.error.includes('already been distributed')) {
+    if (response.status === 400 && data.error.includes('Points have already been distributed')) {
       console.log('✅ Distribute points endpoint correctly prevents duplicate distribution');
       return true;
     } else {
@@ -312,6 +339,9 @@ async function runPhase5Test() {
     
     // Step 6: Set result and distribute points
     if (!await setQuestionResult(testQuestionId)) return;
+    
+    // Step 6.5: Check question status
+    await checkQuestionStatus(testQuestionId);
     
     // Step 7: Test separate distribution endpoint
     if (!await testDistributePointsEndpoint(testQuestionId)) return;

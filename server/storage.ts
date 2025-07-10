@@ -6934,6 +6934,21 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async setPredictionQuestionResult(questionId: number, correctAnswerIndex: number, pointsPerOption: number[]): Promise<void> {
+    try {
+      const result = await db.update(predictionQuestions)
+        .set({
+          correctAnswerIndex,
+          pointAwards: JSON.stringify(pointsPerOption)
+        })
+        .where(eq(predictionQuestions.id, questionId))
+        .returning();
+    } catch (error) {
+      console.error('Error setting prediction question result:', error);
+      throw error;
+    }
+  }
+
   async completePredictionQuestion(questionId: number, completedBy: number): Promise<void> {
     try {
       await db.update(predictionQuestions)
@@ -7128,7 +7143,8 @@ export class MemStorage implements IStorage {
   }> {
     try {
       const question = await this.getPredictionQuestion(predictionQuestionId);
-      if (!question || question.correctAnswerIndex === null) {
+      
+      if (!question || question.correctAnswerIndex === null || question.correctAnswerIndex === undefined) {
         throw new Error('Question not found or correct answer not set');
       }
 
@@ -7173,6 +7189,8 @@ export class MemStorage implements IStorage {
       await db.update(predictionQuestions)
         .set({ pointsDistributed: true })
         .where(eq(predictionQuestions.id, predictionQuestionId));
+
+
 
       return {
         totalPointsAwarded,
