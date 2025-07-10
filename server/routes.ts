@@ -4117,8 +4117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         questionText,
         options,
         submissionDeadline,
-        resultDeterminationTime,
-        pointAwards
+        resultDeterminationTime
       } = req.body;
 
       const question = await storage.createPredictionQuestion({
@@ -4127,7 +4126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         options: JSON.stringify(options), // Store as JSON string
         submissionDeadline: new Date(submissionDeadline),
         resultDeterminationTime: new Date(resultDeterminationTime),
-        pointAwards: pointAwards ? JSON.stringify(pointAwards) : null,
+        pointAwards: null, // Point allocation happens during result determination
         status: 'draft',
         createdBy: req.user.id
       });

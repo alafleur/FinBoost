@@ -82,13 +82,14 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     questionText: '',
     options: ['', ''], // Start with 2 options
     submissionDeadline: '',
-    resultDeterminationTime: '',
-    pointAwards: [10, 10] // Default 10 points per option
+    resultDeterminationTime: ''
   });
 
   // Result determination form
   const [resultForm, setResultForm] = useState({
-    correctOptionIndex: 0
+    correctOptionIndex: 0,
+    pointsPerOption: [] as number[],
+    notes: ''
   });
 
   // Get active cycle on load
@@ -111,7 +112,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/prediction-questions/${selectedCycle}`, {
+      const response = await fetch(`/api/admin/prediction-questions/cycle/${selectedCycle}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -148,8 +149,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
         },
         body: JSON.stringify({
           ...questionForm,
-          cycleSettingId: parseInt(questionForm.cycleSettingId),
-          pointAwards: questionForm.pointAwards.map(p => parseInt(p.toString()))
+          cycleSettingId: parseInt(questionForm.cycleSettingId)
         })
       });
 
@@ -220,7 +220,9 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          correctAnswerIndex: resultForm.correctOptionIndex
+          correctAnswerIndex: resultForm.correctOptionIndex,
+          pointsPerOption: resultForm.pointsPerOption,
+          notes: resultForm.notes
         })
       });
 
@@ -316,16 +318,14 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
       questionText: '',
       options: ['', ''],
       submissionDeadline: '',
-      resultDeterminationTime: '',
-      pointAwards: [10, 10]
+      resultDeterminationTime: ''
     });
   };
 
   const addOption = () => {
     setQuestionForm(prev => ({
       ...prev,
-      options: [...prev.options, ''],
-      pointAwards: [...prev.pointAwards, 10]
+      options: [...prev.options, '']
     }));
   };
 
@@ -334,8 +334,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     
     setQuestionForm(prev => ({
       ...prev,
-      options: prev.options.filter((_, i) => i !== index),
-      pointAwards: prev.pointAwards.filter((_, i) => i !== index)
+      options: prev.options.filter((_, i) => i !== index)
     }));
   };
 
@@ -346,12 +345,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     }));
   };
 
-  const updatePointAward = (index: number, value: number) => {
-    setQuestionForm(prev => ({
-      ...prev,
-      pointAwards: prev.pointAwards.map((points, i) => i === index ? value : points)
-    }));
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString() + ' ' + new Date(dateString).toLocaleTimeString();
@@ -472,6 +466,11 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                               variant="secondary"
                               onClick={() => {
                                 setSelectedQuestion(question);
+                                setResultForm({
+                                  correctOptionIndex: 0,
+                                  pointsPerOption: new Array(question.options.length).fill(10),
+                                  notes: ''
+                                });
                                 setShowResultDialog(true);
                               }}
                             >
@@ -555,14 +554,6 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                       onChange={(e) => updateOption(index, e.target.value)}
                       placeholder={`Option ${index + 1}`}
                       className="flex-1"
-                    />
-                    <Input
-                      type="number"
-                      value={questionForm.pointAwards[index]}
-                      onChange={(e) => updatePointAward(index, parseInt(e.target.value) || 0)}
-                      placeholder="Points"
-                      className="w-20"
-                      min="0"
                     />
                     {questionForm.options.length > 2 && (
                       <Button
@@ -672,7 +663,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                 <Label>Correct Answer</Label>
                 <Select 
                   value={resultForm.correctOptionIndex.toString()} 
-                  onValueChange={(value) => setResultForm({ correctOptionIndex: parseInt(value) })}
+                  onValueChange={(value) => setResultForm(prev => ({ ...prev, correctOptionIndex: parseInt(value) }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -685,6 +676,46 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              
+              <div>
+                <Label>Point Allocation per Option</Label>
+                <div className="space-y-2">
+                  {selectedQuestion.options.map((option, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">Option {index + 1}:</span>
+                        <span className="text-sm text-gray-600 ml-2">{option}</span>
+                      </div>
+                      <Input
+                        type="number"
+                        value={resultForm.pointsPerOption[index] || 0}
+                        onChange={(e) => {
+                          const newPoints = [...resultForm.pointsPerOption];
+                          newPoints[index] = parseInt(e.target.value) || 0;
+                          setResultForm(prev => ({ ...prev, pointsPerOption: newPoints }));
+                        }}
+                        placeholder="Points"
+                        className="w-20"
+                        min="0"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Set how many points users who selected each option will receive. Allows for nuanced scoring (e.g., partial credit for close predictions).
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="notes">Admin Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  value={resultForm.notes}
+                  onChange={(e) => setResultForm(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Add any notes about this result determination..."
+                  rows={2}
+                />
               </div>
               
               <div className="flex justify-end gap-2">
