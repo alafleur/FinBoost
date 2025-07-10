@@ -24,6 +24,9 @@ interface CycleSetting {
   isActive: boolean;
   allowMidCycleJoining: boolean;
   midCycleJoinThresholdDays: number;
+  status?: string; // "active", "completed", "archived"
+  completedAt?: Date;
+  completedBy?: number;
   createdAt: Date;
   createdBy?: number;
 }
@@ -119,6 +122,42 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
     }
   };
 
+  const handleCompleteCycle = async (cycleId: number, cycleName: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Confirm action with user
+      if (!confirm(`Are you sure you want to complete "${cycleName}"? This will reset all user points to 0 for a fresh start.`)) {
+        return;
+      }
+
+      const response = await fetch(`/api/admin/cycles/${cycleId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Cycle Completed",
+          description: data.message || "Cycle completed successfully. All user points have been reset."
+        });
+        onRefresh();
+      } else {
+        throw new Error('Failed to complete cycle');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to complete cycle",
+        variant: "destructive"
+      });
+    }
+  };
+
   const formatCurrency = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
@@ -195,8 +234,14 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold">{cycle.cycleName}</h3>
-                          <Badge variant={cycle.isActive ? "default" : "secondary"}>
-                            {cycle.isActive ? "Active" : "Inactive"}
+                          <Badge variant={
+                            cycle.status === 'completed' ? "outline" : 
+                            cycle.status === 'archived' ? "secondary" :
+                            cycle.isActive ? "default" : "secondary"
+                          }>
+                            {cycle.status === 'completed' ? "Completed" :
+                             cycle.status === 'archived' ? "Archived" :
+                             cycle.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </div>
                         
@@ -244,6 +289,16 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                       </div>
                       
                       <div className="flex items-center gap-2 ml-4">
+                        {cycle.status !== 'completed' && cycle.status !== 'archived' && cycle.isActive && (
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => handleCompleteCycle(cycle.id, cycle.cycleName)}
+                            title="Complete this cycle and reset all user points"
+                          >
+                            Complete Cycle
+                          </Button>
+                        )}
                         <Button 
                           size="sm" 
                           variant="outline"
