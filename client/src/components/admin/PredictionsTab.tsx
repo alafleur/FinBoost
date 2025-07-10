@@ -213,14 +213,14 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     if (!selectedQuestion) return;
     
     try {
-      const response = await fetch(`/api/admin/prediction-questions/${selectedQuestion.id}/determine-result`, {
+      const response = await fetch(`/api/admin/prediction-questions/${selectedQuestion.id}/results`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          correctOptionIndex: resultForm.correctOptionIndex
+          correctAnswerIndex: resultForm.correctOptionIndex
         })
       });
 
@@ -243,6 +243,40 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
       toast({
         title: "Error",
         description: "Failed to determine result",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const distributePoints = async (questionId: number) => {
+    try {
+      const response = await fetch(`/api/admin/prediction-questions/${questionId}/distribute-points`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Success",
+          description: `Points distributed successfully! ${data.distributionResult.usersAwarded} users received ${data.distributionResult.totalPointsAwarded} total points.`
+        });
+        fetchQuestions();
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to distribute points",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to distribute points",
         variant: "destructive"
       });
     }
@@ -443,6 +477,22 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                             >
                               Set Result
                             </Button>
+                          )}
+                          
+                          {question.isResultDetermined && !question.pointsDistributed && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => distributePoints(question.id)}
+                            >
+                              Distribute Points
+                            </Button>
+                          )}
+                          
+                          {question.pointsDistributed && (
+                            <Badge variant="secondary" className="text-xs">
+                              Points Distributed
+                            </Badge>
                           )}
                         </div>
                       </TableCell>

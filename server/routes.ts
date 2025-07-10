@@ -4265,6 +4265,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Prediction question not found' });
       }
 
+      // Update the prediction question with the correct answer index first
+      await storage.setPredictionQuestionResult(questionId, correctAnswerIndex);
+
       // Create prediction result
       const pointsPerOption = Array(stats.optionCounts.length).fill(0);
       pointsPerOption[correctAnswerIndex] = 10; // Default 10 points for correct answer
@@ -4294,6 +4297,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error setting prediction results:', error);
       res.status(500).json({ error: 'Failed to set prediction results' });
+    }
+  });
+
+  // Distribute points separately (if not done during result determination)
+  app.post('/api/admin/prediction-questions/:questionId/distribute-points', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const questionId = parseInt(req.params.questionId);
+      
+      // Check if question has result determined but points not distributed
+      const question = await storage.getPredictionQuestion(questionId);
+      if (!question) {
+        return res.status(404).json({ error: 'Prediction question not found' });
+      }
+      
+      if (!question.isResultDetermined) {
+        return res.status(400).json({ error: 'Cannot distribute points before result is determined' });
+      }
+      
+      if (question.pointsDistributed) {
+        return res.status(400).json({ error: 'Points have already been distributed for this question' });
+      }
+
+      // Distribute points
+      const distributionResult = await storage.distributePredictionPoints(questionId);
+
+      res.json({ 
+        success: true, 
+        distributionResult
+      });
+    } catch (error) {
+      console.error('Error distributing prediction points:', error);
+      res.status(500).json({ error: 'Failed to distribute prediction points' });
     }
   });
 
