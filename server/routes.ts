@@ -2825,6 +2825,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cycle Completion Endpoints
+  app.post("/api/admin/cycles/:cycleId/complete", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      await storage.completeCycle(cycleId, req.user.id);
+      
+      res.json({ 
+        success: true, 
+        message: "Cycle completed successfully. All user points have been reset for the new cycle." 
+      });
+    } catch (error) {
+      console.error("Error completing cycle:", error);
+      res.status(500).json({ error: "Failed to complete cycle" });
+    }
+  });
+
+  app.post("/api/admin/cycles/:cycleId/archive", authenticateToken, async (req, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      await storage.archiveCycleData(cycleId);
+      
+      res.json({ 
+        success: true, 
+        message: "Cycle archived successfully" 
+      });
+    } catch (error) {
+      console.error("Error archiving cycle:", error);
+      res.status(500).json({ error: "Failed to archive cycle" });
+    }
+  });
+
   app.post("/api/admin/cycles/:cycleId/enroll-premium-users", authenticateToken, async (req, res) => {
     try {
       if (!req.user.isAdmin) {
