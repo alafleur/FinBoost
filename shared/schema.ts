@@ -315,6 +315,11 @@ export const cycleSettings = pgTable("cycle_settings", {
   // Mid-cycle joining threshold
   midCycleJoinThresholdDays: integer("mid_cycle_join_threshold_days").default(3).notNull(),
   
+  // Cycle Status and Completion
+  status: text("status").default("active").notNull(), // "active", "completed", "archived"
+  completedAt: timestamp("completed_at"),
+  completedBy: integer("completed_by").references(() => users.id),
+  
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   createdBy: integer("created_by").references(() => users.id),
