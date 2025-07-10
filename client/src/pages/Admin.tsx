@@ -18,6 +18,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import CycleManagementTab from "@/components/admin/CycleManagementTab";
 import CycleOperationsTab from "@/components/admin/CycleOperationsTab";
+import PredictionsTab from "@/components/admin/PredictionsTab";
 import {
   Settings,
   Plus,
@@ -1807,6 +1808,7 @@ export default function Admin() {
             <TabsTrigger value="quiz">Quiz</TabsTrigger>
             <TabsTrigger value="cycle-management">Cycle Management</TabsTrigger>
             <TabsTrigger value="cycle-operations">Cycle Operations</TabsTrigger>
+            <TabsTrigger value="predictions">Predictions</TabsTrigger>
             <TabsTrigger value="points">Points</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="proofs">Proof Review</TabsTrigger>
@@ -2688,6 +2690,13 @@ export default function Admin() {
 
           <TabsContent value="cycle-operations">
             <CycleOperationsTab 
+              cycleSettings={cycleSettings} 
+              onRefresh={fetchData}
+            />
+          </TabsContent>
+
+          <TabsContent value="predictions">
+            <PredictionsTab 
               cycleSettings={cycleSettings} 
               onRefresh={fetchData}
             />
