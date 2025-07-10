@@ -64,6 +64,7 @@ interface PredictionsContentProps {
 }
 
 export default function PredictionsContent({ user, onUpgradeClick }: PredictionsContentProps) {
+  console.log('PredictionsContent rendered with user:', user);
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [activeQuestions, setActiveQuestions] = useState<PredictionQuestion[]>([]);
@@ -224,6 +225,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
 
   // Non-premium user content
   if (user?.subscriptionStatus !== 'active') {
+    console.log('User not premium, showing upgrade prompt. User status:', user?.subscriptionStatus);
     return (
       <div className="space-y-6">
         <Card>
@@ -241,6 +243,8 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
       </div>
     );
   }
+
+  console.log('User is premium, rendering main component. Stats:', userStats, 'Active questions:', activeQuestions.length);
 
   return (
     <div className="space-y-6">
