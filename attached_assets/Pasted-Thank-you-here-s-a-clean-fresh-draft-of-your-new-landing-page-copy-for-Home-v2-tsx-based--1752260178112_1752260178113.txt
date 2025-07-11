@@ -1,0 +1,136 @@
+Thank you—here’s a **clean, fresh draft** of your **new landing page copy** for `Home_v2.tsx` based on:
+
+✅ The **gamified learning + cash rewards** core
+✅ The **Early Access guaranteed prize pool**
+✅ The **student debt + consumer debt mission**
+✅ The **target audience** of reward-seekers, finance-curious users, and people looking for real financial impact
+
+---
+
+# 🚀 FinBoost Landing Page Copy Draft (`Home_v2.tsx`)
+
+---
+
+## 1️⃣ Hero Section (Hook + CTA)
+
+**Headline:**
+**“Learn Money. Earn Points. Win Cash.”**
+
+**Subheadline:**
+Financial literacy has never paid off like this.
+Complete quick lessons, earn points, and enter for a chance to win real cash rewards—every cycle.
+
+**CTA Button:**
+👉 **Join Early Access & Start Earning**
+
+**Subtext (small below CTA):**
+✅ Prize pools guaranteed during Early Access.
+✅ No purchase necessary.
+
+---
+
+## 2️⃣ How It Works Section (Simple 3-Step Process)
+
+**Section Title:**
+**How FinBoost Works**
+
+**Step 1:**
+📚 **Learn:** Complete short, fun lessons about saving, investing, and mastering your money.
+
+**Step 2:**
+🎯 **Earn Points:** Rack up points for learning, daily streaks, referrals, and even real-world actions like paying down debt.
+
+**Step 3:**
+💰 **Win Cash:** Your points enter you into cycle-based prize pools—**the more you learn, the better your chances to win.**
+
+---
+
+## 3️⃣ Early Access Bonus Section (Value + Urgency)
+
+**Section Title:**
+**Why Join Early? Bigger Prize Pools—Guaranteed.**
+
+**Body Copy:**
+To celebrate the launch of FinBoost, we’re guaranteeing every reward cycle’s prize pool for our first members.
+That means **you’ll compete for real cash prizes funded directly by FinBoost—no matter how many users join.**
+This is a **limited-time Early Access Bonus** that won’t last.
+
+**Callout Box:**
+🔥 **This cycle’s guaranteed prize pool:** **\$2,500** *(Example—confirm actual amount)*
+
+---
+
+## 4️⃣ What Makes FinBoost Different Section (Mission + Values)
+
+**Section Title:**
+**More Than Just Prizes—We’re Tackling the Debt Crisis**
+
+**Body Copy:**
+FinBoost isn’t just about winning money—it’s about **helping people take control of their finances at a time when it’s needed most**.
+
+With student loans back, consumer debt at record highs, and financial stress rising, we believe that:
+✅ **Financial education should be accessible.**
+✅ **Small steps deserve real rewards.**
+✅ **Paying down debt, building savings, and learning smart money habits should be celebrated.**
+
+We reward not just what you know—but what you do.
+
+---
+
+## 5️⃣ What You Learn Section (Content Preview)
+
+**Section Title:**
+**What You’ll Learn**
+
+✅ How to build a budget that actually works
+✅ Smarter saving habits for any income
+✅ The basics of investing without the jargon
+✅ How to crush debt faster
+✅ And more—new lessons added regularly
+
+---
+
+## 6️⃣ FAQ Section (Selected Key Questions)
+
+* **How do I earn rewards?**
+  Complete lessons, earn points, and enter our point-weighted reward draws every cycle.
+
+* **How are winners selected?**
+  Your points give you **better odds—but everyone has a chance**.
+
+* **Is this gambling?**
+  No—FinBoost is a **legal, sweepstakes-compliant system with no purchase necessary**.
+
+* **Why are rewards guaranteed right now?**
+  To reward our first members, we’re **subsidizing prize pools for Early Access**. This is a **limited-time bonus**.
+
+---
+
+## 7️⃣ Final CTA Section
+
+**Headline:**
+Ready to Learn, Earn, and Win?
+
+**Button:**
+👉 **Join Early Access & Boost Your Finances**
+
+**Subtext:**
+Prize pools guaranteed for Early Access. No purchase necessary. See terms.
+
+---
+
+# 🔑 Key Notes:
+
+* **Tone:** Approachable, bold, reward-driven but not gimmicky.
+* **Mission woven in:** Not just about winning but about **solving a real-world problem**.
+* **Urgency present but not pushy.**
+
+---
+
+👉 Would you like me to:
+
+1. **Draft the React/Tailwind code structure** for this (`Home_v2.tsx`)?
+2. **Refine the copy further toward playful or premium tone?**
+3. **Write social/email variations to match?**
+
+What’s next?
