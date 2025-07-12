@@ -19,7 +19,7 @@ export default function FinalCTAV2({ onSubscribeSuccess }: FinalCTAV2Props) {
     <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">
-          Ready to Learn, Take Action, and Get Rewarded?
+          Ready to Turn Financial Stress into Financial Progress?
         </h2>
         
         <p className="text-blue-100 text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -50,7 +50,7 @@ export default function FinalCTAV2({ onSubscribeSuccess }: FinalCTAV2Props) {
             size="lg"
             className="w-full sm:w-auto h-[56px] bg-white text-blue-700 hover:bg-gray-100 font-semibold px-8 rounded-lg shadow-xl transition duration-300 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
           >
-            Join Early Access & Start Earning
+            Claim Early Access & Start Earning
           </Button>
         </div>
         
