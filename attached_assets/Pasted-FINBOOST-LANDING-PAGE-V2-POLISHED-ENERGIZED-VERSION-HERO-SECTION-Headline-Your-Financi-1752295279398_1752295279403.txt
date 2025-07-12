@@ -1,0 +1,171 @@
+FINBOOST LANDING PAGE V2 - POLISHED & ENERGIZED VERSION
+
+
+---
+
+HERO SECTION
+
+Headline: "Your Financial Comeback Starts Here—And We’ll Reward You For It."
+
+Subheadline: "Learn powerful money skills. Take real financial actions. Earn points and win real cash rewards—every two weeks. Join our limited Early Access where every prize pool is guaranteed, no matter how many members join."
+
+CTA: 👉 Claim Early Access & Start Earning
+
+Trust Elements (small below CTA):
+
+Prize pools guaranteed by FinBoost during Early Access
+
+Limited to our first few hundred members
+
+No purchase necessary—see official rules
+
+
+Suggested Graphic: Hero image of smiling, diverse people (not stock-corporate), with dynamic visuals of money icons, upward arrows, and rewards imagery (could animate in future versions).
+
+
+---
+
+SECTION 2: THE SHARED STRUGGLE
+
+Headline: "Money Stress is Real—But You’re Not Powerless."
+
+Copy: Rising costs. Debt that feels endless. Worries about saving—or being ready for retirement. You're not alone. But small, smart steps—taken consistently—can change the game. FinBoost rewards you for every move you make.
+
+Suggested Visual: Illustration of common financial worries (bills, credit cards, savings jars) transforming into bright symbols of success (checkmarks, coins, celebrations).
+
+
+---
+
+SECTION 3: HOW FINBOOST WORKS
+
+Headline: "Learn. Take Action. Earn Points. Win Cash."
+
+Step 1: Learn
+
+Quick, actionable lessons on money, debt, savings, and investing.
+
+Earn points by completing each module.
+
+
+Step 2: Take Real-World Action
+
+Prove real progress: debt payments, savings deposits, budgets.
+
+Verified actions = bonus points.
+
+
+Step 3: Make Predictions (Optional)
+
+Share your take on market or economy outcomes.
+
+Closer guesses = more bonus points.
+
+
+Step 4: Compete & Win
+
+Points boost your odds in bi-weekly reward draws.
+
+Transparent system, real cash prizes.
+
+
+Suggested Visual: A simple animated flowchart graphic showing Learn → Take Action → Earn Points → Win Rewards.
+
+
+---
+
+SECTION 4: EARLY ACCESS BONUS
+
+Headline: "Guaranteed Prize Pools—For Early Access Only."
+
+Copy: Every reward cycle during Early Access is fully backed by FinBoost. That means real cash prizes—guaranteed—no matter how many users join. Join early to maximize your chances while competition is still small.
+
+Suggested Visual: Bold badge or lock icon highlighting "Guaranteed Prize Pool Active" alongside sample cash reward figures.
+
+
+---
+
+SECTION 5: HOW REWARDS WORK
+
+Headline: "More Than Half of Active Members Win Rewards Every Cycle."
+
+Copy: We reward consistent engagement—not luck. Here’s how it works:
+
+All points earned during the cycle determine your odds.
+
+At the end of each cycle, rewards are distributed across multiple tiers:
+
+Top tier: Higher-value prizes for top point earners.
+
+Middle tier: Solid rewards for engaged participants.
+
+Entry tier: Small guaranteed rewards for consistent action.
+
+
+More than half of active members receive rewards each cycle.
+
+
+Suggested Visual: Tiered pyramid or bar graph showing three levels of winners with indicative prize sizes (no exact dollar amounts).
+
+
+---
+
+SECTION 6: OUR BIGGER PURPOSE
+
+Headline: "We’re Here to Help Break the Cycle of Financial Stress."
+
+Copy: From student loans to consumer debt to retirement fears, too many people feel stuck. FinBoost exists to reward your journey toward real financial freedom. Every lesson completed, every step forward—you’re building a stronger future. And we’ll reward you for it.
+
+Suggested Visual: A community circle or chain of people linking together visually with upward progress icons (arrows, graphs, trees).
+
+
+---
+
+SECTION 7: WHY FINBOOST IS DIFFERENT
+
+Headline: "Other Apps Track. We Reward."
+
+Key Points:
+
+Most apps show you charts—we help you move forward and pay you for progress.
+
+It’s not about theory—it’s about real action, real improvement, and real cash.
+
+
+Suggested Visual: Side-by-side comparison graphic (Track vs. Reward).
+
+
+---
+
+FINAL CTA SECTION
+
+Headline: "Ready to Learn, Take Action, and Get Rewarded?"
+
+Copy: Join FinBoost Early Access today and take control of your financial future—with real rewards for every step you take.
+
+More than half of active members win something each cycle.
+
+Prize pools guaranteed for Early Access participants.
+
+Limited spots available.
+
+
+CTA: 👉 Join Early Access & Start Earning
+
+Suggested Visual: Large call-to-action button with celebratory icon (confetti, lightning bolt) and a smaller “Guaranteed Prize Pools Active” badge.
+
+
+---
+
+Footnotes:
+
+Prize pools guaranteed during Early Access.
+
+No purchase necessary. See official rules.
+
+Early Access capped at a few hundred members.
+
+
+
+
+✅ Done—I've applied the edits to sharpen the emotional hook, clarify the Early Access value, and suggest graphics for visual engagement. Let me know if you’d like me to help turn this into code for Home_v2.tsx or if you want help with launch messaging for social or email.
+
