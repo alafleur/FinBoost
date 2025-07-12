@@ -71,3 +71,13 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  }
+  
+  .font-heading {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+}
