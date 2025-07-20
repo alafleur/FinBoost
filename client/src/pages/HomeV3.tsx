@@ -58,7 +58,7 @@ export default function HomeV3() {
       <Navbar />
       
       {/* Hero Section - Modern Sleek Design */}
-      <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pt-20 pb-16 px-4 overflow-hidden">
+      <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 pt-16 pb-16 px-4 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -77,35 +77,35 @@ export default function HomeV3() {
               <span className="text-white/90 font-medium">Early Access Now Open</span>
             </div>
             
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-[0.95] tracking-tight">
               Take Control of 
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"> Your Money</span>
+              <span className="block bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"> Your Money</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto font-light leading-relaxed">
-              Learn real financial skills. Take real action. Earn real rewards.<br/>
-              <span className="text-blue-300 font-medium">Prize pools are company-boosted during Early Access.</span>
+            <p className="text-lg md:text-xl text-white/70 mb-12 max-w-3xl mx-auto font-normal leading-relaxed">
+              Learn real financial skills. Take real action. Earn real rewards.
+              <span className="block mt-2 text-blue-200 font-semibold">Prize pools are company-boosted during Early Access.</span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold rounded-2xl shadow-2xl shadow-blue-500/25 border-0 h-auto"
+                  className="bg-white text-slate-900 hover:bg-gray-100 px-8 py-4 text-lg font-bold rounded-xl shadow-2xl shadow-black/25 border-0 h-auto transition-all duration-300 hover:shadow-white/10 hover:scale-105"
                 >
-                  <Trophy className="mr-3 h-6 w-6" />
+                  <Trophy className="mr-3 h-5 w-5" />
                   Join Early Access
-                  <ArrowRight className="ml-3 h-6 w-6" />
+                  <ArrowRight className="ml-3 h-5 w-5" />
                 </Button>
               </motion.div>
               
-              <div className="flex items-center text-white/70 bg-white/5 backdrop-blur-md rounded-full px-6 py-3 border border-white/10">
+              <div className="flex items-center text-slate-600 bg-white/90 backdrop-blur-md rounded-full px-6 py-3 border border-slate-200 shadow-lg">
                 <Users className="mr-2 h-5 w-5" />
-                <span className="font-medium">Limited to 500 founding members</span>
+                <span className="font-semibold">Limited to 500 founding members</span>
               </div>
             </div>
             
-            <p className="text-sm text-white/60 font-light">
+            <p className="text-sm text-white/50 font-normal">
               No purchase necessary • Alternative entry available • AMOE compliant
             </p>
           </motion.div>
@@ -124,7 +124,7 @@ export default function HomeV3() {
       </section>
 
       {/* App Preview - Modern Sleek Design */}
-      <section className="py-24 px-4 bg-gradient-to-b from-white to-slate-50">
+      <section className="py-24 px-4 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -136,25 +136,25 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-700 font-semibold text-sm">PLATFORM PREVIEW</span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
               See What Progress
-              <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text"> Looks Like</span>
+              <span className="block text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text"> Looks Like</span>
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
               Interactive previews from the FinBoost platform showing your journey to financial rewards
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Screenshot Navigation */}
             <div className="space-y-3">
               {screenshots.map((screenshot, index) => (
                 <motion.div
                   key={index}
-                  className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
+                  className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
                     activeScreenshot === index 
-                      ? 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 shadow-lg shadow-blue-100' 
-                      : 'bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200/50'
+                      ? 'bg-white border-2 border-blue-200 shadow-lg shadow-blue-100/50' 
+                      : 'bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
                   }`}
                   onClick={() => setActiveScreenshot(index)}
                   whileHover={{ y: -2 }}
@@ -194,7 +194,7 @@ export default function HomeV3() {
                 className="relative"
               >
                 {/* Phone mockup frame */}
-                <div className="relative mx-auto w-80 h-[600px] bg-slate-900 rounded-[3rem] p-2 shadow-2xl">
+                <div className="relative mx-auto w-80 h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl shadow-slate-900/50">
                   {/* Screen */}
                   <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
                     {/* Status bar */}
@@ -208,7 +208,7 @@ export default function HomeV3() {
                     </div>
                     
                     {/* App content */}
-                    <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 min-h-[calc(100%-3rem)]">
+                    <div className="p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-3rem)]">
                       <div className="text-center h-full flex flex-col justify-center">
                         <motion.div
                           initial={{ scale: 0.8, opacity: 0 }}
@@ -278,9 +278,9 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
               Earn Points and
-              <span className="text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text"> Compete for Rewards</span>
+              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Compete for Rewards</span>
             </h2>
             <p className="text-xl text-white/70 max-w-2xl mx-auto font-light">
               Four streamlined steps to financial progress and real rewards
@@ -652,18 +652,18 @@ export default function HomeV3() {
             viewport={{ once: true }}
           >
             {/* Main heading */}
-            <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tight">
               Join the Movement
               <br />
-              <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text">
+              <span className="text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text">
                 That Rewards Progress
               </span>
             </h2>
             
-            <p className="text-xl md:text-2xl text-white/80 mb-16 max-w-3xl mx-auto font-light leading-relaxed">
+            <p className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto font-normal leading-relaxed">
               FinBoost is where financial education meets real competition. 
               With boosted reward pools and limited Early Access slots, 
-              <span className="text-blue-300 font-medium"> now's the time to join.</span>
+              <span className="text-blue-200 font-semibold"> now's the time to join.</span>
             </p>
 
             {/* CTA Buttons */}
