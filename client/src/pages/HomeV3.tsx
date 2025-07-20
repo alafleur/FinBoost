@@ -643,126 +643,81 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Comparison Block */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
+      {/* What Makes FinBoost Different */}
+      <section className="py-24 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Why Choose <span className="text-blue-600">FinBoost</span>?
+              What Makes FinBoost <span className="text-blue-600">Different</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              See how we stack up against traditional financial education and fantasy platforms
-            </p>
-          </motion.div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-2xl shadow-lg border border-gray-100">
-              <thead>
-                <tr className="bg-gradient-to-r from-blue-50 to-purple-50">
-                  <th className="p-6 text-left font-bold text-gray-900 rounded-tl-2xl">Feature</th>
-                  <th className="p-6 text-center font-bold text-blue-600">FinBoost</th>
-                  <th className="p-6 text-center font-bold text-gray-600">Budgeting Apps</th>
-                  <th className="p-6 text-center font-bold text-gray-600">Online Courses</th>
-                  <th className="p-6 text-center font-bold text-gray-600 rounded-tr-2xl">Fantasy Sports</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    feature: "Real cash rewards",
-                    finboost: "✓",
-                    budgeting: "✗", 
-                    courses: "✗",
-                    fantasy: "✓"
-                  },
-                  {
-                    feature: "Financial education",
-                    finboost: "✓",
-                    budgeting: "Limited", 
-                    courses: "✓",
-                    fantasy: "✗"
-                  },
-                  {
-                    feature: "Skill-based competition",
-                    finboost: "✓",
-                    budgeting: "✗", 
-                    courses: "✗",
-                    fantasy: "✓"
-                  },
-                  {
-                    feature: "Real-world application",
-                    finboost: "✓",
-                    budgeting: "✓", 
-                    courses: "Limited",
-                    fantasy: "✗"
-                  },
-                  {
-                    feature: "Community engagement",
-                    finboost: "✓",
-                    budgeting: "✗", 
-                    courses: "Limited",
-                    fantasy: "✓"
-                  },
-                  {
-                    feature: "Monthly rewards cycles",
-                    finboost: "✓",
-                    budgeting: "✗", 
-                    courses: "✗",
-                    fantasy: "Seasonal"
-                  }
-                ].map((row, index) => (
-                  <motion.tr
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className={`border-b border-gray-100 ${index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
-                  >
-                    <td className="p-6 font-semibold text-gray-900">{row.feature}</td>
-                    <td className="p-6 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
-                        {row.finboost}
-                      </span>
-                    </td>
-                    <td className="p-6 text-center text-gray-500 font-medium">{row.budgeting}</td>
-                    <td className="p-6 text-center text-gray-500 font-medium">{row.courses}</td>
-                    <td className="p-6 text-center text-gray-500 font-medium">{row.fantasy}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mt-12"
-          >
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                The Only Platform That Combines All Four
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                FinBoost uniquely blends education, real-world application, skill-based competition, and genuine rewards in one comprehensive platform.
+            <div className="max-w-3xl mx-auto text-lg text-gray-700 space-y-5 leading-relaxed">
+              <p>
+                We're not another finance tracker or budgeting tool. FinBoost is a rewards-based platform where your actions—learning, improving, paying down debt—earn you real chances to win.
               </p>
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-bold rounded-xl shadow-lg border-0"
-              >
-                <Trophy className="mr-2 h-5 w-5" />
-                Experience the Difference
-              </Button>
+              <p>
+                Every point you earn comes from real effort. And every prize pool is transparently funded by the community (and currently, the company).
+              </p>
+              <p>
+                No gimmicks. No luck. Just real rewards for real progress—backed by fairness, transparency, and optional free entry.
+              </p>
             </div>
           </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <GraduationCap className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Progress</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Learn practical skills, take real financial actions, and build lasting habits that improve your life beyond the platform.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Rewards</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Earn genuine cash rewards distributed fairly based on your effort and progress, not luck or chance.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <Shield className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Transparency</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Complete transparency in prize pool funding, point distribution, and winner selection. AMOE compliant with free entry options.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
