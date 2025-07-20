@@ -518,7 +518,7 @@ export default function HomeV3() {
                 },
                 {
                   icon: <Shield className="w-6 h-6 text-blue-600" />,
-                  text: "Built for compliance (AMOE + skill-based rewards)"
+                  text: "Secure platform with transparent fair play"
                 },
                 {
                   icon: <DollarSign className="w-6 h-6 text-green-600" />,
