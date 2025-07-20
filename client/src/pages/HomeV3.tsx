@@ -23,7 +23,10 @@ import {
   GraduationCap,
   Timer,
   Award,
-  Sparkles
+  Sparkles,
+  CreditCard,
+  Calculator,
+  ExternalLink
 } from "lucide-react";
 
 export default function HomeV3() {
@@ -694,6 +697,151 @@ export default function HomeV3() {
               </p>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Learning Module Section */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Build Better Money Habits That Actually Stick
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+              Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
+            </p>
+            <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
+              Most members start seeing progress in their first month
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 text-center mb-12">
+              What You'll Master:
+            </h3>
+            
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                  <CreditCard className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                  Improve Your Credit Score with Smart Strategies
+                </h4>
+                <p className="text-gray-600 text-sm">
+                  Learn the tactics that have helped thousands boost their scores
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                  <Calculator className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                  Create a Budget That Actually Fits Your Life
+                </h4>
+                <p className="text-gray-600 text-sm">
+                  Practical approaches that work even on tight budgets
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                  <DollarSign className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                  Accelerate Your Debt Payoff with Smart Planning
+                </h4>
+                <p className="text-gray-600 text-sm">
+                  Strategic methods to save on interest and get debt-free sooner
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                  Start Investing Even with Small Amounts
+                </h4>
+                <p className="text-gray-600 text-sm">
+                  Simple, low-risk ways to begin building wealth
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Learning Features */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap justify-center gap-8 mb-12"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+              <span className="text-gray-700 text-sm font-medium">3-5 minute lessons</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+              <span className="text-gray-700 text-sm font-medium">Interactive quizzes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+              <span className="text-gray-700 text-sm font-medium">Real-world applications</span>
+            </div>
+          </motion.div>
+
+          {/* Preview Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <button className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+              Preview a Lesson
+              <ExternalLink className="h-4 w-4" />
+            </button>
+          </motion.div>
         </div>
       </section>
 
