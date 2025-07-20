@@ -1,0 +1,110 @@
+// File: client/src/pages/HomeV2Clean.tsx
+
+import React from 'react';
+import {
+  Hero,
+  HowItWorks,
+  MembershipValue,
+  HowRewardsWork,
+  WhatYouLearn,
+  FAQ,
+  FinalCTA,
+} from '@/components';
+
+const HomeV2Clean: React.FC = () => {
+  return (
+    <main className="flex flex-col items-center w-full">
+      <section className="w-full bg-gradient-to-br from-[#edf2ff] to-[#f5faff] py-16 px-4 text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 max-w-4xl mx-auto">
+          Financial stress is real—let’s turn it into collective power.
+        </h1>
+        <p className="mt-6 text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+          Join a movement where you take real financial actions, earn points, and get rewarded. Early members benefit from a guaranteed prize pool boost—limited to the first few hundred users.
+        </p>
+        <button className="mt-8 px-6 py-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition">
+          Join Early Access
+        </button>
+        <p className="mt-4 text-xs text-gray-500 italic">
+          No purchase necessary. Alternative entry available.
+        </p>
+      </section>
+
+      <section className="w-full max-w-6xl py-16 px-6">
+        <h2 className="text-3xl font-bold text-center text-gray-900">
+          How It Works
+        </h2>
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-xl font-semibold mb-2">1. Learn Financial Skills</h3>
+            <p>Complete 5–10 minute modules on budgeting, debt, saving, and investing. Earn points for each lesson + quiz.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">2. Take Real Action</h3>
+            <p>Upload proof of debt payments or savings. Get bonus points for verified actions that improve your finances.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">3. Compete for Rewards</h3>
+            <p>Each 2-week cycle, compete based on your total points. Users in the top 67% receive rewards.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">4. Earn Based on Skill</h3>
+            <p>Mid-cycle bonus questions test your financial instincts. Get closer, earn more points, and boost your rank.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-gray-50 py-16 px-6">
+        <h2 className="text-3xl font-bold text-center text-gray-900">
+          What Makes FinBoost Different
+        </h2>
+        <div className="mt-10 max-w-3xl mx-auto text-center text-gray-700 space-y-4">
+          <p>Not just budgeting. Not just tracking. FinBoost rewards real action and consistent effort.</p>
+          <p>No gimmicks. No gambling. Your contributions build the prize pool—and your skills increase your odds.</p>
+          <p>All built with transparency, legality (AMOE), and fairness in mind.</p>
+        </div>
+      </section>
+
+      <section className="w-full py-16 px-6">
+        <h2 className="text-3xl font-bold text-center text-gray-900">Limited Early Access</h2>
+        <p className="mt-4 max-w-2xl mx-auto text-center text-gray-700">
+          We're opening access to a few hundred founding members. During Early Access, FinBoost is boosting the prize pool from company funds to help kickstart your impact.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <button className="px-6 py-3 bg-green-600 text-white rounded-xl shadow-md hover:bg-green-700 transition">
+            Reserve My Spot
+          </button>
+        </div>
+      </section>
+
+      <section className="w-full bg-blue-50 py-16 px-6">
+        <h2 className="text-3xl font-bold text-center text-blue-900">What You’ll Learn</h2>
+        <ul className="mt-6 max-w-2xl mx-auto space-y-3 text-blue-800 list-disc list-inside">
+          <li>How to budget and eliminate hidden leaks in your spending</li>
+          <li>How credit scores actually work—and how to raise yours</li>
+          <li>Student loan strategies, debt repayment methods, and real tools</li>
+          <li>How to begin investing with $50 or less</li>
+          <li>What matters most for building long-term retirement security</li>
+        </ul>
+      </section>
+
+      <section className="w-full py-16 px-6 bg-white border-t">
+        <h2 className="text-2xl font-semibold text-center text-gray-900">
+          Join a movement to turn personal financial stress into collective power.
+        </h2>
+        <p className="mt-4 text-center text-gray-600 max-w-xl mx-auto">
+          Sign up now. Be one of the first to earn, compete, and win with real financial progress.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <button className="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700">
+            Get Started
+          </button>
+        </div>
+      </section>
+
+      <FAQ />
+      <FinalCTA />
+    </main>
+  );
+};
+
+export default HomeV2Clean;
