@@ -18,9 +18,12 @@ export default function Navbar() {
         <div className="flex items-center space-x-2 md:space-x-3">
           <a 
             href="/auth" 
-            className="text-gray-600 hover:text-gray-800 text-xs md:text-sm font-medium transition duration-200 whitespace-nowrap"
+            className="text-gray-600 hover:text-gray-800 text-xs md:text-sm font-medium transition duration-200 text-center leading-tight"
           >
-            Member Login
+            <div className="flex flex-col">
+              <span>Member</span>
+              <span>Login</span>
+            </div>
           </a>
           <Button 
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-2 border-blue-600"
