@@ -145,115 +145,120 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Screenshot Navigation */}
-            <div className="space-y-3">
-              {screenshots.map((screenshot, index) => (
-                <motion.div
-                  key={index}
-                  className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                    activeScreenshot === index 
-                      ? 'bg-white border-2 border-blue-200 shadow-lg shadow-blue-100/50' 
-                      : 'bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
-                  }`}
-                  onClick={() => setActiveScreenshot(index)}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex items-start space-x-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                      activeScreenshot === index 
-                        ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
-                        : 'bg-slate-100 group-hover:bg-slate-200'
-                    }`}>
-                      {index === 0 && <BookOpen className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                      {index === 1 && <CheckCircle className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                      {index === 2 && <Trophy className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                      {index === 3 && <Zap className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
-                        {screenshot.title}
-                      </h3>
-                      <p className="text-slate-600 text-sm leading-relaxed">
-                        {screenshot.description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Modern Mock Screenshot Display */}
-            <div className="relative">
+          {/* Unified Responsive Layout */}
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
+            {/* Phone Preview - Mobile Centered, Desktop Right */}
+            <div className="order-1 lg:order-2 flex justify-center lg:justify-start">
               <motion.div
                 key={activeScreenshot}
-                initial={{ opacity: 0, x: 30, rotateY: 15 }}
-                animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Phone mockup frame */}
-                <div className="relative mx-auto w-80 h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl shadow-slate-900/50">
-                  {/* Screen */}
-                  <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
+                {/* Responsive Phone mockup */}
+                <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
                     {/* Status bar */}
-                    <div className="bg-slate-50 h-12 flex items-center justify-between px-6 text-xs font-medium text-slate-600">
+                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
                       <span>9:41</span>
                       <div className="flex space-x-1">
-                        <div className="w-4 h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-4 h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-6 h-2 bg-green-500 rounded-sm"></div>
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm"></div>
                       </div>
                     </div>
                     
                     {/* App content */}
-                    <div className="p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-3rem)]">
+                    <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
                       <div className="text-center h-full flex flex-col justify-center">
                         <motion.div
+                          key={`icon-${activeScreenshot}`}
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.3, duration: 0.5 }}
-                          className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+                          transition={{ duration: 0.3 }}
+                          className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg"
                         >
-                          {activeScreenshot === 0 && <BookOpen className="w-10 h-10 text-white" />}
-                          {activeScreenshot === 1 && <CheckCircle className="w-10 h-10 text-white" />}
-                          {activeScreenshot === 2 && <Trophy className="w-10 h-10 text-white" />}
-                          {activeScreenshot === 3 && <Zap className="w-10 h-10 text-white" />}
+                          {activeScreenshot === 0 && <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
+                          {activeScreenshot === 1 && <CheckCircle className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
+                          {activeScreenshot === 2 && <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
+                          {activeScreenshot === 3 && <Zap className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
                         </motion.div>
                         
                         <motion.div
-                          initial={{ y: 20, opacity: 0 }}
+                          key={`text-${activeScreenshot}`}
+                          initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.5, duration: 0.5 }}
+                          transition={{ delay: 0.1, duration: 0.3 }}
                         >
-                          <p className="text-sm font-semibold text-slate-800 leading-relaxed mb-4">
+                          <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
                             {screenshots[activeScreenshot].mockContent}
                           </p>
-                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-blue-200/50">
+                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
                             <span className="text-xs font-medium text-blue-700">Live Preview Coming Soon</span>
                           </div>
                         </motion.div>
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Home indicator */}
-                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full"></div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
                 </div>
                 
-                {/* Floating elements */}
+                {/* Floating elements - desktop only */}
                 <motion.div
-                  className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg"
+                  className="hidden lg:block absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 />
                 <motion.div
-                  className="absolute -bottom-4 -left-4 w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg shadow-lg"
+                  className="hidden lg:block absolute -bottom-4 -left-4 w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg shadow-lg"
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
+            </div>
+
+            {/* Interactive Cards - Mobile Below Phone, Desktop Left */}
+            <div className="order-2 lg:order-1">
+              {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
+              <div className="lg:space-y-3">
+                <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
+                  {screenshots.map((screenshot, index) => (
+                    <motion.div
+                      key={index}
+                      className={`flex-shrink-0 w-72 lg:w-full group p-5 lg:p-6 rounded-xl cursor-pointer transition-all duration-300 ${
+                        activeScreenshot === index 
+                          ? 'bg-white border-2 border-blue-200 shadow-lg shadow-blue-100/50' 
+                          : 'bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
+                      }`}
+                      onClick={() => setActiveScreenshot(index)}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-start space-x-3 lg:space-x-4">
+                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center transition-colors ${
+                          activeScreenshot === index 
+                            ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                            : 'bg-slate-100 group-hover:bg-slate-200'
+                        }`}>
+                          {index === 0 && <BookOpen className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                          {index === 1 && <CheckCircle className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                          {index === 2 && <Trophy className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                          {index === 3 && <Zap className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base lg:text-lg text-slate-900 mb-1 lg:mb-2">
+                            {screenshot.title}
+                          </h3>
+                          <p className="text-slate-600 text-sm leading-relaxed">
+                            {screenshot.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
