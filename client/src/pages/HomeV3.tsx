@@ -17,7 +17,13 @@ import {
   ArrowRight,
   Target,
   Zap,
-  Shield
+  Shield,
+  BarChart3,
+  Lock,
+  GraduationCap,
+  Timer,
+  Award,
+  Sparkles
 } from "lucide-react";
 
 export default function HomeV3() {
@@ -90,11 +96,11 @@ export default function HomeV3() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/30"
                 >
-                  <Trophy className="mr-3 h-5 w-5" />
+                  <Trophy className="mr-3 h-6 w-6" />
                   Join Early Access
-                  <ArrowRight className="ml-3 h-5 w-5" />
+                  <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </motion.div>
               
@@ -634,6 +640,177 @@ export default function HomeV3() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Comparison Block */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Why Choose <span className="text-blue-600">FinBoost</span>?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See how we stack up against traditional financial education and fantasy platforms
+            </p>
+          </motion.div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full bg-white rounded-2xl shadow-lg border border-gray-100">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-50 to-purple-50">
+                  <th className="p-6 text-left font-bold text-gray-900 rounded-tl-2xl">Feature</th>
+                  <th className="p-6 text-center font-bold text-blue-600">FinBoost</th>
+                  <th className="p-6 text-center font-bold text-gray-600">Budgeting Apps</th>
+                  <th className="p-6 text-center font-bold text-gray-600">Online Courses</th>
+                  <th className="p-6 text-center font-bold text-gray-600 rounded-tr-2xl">Fantasy Sports</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    feature: "Real cash rewards",
+                    finboost: "✓",
+                    budgeting: "✗", 
+                    courses: "✗",
+                    fantasy: "✓"
+                  },
+                  {
+                    feature: "Financial education",
+                    finboost: "✓",
+                    budgeting: "Limited", 
+                    courses: "✓",
+                    fantasy: "✗"
+                  },
+                  {
+                    feature: "Skill-based competition",
+                    finboost: "✓",
+                    budgeting: "✗", 
+                    courses: "✗",
+                    fantasy: "✓"
+                  },
+                  {
+                    feature: "Real-world application",
+                    finboost: "✓",
+                    budgeting: "✓", 
+                    courses: "Limited",
+                    fantasy: "✗"
+                  },
+                  {
+                    feature: "Community engagement",
+                    finboost: "✓",
+                    budgeting: "✗", 
+                    courses: "Limited",
+                    fantasy: "✓"
+                  },
+                  {
+                    feature: "Monthly rewards cycles",
+                    finboost: "✓",
+                    budgeting: "✗", 
+                    courses: "✗",
+                    fantasy: "Seasonal"
+                  }
+                ].map((row, index) => (
+                  <motion.tr
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className={`border-b border-gray-100 ${index % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
+                  >
+                    <td className="p-6 font-semibold text-gray-900">{row.feature}</td>
+                    <td className="p-6 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
+                        {row.finboost}
+                      </span>
+                    </td>
+                    <td className="p-6 text-center text-gray-500 font-medium">{row.budgeting}</td>
+                    <td className="p-6 text-center text-gray-500 font-medium">{row.courses}</td>
+                    <td className="p-6 text-center text-gray-500 font-medium">{row.fantasy}</td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                The Only Platform That Combines All Four
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                FinBoost uniquely blends education, real-world application, skill-based competition, and genuine rewards in one comprehensive platform.
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-bold rounded-xl shadow-lg border-0"
+              >
+                <Trophy className="mr-2 h-5 w-5" />
+                Experience the Difference
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonial Placeholder Section */}
+      <section className="py-24 px-4 bg-gradient-to-r from-blue-50 to-purple-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-white rounded-3xl p-12 shadow-lg border border-gray-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <Users className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Real Stories Coming Soon
+              </h3>
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Join our founding members and be among the first to share your success story. 
+                Early Access members will have exclusive opportunities to provide feedback and shape the platform.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-3"></div>
+                  <div className="text-xs text-gray-500">Member #001</div>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-3"></div>
+                  <div className="text-xs text-gray-500">Member #002</div>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-3"></div>
+                  <div className="text-xs text-gray-500">Member #003</div>
+                </div>
+              </div>
+              <Badge className="mt-8 bg-blue-100 text-blue-800 px-4 py-2">
+                Be part of our founding story
+              </Badge>
+            </div>
+          </motion.div>
         </div>
       </section>
 
