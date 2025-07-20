@@ -643,9 +643,9 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* What Makes FinBoost Different */}
-      <section className="py-24 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* What Makes FinBoost Different - Simplified */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -653,36 +653,28 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               What Makes FinBoost <span className="text-blue-600">Different</span>
             </h2>
-            <div className="max-w-3xl mx-auto text-lg text-gray-700 space-y-5 leading-relaxed">
-              <p>
-                We're not another finance tracker or budgeting tool. FinBoost is a rewards-based platform where your actions—learning, improving, paying down debt—earn you real chances to win.
-              </p>
-              <p>
-                Every point you earn comes from real effort. And every prize pool is transparently funded by the community (and currently, the company).
-              </p>
-              <p>
-                No gimmicks. No luck. Just real rewards for real progress—backed by fairness, transparency, and optional free entry.
-              </p>
-            </div>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Real rewards for real progress—no gimmicks, just effort-based competition
+            </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <GraduationCap className="h-8 w-8 text-blue-600" />
+              <div className="bg-blue-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                <GraduationCap className="h-7 w-7 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Progress</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Learn practical skills, take real financial actions, and build lasting habits that improve your life beyond the platform.
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Skill-Based Learning</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Earn points through education and real financial actions, not luck
               </p>
             </motion.div>
 
@@ -691,14 +683,14 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <DollarSign className="h-8 w-8 text-green-600" />
+              <div className="bg-green-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="h-7 w-7 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Rewards</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Earn genuine cash rewards distributed fairly based on your effort and progress, not luck or chance.
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Community-Funded Rewards</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Prize pools transparently funded by members and company backing
               </p>
             </motion.div>
 
@@ -707,14 +699,14 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-8 w-8 text-purple-600" />
+              <div className="bg-purple-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-7 w-7 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Transparency</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Complete transparency in prize pool funding, point distribution, and winner selection. AMOE compliant with free entry options.
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Legally Compliant</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                AMOE structure with free entry options and transparent rules
               </p>
             </motion.div>
           </div>
