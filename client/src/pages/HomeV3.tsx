@@ -57,13 +57,12 @@ export default function HomeV3() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section - Modern Sleek Design */}
-      <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 pt-16 pb-16 px-4 overflow-hidden">
-        {/* Animated background elements */}
+      {/* Hero Section - Clean White Design */}
+      <section className="relative min-h-screen flex items-center bg-white pt-20 pb-16 px-4">
+        {/* Subtle background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-50 rounded-full blur-3xl opacity-40"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto text-center z-10">
@@ -72,26 +71,26 @@ export default function HomeV3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 mb-8">
-              <span className="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></span>
-              <span className="text-white/90 font-medium">Early Access Now Open</span>
+            <div className="inline-flex items-center bg-green-50 border border-green-200 rounded-full px-6 py-3 mb-8">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
+              <span className="text-green-700 font-semibold">Early Access Now Open</span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-[0.95] tracking-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 leading-[0.95] tracking-tight">
               Take Control of 
-              <span className="block bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"> Your Money</span>
+              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"> Your Money</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-white/70 mb-12 max-w-3xl mx-auto font-normal leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto font-normal leading-relaxed">
               Learn real financial skills. Take real action. Earn real rewards.
-              <span className="block mt-2 text-blue-200 font-semibold">Prize pools are company-boosted during Early Access.</span>
+              <span className="block mt-2 text-blue-600 font-semibold">Prize pools are company-boosted during Early Access.</span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   size="lg" 
-                  className="bg-white text-slate-900 hover:bg-gray-100 px-8 py-4 text-lg font-bold rounded-xl shadow-2xl shadow-black/25 border-0 h-auto transition-all duration-300 hover:shadow-white/10 hover:scale-105"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300"
                 >
                   <Trophy className="mr-3 h-5 w-5" />
                   Join Early Access
@@ -99,7 +98,7 @@ export default function HomeV3() {
                 </Button>
               </motion.div>
               
-              <div className="flex items-center text-slate-600 bg-white/90 backdrop-blur-md rounded-full px-6 py-3 border border-slate-200 shadow-lg">
+              <div className="flex items-center text-slate-600 bg-slate-50 rounded-full px-6 py-3 border border-slate-200 shadow-sm">
                 <Users className="mr-2 h-5 w-5" />
                 <span className="font-semibold">Limited to 500 founding members</span>
               </div>
@@ -638,15 +637,13 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Final CTA - Ultra Modern */}
-      <section className="relative py-32 px-4 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 overflow-hidden">
-        {/* Background effects */}
+      {/* Final CTA - Ultra Modern Dark Section */}
+      <section className="relative py-32 px-4 bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 overflow-hidden">
+        {/* Animated background effects */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute inset-0 opacity-30">
-            <div className="w-full h-full bg-gradient-to-br from-white/5 to-transparent"></div>
-          </div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full"></div>
         </div>
         
         <div className="relative max-w-6xl mx-auto text-center z-10">
