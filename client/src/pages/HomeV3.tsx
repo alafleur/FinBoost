@@ -57,117 +57,75 @@ export default function HomeV3() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section - Emotional + Aspirational Hook */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-20 pb-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative max-w-6xl mx-auto text-center">
+      {/* Hero Section - Modern Sleek Design */}
+      <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pt-20 pb-16 px-4 overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto text-center z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Take Control of Your Money.
-              <span className="text-blue-600"> Get Rewarded For It.</span>
+            <div className="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-3 mb-8">
+              <span className="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></span>
+              <span className="text-white/90 font-medium">Early Access Now Open</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
+              Take Control of 
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"> Your Money</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Learn real financial skills. Take real action. Earn real rewards. 
-              <span className="font-semibold text-blue-600"> Early Access is limited and prize pools are company-boosted.</span>
+            
+            <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto font-light leading-relaxed">
+              Learn real financial skills. Take real action. Earn real rewards.<br/>
+              <span className="text-blue-300 font-medium">Prize pools are company-boosted during Early Access.</span>
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg">
-                <Trophy className="mr-2 h-5 w-5" />
-                Join Early Access
-              </Button>
-              <Badge variant="secondary" className="text-sm px-4 py-2">
-                <Users className="mr-1 h-4 w-4" />
-                First 500 members shape the platform
-              </Badge>
-            </div>
-            <p className="text-sm text-gray-500 italic">
-              No purchase necessary. Alternative entry available.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* App Preview - Show It, Don't Just Say It */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              See What Progress Looks Like
-            </h2>
-            <p className="text-xl text-gray-600">
-              Real screenshots from the FinBoost platform showing your path to rewards
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Screenshot Navigation */}
-            <div className="space-y-4">
-              {screenshots.map((screenshot, index) => (
-                <motion.div
-                  key={index}
-                  className={`p-4 rounded-lg cursor-pointer transition-all ${
-                    activeScreenshot === index 
-                      ? 'bg-blue-50 border-2 border-blue-200' 
-                      : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                  }`}
-                  onClick={() => setActiveScreenshot(index)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-10 py-6 text-lg font-semibold rounded-2xl shadow-2xl shadow-blue-500/25 border-0 h-auto"
                 >
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                    {screenshot.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {screenshot.description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Mock Screenshot Display */}
-            <div className="relative">
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4 }}
-                className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-2xl shadow-2xl"
-              >
-                <div className="bg-white rounded-lg p-6 min-h-[300px] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {activeScreenshot === 0 && <BookOpen className="w-8 h-8 text-blue-600" />}
-                      {activeScreenshot === 1 && <CheckCircle className="w-8 h-8 text-green-600" />}
-                      {activeScreenshot === 2 && <Trophy className="w-8 h-8 text-yellow-600" />}
-                      {activeScreenshot === 3 && <Zap className="w-8 h-8 text-orange-600" />}
-                    </div>
-                    <p className="text-lg font-medium text-gray-800">
-                      {screenshots[activeScreenshot].mockContent}
-                    </p>
-                    <Badge className="mt-4">
-                      Live Preview Coming Soon
-                    </Badge>
-                  </div>
-                </div>
+                  <Trophy className="mr-3 h-6 w-6" />
+                  Join Early Access
+                  <ArrowRight className="ml-3 h-6 w-6" />
+                </Button>
               </motion.div>
+              
+              <div className="flex items-center text-white/70 bg-white/5 backdrop-blur-md rounded-full px-6 py-3 border border-white/10">
+                <Users className="mr-2 h-5 w-5" />
+                <span className="font-medium">Limited to 500 founding members</span>
+              </div>
             </div>
-          </div>
+            
+            <p className="text-sm text-white/60 font-light">
+              No purchase necessary • Alternative entry available • AMOE compliant
+            </p>
+          </motion.div>
         </div>
+        
+        {/* Scroll indicator */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white/50 rounded-full mt-2"></div>
+          </div>
+        </motion.div>
       </section>
 
-      {/* How It Works - Interactive Process Explainer */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
+      {/* App Preview - Modern Sleek Design */}
+      <section className="py-24 px-4 bg-gradient-to-b from-white to-slate-50">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -175,70 +133,232 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              How You Earn Points and Compete for Rewards
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">PLATFORM PREVIEW</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+              See What Progress
+              <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text"> Looks Like</span>
             </h2>
-            <p className="text-xl text-gray-600">
-              Four simple steps to financial progress and real rewards
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              Interactive previews from the FinBoost platform showing your journey to financial rewards
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Screenshot Navigation */}
+            <div className="space-y-3">
+              {screenshots.map((screenshot, index) => (
+                <motion.div
+                  key={index}
+                  className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
+                    activeScreenshot === index 
+                      ? 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 shadow-lg shadow-blue-100' 
+                      : 'bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200/50'
+                  }`}
+                  onClick={() => setActiveScreenshot(index)}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      activeScreenshot === index 
+                        ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                        : 'bg-slate-100 group-hover:bg-slate-200'
+                    }`}>
+                      {index === 0 && <BookOpen className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                      {index === 1 && <CheckCircle className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                      {index === 2 && <Trophy className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                      {index === 3 && <Zap className={`w-6 h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
+                        {screenshot.title}
+                      </h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">
+                        {screenshot.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Modern Mock Screenshot Display */}
+            <div className="relative">
+              <motion.div
+                key={activeScreenshot}
+                initial={{ opacity: 0, x: 30, rotateY: 15 }}
+                animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative"
+              >
+                {/* Phone mockup frame */}
+                <div className="relative mx-auto w-80 h-[600px] bg-slate-900 rounded-[3rem] p-2 shadow-2xl">
+                  {/* Screen */}
+                  <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-slate-50 h-12 flex items-center justify-between px-6 text-xs font-medium text-slate-600">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-4 h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-4 h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-6 h-2 bg-green-500 rounded-sm"></div>
+                      </div>
+                    </div>
+                    
+                    {/* App content */}
+                    <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 min-h-[calc(100%-3rem)]">
+                      <div className="text-center h-full flex flex-col justify-center">
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.5 }}
+                          className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+                        >
+                          {activeScreenshot === 0 && <BookOpen className="w-10 h-10 text-white" />}
+                          {activeScreenshot === 1 && <CheckCircle className="w-10 h-10 text-white" />}
+                          {activeScreenshot === 2 && <Trophy className="w-10 h-10 text-white" />}
+                          {activeScreenshot === 3 && <Zap className="w-10 h-10 text-white" />}
+                        </motion.div>
+                        
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.5, duration: 0.5 }}
+                        >
+                          <p className="text-sm font-semibold text-slate-800 leading-relaxed mb-4">
+                            {screenshots[activeScreenshot].mockContent}
+                          </p>
+                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-blue-200/50">
+                            <span className="text-xs font-medium text-blue-700">Live Preview Coming Soon</span>
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Home indicator */}
+                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full"></div>
+                </div>
+                
+                {/* Floating elements */}
+                <motion.div
+                  className="absolute -top-6 -right-6 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                />
+                <motion.div
+                  className="absolute -bottom-4 -left-4 w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg shadow-lg"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Modern Process Flow */}
+      <section className="py-24 px-4 bg-slate-900 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              Earn Points and
+              <span className="text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text"> Compete for Rewards</span>
+            </h2>
+            <p className="text-xl text-white/70 max-w-2xl mx-auto font-light">
+              Four streamlined steps to financial progress and real rewards
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-4 gap-8">
             {[
               {
                 icon: <BookOpen className="w-8 h-8" />,
                 title: "Learn Modules",
                 description: "5–10 mins, earn 10–20 points",
                 details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more",
-                color: "blue"
+                gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
                 title: "Take Action", 
                 description: "Upload proof, earn 50–100 points",
                 details: "Submit proof of debt payments, savings, or other financial actions for bonus points",
-                color: "green"
+                gradient: "from-green-500 to-emerald-500"
               },
               {
                 icon: <TrendingUp className="w-8 h-8" />,
                 title: "Predict Markets",
                 description: "Bonus points for accuracy",
                 details: "Mid-cycle prediction questions test your financial knowledge for extra points",
-                color: "purple"
+                gradient: "from-purple-500 to-violet-500"
               },
               {
                 icon: <Trophy className="w-8 h-8" />,
                 title: "Compete in Cycles",
                 description: "Every 2 weeks, reset + win",
                 details: "Point totals determine tier placement. Top performers win from the prize pool",
-                color: "orange"
+                gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
+                className="group"
               >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 group">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 rounded-full bg-${step.color}-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                      <div className={`text-${step.color}-600`}>
+                <div className="relative h-full">
+                  {/* Connection line */}
+                  {index < 3 && (
+                    <div className="hidden lg:block absolute top-20 -right-4 w-8 h-px bg-gradient-to-r from-white/30 to-transparent z-10"></div>
+                  )}
+                  
+                  {/* Card */}
+                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">
+                    {/* Step number */}
+                    <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center text-slate-900 font-bold text-sm shadow-lg">
+                      {index + 1}
+                    </div>
+                    
+                    {/* Icon */}
+                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
+                      <div className="text-white">
                         {step.icon}
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                    
+                    <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
                       {step.title}
                     </h3>
-                    <p className={`text-${step.color}-600 font-medium mb-3`}>
+                    
+                    <p className="text-blue-300 font-semibold mb-4 text-sm">
                       {step.description}
                     </p>
-                    <p className="text-gray-600 text-sm">
+                    
+                    <p className="text-white/70 text-sm leading-relaxed">
                       {step.details}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -513,48 +633,91 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Final CTA - Scarcity & Movement */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Final CTA - Ultra Modern */}
+      <section className="relative py-32 px-4 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3e%3cg fill="none" fill-rule="evenodd"%3e%3cg fill="%23ffffff" fill-opacity="0.02"%3e%3cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4z"/%3e%3c/g%3e%3c/g%3e%3c/svg%3e')] opacity-30"></div>
+        </div>
+        
+        <div className="relative max-w-6xl mx-auto text-center z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Join the Movement That Rewards Financial Progress
+            {/* Main heading */}
+            <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+              Join the Movement
+              <br />
+              <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text">
+                That Rewards Progress
+              </span>
             </h2>
-            <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+            
+            <p className="text-xl md:text-2xl text-white/80 mb-16 max-w-3xl mx-auto font-light leading-relaxed">
               FinBoost is where financial education meets real competition. 
-              With boosted reward pools and limited Early Access slots, now's the time to join.
+              With boosted reward pools and limited Early Access slots, 
+              <span className="text-blue-300 font-medium"> now's the time to join.</span>
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl">
-                <Zap className="mr-2 h-5 w-5" />
-                Start Earning With FinBoost
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <div className="flex items-center text-white/80">
-                <Clock className="mr-2 h-5 w-5" />
-                <span>Next cycle starts in 12 days</span>
-              </div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 1 }}
+                whileTap={{ scale: 0.95 }}
+                className="group"
+              >
+                <Button 
+                  size="lg" 
+                  className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl shadow-purple-500/30 border-0 h-auto overflow-hidden group-hover:shadow-purple-500/50 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center">
+                    <Zap className="mr-3 h-6 w-6 group-hover:animate-pulse" />
+                    Start Earning With FinBoost
+                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Button>
+              </motion.div>
+              
+              {/* Countdown timer */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-4"
+              >
+                <Clock className="mr-3 h-5 w-5 text-blue-300" />
+                <div className="text-left">
+                  <div className="text-white font-semibold">Next cycle starts in</div>
+                  <div className="text-blue-300 text-lg font-bold">12 days</div>
+                </div>
+              </motion.div>
             </div>
 
-            <div className="flex justify-center items-center space-x-8 text-sm opacity-75">
-              <div className="flex items-center">
-                <CheckCircle className="mr-1 h-4 w-4" />
-                No credit card required
-              </div>
-              <div className="flex items-center">
-                <Shield className="mr-1 h-4 w-4" />
-                AMOE compliant
-              </div>
-              <div className="flex items-center">
-                <Users className="mr-1 h-4 w-4" />
-                Limited to 500 founding members
-              </div>
+            {/* Trust indicators */}
+            <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+              {[
+                { icon: <CheckCircle className="w-5 h-5" />, text: "No credit card required" },
+                { icon: <Shield className="w-5 h-5" />, text: "AMOE compliant" },
+                { icon: <Users className="w-5 h-5" />, text: "Limited to 500 founding members" }
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex items-center justify-center text-white/80 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10"
+                >
+                  <div className="text-blue-300 mr-3">{item.icon}</div>
+                  <span className="font-medium">{item.text}</span>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
