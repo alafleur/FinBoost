@@ -661,19 +661,19 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-blue-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                <GraduationCap className="h-7 w-7 text-blue-600" />
+              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <GraduationCap className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Skill-Based Learning</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Skill-Based Learning</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Earn points through education and real financial actions, not luck
               </p>
             </motion.div>
@@ -683,30 +683,14 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-green-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="h-7 w-7 text-green-600" />
+              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Community-Funded Rewards</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Community-Funded Rewards</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Prize pools transparently funded by members and company backing
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <div className="bg-purple-100 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-7 w-7 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Legally Compliant</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                AMOE structure with free entry options and transparent rules
               </p>
             </motion.div>
           </div>
