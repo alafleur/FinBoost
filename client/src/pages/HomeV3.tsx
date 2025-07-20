@@ -88,7 +88,7 @@ export default function HomeV3() {
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 leading-[0.95] tracking-tight">
               Take Control of 
-              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"> Your Money</span>
+              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Your Money</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto font-normal leading-relaxed">
@@ -147,7 +147,7 @@ export default function HomeV3() {
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
               See What Progress
-              <span className="block text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text"> Looks Like</span>
+              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Looks Like</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
               Interactive previews from the FinBoost platform showing your journey to financial rewards
