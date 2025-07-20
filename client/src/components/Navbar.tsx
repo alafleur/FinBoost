@@ -10,7 +10,7 @@ export default function Navbar() {
   };
   
   return (
-    <nav className="bg-white shadow-sm px-4 py-5 md:py-4 fixed w-full z-50">
+    <nav className="bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 px-4 py-5 md:py-4 fixed w-full z-50 backdrop-blur-md border-b border-white/10">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <FinBoostLogo size="md" className="md:scale-110" />
@@ -18,12 +18,12 @@ export default function Navbar() {
         <div className="flex items-center space-x-2 md:space-x-3">
           <a 
             href="/auth" 
-            className="text-gray-600 hover:text-gray-800 text-xs md:text-sm font-medium transition duration-200 whitespace-nowrap"
+            className="text-white/70 hover:text-white text-xs md:text-sm font-medium transition duration-200 whitespace-nowrap"
           >
             Member Login
           </a>
           <Button 
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-2 border-blue-600"
+            className="bg-white hover:bg-gray-100 text-slate-900 font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-lg transition duration-300 border-0"
             onClick={handleSignUpClick}
           >
             Sign Up for Free
