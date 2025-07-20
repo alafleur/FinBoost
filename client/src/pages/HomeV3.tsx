@@ -913,10 +913,9 @@ export default function HomeV3() {
             </div>
 
             {/* Trust indicators */}
-            <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            <div className="grid sm:grid-cols-2 gap-6 max-w-xl mx-auto">
               {[
                 { icon: <CheckCircle className="w-5 h-5" />, text: "No credit card required" },
-                { icon: <Shield className="w-5 h-5" />, text: "AMOE compliant" },
                 { icon: <Users className="w-5 h-5" />, text: "Limited to 500 founding members" }
               ].map((item, index) => (
                 <motion.div
