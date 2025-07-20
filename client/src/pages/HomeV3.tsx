@@ -646,56 +646,36 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Why FinBoost Exists - Emotionally Rooted */}
+      {/* Why FinBoost Exists - Simplified */}
       <section className="w-full bg-gray-50 py-16 px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
+          className="max-w-3xl mx-auto text-center"
         >
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-10">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
             Why FinBoost Exists
           </h2>
-          <div className="text-center text-gray-700 space-y-6">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="text-lg leading-relaxed"
-            >
-              Most people know what they *should* do with money—but stress, debt, and the pressure of day-to-day life make it hard to follow through.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-lg leading-relaxed"
-            >
-              Millions are buried in student loans or consumer debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="text-lg leading-relaxed"
-            >
-              FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="text-lg leading-relaxed font-medium"
-            >
-              Our mission is to make financial progress not just possible, but motivating. When you grow, you earn. And when the community grows, we all win.
-            </motion.p>
-          </div>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="text-xl text-gray-700 leading-relaxed mb-6"
+          >
+            Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="text-lg text-gray-600 leading-relaxed font-medium"
+          >
+            FinBoost bridges that gap. We reward real actions and make financial progress motivating.
+          </motion.p>
         </motion.div>
       </section>
 
