@@ -1,0 +1,143 @@
+ FinBoost Landing Page – Full Redesign Brief for Replit
+📁 File: client/src/pages/HomeV2Clean.tsx
+🎯 Objective:
+Redesign the landing page to maximize early access signups by showcasing FinBoost as a bold, community-powered financial education and rewards platform. Prioritize immersive visuals, clear value communication, and early trust-building.
+
+🧩 Component Structure + Content & Visuals
+1. Hero Section – Emotional + Aspirational Hook
+Headline:
+"Take Control of Your Money. Get Rewarded For It."
+
+Subheadline:
+"Learn real financial skills. Take real action. Earn real rewards. Early Access is limited and prize pools are company-boosted."
+
+Visuals:
+
+Mockup of the FinBoost dashboard with progress bars and point totals
+
+Rotating carousel or GIF preview of user actions (lessons completed, rewards earned)
+
+CTA Button:
+"Join Early Access" (large, primary button with scroll anchor or modal trigger)
+
+2. App Preview – Show It, Don’t Just Say It
+Headline:
+"See What Progress Looks Like"
+
+Visuals: Carousel or grid of real app screenshots (styled mockups):
+
+Learning module screen
+
+Quiz completion and points earned
+
+Reward tiers or cycle progress
+
+Daily streak tracker
+
+Mid-cycle bonus question sample (e.g., “Will S&P 500 be up or down?”)
+
+Captions under each image explaining what users are seeing.
+
+3. How It Works – Interactive Process Explainer
+Headline:
+"How You Earn Points and Compete for Rewards"
+
+Visual or Layout:
+4 animated or scroll-reveal cards:
+
+📘 Learn Modules – 5–10 mins, earn 10–20 points
+
+💸 Take Action – Upload proof of debt/savings, earn 50–100 points
+
+📈 Predict Markets – Bonus points for accuracy (mid-cycle)
+
+🏆 Compete in Cycles – Every 2 weeks, reset + win based on points
+
+Optional: Add scroll-triggered line between cards to show flow
+
+4. Reward Pool Mechanics – Show Real Impact
+Headline:
+"Your Effort Builds the Community Prize Pool"
+
+Copy:
+"Every member contributes to both their own progress and the prize pool. During Early Access, FinBoost guarantees a minimum prize pool amount—even before user growth."
+
+Visual:
+Dynamic calculator or graphic (could be static for now):
+
+100 users = $2,000
+
+500 users = $10,000
+
+1,000 users = $20,000
+
+Add callout box:
+"This cycle’s boosted pool: $3,000 (normally $1,440) – FinBoost covers the difference."
+
+5. Social Trust Section – No Overclaiming
+Headline:
+"You're Not Alone — This Is Just the Beginning"
+
+Copy:
+"FinBoost is launching with a founding group of a few hundred users ready to take control of their money. Be part of shaping the future of financial progress."
+
+Bullet List of Trust Signals:
+
+✅ Real financial education, not gimmicks
+
+✅ Built for compliance (AMOE + skill-based rewards)
+
+✅ Prize pool boosted by FinBoost during Early Access
+
+✅ Transparent and fair tier-based system
+
+Visual Add-ons (optional):
+
+Avatar group or illustration of diverse early members
+
+Banner: "First 500 members shape the platform + earn early rewards"
+
+6. Reward Tiers Explainer – Simple & Visual
+Headline:
+"More Than Half of Members Earn Rewards Each Cycle"
+
+Copy:
+
+"Users are placed in tiers based on points: Tier 1 (top third), Tier 2 (middle), Tier 3 (lower)"
+
+"Each tier has a portion of the prize pool and winners are selected based on point-weighted random draws."
+
+"More points = better odds, but everyone in a tier has a shot."
+
+Visual:
+Horizontal tier layout (Tier 1, Tier 2, Tier 3), with:
+
+% of pool (e.g., 50% / 35% / 15%)
+
+of winners per tier (configurable)
+“Point-weighted draw” explanation tooltip
+
+7. Final CTA – Scarcity & Movement
+Headline:
+"Join the Movement That Rewards Financial Progress"
+
+Copy:
+"FinBoost is where financial education meets real competition. With boosted reward pools and limited Early Access slots, now’s the time to join."
+
+Visuals:
+
+Countdown timer to next cycle (optional/dummy ok)
+
+Real screenshot of rewards tab or PayPal payout UI
+
+CTA Button (Repeat):
+"Start Earning With FinBoost" → leads to Early Access flow
+
+💡 Technical & UI Notes for Replit
+Use react-slick, swiper, or framer-motion for scroll interactions and screenshot carousels
+
+Use Tailwind styling + shadcn/ui components
+
+Add public/assets/screens/ folder for image references if not already included
+
+Keep layout mobile-first responsive
