@@ -877,8 +877,8 @@ export default function HomeV3() {
               <span className="text-blue-200 font-semibold"> now's the time to join.</span>
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+            {/* CTA Button */}
+            <div className="flex justify-center">
               <motion.div
                 whileHover={{ scale: 1.05, rotate: 1 }}
                 whileTap={{ scale: 0.95 }}
@@ -896,40 +896,6 @@ export default function HomeV3() {
                   </div>
                 </Button>
               </motion.div>
-              
-              {/* Countdown timer */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-4"
-              >
-                <Clock className="mr-3 h-5 w-5 text-blue-300" />
-                <div className="text-left">
-                  <div className="text-white font-semibold">Next cycle starts in</div>
-                  <div className="text-blue-300 text-lg font-bold">12 days</div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Trust indicators */}
-            <div className="grid sm:grid-cols-2 gap-6 max-w-xl mx-auto">
-              {[
-                { icon: <CheckCircle className="w-5 h-5" />, text: "No credit card required" },
-                { icon: <Users className="w-5 h-5" />, text: "Limited to 500 founding members" }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="flex items-center justify-center text-white/80 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10"
-                >
-                  <div className="text-blue-300 mr-3">{item.icon}</div>
-                  <span className="font-medium">{item.text}</span>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
         </div>
