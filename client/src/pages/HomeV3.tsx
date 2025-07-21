@@ -59,7 +59,7 @@ export default function HomeV3() {
   ];
 
   const calculatePrizePool = (users: number) => {
-    const basePool = users * 20 * 0.55; // $20 subscription * 55% pool allocation
+    const basePool = users * 20 * 0.50 * 0.55; // $20 subscription * 50% * 55% pool allocation
     return basePool;
   };
 
@@ -93,7 +93,7 @@ export default function HomeV3() {
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Learn real financial skills. Take real action. Earn real rewards.
-              <span className="block mt-2 text-blue-600 font-semibold">Prize pools are company-boosted during Early Access.</span>
+              <span className="block mt-2 text-blue-600 font-semibold">Rewards pools are company-boosted during Early Access.</span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
@@ -331,7 +331,7 @@ export default function HomeV3() {
                 icon: <Trophy className="w-8 h-8" />,
                 title: "Compete in Cycles",
                 description: "Every 2 weeks, reset + win",
-                details: "Point totals determine tier placement. Top performers win from the prize pool",
+                details: "Point totals determine tier placement. Top performers win from the rewards pool",
                 gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
@@ -424,7 +424,7 @@ export default function HomeV3() {
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Community Rewards Pool</h4>
               <p className="text-gray-600 leading-relaxed">
-                Part of every membership funds the prize pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
+                Part of every membership funds the rewards pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
               </p>
             </motion.div>
           </div>
@@ -461,11 +461,11 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Your Effort Builds the Community Prize Pool
+              Your Effort Builds the Community Rewards Pool
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Every member contributes to both their own progress and the prize pool. 
-              During Early Access, FinBoost guarantees a minimum prize pool amount—even before user growth.
+              Every member contributes to both their own progress and the rewards pool. 
+              During Early Access, FinBoost guarantees a minimum rewards pool amount—even before user growth.
             </p>
           </motion.div>
 
@@ -473,31 +473,41 @@ export default function HomeV3() {
             {/* Dynamic Calculator */}
             <div className="space-y-6">
               <div className="bg-gray-50 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold mb-4">Prize Pool Calculator</h3>
+                <h3 className="text-xl font-semibold mb-4">Illustrative Rewards Pool Calculator</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Number of Members</label>
                     <input
                       type="range"
-                      min="100"
-                      max="1000"
-                      step="100"
+                      min="250"
+                      max="10000"
+                      step="250"
                       value={prizePoolUsers}
                       onChange={(e) => setPrizePoolUsers(parseInt(e.target.value))}
                       className="w-full"
                     />
                     <div className="flex justify-between text-sm text-gray-600 mt-1">
-                      <span>100</span>
-                      <span className="font-medium">{prizePoolUsers} users</span>
-                      <span>1,000</span>
+                      <span>250</span>
+                      <span className="font-medium">{prizePoolUsers} members</span>
+                      <span>10,000</span>
                     </div>
                   </div>
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600">
-                      ${calculatePrizePool(prizePoolUsers).toLocaleString()}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-3xl font-bold text-blue-600">
+                        ${calculatePrizePool(prizePoolUsers).toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Cycle rewards pool ({prizePoolUsers} × $20 × 50% × 55%)
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      Monthly prize pool ({prizePoolUsers} × $20 × 55%)
+                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        ${Math.round(calculatePrizePool(prizePoolUsers) * 0.1).toLocaleString()}
+                      </div>
+                      <div className="text-sm text-yellow-700">
+                        Top reward (10% of cycle rewards pool)
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -513,7 +523,7 @@ export default function HomeV3() {
                     <strong>This cycle's boosted pool: $3,000</strong>
                   </p>
                   <p className="text-sm text-green-600">
-                    (normally $1,440) – FinBoost covers the difference during Early Access
+                    (normally $550) – FinBoost covers the difference during Early Access
                   </p>
                 </CardContent>
               </Card>
@@ -522,9 +532,9 @@ export default function HomeV3() {
             {/* Visual Examples */}
             <div className="space-y-4">
               {[
-                { users: 100, pool: 1100, boost: 1900 },
-                { users: 500, pool: 5500, boost: 0 },
-                { users: 1000, pool: 11000, boost: 0 }
+                { members: 100, pool: Math.round(100 * 20 * 0.50 * 0.55), boost: 1900 },
+                { members: 500, pool: Math.round(500 * 20 * 0.50 * 0.55), boost: 0 },
+                { members: 1000, pool: Math.round(1000 * 20 * 0.50 * 0.55), boost: 0 }
               ].map((example, index) => (
                 <motion.div
                   key={index}
@@ -537,7 +547,7 @@ export default function HomeV3() {
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="text-2xl font-bold text-gray-900">
-                          {example.users} users
+                          {example.members} members
                         </div>
                         <div className="text-sm text-gray-600">
                           Community size
@@ -593,7 +603,7 @@ export default function HomeV3() {
                 },
                 {
                   icon: <DollarSign className="w-6 h-6 text-green-600" />,
-                  text: "Prize pool boosted by FinBoost during Early Access"
+                  text: "Rewards pool boosted by FinBoost during Early Access"
                 },
                 {
                   icon: <Star className="w-6 h-6 text-yellow-600" />,
@@ -653,7 +663,7 @@ export default function HomeV3() {
               {
                 icon: <Users className="w-8 h-8 text-blue-600" />,
                 title: "Build Together",
-                description: "Every member helps grow the prize pool. More people = bigger rewards for everyone.",
+                description: "Every member helps grow the rewards pool. More people = bigger rewards for everyone.",
                 gradient: "from-blue-500 to-blue-600"
               },
               {
@@ -728,7 +738,7 @@ export default function HomeV3() {
               More Than Half of Members Earn Rewards Each Cycle
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Users are placed in tiers based on points. Each tier has a portion of the prize pool 
+              Users are placed in tiers based on points. Each tier has a portion of the rewards pool 
               and winners are selected based on point-weighted random draws.
             </p>
           </motion.div>
@@ -779,7 +789,7 @@ export default function HomeV3() {
                     <div className={`text-3xl font-bold text-${tier.textColor} mb-2`}>
                       {tier.poolShare}
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">of prize pool</p>
+                    <p className="text-sm text-gray-600 mb-4">of rewards pool</p>
                     <p className="text-sm text-gray-700">
                       {tier.description}
                     </p>
@@ -807,7 +817,7 @@ export default function HomeV3() {
             </Card>
             
             <div className="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-md text-yellow-900 text-center">
-              <p className="mb-4"><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every prize pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
+              <p className="mb-4"><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every rewards pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
