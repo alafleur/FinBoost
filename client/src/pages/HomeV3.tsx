@@ -559,28 +559,88 @@ export default function HomeV3() {
       </section>
 
       {/* Collective Strength Section */}
-      <section className="w-full bg-white py-16 px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl font-bold text-center text-gray-900">
-            Collective Strength. Shared Rewards.
-          </h2>
-          <div className="mt-8 max-w-3xl mx-auto text-center text-gray-700 space-y-5">
-            <p>
-              FinBoost isn't just about individual progress. It's about building something together. Every member helps grow the prize pool—and every reward cycle gives more people a shot at winning.
+      <section className="w-full bg-gradient-to-b from-blue-50 to-white py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+              Collective Strength.
+              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Shared Rewards.</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Individual progress meets collective power. When we grow together, everyone wins bigger.
             </p>
-            <p>
-              The more people who join, the bigger the rewards. And the more financial actions we take together, the more impact we can make. It's financial momentum, powered by the collective.
-            </p>
-            <p className="font-semibold text-gray-900">
-              Small individual efforts → large shared outcomes. That's the FinBoost effect.
-            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {[
+              {
+                icon: <Users className="w-8 h-8 text-blue-600" />,
+                title: "Build Together",
+                description: "Every member helps grow the prize pool. More people = bigger rewards for everyone.",
+                gradient: "from-blue-500 to-blue-600"
+              },
+              {
+                icon: <BarChart3 className="w-8 h-8 text-purple-600" />,
+                title: "Scale Impact",
+                description: "Small individual actions create large shared outcomes through collective momentum.",
+                gradient: "from-purple-500 to-purple-600"
+              },
+              {
+                icon: <Target className="w-8 h-8 text-pink-600" />,
+                title: "Win More Often",
+                description: "Every cycle gives more people a shot at rewards. The collective creates more opportunities.",
+                gradient: "from-pink-500 to-pink-600"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group hover:-translate-y-2"
+              >
+                <div className={`w-16 h-16 bg-gradient-to-r ${item.gradient} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  {item.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {item.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-r from-gray-900 to-blue-900 rounded-3xl p-8 text-center text-white relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+            <div className="relative z-10">
+              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+                <Sparkles className="w-5 h-5 mr-2" />
+                <span className="font-semibold">The FinBoost Effect</span>
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                Small individual efforts → Large shared outcomes
+              </h3>
+              <p className="text-lg text-white/80 max-w-2xl mx-auto">
+                It's financial momentum, powered by the collective. Join the movement that turns personal progress into community rewards.
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Reward Tiers Explainer */}
