@@ -558,7 +558,7 @@ export default function HomeV3() {
               <span className="text-green-700 font-semibold text-sm">REWARDS BREAKDOWN</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              How Real People Win Real Rewards
+              How You Learn, Earn, and Win
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Compete. Win. Get paid. Every cycle, real money rewards go to the top performers and active members.
