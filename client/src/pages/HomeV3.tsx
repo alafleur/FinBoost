@@ -629,7 +629,7 @@ export default function HomeV3() {
               <span className="block text-white"> Learning Finance</span>
             </h2>
             <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-              Earn points through financial education. Top performers win real money every 2 weeks.
+              Earn points through financial education. Half of members win real money every 2 weeks.
             </p>
           </motion.div>
 
@@ -637,21 +637,21 @@ export default function HomeV3() {
             {[
               {
                 icon: <BookOpen className="w-8 h-8" />,
-                title: "Learn Modules",
+                title: "Lesson Modules",
                 description: "3–5 minutes, earn points",
                 details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more",
                 gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
-                title: "Take Action", 
+                title: "Take Financial Action", 
                 description: "Upload proof, earn points",
                 details: "Submit proof of debt payments, savings, or other financial actions for bonus points",
                 gradient: "from-green-500 to-emerald-500"
               },
               {
                 icon: <TrendingUp className="w-8 h-8" />,
-                title: "Predict Markets",
+                title: "Real World Bonus Questions",
                 description: "Bonus points for accuracy",
                 details: "Mid-cycle prediction questions test your financial knowledge for extra points",
                 gradient: "from-purple-500 to-violet-500"
@@ -659,8 +659,8 @@ export default function HomeV3() {
               {
                 icon: <Trophy className="w-8 h-8" />,
                 title: "Win Cash Rewards",
-                description: "Top performers split $3,000+",
-                details: "Every 2 weeks, highest-scoring members win real money from the collective rewards pool",
+                description: "Point-weighted winner selection",
+                details: "Every 2 weeks, half of members win real money from the rewards pool with top rewards into the hundreds or even thousands",
                 gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
