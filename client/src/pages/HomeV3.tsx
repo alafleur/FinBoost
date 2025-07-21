@@ -741,11 +741,12 @@ export default function HomeV3() {
               <span className="text-green-700 font-semibold text-sm">🚀 EARLY ACCESS EXCLUSIVE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Guaranteed Winner Rewards
+              Guaranteed Minimums for Top Rewards
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               To kick things off, FinBoost is guaranteeing <span className="font-semibold text-green-600">$5,000</span> in total rewards during the first cycle. 
-              That includes minimum guaranteed payouts for the top 5 performers—selected through our hybrid point-weighted draw system.
+              That includes minimum guaranteed payouts for the top 5 performers—selected through our hybrid point-weighted draw system. 
+              <span className="font-semibold text-blue-600">Plus, at least half of all active members will receive rewards every cycle.</span>
             </p>
           </motion.div>
 
