@@ -1224,7 +1224,7 @@ export default function HomeV3() {
                 onClick={() => window.location.href = '/auth?mode=signup'}
               >
                 <Trophy className="mr-2 h-5 w-5" />
-                Sign Up for Free
+                Join Early Access
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </motion.div>
