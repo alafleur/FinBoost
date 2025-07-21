@@ -174,9 +174,9 @@ export default function HomeV3() {
           </motion.div>
           
           {/* Staggered headline animation */}
-          <div className="mb-6 md:mb-8">
+          <div className="mb-8 md:mb-10 pb-2">
             <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[1.1] lg:leading-[1.05] tracking-tight"
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -190,7 +190,7 @@ export default function HomeV3() {
                 Turn Financial Stress into
               </motion.span>
               <motion.span 
-                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
