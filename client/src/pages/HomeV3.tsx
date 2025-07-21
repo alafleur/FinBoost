@@ -558,6 +558,31 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Collective Strength Section */}
+      <section className="w-full bg-white py-16 px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl font-bold text-center text-gray-900">
+            Collective Strength. Shared Rewards.
+          </h2>
+          <div className="mt-8 max-w-3xl mx-auto text-center text-gray-700 space-y-5">
+            <p>
+              FinBoost isn't just about individual progress. It's about building something together. Every member helps grow the prize pool—and every reward cycle gives more people a shot at winning.
+            </p>
+            <p>
+              The more people who join, the bigger the rewards. And the more financial actions we take together, the more impact we can make. It's financial momentum, powered by the collective.
+            </p>
+            <p className="font-semibold text-gray-900">
+              Small individual efforts → large shared outcomes. That's the FinBoost effect.
+            </p>
+          </div>
+        </motion.div>
+      </section>
+
       {/* Reward Tiers Explainer */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
