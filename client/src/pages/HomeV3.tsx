@@ -114,7 +114,7 @@ export default function HomeV3() {
       <Navbar />
       
       {/* Hero Section - Clean White Design */}
-      <section className="relative min-h-screen flex items-center bg-white pt-20 pb-16 px-4">
+      <section id="hero" className="relative min-h-screen flex items-center bg-white pt-20 pb-16 px-4">
         {/* Subtle background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
@@ -157,6 +157,7 @@ export default function HomeV3() {
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/30"
+                  onClick={() => window.location.href = '/auth?mode=signup'}
                 >
                   <Trophy className="mr-3 h-6 w-6" />
                   Join Early Access
@@ -195,7 +196,7 @@ export default function HomeV3() {
       </section>
 
       {/* Why FinBoost Exists - Card Format */}
-      <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
+      <section id="why" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
@@ -213,7 +214,7 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">OUR PURPOSE</span>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Why FinBoost Exists
             </h2>
             <p className="text-lg leading-relaxed text-white/70 max-w-3xl mx-auto">
@@ -278,7 +279,7 @@ export default function HomeV3() {
       </section>
 
       {/* App Preview - Modern Sleek Design */}
-      <section className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white">
+      <section id="preview" className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -457,7 +458,7 @@ export default function HomeV3() {
 
 
       {/* How Real People Win Real Rewards - Dedicated Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+      <section id="rewards" className="py-20 px-4 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -605,7 +606,7 @@ export default function HomeV3() {
       </section>
 
       {/* How It Works - Modern Process Flow */}
-      <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
+      <section id="how-it-works" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
@@ -623,7 +624,7 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
               Compete for Cash While
               <span className="block text-white"> Learning Finance</span>
             </h2>
@@ -701,7 +702,7 @@ export default function HomeV3() {
       <div className="border-t border-gray-200 my-10" />
 
       {/* Membership Value Breakdown */}
-      <section className="w-full bg-gray-50 py-16 px-6">
+      <section id="membership" className="w-full bg-gray-50 py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -710,7 +711,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
               How Your Membership Fuels the Movement
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -755,7 +756,7 @@ export default function HomeV3() {
       </section>
 
       {/* Reward Pool Mechanics - Show Real Impact */}
-      <section className="py-16 px-4 bg-white">
+      <section id="pool-mechanics" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -764,7 +765,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Toggle the dial to see the power of the collective
             </h2>
           </motion.div>
@@ -920,7 +921,7 @@ export default function HomeV3() {
 
 
       {/* Reward Tiers Explainer */}
-      <section className="py-16 px-4 bg-white">
+      <section id="tiers" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -929,7 +930,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Half of Members Earn Rewards Each Cycle
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -990,6 +991,7 @@ export default function HomeV3() {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                onClick={() => window.location.href = '/auth?mode=signup'}
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Sign Up for Free
@@ -1001,7 +1003,7 @@ export default function HomeV3() {
       </section>
 
       {/* Learning Module Section */}
-      <section className="py-16 px-4 bg-white">
+      <section id="learn" className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1010,7 +1012,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Build Better Money Habits That Actually Stick
             </h2>
             <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
@@ -1144,7 +1146,7 @@ export default function HomeV3() {
 
 
       {/* Final CTA - Strong Blue Background */}
-      <section className="bg-blue-600 text-white py-20 px-6 text-center">
+      <section id="cta" className="bg-blue-600 text-white py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1165,6 +1167,7 @@ export default function HomeV3() {
               <Button 
                 size="lg" 
                 className="bg-white text-blue-600 font-semibold py-3 px-8 text-lg rounded-xl hover:bg-gray-100 transition-all duration-300 border-0 h-auto shadow-lg"
+                onClick={() => window.location.href = '/auth?mode=signup'}
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Get Early Access Now
