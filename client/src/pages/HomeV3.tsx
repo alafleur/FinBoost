@@ -218,11 +218,11 @@ export default function HomeV3() {
           >
             <div className="flex items-center justify-center mb-2">
               <Trophy className="w-6 h-6 text-yellow-600 mr-2" />
-              <span className="text-lg font-bold text-slate-800">This Cycle's Rewards Pool</span>
+              <span className="text-lg font-bold text-slate-800">Guaranteed Early Access Cycle Rewards Pool</span>
             </div>
-            <div className="text-3xl font-bold text-green-700 text-center mb-2">$3,000</div>
+            <div className="text-3xl font-bold text-green-700 text-center mb-2">$5,000</div>
             <p className="text-sm text-slate-600 text-center">
-              <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Distributed to top performers every 2 weeks
+              <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Rewards distribution skewed to top performers
             </p>
           </motion.div>
           
@@ -261,7 +261,7 @@ export default function HomeV3() {
               className="flex items-center text-slate-600 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-slate-200 shadow-lg"
             >
               <Users className="mr-2 h-5 w-5" />
-              <span className="font-semibold">Early access founding membership is limited</span>
+              <span className="font-semibold">Early access membership is limited</span>
             </motion.div>
           </motion.div>
           
@@ -273,7 +273,7 @@ export default function HomeV3() {
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
             <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-              More than half of active members win every cycle.
+              At least half of members win cash rewards every cycle.
             </p>
           </motion.div>
           
