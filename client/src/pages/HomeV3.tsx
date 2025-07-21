@@ -285,6 +285,14 @@ export default function HomeV3() {
 
             {/* Interactive Cards - Mobile Below Phone, Desktop Left */}
             <div className="order-2 lg:order-1">
+              {/* Mobile instruction hint */}
+              <div className="lg:hidden text-center mb-4">
+                <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
+                  <span className="mr-2">👆</span>
+                  Tap cards to preview different features
+                </div>
+              </div>
+              
               {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
               <div className="lg:space-y-3">
                 <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
@@ -312,15 +320,43 @@ export default function HomeV3() {
                           {index === 3 && <Zap className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base lg:text-lg text-slate-900 mb-1 lg:mb-2">
-                            {screenshot.title}
-                          </h3>
+                          <div className="flex items-center justify-between mb-1 lg:mb-2">
+                            <h3 className="font-semibold text-base lg:text-lg text-slate-900">
+                              {screenshot.title}
+                            </h3>
+                            {/* Mobile chevron indicator */}
+                            <div className={`lg:hidden w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                              activeScreenshot === index 
+                                ? 'bg-blue-100' 
+                                : 'bg-slate-100 group-hover:bg-slate-200'
+                            }`}>
+                              <ArrowRight className={`w-3 h-3 transition-colors ${
+                                activeScreenshot === index ? 'text-blue-600' : 'text-slate-400'
+                              }`} />
+                            </div>
+                          </div>
                           <p className="text-slate-600 text-sm leading-relaxed">
                             {screenshot.description}
                           </p>
                         </div>
                       </div>
                     </motion.div>
+                  ))}
+                </div>
+                
+                {/* Mobile navigation dots */}
+                <div className="lg:hidden flex justify-center space-x-2 mt-6">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveScreenshot(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        activeScreenshot === index 
+                          ? 'bg-blue-600 w-8' 
+                          : 'bg-slate-300 hover:bg-slate-400'
+                      }`}
+                      aria-label={`View ${screenshots[index].title}`}
+                    />
                   ))}
                 </div>
               </div>
