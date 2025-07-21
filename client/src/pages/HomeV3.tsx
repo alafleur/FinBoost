@@ -651,10 +651,10 @@ export default function HomeV3() {
                   </div>
                   <h4 className="text-lg font-semibold text-yellow-800 mb-2">Top Reward</h4>
                   <div className="text-2xl font-bold text-yellow-700 mb-2">
-                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.1))}
+                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
                   <p className="text-xs text-yellow-700">
-                    10% of rewards pool goes to top performer
+                    5% of rewards pool goes to top performer
                   </p>
                 </div>
               </div>
