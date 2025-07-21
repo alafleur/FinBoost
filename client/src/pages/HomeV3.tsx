@@ -88,7 +88,7 @@ export default function HomeV3() {
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-8 leading-[0.95] tracking-tight">
               Take Control of 
-              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Your Money</span>
+              <span className="block text-slate-900"> Your Money</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
@@ -147,7 +147,7 @@ export default function HomeV3() {
             </div>
             <h2 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
               See What Progress
-              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Looks Like</span>
+              <span className="block text-slate-900"> Looks Like</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
               Interactive previews from the FinBoost platform showing your journey to financial rewards
@@ -297,7 +297,7 @@ export default function HomeV3() {
             </div>
             <h2 className="text-3xl font-bold text-white mb-6 leading-tight">
               Earn Points and
-              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Compete for Rewards</span>
+              <span className="block text-white"> Compete for Rewards</span>
             </h2>
             <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
               Four streamlined steps to financial progress and real rewards
@@ -651,7 +651,7 @@ export default function HomeV3() {
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight text-center">
               Collective Strength.
-              <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Shared Rewards.</span>
+              <span className="block text-gray-900"> Shared Rewards.</span>
             </h2>
             <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
               Individual progress meets collective power. When we grow together, everyone wins bigger.
