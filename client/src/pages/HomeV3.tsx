@@ -407,7 +407,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-red-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-red-400 hover:bg-white/15 transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-white mb-3">The Problem</h3>
               <p className="text-white/70">
@@ -420,7 +420,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-yellow-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-yellow-400 hover:bg-white/15 transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-white mb-3">The Reality</h3>
               <p className="text-white/70">
@@ -433,7 +433,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-blue-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-blue-400 hover:bg-white/15 transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-white mb-3">Our Solution</h3>
               <p className="text-white/70">
@@ -446,7 +446,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-green-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-green-400 hover:bg-white/15 transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-white mb-3">Our Mission</h3>
               <p className="text-white/70">
