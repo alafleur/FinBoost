@@ -355,14 +355,14 @@ export default function HomeV3() {
               {
                 icon: <BookOpen className="w-8 h-8" />,
                 title: "Learn Modules",
-                description: "5–10 mins, earn 10–20 points",
+                description: "3–5 minutes, earn points",
                 details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more",
                 gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
                 title: "Take Action", 
-                description: "Upload proof, earn 50–100 points",
+                description: "Upload proof, earn points",
                 details: "Submit proof of debt payments, savings, or other financial actions for bonus points",
                 gradient: "from-green-500 to-emerald-500"
               },
