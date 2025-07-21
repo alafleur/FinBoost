@@ -1,0 +1,72 @@
+Here’s how you can integrate those three messaging improvements into your existing `HomeV3.tsx` structure without disrupting flow — and **strengthen the emotional arc and clarity** without relying on stats:
+
+---
+
+## 🧩 Suggested Insert Points and Rewrites
+
+---
+
+### ✅ **1. Relatability & Emotion**
+
+**→ Insert at the top of the “Why FinBoost Exists” section** (just below the heading)
+
+**Current heading**:
+
+```jsx
+<h2 className="text-3xl font-bold mb-4 text-center">Why FinBoost Exists</h2>
+```
+
+**Suggested content** (new paragraph right after heading):
+
+```jsx
+<p className="text-lg text-gray-700 max-w-2xl mx-auto text-center mb-4">
+  If you've ever paid off a debt and still felt behind, you're not alone. If you're trying to plan for retirement while juggling everyday bills — this is for you.
+</p>
+```
+
+---
+
+### ✅ **2. Collective Framing**
+
+**→ Replace or rewrite your next paragraph in the same section** with stronger “we” framing.
+
+**Current paragraph** (if present):
+
+> “Financial stress is a shared problem... FinBoost flips the model…”
+
+**Replace with**:
+
+```jsx
+<p className="text-lg text-gray-700 max-w-2xl mx-auto text-center mb-6">
+  Most financial platforms keep us isolated. FinBoost turns that on its head: your learning, actions, and effort feed into a shared system of growth — where the community’s strength becomes your opportunity.
+</p>
+```
+
+---
+
+### ✅ **3. Clear Mechanics**
+
+**→ Add this as a lead-in to your “How It Works” section**
+(You likely have a section like `<h2>How It Works</h2>` — place this right above or just under the heading.)
+
+**Insert this paragraph:**
+
+```jsx
+<p className="text-lg text-gray-700 max-w-2xl mx-auto text-center mb-6">
+  Learn real money skills. Earn points for real financial actions. Compete for real rewards. And with company-funded prize boosts during Early Access — the timing has never been better.
+</p>
+```
+
+This adds clarity to your hook **before** people get into the step-by-step mechanics.
+
+---
+
+## ✅ Recap of Insert Locations
+
+| Insert                        | Section                         | Purpose                                   |
+| ----------------------------- | ------------------------------- | ----------------------------------------- |
+| ✅ Relatable empathy paragraph | Top of “Why FinBoost Exists”    | Builds emotional resonance                |
+| ✅ Collective power rewrite    | Middle of “Why FinBoost Exists” | Frames platform as collaborative solution |
+| ✅ Mechanics summary paragraph | Start of “How It Works”         | Summarizes value loop early               |
+
+Let me know if you’d like a PR-style formatted snippet with all three edits in JSX!
