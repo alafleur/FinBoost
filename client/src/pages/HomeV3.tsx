@@ -110,7 +110,7 @@ export default function HomeV3() {
               
               <div className="flex items-center text-slate-600 bg-slate-50 rounded-full px-6 py-3 border border-slate-200 shadow-sm">
                 <Users className="mr-2 h-5 w-5" />
-                <span className="font-semibold">Limited to 500 founding members</span>
+                <span className="font-semibold">Early access founding membership is limited</span>
               </div>
             </div>
             
