@@ -375,8 +375,14 @@ export default function HomeV3() {
       <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
 
       {/* Why FinBoost Exists - Card Format */}
-      <section className="w-full bg-gray-50 py-16 px-6">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -384,10 +390,13 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-300 font-semibold text-sm">OUR PURPOSE</span>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">
               Why FinBoost Exists
             </h2>
-            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
+            <p className="text-lg leading-relaxed text-white/70 max-w-3xl mx-auto">
               Bridging the gap between financial knowledge and real action
             </p>
           </motion.div>
@@ -398,13 +407,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-red-400"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-red-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Target className="h-6 w-6 text-red-600" />
+              <div className="bg-red-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Target className="h-6 w-6 text-red-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Problem</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-white mb-3">The Problem</h3>
+              <p className="text-white/70">
                 Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
               </p>
             </motion.div>
@@ -414,13 +423,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-yellow-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+              <div className="bg-yellow-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-yellow-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Reality</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-white mb-3">The Reality</h3>
+              <p className="text-white/70">
                 Millions are buried in debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
               </p>
             </motion.div>
@@ -430,13 +439,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-blue-400"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Zap className="h-6 w-6 text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Solution</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-white mb-3">Our Solution</h3>
+              <p className="text-white/70">
                 FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
               </p>
             </motion.div>
@@ -446,13 +455,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-green-400"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-green-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-green-600" />
+              <div className="bg-green-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-white mb-3">Our Mission</h3>
+              <p className="text-white/70">
                 Make financial progress not just possible, but motivating. When you grow, you earn. When the community grows, we all win.
               </p>
             </motion.div>
