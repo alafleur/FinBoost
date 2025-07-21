@@ -133,14 +133,24 @@ export default function HomeV3() {
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-8 leading-[0.95] tracking-tight">
-              Take Control of 
-              <span className="block text-slate-900"> Your Money</span>
+              Learn Finance,
+              <span className="block text-slate-900"> Win Real Money</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Learn real financial skills. Take real action. Earn real rewards.
-              <span className="block mt-2 text-blue-600 font-semibold">Rewards pools are company-boosted during Early Access.</span>
+            <p className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+              The only financial education platform where your progress competes for cash rewards.
             </p>
+            
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-green-200">
+              <div className="flex items-center justify-center mb-2">
+                <Trophy className="w-6 h-6 text-yellow-600 mr-2" />
+                <span className="text-lg font-bold text-slate-800">This Cycle's Rewards Pool</span>
+              </div>
+              <div className="text-3xl font-bold text-green-700 text-center mb-2">$3,000</div>
+              <p className="text-sm text-slate-600 text-center">
+                <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Distributed to top performers every 2 weeks
+              </p>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -342,11 +352,11 @@ export default function HomeV3() {
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl font-bold text-white mb-6 leading-tight">
-              Earn Points and
-              <span className="block text-white"> Compete for Rewards</span>
+              Compete for Cash While
+              <span className="block text-white"> Learning Finance</span>
             </h2>
             <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-              Four streamlined steps to financial progress and real rewards
+              Earn points through financial education. Top performers win real money every 2 weeks.
             </p>
           </motion.div>
 
@@ -375,9 +385,9 @@ export default function HomeV3() {
               },
               {
                 icon: <Trophy className="w-8 h-8" />,
-                title: "Compete in Cycles",
-                description: "Every 2 weeks, reset + win",
-                details: "Point totals determine tier placement. Top performers win from the rewards pool",
+                title: "Win Cash Rewards",
+                description: "Top performers split $3,000+",
+                details: "Every 2 weeks, highest-scoring members win real money from the collective rewards pool",
                 gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
