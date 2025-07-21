@@ -320,6 +320,21 @@ export default function HomeV3() {
         </div>
         
         <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-300 font-semibold text-sm">OUR PURPOSE</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Why FinBoost Exists
+            </h2>
+          </motion.div>
+
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
