@@ -1016,12 +1016,9 @@ export default function HomeV3() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Build Better Money Habits That Actually Stick
             </h2>
-            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto mb-8">
+            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
               Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
             </p>
-            <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
-              Most members start seeing progress in their first month
-            </div>
           </motion.div>
 
           <motion.div
