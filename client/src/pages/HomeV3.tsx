@@ -374,6 +374,92 @@ export default function HomeV3() {
       {/* Hero Separator */}
       <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
 
+      {/* Why FinBoost Exists - Card Format */}
+      <section className="w-full bg-gray-50 py-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why FinBoost Exists
+            </h2>
+            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
+              Bridging the gap between financial knowledge and real action
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-red-400"
+            >
+              <div className="bg-red-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Target className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Problem</h3>
+              <p className="text-gray-600">
+                Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400"
+            >
+              <div className="bg-yellow-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Reality</h3>
+              <p className="text-gray-600">
+                Millions are buried in debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-blue-400"
+            >
+              <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Zap className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Solution</h3>
+              <p className="text-gray-600">
+                FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-green-400"
+            >
+              <div className="bg-green-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
+              <p className="text-gray-600">
+                Make financial progress not just possible, but motivating. When you grow, you earn. When the community grows, we all win.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* How Real People Win Real Rewards - Dedicated Section */}
       <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
@@ -1102,92 +1188,6 @@ export default function HomeV3() {
                 Sign Up for Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why FinBoost Exists - Card Format */}
-      <section className="w-full bg-gray-50 py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why FinBoost Exists
-            </h2>
-            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
-              Bridging the gap between financial knowledge and real action
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-red-400"
-            >
-              <div className="bg-red-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Target className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Problem</h3>
-              <p className="text-gray-600">
-                Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400"
-            >
-              <div className="bg-yellow-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Reality</h3>
-              <p className="text-gray-600">
-                Millions are buried in debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-blue-400"
-            >
-              <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Solution</h3>
-              <p className="text-gray-600">
-                FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-green-400"
-            >
-              <div className="bg-green-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
-              <p className="text-gray-600">
-                Make financial progress not just possible, but motivating. When you grow, you earn. When the community grows, we all win.
-              </p>
             </motion.div>
           </div>
         </div>
