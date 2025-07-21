@@ -407,11 +407,8 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-red-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-red-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Target className="h-6 w-6 text-red-400" />
-              </div>
               <h3 className="text-xl font-semibold text-white mb-3">The Problem</h3>
               <p className="text-white/70">
                 Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
@@ -423,11 +420,8 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-yellow-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-yellow-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-yellow-400" />
-              </div>
               <h3 className="text-xl font-semibold text-white mb-3">The Reality</h3>
               <p className="text-white/70">
                 Millions are buried in debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
@@ -439,11 +433,8 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-blue-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-blue-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-blue-400" />
-              </div>
               <h3 className="text-xl font-semibold text-white mb-3">Our Solution</h3>
               <p className="text-white/70">
                 FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
@@ -455,11 +446,8 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-l-4 border-green-400 border border-white/20 hover:bg-white/15 transition-all duration-300"
             >
-              <div className="bg-green-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-green-400" />
-              </div>
               <h3 className="text-xl font-semibold text-white mb-3">Our Mission</h3>
               <p className="text-white/70">
                 Make financial progress not just possible, but motivating. When you grow, you earn. When the community grows, we all win.
