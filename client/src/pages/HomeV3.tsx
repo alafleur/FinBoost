@@ -32,31 +32,31 @@ import {
 
 export default function HomeV3() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
-  const [communitySize, setCommunitySize] = useState(93000);
+  const [communitySize, setCommunitySize] = useState(5000);
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
 
-  // Calculate scaling percentage based on member count (from original MembershipValue)
+  // Calculate scaling percentage based on member count (250-10,000+ range)
   useEffect(() => {
     const count = communitySize;
     let percentage;
 
-    if (count <= 1000) {
+    if (count <= 250) {
       percentage = 50;
+    } else if (count <= 1000) {
+      // Scale from 50% to 55% between 250-1k members
+      percentage = 50 + ((count - 250) / 750) * 5;
+    } else if (count <= 3000) {
+      // Scale from 55% to 65% between 1k-3k members
+      percentage = 55 + ((count - 1000) / 2000) * 10;
+    } else if (count <= 6000) {
+      // Scale from 65% to 75% between 3k-6k members
+      percentage = 65 + ((count - 3000) / 3000) * 10;
     } else if (count <= 10000) {
-      // Scale from 50% to 60% between 1k-10k members
-      percentage = 50 + ((count - 1000) / 9000) * 10;
-    } else if (count <= 25000) {
-      // Scale from 60% to 70% between 10k-25k members
-      percentage = 60 + ((count - 10000) / 15000) * 10;
-    } else if (count <= 50000) {
-      // Scale from 70% to 75% between 25k-50k members
-      percentage = 70 + ((count - 25000) / 25000) * 5;
-    } else if (count <= 100000) {
-      // Scale from 75% to 80% between 50k-100k members
-      percentage = 75 + ((count - 50000) / 50000) * 5;
+      // Scale from 75% to 85% between 6k-10k members
+      percentage = 75 + ((count - 6000) / 4000) * 10;
     } else {
-      // 80%+ for 100k+ members
-      percentage = 80 + Math.min(((count - 100000) / 100000) * 5, 5);
+      // 85%+ for 10k+ members
+      percentage = 85;
     }
 
     setRewardsPercentage(Math.round(percentage));
@@ -532,15 +532,15 @@ export default function HomeV3() {
                   type="range"
                   value={communitySize}
                   onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                  max={150000}
-                  min={1000}
-                  step={1000}
+                  max={10000}
+                  min={250}
+                  step={250}
                   className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-2">
-                  <span>1K</span>
-                  <span>75K</span>
-                  <span>150K+</span>
+                  <span>250</span>
+                  <span>5K</span>
+                  <span>10K+</span>
                 </div>
               </div>
 
