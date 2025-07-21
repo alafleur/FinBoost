@@ -1,0 +1,100 @@
+ Remaining Gaps / Opportunities
+1. Still Missing a Strong Emotional Hook Around Rewards
+The current tone is informative but doesn’t tap into the excitement or competitive drive that motivates fantasy sports or Underdog users.
+
+✅ Suggestion:
+Add language like:
+
+“Compete. Win. Get paid.”
+
+“Your progress isn’t just tracked — it’s rewarded.”
+
+“Every cycle, real money rewards go to the top performers and active members.”
+
+2. Still Needs a Standalone Rewards Section
+You’re blending rewards info into other sections, but a dedicated section with visual focus would make the incentive clearer.
+
+✅ Suggestion:
+Insert a section titled:
+
+tsx
+Copy
+Edit
+<h2 className="text-3xl font-bold text-center mb-4">How Real People Win Real Rewards</h2>
+With supporting bullets:
+
+✅ Earn points for completing lessons and taking real actions
+
+✅ Compete in 2-week cycles
+
+✅ More than half of active members win cash prizes
+
+✅ Top prizes can reach $500–$2,000
+
+✅ FinBoost boosts prize pools during Early Access
+
+3. Still No Visual Showing How Points → Rewards
+There’s no visual bridge showing:
+
+How users earn points
+
+How those points translate into odds or tiers
+
+How rewards are allocated
+
+✅ Suggestion:
+Use a 3-step visual layout:
+
+Copy
+Edit
+📘 Learn → 📈 Earn Points → 🏆 Win Rewards
+Or animate a mock cycle leaderboard:
+
+text
+Copy
+Edit
+User A: 240 pts → Tier 1 → Wins $500
+User B: 110 pts → Tier 2 → Wins $75
+User C: 10 pts → Tier 3 → Wins $10
+✅ Summary of Recommendations to Pass to Replit
+Here’s what to send Replit as a structured set of suggestions:
+
+📌 Landing Page V3: Conversion Optimization Suggestions
+Enhance Rewards Messaging in Hero Section
+
+Consider revising to:
+“Earn real cash rewards for building real financial habits.”
+
+Add a CTA below the button:
+“More than half of active members win every cycle.”
+
+Insert a Dedicated Rewards Breakdown Section
+
+Title: “How Real People Win Real Rewards”
+
+Bullets:
+
+Earn points from lessons, actions, and predictions
+
+Compete every 2 weeks
+
+Points = your odds
+
+Top prizes: up to $500–$2,000 per cycle
+
+Company-boosted prize pools during Early Access
+
+Add Visual Progression of Earning
+
+New graphic or section:
+
+“Learn → Earn → Win” (icons or simple diagram)
+
+Optional: a sample leaderboard mockup with rewards per tier
+
+Rephrase Overly Technical Copy
+
+Replace pool formula text with plain language:
+
+“With 500 members, FinBoost allocates $2,750 to the reward pool—more than half of which goes to winners every cycle.”
+

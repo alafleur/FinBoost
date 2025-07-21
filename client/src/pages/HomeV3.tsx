@@ -138,7 +138,7 @@ export default function HomeV3() {
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed">
-              The only financial education platform where your progress competes for cash rewards.
+              Earn real cash rewards for building real financial habits. Your progress isn't just tracked — it's rewarded.
             </p>
             
             <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-green-200">
@@ -168,6 +168,12 @@ export default function HomeV3() {
                 <Users className="mr-2 h-5 w-5" />
                 <span className="font-semibold">Early access founding membership is limited</span>
               </div>
+            </div>
+            
+            <div className="text-center mb-8">
+              <p className="text-lg font-semibold text-green-600">
+                More than half of active members win every cycle.
+              </p>
             </div>
             
             <p className="text-sm text-white/50 font-normal">
@@ -367,6 +373,154 @@ export default function HomeV3() {
 
       {/* Hero Separator */}
       <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
+
+      {/* How Real People Win Real Rewards - Dedicated Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-green-100 to-emerald-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-green-700 font-semibold text-sm">REWARDS BREAKDOWN</span>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              How Real People Win Real Rewards
+            </h2>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Compete. Win. Get paid. Every cycle, real money rewards go to the top performers and active members.
+            </p>
+          </motion.div>
+
+          {/* Learn → Earn → Win Visual Progression */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">📘 Learn</h3>
+              <p className="text-gray-600">Complete lessons, take quizzes, and upload proof of real financial actions</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="w-10 h-10 text-yellow-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">📈 Earn Points</h3>
+              <p className="text-gray-600">Points determine your tier and odds of winning. More points = better chances</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">🏆 Win Rewards</h3>
+              <p className="text-gray-600">Cash prizes distributed every 2 weeks. Top prizes can reach $500–$2,000</p>
+            </motion.div>
+          </div>
+
+          {/* Rewards Details */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full bg-white border-2 border-green-200 shadow-lg">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-6">
+                    <Trophy className="w-8 h-8 text-green-600 mr-3" />
+                    <h3 className="text-2xl font-bold text-gray-900">Reward Structure</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">Earn points from lessons, actions, and predictions</span>
+                    </div>
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">Compete every 2 weeks</span>
+                    </div>
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">Points = your odds</span>
+                    </div>
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">Top prizes: up to $500–$2,000 per cycle</span>
+                    </div>
+                    <div className="flex items-center">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <span className="text-gray-700">Company-boosted prize pools during Early Access</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 shadow-lg">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-6">
+                    <Users className="w-8 h-8 text-blue-600 mr-3" />
+                    <h3 className="text-2xl font-bold text-gray-900">Sample Leaderboard</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="bg-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-gray-800">User A: 240 pts → Tier 1</span>
+                        <span className="font-bold text-green-600">Wins $500</span>
+                      </div>
+                    </div>
+                    <div className="bg-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-gray-800">User B: 110 pts → Tier 2</span>
+                        <span className="font-bold text-green-600">Wins $75</span>
+                      </div>
+                    </div>
+                    <div className="bg-green-100 rounded-lg p-4 border-l-4 border-green-500">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-gray-800">User C: 10 pts → Tier 3</span>
+                        <span className="font-bold text-green-600">Wins $10</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-4 text-center font-medium">
+                    More than half of active members receive rewards every cycle
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
       {/* How It Works - Modern Process Flow */}
       <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
