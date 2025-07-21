@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,34 @@ import {
 export default function HomeV3() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [communitySize, setCommunitySize] = useState(93000);
-  const [rewardsPercentage, setRewardsPercentage] = useState(79); // Dynamic percentage
+  const [rewardsPercentage, setRewardsPercentage] = useState(79);
+
+  // Calculate scaling percentage based on member count (from original MembershipValue)
+  useEffect(() => {
+    const count = communitySize;
+    let percentage;
+
+    if (count <= 1000) {
+      percentage = 50;
+    } else if (count <= 10000) {
+      // Scale from 50% to 60% between 1k-10k members
+      percentage = 50 + ((count - 1000) / 9000) * 10;
+    } else if (count <= 25000) {
+      // Scale from 60% to 70% between 10k-25k members
+      percentage = 60 + ((count - 10000) / 15000) * 10;
+    } else if (count <= 50000) {
+      // Scale from 70% to 75% between 25k-50k members
+      percentage = 70 + ((count - 25000) / 25000) * 5;
+    } else if (count <= 100000) {
+      // Scale from 75% to 80% between 50k-100k members
+      percentage = 75 + ((count - 50000) / 50000) * 5;
+    } else {
+      // 80%+ for 100k+ members
+      percentage = 80 + Math.min(((count - 100000) / 100000) * 5, 5);
+    }
+
+    setRewardsPercentage(Math.round(percentage));
+  }, [communitySize]);
 
   // Mock app screenshots data
   const screenshots = [
@@ -489,118 +516,49 @@ export default function HomeV3() {
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Interactive Dial Component */}
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-8 rounded-xl">
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Toggle the dial to see the power of the collective</h3>
-                  <div className="flex items-center justify-center space-x-3 mb-4">
-                    <Users className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-600">Community Size</span>
-                  </div>
-                  <div className="text-4xl font-bold text-gray-900 mb-2">
+            {/* Interactive Controls */}
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    Community Size
+                  </label>
+                  <span className="text-2xl font-bold text-blue-600">
                     {formatMembers(communitySize)} members
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  value={communitySize}
+                  onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                  max={150000}
+                  min={1000}
+                  step={1000}
+                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>1K</span>
+                  <span>75K</span>
+                  <span>150K+</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 text-center">
+                  <div className="text-sm text-blue-600 font-medium mb-1">Rewards Allocation</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">
+                    {rewardsPercentage}%
                   </div>
-                  
-                  {/* Interactive Range Sliders */}
-                  <div className="space-y-4 mt-6">
-                    <div className="relative">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Community Size</label>
-                      <input
-                        type="range"
-                        min="75000"
-                        max="150000"
-                        step="1000"
-                        value={communitySize}
-                        onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <div className="flex justify-between text-sm text-gray-600 mt-1">
-                        <span>75K</span>
-                        <span>150K+</span>
-                      </div>
-                    </div>
-                    
-                    <div className="relative">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Rewards Allocation %</label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="90"
-                        step="1"
-                        value={rewardsPercentage}
-                        onChange={(e) => setRewardsPercentage(parseInt(e.target.value))}
-                        className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <div className="flex justify-between text-sm text-gray-600 mt-1">
-                        <span>50%</span>
-                        <span>90%</span>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="text-xs text-blue-500">of membership fees</div>
                 </div>
 
-                {/* Split Allocation Display */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-white p-4 rounded-lg text-center">
-                    <div className="text-xs text-blue-600 font-semibold uppercase mb-1">Rewards Allocation</div>
-                    <div className="text-2xl font-bold text-blue-600">{rewardsPercentage}%</div>
-                    <div className="text-xs text-gray-600">of membership fees</div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 text-center">
+                  <div className="text-sm text-green-600 font-medium mb-1">Monthly Pool Size</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-700 mb-1">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg text-center">
-                    <div className="text-xs text-green-700 font-semibold uppercase mb-1">Monthly Pool Size</div>
-                    <div className="text-2xl font-bold text-green-700">
-                      {formatCurrency(calculateRewardsPool(communitySize))}
-                    </div>
-                    <div className="text-xs text-green-600">available for rewards</div>
-                  </div>
-                </div>
-
-                {/* Dynamic Circular Visualization */}
-                <div className="flex justify-center mb-6">
-                  <div className="relative w-32 h-32">
-                    <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
-                      {/* Background circle */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="35"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="8"
-                      />
-                      {/* Animated Rewards Pool (Dynamic %) */}
-                      <motion.circle
-                        cx="50"
-                        cy="50"
-                        r="35"
-                        fill="none"
-                        stroke="#10b981"
-                        strokeWidth="8"
-                        strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
-                        strokeLinecap="round"
-                        initial={{ strokeDasharray: "219.9 219.9" }}
-                        animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <div className="text-lg font-bold text-gray-900">$20</div>
-                      <div className="text-xs text-gray-600 text-center">monthly membership</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                    <span className="text-gray-700">{rewardsPercentage}% — Collective Rewards Pool</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-                    <span className="text-gray-700">{100 - rewardsPercentage}% — Education & Platform Operations</span>
-                  </div>
+                  <div className="text-xs text-green-500">available for rewards</div>
                 </div>
               </div>
 
@@ -619,47 +577,85 @@ export default function HomeV3() {
               </div>
             </div>
 
-            {/* Top Reward Callout */}
-            <div className="space-y-6">
-              <div className="bg-yellow-50 p-8 rounded-xl border border-yellow-200">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="w-8 h-8 text-white" />
-                  </div>
-                  <h4 className="text-xl font-semibold text-yellow-800 mb-2">Top Reward</h4>
-                  <div className="text-3xl font-bold text-yellow-700 mb-2">
-                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.1))}
-                  </div>
-                  <p className="text-sm text-yellow-700">
-                    10% of cycle rewards pool goes to the top performer
-                  </p>
+            {/* Dynamic Donut Chart */}
+            <div className="flex flex-col items-center">
+              <div className="relative w-64 h-64 mb-6">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                  />
+                  {/* Rewards percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="10"
+                    strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                  {/* Operations percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#3b82f6"
+                    strokeWidth="10"
+                    strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
+                    strokeDashoffset={`-${rewardsPercentage * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ 
+                      strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
+                      strokeDashoffset: `-${rewardsPercentage * 2.199}`
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                </svg>
+
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold text-gray-800">$20</div>
+                  <div className="text-sm text-gray-500">monthly membership</div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">How Distribution Works</h4>
-                <div className="space-y-3 text-sm text-gray-700">
-                  <div className="flex justify-between">
-                    <span>Top performer (Tier 1)</span>
-                    <span className="font-semibold">10%</span>
+              {/* Legend */}
+              <div className="space-y-2 text-sm mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500 rounded"></div>
+                  <span>{rewardsPercentage}% → Collective Rewards Pool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                  <span>{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                </div>
+              </div>
+
+              {/* Top Reward Callout */}
+              <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-200 w-full max-w-sm">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Trophy className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex justify-between">
-                    <span>Top third of community</span>
-                    <span className="font-semibold">50%</span>
+                  <h4 className="text-lg font-semibold text-yellow-800 mb-2">Top Reward</h4>
+                  <div className="text-2xl font-bold text-yellow-700 mb-2">
+                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.1))}
                   </div>
-                  <div className="flex justify-between">
-                    <span>Middle third</span>
-                    <span className="font-semibold">30%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Bottom third</span>
-                    <span className="font-semibold">20%</span>
-                  </div>
-                  <hr className="my-3" />
-                  <div className="flex justify-between font-semibold">
-                    <span>Total distributed</span>
-                    <span>100%</span>
-                  </div>
+                  <p className="text-xs text-yellow-700">
+                    10% of rewards pool goes to top performer
+                  </p>
                 </div>
               </div>
             </div>
