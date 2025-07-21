@@ -741,7 +741,7 @@ export default function HomeV3() {
               <span className="text-green-700 font-semibold text-sm">🚀 EARLY ACCESS EXCLUSIVE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Top Guaranteed Minimums
+              Guaranteed Minimums for Top Rewards
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               To kick things off, FinBoost is guaranteeing <span className="font-semibold text-green-600">$5,000</span> in total rewards during the first cycle. 
@@ -795,7 +795,7 @@ export default function HomeV3() {
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Guaranteed Minimums</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Top Guaranteed Minimums</h3>
                   <p className="text-gray-700">These amounts are locked in regardless of pool size. You could win more, but not less.</p>
                 </div>
               </div>
@@ -818,7 +818,7 @@ export default function HomeV3() {
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">High Win Rate</h3>
                   <p className="text-gray-700">
-                    <span className="font-semibold text-blue-600">At least half of all active members will receive rewards every cycle.</span>
+                    At least half of all active members will receive rewards every cycle.
                   </p>
                 </div>
               </div>
