@@ -578,19 +578,19 @@ export default function HomeV3() {
                   <div className="space-y-4">
                     <div className="bg-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">User A: 240 pts → Tier 1</span>
+                        <span className="font-semibold text-gray-800">Sarah_M: 240 pts → Tier 1</span>
                         <span className="font-bold text-green-600">Wins $500</span>
                       </div>
                     </div>
                     <div className="bg-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">User B: 110 pts → Tier 2</span>
+                        <span className="font-semibold text-gray-800">DebtFree2025: 110 pts → Tier 2</span>
                         <span className="font-bold text-green-600">Wins $75</span>
                       </div>
                     </div>
                     <div className="bg-green-100 rounded-lg p-4 border-l-4 border-green-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">User C: 10 pts → Tier 3</span>
+                        <span className="font-semibold text-gray-800">Mike_Invests: 10 pts → Tier 3</span>
                         <span className="font-bold text-green-600">Wins $10</span>
                       </div>
                     </div>
