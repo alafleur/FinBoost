@@ -934,39 +934,21 @@ export default function HomeV3() {
             ))}
           </div>
 
-          <div className="space-y-4">
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-6 text-center">
-                <h4 className="text-lg font-semibold text-blue-800 mb-3">
-                  How Tier Distribution Works
-                </h4>
-                <div className="text-left text-blue-700 space-y-3 max-w-2xl mx-auto">
-                  <p>• Top third of point earners receive ~50% of the pool</p>
-                  <p>• Middle third share ~35% of the pool</p>
-                  <p>• Bottom third share ~15% — yes, even new learners can win</p>
-                </div>
-                <p className="mt-4 font-medium text-blue-800">
-                  At least half of active members receive rewards every cycle.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <div className="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-md text-yellow-900 text-center">
-              <p className="mb-4"><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every rewards pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          <div className="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-md text-yellow-900 text-center mt-8">
+            <p className="mb-4"><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every rewards pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
               >
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
-                >
-                  <Trophy className="mr-2 h-5 w-5" />
-                  Sign Up for Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </motion.div>
-            </div>
+                <Trophy className="mr-2 h-5 w-5" />
+                Sign Up for Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </section>
