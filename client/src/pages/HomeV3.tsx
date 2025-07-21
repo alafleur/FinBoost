@@ -745,18 +745,18 @@ export default function HomeV3() {
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               To kick things off, FinBoost is guaranteeing <span className="font-semibold text-green-600">$5,000</span> in total rewards during the first cycle. 
-              That includes minimum guaranteed payouts for the top 5 performers—based on skill, not chance.
+              That includes minimum guaranteed payouts for the top 5 performers—selected through our hybrid point-weighted draw system.
             </p>
           </motion.div>
 
           {/* Guaranteed Winners Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
             {[
-              { position: "🥇 1st Place", amount: "$500+", gradient: "from-yellow-400 to-yellow-500", border: "border-yellow-400" },
-              { position: "🥈 2nd Place", amount: "$300+", gradient: "from-gray-300 to-gray-400", border: "border-gray-400" },
-              { position: "🥉 3rd Place", amount: "$200+", gradient: "from-orange-400 to-orange-500", border: "border-orange-400" },
-              { position: "4th Place", amount: "$150+", gradient: "from-blue-400 to-blue-500", border: "border-blue-400" },
-              { position: "5th Place", amount: "$100+", gradient: "from-green-400 to-green-500", border: "border-green-400" }
+              { position: "1st", amount: "$500+" },
+              { position: "2nd", amount: "$300+" },
+              { position: "3rd", amount: "$200+" },
+              { position: "4th", amount: "$150+" },
+              { position: "5th", amount: "$100+" }
             ].map((winner, index) => (
               <motion.div
                 key={index}
@@ -766,12 +766,12 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="group"
               >
-                <div className={`bg-white rounded-xl p-4 md:p-6 shadow-lg border-l-4 ${winner.border} hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1`}>
+                <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-l-4 border-blue-500 hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
                   <div className="text-center">
                     <p className="font-semibold text-gray-800 text-sm md:text-base mb-2">
                       {winner.position}
                     </p>
-                    <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${winner.gradient} bg-clip-text text-transparent mb-2`}>
+                    <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                       {winner.amount}
                     </div>
                     <div className="w-8 h-1 bg-gradient-to-r from-gray-200 to-gray-300 rounded mx-auto"></div>
@@ -787,28 +787,16 @@ export default function HomeV3() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="grid md:grid-cols-2 gap-8 mb-12"
+            className="flex justify-center mb-12"
           >
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 max-w-2xl">
               <div className="flex items-start space-x-4">
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Guaranteed Minimums</h3>
-                  <p className="text-gray-700">These amounts are locked in regardless of pool size. You could win more, but never less.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">First Cycle Only</h3>
-                  <p className="text-gray-700">These guarantees apply only to founding members in the inaugural cycle. Future cycles will be community-funded.</p>
+                  <p className="text-gray-700">These amounts are locked in regardless of pool size. You could win more, but not less.</p>
                 </div>
               </div>
             </div>
@@ -824,7 +812,7 @@ export default function HomeV3() {
           >
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-8 border border-yellow-200 mb-6">
               <p className="text-lg font-semibold text-gray-900 mb-4">
-                <span className="text-yellow-600">⚡ Limited Time:</span> These guarantees are exclusive to Early Access founding members
+                <span className="text-yellow-600">⚡ Limited Time:</span> Minimum reward guarantees are exclusive to Early Access members
               </p>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -832,18 +820,20 @@ export default function HomeV3() {
               >
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-4 text-base md:text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300 leading-tight"
                   onClick={() => window.location.href = '/auth?mode=signup'}
                 >
-                  <Trophy className="mr-3 h-6 w-6" />
-                  Secure Your Spot for Guaranteed Rewards
-                  <ArrowRight className="ml-3 h-6 w-6" />
+                  <Trophy className="mr-2 h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
+                  <span className="text-center">
+                    Join Now While Rewards<br className="md:hidden" /> Are Guaranteed
+                  </span>
+                  <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
                 </Button>
               </motion.div>
             </div>
             
             <p className="text-sm text-gray-500">
-              Winner guarantees apply to the first cycle only. Subsequent cycles will operate on the standard community-funded model with rewards based on pool size and tier distribution.
+              Minimum guarantees currently apply to the first cycle only.
             </p>
           </motion.div>
         </div>
