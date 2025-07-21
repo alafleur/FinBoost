@@ -380,33 +380,73 @@ export default function HomeV3() {
       </section>
 
       {/* Membership Value Breakdown */}
-      <section className="w-full bg-white py-12 px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="text-2xl font-semibold text-center text-gray-900 mb-6">
-            Where Your $20 Membership Goes
-          </h3>
-          <div className="max-w-2xl mx-auto text-center text-gray-700 space-y-5">
-            <p>
-              At FinBoost, your membership isn't just a transaction — it's a contribution to a collective effort.
+      <section className="w-full bg-gradient-to-b from-slate-50 to-white py-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How Your Membership Fuels the Movement
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Your membership isn't just a transaction — it's a contribution to a collective effort that drives real financial outcomes.
             </p>
-            <ul className="list-disc text-left list-inside space-y-2">
-              <li>
-                <strong>Education Access:</strong> You unlock full access to our growing library of financial lessons, quizzes, and real-world action incentives.
-              </li>
-              <li>
-                <strong>Community Rewards Pool:</strong> Part of every membership funds the prize pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
-              </li>
-            </ul>
-            <p className="font-medium text-gray-800">
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                <GraduationCap className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Education Access</h4>
+              <p className="text-gray-600 leading-relaxed">
+                You unlock full access to our growing library of financial lessons, quizzes, and real-world action incentives that build genuine financial skills.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Community Rewards Pool</h4>
+              <p className="text-gray-600 leading-relaxed">
+                Part of every membership funds the prize pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
+              </p>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-center text-white"
+          >
+            <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-4">
+              <Sparkles className="w-5 h-5 mr-2" />
+              <span className="font-semibold">The Investment Effect</span>
+            </div>
+            <p className="text-lg font-medium">
               You're not just buying access — you're investing in a system where collective effort drives real financial outcomes.
             </p>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Reward Pool Mechanics - Show Real Impact */}
