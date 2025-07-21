@@ -379,6 +379,36 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Membership Value Breakdown */}
+      <section className="w-full bg-white py-12 px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h3 className="text-2xl font-semibold text-center text-gray-900 mb-6">
+            Where Your $20 Membership Goes
+          </h3>
+          <div className="max-w-2xl mx-auto text-center text-gray-700 space-y-5">
+            <p>
+              At FinBoost, your membership isn't just a transaction — it's a contribution to a collective effort.
+            </p>
+            <ul className="list-disc text-left list-inside space-y-2">
+              <li>
+                <strong>Education Access:</strong> You unlock full access to our growing library of financial lessons, quizzes, and real-world action incentives.
+              </li>
+              <li>
+                <strong>Community Rewards Pool:</strong> Part of every membership funds the prize pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
+              </li>
+            </ul>
+            <p className="font-medium text-gray-800">
+              You're not just buying access — you're investing in a system where collective effort drives real financial outcomes.
+            </p>
+          </div>
+        </motion.div>
+      </section>
+
       {/* Reward Pool Mechanics - Show Real Impact */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
