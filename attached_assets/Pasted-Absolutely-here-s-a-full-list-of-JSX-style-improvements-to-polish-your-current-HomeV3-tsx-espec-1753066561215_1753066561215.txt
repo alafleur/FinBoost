@@ -1,0 +1,91 @@
+Absolutely — here’s a full list of JSX/style improvements to polish your current `HomeV3.tsx`, especially focused on the **“How Your Membership Fuels the Movement”** section and broader layout enhancements. This bundle is optimized for immediate implementation by Replit.
+
+---
+
+### ✅ 1. Make the Section Title Stronger (Visual Hierarchy)
+
+**Update the heading size and weight to increase prominence:**
+
+```tsx
+<h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
+  How Your Membership Fuels the Movement
+</h2>
+```
+
+**Rationale:** This increases contrast with `<h3>` elements used in surrounding sections and emphasizes the section’s importance.
+
+---
+
+### ✅ 2. Add a Light Background to This Section for Visual Rhythm
+
+**Wrap the section with a gray background:**
+
+```tsx
+<section className="w-full bg-gray-50 py-12 px-6">
+  {/* ... existing content ... */}
+</section>
+```
+
+**Rationale:** Visually segments this section from those before/after. Improves rhythm across a text-heavy layout.
+
+---
+
+### ✅ 3. Add a Top Border Divider (Optional, for Clean Separation)
+
+**To visually separate this section from “How It Works” above:**
+
+Right before this section, insert:
+
+```tsx
+<div className="border-t border-gray-200 my-10" />
+```
+
+**Rationale:** Acts as a subtle divider and improves flow.
+
+---
+
+### ✅ 4. Minor Typography Adjustments Inside the Section
+
+**Update the paragraph copy for readability and spacing:**
+
+Replace:
+
+```tsx
+<p className="font-medium text-gray-800">
+  You’re not just buying access — you’re investing in a system where collective effort drives real financial outcomes.
+</p>
+```
+
+With:
+
+```tsx
+<p className="text-lg font-medium text-gray-800 leading-relaxed">
+  You’re not just buying access — you’re investing in a system where collective effort drives real financial outcomes.
+</p>
+```
+
+**Rationale:** Improves readability by increasing font size and line height.
+
+---
+
+### ✅ 5. Call-to-Action Reinforcement (Optional)
+
+**At the end of the section, consider adding this line to tie back to community theme:**
+
+```tsx
+<p className="text-gray-700 text-center italic mt-6">
+  When you invest in yourself, you help reward others doing the same — and they help reward you.
+</p>
+```
+
+**Rationale:** Echoes the collective model in a memorable, trust-building way.
+
+---
+
+### ✅ Final Note: Apply Consistent Section Padding
+
+Ensure all major `<section>` blocks in the page use **`py-12` or `py-16`** rather than smaller paddings (`py-6`), so the page doesn’t feel cramped. This will improve scannability and visual spacing on all screen sizes.
+
+---
+
+Let me know if you'd like a merged version of all this as a full JSX snippet. Otherwise, this list is ready to pass directly to Replit for implementation.

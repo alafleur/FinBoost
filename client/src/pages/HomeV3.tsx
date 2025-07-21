@@ -133,7 +133,7 @@ export default function HomeV3() {
       </section>
 
       {/* App Preview - Modern Sleek Design */}
-      <section className="py-24 px-4 bg-gradient-to-b from-slate-50 to-white">
+      <section className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -274,7 +274,7 @@ export default function HomeV3() {
       </section>
 
       {/* How It Works - Modern Process Flow */}
-      <section className="py-24 px-4 bg-slate-900 relative overflow-hidden">
+      <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
@@ -347,30 +347,22 @@ export default function HomeV3() {
                   )}
                   
                   {/* Card */}
-                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">
-                    {/* Step number */}
-                    <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center text-slate-900 font-bold text-sm shadow-lg">
-                      {index + 1}
-                    </div>
-                    
-                    {/* Icon */}
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
-                      <div className="text-white">
-                        {step.icon}
+                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">                    
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-4 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
+                          <div className="text-white">
+                            {step.icon}
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
+                        <p className="text-blue-300 font-semibold mb-3 text-sm">{step.description}</p>
+                        <p className="text-white/70 text-sm leading-relaxed">{step.details}</p>
                       </div>
                     </div>
-                    
-                    <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
-                      {step.title}
-                    </h3>
-                    
-                    <p className="text-blue-300 font-semibold mb-4 text-sm">
-                      {step.description}
-                    </p>
-                    
-                    <p className="text-white/70 text-sm leading-relaxed">
-                      {step.details}
-                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -379,8 +371,11 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Visual divider */}
+      <div className="border-t border-gray-200 my-10" />
+
       {/* Membership Value Breakdown */}
-      <section className="w-full bg-gradient-to-b from-slate-50 to-white py-16 px-6">
+      <section className="w-full bg-gray-50 py-12 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -389,9 +384,9 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
               How Your Membership Fuels the Movement
-            </h3>
+            </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Your membership isn't just a transaction — it's a contribution to a collective effort that drives real financial outcomes.
             </p>
@@ -442,8 +437,11 @@ export default function HomeV3() {
               <Sparkles className="w-5 h-5 mr-2" />
               <span className="font-semibold">The Investment Effect</span>
             </div>
-            <p className="text-lg font-medium">
+            <p className="text-lg font-medium leading-relaxed">
               You're not just buying access — you're investing in a system where collective effort drives real financial outcomes.
+            </p>
+            <p className="text-gray-700 text-center italic mt-6">
+              When you invest in yourself, you help reward others doing the same — and they help reward you.
             </p>
           </motion.div>
         </div>
@@ -788,17 +786,27 @@ export default function HomeV3() {
             ))}
           </div>
 
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-6 text-center">
-              <h4 className="text-lg font-semibold text-blue-800 mb-2">
-                Point-Weighted Selection
-              </h4>
-              <p className="text-blue-700">
-                More points = better odds, but everyone in a tier has a shot. 
-                It's skill-based competition, not pure luck.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6 text-center">
+                <h4 className="text-lg font-semibold text-blue-800 mb-3">
+                  How Tier Distribution Works
+                </h4>
+                <ul className="list-disc list-inside text-left text-blue-700 space-y-2 max-w-2xl mx-auto">
+                  <li>Top third of point earners receive ~50% of the pool</li>
+                  <li>Middle third share ~35% of the pool</li>
+                  <li>Bottom third share ~15% — yes, even new learners can win</li>
+                </ul>
+                <p className="mt-4 font-medium text-blue-800">
+                  At least half of active members receive rewards every cycle.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <div className="bg-yellow-100 border-l-4 border-yellow-400 p-4 rounded-md text-yellow-900 text-center">
+              <p><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every prize pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1052,17 +1060,12 @@ export default function HomeV3() {
           >
             {/* Main heading */}
             <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tight">
-              Join the Movement
-              <br />
-              <span className="text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text">
-                That Rewards Progress
-              </span>
+              Ready to Turn Financial Struggle Into Strength?
             </h2>
             
             <p className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto font-normal leading-relaxed">
-              FinBoost is where financial education meets real competition. 
-              With boosted reward pools and limited Early Access slots, 
-              <span className="text-blue-200 font-semibold"> now's the time to join.</span>
+              Join a growing movement where every dollar you invest fuels your growth and builds collective opportunity.
+              <span className="text-blue-200 font-semibold"> Turn your progress into real rewards.</span>
             </p>
 
             {/* CTA Button */}
@@ -1079,7 +1082,7 @@ export default function HomeV3() {
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="relative flex items-center">
                     <Zap className="mr-3 h-6 w-6 group-hover:animate-pulse" />
-                    Start Earning With FinBoost
+                    Start Your Financial Transformation
                     <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Button>
