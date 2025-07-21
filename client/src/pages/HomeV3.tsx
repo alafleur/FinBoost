@@ -133,8 +133,8 @@ export default function HomeV3() {
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-8 leading-[0.95] tracking-tight">
-              Learn Finance,
-              <span className="block text-slate-900"> Win Real Money</span>
+              Turn Financial Stress into
+              <span className="block text-slate-900"> Financial Progress – Together</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed">
