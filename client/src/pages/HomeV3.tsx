@@ -32,7 +32,7 @@ import {
 
 export default function HomeV3() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
-  const [prizePoolUsers, setPrizePoolUsers] = useState(500);
+  const [communitySize, setCommunitySize] = useState(93000);
 
   // Mock app screenshots data
   const screenshots = [
@@ -58,9 +58,27 @@ export default function HomeV3() {
     }
   ];
 
-  const calculatePrizePool = (users: number) => {
-    const basePool = users * 20 * 0.50 * 0.55; // $20 subscription * 50% * 55% pool allocation
-    return basePool;
+  const calculateRewardsPool = (members: number) => {
+    const totalRevenue = members * 20; // Total monthly revenue
+    const rewardsAllocation = totalRevenue * 0.79; // 79% goes to rewards pool
+    return rewardsAllocation;
+  };
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`;
+    } else {
+      return `$${amount}`;
+    }
+  };
+
+  const formatMembers = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(0)}K`;
+    }
+    return count.toString();
   };
 
   return (
@@ -469,106 +487,163 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Dynamic Calculator */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Interactive Dial Component */}
             <div className="space-y-6">
-              <div className="bg-gray-50 p-6 rounded-xl">
-                <h3 className="text-xl font-semibold mb-4">Illustrative Rewards Pool Calculator</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Number of Members</label>
+              <div className="bg-gray-50 p-8 rounded-xl">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-semibold mb-2">Toggle the dial to see the power of the collective</h3>
+                  <div className="flex items-center justify-center space-x-3 mb-4">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-600">Community Size</span>
+                  </div>
+                  <div className="text-4xl font-bold text-gray-900 mb-2">
+                    {formatMembers(communitySize)} members
+                  </div>
+                  
+                  {/* Interactive Range Slider */}
+                  <div className="relative mt-6">
                     <input
                       type="range"
-                      min="250"
-                      max="10000"
-                      step="250"
-                      value={prizePoolUsers}
-                      onChange={(e) => setPrizePoolUsers(parseInt(e.target.value))}
-                      className="w-full"
+                      min="75000"
+                      max="150000"
+                      step="1000"
+                      value={communitySize}
+                      onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                      className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
                     />
-                    <div className="flex justify-between text-sm text-gray-600 mt-1">
-                      <span>250</span>
-                      <span className="font-medium">{prizePoolUsers} members</span>
-                      <span>10,000</span>
+                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                      <span>75K</span>
+                      <span>150K+</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="text-3xl font-bold text-blue-600">
-                        ${calculatePrizePool(prizePoolUsers).toLocaleString()}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Cycle rewards pool ({prizePoolUsers} × $20 × 50% × 55%)
-                      </div>
+                </div>
+
+                {/* Split Allocation Display */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-white p-4 rounded-lg text-center">
+                    <div className="text-xs text-blue-600 font-semibold uppercase mb-1">Rewards Allocation</div>
+                    <div className="text-2xl font-bold text-blue-600">79%</div>
+                    <div className="text-xs text-gray-600">of membership fees</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg text-center">
+                    <div className="text-xs text-green-700 font-semibold uppercase mb-1">Monthly Pool Size</div>
+                    <div className="text-2xl font-bold text-green-700">
+                      {formatCurrency(calculateRewardsPool(communitySize))}
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                      <div className="text-2xl font-bold text-yellow-600">
-                        ${Math.round(calculatePrizePool(prizePoolUsers) * 0.1).toLocaleString()}
-                      </div>
-                      <div className="text-sm text-yellow-700">
-                        Top reward (10% of cycle rewards pool)
-                      </div>
+                    <div className="text-xs text-green-600">available for rewards</div>
+                  </div>
+                </div>
+
+                {/* Circular Visualization */}
+                <div className="flex justify-center mb-6">
+                  <div className="relative w-32 h-32">
+                    <svg className="w-32 h-32 -rotate-90" viewBox="0 0 36 36">
+                      {/* Background circle */}
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e5e7eb"
+                        strokeWidth="3"
+                      />
+                      {/* Rewards Pool (79%) */}
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="3"
+                        strokeDasharray="79, 21"
+                        strokeLinecap="round"
+                      />
+                      {/* Operations (21%) */}
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth="3"
+                        strokeDasharray="21, 79"
+                        strokeDashoffset="-79"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className="text-lg font-bold text-gray-900">$20</div>
+                      <div className="text-xs text-gray-600 text-center">monthly membership</div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-gray-700">79% — Collective Rewards Pool</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    <span className="text-gray-700">21% — Education & Platform Operations</span>
                   </div>
                 </div>
               </div>
 
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-3">
-                    <Shield className="w-6 h-6 text-green-600 mr-2" />
-                    <h4 className="font-semibold text-green-800">Early Access Boost</h4>
-                  </div>
-                  <p className="text-green-700 mb-2">
-                    <strong>This cycle's boosted pool: $3,000</strong>
-                  </p>
-                  <p className="text-sm text-green-600">
-                    (normally $550) – FinBoost covers the difference during Early Access
-                  </p>
-                </CardContent>
-              </Card>
+              {/* Early Access Boost */}
+              <div className="bg-green-50 p-6 rounded-xl border border-green-200">
+                <div className="flex items-center mb-3">
+                  <Shield className="w-6 h-6 text-green-600 mr-2" />
+                  <h4 className="font-semibold text-green-800">Early Access Boost</h4>
+                </div>
+                <p className="text-green-700 mb-2">
+                  <strong>This cycle's boosted pool: $3,000</strong>
+                </p>
+                <p className="text-sm text-green-600">
+                  (normally {formatCurrency(calculateRewardsPool(500))}) – FinBoost covers the difference during Early Access
+                </p>
+              </div>
             </div>
 
-            {/* Visual Examples */}
-            <div className="space-y-4">
-              {[
-                { members: 100, pool: Math.round(100 * 20 * 0.50 * 0.55), boost: 1900 },
-                { members: 500, pool: Math.round(500 * 20 * 0.50 * 0.55), boost: 0 },
-                { members: 1000, pool: Math.round(1000 * 20 * 0.50 * 0.55), boost: 0 }
-              ].map((example, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-2xl font-bold text-gray-900">
-                          {example.members} members
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Community size
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">
-                          ${(example.pool + example.boost).toLocaleString()}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {example.boost > 0 && (
-                            <span className="text-green-600">
-                              +${example.boost.toLocaleString()} boost
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+            {/* Top Reward Callout */}
+            <div className="space-y-6">
+              <div className="bg-yellow-50 p-8 rounded-xl border border-yellow-200">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-8 h-8 text-white" />
+                  </div>
+                  <h4 className="text-xl font-semibold text-yellow-800 mb-2">Top Reward</h4>
+                  <div className="text-3xl font-bold text-yellow-700 mb-2">
+                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.1))}
+                  </div>
+                  <p className="text-sm text-yellow-700">
+                    10% of cycle rewards pool goes to the top performer
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">How Distribution Works</h4>
+                <div className="space-y-3 text-sm text-gray-700">
+                  <div className="flex justify-between">
+                    <span>Top performer (Tier 1)</span>
+                    <span className="font-semibold">10%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Top third of community</span>
+                    <span className="font-semibold">50%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Middle third</span>
+                    <span className="font-semibold">30%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Bottom third</span>
+                    <span className="font-semibold">20%</span>
+                  </div>
+                  <hr className="my-3" />
+                  <div className="flex justify-between font-semibold">
+                    <span>Total distributed</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
