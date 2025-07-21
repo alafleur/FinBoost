@@ -86,12 +86,12 @@ export default function HomeV3() {
               <span className="text-green-700 font-semibold">Early Access Now Open</span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 leading-[0.95] tracking-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-8 leading-[0.95] tracking-tight">
               Take Control of 
               <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Your Money</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto font-normal leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Learn real financial skills. Take real action. Earn real rewards.
               <span className="block mt-2 text-blue-600 font-semibold">Prize pools are company-boosted during Early Access.</span>
             </p>
@@ -292,11 +292,11 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
               Earn Points and
               <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Compete for Rewards</span>
             </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto font-light">
+            <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
               Four streamlined steps to financial progress and real rewards
             </p>
           </motion.div>
@@ -375,7 +375,7 @@ export default function HomeV3() {
       <div className="border-t border-gray-200 my-10" />
 
       {/* Membership Value Breakdown */}
-      <section className="w-full bg-gray-50 py-12 px-6">
+      <section className="w-full bg-gray-50 py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -457,10 +457,10 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Your Effort Builds the Community Prize Pool
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Every member contributes to both their own progress and the prize pool. 
               During Early Access, FinBoost guarantees a minimum prize pool amount—even before user growth.
             </p>
@@ -700,7 +700,7 @@ export default function HomeV3() {
                 <Sparkles className="w-5 h-5 mr-2" />
                 <span className="font-semibold">The FinBoost Effect</span>
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+              <h3 className="text-2xl md:text-3xl font-semibold mb-4">
                 Small individual efforts → Large shared outcomes
               </h3>
               <p className="text-lg text-white/80 max-w-2xl mx-auto">
@@ -721,10 +721,10 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               More Than Half of Members Earn Rewards Each Cycle
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Users are placed in tiers based on points. Each tier has a portion of the prize pool 
               and winners are selected based on point-weighted random draws.
             </p>
@@ -769,7 +769,7 @@ export default function HomeV3() {
                     <div className={`w-16 h-16 rounded-full bg-${tier.color}-100 flex items-center justify-center mx-auto mb-4`}>
                       <Trophy className={`w-8 h-8 text-${tier.color}-600`} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-1">
                       {tier.tier}
                     </h3>
                     <p className="text-gray-600 mb-3">{tier.subtitle}</p>
@@ -910,7 +910,7 @@ export default function HomeV3() {
       </section>
 
       {/* Learning Module Section */}
-      <section className="py-24 px-4 bg-white">
+      <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -919,10 +919,10 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Build Better Money Habits That Actually Stick
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
               Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
             </p>
             <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
@@ -937,7 +937,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="mb-16"
           >
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-12">
+            <h3 className="text-2xl font-semibold text-gray-900 text-center mb-12">
               What You'll Master:
             </h3>
             
@@ -1056,7 +1056,7 @@ export default function HomeV3() {
 
 
       {/* Final CTA - Ultra Modern Dark Section */}
-      <section className="relative py-32 px-4 bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 overflow-hidden">
+      <section className="relative py-20 px-4 bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 overflow-hidden">
         {/* Animated background effects */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -1072,11 +1072,11 @@ export default function HomeV3() {
             viewport={{ once: true }}
           >
             {/* Main heading */}
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tight">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-8 leading-tight tracking-tight">
               Ready to Turn Financial Struggle Into Strength?
             </h2>
             
-            <p className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto font-normal leading-relaxed">
+            <p className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto leading-relaxed">
               Join a growing movement where every dollar you invest fuels your growth and builds collective opportunity.
               <span className="text-blue-200 font-semibold"> Turn your progress into real rewards.</span>
             </p>
