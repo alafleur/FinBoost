@@ -741,12 +741,11 @@ export default function HomeV3() {
               <span className="text-green-700 font-semibold text-sm">🚀 EARLY ACCESS EXCLUSIVE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Guaranteed Minimums for Top Rewards
+              Top Guaranteed Minimums
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               To kick things off, FinBoost is guaranteeing <span className="font-semibold text-green-600">$5,000</span> in total rewards during the first cycle. 
-              That includes minimum guaranteed payouts for the top 5 performers—selected through our hybrid point-weighted draw system. 
-              <span className="font-semibold text-blue-600">Plus, at least half of all active members will receive rewards every cycle.</span>
+              That includes minimum guaranteed payouts for the top 5 performers—selected through our hybrid point-weighted draw system.
             </p>
           </motion.div>
 
@@ -788,7 +787,7 @@ export default function HomeV3() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="flex justify-center mb-12"
+            className="flex justify-center mb-8"
           >
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 max-w-2xl">
               <div className="flex items-start space-x-4">
@@ -798,6 +797,29 @@ export default function HomeV3() {
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Guaranteed Minimums</h3>
                   <p className="text-gray-700">These amounts are locked in regardless of pool size. You could win more, but not less.</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Member Win Rate Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="flex justify-center mb-12"
+          >
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 max-w-2xl">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">High Win Rate</h3>
+                  <p className="text-gray-700">
+                    <span className="font-semibold text-blue-600">At least half of all active members will receive rewards every cycle.</span>
+                  </p>
                 </div>
               </div>
             </div>
