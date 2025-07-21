@@ -766,12 +766,8 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Your Effort Builds the Community Rewards Pool
+              Toggle the dial to see the power of the collective
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Every member contributes to both their own progress and the rewards pool. 
-              During Early Access, FinBoost guarantees a minimum rewards pool amount—even before user growth.
-            </p>
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
