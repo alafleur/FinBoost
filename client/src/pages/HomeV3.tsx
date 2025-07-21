@@ -685,11 +685,6 @@ export default function HomeV3() {
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-4 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
-                          <div className="text-white">
-                            {step.icon}
-                          </div>
-                        </div>
                         <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
                         <p className="text-blue-300 font-semibold mb-3 text-sm">{step.description}</p>
                         <p className="text-white/70 text-sm leading-relaxed">{step.details}</p>
