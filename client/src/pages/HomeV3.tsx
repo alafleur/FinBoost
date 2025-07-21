@@ -114,7 +114,7 @@ export default function HomeV3() {
       <Navbar />
       
       {/* Hero Section - Enhanced with Animated Gradient */}
-      <section id="hero" className="relative min-h-screen flex items-center pt-20 pb-16 px-4 overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex items-center pt-16 pb-12 px-6 overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-purple-50/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
@@ -174,9 +174,9 @@ export default function HomeV3() {
           </motion.div>
           
           {/* Staggered headline animation */}
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <motion.h1 
-              className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[0.95] tracking-tight"
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[0.95] tracking-tight"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -201,7 +201,7 @@ export default function HomeV3() {
           </div>
           
           <motion.p 
-            className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed"
+            className="text-base md:text-xl text-slate-600 mb-4 md:mb-6 max-w-3xl mx-auto leading-relaxed px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
@@ -211,24 +211,24 @@ export default function HomeV3() {
           
           {/* Enhanced Rewards Pool Section */}
           <motion.div
-            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-green-200 shadow-lg backdrop-blur-sm"
+            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 md:p-6 mb-6 md:mb-8 max-w-2xl mx-auto border border-green-200 shadow-lg backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
           >
-            <div className="flex items-center justify-center mb-2">
-              <Trophy className="w-6 h-6 text-yellow-600 mr-2" />
-              <span className="text-lg font-bold text-slate-800">Guaranteed Early Access Cycle Rewards Pool</span>
+            <div className="flex items-center justify-center mb-1">
+              <Trophy className="w-5 h-5 md:w-6 md:h-6 text-yellow-600 mr-2" />
+              <span className="text-sm md:text-lg font-bold text-slate-800 text-center">Guaranteed Early Access Cycle Rewards Pool</span>
             </div>
-            <div className="text-3xl font-bold text-green-700 text-center mb-2">$5,000</div>
-            <p className="text-sm text-slate-600 text-center">
+            <div className="text-2xl md:text-3xl font-bold text-green-700 text-center mb-1">$5,000</div>
+            <p className="text-xs md:text-sm text-slate-600 text-center px-2">
               <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Rewards distribution skewed to top performers
             </p>
           </motion.div>
           
           {/* Enhanced CTA Buttons */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12"
+            className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-8 md:mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4, ease: "easeOut" }}
@@ -245,12 +245,12 @@ export default function HomeV3() {
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <Button 
                 size="lg" 
-                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
+                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
                 onClick={() => window.location.href = '/auth?mode=signup'}
               >
-                <Trophy className="mr-3 h-6 w-6" />
+                <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6" />
                 Join Early Access
-                <ArrowRight className="ml-3 h-6 w-6" />
+                <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6" />
               </Button>
             </motion.div>
             
@@ -258,10 +258,10 @@ export default function HomeV3() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.6, ease: "easeOut" }}
-              className="flex items-center text-slate-600 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-slate-200 shadow-lg"
+              className="flex items-center text-slate-600 bg-white/80 backdrop-blur-sm rounded-full px-4 md:px-6 py-2 md:py-3 border border-slate-200 shadow-lg"
             >
-              <Users className="mr-2 h-5 w-5" />
-              <span className="font-semibold">Early access membership is limited</span>
+              <Users className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+              <span className="font-semibold text-sm md:text-base">Early access membership is limited</span>
             </motion.div>
           </motion.div>
           
