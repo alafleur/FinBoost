@@ -113,84 +113,200 @@ export default function HomeV3() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section - Clean White Design */}
-      <section id="hero" className="relative min-h-screen flex items-center bg-white pt-20 pb-16 px-4">
-        {/* Subtle background elements */}
+      {/* Hero Section - Enhanced with Animated Gradient */}
+      <section id="hero" className="relative min-h-screen flex items-center pt-20 pb-16 px-4 overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-purple-50/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+        </div>
+        
+        {/* Enhanced floating background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-50 rounded-full blur-3xl opacity-40"></div>
+          <motion.div 
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-100/40 to-cyan-100/30 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.5, 0.3]
+            }}
+            transition={{ 
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          ></motion.div>
+          <motion.div 
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-100/40 to-pink-100/30 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2]
+            }}
+            transition={{ 
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2
+            }}
+          ></motion.div>
+          <motion.div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-green-100/20 to-blue-100/20 rounded-full blur-2xl"
+            animate={{ 
+              rotate: [0, 180, 360],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 12,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          ></motion.div>
         </div>
         
         <div className="relative max-w-7xl mx-auto text-center z-10">
+          {/* Badge with entrance animation */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="inline-flex items-center bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full px-6 py-3 mb-8 shadow-lg backdrop-blur-sm"
           >
-            <div className="inline-flex items-center bg-green-50 border border-green-200 rounded-full px-6 py-3 mb-8">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
-              <span className="text-green-700 font-semibold">Early Access Now Open</span>
+            <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
+            <span className="text-green-700 font-semibold">Early Access Now Open</span>
+          </motion.div>
+          
+          {/* Staggered headline animation */}
+          <div className="mb-8">
+            <motion.h1 
+              className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[0.95] tracking-tight"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <motion.span
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+                className="inline-block"
+              >
+                Turn Financial Stress into
+              </motion.span>
+              <motion.span 
+                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
+              >
+                Financial Progress – Together
+              </motion.span>
+            </motion.h1>
+          </div>
+          
+          <motion.p 
+            className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
+          >
+            Earn real cash rewards for building real financial habits. Your progress isn't just tracked — it's rewarded.
+          </motion.p>
+          
+          {/* Enhanced Rewards Pool Section */}
+          <motion.div
+            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-green-200 shadow-lg backdrop-blur-sm"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
+          >
+            <div className="flex items-center justify-center mb-2">
+              <Trophy className="w-6 h-6 text-yellow-600 mr-2" />
+              <span className="text-lg font-bold text-slate-800">This Cycle's Rewards Pool</span>
             </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-8 leading-[0.95] tracking-tight">
-              Turn Financial Stress into
-              <span className="block text-slate-900"> Financial Progress – Together</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-slate-600 mb-6 max-w-3xl mx-auto leading-relaxed">
-              Earn real cash rewards for building real financial habits. Your progress isn't just tracked — it's rewarded.
-            </p>
-            
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-green-200">
-              <div className="flex items-center justify-center mb-2">
-                <Trophy className="w-6 h-6 text-yellow-600 mr-2" />
-                <span className="text-lg font-bold text-slate-800">This Cycle's Rewards Pool</span>
-              </div>
-              <div className="text-3xl font-bold text-green-700 text-center mb-2">$3,000</div>
-              <p className="text-sm text-slate-600 text-center">
-                <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Distributed to top performers every 2 weeks
-              </p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/30"
-                  onClick={() => window.location.href = '/auth?mode=signup'}
-                >
-                  <Trophy className="mr-3 h-6 w-6" />
-                  Join Early Access
-                  <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
-              </motion.div>
-              
-              <div className="flex items-center text-slate-600 bg-slate-50 rounded-full px-6 py-3 border border-slate-200 shadow-sm">
-                <Users className="mr-2 h-5 w-5" />
-                <span className="font-semibold">Early access founding membership is limited</span>
-              </div>
-            </div>
-            
-            <div className="text-center mb-8">
-              <p className="text-lg font-semibold text-green-600">
-                More than half of active members win every cycle.
-              </p>
-            </div>
-            
-            <p className="text-sm text-white/50 font-normal">
-              No purchase necessary • Alternative entry available • AMOE compliant
+            <div className="text-3xl font-bold text-green-700 text-center mb-2">$3,000</div>
+            <p className="text-sm text-slate-600 text-center">
+              <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Distributed to top performers every 2 weeks
             </p>
           </motion.div>
+          
+          {/* Enhanced CTA Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.4, ease: "easeOut" }}
+          >
+            <motion.div 
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)"
+              }} 
+              whileTap={{ scale: 0.95 }}
+              className="relative"
+            >
+              {/* Enhanced glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+              <Button 
+                size="lg" 
+                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
+                onClick={() => window.location.href = '/auth?mode=signup'}
+              >
+                <Trophy className="mr-3 h-6 w-6" />
+                Join Early Access
+                <ArrowRight className="ml-3 h-6 w-6" />
+              </Button>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1.6, ease: "easeOut" }}
+              className="flex items-center text-slate-600 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-slate-200 shadow-lg"
+            >
+              <Users className="mr-2 h-5 w-5" />
+              <span className="font-semibold">Early access founding membership is limited</span>
+            </motion.div>
+          </motion.div>
+          
+          {/* Winning Stats */}
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
+          >
+            <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+              More than half of active members win every cycle.
+            </p>
+          </motion.div>
+          
+          {/* Legal disclaimer */}
+          <motion.p 
+            className="text-sm text-slate-400 font-normal text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 2.0, ease: "easeOut" }}
+          >
+            No purchase necessary • Alternative entry available • AMOE compliant
+          </motion.p>
         </div>
         
-        {/* Scroll indicator */}
+        {/* Enhanced scroll indicator */}
         <motion.div 
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          animate={{ 
+            y: [0, 10, 0],
+            opacity: 1 
+          }}
+          transition={{ 
+            y: { duration: 2, repeat: Infinity },
+            opacity: { delay: 2.5, duration: 0.8 }
+          }}
+          initial={{ opacity: 0 }}
         >
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/50 rounded-full mt-2"></div>
+          <div className="w-6 h-10 border-2 border-slate-300/40 rounded-full flex justify-center backdrop-blur-sm bg-white/20 shadow-lg">
+            <motion.div 
+              className="w-1 h-3 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mt-2"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            ></motion.div>
           </div>
         </motion.div>
       </section>
