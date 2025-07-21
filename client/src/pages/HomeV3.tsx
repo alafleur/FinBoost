@@ -931,7 +931,7 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              More Than Half of Members Earn Rewards Each Cycle
+              Half of Members Earn Rewards Each Cycle
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Users are placed in tiers based on points. Each tier has a portion of the rewards pool 
@@ -944,26 +944,17 @@ export default function HomeV3() {
               {
                 tier: "Tier 1",
                 subtitle: "Top Third",
-                poolShare: "50%",
-                description: "Highest point earners with best odds",
-                color: "yellow",
-                textColor: "yellow-800"
+                poolShare: "50%"
               },
               {
                 tier: "Tier 2", 
                 subtitle: "Middle Third",
-                poolShare: "35%",
-                description: "Consistent performers with solid chances",
-                color: "gray",
-                textColor: "gray-800"
+                poolShare: "35%"
               },
               {
                 tier: "Tier 3",
                 subtitle: "Lower Third", 
-                poolShare: "15%",
-                description: "Early learners still earning rewards",
-                color: "orange",
-                textColor: "orange-800"
+                poolShare: "15%"
               }
             ].map((tier, index) => (
               <motion.div
@@ -973,22 +964,16 @@ export default function HomeV3() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className={`h-full border-2 border-${tier.color}-200 hover:shadow-lg transition-shadow`}>
+                <Card className="h-full border-2 border-green-200 hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 rounded-full bg-${tier.color}-100 flex items-center justify-center mx-auto mb-4`}>
-                      <Trophy className={`w-8 h-8 text-${tier.color}-600`} />
-                    </div>
                     <h3 className="text-2xl font-semibold text-gray-900 mb-1">
                       {tier.tier}
                     </h3>
                     <p className="text-gray-600 mb-3">{tier.subtitle}</p>
-                    <div className={`text-3xl font-bold text-${tier.textColor} mb-2`}>
+                    <div className="text-3xl font-bold text-green-600 mb-2">
                       {tier.poolShare}
                     </div>
                     <p className="text-sm text-gray-600 mb-4">of rewards pool</p>
-                    <p className="text-sm text-gray-700">
-                      {tier.description}
-                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
