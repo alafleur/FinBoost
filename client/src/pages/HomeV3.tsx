@@ -964,19 +964,16 @@ export default function HomeV3() {
                 viewport={{ once: true }}
               >
                 <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <CardContent className="p-6 text-center bg-gradient-to-br from-blue-900 via-blue-800 to-slate-800 relative">
-                    {/* Subtle overlay pattern */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-transparent opacity-50"></div>
-                    
+                  <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
                     <div className="relative z-10">
                       <h3 className="text-2xl font-semibold text-white mb-1">
                         {tier.tier}
                       </h3>
-                      <p className="text-blue-100 mb-3">{tier.subtitle}</p>
-                      <div className="text-3xl font-bold text-green-400 mb-2">
+                      <p className="text-white/90 mb-3">{tier.subtitle}</p>
+                      <div className="text-3xl font-bold text-white mb-2">
                         {tier.poolShare}
                       </div>
-                      <p className="text-sm text-blue-100 mb-4">of rewards pool</p>
+                      <p className="text-sm text-white/90 mb-4">of rewards pool</p>
                     </div>
                   </CardContent>
                 </Card>
