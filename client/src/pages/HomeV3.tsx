@@ -176,7 +176,7 @@ export default function HomeV3() {
           {/* Staggered headline animation */}
           <div className="mb-6 md:mb-8">
             <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[0.95] tracking-tight"
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[1.1] lg:leading-[1.05] tracking-tight"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
