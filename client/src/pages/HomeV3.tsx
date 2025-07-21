@@ -1002,9 +1002,17 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Learning Module Section */}
-      <section id="learn" className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
+      {/* Learning Module Section - Enhanced Design */}
+      <section id="learn" className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/20 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-200/20 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-100/10 to-purple-100/10 rounded-full blur-2xl"></div>
+        </div>
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1012,6 +1020,9 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">FINANCIAL EDUCATION</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Build Better Money Habits That Actually Stick
             </h2>
@@ -1020,127 +1031,152 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-16"
-          >
-            <h3 className="text-2xl font-semibold text-gray-900 text-center mb-12">
-              What You'll Master:
-            </h3>
-            
-            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {/* Main Content Grid */}
+          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            {/* Left Column - What You'll Master */}
+            <div className="lg:col-span-2">
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+                className="mb-8"
               >
-                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                  <CreditCard className="h-6 w-6 text-blue-600" />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-3">
-                  Improve Your Credit Score with Smart Strategies
+                <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center lg:text-left">
+                  What You'll Master:
+                </h3>
+              </motion.div>
+              
+              <div className="grid sm:grid-cols-2 gap-6">
+                {[
+                  {
+                    icon: <CreditCard className="h-6 w-6" />,
+                    title: "Improve Your Credit Score with Smart Strategies",
+                    description: "Learn the tactics that have helped thousands boost their scores",
+                    gradient: "from-blue-500 to-cyan-500",
+                    bgGradient: "from-blue-50 to-cyan-50"
+                  },
+                  {
+                    icon: <Calculator className="h-6 w-6" />,
+                    title: "Create a Budget That Actually Fits Your Life", 
+                    description: "Practical approaches that work even on tight budgets",
+                    gradient: "from-green-500 to-emerald-500",
+                    bgGradient: "from-green-50 to-emerald-50"
+                  },
+                  {
+                    icon: <DollarSign className="h-6 w-6" />,
+                    title: "Accelerate Your Debt Payoff with Smart Planning",
+                    description: "Strategic methods to save on interest and get debt-free sooner",
+                    gradient: "from-orange-500 to-red-500",
+                    bgGradient: "from-orange-50 to-red-50"
+                  },
+                  {
+                    icon: <TrendingUp className="h-6 w-6" />,
+                    title: "Start Investing Even with Small Amounts",
+                    description: "Simple, low-risk ways to begin building wealth",
+                    gradient: "from-purple-500 to-violet-500", 
+                    bgGradient: "from-purple-50 to-violet-50"
+                  }
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className={`bg-gradient-to-br ${item.bgGradient} border border-white/60 rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-sm`}
+                  >
+                    <div className={`bg-gradient-to-r ${item.gradient} rounded-xl w-12 h-12 flex items-center justify-center mb-4 shadow-lg`}>
+                      <div className="text-white">
+                        {item.icon}
+                      </div>
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3 leading-tight">
+                      {item.title}
+                    </h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {item.description}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column - Learning Features & Preview */}
+            <div className="space-y-8">
+              {/* Learning Features Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg"
+              >
+                <h4 className="text-lg font-bold text-gray-900 mb-6 text-center">
+                  Learning Experience
                 </h4>
-                <p className="text-gray-600 text-sm">
-                  Learn the tactics that have helped thousands boost their scores
-                </p>
+                <div className="space-y-4">
+                  {[
+                    { icon: "⏱️", text: "3-5 minute lessons", color: "bg-green-100 text-green-700" },
+                    { icon: "🧩", text: "Interactive quizzes", color: "bg-blue-100 text-blue-700" },
+                    { icon: "🎯", text: "Real-world applications", color: "bg-purple-100 text-purple-700" }
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium`}>
+                        {feature.icon}
+                      </div>
+                      <span className="text-gray-700 font-medium">{feature.text}</span>
+                    </div>
+                  ))}
+                </div>
               </motion.div>
 
+              {/* Preview CTA Card */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+                className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl"
               >
-                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                  <Calculator className="h-6 w-6 text-blue-600" />
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3">Try Before You Join</h4>
+                  <p className="text-white/90 mb-6 text-sm leading-relaxed">
+                    Experience our interactive lesson format with a free preview
+                  </p>
+                  <Button
+                    className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-2 px-6 rounded-xl transition-all duration-300 border-0 h-auto shadow-lg w-full"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview a Lesson
+                  </Button>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-3">
-                  Create a Budget That Actually Fits Your Life
-                </h4>
-                <p className="text-gray-600 text-sm">
-                  Practical approaches that work even on tight budgets
-                </p>
               </motion.div>
 
+              {/* Quick Stats */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
+                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg"
               >
-                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                  <DollarSign className="h-6 w-6 text-blue-600" />
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600 mb-1">25+</div>
+                    <div className="text-xs text-gray-600 font-medium">Learning Modules</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600 mb-1">5min</div>
+                    <div className="text-xs text-gray-600 font-medium">Average Lesson</div>
+                  </div>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-3">
-                  Accelerate Your Debt Payoff with Smart Planning
-                </h4>
-                <p className="text-gray-600 text-sm">
-                  Strategic methods to save on interest and get debt-free sooner
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                viewport={{ once: true }}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                  <TrendingUp className="h-6 w-6 text-blue-600" />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-3">
-                  Start Investing Even with Small Amounts
-                </h4>
-                <p className="text-gray-600 text-sm">
-                  Simple, low-risk ways to begin building wealth
-                </p>
               </motion.div>
             </div>
-          </motion.div>
-
-          {/* Learning Features */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-8 mb-12"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-              <span className="text-gray-700 text-sm font-medium">3-5 minute lessons</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-              <span className="text-gray-700 text-sm font-medium">Interactive quizzes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
-              <span className="text-gray-700 text-sm font-medium">Real-world applications</span>
-            </div>
-          </motion.div>
-
-          {/* Preview Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <button className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
-              Preview a Lesson
-              <ExternalLink className="h-4 w-4" />
-            </button>
-          </motion.div>
+          </div>
         </div>
       </section>
 
