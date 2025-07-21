@@ -273,6 +273,9 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Hero Separator */}
+      <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
+
       {/* How It Works - Modern Process Flow */}
       <section className="py-16 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
@@ -573,7 +576,7 @@ export default function HomeV3() {
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               You're Not Alone — This Is Just the Beginning
             </h2>
-            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+            <p className="text-lg leading-relaxed text-gray-700 mb-12 max-w-3xl mx-auto">
               FinBoost is launching with a founding group of a few hundred users ready to take control of their money. 
               Be part of shaping the future of financial progress.
             </p>
@@ -627,7 +630,7 @@ export default function HomeV3() {
       </section>
 
       {/* Collective Strength Section */}
-      <section className="w-full bg-gradient-to-b from-blue-50 to-white py-20 px-6">
+      <section className="w-full bg-white py-16 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -636,11 +639,11 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight text-center">
               Collective Strength.
               <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Shared Rewards.</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
               Individual progress meets collective power. When we grow together, everyone wins bigger.
             </p>
           </motion.div>
@@ -824,7 +827,7 @@ export default function HomeV3() {
       </section>
 
       {/* Why FinBoost Exists - Card Format */}
-      <section className="w-full bg-gray-50 py-20 px-6">
+      <section className="w-full bg-gray-50 py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -836,7 +839,7 @@ export default function HomeV3() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Why FinBoost Exists
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
               Bridging the gap between financial knowledge and real action
             </p>
           </motion.div>
@@ -852,7 +855,7 @@ export default function HomeV3() {
               <div className="bg-red-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                 <Target className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">The Problem</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Problem</h3>
               <p className="text-gray-600">
                 Most people know what they should do with money—but stress, debt, and daily pressures make it hard to follow through.
               </p>
@@ -868,7 +871,7 @@ export default function HomeV3() {
               <div className="bg-yellow-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                 <AlertTriangle className="h-6 w-6 text-yellow-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">The Reality</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">The Reality</h3>
               <p className="text-gray-600">
                 Millions are buried in debt. Many worry they'll never be ready for retirement. Financial advice is everywhere, but it rarely leads to action.
               </p>
@@ -884,7 +887,7 @@ export default function HomeV3() {
               <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Our Solution</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Solution</h3>
               <p className="text-gray-600">
                 FinBoost was built for that gap—the space between knowing and doing. We reward real actions: paying down debt, building savings, showing up consistently.
               </p>
@@ -900,7 +903,7 @@ export default function HomeV3() {
               <div className="bg-green-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Our Mission</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Our Mission</h3>
               <p className="text-gray-600">
                 Make financial progress not just possible, but motivating. When you grow, you earn. When the community grows, we all win.
               </p>
@@ -910,7 +913,7 @@ export default function HomeV3() {
       </section>
 
       {/* Learning Module Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -922,7 +925,7 @@ export default function HomeV3() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Build Better Money Habits That Actually Stick
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto mb-8">
               Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
             </p>
             <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium">
@@ -952,7 +955,7 @@ export default function HomeV3() {
                 <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                   <CreditCard className="h-6 w-6 text-blue-600" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                <h4 className="text-xl font-semibold text-gray-800 mb-3">
                   Improve Your Credit Score with Smart Strategies
                 </h4>
                 <p className="text-gray-600 text-sm">
@@ -970,7 +973,7 @@ export default function HomeV3() {
                 <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                   <Calculator className="h-6 w-6 text-blue-600" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                <h4 className="text-xl font-semibold text-gray-800 mb-3">
                   Create a Budget That Actually Fits Your Life
                 </h4>
                 <p className="text-gray-600 text-sm">
@@ -988,7 +991,7 @@ export default function HomeV3() {
                 <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                   <DollarSign className="h-6 w-6 text-blue-600" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                <h4 className="text-xl font-semibold text-gray-800 mb-3">
                   Accelerate Your Debt Payoff with Smart Planning
                 </h4>
                 <p className="text-gray-600 text-sm">
@@ -1006,7 +1009,7 @@ export default function HomeV3() {
                 <div className="bg-blue-50 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                   <TrendingUp className="h-6 w-6 text-blue-600" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-3">
+                <h4 className="text-xl font-semibold text-gray-800 mb-3">
                   Start Investing Even with Small Amounts
                 </h4>
                 <p className="text-gray-600 text-sm">
@@ -1055,52 +1058,34 @@ export default function HomeV3() {
       </section>
 
 
-      {/* Final CTA - Ultra Modern Dark Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-slate-900 via-blue-900/90 to-indigo-900 overflow-hidden">
-        {/* Animated background effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full"></div>
-        </div>
-        
-        <div className="relative max-w-6xl mx-auto text-center z-10">
+      {/* Final CTA - Strong Blue Background */}
+      <section className="bg-blue-600 text-white py-20 px-6 text-center">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            {/* Main heading */}
-            <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-8 leading-tight tracking-tight">
-              Ready to Turn Financial Struggle Into Strength?
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
+              Ready to Take Control of Your Financial Future?
             </h2>
-            
-            <p className="text-lg md:text-xl text-white/70 mb-16 max-w-3xl mx-auto leading-relaxed">
-              Join a growing movement where every dollar you invest fuels your growth and builds collective opportunity.
-              <span className="text-blue-200 font-semibold"> Turn your progress into real rewards.</span>
+            <p className="text-lg leading-relaxed text-white/90 mb-8 max-w-3xl mx-auto">
+              Join FinBoost today and turn your effort into rewards — with real stakes, real skills, and collective power behind you.
             </p>
-
-            {/* CTA Button */}
-            <div className="flex justify-center">
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: 1 }}
-                whileTap={{ scale: 0.95 }}
-                className="group"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                size="lg" 
+                className="bg-white text-blue-600 font-semibold py-3 px-8 text-lg rounded-xl hover:bg-gray-100 transition-all duration-300 border-0 h-auto shadow-lg"
               >
-                <Button 
-                  size="lg" 
-                  className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl shadow-purple-500/30 border-0 h-auto overflow-hidden group-hover:shadow-purple-500/50 transition-all duration-300"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative flex items-center">
-                    <Zap className="mr-3 h-6 w-6 group-hover:animate-pulse" />
-                    Start Your Financial Transformation
-                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Button>
-              </motion.div>
-            </div>
+                <Trophy className="mr-2 h-5 w-5" />
+                Get Early Access Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
