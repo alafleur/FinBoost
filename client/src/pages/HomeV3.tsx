@@ -33,6 +33,7 @@ import {
 export default function HomeV3() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [communitySize, setCommunitySize] = useState(93000);
+  const [rewardsPercentage, setRewardsPercentage] = useState(79); // Dynamic percentage
 
   // Mock app screenshots data
   const screenshots = [
@@ -60,7 +61,7 @@ export default function HomeV3() {
 
   const calculateRewardsPool = (members: number) => {
     const totalRevenue = members * 20; // Total monthly revenue
-    const rewardsAllocation = totalRevenue * 0.79; // 79% goes to rewards pool
+    const rewardsAllocation = totalRevenue * (rewardsPercentage / 100); // Dynamic percentage
     return rewardsAllocation;
   };
 
@@ -501,20 +502,40 @@ export default function HomeV3() {
                     {formatMembers(communitySize)} members
                   </div>
                   
-                  {/* Interactive Range Slider */}
-                  <div className="relative mt-6">
-                    <input
-                      type="range"
-                      min="75000"
-                      max="150000"
-                      step="1000"
-                      value={communitySize}
-                      onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                      className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-                    />
-                    <div className="flex justify-between text-sm text-gray-600 mt-2">
-                      <span>75K</span>
-                      <span>150K+</span>
+                  {/* Interactive Range Sliders */}
+                  <div className="space-y-4 mt-6">
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Community Size</label>
+                      <input
+                        type="range"
+                        min="75000"
+                        max="150000"
+                        step="1000"
+                        value={communitySize}
+                        onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                      <div className="flex justify-between text-sm text-gray-600 mt-1">
+                        <span>75K</span>
+                        <span>150K+</span>
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Rewards Allocation %</label>
+                      <input
+                        type="range"
+                        min="50"
+                        max="90"
+                        step="1"
+                        value={rewardsPercentage}
+                        onChange={(e) => setRewardsPercentage(parseInt(e.target.value))}
+                        className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                      <div className="flex justify-between text-sm text-gray-600 mt-1">
+                        <span>50%</span>
+                        <span>90%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -523,7 +544,7 @@ export default function HomeV3() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white p-4 rounded-lg text-center">
                     <div className="text-xs text-blue-600 font-semibold uppercase mb-1">Rewards Allocation</div>
-                    <div className="text-2xl font-bold text-blue-600">79%</div>
+                    <div className="text-2xl font-bold text-blue-600">{rewardsPercentage}%</div>
                     <div className="text-xs text-gray-600">of membership fees</div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg text-center">
@@ -535,35 +556,32 @@ export default function HomeV3() {
                   </div>
                 </div>
 
-                {/* Circular Visualization */}
+                {/* Dynamic Circular Visualization */}
                 <div className="flex justify-center mb-6">
                   <div className="relative w-32 h-32">
-                    <svg className="w-32 h-32 -rotate-90" viewBox="0 0 36 36">
+                    <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
                       {/* Background circle */}
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="35"
                         fill="none"
                         stroke="#e5e7eb"
-                        strokeWidth="3"
+                        strokeWidth="8"
                       />
-                      {/* Rewards Pool (79%) */}
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      {/* Animated Rewards Pool (Dynamic %) */}
+                      <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="35"
                         fill="none"
                         stroke="#10b981"
-                        strokeWidth="3"
-                        strokeDasharray="79, 21"
+                        strokeWidth="8"
+                        strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
                         strokeLinecap="round"
-                      />
-                      {/* Operations (21%) */}
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="3"
-                        strokeDasharray="21, 79"
-                        strokeDashoffset="-79"
-                        strokeLinecap="round"
+                        initial={{ strokeDasharray: "219.9 219.9" }}
+                        animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -577,11 +595,11 @@ export default function HomeV3() {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                    <span className="text-gray-700">79% — Collective Rewards Pool</span>
+                    <span className="text-gray-700">{rewardsPercentage}% — Collective Rewards Pool</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                    <span className="text-gray-700">21% — Education & Platform Operations</span>
+                    <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                    <span className="text-gray-700">{100 - rewardsPercentage}% — Education & Platform Operations</span>
                   </div>
                 </div>
               </div>
