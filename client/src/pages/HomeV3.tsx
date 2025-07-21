@@ -994,7 +994,7 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-700 font-semibold text-sm">COLLECTIVE POWER</span>
+              <span className="text-blue-700 font-semibold text-sm">STRENGTH IN NUMBERS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Toggle the Dial to See the Power of the Collective
