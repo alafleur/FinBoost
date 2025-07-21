@@ -635,7 +635,7 @@ export default function HomeV3() {
                 <Trophy className="w-10 h-10 text-green-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">🏆 Win Rewards</h3>
-              <p className="text-gray-600">Cash prizes distributed every 2 weeks. Top prizes can reach $500–$2,000</p>
+              <p className="text-gray-600">Cash prizes distributed every 2 weeks. Top prizes can reach into the thousands</p>
             </motion.div>
           </div>
 
@@ -668,11 +668,11 @@ export default function HomeV3() {
                     </div>
                     <div className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                      <span className="text-gray-700">Top prizes: up to $500–$2,000 per cycle</span>
+                      <span className="text-gray-700">Top prizes reach into the thousands per cycle</span>
                     </div>
                     <div className="flex items-center">
                       <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                      <span className="text-gray-700">Company-boosted prize pools during Early Access</span>
+                      <span className="text-gray-700">Company-boosted rewards pools during Early Access</span>
                     </div>
                   </div>
                 </CardContent>
@@ -694,19 +694,19 @@ export default function HomeV3() {
                   <div className="space-y-4">
                     <div className="bg-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">Sarah_M: 240 pts → Tier 1</span>
+                        <span className="font-semibold text-gray-800">Sarah: 240 pts → Tier 1</span>
                         <span className="font-bold text-green-600">Wins $500</span>
                       </div>
                     </div>
                     <div className="bg-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">DebtFree2025: 110 pts → Tier 2</span>
+                        <span className="font-semibold text-gray-800">Alex: 110 pts → Tier 2</span>
                         <span className="font-bold text-green-600">Wins $75</span>
                       </div>
                     </div>
                     <div className="bg-green-100 rounded-lg p-4 border-l-4 border-green-500">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">Mike_Invests: 10 pts → Tier 3</span>
+                        <span className="font-semibold text-gray-800">Mike: 10 pts → Tier 3</span>
                         <span className="font-bold text-green-600">Wins $10</span>
                       </div>
                     </div>
