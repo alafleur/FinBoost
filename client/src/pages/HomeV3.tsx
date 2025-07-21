@@ -145,7 +145,7 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-700 font-semibold text-sm">PLATFORM PREVIEW</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
+            <h2 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
               See What Progress
               <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Looks Like</span>
             </h2>
@@ -295,7 +295,7 @@ export default function HomeV3() {
             <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
+            <h2 className="text-3xl font-bold text-white mb-6 leading-tight">
               Earn Points and
               <span className="block text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text"> Compete for Rewards</span>
             </h2>
@@ -573,7 +573,7 @@ export default function HomeV3() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               You're Not Alone — This Is Just the Beginning
             </h2>
             <p className="text-lg leading-relaxed text-gray-700 mb-12 max-w-3xl mx-auto">
