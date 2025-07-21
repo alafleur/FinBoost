@@ -939,6 +939,9 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">MEMBERSHIP VALUE</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
               How Your Membership Fuels the Movement
             </h2>
@@ -1154,6 +1157,9 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
+            <div className="inline-block bg-gradient-to-r from-green-100 to-yellow-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-green-700 font-semibold text-sm">TIER SYSTEM</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Half of Members Earn Rewards Each Cycle
             </h2>
