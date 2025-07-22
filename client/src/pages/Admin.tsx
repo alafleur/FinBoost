@@ -2088,8 +2088,9 @@ export default function Admin() {
                       <TableBody>
                         {users
                           .filter((user: any) => 
-                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                            !user.isAdmin &&
+                            (user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()))
                           )
                           .slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
                           .map((user: any) => (
