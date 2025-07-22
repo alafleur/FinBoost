@@ -2206,8 +2206,9 @@ export default function Admin() {
                     <div className="text-sm text-gray-600">
                       {(() => {
                         const filteredUsers = users.filter((user: any) => 
-                          user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                          user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                          !user.isAdmin &&
+                          (user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                          user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()))
                         );
                         const start = Math.min((currentPage - 1) * usersPerPage + 1, filteredUsers.length);
                         const end = Math.min(currentPage * usersPerPage, filteredUsers.length);
@@ -2226,8 +2227,9 @@ export default function Admin() {
                       <span className="text-sm">
                         Page {currentPage} of {(() => {
                           const filteredUsers = users.filter((user: any) => 
-                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                            !user.isAdmin &&
+                            (user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()))
                           );
                           return Math.ceil(filteredUsers.length / usersPerPage);
                         })()}
@@ -2238,8 +2240,9 @@ export default function Admin() {
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={(() => {
                           const filteredUsers = users.filter((user: any) => 
-                            user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+                            !user.isAdmin &&
+                            (user.username?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                            user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()))
                           );
                           return currentPage >= Math.ceil(filteredUsers.length / usersPerPage);
                         })()}
@@ -2261,7 +2264,7 @@ export default function Admin() {
                   <CardContent>
                     <div className="space-y-4">
                       {['tier1', 'tier2', 'tier3'].map((tier) => {
-                        const premiumUsers = users.filter((u: any) => u.subscriptionStatus === 'active');
+                        const premiumUsers = users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin);
                         const count = premiumUsers.filter((u: any) => u.tier === tier).length;
                         const percentage = premiumUsers.length > 0 ? Math.round((count / premiumUsers.length) * 100) : 0;
                         return (
