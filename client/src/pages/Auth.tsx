@@ -34,7 +34,7 @@ export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
-  const [defaultTab, setDefaultTab] = useState('login');
+  const [activeTab, setActiveTab] = useState('login');
 
   const registerForm = useForm<RegisterForm>();
   const loginForm = useForm<LoginForm>();
@@ -44,7 +44,7 @@ export default function Auth() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
     if (mode === 'signup') {
-      setDefaultTab('register');
+      setActiveTab('register');
     }
 
     // Check for referral code in URL
@@ -252,14 +252,14 @@ export default function Auth() {
           <CardHeader>
             <CardTitle>Welcome to FinBoost</CardTitle>
             <CardDescription>
-              {defaultTab === 'register' 
+              {activeTab === 'register' 
                 ? "Sign up to get your free financial assessment and start learning"
                 : "Join thousands learning to earn with financial education"
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={defaultTab} className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Sign Up</TabsTrigger>
