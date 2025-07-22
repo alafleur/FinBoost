@@ -519,7 +519,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserCount(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.isAdmin, false));
     return result[0].count;
   }
 
@@ -971,7 +971,7 @@ export class MemStorage implements IStorage {
         tier: users.tier
       })
       .from(users)
-      .where(eq(users.subscriptionStatus, 'active'))
+      .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)))
       .orderBy(desc(pointsColumn))
       .limit(limit);
 
@@ -998,7 +998,7 @@ export class MemStorage implements IStorage {
         points: users[pointsColumn],
         tier: users.tier
       }).from(users)
-      .where(eq(users.isActive, true))
+      .where(and(eq(users.isActive, true), eq(users.isAdmin, false)))
       .as('ranked_users');
 
       const query = await db.select({
@@ -2219,19 +2219,19 @@ export class MemStorage implements IStorage {
 
   async getMonthlyPool(): Promise<any> {
     try {
-      // Only count premium members (active subscription status)
+      // Only count premium members (active subscription status) excluding admin users
       const premiumUsers = await db.select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(eq(users.subscriptionStatus, 'active'));
+        .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)));
       const premiumUserCount = premiumUsers[0]?.count || 0;
 
-      // Get tier distribution for premium users only
+      // Get tier distribution for premium users only (excluding admin users)
       const tierCounts = await db.select({
         tier: users.tier,
         count: sql<number>`count(*)`
       })
         .from(users)
-        .where(eq(users.subscriptionStatus, 'active'))
+        .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)))
         .groupBy(users.tier);
 
       const tierMap = tierCounts.reduce((acc, { tier, count }) => {
@@ -2412,6 +2412,7 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(users.subscriptionStatus, 'active'),
+            eq(users.isAdmin, false),
             sql`${users.username} ILIKE ${`%${search}%`}`
           )
         )
@@ -4313,14 +4314,14 @@ export class MemStorage implements IStorage {
         };
       }
 
-      // Get all premium subscribers who are not enrolled in any cycle
+      // Get all premium subscribers who are not enrolled in any cycle (excluding admin users)
       const premiumSubscribers = await db.select({
         id: users.id,
         username: users.username,
         subscriptionStatus: users.subscriptionStatus
       })
       .from(users)
-      .where(eq(users.subscriptionStatus, 'active'));
+      .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)));
 
       let successCount = 0;
       let errorCount = 0;
@@ -4392,7 +4393,7 @@ export class MemStorage implements IStorage {
         return { totalPool: 0, premiumUsers: 0, totalUsers: 0 };
       }
 
-      // Count premium users in this cycle (unified approach: active subscribers in cycle)
+      // Count premium users in this cycle (unified approach: active subscribers in cycle, excluding admin users)
       const premiumUsersCount = await db.select({ count: sql<number>`count(*)` })
         .from(userCyclePoints)
         .leftJoin(users, eq(userCyclePoints.userId, users.id))
@@ -4400,17 +4401,20 @@ export class MemStorage implements IStorage {
           and(
             eq(userCyclePoints.cycleSettingId, cycleId),
             eq(userCyclePoints.isActive, true),
-            eq(users.subscriptionStatus, 'active')
+            eq(users.subscriptionStatus, 'active'),
+            eq(users.isAdmin, false)
           )
         );
 
-      // Count total users in this cycle
+      // Count total users in this cycle (excluding admin users)
       const totalUsersCount = await db.select({ count: sql<number>`count(*)` })
         .from(userCyclePoints)
+        .leftJoin(users, eq(userCyclePoints.userId, users.id))
         .where(
           and(
             eq(userCyclePoints.cycleSettingId, cycleId),
-            eq(userCyclePoints.isActive, true)
+            eq(userCyclePoints.isActive, true),
+            eq(users.isAdmin, false)
           )
         );
 
@@ -4508,7 +4512,7 @@ export class MemStorage implements IStorage {
     try {
       const result = await db.select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(sql`last_login_at >= ${since}`);
+        .where(and(sql`last_login_at >= ${since}`, eq(users.isAdmin, false)));
       return result[0]?.count || 0;
     } catch (error) {
       console.error('Error getting active users count:', error);
@@ -4518,7 +4522,7 @@ export class MemStorage implements IStorage {
 
   async getAveragePointsPerUser(): Promise<number> {
     try {
-      const result = await db.select({ avg: sql<number>`avg(total_points)` }).from(users);
+      const result = await db.select({ avg: sql<number>`avg(total_points)` }).from(users).where(eq(users.isAdmin, false));
       return result[0]?.avg || 0;
     } catch (error) {
       console.error('Error getting average points per user:', error);
@@ -4533,14 +4537,15 @@ export class MemStorage implements IStorage {
       const cached = this.getCachedData(cacheKey);
       if (cached !== null) return cached;
 
-      // Optimized query with proper conditions for active premium users
+      // Optimized query with proper conditions for active premium users (excluding admin users)
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
         .where(
           and(
             eq(users.subscriptionStatus, 'active'),
-            eq(users.isActive, true)
+            eq(users.isActive, true),
+            eq(users.isAdmin, false)
           )
         );
       
@@ -4583,14 +4588,14 @@ export class MemStorage implements IStorage {
         };
       }
 
-      // Single optimized query to get all user metrics at once
+      // Single optimized query to get all user metrics at once (excluding admin users)
       const result = await db.execute(sql`
         SELECT 
           COUNT(*) as total_users,
           COUNT(CASE WHEN last_login_at >= ${startDate.toISOString()} AND is_active = true THEN 1 END) as active_users,
           COUNT(CASE WHEN subscription_status = 'active' AND is_active = true THEN 1 END) as premium_users
         FROM users
-        WHERE is_active = true
+        WHERE is_active = true AND is_admin = false
       `);
 
       const metrics = result[0];
@@ -5103,14 +5108,15 @@ export class MemStorage implements IStorage {
         .where(
           and(
             eq(users.subscriptionStatus, 'active'),
-            gte(users.subscriptionStartDate, startDate)
+            gte(users.subscriptionStartDate, startDate),
+            eq(users.isAdmin, false)
           )
         );
 
       const monthlyRecurring = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(eq(users.subscriptionStatus, 'active'));
+        .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)));
 
       return {
         newRevenue: premiumUsers[0]?.totalRevenue || 0,
@@ -5128,7 +5134,7 @@ export class MemStorage implements IStorage {
       const totalUsers = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(gte(users.createdAt, startDate));
+        .where(and(gte(users.createdAt, startDate), eq(users.isAdmin, false)));
 
       const convertedUsers = await db
         .select({ count: sql<number>`count(*)` })
@@ -5136,7 +5142,8 @@ export class MemStorage implements IStorage {
         .where(
           and(
             gte(users.createdAt, startDate),
-            eq(users.subscriptionStatus, 'active')
+            eq(users.subscriptionStatus, 'active'),
+            eq(users.isAdmin, false)
           )
         );
 
@@ -5311,7 +5318,8 @@ export class MemStorage implements IStorage {
         .where(
           and(
             gte(users.lastLoginAt, startDate),
-            lte(users.lastLoginAt, endDate)
+            lte(users.lastLoginAt, endDate),
+            eq(users.isAdmin, false)
           )
         );
       
@@ -5333,7 +5341,8 @@ export class MemStorage implements IStorage {
         .where(
           and(
             gte(users.lastLoginAt, weekAgo),
-            lte(users.lastLoginAt, endDate)
+            lte(users.lastLoginAt, endDate),
+            eq(users.isAdmin, false)
           )
         );
       
@@ -5350,9 +5359,10 @@ export class MemStorage implements IStorage {
       if (!currentCycle) return 0;
 
       const result = await db
-        .select({ count: sql<number>`count(DISTINCT user_id)` })
-        .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id));
+        .select({ count: sql<number>`count(DISTINCT ucp.user_id)` })
+        .from(userCyclePoints.as('ucp'))
+        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+        .where(and(eq(sql.raw('ucp.cycle_setting_id'), currentCycle.id), eq(users.isAdmin, false)));
       
       return result[0]?.count || 0;
     } catch (error) {
@@ -6220,11 +6230,12 @@ export class MemStorage implements IStorage {
 
       const cycle = activeCycle[0];
 
-      // Get participants count
+      // Get participants count (excluding admin users)
       const participantsResult = await db
-        .select({ count: sql<number>`count(DISTINCT user_id)::int` })
-        .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+        .select({ count: sql<number>`count(DISTINCT ucp.user_id)::int` })
+        .from(userCyclePoints.as('ucp'))
+        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycle.id), eq(users.isAdmin, false)));
 
       const participants = Number(participantsResult[0]?.count) || 0;
 
@@ -6232,15 +6243,16 @@ export class MemStorage implements IStorage {
       const totalPoolAmountCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
       const totalPoolAmount = totalPoolAmountCents / 100;
 
-      // Get average points
+      // Get average points (excluding admin users)
       const avgPointsResult = await db
-        .select({ avg: sql<number>`avg(current_cycle_points)` })
-        .from(userCyclePoints)
-        .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+        .select({ avg: sql<number>`avg(ucp.current_cycle_points)` })
+        .from(userCyclePoints.as('ucp'))
+        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycle.id), eq(users.isAdmin, false)));
 
       const averagePoints = Math.round(avgPointsResult[0]?.avg || 0);
 
-      // Get top performer
+      // Get top performer (excluding admin users)
       const topPerformerResult = await db
         .select({
           username: users.username,
@@ -6248,7 +6260,7 @@ export class MemStorage implements IStorage {
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
-        .where(eq(userCyclePoints.cycleSettingId, cycle.id))
+        .where(and(eq(userCyclePoints.cycleSettingId, cycle.id), eq(users.isAdmin, false)))
         .orderBy(desc(userCyclePoints.currentCyclePoints))
         .limit(1);
 
@@ -6307,11 +6319,12 @@ export class MemStorage implements IStorage {
           continue;
         }
 
-        // Get participants for this cycle
+        // Get participants for this cycle (excluding admin users)
         const participantsResult = await db
-          .select({ count: sql<number>`count(DISTINCT user_id)::int` })
-          .from(userCyclePoints)
-          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+          .select({ count: sql<number>`count(DISTINCT ucp.user_id)::int` })
+          .from(userCyclePoints.as('ucp'))
+          .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+          .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycle.id), eq(users.isAdmin, false)));
 
         const participants = Number(participantsResult[0]?.count) || 0;
 
@@ -6319,11 +6332,12 @@ export class MemStorage implements IStorage {
         const totalPayoutCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
         const totalPayout = totalPayoutCents / 100;
 
-        // Get average points
+        // Get average points (excluding admin users)
         const avgPointsResult = await db
-          .select({ avg: sql<number>`avg(current_cycle_points)` })
-          .from(userCyclePoints)
-          .where(eq(userCyclePoints.cycleSettingId, cycle.id));
+          .select({ avg: sql<number>`avg(ucp.current_cycle_points)` })
+          .from(userCyclePoints.as('ucp'))
+          .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+          .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycle.id), eq(users.isAdmin, false)));
 
         const avgPointsPerUser = Math.round(avgPointsResult[0]?.avg || 0);
 
