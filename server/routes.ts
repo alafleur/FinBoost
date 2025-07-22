@@ -3511,10 +3511,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get participants count (excluding admin users)
       const participantsResult = await db
-        .select({ count: sql<number>`count(DISTINCT ucp.user_id)::int` })
-        .from(userCyclePoints.as('ucp'))
-        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
-        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycleId), eq(users.isAdmin, false)));
+        .select({ count: sql<number>`count(DISTINCT ${userCyclePoints.userId})::int` })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(and(eq(userCyclePoints.cycleSettingId, cycleId), eq(users.isAdmin, false)));
 
       const participants = Number(participantsResult[0]?.count) || 0;
 
@@ -3524,10 +3524,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get average points (excluding admin users)
       const avgPointsResult = await db
-        .select({ avg: sql<number>`avg(ucp.current_cycle_points)` })
-        .from(userCyclePoints.as('ucp'))
-        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
-        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycleId), eq(users.isAdmin, false)));
+        .select({ avg: sql<number>`avg(${userCyclePoints.currentCyclePoints})` })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(and(eq(userCyclePoints.cycleSettingId, cycleId), eq(users.isAdmin, false)));
 
       const averagePoints = Math.round(avgPointsResult[0]?.avg || 0);
 
@@ -3548,8 +3548,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : null;
 
       res.json({
-        participants,
-        totalPoolAmount,
+        participantCount: participants,
+        totalRewardPool: totalPoolAmount * 100, // Convert back to cents for consistency
         averagePoints,
         topPerformer
       });
