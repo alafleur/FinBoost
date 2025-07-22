@@ -38,8 +38,10 @@ export default function HomeV3() {
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   
   const handleJoinEarlyAccess = () => {
-    // Navigate to auth page with signup mode
-    window.location.href = '/auth?mode=signup';
+    // Set URL search params and navigate
+    const url = new URL('/auth', window.location.origin);
+    url.searchParams.set('mode', 'signup');
+    navigate(url.pathname + url.search);
   };
 
   // Calculate scaling percentage based on member count (250-10,000+ range)

@@ -6,7 +6,9 @@ export default function Navbar() {
   const [, navigate] = useLocation();
 
   const handleSignUpClick = () => {
-    navigate("/auth?mode=signup");
+    const url = new URL('/auth', window.location.origin);
+    url.searchParams.set('mode', 'signup');
+    navigate(url.pathname + url.search);
   };
   
   return (
