@@ -491,8 +491,6 @@ export const insertLearningModuleSchema = createInsertSchema(learningModules).pi
 
 export type RewardDistributionSetting = typeof rewardDistributionSettings.$inferSelect;
 export type InsertRewardDistributionSetting = z.infer<typeof insertRewardDistributionSettingSchema>;
-export type MonthlyPoolSetting = typeof monthlyPoolSettings.$inferSelect;
-export type InsertMonthlyPoolSetting = z.infer<typeof insertMonthlyPoolSettingSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
 export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
@@ -564,6 +562,7 @@ export const insertCycleSettingSchema = createInsertSchema(cycleSettings).pick({
   paymentPeriodDays: true,
   membershipFee: true,
   rewardPoolPercentage: true,
+  minimumPoolGuarantee: true,
   tier1Threshold: true,
   tier2Threshold: true,
   tier1PoolPercentage: true,
