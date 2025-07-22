@@ -561,18 +561,33 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       {cycleAnalytics.tier1Count || 0}
                     </div>
                     <div className="text-sm text-gray-500">Tier 1 Members</div>
+                    {cycleAnalytics.tierThresholds && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {cycleAnalytics.tierThresholds.tier1}+ points
+                      </div>
+                    )}
                   </div>
                   <div className="text-center p-4 border rounded">
                     <div className="text-2xl font-bold text-green-600">
                       {cycleAnalytics.tier2Count || 0}
                     </div>
                     <div className="text-sm text-gray-500">Tier 2 Members</div>
+                    {cycleAnalytics.tierThresholds && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {cycleAnalytics.tierThresholds.tier2}-{cycleAnalytics.tierThresholds.tier1 - 1} points
+                      </div>
+                    )}
                   </div>
                   <div className="text-center p-4 border rounded">
                     <div className="text-2xl font-bold text-yellow-600">
                       {cycleAnalytics.tier3Count || 0}
                     </div>
                     <div className="text-sm text-gray-500">Tier 3 Members</div>
+                    {cycleAnalytics.tierThresholds && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {cycleAnalytics.tierThresholds.tier3}-{cycleAnalytics.tierThresholds.tier2 - 1} points
+                      </div>
+                    )}
                   </div>
                   <div className="text-center p-4 border rounded">
                     <div className="text-2xl font-bold text-purple-600">

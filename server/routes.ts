@@ -3570,6 +3570,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (item.tier === 'tier3') tierBreakdown.tier3 = Number(item.count);
       });
 
+      // Get current tier thresholds
+      const tierThresholds = await storage.getCycleTierThresholds(cycleId);
+
       res.json({
         participantCount: participants,
         totalRewardPool: totalPoolAmount * 100, // Convert back to cents for consistency
@@ -3577,7 +3580,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         topPerformer,
         tier1Count: tierBreakdown.tier1,
         tier2Count: tierBreakdown.tier2,
-        tier3Count: tierBreakdown.tier3
+        tier3Count: tierBreakdown.tier3,
+        tierThresholds
       });
     } catch (error) {
       console.error('Error fetching cycle analytics:', error);
