@@ -295,6 +295,7 @@ export const cycleSettings = pgTable("cycle_settings", {
   
   // Reward Pool Configuration
   rewardPoolPercentage: integer("reward_pool_percentage").notNull(), // 0-100
+  minimumPoolGuarantee: integer("minimum_pool_guarantee").default(0).notNull(), // Minimum guaranteed pool in cents
   
   // Tier Distribution (admin configurable percentiles)
   tier1Threshold: integer("tier1_threshold").default(33).notNull(), // Top X% (e.g., 33 = top 33%)
