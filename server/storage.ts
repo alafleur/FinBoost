@@ -2239,8 +2239,15 @@ export class MemStorage implements IStorage {
         return acc;
       }, {} as Record<string, number>);
 
+      // Get active cycle setting for minimum guarantee calculation
+      const activeCycle = await this.getActiveCycleSetting();
+      
       const monthlyRevenue = premiumUserCount * 20; // $20 per premium user
-      const totalPool = Math.round(monthlyRevenue * 0.55); // 55% of revenue
+      const memberContributions = Math.round(monthlyRevenue * 0.55); // 55% of revenue
+      
+      // Apply minimum pool guarantee if active cycle has one set
+      const minimumGuaranteeDollars = activeCycle ? Math.floor(activeCycle.minimumPoolGuarantee / 100) : 0;
+      const totalPool = Math.max(memberContributions, minimumGuaranteeDollars);
 
       return {
         totalUsers: premiumUserCount, // Return as number for consistency
@@ -4412,7 +4419,12 @@ export class MemStorage implements IStorage {
       
       // Calculate total pool (premium users * membership fee * reward pool percentage)
       // Note: membershipFee is in cents, so divide by 100 to convert to dollars
-      const totalPool = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100 / 100);
+      const memberContributions = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100 / 100);
+      
+      // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
+      // minimumPoolGuarantee is in cents, so divide by 100 to convert to dollars
+      const minimumGuaranteeDollars = Math.floor(cycle.minimumPoolGuarantee / 100);
+      const totalPool = Math.max(memberContributions, minimumGuaranteeDollars);
 
       return {
         totalPool,
@@ -6466,7 +6478,12 @@ export class MemStorage implements IStorage {
       
       // Get premium user count for pool calculation
       const premiumUserCount = eligibleUsers.length;
-      const totalPoolCents = Math.floor((premiumUserCount * cycleSetting.membershipFee * cycleSetting.rewardPoolPercentage) / 100);
+      
+      // Calculate member contributions
+      const memberContributionsCents = Math.floor((premiumUserCount * cycleSetting.membershipFee * cycleSetting.rewardPoolPercentage) / 100);
+      
+      // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
+      const totalPoolCents = Math.max(memberContributionsCents, cycleSetting.minimumPoolGuarantee);
       const poolInfo = { totalPool: totalPoolCents / 100 }; // Convert to dollars
       
       // Calculate tier pools
