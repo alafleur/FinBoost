@@ -1801,19 +1801,19 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="quiz">Quiz</TabsTrigger>
-            <TabsTrigger value="cycle-management">Cycle Management</TabsTrigger>
-            <TabsTrigger value="cycle-operations">Cycle Operations</TabsTrigger>
-            <TabsTrigger value="predictions">Predictions</TabsTrigger>
-            <TabsTrigger value="points">Points</TabsTrigger>
-            <TabsTrigger value="actions">Actions</TabsTrigger>
-            <TabsTrigger value="proofs">Proof Review</TabsTrigger>
-            <TabsTrigger value="support">Support</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsList className="flex w-full flex-wrap gap-1 h-auto p-1">
+            <TabsTrigger value="overview" className="flex-shrink-0">Overview</TabsTrigger>
+            <TabsTrigger value="users" className="flex-shrink-0">Users</TabsTrigger>
+            <TabsTrigger value="content" className="flex-shrink-0">Content</TabsTrigger>
+            <TabsTrigger value="quiz" className="flex-shrink-0">Quiz</TabsTrigger>
+            <TabsTrigger value="cycle-management" className="flex-shrink-0">Cycle Management</TabsTrigger>
+            <TabsTrigger value="cycle-operations" className="flex-shrink-0">Cycle Operations</TabsTrigger>
+            <TabsTrigger value="predictions" className="flex-shrink-0">Predictions</TabsTrigger>
+            <TabsTrigger value="points" className="flex-shrink-0">Points</TabsTrigger>
+            <TabsTrigger value="actions" className="flex-shrink-0">Actions</TabsTrigger>
+            <TabsTrigger value="proofs" className="flex-shrink-0">Proof Review</TabsTrigger>
+            <TabsTrigger value="support" className="flex-shrink-0">Support</TabsTrigger>
+            <TabsTrigger value="settings" className="flex-shrink-0">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
