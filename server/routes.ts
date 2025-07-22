@@ -1459,7 +1459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/cycle-settings/:id", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
-      const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee, isActive } = req.body;
+      const { cycleName, cycleStartDate, cycleEndDate, rewardPoolPercentage, membershipFee, minimumPoolGuarantee, isActive } = req.body;
 
       const updates: any = {};
       if (cycleName) updates.cycleName = cycleName;
@@ -1467,6 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (cycleEndDate) updates.cycleEndDate = new Date(cycleEndDate);
       if (rewardPoolPercentage !== undefined) updates.rewardPoolPercentage = parseInt(rewardPoolPercentage);
       if (membershipFee !== undefined) updates.membershipFee = parseInt(membershipFee);
+      if (minimumPoolGuarantee !== undefined) updates.minimumPoolGuarantee = parseInt(minimumPoolGuarantee);
       if (isActive !== undefined) updates.isActive = isActive;
 
       const updated = await storage.updateCycleSetting(parseInt(id), updates);
@@ -3214,6 +3215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           premiumUsers: 0,
           totalUsers: 0,
           rewardPoolPercentage: 50, // Default fallback
+          minimumPoolGuarantee: 0, // Default fallback
           tierBreakdown: {
             tier1: 0,
             tier2: 0,
@@ -3227,6 +3229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the actual reward pool percentage from cycle settings
       const cycleSettings = await storage.getCurrentPoolSettingsForDate(new Date());
       const rewardPoolPercentage = cycleSettings?.rewardPoolPercentage || 50;
+      const minimumPoolGuarantee = cycleSettings?.minimumPoolGuarantee || 0;
       
       // Calculate tier-specific pool breakdown
       const tierBreakdown = {
@@ -3238,6 +3241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ...poolData,
         rewardPoolPercentage,
+        minimumPoolGuarantee: Math.floor(minimumPoolGuarantee / 100), // Convert cents to dollars
         tierBreakdown
       });
     } catch (error) {
