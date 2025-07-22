@@ -288,27 +288,7 @@ export default function HomeV3() {
           </motion.p>
         </div>
         
-        {/* Enhanced scroll indicator */}
-        <motion.div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{ 
-            y: [0, 10, 0],
-            opacity: 1 
-          }}
-          transition={{ 
-            y: { duration: 2, repeat: Infinity },
-            opacity: { delay: 2.5, duration: 0.8 }
-          }}
-          initial={{ opacity: 0 }}
-        >
-          <div className="w-6 h-10 border-2 border-slate-300/40 rounded-full flex justify-center backdrop-blur-sm bg-white/20 shadow-lg">
-            <motion.div 
-              className="w-1 h-3 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mt-2"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            ></motion.div>
-          </div>
-        </motion.div>
+
       </section>
 
       {/* Why FinBoost Exists - Card Format */}
