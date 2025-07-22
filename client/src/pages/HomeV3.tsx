@@ -1212,8 +1212,7 @@ export default function HomeV3() {
             ))}
           </div>
 
-          <div className="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-md text-yellow-900 text-center mt-8">
-            <p className="mb-4"><strong>Founding Member Advantage:</strong> For a limited time, FinBoost is boosting every rewards pool with company contributions. Smaller competition + guaranteed rewards = your best shot at early wins.</p>
+          <div className="text-center mt-8">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
