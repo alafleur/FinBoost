@@ -3568,10 +3568,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (item.tier === 'tier1') tierBreakdown.tier1 = Number(item.count);
         if (item.tier === 'tier2') tierBreakdown.tier2 = Number(item.count);
         if (item.tier === 'tier3') tierBreakdown.tier3 = Number(item.count);
-        // Handle old tier naming system
-        if (item.tier === 'bronze') tierBreakdown.tier3 = Number(item.count);
-        if (item.tier === 'silver') tierBreakdown.tier2 = Number(item.count);
-        if (item.tier === 'gold') tierBreakdown.tier1 = Number(item.count);
       });
 
       res.json({
