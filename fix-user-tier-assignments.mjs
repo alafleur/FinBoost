@@ -1,6 +1,6 @@
-const { pool, db } = require('./server/db.js');
-const { users, userCyclePoints, cycleSettings } = require('./shared/schema.js');
-const { eq, and, gt, desc } = require('drizzle-orm');
+import { db } from './server/db.ts';
+import { users, userCyclePoints, cycleSettings } from './shared/schema.ts';
+import { eq, and, gt, desc } from 'drizzle-orm';
 
 async function fixUserTierAssignments() {
   console.log('Starting user tier assignment fix...');
@@ -103,7 +103,7 @@ async function fixUserTierAssignments() {
   } catch (error) {
     console.error('Error fixing tier assignments:', error);
   } finally {
-    await pool.end();
+    process.exit(0);
   }
 }
 
