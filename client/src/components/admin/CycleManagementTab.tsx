@@ -19,6 +19,7 @@ interface CycleSetting {
   paymentPeriodDays: number;
   membershipFee: number;
   rewardPoolPercentage: number;
+  minimumPoolGuarantee: number;
   tier1Threshold: number;
   tier2Threshold: number;
   isActive: boolean;
@@ -48,6 +49,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
     paymentPeriodDays: 30,
     membershipFee: 2000,
     rewardPoolPercentage: 55,
+    minimumPoolGuarantee: 0, // Default: no guarantee
     tier1Threshold: 33, // Top 33% percentile
     tier2Threshold: 67, // Up to 67% percentile 
     isActive: true,
@@ -207,6 +209,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                 paymentPeriodDays: 30,
                 membershipFee: 2000,
                 rewardPoolPercentage: 55,
+                minimumPoolGuarantee: 0,
                 tier1Threshold: 33,
                 tier2Threshold: 67,
                 isActive: true,
@@ -312,6 +315,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                               paymentPeriodDays: cycle.paymentPeriodDays,
                               membershipFee: cycle.membershipFee,
                               rewardPoolPercentage: cycle.rewardPoolPercentage,
+                              minimumPoolGuarantee: cycle.minimumPoolGuarantee || 0,
                               tier1Threshold: cycle.tier1Threshold,
                               tier2Threshold: cycle.tier2Threshold,
                               isActive: cycle.isActive,
@@ -440,6 +444,21 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                     onChange={(e) => setCycleForm({...cycleForm, rewardPoolPercentage: parseInt(e.target.value)})}
                   />
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="minimumPoolGuarantee">Minimum Pool Guarantee (cents)</Label>
+                <Input
+                  id="minimumPoolGuarantee"
+                  type="number"
+                  min="0"
+                  value={cycleForm.minimumPoolGuarantee}
+                  onChange={(e) => setCycleForm({...cycleForm, minimumPoolGuarantee: parseInt(e.target.value)})}
+                />
+                <span className="text-xs text-gray-500">
+                  {cycleForm.minimumPoolGuarantee > 0 
+                    ? `Guaranteed minimum: ${formatCurrency(cycleForm.minimumPoolGuarantee)}` 
+                    : 'No minimum guarantee set'}
+                </span>
               </div>
             </div>
 
