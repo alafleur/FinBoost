@@ -883,43 +883,59 @@ export class MemStorage implements IStorage {
       return 'tier3';
     }
 
-    // Get tier percentile thresholds from current cycle settings
+    // Get current active cycle settings
     const currentCycle = await this.getCurrentCycle();
     if (!currentCycle) {
       return 'tier3';
     }
 
-    // Get all active users with points > 0 to calculate percentiles among engaged users only
-    const activeUsersWithPoints = await db.select({
-      currentCyclePoints: userCyclePoints.currentCyclePoints
+    // Get all active users with their cycle points, sorted by points descending
+    const allUsersWithCyclePoints = await db.select({
+      userId: users.id,
+      cyclePoints: userCyclePoints.currentCyclePoints
     }).from(users)
-    .leftJoin(userCyclePoints, eq(users.id, userCyclePoints.userId))
+    .leftJoin(userCyclePoints, and(
+      eq(userCyclePoints.userId, users.id),
+      eq(userCyclePoints.cycleSettingId, currentCycle.id)
+    ))
     .where(and(
       eq(users.isActive, true), 
       eq(users.subscriptionStatus, 'active'),
-      gt(userCyclePoints.currentCyclePoints, 0)
+      eq(users.isAdmin, false)
     ));
 
-    if (activeUsersWithPoints.length === 0) {
+    // Separate users with points > 0 for tier calculation
+    const usersWithPoints = allUsersWithCyclePoints
+      .filter(user => (user.cyclePoints || 0) > 0)
+      .sort((a, b) => (b.cyclePoints || 0) - (a.cyclePoints || 0));
+
+    if (usersWithPoints.length === 0) {
       return 'tier1'; // Only user with points
     }
 
-    // Get unique point values and sort in descending order (highest to lowest)
-    const uniquePoints = [...new Set(activeUsersWithPoints.map(u => u.currentCyclePoints || 0))]
-      .sort((a, b) => b - a);
+    // Calculate equal divisions for users with points
+    const totalUsersWithPoints = usersWithPoints.length;
+    const usersPerTier = Math.floor(totalUsersWithPoints / 3);
+    const remainderUsers = totalUsersWithPoints % 3;
 
-    // Find position of current user's points in the unique rankings
-    const pointRank = uniquePoints.indexOf(currentCyclePoints) + 1;
-    const totalUniqueRanks = uniquePoints.length;
+    // Distribute users: top tier gets extra users if there's a remainder
+    const tier1Count = usersPerTier + (remainderUsers > 0 ? 1 : 0);
+    const tier2Count = usersPerTier + (remainderUsers > 1 ? 1 : 0);
 
-    // Calculate position as percentage from top (1 = best, totalUniqueRanks = worst)
-    const positionFromTop = ((pointRank - 1) / (totalUniqueRanks - 1)) * 100;
+    // Find the user's rank among users with points
+    const userRank = usersWithPoints.findIndex(user => 
+      (user.cyclePoints || 0) === currentCyclePoints
+    );
 
-    // Assign tiers based on position from top
-    // Top 33%: tier1, Middle 33%: tier2, Bottom 33%: tier3
-    if (positionFromTop <= 33) {
+    if (userRank === -1) {
+      // User not found in rankings (shouldn't happen)
+      return 'tier3';
+    }
+
+    // Assign tier based on equal division ranking
+    if (userRank < tier1Count) {
       return 'tier1';
-    } else if (positionFromTop <= 67) {
+    } else if (userRank < tier1Count + tier2Count) {
       return 'tier2';
     } else {
       return 'tier3';
@@ -933,26 +949,50 @@ export class MemStorage implements IStorage {
     this.tierThresholdCache = null;
     this.tierThresholdCacheTime = null;
 
-    // Get all active users
-    const allUsers = await db.select().from(users).where(eq(users.isActive, true));
+    // Get current active cycle
+    const currentCycle = await this.getCurrentCycle();
+    if (!currentCycle) {
+      console.log("No active cycle found, cannot recalculate tiers");
+      return;
+    }
 
-    console.log(`Recalculating tiers for ${allUsers.length} users`);
+    // Get all active users with their cycle points
+    const allUsersWithCyclePoints = await db.select({
+      userId: users.id,
+      username: users.username,
+      currentTier: users.tier,
+      cyclePoints: userCyclePoints.currentCyclePoints
+    }).from(users)
+    .leftJoin(userCyclePoints, and(
+      eq(userCyclePoints.userId, users.id),
+      eq(userCyclePoints.cycleSettingId, currentCycle.id)
+    ))
+    .where(and(
+      eq(users.isActive, true),
+      eq(users.isAdmin, false)
+    ));
+
+    console.log(`Recalculating tiers for ${allUsersWithCyclePoints.length} users`);
 
     // Update each user's tier based on their current cycle points
-    for (const user of allUsers) {
-      const newTier = await this.calculateUserTier(user.currentMonthPoints || 0);
+    for (const user of allUsersWithCyclePoints) {
+      const cyclePoints = user.cyclePoints || 0;
+      const newTier = await this.calculateUserTier(cyclePoints);
 
-      if (user.tier !== newTier) {
-        console.log(`Updating user ${user.id} (${user.username}) from ${user.tier} to ${newTier} (${user.currentMonthPoints} cycle points)`);
+      if (user.currentTier !== newTier) {
+        console.log(`Updating user ${user.username} from ${user.currentTier} to ${newTier} (${cyclePoints} cycle points)`);
 
         await db.update(users)
           .set({ 
             tier: newTier
           })
-          .where(eq(users.id, user.id));
+          .where(eq(users.id, user.userId));
 
-        // Update memory cache
-        this.users.set(user.id, { ...user, tier: newTier });
+        // Update memory cache if it exists
+        const cachedUser = this.users.get(user.userId);
+        if (cachedUser) {
+          this.users.set(user.userId, { ...cachedUser, tier: newTier });
+        }
       }
     }
 
