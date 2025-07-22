@@ -33,7 +33,8 @@ function Router() {
   
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={HomeV3} />
+      <Route path="/v1" component={Home} />
       <Route path="/v2" component={HomeV2} />
       <Route path="/v2clean" component={HomeV2Clean} />
       <Route path="/v3" component={HomeV3} />
