@@ -47,8 +47,15 @@ import {
   Timer,
   MoreHorizontal,
   Crown,
-  Calendar
+  Calendar,
+  Copy,
+  ExternalLink,
+  RotateCcw,
+  UserX,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface LearningModule {
   id: number;
@@ -181,6 +188,7 @@ export default function Admin() {
   const [usersPerPage] = useState(20);
   const [currentModulePage, setCurrentModulePage] = useState(1);
   const [modulesPerPage] = useState(10);
+  const [enrollmentPage, setEnrollmentPage] = useState(1);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState({
@@ -3030,64 +3038,155 @@ export default function Admin() {
                         No users enrolled in active cycles yet.
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left p-2">User</th>
-                              <th className="text-left p-2">Current Points</th>
-                              <th className="text-left p-2">Tier</th>
-                              <th className="text-left p-2">Joined</th>
-                              <th className="text-left p-2">Last Activity</th>
-                              <th className="text-left p-2">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {userCyclePoints.slice(0, 10).map((userPoints) => {
-                              const user = users.find(u => u.id === userPoints.userId);
-                              return (
-                                <tr key={userPoints.id} className="border-b">
-                                  <td className="p-2">
-                                    <div className="font-medium">{user?.username || 'Unknown'}</div>
-                                    <div className="text-xs text-gray-500">{user?.email}</div>
-                                  </td>
-                                  <td className="p-2">
-                                    <div className="font-bold text-green-600">
-                                      {userPoints.currentCyclePoints}
-                                    </div>
-                                  </td>
-                                  <td className="p-2">
-                                    <Badge variant={
-                                      userPoints.tier === 'tier1' ? 'default' :
-                                      userPoints.tier === 'tier2' ? 'secondary' : 'outline'
-                                    }>
-                                      {userPoints.tier.replace('tier', 'Tier ')}
-                                    </Badge>
-                                  </td>
-                                  <td className="p-2">
-                                    <div className="text-xs">
-                                      {new Date(userPoints.joinedCycleAt).toLocaleDateString()}
-                                    </div>
-                                  </td>
-                                  <td className="p-2">
-                                    <div className="text-xs">
-                                      {userPoints.lastActivityDate 
-                                        ? new Date(userPoints.lastActivityDate).toLocaleDateString()
-                                        : 'No activity'
-                                      }
-                                    </div>
-                                  </td>
-                                  <td className="p-2">
-                                    <Button variant="ghost" size="sm">
-                                      <Settings className="w-4 h-4" />
-                                    </Button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                      <>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left p-2">User</th>
+                                <th className="text-left p-2">Current Points</th>
+                                <th className="text-left p-2">Tier</th>
+                                <th className="text-left p-2">Joined</th>
+                                <th className="text-left p-2">Last Activity</th>
+                                <th className="text-left p-2">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(() => {
+                                const USERS_PER_PAGE = 20;
+                                const startIndex = (enrollmentPage - 1) * USERS_PER_PAGE;
+                                const endIndex = startIndex + USERS_PER_PAGE;
+                                const paginatedUsers = userCyclePoints.slice(startIndex, endIndex);
+
+                                return paginatedUsers.map((userPoints) => {
+                                  const user = users.find(u => u.id === userPoints.userId);
+                                  return (
+                                    <tr key={userPoints.userId} className="border-b">
+                                      <td className="p-2">
+                                        <div className="font-medium">{user?.username || 'Unknown'}</div>
+                                        <div className="text-xs text-gray-500">{user?.email}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-bold text-green-600">
+                                          {userPoints.currentCyclePoints}
+                                        </div>
+                                      </td>
+                                      <td className="p-2">
+                                        <Badge variant={
+                                          userPoints.tier === 'tier1' ? 'default' :
+                                          userPoints.tier === 'tier2' ? 'secondary' : 'outline'
+                                        }>
+                                          {userPoints.tier.replace('tier', 'Tier ')}
+                                        </Badge>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-xs">
+                                          {new Date(userPoints.joinedCycleAt).toLocaleDateString()}
+                                        </div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-xs">
+                                          {userPoints.lastActivityDate 
+                                            ? new Date(userPoints.lastActivityDate).toLocaleDateString()
+                                            : 'No activity'
+                                          }
+                                        </div>
+                                      </td>
+                                      <td className="p-2">
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="sm">
+                                              <Settings className="w-4 h-4" />
+                                            </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => {
+                                              navigator.clipboard.writeText(`user${userPoints.userId}@test.com`);
+                                              toast({ title: "Email copied", description: "User email copied to clipboard" });
+                                            }}>
+                                              <Copy className="mr-2 h-4 w-4" />
+                                              Copy Email
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => {
+                                              window.open(`/dashboard?user=${userPoints.userId}`, '_blank');
+                                            }}>
+                                              <ExternalLink className="mr-2 h-4 w-4" />
+                                              View Profile
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => {
+                                              if (confirm(`Reset ${user?.username}'s cycle points to 0?`)) {
+                                                // This would need an API endpoint implementation
+                                                toast({ title: "Feature coming soon", description: "Point reset functionality will be added" });
+                                              }
+                                            }}>
+                                              <RotateCcw className="mr-2 h-4 w-4" />
+                                              Reset Points
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem 
+                                              className="text-red-600"
+                                              onClick={() => {
+                                                if (confirm(`Remove ${user?.username} from the current cycle?`)) {
+                                                  // This would need an API endpoint implementation
+                                                  toast({ title: "Feature coming soon", description: "User removal functionality will be added" });
+                                                }
+                                              }}
+                                            >
+                                              <UserX className="mr-2 h-4 w-4" />
+                                              Remove from Cycle
+                                            </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
+                                      </td>
+                                    </tr>
+                                  );
+                                });
+                              })()}
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                        {/* Pagination Controls */}
+                        {(() => {
+                          const USERS_PER_PAGE = 20;
+                          const totalPages = Math.ceil(userCyclePoints.length / USERS_PER_PAGE);
+                          
+                          if (totalPages <= 1) return null;
+                          
+                          return (
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm text-gray-500">
+                                Showing {((enrollmentPage - 1) * USERS_PER_PAGE) + 1} to{' '}
+                                {Math.min(enrollmentPage * USERS_PER_PAGE, userCyclePoints.length)} of{' '}
+                                {userCyclePoints.length} users
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEnrollmentPage(prev => Math.max(prev - 1, 1))}
+                                  disabled={enrollmentPage === 1}
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                  Previous
+                                </Button>
+                                <span className="text-sm">
+                                  Page {enrollmentPage} of {totalPages}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEnrollmentPage(prev => Math.min(prev + 1, totalPages))}
+                                  disabled={enrollmentPage === totalPages}
+                                >
+                                  Next
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </>
                     )}
                   </div>
                 </CardContent>
