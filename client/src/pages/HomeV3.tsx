@@ -171,16 +171,7 @@ export default function HomeV3() {
         </div>
         
         <div className="relative max-w-7xl mx-auto text-center z-10">
-          {/* Badge with entrance animation */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="inline-flex items-center bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full px-6 py-3 mb-8 shadow-lg backdrop-blur-sm"
-          >
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
-            <span className="text-green-700 font-semibold">Early Access Now Open</span>
-          </motion.div>
+
           
           {/* Staggered headline animation */}
           <div className="mb-8 md:mb-10 pb-2">
