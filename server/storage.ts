@@ -6216,7 +6216,7 @@ export class MemStorage implements IStorage {
       const activeCycle = await db
         .select()
         .from(cycleSettings)
-        .where(eq(cycleSettings.isActive, true))
+        .where(eq(cycleSettings.status, 'active'))
         .limit(1);
 
       if (!activeCycle.length) {
