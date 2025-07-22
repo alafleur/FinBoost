@@ -1823,7 +1823,7 @@ export default function Admin() {
                   <CardTitle>Premium Members</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{users.filter((u: any) => u.subscriptionStatus === 'active').length}</div>
+                  <div className="text-2xl font-bold">{users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length}</div>
                 </CardContent>
               </Card>
 
@@ -1832,9 +1832,9 @@ export default function Admin() {
                   <CardTitle>Total Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{users.length}</div>
+                  <div className="text-2xl font-bold">{users.filter((u: any) => !u.isAdmin).length}</div>
                   <div className="text-sm text-gray-500">
-                    {users.filter((u: any) => u.subscriptionStatus === 'active').length} premium
+                    {users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length} premium
                   </div>
                 </CardContent>
               </Card>
@@ -1861,7 +1861,7 @@ export default function Admin() {
                     <div>
                       <div className="text-sm font-medium">Premium Subscribers</div>
                       <div className="text-2xl font-bold text-blue-600">
-                        {users.filter((u: any) => u.subscriptionStatus === 'active').length}
+                        {users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length}
                       </div>
                     </div>
                     <div>
@@ -1872,10 +1872,10 @@ export default function Admin() {
                     </div>
                   </div>
                   
-                  {users.filter((u: any) => u.subscriptionStatus === 'active').length !== (poolData?.premiumUsers ?? 0) && (
+                  {users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length !== (poolData?.premiumUsers ?? 0) && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                       <div className="text-sm text-yellow-800">
-                        <strong>Data Mismatch Detected:</strong> {users.filter((u: any) => u.subscriptionStatus === 'active').length - (poolData?.premiumUsers ?? 0)} premium subscribers not enrolled in cycles
+                        <strong>Data Mismatch Detected:</strong> {users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length - (poolData?.premiumUsers ?? 0)} premium subscribers not enrolled in cycles
                       </div>
                       <Button
                         size="sm"

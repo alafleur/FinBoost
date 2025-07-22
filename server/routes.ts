@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      // Get all premium users with their payment information
+      // Get all premium users with their payment information (excluding admin users)
       const usersWithPaymentInfo = await db.select({
         id: users.id,
         username: users.username,
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastPaymentStatus: users.lastPaymentStatus
       })
       .from(users)
-      .where(eq(users.subscriptionStatus, 'active'))
+      .where(and(eq(users.subscriptionStatus, 'active'), eq(users.isAdmin, false)))
       .orderBy(desc(users.currentMonthPoints));
 
       // Add payment status information
