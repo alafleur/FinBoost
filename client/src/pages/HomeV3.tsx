@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +32,14 @@ import {
 } from "lucide-react";
 
 export default function HomeV3() {
+  const [location, navigate] = useLocation();
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [communitySize, setCommunitySize] = useState(5000);
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
+  
+  const handleJoinEarlyAccess = () => {
+    navigate('/auth?mode=signup');
+  };
 
   // Calculate scaling percentage based on member count (250-10,000+ range)
   useEffect(() => {
@@ -246,7 +252,7 @@ export default function HomeV3() {
               <Button 
                 size="lg" 
                 className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
-                onClick={() => window.location.href = '/auth?mode=signup'}
+                onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6" />
                 Join Early Access
@@ -1220,7 +1226,7 @@ export default function HomeV3() {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
-                onClick={() => window.location.href = '/auth?mode=signup'}
+                onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Join Early Access
