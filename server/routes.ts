@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 
@@ -3486,6 +3486,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pointsDistribution,
           timeframe: days
         }
+      });
+    } catch (error) {
+      console.error('Error fetching cycle analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch cycle analytics' });
+    }
+  });
+
+  // Individual Cycle Analytics
+  app.get('/api/admin/cycles/:id/analytics', requireAdmin, async (req, res) => {
+    try {
+      const cycleId = parseInt(req.params.id);
+      
+      // Get cycle-specific stats
+      const [cycle] = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleId))
+        .limit(1);
+        
+      if (!cycle) {
+        return res.status(404).json({ error: 'Cycle not found' });
+      }
+      
+      // Get participants count (excluding admin users)
+      const participantsResult = await db
+        .select({ count: sql<number>`count(DISTINCT ucp.user_id)::int` })
+        .from(userCyclePoints.as('ucp'))
+        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycleId), eq(users.isAdmin, false)));
+
+      const participants = Number(participantsResult[0]?.count) || 0;
+
+      // Calculate total pool amount (convert from cents to dollars)
+      const totalPoolAmountCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+      const totalPoolAmount = totalPoolAmountCents / 100;
+
+      // Get average points (excluding admin users)
+      const avgPointsResult = await db
+        .select({ avg: sql<number>`avg(ucp.current_cycle_points)` })
+        .from(userCyclePoints.as('ucp'))
+        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
+        .where(and(eq(sql.raw('ucp.cycle_setting_id'), cycleId), eq(users.isAdmin, false)));
+
+      const averagePoints = Math.round(avgPointsResult[0]?.avg || 0);
+
+      // Get top performer (excluding admin users)
+      const topPerformerResult = await db
+        .select({
+          username: users.username,
+          points: userCyclePoints.currentCyclePoints
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(and(eq(userCyclePoints.cycleSettingId, cycleId), eq(users.isAdmin, false)))
+        .orderBy(desc(userCyclePoints.currentCyclePoints))
+        .limit(1);
+
+      const topPerformer = topPerformerResult.length > 0 
+        ? { username: topPerformerResult[0].username, points: topPerformerResult[0].points }
+        : null;
+
+      res.json({
+        participants,
+        totalPoolAmount,
+        averagePoints,
+        topPerformer
       });
     } catch (error) {
       console.error('Error fetching cycle analytics:', error);
