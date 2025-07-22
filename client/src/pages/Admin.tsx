@@ -1960,7 +1960,7 @@ export default function Admin() {
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{users.length}</div>
+                    <div className="text-2xl font-bold">{users.filter((u: any) => !u.isAdmin).length}</div>
                     <p className="text-xs text-muted-foreground">
                       +12% from last month
                     </p>
@@ -1973,9 +1973,9 @@ export default function Admin() {
                     <Activity className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{users.filter((u: any) => u.isActive).length}</div>
+                    <div className="text-2xl font-bold">{users.filter((u: any) => u.isActive && !u.isAdmin).length}</div>
                     <p className="text-xs text-muted-foreground">
-                      {Math.round((users.filter((u: any) => u.isActive).length / users.length) * 100)}% active rate
+                      {users.filter((u: any) => !u.isAdmin).length > 0 ? Math.round((users.filter((u: any) => u.isActive && !u.isAdmin).length / users.filter((u: any) => !u.isAdmin).length) * 100) : 100}% active rate
                     </p>
                   </CardContent>
                 </Card>
@@ -1987,10 +1987,10 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {users.filter((u: any) => u.subscriptionStatus === 'active').length}
+                      {users.filter((u: any) => u.subscriptionStatus === 'active' && !u.isAdmin).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {users.filter((u: any) => u.subscriptionStatus !== 'active').length} free users
+                      {users.filter((u: any) => u.subscriptionStatus !== 'active' && !u.isAdmin).length} free users
                     </p>
                   </CardContent>
                 </Card>
@@ -2002,7 +2002,7 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {Math.round(users.reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0) / (users.length || 1))}
+                      {users.filter((u: any) => !u.isAdmin).length > 0 ? Math.round(users.filter((u: any) => !u.isAdmin).reduce((sum: number, u: any) => sum + (u.totalPoints || 0), 0) / users.filter((u: any) => !u.isAdmin).length) : 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Per user average
@@ -2285,7 +2285,7 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {users.slice(0, 5).map((user: any) => (
+                      {users.filter((u: any) => !u.isAdmin).slice(0, 5).map((user: any) => (
                         <div key={user.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
