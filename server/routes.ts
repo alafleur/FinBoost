@@ -3547,11 +3547,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? { username: topPerformerResult[0].username, points: topPerformerResult[0].points }
         : null;
 
+      // Get tier breakdown counts
+      const tierBreakdownResult = await db
+        .select({
+          tier: users.tier,
+          count: sql<number>`count(*)::int`
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(and(eq(userCyclePoints.cycleSettingId, cycleId), eq(users.isAdmin, false)))
+        .groupBy(users.tier);
+
+      const tierBreakdown = {
+        tier1: 0,
+        tier2: 0,
+        tier3: 0
+      };
+
+      tierBreakdownResult.forEach(item => {
+        if (item.tier === 'tier1') tierBreakdown.tier1 = Number(item.count);
+        if (item.tier === 'tier2') tierBreakdown.tier2 = Number(item.count);
+        if (item.tier === 'tier3') tierBreakdown.tier3 = Number(item.count);
+        // Handle old tier naming system
+        if (item.tier === 'bronze') tierBreakdown.tier3 = Number(item.count);
+        if (item.tier === 'silver') tierBreakdown.tier2 = Number(item.count);
+        if (item.tier === 'gold') tierBreakdown.tier1 = Number(item.count);
+      });
+
       res.json({
         participantCount: participants,
         totalRewardPool: totalPoolAmount * 100, // Convert back to cents for consistency
         averagePoints,
-        topPerformer
+        topPerformer,
+        tier1Count: tierBreakdown.tier1,
+        tier2Count: tierBreakdown.tier2,
+        tier3Count: tierBreakdown.tier3
       });
     } catch (error) {
       console.error('Error fetching cycle analytics:', error);

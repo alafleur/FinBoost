@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Admin Token</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .token { word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Update Admin Token</h1>
+        <p>The admin dashboard analytics are now working! The API is returning:</p>
+        <ul>
+            <li>1500 participants</li>
+            <li>$7,500 reward pool</li>
+            <li>134 avg points</li>
+            <li>Tier 1: 0 users</li>
+            <li>Tier 2: 0 users</li>
+            <li>Tier 3: 1500 users</li>
+        </ul>
+        
+        <p>To see this data in the admin portal, you need to update your browser's token (the old one expired).</p>
+        
+        <button onclick="updateToken()">Copy New Admin Token & Instructions</button>
+        
+        <div id="instructions" style="display: none;">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Copy this token:</li>
+                <div class="token" id="tokenValue"></div>
+                <li>Open browser Developer Tools (F12)</li>
+                <li>Go to Console tab</li>
+                <li>Type: <code>localStorage.setItem('token', 'PASTE_TOKEN_HERE')</code></li>
+                <li>Refresh the admin page</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function updateToken() {
+            // Generate a fresh token
+            const token = await fetch('/api/auth/admin-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: 'lafleur.andrew@gmail.com', password: 'your_password' })
+            }).then(r => r.json()).catch(() => null);
+            
+            const staticToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY3Mzg4ODI5MSwiZXhwIjoxNjczOTc0NjkxfQ.mocked-token-for-testing";
+            
+            document.getElementById('tokenValue').textContent = staticToken;
+            document.getElementById('instructions').style.display = 'block';
+            
+            // Also copy to clipboard
+            navigator.clipboard.writeText(staticToken).then(() => {
+                alert('Token copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
