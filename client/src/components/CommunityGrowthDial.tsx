@@ -12,6 +12,7 @@ interface CommunityGrowthDialProps {
     premiumUsers: number;
     totalUsers: number;
     rewardPoolPercentage?: number;
+    minimumPoolGuarantee?: number;
     tierBreakdown?: {
       tier1: number;
       tier2: number;
@@ -158,8 +159,24 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
                 </div>
                 <div className="text-xs text-green-500">available for rewards</div>
+                {poolData.minimumPoolGuarantee && poolData.minimumPoolGuarantee > 0 && (
+                  <div className="text-xs text-blue-600 mt-1 font-medium">
+                    Guaranteed min: {formatCurrency(poolData.minimumPoolGuarantee)}
+                  </div>
+                )}
               </div>
             </div>
+            
+            {/* Minimum Pool Guarantee Display - Only show if guarantee exists and is greater than current pool */}
+            {poolData.minimumPoolGuarantee && poolData.minimumPoolGuarantee > 0 && poolData.minimumPoolGuarantee > poolData.totalPool && (
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border border-blue-200 mb-4">
+                <div className="text-sm text-blue-600 font-medium mb-1">Pool Guarantee Active</div>
+                <div className="text-lg font-bold text-blue-700 mb-1">
+                  {formatCurrency(poolData.minimumPoolGuarantee)}
+                </div>
+                <div className="text-xs text-blue-500">Company-backed minimum pool</div>
+              </div>
+            )}
 
             {/* Tier Breakdown - Separate Row */}
             {poolData.tierBreakdown && (

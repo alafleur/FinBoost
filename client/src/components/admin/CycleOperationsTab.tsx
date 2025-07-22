@@ -31,6 +31,7 @@ interface CycleSetting {
   paymentPeriodDays: number;
   membershipFee: number;
   rewardPoolPercentage: number;
+  minimumPoolGuarantee?: number;
   tier1Threshold: number;
   tier2Threshold: number;
   isActive: boolean;
@@ -312,6 +313,14 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
             <p className="text-xs text-muted-foreground">
               Available for distribution
             </p>
+            {selectedCycle?.minimumPoolGuarantee && selectedCycle.minimumPoolGuarantee > 0 && (
+              <div className="mt-2 text-xs text-blue-600 font-medium">
+                Minimum guarantee: {formatCurrency(selectedCycle.minimumPoolGuarantee)}
+                {selectedCycle.minimumPoolGuarantee > (cycleAnalytics?.totalRewardPool || 0) && (
+                  <span className="text-orange-600 ml-1">(Active)</span>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

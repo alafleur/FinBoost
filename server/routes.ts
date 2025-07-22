@@ -3241,7 +3241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ...poolData,
         rewardPoolPercentage,
-        minimumPoolGuarantee: Math.floor(minimumPoolGuarantee / 100), // Convert cents to dollars
+        minimumPoolGuarantee, // Keep in cents for consistency
         tierBreakdown
       });
     } catch (error) {
