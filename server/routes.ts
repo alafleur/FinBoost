@@ -3589,6 +3589,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get User Cycle Points for Admin Dashboard
+  app.get('/api/admin/user-cycle-points', requireAdmin, async (req, res) => {
+    try {
+      // Get active cycle
+      const activeCycle = await storage.getActiveCycleSetting();
+      if (!activeCycle) {
+        return res.json({ userCyclePoints: [] });
+      }
+
+      // Get all enrolled users in the active cycle (excluding admins)
+      const enrolledUsers = await db
+        .select({
+          userId: userCyclePoints.userId,
+          username: users.username,
+          email: users.email,
+          currentCyclePoints: userCyclePoints.currentCyclePoints,
+          pointsRolledOver: userCyclePoints.pointsRolledOver,
+          tier: users.tier,
+          isActive: users.isActive,
+          joinedCycleAt: userCyclePoints.joinedCycleAt,
+          lastActivityDate: userCyclePoints.lastActivityDate
+        })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(userCyclePoints.userId, users.id))
+        .where(and(
+          eq(userCyclePoints.cycleSettingId, activeCycle.id),
+          eq(users.isAdmin, false)
+        ))
+        .orderBy(desc(userCyclePoints.currentCyclePoints));
+
+      res.json({ 
+        success: true,
+        userCyclePoints: enrolledUsers,
+        activeAdapterCycleId: activeCycle.id,
+        activeCycleName: activeCycle.cycleName
+      });
+    } catch (error) {
+      console.error('Error fetching user cycle points:', error);
+      res.status(500).json({ error: 'Failed to fetch user cycle points' });
+    }
+  });
+
   // Financial Analytics
   app.get('/api/admin/analytics/financial/overview', requireAdmin, async (req, res) => {
     try {
