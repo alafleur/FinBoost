@@ -947,7 +947,7 @@ export default function HomeV3() {
       </section>
 
       {/* Reward Pool Mechanics - Show Real Impact */}
-      <section id="pool-mechanics" className="py-20 px-4 bg-white">
+      <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
