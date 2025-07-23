@@ -1133,17 +1133,17 @@ export default function HomeV3() {
               {
                 tier: "Tier 1",
                 subtitle: "Top Third",
-                rewardLevel: "Premium rewards"
+                rewardLevel: "Premium Rewards"
               },
               {
                 tier: "Tier 2", 
                 subtitle: "Middle Third",
-                rewardLevel: "Standard rewards"
+                rewardLevel: "Standard Rewards"
               },
               {
                 tier: "Tier 3",
                 subtitle: "Lower Third", 
-                rewardLevel: "Base rewards"
+                rewardLevel: "Base Rewards"
               }
             ].map((tier, index) => (
               <motion.div
@@ -1176,7 +1176,7 @@ export default function HomeV3() {
             className="text-center mb-8"
           >
             <p className="text-lg font-semibold text-gray-700">
-              Higher effort → Higher tier → Larger rewards
+              Higher Effort → Higher Tier → Larger Rewards
             </p>
           </motion.div>
 
