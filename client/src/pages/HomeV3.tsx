@@ -1133,17 +1133,17 @@ export default function HomeV3() {
               {
                 tier: "Tier 1",
                 subtitle: "Top Third",
-                poolShare: "50%"
+                rewardLevel: "Premium rewards"
               },
               {
                 tier: "Tier 2", 
                 subtitle: "Middle Third",
-                poolShare: "35%"
+                rewardLevel: "Standard rewards"
               },
               {
                 tier: "Tier 3",
                 subtitle: "Lower Third", 
-                poolShare: "15%"
+                rewardLevel: "Base rewards"
               }
             ].map((tier, index) => (
               <motion.div
@@ -1159,17 +1159,26 @@ export default function HomeV3() {
                       <h3 className="text-2xl font-semibold text-white mb-1">
                         {tier.tier}
                       </h3>
-                      <p className="text-white/90 mb-3">{tier.subtitle}</p>
-                      <div className="text-3xl font-bold text-white mb-2">
-                        {tier.poolShare}
-                      </div>
-                      <p className="text-sm text-white/90 mb-4">of rewards pool</p>
+                      <p className="text-white/90 mb-3">{tier.subtitle} = {tier.rewardLevel}</p>
                     </div>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
+
+          {/* Caption below tier boxes */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <p className="text-lg font-semibold text-gray-700">
+              Higher effort → Higher tier → Larger rewards
+            </p>
+          </motion.div>
 
           <div className="text-center mt-8">
             <motion.div
