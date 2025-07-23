@@ -586,23 +586,23 @@ export default function HomeV3() {
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">Earn points from lessons, actions, and predictions</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">Compete every 2 weeks</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">Points = your odds</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">Top prizes reach into the thousands per cycle</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                       <span className="text-gray-700">Company-boosted rewards pools during Early Access</span>
                     </div>
                   </div>
@@ -624,21 +624,21 @@ export default function HomeV3() {
                   </div>
                   <div className="space-y-4">
                     <div className="bg-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">Sarah: 240 pts → Tier 1</span>
-                        <span className="font-bold text-green-600">Wins $500</span>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base truncate">Sarah: 240 pts → Tier 1</span>
+                        <span className="font-bold text-green-600 text-sm sm:text-base flex-shrink-0">Wins $500</span>
                       </div>
                     </div>
                     <div className="bg-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">Alex: 110 pts → Tier 2</span>
-                        <span className="font-bold text-green-600">Wins $75</span>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base truncate">Alex: 110 pts → Tier 2</span>
+                        <span className="font-bold text-green-600 text-sm sm:text-base flex-shrink-0">Wins $75</span>
                       </div>
                     </div>
                     <div className="bg-green-100 rounded-lg p-4 border-l-4 border-green-500">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">Mike: 10 pts → Tier 3</span>
-                        <span className="font-bold text-green-600">Wins $10</span>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base truncate">Mike: 10 pts → Tier 3</span>
+                        <span className="font-bold text-green-600 text-sm sm:text-base flex-shrink-0">Wins $10</span>
                       </div>
                     </div>
                   </div>
