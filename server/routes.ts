@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 
@@ -187,6 +187,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const publishedActions = actions.filter(action => action.isActive);
       res.json({ success: true, actions: publishedActions });
     } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // Auto-approved points for lessons and quizzes
+  app.post("/api/points/award", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ success: false, message: "No token provided" });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Invalid token" });
+      }
+
+      const { actionId, relatedId, metadata } = req.body;
+
+      // Auto-approve lesson and quiz completions
+      if (actionId === 'lesson_complete') {
+        const result = await storage.markLessonComplete(user.id, relatedId || metadata?.lessonId);
+        return res.json({ 
+          success: true, 
+          message: `Earned ${result.pointsEarned} points for lesson completion!`,
+          points: result.pointsEarned,
+          streakBonus: result.streakBonus
+        });
+      } else if (actionId === 'quiz_complete') {
+        // Award quiz points directly with auto-approval
+        const pointsEarned = 15; // Standard quiz points
+        
+        // Record in points history as approved
+        await db.insert(userPointsHistory).values({
+          userId: user.id,
+          action: actionId,
+          points: pointsEarned,
+          description: `Quiz completed: ${relatedId || 'quiz'}`,
+          status: 'approved',
+          metadata: JSON.stringify(metadata || {})
+        });
+
+        // Update user points and cycle points
+        await db.update(users)
+          .set({
+            totalPoints: sql`${users.totalPoints} + ${pointsEarned}`,
+            currentMonthPoints: sql`${users.currentMonthPoints} + ${pointsEarned}`,
+          })
+          .where(eq(users.id, user.id));
+
+        // Update cycle points
+        try {
+          await db.update(userCyclePoints)
+            .set({
+              currentCyclePoints: sql`${userCyclePoints.currentCyclePoints} + ${pointsEarned}`,
+              lastActivityDate: new Date()
+            })
+            .where(and(
+              eq(userCyclePoints.userId, user.id),
+              eq(userCyclePoints.isActive, true)
+            ));
+        } catch (error) {
+          console.error('Error updating cycle points for quiz:', error);
+        }
+
+        return res.json({ 
+          success: true, 
+          message: `Earned ${pointsEarned} points for quiz completion!`,
+          points: pointsEarned
+        });
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid action for auto-approval" });
+      }
+    } catch (error: any) {
+      console.error('Error in /api/points/award:', error);
       res.status(500).json({ success: false, message: error.message });
     }
   });
