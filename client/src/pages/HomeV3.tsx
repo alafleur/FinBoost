@@ -123,7 +123,7 @@ export default function HomeV3() {
       <Navbar />
       
       {/* Hero Section - Enhanced with Animated Gradient */}
-      <section id="hero" className="relative min-h-screen flex items-center pt-16 pb-12 px-6 overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex items-center pt-20 sm:pt-16 pb-12 px-6 overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-purple-50/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
