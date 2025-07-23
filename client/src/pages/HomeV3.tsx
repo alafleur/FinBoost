@@ -209,22 +209,7 @@ export default function HomeV3() {
             Earn real cash rewards for building real financial habits. Your progress isn't just tracked — it's rewarded.
           </motion.p>
           
-          {/* Enhanced Rewards Pool Section */}
-          <motion.div
-            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 md:p-6 mb-6 md:mb-8 max-w-2xl mx-auto border border-green-200 shadow-lg backdrop-blur-sm"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
-          >
-            <div className="flex items-center justify-center mb-1">
-              <Trophy className="w-5 h-5 md:w-6 md:h-6 text-yellow-600 mr-2" />
-              <span className="text-sm md:text-lg font-bold text-slate-800 text-center">Guaranteed Early Access Cycle Rewards Pool</span>
-            </div>
-            <div className="text-2xl md:text-3xl font-bold text-green-700 text-center mb-1">$5,000</div>
-            <p className="text-xs md:text-sm text-slate-600 text-center px-2">
-              <span className="font-semibold text-green-600">Company-boosted</span> during Early Access • Rewards distribution skewed to top performers
-            </p>
-          </motion.div>
+
           
           {/* Enhanced CTA Buttons */}
           <motion.div
@@ -273,7 +258,7 @@ export default function HomeV3() {
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
             <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-              At least half of members win cash rewards every cycle.
+              At least half of members win from our company-guaranteed $5,000 early access reward pool.
             </p>
           </motion.div>
           
