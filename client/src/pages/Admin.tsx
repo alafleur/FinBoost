@@ -3924,7 +3924,7 @@ export default function Admin() {
                       {pendingProofs.map((proof) => (
                         <Card key={proof.id} className="border-l-4 border-l-yellow-400">
                           <CardContent className="pt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                               <div>
                                 <h4 className="font-semibold">{proof.action}</h4>
                                 <p className="text-sm text-gray-600">
@@ -3940,6 +3940,31 @@ export default function Admin() {
                               <div>
                                 <p className="text-sm font-medium mb-2">Description:</p>
                                 <p className="text-sm text-gray-700">{proof.description}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium mb-2">Proof Attachment:</p>
+                                {proof.proofUrl ? (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                      <span className="text-sm text-green-700">File attached</span>
+                                    </div>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => window.open(proof.proofUrl, '_blank')}
+                                      className="w-full"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      View Proof File
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                    <span className="text-sm text-red-600">No file attached</span>
+                                  </div>
+                                )}
                               </div>
                               <div className="flex flex-col gap-2">
                                 <Button 
@@ -3958,16 +3983,6 @@ export default function Admin() {
                                   <X className="h-4 w-4 mr-1" />
                                   Reject
                                 </Button>
-                                {proof.proofUrl && (
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => window.open(proof.proofUrl, '_blank')}
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    View Proof
-                                  </Button>
-                                )}
                               </div>
                             </div>
                           </CardContent>
