@@ -201,7 +201,7 @@ export default function HomeV3() {
           </div>
           
           <motion.p 
-            className="text-base md:text-xl text-slate-600 mb-4 md:mb-6 max-w-3xl mx-auto leading-relaxed px-2"
+            className="text-base md:text-xl text-slate-600 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
@@ -213,7 +213,7 @@ export default function HomeV3() {
           
           {/* Enhanced CTA Buttons */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-8 md:mb-12"
+            className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center items-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4, ease: "easeOut" }}
@@ -252,25 +252,17 @@ export default function HomeV3() {
           
           {/* Winning Stats */}
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+            <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600 px-4">
               At least half of members win from our company-guaranteed $5,000 early access reward pool.
             </p>
           </motion.div>
           
-          {/* Legal disclaimer */}
-          <motion.p 
-            className="text-sm text-slate-400 font-normal text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 2.0, ease: "easeOut" }}
-          >
-            No purchase necessary • Alternative entry available • AMOE compliant
-          </motion.p>
+
         </div>
         
 
@@ -327,6 +319,19 @@ export default function HomeV3() {
               </p>
             </motion.div>
           </div>
+          
+          {/* Legal disclaimer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-sm text-white/50 font-normal">
+              No purchase necessary • Alternative entry available • AMOE compliant
+            </p>
+          </motion.div>
         </div>
       </section>
 
