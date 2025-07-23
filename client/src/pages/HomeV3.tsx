@@ -1124,8 +1124,7 @@ export default function HomeV3() {
               Half of Members Earn Rewards Each Cycle
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Users are placed in tiers based on points. Each tier has a portion of the rewards pool 
-              and winners are selected based on point-weighted random draws.
+              Users are placed in tiers based on points. The more you learn, the more you earn. Points aren't just for progress — they increase your chances at real cash rewards. At the end of each cycle, members with more points are eligible for larger potential payouts. Winners are selected based on point-weighted random draws.
             </p>
           </motion.div>
 
