@@ -1,0 +1,91 @@
+Got it — that’s an important clarification and we’ll update the plan accordingly.
+
+Here’s the revised version:
+
+---
+
+## ✅ **Updated FinBoost Learning Module Plan**
+
+**(for Replit and internal reference)**
+**As of July 2025**
+
+---
+
+### 🎯 **Core Strategy**
+
+FinBoost's educational modules are designed to be:
+
+* **Culturally Relevant** – Inspired by real-time TikTok, Instagram, Reddit, and economic trends
+* **Credible & Actionable** – Educational, myth-busting, behavior-focused
+* **Gamified** – Connected to real-world actions and point rewards
+* **Digestible** – Short-form, dynamic, TikTok-style format (3–5 minute reads)
+
+---
+
+### 🧱 **Module Structure**
+
+Each module includes:
+
+* A strong **hook** (relatable question, myth, or challenge)
+* Structured HTML content (headings, bullets, tips, examples)
+* A 3–4 question **quiz** (with correct answers and explanations)
+* Optionally linked to **proof-based actions** for bonus points
+* Default: **20 points per completed module**
+* Estimated time: **5 minutes**
+
+---
+
+### 📦 **Cycle-Based Content System**
+
+**Each cycle includes a full new batch of modules.**
+
+* Volume: **10–20 new modules per cycle**
+* Some content may **overlap in theme** with prior cycles, but each must offer a **fresh angle** or scenario
+* Purpose: Keeps returning users engaged with **new, relevant content** every cycle (drives retention)
+
+---
+
+### 🧠 **Topic Development Approach**
+
+Module topics are driven by:
+
+* Real-world economic events (e.g. student loan changes, interest hikes)
+* Social media trends (#DebtFreeJourney, “house poor”, debt snowball, investing myths)
+* Recurring user pain points and misconceptions
+* Timely, specific financial situations — *not* broad textbook topics
+
+| Example Category | Sample Specific Modules                                       |
+| ---------------- | ------------------------------------------------------------- |
+| Credit           | “Does Checking Your Score Actually Hurt It?”                  |
+| Debt             | “How the Snowball Method Actually Works”                      |
+| Real Estate      | “House Poor: What TikTok Gets Right (and Wrong)”              |
+| Career           | “Salary Isn’t Everything — How to Compare Total Compensation” |
+
+---
+
+### 🔁 **Ongoing Expansion Plan**
+
+* Content team will produce **10–20 new modules per 2-week cycle**
+* Expansion guided by:
+
+  * TikTok trend scans
+  * Platform engagement patterns
+  * Feedback from high-retention users
+* Evergreen modules will also be archived or reused **with adjustments**, e.g., scenario tweaks, new quiz formats
+
+---
+
+### 🔧 **Replit Implementation Notes**
+
+* Continue using current backend structure (HTML + quiz objects)
+* Ensure ability to:
+
+  * Batch-upload cycle-specific modules
+  * Assign modules to a given cycle (metadata field or tag)
+  * Archive past cycle content while preserving completion history
+* Support optional **proof-of-action** uploads for bonus points
+* Long-term: may incorporate **dynamic quizzes** or AI-generated variants for depth
+
+---
+
+Let me know if you'd like this in PDF or want help drafting the next 10–20 modules for Cycle 1.
