@@ -178,6 +178,48 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     }
   };
 
+  const updateQuestion = async () => {
+    if (!selectedQuestion) return;
+    
+    try {
+      const response = await fetch(`/api/admin/prediction-questions/${selectedQuestion.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...questionForm,
+          cycleSettingId: parseInt(questionForm.cycleSettingId)
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Prediction question updated successfully"
+        });
+        setShowEditDialog(false);
+        setSelectedQuestion(null);
+        resetForm();
+        fetchQuestions();
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Error",
+          description: `Failed to update question: ${error}`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update prediction question",
+        variant: "destructive"
+      });
+    }
+  };
+
   const publishQuestion = async (questionId: number) => {
     try {
       const response = await fetch(`/api/admin/prediction-questions/${questionId}/publish`, {
@@ -452,12 +494,31 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                           </Button>
                           
                           {!question.isPublished && (
-                            <Button
-                              size="sm"
-                              onClick={() => publishQuestion(question.id)}
-                            >
-                              Publish
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedQuestion(question);
+                                  setQuestionForm({
+                                    cycleSettingId: question.cycleSettingId.toString(),
+                                    questionText: question.questionText,
+                                    options: [...question.options],
+                                    submissionDeadline: new Date(question.submissionDeadline).toISOString().slice(0, 16),
+                                    resultDeterminationTime: new Date(question.resultDeterminationTime).toISOString().slice(0, 16)
+                                  });
+                                  setShowEditDialog(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => publishQuestion(question.id)}
+                              >
+                                Publish
+                              </Button>
+                            </>
                           )}
                           
                           {question.isPublished && !question.isResultDetermined && (
@@ -605,6 +666,113 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
               </Button>
               <Button onClick={createQuestion}>
                 Create Question
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Question Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Prediction Question</DialogTitle>
+            <DialogDescription>
+              Update the prediction question details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="cycle">Cycle</Label>
+              <Select value={questionForm.cycleSettingId} onValueChange={(value) => 
+                setQuestionForm(prev => ({ ...prev, cycleSettingId: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select cycle" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cycleSettings.map((cycle) => (
+                    <SelectItem key={cycle.id} value={cycle.id.toString()}>
+                      {cycle.cycleName} {cycle.isActive && '(Active)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="questionText">Question</Label>
+              <Textarea
+                id="questionText"
+                value={questionForm.questionText}
+                onChange={(e) => setQuestionForm(prev => ({ ...prev, questionText: e.target.value }))}
+                placeholder="What prediction question do you want to ask?"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label>Answer Options</Label>
+              <div className="space-y-2">
+                {questionForm.options.map((option, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      value={option}
+                      onChange={(e) => updateOption(index, e.target.value)}
+                      placeholder={`Option ${index + 1}`}
+                      className="flex-1"
+                    />
+                    {questionForm.options.length > 2 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => removeOption(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addOption}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Option
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="submissionDeadline">Submission Deadline</Label>
+                <Input
+                  type="datetime-local"
+                  id="submissionDeadline"
+                  value={questionForm.submissionDeadline}
+                  onChange={(e) => setQuestionForm(prev => ({ ...prev, submissionDeadline: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="resultDeterminationTime">Result Determination</Label>
+                <Input
+                  type="datetime-local"
+                  id="resultDeterminationTime"
+                  value={questionForm.resultDeterminationTime}
+                  onChange={(e) => setQuestionForm(prev => ({ ...prev, resultDeterminationTime: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={updateQuestion}>
+                Update Question
               </Button>
             </div>
           </div>
