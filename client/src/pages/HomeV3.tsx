@@ -1353,25 +1353,7 @@ export default function HomeV3() {
                 </div>
               </motion.div>
 
-              {/* Quick Stats */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg"
-              >
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600 mb-1">25+</div>
-                    <div className="text-xs text-gray-600 font-medium">Learning Modules</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-purple-600 mb-1">5min</div>
-                    <div className="text-xs text-gray-600 font-medium">Average Lesson</div>
-                  </div>
-                </div>
-              </motion.div>
+
             </div>
           </div>
         </div>
