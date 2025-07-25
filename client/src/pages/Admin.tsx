@@ -3048,6 +3048,7 @@ export default function Admin() {
                                 <th className="text-left p-2">Tier</th>
                                 <th className="text-left p-2">Joined</th>
                                 <th className="text-left p-2">Last Activity</th>
+                                <th className="text-left p-2">Predictions</th>
                                 <th className="text-left p-2">Actions</th>
                               </tr>
                             </thead>
@@ -3090,6 +3091,30 @@ export default function Admin() {
                                             ? new Date(userPoints.lastActivityDate).toLocaleDateString()
                                             : 'No activity'
                                           }
+                                        </div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-xs space-y-1">
+                                          {userPoints.predictions && userPoints.predictions.length > 0 ? (
+                                            userPoints.predictions.map((prediction, index) => (
+                                              <div key={index} className="bg-gray-50 px-2 py-1 rounded text-xs">
+                                                <div className="font-medium text-gray-700 truncate max-w-[120px]" title={prediction.question}>
+                                                  {prediction.question.length > 20 ? 
+                                                    prediction.question.substring(0, 20) + '...' : 
+                                                    prediction.question
+                                                  }
+                                                </div>
+                                                <div className="text-blue-600 font-medium" title={prediction.selectedOption}>
+                                                  {prediction.selectedOption.length > 15 ? 
+                                                    prediction.selectedOption.substring(0, 15) + '...' : 
+                                                    prediction.selectedOption
+                                                  }
+                                                </div>
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <span className="text-gray-400">No answers</span>
+                                          )}
                                         </div>
                                       </td>
                                       <td className="p-2">

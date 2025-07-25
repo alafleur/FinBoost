@@ -3688,9 +3688,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ))
         .orderBy(desc(userCyclePoints.currentCyclePoints));
 
+      // Get prediction data for each user
+      const userIds = enrolledUsers.map(user => user.userId);
+      const predictionData = await db
+        .select({
+          userId: userPredictions.userId,
+          questionText: predictionQuestions.questionText,
+          selectedOptionIndex: userPredictions.selectedOptionIndex,
+          options: predictionQuestions.options,
+          submittedAt: userPredictions.submittedAt
+        })
+        .from(userPredictions)
+        .innerJoin(predictionQuestions, eq(userPredictions.predictionQuestionId, predictionQuestions.id))
+        .where(and(
+          sql`${userPredictions.userId} = ANY(${userIds})`,
+          eq(predictionQuestions.cycleSettingId, activeCycle.id)
+        ))
+        .orderBy(desc(userPredictions.submittedAt));
+
+      // Group predictions by user
+      const predictionsByUser = predictionData.reduce((acc, pred) => {
+        if (!acc[pred.userId]) acc[pred.userId] = [];
+        const options = JSON.parse(pred.options);
+        acc[pred.userId].push({
+          question: pred.questionText,
+          selectedOption: options[pred.selectedOptionIndex] || `Option ${pred.selectedOptionIndex + 1}`,
+          submittedAt: pred.submittedAt
+        });
+        return acc;
+      }, {} as Record<number, Array<{question: string; selectedOption: string; submittedAt: Date}>>);
+
+      // Add prediction data to enrolled users
+      const usersWithPredictions = enrolledUsers.map(user => ({
+        ...user,
+        predictions: predictionsByUser[user.userId] || []
+      }));
+
       res.json({ 
         success: true,
-        userCyclePoints: enrolledUsers,
+        userCyclePoints: usersWithPredictions,
         activeAdapterCycleId: activeCycle.id,
         activeCycleName: activeCycle.cycleName
       });
