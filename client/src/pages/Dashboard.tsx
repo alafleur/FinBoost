@@ -1288,102 +1288,76 @@ export default function Dashboard() {
 
             {/* Overview Tab - Complete Content from Mobile */}
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Enhanced Welcome Section */}
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg rounded-2xl overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <DollarSign className="h-7 w-7 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                        Welcome back, {user?.firstName || user?.username}!
-                      </h2>
-                      <p className="text-gray-700 leading-relaxed">
-                        Track your progress, earn points, and compete for cycle rewards while building better financial habits.
-                      </p>
-                    </div>
+              {/* Clean Welcome Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center">
+                    <DollarSign className="h-7 w-7 text-white" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                      Welcome back, {user?.firstName || user?.username}!
+                    </h2>
+                    <p className="text-gray-600 leading-relaxed">
+                      Track your progress, earn points, and compete for cycle rewards while building better financial habits.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              {/* Enhanced Stats Grid - Landing Page Style */}
+              {/* Clean Stats Grid - Landing Page Style */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* 1. Current Tier */}
-                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col space-y-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Trophy className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
-                          {getTierDisplayName(user?.tier || 'tier1')}
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Your current competitive tier this cycle
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-sm">
+                  <div className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center mb-4">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {getTierDisplayName(user?.tier || 'tier1')} Standing
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Your current competitive tier this cycle
+                  </p>
+                </div>
 
                 {/* 2. Total Points */}
-                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col space-y-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Star className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
-                          {(user?.totalPoints || 0).toLocaleString()} Total Points
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          All-time points earned across your journey
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-sm">
+                  <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center mb-4">
+                    <Star className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {(user?.totalPoints || 0).toLocaleString()} Total Points
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    All-time points earned across your journey
+                  </p>
+                </div>
 
                 {/* 3. Current Cycle Points */}
-                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col space-y-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <TrendingUp className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
-                          {user?.currentCyclePoints || 0} This Cycle
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Points earned in the current reward cycle
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-sm">
+                  <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center mb-4">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {user?.currentCyclePoints || 0} This Cycle
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Points earned in the current reward cycle
+                  </p>
+                </div>
 
                 {/* 4. Learning Progress */}
-                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col space-y-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
-                          {completedLessonIds.length} of {publishedLessons.length} Lessons
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Financial education modules completed
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-sm">
+                  <div className="w-12 h-12 bg-purple-500 rounded-2xl flex items-center justify-center mb-4">
+                    <BookOpen className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {completedLessonIds.length} of {publishedLessons.length} Lessons
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Financial education modules completed
+                  </p>
+                </div>
               </div>
 
               {/* Tier Thresholds */}
@@ -1502,39 +1476,25 @@ export default function Dashboard() {
               </div>
               END BACKUP COMMENT */}
 
-              {/* Enhanced Continue Learning Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-gray-900">Continue Learning</h3>
-                
-                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer" onClick={() => setLocation("/education")}>
-                  <CardContent className="p-8">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                        <BookOpen className="h-8 w-8 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-xl font-bold text-gray-900 mb-3">
-                          Master Essential Financial Skills
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed mb-4">
-                          Continue your financial education journey with interactive lessons designed to build real-world money management skills.
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span className="flex items-center">
-                            <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
-                            {completedLessonIds.length} completed
-                          </span>
-                          <span>•</span>
-                          <span>{publishedLessons.length - completedLessonIds.length} remaining</span>
-                        </div>
-                      </div>
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-300 flex-shrink-0">
-                        {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* Clean Continue Learning Section */}
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200" onClick={() => setLocation("/education")}>
+                <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mb-4">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Continue Your Financial Education
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Master essential money management skills with interactive lessons designed for real-world application.
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {completedLessonIds.length} of {publishedLessons.length} lessons completed
+                  </span>
+                  <Button size="sm" className="bg-slate-600 hover:bg-slate-700 text-white">
+                    {completedLessonIds.length > 0 ? "Continue" : "Start"}
+                  </Button>
+                </div>
               </div>
 
               {/* Desktop Rewards Summary */}
