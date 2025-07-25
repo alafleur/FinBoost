@@ -7184,6 +7184,7 @@ export class MemStorage implements IStorage {
     totalSubmissions: number;
     optionCounts: number[];
     optionPercentages: number[];
+    usersByOption: Array<{email: string; username: string; submittedAt: string}[]>;
   }> {
     try {
       const [question] = await db.select()
@@ -7196,14 +7197,31 @@ export class MemStorage implements IStorage {
 
       const options = JSON.parse(question.options);
       const optionCounts = new Array(options.length).fill(0);
+      const usersByOption: Array<{email: string; username: string; submittedAt: string}[]> = 
+        options.map(() => []);
 
-      const predictions = await this.getUserPredictionsByQuestion(predictionQuestionId);
+      // Get predictions with user details
+      const predictions = await db.select({
+        selectedOptionIndex: userPredictions.selectedOptionIndex,
+        submittedAt: userPredictions.submittedAt,
+        email: users.email,
+        username: users.username
+      })
+        .from(userPredictions)
+        .innerJoin(users, eq(userPredictions.userId, users.id))
+        .where(eq(userPredictions.predictionQuestionId, predictionQuestionId));
+
       const totalSubmissions = predictions.length;
 
-      // Count submissions for each option
+      // Count submissions and organize users by option
       predictions.forEach(prediction => {
         if (prediction.selectedOptionIndex >= 0 && prediction.selectedOptionIndex < options.length) {
           optionCounts[prediction.selectedOptionIndex]++;
+          usersByOption[prediction.selectedOptionIndex].push({
+            email: prediction.email,
+            username: prediction.username,
+            submittedAt: prediction.submittedAt.toISOString()
+          });
         }
       });
 
@@ -7215,14 +7233,16 @@ export class MemStorage implements IStorage {
       return {
         totalSubmissions,
         optionCounts,
-        optionPercentages
+        optionPercentages,
+        usersByOption
       };
     } catch (error) {
       console.error('Error getting prediction question stats:', error);
       return {
         totalSubmissions: 0,
         optionCounts: [],
-        optionPercentages: []
+        optionPercentages: [],
+        usersByOption: []
       };
     }
   }
