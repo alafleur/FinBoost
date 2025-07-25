@@ -423,7 +423,7 @@ export default function Predictions() {
                                 </span>
                               </div>
                               <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-orange-700'}`}>
-                                {isExpired ? 'No changes allowed' : getTimeRemaining(question.submissionDeadline)}
+                                {isExpired ? 'No changes allowed' : formatDate(question.submissionDeadline)}
                               </p>
                             </div>
 
