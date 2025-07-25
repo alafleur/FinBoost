@@ -150,9 +150,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get actual current cycle points from user_cycle_points table
       const currentCycle = await storage.getActiveCycleSetting();
       let actualCyclePoints = 0;
+      let realTimeTier = user.tier;
       if (currentCycle) {
         const userCycleData = await storage.getUserCyclePoints(user.id, currentCycle.id);
         actualCyclePoints = userCycleData?.currentCyclePoints || 0;
+        // Calculate real-time tier based on current cycle points
+        realTimeTier = await storage.calculateUserTier(actualCyclePoints);
       }
 
       res.json({ 
@@ -166,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalPoints: user.totalPoints || 0,
           currentMonthPoints: user.currentMonthPoints || 0,
           currentCyclePoints: actualCyclePoints,
-          tier: user.tier,
+          tier: realTimeTier,
           currentStreak: user.currentStreak || 0,
           longestStreak: user.longestStreak || 0,
           subscriptionStatus: user.subscriptionStatus || 'inactive',
