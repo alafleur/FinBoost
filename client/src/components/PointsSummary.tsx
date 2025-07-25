@@ -228,34 +228,5 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
       </Card>
     </div>
   </div>
-
-
-
-      {/* Recent Activity */}
-      {recentActivity.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {recentActivity.map((activity: any) => (
-              <div key={activity.id} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 truncate">{activity.description}</span>
-                <div className="flex items-center space-x-1">
-                  <span className={`font-bold ${activity.points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {activity.points >= 0 ? '+' : ''}{activity.points}
-                  </span>
-                  {activity.status === 'pending' && (
-                    <Badge variant="outline" className="text-xs">
-                      Pending
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-    </div>
   );
 }
