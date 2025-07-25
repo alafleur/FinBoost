@@ -2082,6 +2082,7 @@ export default function Admin() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>ID</TableHead>
                           <TableHead>User</TableHead>
                           <TableHead>Points</TableHead>
                           <TableHead>Tier</TableHead>
@@ -2103,6 +2104,9 @@ export default function Admin() {
                           .slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage)
                           .map((user: any) => (
                             <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="text-sm font-mono text-gray-600">{user.id}</div>
+                            </TableCell>
                             <TableCell className="font-medium">
                               <div>
                                 <div className="flex items-center gap-2">
@@ -3043,6 +3047,7 @@ export default function Admin() {
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b">
+                                <th className="text-left p-2">ID</th>
                                 <th className="text-left p-2">User</th>
                                 <th className="text-left p-2">Email</th>
                                 <th className="text-left p-2">Current Points</th>
@@ -3064,6 +3069,9 @@ export default function Admin() {
                                   const user = users.find(u => u.id === userPoints.userId);
                                   return (
                                     <tr key={userPoints.userId} className="border-b">
+                                      <td className="p-2">
+                                        <div className="text-sm font-mono text-gray-600">{userPoints.userId}</div>
+                                      </td>
                                       <td className="p-2">
                                         <div className="font-medium">{user?.username || 'Unknown'}</div>
                                       </td>
