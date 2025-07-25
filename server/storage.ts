@@ -1889,6 +1889,26 @@ export class MemStorage implements IStorage {
         ));
       
       console.log(`Updated cycle points for user ${userId}: +${pointsEarned} points`);
+      
+      // Recalculate and update user tier based on new cycle points
+      try {
+        const currentCycle = await this.getCurrentCycle();
+        if (currentCycle) {
+          const userCycleData = await this.getUserCyclePoints(userId, currentCycle.id);
+          const newTier = await this.calculateUserTier(userCycleData?.currentCyclePoints || 0);
+          
+          // Only update database if tier changed
+          if (newTier !== (await this.getUserById(userId))?.tier) {
+            await db.update(users)
+              .set({ tier: newTier })
+              .where(eq(users.id, userId));
+            console.log(`Updated user ${userId} tier to ${newTier}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating user tier:', error);
+        // Continue even if tier update fails
+      }
     } catch (error) {
       console.error('Error updating cycle points:', error);
       // Continue even if cycle update fails
