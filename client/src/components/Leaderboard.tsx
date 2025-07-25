@@ -260,12 +260,7 @@ export default function Leaderboard() {
                         ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
-                      {entry.rank <= 3 && (
-                        entry.rank === 1 ? <Crown className="h-5 w-5" /> :
-                        entry.rank === 2 ? <Medal className="h-4 w-4" /> :
-                        <Award className="h-4 w-4" />
-                      )}
-                      {entry.rank > 3 && entry.rank}
+                      {entry.rank}
                     </div>
                     <div>
                       <p className={`font-semibold ${entry.isCurrentUser ? 'text-blue-700' : 'text-gray-900'}`}>
