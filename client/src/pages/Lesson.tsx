@@ -214,8 +214,8 @@ export default function Lesson() {
     setShowResults(true);
     setQuizCompleted(true);
 
-    // Award points if score is 70% or higher
-    if (finalScore >= 70) {
+    // Award points if score is 66% or higher
+    if (finalScore >= 66) {
       try {
         const token = localStorage.getItem('token');
 
