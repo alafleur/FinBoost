@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, DollarSign, TrendingUp, Gift, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 interface CommunityGrowthDialProps {
@@ -131,36 +129,35 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
   };
 
   return (
-    <Card className="border-purple-200 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 mb-6">
-      <CardContent className="p-6">
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-purple-900 mb-2">Strength in Numbers</h3>
-          <p className="text-sm text-purple-700">
-            The power of our financial community grows stronger every day
-          </p>
-        </div>
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Community Rewards Pool</h3>
+        <p className="text-sm text-gray-600">
+          The power of our financial community grows stronger every day
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
           {/* Stats Display */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-4 text-center">
-                <div className="text-sm text-primary-600 font-medium mb-1">Rewards Allocation</div>
-                <div className="text-2xl sm:text-3xl font-bold text-primary-700 mb-1">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <div className="text-xs text-gray-500 font-medium mb-1">Rewards Allocation</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">
                   {rewardsPercentage}%
                 </div>
-                <div className="text-xs text-primary-500">of membership fees</div>
+                <div className="text-xs text-gray-500">of membership fees</div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center">
-                <div className="text-sm text-green-600 font-medium mb-1">Cycle Pool Size</div>
-                <div className="text-xl sm:text-2xl font-bold text-green-700 mb-1">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <div className="text-xs text-gray-500 font-medium mb-1">Cycle Pool Size</div>
+                <div className="text-lg font-bold text-gray-900 mb-1">
                   <span className="hidden sm:inline">{formatCurrency(poolData.totalPool)}</span>
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
                 </div>
-                <div className="text-xs text-green-500">available for rewards</div>
+                <div className="text-xs text-gray-500">available for rewards</div>
                 {poolData.minimumPoolGuarantee && poolData.minimumPoolGuarantee > 0 && (
-                  <div className="text-xs text-blue-600 mt-1 font-medium">
+                  <div className="text-xs text-gray-600 mt-1 font-medium">
                     Guaranteed min: {formatCurrency(poolData.minimumPoolGuarantee)}
                   </div>
                 )}
@@ -169,7 +166,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             
             {/* Minimum Pool Guarantee Display - Only show if guarantee exists and is greater than current pool */}
             {poolData.minimumPoolGuarantee && poolData.minimumPoolGuarantee > 0 && poolData.minimumPoolGuarantee > poolData.totalPool && (
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border border-blue-200 mb-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center mb-4">
                 <div className="text-sm text-blue-600 font-medium mb-1">Pool Guarantee Active</div>
                 <div className="text-lg font-bold text-blue-700 mb-1">
                   {formatCurrency(poolData.minimumPoolGuarantee)}
@@ -181,21 +178,21 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             {/* Tier Breakdown - Separate Row */}
             {poolData.tierBreakdown && (
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-lg p-3 text-center border border-green-300">
-                  <div className="text-xs text-green-700 font-medium mb-1">Tier 1</div>
-                  <div className="text-sm font-bold text-green-800">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <div className="text-xs text-gray-500 font-medium mb-1">Tier 1</div>
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier1)}
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 text-center border border-green-200">
-                  <div className="text-xs text-green-600 font-medium mb-1">Tier 2</div>
-                  <div className="text-sm font-bold text-green-700">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <div className="text-xs text-gray-500 font-medium mb-1">Tier 2</div>
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier2)}
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-white to-green-50 rounded-lg p-3 text-center border border-green-100">
-                  <div className="text-xs text-green-500 font-medium mb-1">Tier 3</div>
-                  <div className="text-sm font-bold text-green-600">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <div className="text-xs text-gray-500 font-medium mb-1">Tier 3</div>
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier3)}
                   </div>
                 </div>
@@ -203,22 +200,19 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             )}
 
             {/* Call to Action */}
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               {!isPremiumUser ? (
                 <>
                   <div className="text-center mb-4">
-                    <Crown className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                    <h4 className="font-bold text-gray-900 mb-2">Unlock Your Share</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">Unlock Your Share</h4>
                     <p className="text-sm text-gray-600 mb-4">
-                      Join {formatNumber(memberCount)} premium members earning real rewards every month
+                      Join {formatNumber(memberCount)} premium members earning real rewards every cycle
                     </p>
-
                   </div>
                   <Button 
                     onClick={onUpgradeClick}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 text-sm"
+                    className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium"
                   >
-                    <Crown className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">Join Premium Members - $20/month</span>
                     <span className="sm:hidden">Upgrade to Premium - $20/mo</span>
                   </Button>
@@ -226,16 +220,15 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               ) : (
                 <>
                   <div className="text-center mb-4">
-                    <Gift className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                    <h4 className="font-bold text-gray-900 mb-2">Grow the Community</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">Grow the Community</h4>
                     <p className="text-sm text-gray-600 mb-4">
                       Invite friends and earn bonus points for each successful referral
                     </p>
-                    <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                      <p className="text-sm font-medium text-blue-800">
+                    <div className="bg-white border border-gray-200 rounded p-3 mb-4">
+                      <p className="text-sm font-medium text-gray-900">
                         Earn <span className="font-bold">+{referralPoints} points</span> per referral
                       </p>
-                      <p className="text-xs text-blue-600 mt-1">
+                      <p className="text-xs text-gray-600 mt-1">
                         Help friends build wealth while boosting your rewards
                       </p>
                     </div>
@@ -273,9 +266,8 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                     </Button>
                     <Button 
                       onClick={handleReferralClick}
-                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium"
+                      className="bg-gray-900 hover:bg-gray-800 text-white font-medium"
                     >
-                      <Gift className="w-4 h-4 mr-2" />
                       Share Link
                     </Button>
                   </div>
@@ -320,30 +312,29 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             </div>
 
             {/* Community Stats */}
-            <div className="text-center space-y-4">
-              <div className="grid grid-cols-1 gap-4">
+            <div className="text-center space-y-3">
+              <div className="grid grid-cols-1 gap-3">
                 {/* Premium Members */}
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <Users className="w-5 h-5 text-green-600" />
-                    <span className="text-2xl font-bold text-green-900">
+                    <span className="text-xl font-bold text-gray-900">
                       {formatNumber(memberCount)}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-green-800">Premium Members</p>
-                  <p className="text-xs text-green-600">Building wealth together</p>
+                  <p className="text-sm font-medium text-gray-900">Premium Members</p>
+                  <p className="text-xs text-gray-600">Building wealth together</p>
                 </div>
 
                 {/* Days to Cycle End */}
                 {distributionInfo && (
-                  <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                    <div className="text-2xl font-bold text-orange-900 mb-2">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="text-xl font-bold text-gray-900 mb-2">
                       {distributionInfo.timeRemaining?.days || 0}
                     </div>
-                    <p className="text-sm font-medium text-orange-800">
+                    <p className="text-sm font-medium text-gray-900">
                       Days to Cycle End
                     </p>
-                    <p className="text-xs text-orange-600 mt-1">
+                    <p className="text-xs text-gray-600 mt-1">
                       {distributionInfo.formattedEndDate || 
                        (distributionInfo.nextDate ? new Date(distributionInfo.nextDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Next cycle')}
                     </p>
@@ -353,7 +344,6 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
