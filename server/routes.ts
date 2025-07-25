@@ -4385,11 +4385,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const questions = await storage.getPredictionQuestionsByCycle(cycleSettingId);
       
-      // Parse JSON strings back to objects for frontend
+      // Parse JSON strings back to objects and map database fields to frontend interface
       const parsedQuestions = questions.map(q => ({
         ...q,
         options: JSON.parse(q.options),
-        pointAwards: q.pointAwards ? JSON.parse(q.pointAwards) : null
+        pointAwards: q.pointAwards ? JSON.parse(q.pointAwards) : null,
+        // Map database status to frontend boolean fields
+        isPublished: q.status === 'active',
+        isResultDetermined: q.resultsPublished || false,
+        pointsDistributed: q.pointsDistributed || false
       }));
 
       res.json({ questions: parsedQuestions });
