@@ -4623,17 +4623,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Submit user prediction
+  // Submit or update user prediction
   app.post('/api/predictions/:questionId/submit', authenticateToken, async (req, res) => {
     try {
       const questionId = parseInt(req.params.questionId);
       const { selectedOptionIndex } = req.body;
-
-      // Check if user already submitted for this question
-      const existingPrediction = await storage.getUserPrediction(questionId, req.user.id);
-      if (existingPrediction) {
-        return res.status(400).json({ error: 'You have already submitted a prediction for this question' });
-      }
 
       // Check if question is still accepting submissions
       const question = await storage.getPredictionQuestion(questionId);
@@ -4645,15 +4639,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Submission deadline has passed' });
       }
 
-      // Submit prediction
-      const prediction = await storage.submitUserPrediction({
-        predictionQuestionId: questionId,
-        userId: req.user.id,
-        selectedOptionIndex,
-        pointsAwarded: 0 // Will be set when results are determined
-      });
+      // Check if user already submitted for this question
+      const existingPrediction = await storage.getUserPrediction(questionId, req.user.id);
+      
+      let prediction;
+      if (existingPrediction) {
+        // Update existing prediction
+        prediction = await storage.updateUserPrediction(existingPrediction.id, selectedOptionIndex);
+      } else {
+        // Create new prediction
+        prediction = await storage.submitUserPrediction({
+          predictionQuestionId: questionId,
+          userId: req.user.id,
+          selectedOptionIndex,
+          pointsAwarded: 0 // Will be set when results are determined
+        });
+      }
 
-      res.json({ success: true, prediction });
+      res.json({ 
+        success: true, 
+        prediction,
+        isUpdate: !!existingPrediction 
+      });
     } catch (error) {
       console.error('Error submitting prediction:', error);
       res.status(500).json({ error: 'Failed to submit prediction' });

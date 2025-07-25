@@ -72,7 +72,9 @@ export default function Predictions() {
   const [selectedQuestion, setSelectedQuestion] = useState<PredictionQuestion | null>(null);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
+  const [showChangeDialog, setShowChangeDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isChangingAnswer, setIsChangingAnswer] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -167,31 +169,41 @@ export default function Predictions() {
       });
 
       if (response.ok) {
+        const result = await response.json();
         toast({
           title: "Success",
-          description: "Your prediction has been submitted!"
+          description: result.isUpdate ? "Your answer has been updated!" : "Your answer has been submitted!"
         });
         setShowSubmissionDialog(false);
+        setShowChangeDialog(false);
         setSelectedQuestion(null);
         setSelectedOptionIndex(null);
+        setIsChangingAnswer(false);
         await fetchData(); // Refresh data
       } else {
         const error = await response.text();
         toast({
           title: "Error",
-          description: `Failed to submit prediction: ${error}`,
+          description: `Failed to submit answer: ${error}`,
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit prediction",
+        description: "Failed to submit answer",
         variant: "destructive"
       });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleChangeAnswer = (question: PredictionQuestion) => {
+    setSelectedQuestion(question);
+    setSelectedOptionIndex(question.userPrediction?.selectedOptionIndex || null);
+    setIsChangingAnswer(true);
+    setShowChangeDialog(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -396,9 +408,22 @@ export default function Predictions() {
                       <CardContent>
                         {userPrediction ? (
                           <div className="space-y-4">
+                            {/* Deadline Warning */}
+                            <div className={`p-4 rounded-lg border-2 ${isExpired ? 'border-red-200 bg-red-50' : 'border-orange-200 bg-orange-50'}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Clock className={`w-4 h-4 ${isExpired ? 'text-red-600' : 'text-orange-600'}`} />
+                                <span className={`font-medium ${isExpired ? 'text-red-900' : 'text-orange-900'}`}>
+                                  {isExpired ? 'Submission Period Ended' : 'Submission Deadline'}
+                                </span>
+                              </div>
+                              <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-orange-700'}`}>
+                                {isExpired ? 'No changes allowed' : getTimeRemaining(question.submissionDeadline)}
+                              </p>
+                            </div>
+
                             <div className="bg-white p-4 rounded-lg border">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium">Your Prediction:</span>
+                                <span className="font-medium">Your Answer:</span>
                                 <span className="text-sm text-gray-600">
                                   {formatDate(userPrediction.submittedAt)}
                                 </span>
@@ -410,6 +435,20 @@ export default function Predictions() {
                                 <p className="text-sm text-green-600 mt-2">
                                   +{userPrediction.pointsAwarded} points awarded
                                 </p>
+                              )}
+                              
+                              {/* Change Answer Button */}
+                              {!isExpired && !question.isResultDetermined && (
+                                <div className="mt-3 pt-3 border-t">
+                                  <Button 
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleChangeAnswer(question)}
+                                    className="w-full"
+                                  >
+                                    Change Answer
+                                  </Button>
+                                </div>
                               )}
                             </div>
                             
@@ -523,9 +562,9 @@ export default function Predictions() {
       <Dialog open={showSubmissionDialog} onOpenChange={setShowSubmissionDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Your Prediction</DialogTitle>
+            <DialogTitle>Confirm Your Answer</DialogTitle>
             <DialogDescription>
-              Once submitted, you cannot change your prediction for this question.
+              You can change your answer until the submission deadline.
             </DialogDescription>
           </DialogHeader>
           
@@ -537,7 +576,7 @@ export default function Predictions() {
               </div>
               
               <div>
-                <h4 className="font-medium mb-2">Your Prediction:</h4>
+                <h4 className="font-medium mb-2">Your Answer:</h4>
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                   <p className="font-medium text-blue-900">
                     {selectedQuestion.options[selectedOptionIndex]}
@@ -553,7 +592,75 @@ export default function Predictions() {
                   Cancel
                 </Button>
                 <Button onClick={submitPrediction} disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Submit Prediction'}
+                  {submitting ? 'Submitting...' : 'Submit Answer'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Answer Confirmation Dialog */}
+      <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Your Answer</DialogTitle>
+            <DialogDescription>
+              Select a new answer below. Your previous answer will be replaced.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedQuestion && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Question:</h4>
+                <p className="text-gray-700">{selectedQuestion.questionText}</p>
+              </div>
+              
+              {selectedQuestion.userPrediction && (
+                <div>
+                  <h4 className="font-medium mb-2">Current Answer:</h4>
+                  <div className="bg-gray-50 p-3 rounded-lg border">
+                    <p className="text-gray-700">
+                      {selectedQuestion.options[selectedQuestion.userPrediction.selectedOptionIndex]}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h4 className="font-medium mb-2">Select New Answer:</h4>
+                <div className="grid gap-2">
+                  {selectedQuestion.options.map((option, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        selectedOptionIndex === index 
+                          ? 'bg-blue-50 border-blue-300' 
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedOptionIndex(index)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{option}</span>
+                        <span className="text-sm text-gray-600">
+                          +{selectedQuestion.pointAwards[index]} pts
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={submitPrediction} 
+                  disabled={submitting || selectedOptionIndex === null}
+                >
+                  {submitting ? 'Updating...' : 'Update Answer'}
                 </Button>
               </div>
             </div>
