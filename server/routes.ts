@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 
@@ -3688,34 +3688,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ))
         .orderBy(desc(userCyclePoints.currentCyclePoints));
 
-      // Get prediction data for each user
+      // Get prediction data for each user with proper error handling
       const userIds = enrolledUsers.map(user => user.userId);
-      const predictionData = await db
-        .select({
-          userId: userPredictions.userId,
-          questionText: predictionQuestions.questionText,
-          selectedOptionIndex: userPredictions.selectedOptionIndex,
-          options: predictionQuestions.options,
-          submittedAt: userPredictions.submittedAt
-        })
-        .from(userPredictions)
-        .innerJoin(predictionQuestions, eq(userPredictions.predictionQuestionId, predictionQuestions.id))
-        .where(and(
-          sql`${userPredictions.userId} = ANY(${userIds})`,
-          eq(predictionQuestions.cycleSettingId, activeCycle.id)
-        ))
-        .orderBy(desc(userPredictions.submittedAt));
+      let predictionData = [];
+      
+      if (userIds.length > 0) {
+        try {
+          predictionData = await db
+            .select({
+              userId: userPredictions.userId,
+              questionText: predictionQuestions.questionText,
+              selectedOptionIndex: userPredictions.selectedOptionIndex,
+              options: predictionQuestions.options,
+              submittedAt: userPredictions.submittedAt
+            })
+            .from(userPredictions)
+            .innerJoin(predictionQuestions, eq(userPredictions.predictionQuestionId, predictionQuestions.id))
+            .where(and(
+              inArray(userPredictions.userId, userIds),
+              eq(predictionQuestions.cycleSettingId, activeCycle.id)
+            ))
+            .orderBy(desc(userPredictions.submittedAt));
+        } catch (predictionError) {
+          console.warn('Error fetching prediction data:', predictionError);
+          // Continue without prediction data if there's an issue
+        }
+      }
 
       // Group predictions by user
       const predictionsByUser = predictionData.reduce((acc, pred) => {
         if (!acc[pred.userId]) acc[pred.userId] = [];
-        const options = JSON.parse(pred.options);
-        acc[pred.userId].push({
-          question: pred.questionText,
-          selectedOption: options[pred.selectedOptionIndex] || `Option ${pred.selectedOptionIndex + 1}`,
-          selectedOptionIndex: pred.selectedOptionIndex,
-          submittedAt: pred.submittedAt
-        });
+        try {
+          const options = JSON.parse(pred.options);
+          acc[pred.userId].push({
+            question: pred.questionText,
+            selectedOption: options[pred.selectedOptionIndex] || `Option ${pred.selectedOptionIndex + 1}`,
+            selectedOptionIndex: pred.selectedOptionIndex,
+            submittedAt: pred.submittedAt
+          });
+        } catch (parseError) {
+          console.warn('Error parsing prediction options:', parseError);
+        }
         return acc;
       }, {} as Record<number, Array<{question: string; selectedOption: string; selectedOptionIndex: number; submittedAt: Date}>>);
 
