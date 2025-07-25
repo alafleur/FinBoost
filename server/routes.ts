@@ -206,16 +206,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { actionId, relatedId, metadata } = req.body;
 
-      // Auto-approve lesson and quiz completions
-      if (actionId === 'lesson_complete') {
-        const result = await storage.markLessonComplete(user.id, relatedId || metadata?.lessonId);
-        return res.json({ 
-          success: true, 
-          message: `Earned ${result.pointsEarned} points for lesson completion!`,
-          points: result.pointsEarned,
-          streakBonus: result.streakBonus
-        });
-      } else if (actionId === 'quiz_complete') {
+      // Auto-approve quiz completions only - lesson completion now handled by /api/lessons/:id/complete
+      if (actionId === 'quiz_complete') {
         // Award quiz points directly with auto-approval
         const pointsEarned = 15; // Standard quiz points
         
@@ -1188,8 +1180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true, 
-        history:<replit_final_file>
- history.map(h => ({
+        history: history.map(h => ({
           id: h.id,
           points: h.points,
           action: h.action,

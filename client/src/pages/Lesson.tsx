@@ -389,38 +389,7 @@ export default function Lesson() {
   const currentQuestion = lesson.quiz[currentQuestionIndex];
   const isAnswerSelected = selectedAnswers[currentQuestionIndex] !== undefined;
 
-  const awardPoints = async (actionId: string, relatedId?: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('/api/points/award', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          actionId,
-          relatedId,
-          metadata: { lessonId: 'emergency-fund' }
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: "Points Earned! 🎉",
-          description: data.message,
-        });
-        return data;
-      }
-    } catch (error) {
-      console.error('Failed to award points:', error);
-    }
-  };
-
-  // Legacy functions removed - lesson completion now happens in finishQuiz() only
+  // Legacy awardPoints function removed - lesson completion now happens in finishQuiz() only
 
   const calculateScore = () => {
       const correctAnswers = selectedAnswers.filter((answer, index) =>
