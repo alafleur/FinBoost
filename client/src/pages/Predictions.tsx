@@ -245,10 +245,12 @@ export default function Predictions() {
       return <Badge variant="outline">Pending</Badge>;
     }
     
-    const isCorrect = prediction.selectedOptionIndex === prediction.question.correctOptionIndex;
+    const pointsEarned = prediction.pointsAwarded || 0;
+    const badgeVariant = pointsEarned > 0 ? "default" : "secondary";
+    
     return (
-      <Badge variant={isCorrect ? "default" : "secondary"}>
-        {isCorrect ? `Correct (+${prediction.pointsAwarded || 0}pts)` : 'Incorrect'}
+      <Badge variant={badgeVariant}>
+        Earned: {pointsEarned} pts
       </Badge>
     );
   };
@@ -310,24 +312,28 @@ export default function Predictions() {
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">Average Points</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{Math.round(userStats.accuracyRate)}%</div>
-                <Progress value={userStats.accuracyRate} className="mt-2" />
+                <div className="text-2xl font-bold">
+                  {userStats.totalPredictions > 0 ? Math.round(userStats.totalPointsEarned / userStats.totalPredictions) : 0}
+                </div>
+                <p className="text-xs text-muted-foreground">Points per prediction</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Correct Predictions</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-sm font-medium">Best Performance</CardTitle>
+                <Star className="h-4 w-4 text-yellow-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{userStats.correctPredictions}</div>
+                <div className="text-2xl font-bold">
+                  {userStats.totalPredictions > 0 ? `${Math.round(userStats.accuracyRate)}%` : '0%'}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  {userStats.totalPredictions - userStats.correctPredictions} incorrect
+                  {userStats.correctPredictions} optimal outcomes
                 </p>
               </CardContent>
             </Card>
