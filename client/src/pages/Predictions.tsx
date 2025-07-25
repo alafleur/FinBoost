@@ -438,7 +438,6 @@ export default function Predictions() {
                               )}
                               
                               {/* Change Answer Button */}
-                              {console.log('Debug - isExpired:', isExpired, 'isResultDetermined:', question.isResultDetermined, 'deadline:', question.submissionDeadline, 'now:', new Date().toISOString())}
                               {!isExpired && !question.isResultDetermined && (
                                 <div className="mt-3 pt-3 border-t">
                                   <Button 
