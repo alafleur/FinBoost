@@ -816,7 +816,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                 <Label>Response Distribution</Label>
                 {questionStats.optionCounts.map((count, index) => (
                   <div key={index} className="flex items-center justify-between">
-                    <span>Option {index + 1}</span>
+                    <span>{String.fromCharCode(65 + index)}</span>
                     <span>{count} responses</span>
                   </div>
                 ))}
