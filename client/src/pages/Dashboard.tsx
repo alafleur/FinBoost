@@ -1288,75 +1288,52 @@ export default function Dashboard() {
 
             {/* Overview Tab - Complete Content from Mobile */}
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Clean Welcome Section */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-sm">
-                <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center">
-                    <DollarSign className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                      Welcome back, {user?.firstName || user?.username}!
-                    </h2>
-                    <p className="text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and compete for cycle rewards while building better financial habits.
-                    </p>
-                  </div>
-                </div>
+              {/* Professional Welcome Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Welcome back, {user?.firstName || user?.username}
+                </h2>
+                <p className="text-gray-600">
+                  Track your progress, earn points, and compete for cycle rewards while building better financial habits.
+                </p>
               </div>
 
-              {/* Clean Stats Grid - Landing Page Style */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Professional Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. Current Tier */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-sm">
-                  <div className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center mb-4">
-                    <Trophy className="h-6 w-6 text-white" />
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Current Tier</h3>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {getTierDisplayName(user?.tier || 'tier1')}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {getTierDisplayName(user?.tier || 'tier1')} Standing
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Your current competitive tier this cycle
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Cycle standing</p>
                 </div>
 
                 {/* 2. Total Points */}
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-sm">
-                  <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center mb-4">
-                    <Star className="h-6 w-6 text-white" />
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Total Points</h3>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {(user?.totalPoints || 0).toLocaleString()}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {(user?.totalPoints || 0).toLocaleString()} Total Points
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    All-time points earned across your journey
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">All time earned</p>
                 </div>
 
                 {/* 3. Current Cycle Points */}
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-sm">
-                  <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center mb-4">
-                    <TrendingUp className="h-6 w-6 text-white" />
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">This Cycle</h3>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {user?.currentCyclePoints || 0}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {user?.currentCyclePoints || 0} This Cycle
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Points earned in the current reward cycle
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Current points</p>
                 </div>
 
                 {/* 4. Learning Progress */}
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-sm">
-                  <div className="w-12 h-12 bg-purple-500 rounded-2xl flex items-center justify-center mb-4">
-                    <BookOpen className="h-6 w-6 text-white" />
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Lessons</h3>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {completedLessonIds.length}/{publishedLessons.length}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {completedLessonIds.length} of {publishedLessons.length} Lessons
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Financial education modules completed
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Completed</p>
                 </div>
               </div>
 
@@ -1476,24 +1453,21 @@ export default function Dashboard() {
               </div>
               END BACKUP COMMENT */}
 
-              {/* Clean Continue Learning Section */}
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200" onClick={() => setLocation("/education")}>
-                <div className="w-12 h-12 bg-slate-600 rounded-2xl flex items-center justify-center mb-4">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  Continue Your Financial Education
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                  Master essential money management skills with interactive lessons designed for real-world application.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {completedLessonIds.length} of {publishedLessons.length} lessons completed
-                  </span>
-                  <Button size="sm" className="bg-slate-600 hover:bg-slate-700 text-white">
+              {/* Professional Continue Learning Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6 cursor-pointer hover:border-gray-300 transition-colors" onClick={() => setLocation("/education")}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Continue Learning
+                  </h3>
+                  <Button size="sm" variant="outline" className="text-gray-600 border-gray-300">
                     {completedLessonIds.length > 0 ? "Continue" : "Start"}
                   </Button>
+                </div>
+                <p className="text-gray-600 mb-3">
+                  Master essential money management skills with interactive lessons designed for real-world application.
+                </p>
+                <div className="text-sm text-gray-500">
+                  {completedLessonIds.length} of {publishedLessons.length} lessons completed
                 </div>
               </div>
 
