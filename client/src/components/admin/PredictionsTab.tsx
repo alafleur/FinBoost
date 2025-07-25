@@ -855,7 +855,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   <SelectContent>
                     {selectedQuestion.options.map((option, index) => (
                       <SelectItem key={index} value={index.toString()}>
-                        Option {index + 1}: {option}
+                        {String.fromCharCode(65 + index)}: {option}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -868,7 +868,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   {selectedQuestion.options.map((option, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="flex-1">
-                        <span className="text-sm font-medium">Option {index + 1}:</span>
+                        <span className="text-sm font-medium">{String.fromCharCode(65 + index)}:</span>
                         <span className="text-sm text-gray-600 ml-2">{option}</span>
                       </div>
                       <Input
