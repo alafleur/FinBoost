@@ -254,9 +254,7 @@ export default function Leaderboard() {
                 >
                   <div className="flex items-center space-x-4">
                     <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm shadow-sm ${
-                      entry.rank <= 3 
-                        ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white'
-                        : entry.isCurrentUser
+                      entry.isCurrentUser
                         ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
