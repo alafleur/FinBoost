@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Trophy, TrendingUp, BookOpen } from "lucide-react";
+import { Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 interface DashboardStatsProps {
   user: {
@@ -30,7 +30,7 @@ export default function DashboardStats({
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-              <DollarSign className="h-5 w-5 text-gray-600" />
+              <Trophy className="h-5 w-5 text-gray-600" />
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-900">${(poolData.totalPool || 0).toLocaleString()}</div>

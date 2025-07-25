@@ -68,12 +68,12 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`border rounded-lg p-4 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
+          className={`border rounded-lg p-4 pt-6 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
         >
           {tier.isCurrentTier && (
             <>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-              <div className={`absolute -top-2 -right-2 text-xs px-2 py-1 rounded-full font-medium ${getCurrentBadgeColor(tier.id)} shadow-sm`}>
+              <div className={`absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs px-2 py-1 rounded-full font-medium ${getCurrentBadgeColor(tier.id)} shadow-sm`}>
                 Current
               </div>
             </>
