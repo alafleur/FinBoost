@@ -1359,18 +1359,18 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
-                      <div className="p-3 bg-purple-100 rounded-xl shadow-sm">
-                        <BookOpen className="h-5 w-5 text-purple-600" />
+                      <CardTitle className="text-base font-semibold text-slate-900">Lessons</CardTitle>
+                      <div className="p-3 bg-slate-50 rounded-xl">
+                        <BookOpen className="h-5 w-5 text-slate-600" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-gray-900">{completedLessonIds.length}</div>
-                    <p className="text-sm text-purple-700 font-medium">of {publishedLessons.length} completed</p>
+                    <div className="text-3xl font-bold text-slate-900">{completedLessonIds.length}</div>
+                    <p className="text-sm text-slate-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
