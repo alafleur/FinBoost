@@ -3104,11 +3104,8 @@ export default function Admin() {
                                                     prediction.question
                                                   }
                                                 </div>
-                                                <div className="text-blue-600 font-medium" title={prediction.selectedOption}>
-                                                  {prediction.selectedOption.length > 15 ? 
-                                                    prediction.selectedOption.substring(0, 15) + '...' : 
-                                                    prediction.selectedOption
-                                                  }
+                                                <div className="text-blue-600 font-bold text-sm" title={prediction.selectedOption}>
+                                                  {String.fromCharCode(65 + prediction.selectedOptionIndex)}
                                                 </div>
                                               </div>
                                             ))

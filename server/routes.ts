@@ -3713,10 +3713,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         acc[pred.userId].push({
           question: pred.questionText,
           selectedOption: options[pred.selectedOptionIndex] || `Option ${pred.selectedOptionIndex + 1}`,
+          selectedOptionIndex: pred.selectedOptionIndex,
           submittedAt: pred.submittedAt
         });
         return acc;
-      }, {} as Record<number, Array<{question: string; selectedOption: string; submittedAt: Date}>>);
+      }, {} as Record<number, Array<{question: string; selectedOption: string; selectedOptionIndex: number; submittedAt: Date}>>);
 
       // Add prediction data to enrolled users
       const usersWithPredictions = enrolledUsers.map(user => ({
