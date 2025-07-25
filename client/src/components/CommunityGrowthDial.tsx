@@ -166,7 +166,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 1</div>
-                  <div className="text-sm font-bold text-slate-800">
+                  <div className="text-sm font-bold text-slate-700">
                     {formatCurrency(poolData.tierBreakdown.tier1)}
                   </div>
                 </div>
