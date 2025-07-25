@@ -24,7 +24,8 @@ import {
   CreditCard,
   Save,
   CheckCircle,
-  Info
+  Info,
+  ChevronRight
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -1287,90 +1288,100 @@ export default function Dashboard() {
 
             {/* Overview Tab - Complete Content from Mobile */}
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Welcome Section */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
+              {/* Enhanced Welcome Section */}
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg rounded-2xl overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <DollarSign className="h-7 w-7 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                        Welcome back, {user?.firstName || user?.username}!
+                      </h2>
+                      <p className="text-gray-700 leading-relaxed">
+                        Track your progress, earn points, and compete for cycle rewards while building better financial habits.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
-                      Welcome back, {user?.firstName || user?.username}!
-                    </h2>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win cycle rewards for building better financial habits.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              {/* Stats Grid - 4 Column Layout Matching Mobile */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {/* Enhanced Stats Grid - Landing Page Style */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* 1. Current Tier */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Current Tier</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <Trophy className="h-5 w-5 text-slate-600" />
+                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col space-y-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Trophy className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          {getTierDisplayName(user?.tier || 'tier1')}
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Your current competitive tier this cycle
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between">
-                      <Badge className="bg-slate-900 text-white text-sm font-medium px-4 py-2">
-                        {getTierDisplayName(user?.tier || 'tier1')}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-600 mt-3">Cycle standing</p>
                   </CardContent>
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Total Points</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <Star className="h-5 w-5 text-slate-600" />
+                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col space-y-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Star className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          {(user?.totalPoints || 0).toLocaleString()} Total Points
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          All-time points earned across your journey
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{user?.totalPoints || 0}</div>
-                    <p className="text-sm text-slate-600">All time earned</p>
                   </CardContent>
                 </Card>
 
-                {/* 3. Current Points (This Month) */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">This Cycle</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <TrendingUp className="h-5 w-5 text-slate-600" />
+                {/* 3. Current Cycle Points */}
+                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col space-y-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <TrendingUp className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          {user?.currentCyclePoints || 0} This Cycle
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Points earned in the current reward cycle
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{user?.currentCyclePoints || 0}</div>
-                    <p className="text-sm text-slate-600">Current cycle points</p>
                   </CardContent>
                 </Card>
 
-                {/* 4. Lessons Completed */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Lessons</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <BookOpen className="h-5 w-5 text-slate-600" />
+                {/* 4. Learning Progress */}
+                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col space-y-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <BookOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          {completedLessonIds.length} of {publishedLessons.length} Lessons
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Financial education modules completed
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{completedLessonIds.length}</div>
-                    <p className="text-sm text-slate-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
@@ -1491,44 +1502,35 @@ export default function Dashboard() {
               </div>
               END BACKUP COMMENT */}
 
-              {/* Desktop Learning CTA - Replacing Module Grid */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <SectionHeader 
-                    icon={BookOpen}
-                    iconColor="blue"
-                    title="Continue Learning"
-                  />
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
+              {/* Enhanced Continue Learning Section */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-gray-900">Continue Learning</h3>
                 
-                <Card
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                  onClick={() => setLocation("/education")}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <BookOpen className="h-6 w-6 text-blue-600" />
+                <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer" onClick={() => setLocation("/education")}>
+                  <CardContent className="p-8">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <BookOpen className="h-8 w-8 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          Explore All Lessons
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          Continue your financial education journey with {publishedLessons.length} available lessons.
+                        <h4 className="text-xl font-bold text-gray-900 mb-3">
+                          Master Essential Financial Skills
+                        </h4>
+                        <p className="text-gray-600 leading-relaxed mb-4">
+                          Continue your financial education journey with interactive lessons designed to build real-world money management skills.
                         </p>
-                        <p className="text-xs text-gray-500">
-                          You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
-                        </p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span className="flex items-center">
+                            <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                            {completedLessonIds.length} completed
+                          </span>
+                          <span>•</span>
+                          <span>{publishedLessons.length - completedLessonIds.length} remaining</span>
+                        </div>
                       </div>
-                      <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                        size="default"
-                      >
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-300 flex-shrink-0">
                         {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
+                        <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
                   </CardContent>
