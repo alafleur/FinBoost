@@ -135,98 +135,124 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
     : Math.max(0, nextTierInfo.points - user.currentCyclePoints);
 
   return (
-    <div className="rounded-2xl shadow-md p-4 bg-white border border-slate-200">
-      <div className="flex flex-col gap-6">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <Star className="h-4 w-4 text-brand-400" />
-                <span className="text-sm font-medium text-slate-700">
-                  {user.subscriptionStatus === 'active' ? 'Total Points' : 'Theoretical Points'}
-                </span>
-              </div>
-              <div className="text-4xl font-bold text-brand-600">
-                {user.subscriptionStatus === 'active' 
-                  ? user.totalPoints.toLocaleString()
-                  : (user.theoreticalPoints || 0).toLocaleString()
-                }
-              </div>
-              {user.subscriptionStatus !== 'active' && (
-                <p className="text-xs text-orange-600 mt-1">
-                  Upgrade to claim as real points
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-brand-400" />
-                <span className="text-sm font-medium text-slate-700">This Cycle</span>
-              </div>
-              <div className="text-4xl font-bold text-brand-600">{user.currentCyclePoints}</div>
-              {user.subscriptionStatus !== 'active' && (
-                <p className="text-xs text-orange-600 mt-1">
-                  Theoretical points only
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tier Progress */}
-        <Card className="rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
+    <div className="space-y-4">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <Trophy className="h-4 w-4 text-brand-400" />
-                <span className="text-sm font-medium text-slate-700">Tier Progress</span>
-              </div>
-              <Badge className="bg-brand-600 hover:bg-brand-700 text-white text-xs">
-                {getTierDisplayName(user.tier)}
-              </Badge>
+            <div className="flex items-center space-x-2 mb-2">
+              <Star className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm font-medium">
+                {user.subscriptionStatus === 'active' ? 'Total Points' : 'Theoretical Points'}
+              </span>
             </div>
+            <div className="text-2xl font-bold">
+              {user.subscriptionStatus === 'active' 
+                ? user.totalPoints.toLocaleString()
+                : (user.theoreticalPoints || 0).toLocaleString()
+              }
+            </div>
+            {user.subscriptionStatus !== 'active' && (
+              <p className="text-xs text-orange-600 mt-1">
+                Upgrade to claim as real points
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span className="text-sm font-medium">This Cycle</span>
+            </div>
+            <div className="text-2xl font-bold">{user.currentCyclePoints}</div>
+            {user.subscriptionStatus !== 'active' && (
+              <p className="text-xs text-orange-600 mt-1">
+                Theoretical points only
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tier Progress */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Trophy className="h-4 w-4 text-orange-500" />
+              <span className="text-sm font-medium">Tier Progress</span>
+            </div>
+            <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
+              {getTierDisplayName(user.tier)}
+            </Badge>
+          </div>
 
           {/* All Tiers Display */}
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
-                <span className="text-xs font-medium text-slate-700">Tier 1</span>
-                <span className="text-xs text-slate-500">{tierThresholds.tier1}+</span>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 1</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier1}+</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
-                <span className="text-xs font-medium text-slate-700">Tier 2</span>
-                <span className="text-xs text-slate-500">{tierThresholds.tier2}+</span>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 2</span>
+                <span className="text-xs text-gray-500">{tierThresholds.tier2}+</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
-                <span className="text-xs font-medium text-slate-700">Tier 3</span>
-                <span className="text-xs text-slate-500">0+</span>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <span className="text-xs font-medium">Tier 3</span>
+                <span className="text-xs text-gray-500">0+</span>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-slate-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-brand-500 to-brand-600 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((user.currentCyclePoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>
 
             {/* Current Status */}
-            <div className="text-center text-xs text-slate-500">
+            <div className="text-center text-xs text-gray-500">
               {user.currentCyclePoints} points this cycle
               {nextTierInfo.isMaxTier ? ' • Maximum tier reached!' : pointsNeeded > 0 && ` • ${pointsNeeded} to ${nextTierInfo.name}`}
             </div>
           </div>
         </CardContent>
       </Card>
+
+
+
+      {/* Recent Activity */}
+      {recentActivity.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {recentActivity.map((activity: any) => (
+              <div key={activity.id} className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 truncate">{activity.description}</span>
+                <div className="flex items-center space-x-1">
+                  <span className={`font-bold ${activity.points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {activity.points >= 0 ? '+' : ''}{activity.points}
+                  </span>
+                  {activity.status === 'pending' && (
+                    <Badge variant="outline" className="text-xs">
+                      Pending
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
-  </div>
   );
 }

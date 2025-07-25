@@ -245,34 +245,30 @@ export default function Leaderboard() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="space-y-1">
-              {data.leaderboard.map((entry, index) => (
+              {data.leaderboard.map((entry) => (
                 <div
                   key={entry.rank}
-                  className={`flex items-center justify-between p-4 border-b border-gray-100 transition-all duration-200 hover:shadow-sm ${
-                    entry.isCurrentUser 
-                      ? 'bg-brand-50 border-brand-200 hover:bg-brand-100 font-semibold' 
-                      : index % 2 === 0 
-                        ? 'bg-slate-50 hover:bg-slate-100' 
-                        : 'bg-white hover:bg-slate-50'
+                  className={`flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm ${
+                    entry.isCurrentUser ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : ''
                   }`}
                 >
                   <div className="flex items-center space-x-4">
                     <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm shadow-sm ${
                       entry.isCurrentUser
-                        ? 'bg-gradient-to-br from-brand-500 to-brand-600 text-white'
-                        : 'bg-slate-100 text-slate-700'
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700'
                     }`}>
                       {entry.rank}
                     </div>
                     <div>
-                      <p className={`font-semibold ${entry.isCurrentUser ? 'text-brand-700' : 'text-slate-900'}`}>
+                      <p className={`font-semibold ${entry.isCurrentUser ? 'text-blue-700' : 'text-gray-900'}`}>
                         {entry.username}
-                        {entry.isCurrentUser && <span className="ml-2 text-brand-600 font-medium">(You)</span>}
+                        {entry.isCurrentUser && <span className="ml-2 text-blue-600 font-medium">(You)</span>}
                       </p>
-                      <p className="text-sm text-slate-600 font-medium">{entry.points.toLocaleString()} points</p>
+                      <p className="text-sm text-gray-600 font-medium">{entry.points.toLocaleString()} points</p>
                     </div>
                   </div>
-                  <Badge className={`bg-brand-600 hover:bg-brand-700 text-white font-semibold px-3 py-1`}>
+                  <Badge className={`${getTierColor(entry.tier)} font-semibold px-3 py-1`}>
                     {entry.tier}
                   </Badge>
                 </div>
