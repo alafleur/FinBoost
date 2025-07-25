@@ -76,16 +76,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case 'tier1':
-        return 'bg-slate-600';
-      case 'tier2':
-        return 'bg-indigo-600';
-      case 'tier3':
-        return 'bg-teal-600';
-      default:
-        return 'bg-gray-600';
-    }
+    return 'bg-gray-900';
   };
 
   const getTierDisplayName = (tier: string) => {
@@ -149,7 +140,9 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-2">
-              <Star className="h-4 w-4 text-blue-500" />
+              <div className="p-1.5 bg-gray-50 rounded border border-gray-100">
+                <Star className="h-4 w-4 text-gray-600" />
+              </div>
               <span className="text-sm font-medium">
                 {user.subscriptionStatus === 'active' ? 'Total Points' : 'Theoretical Points'}
               </span>
@@ -171,7 +164,9 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
+              <div className="p-1.5 bg-gray-50 rounded border border-gray-100">
+                <TrendingUp className="h-4 w-4 text-gray-600" />
+              </div>
               <span className="text-sm font-medium">This Cycle</span>
             </div>
             <div className="text-2xl font-bold">{user.currentCyclePoints}</div>
@@ -189,7 +184,9 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
-              <Trophy className="h-4 w-4 text-slate-500" />
+              <div className="p-1.5 bg-gray-50 rounded border border-gray-100">
+                <Trophy className="h-4 w-4 text-gray-600" />
+              </div>
               <span className="text-sm font-medium">Tier Progress</span>
             </div>
             <Badge className={`${getTierColor(user.tier)} text-white text-xs`}>
@@ -201,17 +198,17 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier1' ? 'bg-gray-900' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 1</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier1}+</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier2' ? 'bg-gray-900' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 2</span>
                 <span className="text-xs text-gray-500">{tierThresholds.tier2}+</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${user.tier === 'tier3' ? 'bg-gray-900' : 'bg-gray-300'}`}></div>
                 <span className="text-xs font-medium">Tier 3</span>
                 <span className="text-xs text-gray-500">0+</span>
               </div>
@@ -220,7 +217,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-slate-500 to-slate-600 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-gray-600 to-gray-900 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((user.currentCyclePoints / Math.max(tierThresholds.tier3, 1)) * 100, 100)}%` }}
               ></div>
             </div>

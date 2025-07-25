@@ -164,21 +164,24 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             {/* Tier Breakdown - Separate Row */}
             {poolData.tierBreakdown && (
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-center">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 1</div>
-                  <div className="text-sm font-bold text-teal-800">
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier1)}
                   </div>
                 </div>
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 2</div>
-                  <div className="text-sm font-bold text-indigo-800">
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier2)}
                   </div>
                 </div>
-                <div className="bg-slate-100 border border-slate-300 rounded-lg p-3 text-center">
-                  <div className="text-xs text-gray-600 font-medium mb-1">Tier 3</div>
-                  <div className="text-sm font-bold text-slate-900">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                  <div className="text-xs text-gray-500 font-medium mb-1">Tier 3</div>
+                  <div className="text-sm font-bold text-gray-900">
                     {formatCurrency(poolData.tierBreakdown.tier3)}
                   </div>
                 </div>

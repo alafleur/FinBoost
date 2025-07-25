@@ -32,32 +32,14 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
 
   const getTierColors = (tierId: string, isCurrentTier: boolean) => {
     if (isCurrentTier) {
-      switch (tierId) {
-        case 'tier1':
-          return 'border-slate-300 bg-slate-50';
-        case 'tier2':
-          return 'border-indigo-300 bg-indigo-50';
-        case 'tier3':
-          return 'border-teal-300 bg-teal-50';
-        default:
-          return 'border-gray-300 bg-gray-50';
-      }
+      return 'border-gray-300 bg-gray-50 relative overflow-hidden';
     } else {
       return 'border-gray-200 bg-white';
     }
   };
 
   const getCurrentBadgeColor = (tierId: string) => {
-    switch (tierId) {
-      case 'tier1':
-        return 'bg-slate-600 text-white';
-      case 'tier2':
-        return 'bg-indigo-600 text-white';
-      case 'tier3':
-        return 'bg-teal-600 text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
+    return 'bg-gray-900 text-white';
   };
 
   const tiers = [
@@ -86,12 +68,15 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`relative border rounded-lg p-4 text-center transition-all duration-200 ${getTierColors(tier.id, tier.isCurrentTier)}`}
+          className={`border rounded-lg p-4 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
         >
           {tier.isCurrentTier && (
-            <div className={`absolute -top-2 -right-2 text-xs px-2 py-1 rounded-full font-medium ${getCurrentBadgeColor(tier.id)}`}>
-              Current
-            </div>
+            <>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+              <div className={`absolute -top-2 -right-2 text-xs px-2 py-1 rounded-full font-medium ${getCurrentBadgeColor(tier.id)} shadow-sm`}>
+                Current
+              </div>
+            </>
           )}
           
           <div className="text-sm font-semibold text-gray-900 mb-1">

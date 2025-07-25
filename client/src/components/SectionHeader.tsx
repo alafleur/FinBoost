@@ -9,12 +9,12 @@ interface SectionHeaderProps {
 }
 
 const iconColorClasses = {
-  blue: 'bg-blue-100 text-blue-600',
-  purple: 'bg-purple-100 text-purple-600', 
-  yellow: 'bg-yellow-100 text-yellow-600',
-  green: 'bg-green-100 text-green-600',
-  orange: 'bg-orange-100 text-orange-600',
-  red: 'bg-red-100 text-red-600',
+  blue: 'bg-gray-50 text-gray-600 border border-gray-100',
+  purple: 'bg-gray-50 text-gray-600 border border-gray-100', 
+  yellow: 'bg-gray-50 text-gray-600 border border-gray-100',
+  green: 'bg-gray-50 text-gray-600 border border-gray-100',
+  orange: 'bg-gray-50 text-gray-600 border border-gray-100',
+  red: 'bg-gray-50 text-gray-600 border border-gray-100',
 };
 
 const titleSizeClasses = {
@@ -32,7 +32,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <div className={`p-1.5 ${iconColorClasses[iconColor]} rounded-lg`}>
+      <div className={`p-2 ${iconColorClasses[iconColor]} rounded-lg`}>
         <Icon className="h-4 w-4" />
       </div>
       <h3 className={`font-heading font-bold ${titleSizeClasses[titleSize]} text-gray-900`}>
