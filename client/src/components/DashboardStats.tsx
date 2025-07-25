@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, TrendingUp, BookOpen } from "lucide-react";
+import { Trophy, TrendingUp, BookOpen, Target } from "lucide-react";
 
 interface DashboardStatsProps {
   user: {
@@ -47,7 +47,7 @@ export default function DashboardStats({
         <CardContent className="p-5">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-              <Trophy className="h-5 w-5 text-gray-600" />
+              <Target className="h-5 w-5 text-gray-600" />
             </div>
             <Badge className="bg-gray-900 text-white text-xs font-medium px-3 py-1.5 shadow-sm">
               {getTierDisplayName(user?.tier || 'tier1')}
