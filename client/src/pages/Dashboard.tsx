@@ -419,7 +419,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header with accessibility improvements */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-50" role="banner">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <img 
@@ -529,7 +529,7 @@ export default function Dashboard() {
           </div>
 
           {/* Mobile Tab Content with Full Desktop Features */}
-          <div className="px-4 py-6 pb-20">
+          <div className="max-w-7xl mx-auto px-4 py-6 pb-20">
             <TabsContent value="overview" className="mt-0 space-y-6">
               {/* Welcome Section with improved typography */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
@@ -551,13 +551,13 @@ export default function Dashboard() {
               {/* Mobile Stats Cards - 4 Cards Matching Desktop */}
               <div className="grid grid-cols-2 gap-4">
                 {/* 1. Current Tier */}
-                <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Trophy className="h-4 w-4 text-orange-600" />
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <Trophy className="h-4 w-4 text-blue-600" />
                       </div>
-                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-xs font-medium shadow-sm`}>
+                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-xs font-medium`}>
                         {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
@@ -567,11 +567,11 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Star className="h-4 w-4 text-amber-600" />
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <Star className="h-4 w-4 text-green-600" />
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-gray-900">{user?.totalPoints || 0}</div>
@@ -583,11 +583,11 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 3. This Cycle */}
-                <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow duration-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <TrendingUp className="h-4 w-4 text-orange-600" />
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <TrendingUp className="h-4 w-4 text-blue-600" />
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
@@ -599,11 +599,11 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="border-0 shadow-md bg-gradient-to-br from-yellow-50 to-amber-100 hover:shadow-lg transition-shadow duration-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <BookOpen className="h-4 w-4 text-amber-600" />
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <BookOpen className="h-4 w-4 text-green-600" />
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-gray-900">{completedLessonIds.length}</div>
@@ -1196,7 +1196,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
@@ -1252,7 +1252,7 @@ export default function Dashboard() {
           </div>
 
           {/* Desktop Tab Content */}
-          <div className="w-full py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             
             {/* Predictions Tab - Single Component Implementation */}
             <TabsContent value="predictions" className="mt-0 space-y-6">
@@ -1307,12 +1307,12 @@ export default function Dashboard() {
               {/* Stats Grid - 4 Column Layout Matching Mobile */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {/* 1. Current Tier */}
-                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Current Tier</CardTitle>
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Trophy className="h-4 w-4 text-orange-600" />
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <Trophy className="h-4 w-4 text-blue-600" />
                       </div>
                     </div>
                   </CardHeader>
@@ -1327,12 +1327,12 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Total Points</CardTitle>
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <Star className="h-4 w-4 text-amber-600" />
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <Star className="h-4 w-4 text-green-600" />
                       </div>
                     </div>
                   </CardHeader>
@@ -1343,12 +1343,12 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 3. Current Points (This Month) */}
-                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">This Cycle</CardTitle>
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <TrendingUp className="h-4 w-4 text-orange-600" />
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <TrendingUp className="h-4 w-4 text-blue-600" />
                       </div>
                     </div>
                   </CardHeader>
@@ -1359,12 +1359,12 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-amber-200">
+                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
-                      <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <BookOpen className="h-4 w-4 text-amber-600" />
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <BookOpen className="h-4 w-4 text-green-600" />
                       </div>
                     </div>
                   </CardHeader>
