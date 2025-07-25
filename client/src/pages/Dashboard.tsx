@@ -551,7 +551,23 @@ export default function Dashboard() {
 
               {/* Mobile Stats Cards - 4 Cards Matching Desktop */}
               <div className="grid grid-cols-2 gap-4">
-                {/* 1. Current Tier */}
+                {/* 1. Rewards Pool Size */}
+                <Card className="bg-white border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <DollarSign className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-blue-800">${(poolData.totalPool || 0).toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Rewards Pool Size</h3>
+                    <p className="text-sm text-gray-600">Available for rewards</p>
+                  </CardContent>
+                </Card>
+
+                {/* 2. Current Tier */}
                 <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -567,23 +583,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                {/* 2. Total Points */}
-                <Card className="bg-white border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <Star className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-800">{user?.totalPoints || 0}</div>
-                      </div>
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
-                    <p className="text-sm text-gray-600">All time earned</p>
-                  </CardContent>
-                </Card>
-
-                {/* 3. This Cycle */}
+                {/* 3. Cycle Points */}
                 <Card className="bg-white border border-emerald-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -594,7 +594,7 @@ export default function Dashboard() {
                         <div className="text-2xl font-bold text-emerald-800">{user?.currentCyclePoints || 0}</div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">This Cycle</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Cycle Points</h3>
                     <p className="text-sm text-gray-600">Current cycle points</p>
                   </CardContent>
                 </Card>
@@ -1300,7 +1300,16 @@ export default function Dashboard() {
 
               {/* Professional Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* 1. Current Tier */}
+                {/* 1. Rewards Pool Size */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Rewards Pool Size</h3>
+                  <div className="text-2xl font-bold text-gray-900">
+                    ${(poolData.totalPool || 0).toLocaleString()}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Available for rewards</p>
+                </div>
+
+                {/* 2. Current Tier */}
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Current Tier</h3>
                   <div className="text-2xl font-bold text-gray-900">
@@ -1309,18 +1318,9 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500 mt-1">Cycle standing</p>
                 </div>
 
-                {/* 2. Total Points */}
+                {/* 3. Cycle Points */}
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Total Points</h3>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {(user?.totalPoints || 0).toLocaleString()}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">All time earned</p>
-                </div>
-
-                {/* 3. Current Cycle Points */}
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">This Cycle</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Cycle Points</h3>
                   <div className="text-2xl font-bold text-gray-900">
                     {user?.currentCyclePoints || 0}
                   </div>
