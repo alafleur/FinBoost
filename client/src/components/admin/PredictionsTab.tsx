@@ -38,6 +38,7 @@ interface PredictionQuestion {
   isPublished: boolean;
   publishedAt?: string;
   isResultDetermined: boolean;
+  pointsDistributed?: boolean;
   correctOptionIndex?: number;
   resultDeterminedAt?: string;
   createdAt: string;
