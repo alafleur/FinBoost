@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import * as XLSX from 'xlsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,8 @@ import {
   RotateCcw,
   UserX,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -464,6 +466,98 @@ export default function Admin() {
   });
 
   const [proportionalDeductions, setProportionalDeductions] = useState([]);
+
+  // Export functions for CSV/Excel
+  const exportUserAccounts = (format: 'csv' | 'xlsx') => {
+    const exportData = users
+      .filter((user: any) => !user.isAdmin)
+      .map((user: any) => ({
+        'User ID': user.id,
+        'Username': user.username,
+        'Email': user.email,
+        'Total Points': user.totalPoints || 0,
+        'Current Month Points': user.currentMonthPoints || 0,
+        'Tier': user.tier?.replace('tier', 'Tier ') || 'Tier 1',
+        'PayPal Email': user.paypalEmail || 'Not set',
+        'Membership': user.subscriptionStatus === 'active' ? 'Member' : 'Free',
+        'Status': user.isActive ? 'Active' : 'Inactive',
+        'Joined': user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A',
+        'Last Login': user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'
+      }));
+
+    if (format === 'csv') {
+      const csvContent = [
+        Object.keys(exportData[0]).join(','),
+        ...exportData.map(row => Object.values(row).map(value => `"${value}"`).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `user-accounts-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'User Accounts');
+      XLSX.writeFile(wb, `user-accounts-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+    
+    toast({
+      title: "Export Complete",
+      description: `User accounts exported as ${format.toUpperCase()}`
+    });
+  };
+
+  const exportUserEnrollment = (format: 'csv' | 'xlsx') => {
+    const exportData = userCyclePoints.map((userPoints) => {
+      const user = users.find(u => u.id === userPoints.userId);
+      const userPredictions = userPoints.predictions || [];
+      
+      return {
+        'User ID': userPoints.userId,
+        'Username': user?.username || 'Unknown',
+        'Email': user?.email || '',
+        'Current Points': userPoints.currentCyclePoints,
+        'Tier': userPoints.tier.replace('tier', 'Tier '),
+        'Joined': new Date(userPoints.joinedCycleAt).toLocaleDateString(),
+        'Last Activity': userPoints.lastActivityDate 
+          ? new Date(userPoints.lastActivityDate).toLocaleDateString()
+          : 'No activity',
+        'Predictions Count': userPredictions.length,
+        'Prediction Answers': userPredictions.map(p => 
+          `${p.question.substring(0, 20)}...: ${String.fromCharCode(65 + p.selectedOptionIndex)}`
+        ).join('; ')
+      };
+    });
+
+    if (format === 'csv') {
+      const csvContent = [
+        Object.keys(exportData[0]).join(','),
+        ...exportData.map(row => Object.values(row).map(value => `"${value}"`).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `user-enrollment-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'User Enrollment');
+      XLSX.writeFile(wb, `user-enrollment-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+    
+    toast({
+      title: "Export Complete",
+      description: `User enrollment data exported as ${format.toUpperCase()}`
+    });
+  };
 
   // Load quiz questions when editing a module
   useEffect(() => {
@@ -2065,6 +2159,22 @@ export default function Admin() {
                         onChange={(e) => setUserSearchTerm(e.target.value)}
                         className="w-64" 
                       />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => exportUserAccounts('csv')}>
+                            Export as CSV
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => exportUserAccounts('xlsx')}>
+                            Export as Excel
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <Button
                         onClick={() => {
                           setEditingUser(null);
@@ -3027,13 +3137,35 @@ export default function Admin() {
               {/* User Enrollment Management */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    User Enrollment Management
-                  </CardTitle>
-                  <CardDescription>
-                    Monitor and manage user participation in active cycles
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5" />
+                        User Enrollment Management
+                      </CardTitle>
+                      <CardDescription>
+                        Monitor and manage user participation in active cycles
+                      </CardDescription>
+                    </div>
+                    {userCyclePoints.length > 0 && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => exportUserEnrollment('csv')}>
+                            Export as CSV
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => exportUserEnrollment('xlsx')}>
+                            Export as Excel
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
