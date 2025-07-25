@@ -113,9 +113,13 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/prediction-questions/cycle/${selectedCycle}`, {
+      // Add timestamp to bust cache
+      const timestamp = Date.now();
+      const response = await fetch(`/api/admin/prediction-questions/cycle/${selectedCycle}?t=${timestamp}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
 
