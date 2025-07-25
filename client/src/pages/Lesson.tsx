@@ -49,7 +49,6 @@ export default function Lesson() {
   const [currentStep, setCurrentStep] = useState<'content' | 'quiz'>('content');
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [hasEarnedLessonPoints, setHasEarnedLessonPoints] = useState(false);
   const [hasEarnedQuizPoints, setHasEarnedQuizPoints] = useState(false);
   const { toast } = useToast();
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -327,35 +326,9 @@ export default function Lesson() {
 
 
   const startQuiz = async () => {
-    // Award points for reading the lesson content
-    if (!hasEarnedLessonPoints) {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/points/award', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            actionId: 'lesson_complete',
-            relatedId: lesson!.id.toString(),
-            metadata: { lessonId: lesson!.id }
-          })
-        });
-
-        if (response.ok) {
-          setHasEarnedLessonPoints(true);
-          toast({
-            title: "Points Earned! 📚",
-            description: "You earned points for reading the lesson!",
-          });
-        }
-      } catch (error) {
-        console.error('Error awarding lesson points:', error);
-      }
-    }
-
+    // No points awarded here - points are only awarded upon successful completion
+    // of both lesson content AND quiz with 70% or higher score
+    
     setCurrentStep('quiz');
     setCurrentQuestionIndex(0);
     setSelectedAnswers([]);
@@ -404,7 +377,7 @@ export default function Lesson() {
 
           <UpgradePrompt 
             theoreticalPoints={user.theoreticalPoints || 0}
-            currentCyclePoints={user.currentCyclePoints || 0}
+            currentCyclePoints={0}
           />
         </div>
       </div>
@@ -447,37 +420,7 @@ export default function Lesson() {
     }
   };
 
-  const handleNextStep = async () => {
-    if (!hasEarnedLessonPoints) {
-      await awardPoints('lesson_complete', 'emergency-fund');
-      setHasEarnedLessonPoints(true);
-    }
-    setCurrentStep('quiz');
-  };
-
-  const handleSubmitQuiz = async () => {
-    setShowResults(true);
-
-    // Award points for quiz completion if passed
-    const score = calculateScore();
-    
-    // Track quiz completion with score
-    trackEvent('quiz_complete', 'education', lesson!.category, score);
-    trackGTMUserAction('quiz_completed', undefined, {
-      lesson_id: lesson!.id,
-      lesson_title: lesson!.title,
-      category: lesson!.category,
-      quiz_score: score,
-      passed: score >= 70,
-      questions_total: lesson!.quiz.length,
-      questions_correct: Math.round((score / 100) * lesson!.quiz.length)
-    });
-    
-    if (score >= 70 && !hasEarnedQuizPoints) {
-      await awardPoints('quiz_complete', 'emergency-fund-quiz');
-      setHasEarnedQuizPoints(true);
-    }
-  };
+  // Legacy functions removed - lesson completion now happens in finishQuiz() only
 
   const calculateScore = () => {
       const correctAnswers = selectedAnswers.filter((answer, index) =>
