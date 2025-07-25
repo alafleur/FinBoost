@@ -269,48 +269,48 @@ export default function RewardsHistory() {
   return (
     <div className="space-y-6">
       {/* Summary Card */}
-      <Card className="bg-gradient-to-r from-green-500 to-blue-600 text-white">
+      <Card className="bg-gradient-to-br from-green-50 to-blue-50 border-green-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Trophy className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-gray-900">
+            <Trophy className="w-5 h-5 text-green-600" />
             Your Rewards Success Story
           </CardTitle>
-          <CardDescription className="text-green-100">
+          <CardDescription className="text-gray-600">
             Celebrating your financial learning achievements
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1">
+              <div className="text-3xl font-bold mb-1 text-gray-900">
                 ${((rewardsData?.totalEarned || 0) / 100).toFixed(2)}
               </div>
-              <p className="text-green-100 text-sm">Total Earned</p>
+              <p className="text-gray-600 text-sm">Total Earned</p>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1">
+              <div className="text-3xl font-bold mb-1 text-gray-900">
                 {rewardsData?.totalCount || 0}
               </div>
-              <p className="text-green-100 text-sm">Rewards Received</p>
+              <p className="text-gray-600 text-sm">Rewards Received</p>
             </div>
           </div>
           
           {/* CTA based on user subscription status */}
           {user?.subscriptionStatus === 'active' ? (
-            <div className="text-center bg-white/10 rounded-lg p-4">
+            <div className="text-center bg-white rounded-lg p-4 border border-green-200">
               <div className="flex items-center justify-center gap-2 mb-2">
                 {user?.paypalEmail ? (
-                  <DollarSign className="w-5 h-5 text-green-300" />
+                  <DollarSign className="w-5 h-5 text-green-600" />
                 ) : (
-                  <Target className="w-5 h-5 text-orange-300" />
+                  <Target className="w-5 h-5 text-orange-600" />
                 )}
-                <h4 className="font-semibold">
-                  {user?.paypalEmail ? 'Payment Details Ready' : 'Setup Rewards Collection Info'}
+                <h4 className="font-semibold text-gray-900">
+                  {user?.paypalEmail ? 'Setup Rewards Collection Info' : 'Setup Rewards Collection Info'}
                 </h4>
               </div>
-              <p className="text-green-100 text-sm mb-3">
+              <p className="text-gray-600 text-sm mb-3">
                 {user?.paypalEmail ? 
-                  `Rewards will be sent to ${user.paypalEmail}` : 
+                  'Configure your payment collection information to receive your rewards' : 
                   'Configure your payment collection information to receive your rewards'
                 }
               </p>
@@ -322,26 +322,24 @@ export default function RewardsHistory() {
                     profileButton.click();
                   }
                 }}
-                variant="secondary"
-                className="bg-white text-blue-600 hover:bg-gray-100"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <DollarSign className="w-4 h-4 mr-2" />
-                {user?.paypalEmail ? 'View Profile' : 'Setup Payment Info'}
+                Setup Payment Info
               </Button>
             </div>
           ) : (
-            <div className="text-center bg-white/10 rounded-lg p-4">
+            <div className="text-center bg-white rounded-lg p-4 border border-yellow-200">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Crown className="w-5 h-5" />
-                <h4 className="font-semibold">Unlock Higher Rewards</h4>
+                <Crown className="w-5 h-5 text-yellow-600" />
+                <h4 className="font-semibold text-gray-900">Unlock Higher Rewards</h4>
               </div>
-              <p className="text-green-100 text-sm mb-3">
+              <p className="text-gray-600 text-sm mb-3">
                 Premium members have better odds and exclusive reward tiers
               </p>
               <Button 
                 onClick={handleUpgradeClick}
-                variant="secondary"
-                className="bg-white text-blue-600 hover:bg-gray-100"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
               >
                 <Crown className="w-4 h-4 mr-2" />
                 Upgrade to Premium - $20/month
