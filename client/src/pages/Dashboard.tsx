@@ -551,66 +551,66 @@ export default function Dashboard() {
               {/* Mobile Stats Cards - 4 Cards Matching Desktop */}
               <div className="grid grid-cols-2 gap-4">
                 {/* 1. Current Tier */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <Trophy className="h-4 w-4 text-blue-600" />
+                      <div className="p-2 bg-blue-100 rounded-lg shadow-sm">
+                        <Trophy className="h-5 w-5 text-blue-600" />
                       </div>
-                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-xs font-medium`}>
+                      <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold px-3 py-1 shadow-md">
                         {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Current Tier</h3>
-                    <p className="text-xs text-gray-600">Cycle standing</p>
+                    <p className="text-sm text-blue-700 font-medium">Cycle standing</p>
                   </CardContent>
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <Star className="h-4 w-4 text-green-600" />
+                      <div className="p-2 bg-green-100 rounded-lg shadow-sm">
+                        <Star className="h-5 w-5 text-green-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                        <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
-                    <p className="text-xs text-gray-600">All time earned</p>
+                    <p className="text-sm text-green-700 font-medium">All time earned</p>
                   </CardContent>
                 </Card>
 
                 {/* 3. This Cycle */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <div className="p-2 bg-orange-100 rounded-lg shadow-sm">
+                        <TrendingUp className="h-5 w-5 text-orange-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
+                        <div className="text-2xl font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">This Cycle</h3>
-                    <p className="text-xs text-gray-600">Current cycle points</p>
+                    <p className="text-sm text-orange-700 font-medium">Current cycle points</p>
                   </CardContent>
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <BookOpen className="h-4 w-4 text-green-600" />
+                      <div className="p-2 bg-purple-100 rounded-lg shadow-sm">
+                        <BookOpen className="h-5 w-5 text-purple-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">{completedLessonIds.length}</div>
+                        <div className="text-2xl font-bold text-gray-900">{completedLessonIds.length}</div>
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1">Lessons</h3>
-                    <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
+                    <p className="text-sm text-purple-700 font-medium">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
@@ -1307,70 +1307,70 @@ export default function Dashboard() {
               {/* Stats Grid - 4 Column Layout Matching Mobile */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {/* 1. Current Tier */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Current Tier</CardTitle>
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <Trophy className="h-4 w-4 text-blue-600" />
+                      <div className="p-3 bg-blue-100 rounded-xl shadow-sm">
+                        <Trophy className="h-5 w-5 text-blue-600" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex items-center justify-between">
-                      <Badge className={`${getTierColor(user?.tier || 'tier1')} text-white text-sm font-medium px-3 py-1`}>
+                      <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold px-4 py-2 shadow-md">
                         {getTierDisplayName(user?.tier || 'tier1')}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-600 mt-2">Cycle standing</p>
+                    <p className="text-sm text-blue-700 mt-3 font-medium">Cycle standing</p>
                   </CardContent>
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Total Points</CardTitle>
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <Star className="h-4 w-4 text-green-600" />
+                      <div className="p-3 bg-green-100 rounded-xl shadow-sm">
+                        <Star className="h-5 w-5 text-green-600" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-2xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
-                    <p className="text-xs text-gray-600">All time earned</p>
+                    <div className="text-3xl font-bold text-gray-900">{user?.totalPoints || 0}</div>
+                    <p className="text-sm text-green-700 font-medium">All time earned</p>
                   </CardContent>
                 </Card>
 
                 {/* 3. Current Points (This Month) */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">This Cycle</CardTitle>
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <div className="p-3 bg-orange-100 rounded-xl shadow-sm">
+                        <TrendingUp className="h-5 w-5 text-orange-600" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-2xl font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
-                    <p className="text-xs text-gray-600">Current cycle points</p>
+                    <div className="text-3xl font-bold text-gray-900">{user?.currentCyclePoints || 0}</div>
+                    <p className="text-sm text-orange-700 font-medium">Current cycle points</p>
                   </CardContent>
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-gray-900">Lessons</CardTitle>
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <BookOpen className="h-4 w-4 text-green-600" />
+                      <div className="p-3 bg-purple-100 rounded-xl shadow-sm">
+                        <BookOpen className="h-5 w-5 text-purple-600" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-2xl font-bold text-gray-900">{completedLessonIds.length}</div>
-                    <p className="text-xs text-gray-600">of {publishedLessons.length} completed</p>
+                    <div className="text-3xl font-bold text-gray-900">{completedLessonIds.length}</div>
+                    <p className="text-sm text-purple-700 font-medium">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>

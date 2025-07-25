@@ -153,8 +153,15 @@ export default function Leaderboard() {
   };
 
   const getTierColor = (tier: string) => {
-    // Use consistent blue colors for all tiers
-    return 'bg-blue-600 text-white';
+    switch (tier?.toLowerCase()) {
+      case 'tier1':
+        return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md';
+      case 'tier2':
+        return 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md';
+      case 'tier3':
+      default:
+        return 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md';
+    }
   };
 
   const getRankIcon = (rank: string | number) => {
@@ -241,23 +248,34 @@ export default function Leaderboard() {
               {data.leaderboard.map((entry) => (
                 <div
                   key={entry.rank}
-                  className={`flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                    entry.isCurrentUser ? 'bg-primary-50 border-primary-200' : ''
+                  className={`flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm ${
+                    entry.isCurrentUser ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : ''
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-semibold text-sm">
-                      {entry.rank}
+                  <div className="flex items-center space-x-4">
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm shadow-sm ${
+                      entry.rank <= 3 
+                        ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white'
+                        : entry.isCurrentUser
+                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {entry.rank <= 3 && (
+                        entry.rank === 1 ? <Crown className="h-5 w-5" /> :
+                        entry.rank === 2 ? <Medal className="h-4 w-4" /> :
+                        <Award className="h-4 w-4" />
+                      )}
+                      {entry.rank > 3 && entry.rank}
                     </div>
                     <div>
-                      <p className={`font-medium ${entry.isCurrentUser ? 'text-primary-600' : ''}`}>
+                      <p className={`font-semibold ${entry.isCurrentUser ? 'text-blue-700' : 'text-gray-900'}`}>
                         {entry.username}
-                        {entry.isCurrentUser && <span className="ml-2 text-primary-500">(You)</span>}
+                        {entry.isCurrentUser && <span className="ml-2 text-blue-600 font-medium">(You)</span>}
                       </p>
-                      <p className="text-sm text-gray-600">{entry.points} points</p>
+                      <p className="text-sm text-gray-600 font-medium">{entry.points.toLocaleString()} points</p>
                     </div>
                   </div>
-                  <Badge className={getTierColor(entry.tier)}>
+                  <Badge className={`${getTierColor(entry.tier)} font-semibold px-3 py-1`}>
                     {entry.tier}
                   </Badge>
                 </div>

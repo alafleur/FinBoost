@@ -38,30 +38,33 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
       name: 'Tier 1',
       range: `${highestThreshold}+`,
       icon: Crown,
-      bgColor: currentTier === 'tier1' ? 'bg-gradient-to-br from-green-50 to-green-100' : 'bg-gray-50',
-      borderColor: currentTier === 'tier1' ? 'border-green-200' : 'border-gray-200',
-      textColor: currentTier === 'tier1' ? 'text-green-800' : 'text-gray-600',
-      iconColor: currentTier === 'tier1' ? 'text-green-600' : 'text-gray-400'
+      bgColor: currentTier === 'tier1' ? 'bg-gradient-to-br from-green-50 to-emerald-100' : 'bg-gray-50',
+      borderColor: currentTier === 'tier1' ? 'border-green-300' : 'border-gray-200',
+      textColor: currentTier === 'tier1' ? 'text-green-900' : 'text-gray-600',
+      iconColor: currentTier === 'tier1' ? 'text-green-600' : 'text-gray-400',
+      shadowClass: currentTier === 'tier1' ? 'shadow-lg shadow-green-100' : 'shadow-sm'
     },
     {
       id: 'tier2',
       name: 'Tier 2',
       range: `${lowestThreshold}-${highestThreshold - 1}`,
       icon: Medal,
-      bgColor: currentTier === 'tier2' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100' : 'bg-gray-50',
-      borderColor: currentTier === 'tier2' ? 'border-yellow-200' : 'border-gray-200',
-      textColor: currentTier === 'tier2' ? 'text-yellow-800' : 'text-gray-600',
-      iconColor: currentTier === 'tier2' ? 'text-yellow-600' : 'text-gray-400'
+      bgColor: currentTier === 'tier2' ? 'bg-gradient-to-br from-yellow-50 to-amber-100' : 'bg-gray-50',
+      borderColor: currentTier === 'tier2' ? 'border-yellow-300' : 'border-gray-200',
+      textColor: currentTier === 'tier2' ? 'text-yellow-900' : 'text-gray-600',
+      iconColor: currentTier === 'tier2' ? 'text-yellow-600' : 'text-gray-400',
+      shadowClass: currentTier === 'tier2' ? 'shadow-lg shadow-yellow-100' : 'shadow-sm'
     },
     {
       id: 'tier3',
       name: 'Tier 3',
       range: `0-${lowestThreshold - 1}`,
       icon: Trophy,
-      bgColor: currentTier === 'tier3' ? 'bg-gradient-to-br from-orange-50 to-orange-100' : 'bg-gray-50',
-      borderColor: currentTier === 'tier3' ? 'border-orange-200' : 'border-gray-200',
-      textColor: currentTier === 'tier3' ? 'text-orange-800' : 'text-gray-600',
-      iconColor: currentTier === 'tier3' ? 'text-orange-600' : 'text-gray-400'
+      bgColor: currentTier === 'tier3' ? 'bg-gradient-to-br from-orange-50 to-red-100' : 'bg-gray-50',
+      borderColor: currentTier === 'tier3' ? 'border-orange-300' : 'border-gray-200',
+      textColor: currentTier === 'tier3' ? 'text-orange-900' : 'text-gray-600',
+      iconColor: currentTier === 'tier3' ? 'text-orange-600' : 'text-gray-400',
+      shadowClass: currentTier === 'tier3' ? 'shadow-lg shadow-orange-100' : 'shadow-sm'
     }
   ];
 
@@ -74,23 +77,25 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
         return (
           <div
             key={tier.id}
-            className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${tier.bgColor} ${tier.borderColor}`}
+            className={`relative p-5 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${tier.bgColor} ${tier.borderColor} ${tier.shadowClass}`}
           >
             {isCurrentTier && (
-              <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg">
                 Your Tier
               </div>
             )}
             
-            <div className="flex items-center justify-center mb-2">
-              <Icon className={`h-6 w-6 ${tier.iconColor}`} />
+            <div className="flex items-center justify-center mb-3">
+              <div className={`p-2 rounded-lg ${isCurrentTier ? 'bg-white shadow-md' : 'bg-white/50'}`}>
+                <Icon className={`h-7 w-7 ${tier.iconColor}`} />
+              </div>
             </div>
             
             <div className="text-center">
-              <div className={`text-sm font-semibold mb-1 ${tier.textColor}`}>
+              <div className={`text-base font-bold mb-2 ${tier.textColor}`}>
                 {tier.name}
               </div>
-              <div className={`text-xs font-medium ${tier.textColor}`}>
+              <div className={`text-sm font-semibold ${tier.textColor} opacity-90`}>
                 {tier.range} pts
               </div>
             </div>
