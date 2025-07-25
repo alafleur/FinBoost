@@ -3044,6 +3044,7 @@ export default function Admin() {
                             <thead>
                               <tr className="border-b">
                                 <th className="text-left p-2">User</th>
+                                <th className="text-left p-2">Email</th>
                                 <th className="text-left p-2">Current Points</th>
                                 <th className="text-left p-2">Tier</th>
                                 <th className="text-left p-2">Joined</th>
@@ -3065,7 +3066,9 @@ export default function Admin() {
                                     <tr key={userPoints.userId} className="border-b">
                                       <td className="p-2">
                                         <div className="font-medium">{user?.username || 'Unknown'}</div>
-                                        <div className="text-xs text-gray-500">{user?.email}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-sm text-gray-700">{user?.email}</div>
                                       </td>
                                       <td className="p-2">
                                         <div className="font-bold text-green-600">
