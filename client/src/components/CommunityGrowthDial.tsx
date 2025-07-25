@@ -164,21 +164,21 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             {/* Tier Breakdown - Separate Row */}
             {poolData.tierBreakdown && (
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 1</div>
-                  <div className="text-sm font-bold text-gray-900">
+                  <div className="text-sm font-bold text-slate-800">
                     {formatCurrency(poolData.tierBreakdown.tier1)}
                   </div>
                 </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 2</div>
-                  <div className="text-sm font-bold text-gray-900">
+                  <div className="text-sm font-bold text-indigo-800">
                     {formatCurrency(poolData.tierBreakdown.tier2)}
                   </div>
                 </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-center">
                   <div className="text-xs text-gray-500 font-medium mb-1">Tier 3</div>
-                  <div className="text-sm font-bold text-gray-900">
+                  <div className="text-sm font-bold text-teal-800">
                     {formatCurrency(poolData.tierBreakdown.tier3)}
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                   cy="50"
                   r="35"
                   fill="none"
-                  stroke="#10b981"
+                  stroke="#3b82f6"
                   strokeWidth="8"
                   strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
                   strokeLinecap="round"
@@ -292,7 +292,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               </svg>
               {/* Center text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold text-gray-900">{rewardsPercentage}%</div>
+                <div className="text-2xl font-bold text-blue-800">{rewardsPercentage}%</div>
                 <div className="text-xs text-gray-600 text-center">to rewards</div>
               </div>
             </div>

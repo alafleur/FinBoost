@@ -30,6 +30,36 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
 
   const currentTier = user.tier || getCurrentTier();
 
+  const getTierColors = (tierId: string, isCurrentTier: boolean) => {
+    if (isCurrentTier) {
+      switch (tierId) {
+        case 'tier1':
+          return 'border-slate-300 bg-slate-50';
+        case 'tier2':
+          return 'border-indigo-300 bg-indigo-50';
+        case 'tier3':
+          return 'border-teal-300 bg-teal-50';
+        default:
+          return 'border-gray-300 bg-gray-50';
+      }
+    } else {
+      return 'border-gray-200 bg-white';
+    }
+  };
+
+  const getCurrentBadgeColor = (tierId: string) => {
+    switch (tierId) {
+      case 'tier1':
+        return 'bg-slate-600 text-white';
+      case 'tier2':
+        return 'bg-indigo-600 text-white';
+      case 'tier3':
+        return 'bg-teal-600 text-white';
+      default:
+        return 'bg-gray-600 text-white';
+    }
+  };
+
   const tiers = [
     {
       id: 'tier1',
@@ -56,12 +86,10 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`relative bg-white border rounded-lg p-4 text-center ${
-            tier.isCurrentTier ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
-          }`}
+          className={`relative border rounded-lg p-4 text-center transition-all duration-200 ${getTierColors(tier.id, tier.isCurrentTier)}`}
         >
           {tier.isCurrentTier && (
-            <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+            <div className={`absolute -top-2 -right-2 text-xs px-2 py-1 rounded-full font-medium ${getCurrentBadgeColor(tier.id)}`}>
               Current
             </div>
           )}

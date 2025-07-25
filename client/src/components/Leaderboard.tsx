@@ -155,12 +155,12 @@ export default function Leaderboard() {
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
       case 'tier1':
-        return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md';
+        return 'bg-slate-600 text-white';
       case 'tier2':
-        return 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md';
+        return 'bg-indigo-600 text-white';
       case 'tier3':
       default:
-        return 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md';
+        return 'bg-teal-600 text-white';
     }
   };
 

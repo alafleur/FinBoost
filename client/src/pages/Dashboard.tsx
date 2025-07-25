@@ -568,50 +568,50 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 2. Total Points */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                <Card className="bg-white border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-slate-50 rounded-lg">
-                        <Star className="h-5 w-5 text-slate-600" />
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <Star className="h-5 w-5 text-blue-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-slate-900">{user?.totalPoints || 0}</div>
+                        <div className="text-2xl font-bold text-blue-800">{user?.totalPoints || 0}</div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-900 mb-1">Total Points</h3>
-                    <p className="text-sm text-slate-600">All time earned</p>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Points</h3>
+                    <p className="text-sm text-gray-600">All time earned</p>
                   </CardContent>
                 </Card>
 
                 {/* 3. This Cycle */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                <Card className="bg-white border border-emerald-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-slate-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-slate-600" />
+                      <div className="p-2 bg-emerald-50 rounded-lg">
+                        <TrendingUp className="h-5 w-5 text-emerald-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-slate-900">{user?.currentCyclePoints || 0}</div>
+                        <div className="text-2xl font-bold text-emerald-800">{user?.currentCyclePoints || 0}</div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-900 mb-1">This Cycle</h3>
-                    <p className="text-sm text-slate-600">Current cycle points</p>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">This Cycle</h3>
+                    <p className="text-sm text-gray-600">Current cycle points</p>
                   </CardContent>
                 </Card>
 
                 {/* 4. Lessons Completed */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                <Card className="bg-white border border-violet-200 hover:border-violet-300 hover:shadow-md transition-all duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 bg-slate-50 rounded-lg">
-                        <BookOpen className="h-5 w-5 text-slate-600" />
+                      <div className="p-2 bg-violet-50 rounded-lg">
+                        <BookOpen className="h-5 w-5 text-violet-600" />
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-slate-900">{completedLessonIds.length}</div>
+                        <div className="text-2xl font-bold text-violet-800">{completedLessonIds.length}</div>
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-900 mb-1">Lessons</h3>
-                    <p className="text-sm text-slate-600">of {publishedLessons.length} completed</p>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Lessons</h3>
+                    <p className="text-sm text-gray-600">of {publishedLessons.length} completed</p>
                   </CardContent>
                 </Card>
               </div>
