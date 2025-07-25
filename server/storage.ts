@@ -913,20 +913,30 @@ export class MemStorage implements IStorage {
       return 'tier1'; // Only user with points
     }
 
-    // Calculate tier thresholds based on point distribution
+    // Calculate equal divisions for users with points
     const totalUsersWithPoints = usersWithPoints.length;
-    const tier1Index = Math.floor(totalUsersWithPoints * 0.33); // Top 33%
-    const tier2Index = Math.floor(totalUsersWithPoints * 0.67); // Top 67%
+    const usersPerTier = Math.floor(totalUsersWithPoints / 3);
+    const remainderUsers = totalUsersWithPoints % 3;
 
-    // Get the point thresholds for tier boundaries
-    const tier1Threshold = tier1Index > 0 ? (usersWithPoints[tier1Index - 1]?.cyclePoints || 0) : currentCyclePoints;
-    const tier2Threshold = tier2Index > 0 ? (usersWithPoints[tier2Index - 1]?.cyclePoints || 0) : 0;
+    // Distribute users: top tier gets extra users if there's a remainder
+    const tier1Count = usersPerTier + (remainderUsers > 0 ? 1 : 0);
+    const tier2Count = usersPerTier + (remainderUsers > 1 ? 1 : 0);
 
-    // Assign tier based on point thresholds (inclusive boundaries)
-    if (currentCyclePoints >= tier1Threshold) {
+    // Find the user's rank among users with points
+    const userRank = usersWithPoints.findIndex(user => 
+      (user.cyclePoints || 0) === currentCyclePoints
+    );
+
+    if (userRank === -1) {
+      // User not found in rankings (shouldn't happen)
+      return 'tier3';
+    }
+
+    // Assign tier based on equal division ranking
+    if (userRank < tier1Count) {
       return 'tier1';
-    } else if (currentCyclePoints >= tier2Threshold) {
-      return 'tier2';  
+    } else if (userRank < tier1Count + tier2Count) {
+      return 'tier2';
     } else {
       return 'tier3';
     }
