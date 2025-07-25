@@ -390,7 +390,14 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
 
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString() + ' ' + new Date(dateString).toLocaleTimeString();
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { timeZone: 'America/New_York' }) + 
+           ' at ' + 
+           date.toLocaleTimeString('en-US', { 
+             hour: '2-digit', 
+             minute: '2-digit',
+             timeZone: 'America/New_York'
+           }) + ' EST';
   };
 
   const getStatusBadge = (question: PredictionQuestion) => {
@@ -648,6 +655,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   value={questionForm.submissionDeadline}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, submissionDeadline: e.target.value }))}
                 />
+                <p className="text-xs text-gray-500 mt-1">Enter time in EST timezone</p>
               </div>
               <div>
                 <Label htmlFor="resultDeterminationTime">Result Determination</Label>
@@ -657,6 +665,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   value={questionForm.resultDeterminationTime}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, resultDeterminationTime: e.target.value }))}
                 />
+                <p className="text-xs text-gray-500 mt-1">Enter time in EST timezone</p>
               </div>
             </div>
 
@@ -755,6 +764,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   value={questionForm.submissionDeadline}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, submissionDeadline: e.target.value }))}
                 />
+                <p className="text-xs text-gray-500 mt-1">Enter time in EST timezone</p>
               </div>
               <div>
                 <Label htmlFor="resultDeterminationTime">Result Determination</Label>
@@ -764,6 +774,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
                   value={questionForm.resultDeterminationTime}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, resultDeterminationTime: e.target.value }))}
                 />
+                <p className="text-xs text-gray-500 mt-1">Enter time in EST timezone</p>
               </div>
             </div>
 

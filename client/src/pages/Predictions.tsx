@@ -208,7 +208,13 @@ export default function Predictions() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('en-US', { timeZone: 'America/New_York' }) + 
+           ' at ' + 
+           date.toLocaleTimeString('en-US', { 
+             hour: '2-digit', 
+             minute: '2-digit',
+             timeZone: 'America/New_York'
+           }) + ' EST';
   };
 
   const getTimeRemaining = (deadline: string) => {
