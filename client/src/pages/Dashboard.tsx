@@ -1285,95 +1285,17 @@ export default function Dashboard() {
               </div>
             </TabsContent>
 
-            {/* Overview Tab - Complete Content from Mobile */}
+            {/* Overview Tab - Using Single Responsive Components */}
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Welcome Section */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
-                      Welcome back, {user?.firstName || user?.username}!
-                    </h2>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win cycle rewards for building better financial habits.
-                    </p>
-                  </div>
-                </div>
+              {/* User Greeting Header */}
+              <div className="rounded-2xl shadow-md p-6 bg-white border border-slate-200">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">
+                  Welcome back, {user?.firstName || user?.username}! Here's your progress this cycle.
+                </h2>
               </div>
 
-              {/* Stats Grid - 4 Column Layout Matching Mobile */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                {/* 1. Current Tier */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Current Tier</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <Trophy className="h-5 w-5 text-slate-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between">
-                      <Badge className="bg-slate-900 text-white text-sm font-medium px-4 py-2">
-                        {getTierDisplayName(user?.tier || 'tier1')}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-600 mt-3">Cycle standing</p>
-                  </CardContent>
-                </Card>
-
-                {/* 2. Total Points */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Total Points</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <Star className="h-5 w-5 text-slate-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{user?.totalPoints || 0}</div>
-                    <p className="text-sm text-slate-600">All time earned</p>
-                  </CardContent>
-                </Card>
-
-                {/* 3. Current Points (This Month) */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">This Cycle</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <TrendingUp className="h-5 w-5 text-slate-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{user?.currentCyclePoints || 0}</div>
-                    <p className="text-sm text-slate-600">Current cycle points</p>
-                  </CardContent>
-                </Card>
-
-                {/* 4. Lessons Completed */}
-                <Card className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold text-slate-900">Lessons</CardTitle>
-                      <div className="p-3 bg-slate-50 rounded-xl">
-                        <BookOpen className="h-5 w-5 text-slate-600" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-3xl font-bold text-slate-900">{completedLessonIds.length}</div>
-                    <p className="text-sm text-slate-600">of {publishedLessons.length} completed</p>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Points Summary Component */}
+              <PointsSummary user={user as any} />
 
               {/* Tier Thresholds */}
               {tierThresholds && user && (
