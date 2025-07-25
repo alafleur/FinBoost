@@ -47,6 +47,7 @@ export default function Lesson() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const [currentStep, setCurrentStep] = useState<'content' | 'quiz'>('content');
+  const [quizStarted, setQuizStarted] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [hasEarnedQuizPoints, setHasEarnedQuizPoints] = useState(false);
@@ -204,6 +205,17 @@ export default function Lesson() {
     }
   };
 
+  const goBackToLesson = () => {
+    setCurrentStep('content');
+    // Preserve quiz progress when going back to lesson
+    // Only reset results if actually completed
+    if (showResults) {
+      setShowResults(false);
+      setQuizCompleted(false);
+      setScore(0);
+    }
+  };
+
   const finishQuiz = async () => {
     const correctAnswers = selectedAnswers.filter((answer, index) => 
       answer === lesson!.quiz[index].correctAnswer
@@ -327,11 +339,15 @@ export default function Lesson() {
 
   const startQuiz = async () => {
     // No points awarded here - points are only awarded upon successful completion
-    // of both lesson content AND quiz with 70% or higher score
+    // of both lesson content AND quiz with 66% or higher score
     
     setCurrentStep('quiz');
     setCurrentQuestionIndex(0);
-    setSelectedAnswers([]);
+    setQuizStarted(true);
+    // Only reset answers if starting fresh, preserve if returning to quiz
+    if (selectedAnswers.length === 0) {
+      setSelectedAnswers(new Array(lesson!.quiz.length).fill(undefined));
+    }
     setShowResults(false);
     setQuizCompleted(false);
   };
@@ -423,6 +439,44 @@ export default function Lesson() {
               <h1 className="text-2xl font-bold mt-2">{lesson.title}</h1>
               <p className="text-gray-600">{lesson.category}</p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Module Navigation Progress */}
+      <div className="bg-white border-b">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant={currentStep === 'content' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentStep('content')}
+                className="flex items-center gap-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                Lesson Content
+              </Button>
+              <div className="w-8 h-px bg-gray-300"></div>
+              <Button
+                variant={currentStep === 'quiz' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => {
+                  setCurrentStep('quiz');
+                  if (currentQuestionIndex === -1) setCurrentQuestionIndex(0);
+                }}
+                className="flex items-center gap-2"
+                disabled={!quizStarted}
+              >
+                <Target className="h-4 w-4" />
+                Quiz ({lesson.quiz.length} questions)
+              </Button>
+            </div>
+            {currentStep === 'quiz' && !showResults && (
+              <div className="text-sm text-gray-600">
+                Question {currentQuestionIndex + 1} of {lesson.quiz.length}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -521,13 +575,23 @@ export default function Lesson() {
 
                 {/* Quiz Navigation */}
                 <div className="flex justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={handlePreviousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                  >
-                    Previous
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={goBackToLesson}
+                      className="flex items-center gap-2"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Back to Lesson
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handlePreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                    >
+                      Previous
+                    </Button>
+                  </div>
                   <Button
                     onClick={handleNextQuestion}
                     disabled={!isAnswerSelected}
