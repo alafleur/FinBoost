@@ -1,0 +1,89 @@
+Sure — here’s a clean message you can pass along to Replit with the narrowed-down UI improvements:
+
+---
+
+Hi team, here are some targeted UI/UX suggestions to improve visual appeal while staying consistent with our existing Tailwind + slate color scheme:
+
+---
+
+### ✅ **General Improvements**
+
+#### 1. Improve Visual Hierarchy Across Dashboard
+
+* Wrap key sections (`PointsSummary`, `TierStats`, `RewardsSummary`) in soft card-style containers:
+
+  ```tsx
+  className="rounded-2xl shadow-md p-4 bg-slate-800 border border-slate-700"
+  ```
+* Increase spacing between stacked sections using wrapper divs like:
+
+  ```tsx
+  className="flex flex-col gap-6"
+  ```
+
+#### 2. Introduce a Branded Accent Color
+
+* Add a custom color (e.g. `brand: colors.indigo` or `emerald`) to `tailwind.config.ts`:
+
+  ```ts
+  colors: {
+    ...colors,
+    brand: colors.indigo,
+  },
+  ```
+* Apply `text-brand-400`, `bg-brand-600`, `hover:bg-brand-700` for highlights, CTAs, and user stats emphasis.
+
+---
+
+### 🧩 **Component-Specific Suggestions**
+
+#### `Dashboard.tsx`
+
+* Add a user-friendly greeting header:
+
+  ```tsx
+  <h2 className="text-xl font-semibold text-slate-300 mb-4">
+    Welcome back, [First Name]! Here's your progress this cycle.
+  </h2>
+  ```
+* Include optional icons in the tab bar (e.g. Heroicons or Lucide):
+
+  ```tsx
+  <HomeIcon className="w-5 h-5 mr-2 text-brand-400" />
+  ```
+
+---
+
+#### `PointsSummary.tsx`
+
+* Emphasize point totals with stronger hierarchy:
+
+  ```tsx
+  <div className="text-4xl font-bold text-brand-400">
+    {user.points} pts
+  </div>
+  ```
+* Wrap the entire block in:
+
+  ```tsx
+  className="rounded-xl bg-slate-900 border border-slate-700 p-4 shadow-sm"
+  ```
+
+---
+
+#### `Leaderboard.tsx`
+
+* Alternate row shading:
+
+  ```tsx
+  className="odd:bg-slate-800 even:bg-slate-900"
+  ```
+* Highlight the current user’s row:
+
+  ```tsx
+  className={isCurrentUser ? "bg-brand-900 text-white font-semibold" : ""}
+  ```
+
+---
+
+Let me know if you'd like JSX examples or want this applied to additional components next.
