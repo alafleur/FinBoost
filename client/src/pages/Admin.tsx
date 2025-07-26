@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { useLocation } from 'wouter';
 import * as XLSX from 'xlsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,6 +191,13 @@ export default function Admin() {
   const [currentModulePage, setCurrentModulePage] = useState(1);
   const [modulesPerPage] = useState(10);
   const [enrollmentPage, setEnrollmentPage] = useState(1);
+  
+  // Winner table pagination state
+  const [winnerTablePage, setWinnerTablePage] = useState(1);
+  const winnersPerPage = 50;
+  
+  // Loading states for performance monitoring
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState({
@@ -594,16 +601,36 @@ export default function Admin() {
 
   // Load initial data including cycle data
   useEffect(() => {
-    fetchData();
-    fetchPendingProofs();
-    fetchPointActions();
-    fetchSupportTickets();
-    fetchCyclePoolSettings();
-    fetchCurrentPoolSettings();
-    fetchCycleSettings();
-    fetchUserCyclePoints();
-    fetchCycleWinnerSelections();
-    fetchCycleWinnerSelections();
+    // Consolidated API calls to prevent redundant requests
+    const loadInitialData = async () => {
+      const startTime = performance.now();
+      setIsLoadingData(true);
+      
+      try {
+        // Group API calls by priority and dependencies
+        await Promise.allSettled([
+          fetchData(), // Core data first
+          fetchCycleSettings(), // Essential cycle data
+          fetchUserCyclePoints(),
+          fetchPendingProofs(),
+          fetchPointActions(),
+          fetchSupportTickets(),
+          fetchCyclePoolSettings(),
+          fetchCurrentPoolSettings(),
+          fetchCycleWinnerSelections()
+          // Removed duplicate fetchCycleWinnerSelections()
+        ]);
+        
+        const loadTime = performance.now() - startTime;
+        console.log(`Admin data loaded in ${Math.round(loadTime)}ms`);
+      } catch (error) {
+        console.error('Error loading initial admin data:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    
+    loadInitialData();
   }, []);
 
   // Load winners when selected cycle changes
@@ -3728,14 +3755,20 @@ export default function Admin() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {winnerDetails?.map((winner: any) => {
-                                  // Calculate tier size from selection results to match the Winner Selection section
-                                  const tierSize = (() => {
-                                    if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 825000; // $8,250 in cents
-                                    if (winner.tier === 'tier2') return selectionResults?.tierBreakdown?.tier2?.poolAmount || 495000; // $4,950 in cents
-                                    if (winner.tier === 'tier3') return selectionResults?.tierBreakdown?.tier3?.poolAmount || 330000; // $3,300 in cents
-                                    return 0;
-                                  })();
+                                {useMemo(() => {
+                                  // Memoize pagination and calculations for performance
+                                  const startIndex = (winnerTablePage - 1) * winnersPerPage;
+                                  const endIndex = startIndex + winnersPerPage;
+                                  const paginatedWinners = winnerDetails?.slice(startIndex, endIndex) || [];
+                                  
+                                  return paginatedWinners.map((winner: any) => {
+                                    // Calculate tier size from selection results to match the Winner Selection section
+                                    const tierSize = (() => {
+                                      if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 825000; // $8,250 in cents
+                                      if (winner.tier === 'tier2') return selectionResults?.tierBreakdown?.tier2?.poolAmount || 495000; // $4,950 in cents
+                                      if (winner.tier === 'tier3') return selectionResults?.tierBreakdown?.tier3?.poolAmount || 330000; // $3,300 in cents
+                                      return 0;
+                                    })();
                                   
                                   const payoutPercentage = payoutPercentages[winner.id] || '';
                                   const payoutCalc = payoutPercentage !== '' ? (tierSize * parseFloat(payoutPercentage)) / 100 : 0;
@@ -3834,10 +3867,43 @@ export default function Admin() {
                                       </td>
                                     </tr>
                                   );
-                                })}
+                                  });
+                                }, [winnerDetails, winnerTablePage, winnersPerPage, selectionResults, payoutPercentages, payoutOverrides])}
                               </tbody>
                             </table>
                           </div>
+                          
+                          {/* Winner Table Pagination */}
+                          {winnerDetails && winnerDetails.length > winnersPerPage && (
+                            <div className="flex items-center justify-between mt-4">
+                              <div className="text-sm text-gray-600">
+                                Showing {((winnerTablePage - 1) * winnersPerPage) + 1} to {Math.min(winnerTablePage * winnersPerPage, winnerDetails.length)} of {winnerDetails.length} winners
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setWinnerTablePage(Math.max(1, winnerTablePage - 1))}
+                                  disabled={winnerTablePage === 1}
+                                >
+                                  <ChevronLeft className="w-4 h-4" />
+                                  Previous
+                                </Button>
+                                <span className="text-sm">
+                                  Page {winnerTablePage} of {Math.ceil(winnerDetails.length / winnersPerPage)}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setWinnerTablePage(winnerTablePage + 1)}
+                                  disabled={winnerTablePage >= Math.ceil(winnerDetails.length / winnersPerPage)}
+                                >
+                                  Next
+                                  <ChevronRight className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex justify-end space-x-3">
