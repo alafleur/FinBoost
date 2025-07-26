@@ -1,0 +1,148 @@
+You're absolutely right — this is a systemic architectural flaw, not just a logic bug. Here's a detailed, multi-phase refactor plan to fully eliminate the dual system, remove legacy "monthly" infrastructure, and migrate everything cleanly to the cycle-based architecture.
+
+
+---
+
+✅ Phase 1: Identify and Map Legacy "Monthly" Infrastructure
+
+Search for ALL references to legacy monthly logic. You’re looking for both backend functions and the frontend components that rely on them.
+
+🔍 Search in Backend (server/):
+
+getMonthlyPool() → (in storage.ts)
+
+/api/pool/monthly → (in routes.ts)
+
+monthlyPool / monthlyRewardPool / $5000 hardcoded strings
+
+Any comment mentioning "monthly pool" or "overview"
+
+
+🔍 Search in Frontend (client/):
+
+Find all components using:
+
+/api/pool/monthly
+
+useMonthlyPool (custom hook?)
+
+References to overviewData.rewardPool that rely on that endpoint
+
+
+
+🔎 Files to Audit:
+
+server/routes.ts
+
+server/storage.ts
+
+client/src/pages/Admin.tsx (Overview tab logic)
+
+Any shared pool fetch utilities
+
+
+
+---
+
+🧼 Phase 2: Remove the Legacy Monthly Infrastructure
+
+🔥 Delete these from server/storage.ts:
+
+async function getMonthlyPool(...) { ... } // DELETE
+
+🔥 Delete this endpoint from server/routes.ts:
+
+router.get('/api/pool/monthly', ...) // DELETE ENTIRE ROUTE
+
+✅ Replace with:
+
+All logic should now go through:
+
+await getCyclePoolData(cycleId)
+
+
+---
+
+🔁 Phase 3: Migrate Admin Overview Tab (and others) to Cycle-Based System
+
+In Admin.tsx:
+
+🔁 Find:
+
+useEffect(() => {
+  fetch('/api/pool/monthly')
+    .then(res => res.json())
+    .then(setOverviewData)
+}, []);
+
+🔁 Replace with:
+
+useEffect(() => {
+  fetch(`/api/cycles/pool?cycleId=${currentCycleId}`)
+    .then(res => res.json())
+    .then(setOverviewData)
+}, [currentCycleId]);
+
+(Adjust currentCycleId sourcing depending on your state structure.)
+
+Also update any field references that assumed monthly context, like:
+
+overviewData.rewardPool → now based on cycle
+
+Display copy like “This month’s prize pool” → change to “This cycle’s prize pool”
+
+
+
+---
+
+✅ Phase 4: Sanity Test All Entry Points
+
+Confirm all pool displays are now driven by the same system:
+
+Section	Endpoint Used	Should Use
+
+Admin Overview	❌ /api/pool/monthly	✅ /api/cycles/pool?cycleId=X
+Admin Cycle Ops	✅ /api/admin/cycles/:id/analytics	✅ already fixed
+User Dashboard	✅ /api/cycles/pool	✅ correct
+Any exports/emails	❓ check custom logic	✅ use getCyclePoolData() only
+
+
+
+---
+
+🧪 Phase 5: Final Regression Tests
+
+Verify all admin tabs load without error
+
+Confirm pool values match expectations (e.g. 1500 × $20 × 50% × 0.5 = $7,500)
+
+Confirm all terminology has dropped “monthly” in both code and UI copy
+
+
+
+---
+
+🔒 Best Practice Going Forward
+
+Rename getCyclePoolData() to something like getRewardPool() to reflect it's now the only valid logic
+
+Add comment in storage.ts:
+
+
+// This is the sole source of truth for reward pool calculations.
+// All endpoints must use this method — no hardcoded calculations elsewhere.
+
+
+---
+
+Let me know if you’d like:
+
+Help rewriting the admin Overview fetch logic
+
+GitHub search queries to run this refactor quickly
+
+A checklist to pass to Replit
+
+
+This is a valuable cleanup — doing it properly will restore full trust in your numbers and messaging.
+
