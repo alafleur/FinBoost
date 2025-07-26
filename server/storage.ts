@@ -6646,7 +6646,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // CORRECTED Point-weighted random selection using cumulative probability distribution
+  // Production-ready point-weighted random selection with exact target achievement
   private selectWeightedRandomWinners(usersByTier: any, tierSettings: any): any[] {
     const winners: any[] = [];
 
@@ -6667,7 +6667,7 @@ export class MemStorage implements IStorage {
         console.log(`WARNING: ${tier} only has ${users.length} users but requested ${winnerCount} winners. Selecting ${actualWinnerCount} instead.`);
       }
 
-      // Use Fisher-Yates weighted sampling without replacement
+      // Use weighted sampling without replacement - guaranteed to achieve exact count
       const selectedUsers = this.weightedSampleWithoutReplacement(users, actualWinnerCount);
       
       const tierWinners = selectedUsers.map(user => ({ ...user, tier }));
@@ -6680,7 +6680,7 @@ export class MemStorage implements IStorage {
     return winners;
   }
 
-  // DEFINITIVE weighted sampling without replacement - guaranteed to select exact count
+  // Optimized weighted sampling without replacement using cumulative probability distribution
   private weightedSampleWithoutReplacement(users: any[], count: number): any[] {
     if (count >= users.length) return [...users];
     if (count === 0) return [];
@@ -6688,38 +6688,30 @@ export class MemStorage implements IStorage {
     const selected: any[] = [];
     const remainingUsers = [...users];
     
-    console.log(`    Weighted sampling: targeting ${count} from ${users.length} users`);
-    
-    // Use simple deterministic approach: select until we reach count
+    // Select users one by one until we reach the target count
     while (selected.length < count && remainingUsers.length > 0) {
-      // Calculate weights for current remaining users
+      // Calculate weights for current remaining users (minimum weight of 1)
       const weights = remainingUsers.map(user => Math.max(1, user.currentCyclePoints || 0));
       const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
       
-      // Generate random value and find corresponding user
+      // Generate random value and find corresponding user using cumulative probability
       const randomValue = Math.random() * totalWeight;
-      let runningTotal = 0;
-      let selectedIndex = 0; // Default to first user as failsafe
+      let cumulativeWeight = 0;
+      let selectedIndex = 0; // Failsafe default
       
       for (let i = 0; i < weights.length; i++) {
-        runningTotal += weights[i];
-        if (randomValue <= runningTotal) {
+        cumulativeWeight += weights[i];
+        if (randomValue <= cumulativeWeight) {
           selectedIndex = i;
           break;
         }
       }
       
-      // Always select a user - remove from pool and add to selected
+      // Remove selected user from pool and add to results
       const selectedUser = remainingUsers.splice(selectedIndex, 1)[0];
       selected.push(selectedUser);
-      
-      // Progress logging for large selections
-      if (selected.length % 100 === 0) {
-        console.log(`    Progress: ${selected.length}/${count} selected`);
-      }
     }
     
-    console.log(`    Completed: ${selected.length}/${count} winners selected`);
     return selected;
   }
 
