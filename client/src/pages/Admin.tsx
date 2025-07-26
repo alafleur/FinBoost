@@ -311,9 +311,9 @@ export default function Admin() {
   const [isProcessingDisbursements, setIsProcessingDisbursements] = useState(false);
   const [winnerSelectionMode, setWinnerSelectionMode] = useState('weighted_random');
   const [tierSettings, setTierSettings] = useState({
-    tier1: { winnerCount: 3, poolPercentage: 50 },
-    tier2: { winnerCount: 5, poolPercentage: 30 },
-    tier3: { winnerCount: 7, poolPercentage: 20 }
+    tier1: { winnerCount: 0, poolPercentage: 50 },
+    tier2: { winnerCount: 0, poolPercentage: 30 },
+    tier3: { winnerCount: 0, poolPercentage: 20 }
   });
   const [eligibleUsers, setEligibleUsers] = useState<any[]>([]);
   const [customWinnerIds, setCustomWinnerIds] = useState<number[]>([]);

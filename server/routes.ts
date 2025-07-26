@@ -4292,9 +4292,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cycleSettingId,
         selectionMode: selectionMode || 'weighted_random',
         tierSettings: tierSettings || {
-          tier1: { winnerCount: 3, poolPercentage: 50 },
-          tier2: { winnerCount: 5, poolPercentage: 30 },
-          tier3: { winnerCount: 7, poolPercentage: 20 }
+          tier1: { winnerCount: 0, poolPercentage: 50 },
+          tier2: { winnerCount: 0, poolPercentage: 30 },
+          tier3: { winnerCount: 0, poolPercentage: 20 }
         },
         customWinnerIds,
         pointDeductionPercentage: pointDeductionPercentage || 50,
