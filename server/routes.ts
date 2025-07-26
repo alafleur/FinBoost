@@ -3294,25 +3294,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const currentCycle = await storage.getCurrentCycle();
       if (!currentCycle) {
-        return res.json({
-          totalPool: 0,
-          premiumUsers: 0,
-          totalUsers: 0,
-          rewardPoolPercentage: 50, // Default fallback
-          minimumPoolGuarantee: 0, // Default fallback
-          tierBreakdown: {
-            tier1: 0,
-            tier2: 0,
-            tier3: 0
-          }
-        });
+        return res.status(400).json({ error: "No active cycle found" });
       }
       
       const poolData = await storage.getCyclePoolData(currentCycle.id);
       
-      // Use the current cycle's actual reward pool percentage instead of separate settings lookup
-      const rewardPoolPercentage = currentCycle.rewardPoolPercentage || 50;
-      const minimumPoolGuarantee = currentCycle.minimumPoolGuarantee || 0;
+      // Use the current cycle's actual reward pool percentage - no fallbacks
+      const rewardPoolPercentage = currentCycle.rewardPoolPercentage;
+      const minimumPoolGuarantee = currentCycle.minimumPoolGuarantee;
       
       // Calculate tier-specific pool breakdown
       const tierBreakdown = {

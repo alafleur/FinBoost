@@ -301,10 +301,10 @@ export default function Admin() {
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [showQuizDialog, setShowQuizDialog] = useState(false);
   
-  // Current pool settings
+  // Current pool settings - will be populated from API
   const [currentPoolSettings, setCurrentPoolSettings] = useState({
-    rewardPoolPercentage: 50,
-    membershipFee: 2000
+    rewardPoolPercentage: 0,
+    membershipFee: 0
   });
 
   // PayPal disbursement state
@@ -765,12 +765,29 @@ export default function Admin() {
   const fetchCurrentPoolSettings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/current-pool-settings', {
+      const response = await fetch('/api/admin/cycle-settings', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setCurrentPoolSettings(data);
+        const activeCycle = data.find(cycle => cycle.isActive);
+        if (activeCycle) {
+          setCurrentPoolSettings({
+            rewardPoolPercentage: activeCycle.rewardPoolPercentage,
+            membershipFee: activeCycle.membershipFee
+          });
+          // Update all form defaults to use actual cycle data
+          setCycleForm(prev => ({
+            ...prev,
+            rewardPoolPercentage: activeCycle.rewardPoolPercentage,
+            membershipFee: activeCycle.membershipFee
+          }));
+          setPoolSettingForm(prev => ({
+            ...prev,
+            rewardPoolPercentage: activeCycle.rewardPoolPercentage,
+            membershipFee: activeCycle.membershipFee
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching current pool settings:', error);
