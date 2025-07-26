@@ -1,0 +1,145 @@
+Thanks for the context. Based on your summary and the intended behavior, here’s a structured breakdown of what’s likely going wrong — and what to check in the `executeCycleWinnerSelection` logic inside `server/storage.ts`:
+
+---
+
+## 🧠 Suspected Root Cause
+
+The **point-weighted random selection** logic is likely failing to meet target counts due to one or more of these issues:
+
+---
+
+### ✅ 1. **Early Exit or Deduplication Logic**
+
+If the algorithm:
+
+* Shuffles or ranks users by weighted probability
+* Then selects top N but **excludes duplicate winners or edge cases**
+
+It may prematurely exit before reaching `targetCount`.
+**Check for:**
+
+```ts
+if (selected.length >= targetCount) break
+```
+
+…or anything limiting retry attempts or reducing pool size mid-loop.
+
+---
+
+### ✅ 2. **Probability Weighting Truncation**
+
+If you’re using a **weighted array** approach like:
+
+```ts
+const weightedPool = users.flatMap(user =>
+  Array(user.points).fill(user)
+)
+```
+
+This can create an **enormous array** and cause:
+
+* Repetition issues
+* Memory limitations
+* Biased or incomplete selection if sampling breaks early
+
+Better: normalize weights and sample without creating giant arrays.
+
+---
+
+### ✅ 3. **Tier Filtering Logic**
+
+Ensure you're correctly filtering users into **tier-specific pools**, and not excluding too many:
+
+* Are you removing users with 0 points?
+* Are inactive or disqualified users still being included?
+
+Look for:
+
+```ts
+eligibleUsers = users.filter(u => u.tier === 1 && u.points > 0)
+```
+
+→ Make sure the **filter criteria doesn’t shrink the pool too much**
+
+---
+
+### ✅ 4. **Sampling Logic – Check This Pattern**
+
+If you’re using logic like:
+
+```ts
+while (selected.length < targetCount) {
+  const candidate = weightedDraw(eligibleUsers)
+  if (!selected.includes(candidate)) selected.push(candidate)
+}
+```
+
+This **degrades fast** when:
+
+* Eligible pool is small
+* Same high-point users are picked over and over
+* Loop reaches max attempts or timeout
+
+Instead, consider:
+
+* Using a **cumulative probability approach**:
+
+  1. Normalize points into weights
+  2. Generate a random number \[0, 1]
+  3. Select user whose cumulative weight interval includes the value
+* Or better yet: use **Fisher-Yates weighted sampling without replacement**
+
+---
+
+## ✅ What You Should Do
+
+### Step 1: Confirm current logic in `executeCycleWinnerSelection()`
+
+Look for:
+
+* Filtering for each tier
+* Weighting logic
+* Loop or sampling condition (especially anything that ends before hitting `targetCount`)
+
+### Step 2: Check for quiet failures
+
+* Are you logging when a user is skipped?
+* Add a counter to report how many *attempts* were made vs. how many *winners selected*
+
+### Step 3: Consider this fix pattern:
+
+Replace naive loop with this structure:
+
+```ts
+function weightedSample(users, count) {
+  const weights = users.map(u => u.points)
+  const totalWeight = weights.reduce((a, b) => a + b, 0)
+
+  const selected = new Set()
+
+  while (selected.size < count && selected.size < users.length) {
+    const rand = Math.random() * totalWeight
+    let cumulative = 0
+
+    for (let i = 0; i < users.length; i++) {
+      cumulative += weights[i]
+      if (rand <= cumulative && !selected.has(users[i].id)) {
+        selected.add(users[i].id)
+        break
+      }
+    }
+  }
+
+  return [...selected]
+}
+```
+
+This ensures:
+
+* Weighted selection
+* No duplicates
+* Loop ends when count is met
+
+---
+
+If you'd like, I can review your exact implementation in `storage.ts` and rewrite the faulty selection logic. Just confirm that I should dive into the GitHub code and patch it directly.
