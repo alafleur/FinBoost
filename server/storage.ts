@@ -6661,6 +6661,12 @@ export class MemStorage implements IStorage {
         return;
       }
 
+      // Key insight: Log if we can't fulfill the winner count
+      const actualWinnerCount = Math.min(winnerCount, users.length);
+      if (actualWinnerCount < winnerCount) {
+        console.log(`WARNING: ${tier} only has ${users.length} users but needs ${winnerCount} winners. Selecting ${actualWinnerCount} instead.`);
+      }
+
       const totalWeight = users.reduce((sum: number, user: any) => sum + Math.max(1, user.currentCyclePoints), 0);
       const tierWinners = [];
       const availableUsers = [...users];
@@ -6686,8 +6692,10 @@ export class MemStorage implements IStorage {
       }
 
       winners.push(...tierWinners);
+      console.log(`${tier} final result: selected ${tierWinners.length} winners (target was ${winnerCount})`);
     });
 
+    console.log(`Total winners selected across all tiers: ${winners.length}`);
     return winners;
   }
 
@@ -6845,21 +6853,24 @@ export class MemStorage implements IStorage {
           tierRank: cycleWinnerSelections.tierRank,
           pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
           rewardAmount: cycleWinnerSelections.rewardAmount,
-          payoutPercentage: cycleWinnerSelections.payoutPercentage,
+          pointsDeducted: cycleWinnerSelections.pointsDeducted,
+          pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
           payoutStatus: cycleWinnerSelections.payoutStatus,
-          selectionMethod: cycleWinnerSelections.selectionMethod,
-          adjustmentReason: cycleWinnerSelections.adjustmentReason,
           selectionDate: cycleWinnerSelections.selectionDate
         })
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
-        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.selectionDate));
+        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.tierRank));
 
       // Calculate overall ranks (1, 2, 3... across all winners)
       const winnersWithOverallRank = winners.map((winner, index) => ({
         ...winner,
-        overallRank: index + 1
+        overallRank: index + 1,
+        payoutPercentage: 100, // Default to 100% since this field doesn't exist in schema
+        baseReward: (winner.rewardAmount || 0) / 100, // Convert cents to dollars for display
+        finalAmount: (winner.rewardAmount || 0) / 100, // Same as base since 100%
+        reason: 'Auto-selected' // Default reason
       }));
 
       return { winners: winnersWithOverallRank };
