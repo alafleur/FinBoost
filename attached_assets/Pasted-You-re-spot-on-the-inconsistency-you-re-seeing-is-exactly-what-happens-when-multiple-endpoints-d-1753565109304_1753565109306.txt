@@ -1,0 +1,67 @@
+You're spot on — the inconsistency you're seeing is exactly what happens when **multiple endpoints duplicate business logic instead of reusing the centralized helper**.
+
+---
+
+## ✅ Action Plan to Fix the Pool Calculation Discrepancy
+
+### 🔍 Problem Summary
+
+| Location                             | Endpoint                          | Calculation Source          | Value                              |
+| ------------------------------------ | --------------------------------- | --------------------------- | ---------------------------------- |
+| Overview Tab                         | `/api/pool/monthly`               | ✅ Uses correct helper       | \$5,000 (based on early override?) |
+| Cycle Analytics Tab & User Dashboard | `/api/cycles/pool`                | ✅ Uses `getCyclePoolData()` | \$5,000                            |
+| **Cycle Operations Tab**             | `/api/admin/cycles/:id/analytics` | ❌ **Hardcoded logic**       | \$3,750                            |
+
+---
+
+### 🔧 **Target Fix**
+
+#### 1. In `server/routes.ts`, around line \~2000:
+
+You’ll see something like:
+
+```ts
+router.get('/api/admin/cycles/:id/analytics', async (req, res) => {
+  const cycleId = req.params.id;
+  ...
+  const rawPool = userCount * 20 * 0.5; // ← outdated
+```
+
+#### ✅ Replace this logic with:
+
+```ts
+const poolData = await storage.getCyclePoolData(Number(cycleId));
+res.json({
+  ...otherStats,
+  rewardPool: poolData.finalRewardPool,
+});
+```
+
+This will:
+
+* Reuse your already-corrected `getCyclePoolData()` logic
+* Account for membership fee × cycle multiplier × contribution rate
+* Apply the minimum guarantee comparison consistently
+
+---
+
+### 📌 Sanity Check: `getCyclePoolData()`
+
+Make sure this method in `storage.ts` is computing:
+
+```ts
+const adjustedFee = membershipFee * getCycleFeeMultiplier(cycleType);
+const contribution = adjustedFee * poolContributionRate;
+const totalPool = numUsers * contribution;
+return Math.max(totalPool, minimumGuarantee);
+```
+
+If so — you're good.
+
+---
+
+### ✅ Final Recommendation
+
+**This fix ensures all visible locations — admin tabs, user dashboard, analytics — reference the same logic**, preventing desync or confusion during payouts or messaging.
+
+Let me know if you want a clean code snippet for the updated route handler.
