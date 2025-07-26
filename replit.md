@@ -192,6 +192,14 @@ The application features a modern React frontend with TypeScript, Express.js bac
 
 Preferred communication style: Simple, everyday language.
 
+**Development Standards:**
+- NO SHORTCUTS EVER - Always implement complete, production-ready solutions
+- Never use placeholders, mock data, or temporary fixes
+- Always trace issues to root cause rather than applying surface-level patches
+- Verify every fix with actual testing and data validation
+- Document exact changes made for transparency and accountability
+- Use systematic debugging approach - identify, isolate, fix, verify
+
 ## Current Status
 - Desktop dashboard fully functional with 5 tabs matching mobile
 - Board tab pagination working for all members
