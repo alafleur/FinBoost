@@ -306,15 +306,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pool routes
-  app.get("/api/pool/monthly", async (req, res) => {
-    try {
-      const pool = await storage.getMonthlyPool();
-      res.json({ success: true, pool });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  });
-
   app.get("/api/pool/next-distribution", async (req, res) => {
     try {
       // Always calculate fresh distribution data for real-time countdown
