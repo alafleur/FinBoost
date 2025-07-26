@@ -2317,20 +2317,42 @@ export class MemStorage implements IStorage {
         return acc;
       }, {} as Record<string, number>);
 
-      // Get active cycle setting for minimum guarantee calculation
+      // Get active cycle setting for proper fee calculation
       const activeCycle = await this.getActiveCycleSetting();
       
-      const monthlyRevenue = premiumUserCount * 20; // $20 per premium user
-      const memberContributions = Math.round(monthlyRevenue * 0.55); // 55% of revenue
+      if (!activeCycle) {
+        // Fallback values if no active cycle
+        const fallbackRevenue = premiumUserCount * 20;
+        const fallbackContributions = Math.round(fallbackRevenue * 0.5);
+        return {
+          totalUsers: premiumUserCount,
+          premiumUsers: premiumUserCount,
+          monthlyRevenue: fallbackRevenue.toString(),
+          totalPool: fallbackContributions,
+          tier1Pool: Math.round(fallbackContributions * 0.5),
+          tier2Pool: Math.round(fallbackContributions * 0.3),
+          tier3Pool: Math.round(fallbackContributions * 0.2),
+          tier1Users: tierMap.tier1 || 0,
+          tier2Users: tierMap.tier2 || 0,
+          tier3Users: tierMap.tier3 || 0,
+          lastUpdated: new Date().toISOString()
+        };
+      }
       
-      // Apply minimum pool guarantee if active cycle has one set
-      const minimumGuaranteeDollars = activeCycle ? Math.floor(activeCycle.minimumPoolGuarantee / 100) : 0;
+      // Use cycle-specific fee calculation with multiplier
+      const cycleFeeMultiplier = getCycleFeeMultiplier(activeCycle.cycleType);
+      const proportionalFee = (activeCycle.membershipFee / 100) * cycleFeeMultiplier; // Convert from cents to dollars
+      const cycleRevenue = premiumUserCount * proportionalFee;
+      const memberContributions = Math.round(cycleRevenue * (activeCycle.rewardPoolPercentage / 100));
+      
+      // Apply minimum pool guarantee
+      const minimumGuaranteeDollars = Math.floor(activeCycle.minimumPoolGuarantee / 100);
       const totalPool = Math.max(memberContributions, minimumGuaranteeDollars);
 
       return {
-        totalUsers: premiumUserCount, // Return as number for consistency
-        premiumUsers: premiumUserCount, // Explicitly show premium user count
-        monthlyRevenue: monthlyRevenue.toString(),
+        totalUsers: premiumUserCount,
+        premiumUsers: premiumUserCount,
+        monthlyRevenue: cycleRevenue.toString(),
         totalPool,
         tier1Pool: Math.round(totalPool * 0.5), // 50%
         tier2Pool: Math.round(totalPool * 0.3), // 30%
