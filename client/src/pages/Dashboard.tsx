@@ -533,23 +533,6 @@ export default function Dashboard() {
           {/* Mobile Tab Content with Full Desktop Features */}
           <div className="max-w-7xl mx-auto px-4 py-6 pb-20">
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Welcome Section with improved typography */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="font-heading font-bold text-xl text-gray-900 mb-1">
-                      Welcome back, {user?.firstName || user?.username}!
-                    </h2>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Track your progress, earn points, and win cycle rewards for building better financial habits.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {/* Unified Stats Cards Component */}
               <DashboardStats 
                 user={user}
@@ -1231,15 +1214,6 @@ export default function Dashboard() {
 
             {/* Overview Tab - Complete Content from Mobile */}
             <TabsContent value="overview" className="mt-0 space-y-6">
-              {/* Professional Welcome Section */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Welcome back, {user?.firstName || user?.username}
-                </h2>
-                <p className="text-gray-600">
-                  Track your progress, earn points, and compete for cycle rewards while building better financial habits.
-                </p>
-              </div>
 
               {/* Unified Stats Cards Component */}
               <DashboardStats 
