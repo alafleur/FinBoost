@@ -4323,7 +4323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get winner details for adjustment
+  // Get winner details for adjustment (original - returns all results)
   app.get('/api/admin/cycle-winner-details/:cycleSettingId', authenticateToken, async (req, res) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
@@ -4335,6 +4335,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting winner details:', error);
       res.status(500).json({ error: 'Failed to get winner details' });
+    }
+  });
+
+  // Get paginated winner details (new - for performance)
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId/paginated', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      // Validate pagination parameters
+      if (page < 1 || limit < 1 || limit > 100) {
+        return res.status(400).json({ error: 'Invalid pagination parameters. Page must be >= 1, limit must be 1-100.' });
+      }
+      
+      const details = await storage.getCycleWinnerDetailsPaginated(cycleSettingId, page, limit);
+      res.json({
+        ...details,
+        currentPage: page,
+        limit: limit,
+        totalPages: Math.ceil(details.totalCount / limit)
+      });
+    } catch (error) {
+      console.error('Error getting paginated winner details:', error);
+      res.status(500).json({ error: 'Failed to get paginated winner details' });
     }
   });
 

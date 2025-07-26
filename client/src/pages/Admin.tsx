@@ -326,6 +326,14 @@ export default function Admin() {
   const [eligibleUsers, setEligibleUsers] = useState<any[]>([]);
   const [customWinnerIds, setCustomWinnerIds] = useState<number[]>([]);
   const [winnerDetails, setWinnerDetails] = useState<any[]>([]);
+  
+  // Paginated winner state (new approach for performance)
+  const [paginatedWinners, setPaginatedWinners] = useState<{winners: any[], totalCount: number, currentPage: number, totalPages: number}>({
+    winners: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0
+  });
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -640,6 +648,14 @@ export default function Admin() {
       loadWinners();
     }
   }, [selectedCycle]);
+
+  // Load paginated winners when Cycle Operations tab is opened
+  useEffect(() => {
+    if (activeTab === 'operations' && currentPoolSettings?.id) {
+      console.log('Loading paginated winners for operations tab');
+      loadPaginatedWinnerDetails(currentPoolSettings.id, 1, winnersPerPage);
+    }
+  }, [activeTab, currentPoolSettings?.id]);
 
   const fetchData = async () => {
     try {
@@ -1366,7 +1382,7 @@ export default function Admin() {
       if (response.ok) {
         const results = await response.json();
         setSelectionResults(results);
-        await loadWinnerDetails(activeCycle.id);
+        await loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
         toast({
           title: "Winner selection completed",
           description: `Selected ${results.winnersSelected} winners using ${winnerSelectionMode} method.`,
@@ -1388,7 +1404,7 @@ export default function Admin() {
     }
   };
 
-  // Load winner details for display and adjustment
+  // Load winner details for display and adjustment (original - loads all data)
   const loadWinnerDetails = async (cycleSettingId: number) => {
     try {
       const token = localStorage.getItem('token');
@@ -1402,6 +1418,34 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Error loading winner details:', error);
+    }
+  };
+
+  // Load paginated winner details (new - for performance)
+  const loadPaginatedWinnerDetails = async (cycleSettingId: number, page: number = 1, limit: number = 50) => {
+    try {
+      console.log(`Loading paginated winners: cycle ${cycleSettingId}, page ${page}, limit ${limit}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-details/${cycleSettingId}/paginated?page=${page}&limit=${limit}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Loaded ${data.winners?.length || 0} winners for page ${page}`);
+        setPaginatedWinners({
+          winners: data.winners || [],
+          totalCount: data.totalCount || 0,
+          currentPage: data.currentPage || page,
+          totalPages: data.totalPages || 0
+        });
+      } else {
+        console.error('Failed to load paginated winner details');
+        setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
+      }
+    } catch (error) {
+      console.error('Error loading paginated winner details:', error);
+      setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
     }
   };
 
@@ -1435,10 +1479,10 @@ export default function Admin() {
         body: JSON.stringify({ payoutPercentage })
       });
 
-      // Refresh winner details
+      // Refresh winner details with pagination
       const activeCycle = cycleSettings.find(c => c.isActive);
       if (activeCycle) {
-        await loadWinnerDetails(activeCycle.id);
+        await loadPaginatedWinnerDetails(activeCycle.id, paginatedWinners.currentPage || 1, winnersPerPage);
       }
     } catch (error) {
       console.error('Error updating winner payout:', error);
@@ -1475,10 +1519,10 @@ export default function Admin() {
         body: JSON.stringify({ payoutStatus: 'removed' })
       });
 
-      // Refresh winner details
+      // Refresh winner details with pagination
       const activeCycle = cycleSettings.find(c => c.isActive);
       if (activeCycle) {
-        await loadWinnerDetails(activeCycle.id);
+        await loadPaginatedWinnerDetails(activeCycle.id, paginatedWinners.currentPage || 1, winnersPerPage);
       }
 
       toast({
@@ -1630,8 +1674,8 @@ export default function Admin() {
 
           setImportResults(result.results);
           
-          // Refresh winner details to show updated data
-          await loadWinnerDetails(activeCycle.id);
+          // Refresh winner details to show updated data with pagination
+          await loadPaginatedWinnerDetails(activeCycle.id, paginatedWinners.currentPage || 1, winnersPerPage);
 
           toast({
             title: "Import completed",
@@ -3757,12 +3801,10 @@ export default function Admin() {
                               </thead>
                               <tbody>
                                 {useMemo(() => {
-                                  // Memoize pagination and calculations for performance
-                                  const startIndex = (winnerTablePage - 1) * winnersPerPage;
-                                  const endIndex = startIndex + winnersPerPage;
-                                  const paginatedWinners = winnerDetails?.slice(startIndex, endIndex) || [];
+                                  // Use paginated data from server instead of client-side pagination
+                                  const winnersToDisplay = paginatedWinners.winners || [];
                                   
-                                  return paginatedWinners.map((winner: any) => {
+                                  return winnersToDisplay.map((winner: any) => {
                                     // Calculate tier size from selection results to match the Winner Selection section
                                     const tierSize = (() => {
                                       if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 825000; // $8,250 in cents
@@ -3869,35 +3911,47 @@ export default function Admin() {
                                     </tr>
                                   );
                                   });
-                                }, [winnerDetails, winnerTablePage, winnersPerPage, selectionResults, payoutPercentages, payoutOverrides])}
+                                }, [paginatedWinners.winners, selectionResults, payoutPercentages, payoutOverrides])}
                               </tbody>
                             </table>
                           </div>
                           
-                          {/* Winner Table Pagination */}
-                          {winnerDetails && winnerDetails.length > winnersPerPage && (
+                          {/* Winner Table Pagination - Server-side */}
+                          {paginatedWinners.totalCount > 0 && (
                             <div className="flex items-center justify-between mt-4">
                               <div className="text-sm text-gray-600">
-                                Showing {((winnerTablePage - 1) * winnersPerPage) + 1} to {Math.min(winnerTablePage * winnersPerPage, winnerDetails.length)} of {winnerDetails.length} winners
+                                Showing {((paginatedWinners.currentPage - 1) * winnersPerPage) + 1} to {Math.min(paginatedWinners.currentPage * winnersPerPage, paginatedWinners.totalCount)} of {paginatedWinners.totalCount} winners
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setWinnerTablePage(Math.max(1, winnerTablePage - 1))}
-                                  disabled={winnerTablePage === 1}
+                                  onClick={() => {
+                                    const newPage = Math.max(1, paginatedWinners.currentPage - 1);
+                                    setWinnerTablePage(newPage);
+                                    if (currentPoolSettings?.id) {
+                                      loadPaginatedWinnerDetails(currentPoolSettings.id, newPage, winnersPerPage);
+                                    }
+                                  }}
+                                  disabled={paginatedWinners.currentPage <= 1}
                                 >
                                   <ChevronLeft className="w-4 h-4" />
                                   Previous
                                 </Button>
                                 <span className="text-sm">
-                                  Page {winnerTablePage} of {Math.ceil(winnerDetails.length / winnersPerPage)}
+                                  Page {paginatedWinners.currentPage} of {paginatedWinners.totalPages}
                                 </span>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setWinnerTablePage(winnerTablePage + 1)}
-                                  disabled={winnerTablePage >= Math.ceil(winnerDetails.length / winnersPerPage)}
+                                  onClick={() => {
+                                    const newPage = Math.min(paginatedWinners.totalPages, paginatedWinners.currentPage + 1);
+                                    setWinnerTablePage(newPage);
+                                    if (currentPoolSettings?.id) {
+                                      loadPaginatedWinnerDetails(currentPoolSettings.id, newPage, winnersPerPage);
+                                    }
+                                  }}
+                                  disabled={paginatedWinners.currentPage >= paginatedWinners.totalPages}
                                 >
                                   Next
                                   <ChevronRight className="w-4 h-4" />

@@ -273,6 +273,7 @@ export interface IStorage {
     // Cycle Winner Selection
     createCycleWinnerSelection(data: InsertCycleWinnerSelection): Promise<CycleWinnerSelection>;
     getCycleWinners(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
+    getCycleWinnerDetailsPaginated(cycleSettingId: number, page: number, limit: number): Promise<{winners: any[], totalCount: number}>;
     performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
     
     // Cycle Analytics and Reporting
@@ -6926,6 +6927,74 @@ export class MemStorage implements IStorage {
       console.error('[DEBUG] Error stack:', error.stack);
       console.error('[DEBUG] Query parameters:', { cycleSettingId });
       return { winners: [] };
+    }
+  }
+
+  async getCycleWinnerDetailsPaginated(cycleSettingId: number, page: number, limit: number): Promise<{winners: any[], totalCount: number}> {
+    try {
+      console.log(`[DEBUG] getCycleWinnerDetailsPaginated called with cycleSettingId: ${cycleSettingId}, page: ${page}, limit: ${limit}`);
+      
+      // Step 1: Get total count for pagination
+      const totalCountResult = await db
+        .select({ count: sql`count(*)`.as('count') })
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+      
+      const totalCount = parseInt(totalCountResult[0]?.count?.toString() || '0');
+      console.log(`[DEBUG] Total winners for cycle ${cycleSettingId}: ${totalCount}`);
+      
+      if (totalCount === 0) {
+        return { winners: [], totalCount: 0 };
+      }
+      
+      // Step 2: Get paginated results with LIMIT and OFFSET
+      const offset = (page - 1) * limit;
+      console.log(`[DEBUG] Fetching page ${page} with limit ${limit}, offset ${offset}`);
+      
+      const winners = await db
+        .select({
+          id: cycleWinnerSelections.id,
+          userId: cycleWinnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          tier: cycleWinnerSelections.tier,
+          tierRank: cycleWinnerSelections.tierRank,
+          pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
+          rewardAmount: cycleWinnerSelections.rewardAmount,
+          pointsDeducted: cycleWinnerSelections.pointsDeducted,
+          pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          selectionDate: cycleWinnerSelections.selectionDate
+        })
+        .from(cycleWinnerSelections)
+        .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.tierRank))
+        .limit(limit)
+        .offset(offset);
+
+      console.log(`[DEBUG] Retrieved ${winners.length} winners for current page`);
+      
+      // Step 3: Calculate overall ranks (accounting for pagination)
+      const winnersWithOverallRank = winners.map((winner, index) => ({
+        ...winner,
+        overallRank: offset + index + 1, // Correct rank based on pagination
+        payoutPercentage: 100,
+        baseReward: (winner.rewardAmount || 0) / 100,
+        finalAmount: (winner.rewardAmount || 0) / 100,
+        reason: 'Auto-selected'
+      }));
+
+      console.log(`[DEBUG] Successfully processed ${winnersWithOverallRank.length} paginated winners`);
+      return { 
+        winners: winnersWithOverallRank, 
+        totalCount: totalCount 
+      };
+    } catch (error) {
+      console.error('[DEBUG] Error getting paginated cycle winner details:', error);
+      console.error('[DEBUG] Error stack:', error);
+      console.error('[DEBUG] Query parameters:', { cycleSettingId, page, limit });
+      return { winners: [], totalCount: 0 };
     }
   }
 
