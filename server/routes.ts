@@ -16,7 +16,7 @@ import * as XLSX from "xlsx";
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2025-04-30.basil",
+    apiVersion: "2025-05-28.basil",
   });
 }
 
@@ -31,8 +31,14 @@ async function getUserFromToken(token: string) {
   }
 }
 
+// Extended Request interface for authentication
+interface AuthenticatedRequest extends express.Request {
+  user?: User;
+  session?: any;
+}
+
 // Authentication middleware
-const authenticateToken = async (req: any, res: any, next: any) => {
+const authenticateToken = async (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -4267,7 +4273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Execute flexible winner selection with point-weighted random as baseline
-  app.post('/api/admin/cycle-winner-selection/execute', authenticateToken, async (req, res) => {
+  app.post('/api/admin/cycle-winner-selection/execute', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
     }
@@ -4309,7 +4315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get eligible users for manual selection
-  app.get('/api/admin/eligible-users/:cycleSettingId', authenticateToken, async (req, res) => {
+  app.get('/api/admin/eligible-users/:cycleSettingId', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
     if (!req.user?.isAdmin) {
       return res.status(403).json({ error: "Admin access required" });
     }
