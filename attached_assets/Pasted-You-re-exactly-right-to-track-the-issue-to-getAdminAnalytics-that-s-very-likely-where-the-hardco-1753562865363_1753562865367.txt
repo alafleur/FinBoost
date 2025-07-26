@@ -1,0 +1,80 @@
+You're exactly right to track the issue to getAdminAnalytics() — that's very likely where the hardcoded or outdated logic is still overriding your new proportional fee calculations. Here's what you should do:
+
+
+---
+
+✅ Fix Plan for Inaccurate Pool Size on Admin Overview
+
+🔍 1. Locate getAdminAnalytics() in server/storage.ts
+
+You're already confident that:
+
+getCyclePoolData(), executeCycleWinnerSelection(), and the /api/admin/cycle-analytics route are using the correct getCycleFeeMultiplier() logic.
+
+So now focus exclusively on this getAdminAnalytics() method — it likely has its own local pool size calculation.
+
+
+Look for any of the following signs inside getAdminAnalytics():
+
+const poolSize = totalUsers * membershipFee * 0.55
+
+or:
+
+const projectedPool = 1500 * 20 * 0.5
+
+→ These will need to be replaced with:
+
+const cycleMultiplier = getCycleFeeMultiplier(cycleType)
+const cycleFee = baseFee * cycleMultiplier
+const projectedPool = totalUsers * cycleFee * poolPercentage
+
+If this function does not currently call getCycleFeeMultiplier(), that’s your missing link.
+
+
+---
+
+🛠 How to Fix It
+
+Replace any line doing:
+
+const projectedPool = userCount * 20 * 0.5
+
+With:
+
+const cycleMultiplier = getCycleFeeMultiplier(cycleType)  // e.g. 0.5 for bi-weekly
+const adjustedFee = membershipFee * cycleMultiplier
+const projectedPool = userCount * adjustedFee * poolContributionRate
+
+Also confirm:
+
+The cycleType variable is correctly passed or derived
+
+You’re using the correct membershipFee (not hardcoded 20)
+
+The poolContributionRate (e.g. 0.5 or 0.55) is consistent across admin view and winner selection
+
+
+
+---
+
+✅ Final Checks
+
+After implementing:
+
+1. Confirm the pool estimate matches actual paid cycle fee per user × # users × contribution %
+
+
+2. Check all dashboard widgets calling this data are now updated
+
+
+3. Add a console log or admin-only tooltip showing:
+
+Fee Breakdown: 1500 users × $10 × 50% = $7,500
+
+
+
+
+---
+
+Let me know if you'd like help rewriting getAdminAnalytics() using the corrected proportional logic — I can output the exact block.
+
