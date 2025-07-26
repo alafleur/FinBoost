@@ -194,7 +194,8 @@ Preferred communication style: Simple, everyday language.
 
 **Development Standards:**
 - NO SHORTCUTS EVER - Always implement complete, production-ready solutions
-- Never use placeholders, mock data, or temporary fixes
+- Never use placeholders or temporary fixes in production code
+- Use realistic test data when needed for testing, but never fake data in production features
 - Always trace issues to root cause rather than applying surface-level patches
 - Verify every fix with actual testing and data validation
 - Document exact changes made for transparency and accountability
