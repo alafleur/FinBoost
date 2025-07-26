@@ -3798,11 +3798,9 @@ export default function Admin() {
                                       </td>
                                       <td className="p-2">
                                         <Input 
-                                          type="number" 
+                                          type="text"
                                           value={payoutOverrides[winner.id] !== undefined ? (payoutOverrides[winner.id] / 100).toFixed(2) : ''}
-                                          min="0" 
-                                          step="0.01"
-                                          className="w-24 text-center"
+                                          className="w-28 text-center"
                                           onChange={(e) => {
                                             const value = e.target.value;
                                             if (value === '') {
@@ -3812,11 +3810,15 @@ export default function Admin() {
                                                 return updated;
                                               });
                                             } else {
-                                              const override = parseFloat(value) * 100;
-                                              setPayoutOverrides(prev => ({
-                                                ...prev,
-                                                [winner.id]: override
-                                              }));
+                                              // Allow any numeric input (including more than 3 digits)
+                                              const numValue = parseFloat(value);
+                                              if (!isNaN(numValue) && numValue >= 0) {
+                                                const override = numValue * 100;
+                                                setPayoutOverrides(prev => ({
+                                                  ...prev,
+                                                  [winner.id]: override
+                                                }));
+                                              }
                                             }
                                           }}
                                           placeholder="0.00"
