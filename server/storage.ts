@@ -5,6 +5,23 @@ import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt, sum,
 import { db } from "./db";
 import crypto from "crypto";
 
+// Helper function to get cycle fee multiplier based on cycle type
+function getCycleFeeMultiplier(cycleType: string): number {
+  switch (cycleType) {
+    case 'weekly':
+      return 1/4;  // 1/4 of monthly fee
+    case '10-day':
+      return 1/3;  // 1/3 of monthly fee  
+    case 'bi-weekly':
+      return 1/2;  // 1/2 of monthly fee
+    case 'monthly':
+      return 1;    // full monthly fee
+    default:
+      console.warn(`Unknown cycle type: ${cycleType}, using bi-weekly multiplier as default`);
+      return 1/2;  // default to bi-weekly
+  }
+}
+
 // modify the interface with any CRUD methods
 // you might need
 
@@ -4481,9 +4498,11 @@ export class MemStorage implements IStorage {
       const premiumUsers = premiumUsersCount[0]?.count || 0;
       const totalUsers = totalUsersCount[0]?.count || 0;
       
-      // Calculate total pool (premium users * membership fee * reward pool percentage)
-      // Note: membershipFee is in cents, so divide by 100 to convert to dollars
-      const memberContributions = Math.floor((premiumUsers * cycle.membershipFee * cycle.rewardPoolPercentage) / 100 / 100);
+      // Calculate total pool (premium users * proportional membership fee * reward pool percentage)
+      // Apply cycle type multiplier to get proportional fee, then convert from cents to dollars
+      const cycleFeeMultiplier = getCycleFeeMultiplier(cycle.cycleType);
+      const proportionalFee = cycle.membershipFee * cycleFeeMultiplier;
+      const memberContributions = Math.floor((premiumUsers * proportionalFee * cycle.rewardPoolPercentage) / 100 / 100);
       
       // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
       // minimumPoolGuarantee is in cents, so divide by 100 to convert to dollars
@@ -6559,8 +6578,10 @@ export class MemStorage implements IStorage {
       // Get premium user count for pool calculation
       const premiumUserCount = eligibleUsers.length;
       
-      // Calculate member contributions
-      const memberContributionsCents = Math.floor((premiumUserCount * cycleSetting.membershipFee * cycleSetting.rewardPoolPercentage) / 100);
+      // Calculate member contributions with cycle type multiplier
+      const cycleFeeMultiplier = getCycleFeeMultiplier(cycleSetting.cycleType);
+      const proportionalFee = cycleSetting.membershipFee * cycleFeeMultiplier;
+      const memberContributionsCents = Math.floor((premiumUserCount * proportionalFee * cycleSetting.rewardPoolPercentage) / 100);
       
       // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
       const totalPoolCents = Math.max(memberContributionsCents, cycleSetting.minimumPoolGuarantee);

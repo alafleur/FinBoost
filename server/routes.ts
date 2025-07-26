@@ -31,6 +31,23 @@ async function getUserFromToken(token: string) {
   }
 }
 
+// Helper function to get cycle fee multiplier based on cycle type
+function getCycleFeeMultiplier(cycleType: string): number {
+  switch (cycleType) {
+    case 'weekly':
+      return 1/4;  // 1/4 of monthly fee
+    case '10-day':
+      return 1/3;  // 1/3 of monthly fee  
+    case 'bi-weekly':
+      return 1/2;  // 1/2 of monthly fee
+    case 'monthly':
+      return 1;    // full monthly fee
+    default:
+      console.warn(`Unknown cycle type: ${cycleType}, using bi-weekly multiplier as default`);
+      return 1/2;  // default to bi-weekly
+  }
+}
+
 // Extended Request interface for authentication
 interface AuthenticatedRequest extends express.Request {
   user?: User;
@@ -3594,8 +3611,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const participants = Number(participantsResult[0]?.count) || 0;
 
-      // Calculate total pool amount (convert from cents to dollars)
-      const totalPoolAmountCents = Math.floor((participants * cycle.membershipFee * cycle.rewardPoolPercentage) / 100);
+      // Calculate total pool amount with cycle type multiplier (convert from cents to dollars)
+      const cycleFeeMultiplier = getCycleFeeMultiplier(cycle.cycleType);
+      const proportionalFee = cycle.membershipFee * cycleFeeMultiplier;
+      const totalPoolAmountCents = Math.floor((participants * proportionalFee * cycle.rewardPoolPercentage) / 100);
       const totalPoolAmount = totalPoolAmountCents / 100;
 
       // Get average points (excluding admin users)
