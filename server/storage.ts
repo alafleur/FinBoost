@@ -6816,7 +6816,7 @@ export class MemStorage implements IStorage {
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
-        .orderBy(cycleWinnerSelections.selectionDate);
+        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.selectionDate));
 
       return { winners };
     } catch (error) {
