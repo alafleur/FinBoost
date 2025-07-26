@@ -320,6 +320,10 @@ export default function Admin() {
   const [winnerDetails, setWinnerDetails] = useState<any[]>([]);
   const [csvImportData, setCsvImportData] = useState("");
   const [showCsvImportDialog, setShowCsvImportDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResults, setImportResults] = useState<any>(null);
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
   const [newCycleForm, setNewCycleForm] = useState({
     cycleName: '',
@@ -1543,6 +1547,84 @@ export default function Admin() {
         description: "Unable to export winner selection to Excel.",
         variant: "destructive",
       });
+    }
+  };
+
+  // Import winner selection from Excel
+  const handleImportWinners = async () => {
+    if (!importFile) {
+      toast({
+        title: "No file selected",
+        description: "Please select an Excel file to import.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (!activeCycle) {
+        toast({
+          title: "No active cycle",
+          description: "Please select an active cycle first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const fileData = e.target?.result as string;
+          
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/admin/cycle-winner-details/${activeCycle.id}/import`, {
+            method: 'POST',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fileData })
+          });
+
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Import failed');
+          }
+
+          setImportResults(result.results);
+          
+          // Refresh winner details to show updated data
+          await loadWinnerDetails(activeCycle.id);
+
+          toast({
+            title: "Import completed",
+            description: `Processed ${result.results.processed} rows, updated ${result.results.updated} winners`,
+          });
+        } catch (error) {
+          console.error('Error importing winners:', error);
+          toast({
+            title: "Import failed",
+            description: error instanceof Error ? error.message : "Unable to import winner data.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsImporting(false);
+        }
+      };
+      
+      reader.readAsDataURL(importFile);
+    } catch (error) {
+      console.error('Error importing winners:', error);
+      toast({
+        title: "Import failed",
+        description: "Unable to process import file.",
+        variant: "destructive",
+      });
+      setIsImporting(false);
     }
   };
 
@@ -3593,21 +3675,33 @@ export default function Admin() {
                             </div>
                           </div>
 
-                          {/* Export Controls */}
+                          {/* Export/Import Controls */}
                           <div className="flex justify-between items-center mb-4">
                             <div className="text-sm text-gray-600">
                               {selectionResults?.winnersSelected || 0} winners selected
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={handleExportWinners}
-                              disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
-                              className="flex items-center gap-2"
-                            >
-                              <Download className="w-4 h-4" />
-                              Export to Excel
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={handleExportWinners}
+                                disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
+                                className="flex items-center gap-2"
+                              >
+                                <Download className="w-4 h-4" />
+                                Export to Excel
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setShowImportDialog(true)}
+                                disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
+                                className="flex items-center gap-2"
+                              >
+                                <Upload className="w-4 h-4" />
+                                Import from Excel
+                              </Button>
+                            </div>
                           </div>
 
                           <div className="overflow-x-auto">
@@ -7551,6 +7645,101 @@ export default function Admin() {
             </Button>
             <Button onClick={handleSaveCycle}>
               {editingCycle ? "Update Cycle" : "Create Cycle"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Winner Selection Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Winner Selection</DialogTitle>
+            <DialogDescription>
+              Import an Excel file to update winner selection data. The file must contain Email, Reward Amount, and Payout Status columns.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Import Requirements</h4>
+              <div className="text-sm text-blue-800 space-y-1">
+                <div>• Excel file must contain "Email", "Reward Amount", and "Payout Status" columns</div>
+                <div>• Only existing winners in the current cycle can be updated</div>
+                <div>• Email addresses are used to match and update records</div>
+                <div>• Reward amounts should be in dollar format (e.g., $10.50)</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="import-file">Select Excel File</Label>
+              <Input
+                id="import-file"
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  setImportFile(file || null);
+                  setImportResults(null);
+                }}
+                className="cursor-pointer"
+              />
+              {importFile && (
+                <div className="text-sm text-gray-600">
+                  Selected: {importFile.name} ({(importFile.size / 1024).toFixed(1)} KB)
+                </div>
+              )}
+            </div>
+
+            {importResults && (
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="font-medium text-green-900 mb-2">Import Results</h4>
+                <div className="text-sm text-green-800 space-y-1">
+                  <div>✓ Processed: {importResults.processed} rows</div>
+                  <div>✓ Updated: {importResults.updated} winners</div>
+                  <div>• Skipped: {importResults.skipped} rows</div>
+                  {importResults.errors.length > 0 && (
+                    <div className="mt-2">
+                      <div className="text-red-800 font-medium">Errors:</div>
+                      <div className="max-h-32 overflow-y-auto">
+                        {importResults.errors.slice(0, 5).map((error: string, index: number) => (
+                          <div key={index} className="text-xs text-red-700">• {error}</div>
+                        ))}
+                        {importResults.errors.length > 5 && (
+                          <div className="text-xs text-red-700">... and {importResults.errors.length - 5} more errors</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {isImporting && (
+              <div className="text-center py-4">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                <div className="text-sm text-gray-600">Processing import...</div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowImportDialog(false);
+                setImportFile(null);
+                setImportResults(null);
+              }}
+              disabled={isImporting}
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={handleImportWinners}
+              disabled={!importFile || isImporting}
+            >
+              {isImporting ? 'Importing...' : 'Import Winners'}
             </Button>
           </div>
         </DialogContent>

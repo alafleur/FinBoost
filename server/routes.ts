@@ -4415,6 +4415,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import winner selection from XLSX
+  app.post('/api/admin/cycle-winner-details/:cycleSettingId/import', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const { fileData } = req.body;
+
+      if (!fileData) {
+        return res.status(400).json({ error: 'No file data provided' });
+      }
+
+      // Parse base64 encoded Excel file
+      const buffer = Buffer.from(fileData.split(',')[1], 'base64');
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      
+      // Get first worksheet
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        return res.status(400).json({ error: 'No worksheet found in Excel file' });
+      }
+
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (!jsonData || jsonData.length === 0) {
+        return res.status(400).json({ error: 'No data found in Excel file' });
+      }
+
+      // Validate required columns
+      const requiredColumns = ['Email', 'Reward Amount', 'Payout Status'];
+      const firstRow = jsonData[0] as any;
+      const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+      
+      if (missingColumns.length > 0) {
+        return res.status(400).json({ 
+          error: `Missing required columns: ${missingColumns.join(', ')}` 
+        });
+      }
+
+      // Process import data
+      const importResults = {
+        processed: 0,
+        updated: 0,
+        errors: [] as string[],
+        skipped: 0
+      };
+
+      for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i] as any;
+        importResults.processed++;
+
+        try {
+          const email = row.Email?.trim();
+          if (!email) {
+            importResults.errors.push(`Row ${i + 2}: Missing email address`);
+            continue;
+          }
+
+          // Parse reward amount (remove $ and convert to cents)
+          let rewardAmount = 0;
+          const rewardStr = String(row['Reward Amount'] || '0');
+          const rewardMatch = rewardStr.match(/[\d.,]+/);
+          if (rewardMatch) {
+            rewardAmount = Math.round(parseFloat(rewardMatch[0].replace(',', '')) * 100);
+          }
+
+          const payoutStatus = row['Payout Status']?.trim() || 'pending';
+
+          // Find existing winner by email and cycle
+          const existingWinner = await db
+            .select()
+            .from(winnerSelections)
+            .innerJoin(users, eq(winnerSelections.userId, users.id))
+            .where(
+              and(
+                eq(winnerSelections.cycleSettingId, cycleSettingId),
+                eq(users.email, email)
+              )
+            )
+            .limit(1);
+
+          if (existingWinner.length === 0) {
+            importResults.errors.push(`Row ${i + 2}: No winner found with email ${email} in this cycle`);
+            continue;
+          }
+
+          // Update winner selection
+          await db
+            .update(winnerSelections)
+            .set({
+              rewardAmount,
+              payoutStatus,
+              updatedAt: new Date()
+            })
+            .where(eq(winnerSelections.id, existingWinner[0].winner_selections.id));
+
+          importResults.updated++;
+
+        } catch (rowError) {
+          console.error(`Error processing row ${i + 2}:`, rowError);
+          importResults.errors.push(`Row ${i + 2}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
+        }
+      }
+
+      res.json({
+        success: true,
+        results: importResults
+      });
+
+    } catch (error) {
+      console.error('Error importing winner details from XLSX:', error);
+      res.status(500).json({ error: 'Failed to import winner details from XLSX' });
+    }
+  });
+
   // Update winner payout percentage or status
   app.patch('/api/admin/winner-payout/:winnerId', authenticateToken, async (req, res) => {
     if (!req.user?.isAdmin) {
