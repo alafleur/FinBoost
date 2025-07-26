@@ -1,0 +1,38 @@
+Based on the logs and images, I can clearly describe the three persistent issues for the Assistant:
+
+Three Critical Issues in Winner Selection System
+Issue 1: Winner Count Discrepancy
+Expected: 225 + 225 + 300 = 750 total winners
+Actual: 565 total winners (172 + 176 + 217)
+
+The logs show:
+
+tier1 selection: 450 users available, target 225 winners → only got 172
+tier2 selection: 449 users available, target 225 winners → only got 176
+tier3 selection: 602 users available, target 300 winners → only got 217
+Root cause: The weighted random selection algorithm is not fulfilling the target winner counts despite having sufficient users in each tier. The algorithm appears to be terminating early or failing to select the full quota.
+
+Issue 2: Overall Rank Column Not Working
+Expected: Sequential numbering (1, 2, 3, 4...) across all winners
+Actual: Shows "#" symbol instead of actual rank numbers
+
+The database query in getCycleWinnerDetails is still failing with error:
+
+TypeError: Cannot convert undefined or null to object
+at Function.entries (<anonymous>)
+at orderSelectedFields
+This suggests the database schema fix didn't resolve the underlying query structure issue.
+
+Issue 3: Export Function Not Working
+Expected: Download Excel file with winner data
+Actual: "Export failed - Unable to export winner selection to Excel" error
+
+The export is failing because the getCycleWinnerDetails method returns empty results due to the same database query error as Issue 2. The API returns 404 with "No winner data found for this cycle".
+
+Key Technical Details:
+The winner selection successfully saves 565 records to database
+The selection parameters are correctly received (225/225/300)
+Each tier has sufficient users but algorithm selects fewer than requested
+Database query fails after successful winner insertion
+Export depends on the broken database query
+The core problem appears to be in the weighted random selection logic that's not completing the full winner quota, plus a persistent database schema/query mismatch preventing winner details retrieval.
