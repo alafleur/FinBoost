@@ -303,7 +303,7 @@ export default function Admin() {
   
   // Current pool settings
   const [currentPoolSettings, setCurrentPoolSettings] = useState({
-    rewardPoolPercentage: 55,
+    rewardPoolPercentage: 50,
     membershipFee: 2000
   });
 
@@ -382,7 +382,7 @@ export default function Admin() {
     cycleName: '',
     cycleStartDate: '',
     cycleEndDate: '',
-    rewardPoolPercentage: 55,
+    rewardPoolPercentage: 50,
     membershipFee: 2000,
     isActive: true
   });
@@ -402,7 +402,7 @@ export default function Admin() {
     cycleEndDate: '',
     paymentPeriodDays: 30,
     membershipFee: 2000,
-    rewardPoolPercentage: 55,
+    rewardPoolPercentage: 50,
     tier1Threshold: 67,
     tier2Threshold: 33,
     isActive: false,
@@ -854,7 +854,7 @@ export default function Admin() {
           cycleEndDate: '',
           paymentPeriodDays: 30,
           membershipFee: 2000,
-          rewardPoolPercentage: 55,
+          rewardPoolPercentage: 50,
           tier1Threshold: 67,
           tier2Threshold: 33,
           isActive: false,
@@ -938,7 +938,7 @@ export default function Admin() {
           cycleName: '',
           cycleStartDate: '',
           cycleEndDate: '',
-          rewardPoolPercentage: 55,
+          rewardPoolPercentage: 50,
           membershipFee: 2000,
           isActive: true
         });
@@ -3079,7 +3079,7 @@ export default function Admin() {
                         cycleEndDate: '',
                         paymentPeriodDays: 30,
                         membershipFee: 2000,
-                        rewardPoolPercentage: 55,
+                        rewardPoolPercentage: 50,
                         tier1Threshold: 56,
                         tier2Threshold: 21,
                         isActive: true,
@@ -5396,7 +5396,7 @@ export default function Admin() {
                         cycleEndDate: '',
                         paymentPeriodDays: 30,
                         membershipFee: 2000,
-                        rewardPoolPercentage: 55,
+                        rewardPoolPercentage: 50,
                         tier1Threshold: 56,
                         tier2Threshold: 21,
                         isActive: true,
@@ -7194,7 +7194,7 @@ export default function Admin() {
                   cycleName: '',
                   cycleStartDate: '',
                   cycleEndDate: '',
-                  rewardPoolPercentage: 55,
+                  rewardPoolPercentage: 50,
                   membershipFee: 2000,
                   isActive: true
                 });
@@ -7807,7 +7807,7 @@ export default function Admin() {
                   cycleEndDate: '',
                   paymentPeriodDays: 30,
                   membershipFee: 2000,
-                  rewardPoolPercentage: 55,
+                  rewardPoolPercentage: 50,
                   tier1Threshold: 67,
                   tier2Threshold: 33,
                   isActive: false,
