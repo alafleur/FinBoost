@@ -2339,11 +2339,13 @@ export class MemStorage implements IStorage {
         };
       }
       
-      // Use cycle-specific fee calculation with multiplier
+      // Use full membership fee (users always pay full amount)
+      // Cycle multiplier affects pool allocation, not what users pay
+      const fullMembershipFee = activeCycle.membershipFee / 100; // Convert from cents to dollars
       const cycleFeeMultiplier = getCycleFeeMultiplier(activeCycle.cycleType);
-      const proportionalFee = (activeCycle.membershipFee / 100) * cycleFeeMultiplier; // Convert from cents to dollars
-      const cycleRevenue = premiumUserCount * proportionalFee;
-      const memberContributions = Math.round(cycleRevenue * (activeCycle.rewardPoolPercentage / 100));
+      const cycleRevenue = premiumUserCount * fullMembershipFee;
+      const proportionalPoolContribution = cycleRevenue * cycleFeeMultiplier; // Apply multiplier to pool allocation
+      const memberContributions = Math.round(proportionalPoolContribution * (activeCycle.rewardPoolPercentage / 100));
       
       // Apply minimum pool guarantee
       const minimumGuaranteeDollars = Math.floor(activeCycle.minimumPoolGuarantee / 100);
@@ -4520,11 +4522,13 @@ export class MemStorage implements IStorage {
       const premiumUsers = premiumUsersCount[0]?.count || 0;
       const totalUsers = totalUsersCount[0]?.count || 0;
       
-      // Calculate total pool (premium users * proportional membership fee * reward pool percentage)
-      // Apply cycle type multiplier to get proportional fee, then convert from cents to dollars
+      // Calculate total pool (premium users * full membership fee * cycle multiplier * reward pool percentage)
+      // Users pay full fee, but pool allocation is proportional to cycle duration
+      const fullMembershipFee = cycle.membershipFee; // Keep in cents for now
       const cycleFeeMultiplier = getCycleFeeMultiplier(cycle.cycleType);
-      const proportionalFee = cycle.membershipFee * cycleFeeMultiplier;
-      const memberContributions = Math.floor((premiumUsers * proportionalFee * cycle.rewardPoolPercentage) / 100 / 100);
+      const totalRevenue = premiumUsers * fullMembershipFee; // Total revenue in cents
+      const proportionalPoolContribution = totalRevenue * cycleFeeMultiplier; // Apply cycle multiplier to pool
+      const memberContributions = Math.floor((proportionalPoolContribution * cycle.rewardPoolPercentage) / 100 / 100);
       
       // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
       // minimumPoolGuarantee is in cents, so divide by 100 to convert to dollars
@@ -6601,9 +6605,12 @@ export class MemStorage implements IStorage {
       const premiumUserCount = eligibleUsers.length;
       
       // Calculate member contributions with cycle type multiplier
+      // Users pay full fee, but pool allocation is proportional to cycle duration
       const cycleFeeMultiplier = getCycleFeeMultiplier(cycleSetting.cycleType);
-      const proportionalFee = cycleSetting.membershipFee * cycleFeeMultiplier;
-      const memberContributionsCents = Math.floor((premiumUserCount * proportionalFee * cycleSetting.rewardPoolPercentage) / 100);
+      const fullMembershipFee = cycleSetting.membershipFee; // Keep in cents
+      const totalRevenue = premiumUserCount * fullMembershipFee; // Total revenue in cents
+      const proportionalPoolContribution = totalRevenue * cycleFeeMultiplier; // Apply cycle multiplier to pool
+      const memberContributionsCents = Math.floor((proportionalPoolContribution * cycleSetting.rewardPoolPercentage) / 100);
       
       // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
       const totalPoolCents = Math.max(memberContributionsCents, cycleSetting.minimumPoolGuarantee);
