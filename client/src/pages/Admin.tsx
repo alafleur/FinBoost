@@ -3538,7 +3538,11 @@ export default function Admin() {
                             <table className="w-full text-sm">
                               <thead>
                                 <tr className="border-b">
+                                  <th className="text-left p-2">Overall Rank</th>
+                                  <th className="text-left p-2">Tier Rank</th>
                                   <th className="text-left p-2">Winner</th>
+                                  <th className="text-left p-2">User ID</th>
+                                  <th className="text-left p-2">Email</th>
                                   <th className="text-left p-2">Tier</th>
                                   <th className="text-left p-2">Points</th>
                                   <th className="text-left p-2">Base Reward</th>
@@ -3552,7 +3556,18 @@ export default function Admin() {
                                 {selectionResults?.winners?.map((winner: any) => (
                                   <tr key={winner.id} className="border-b">
                                     <td className="p-2">
+                                      <div className="font-bold text-blue-600">#{winner.overallRank}</div>
+                                    </td>
+                                    <td className="p-2">
+                                      <div className="font-medium">#{winner.tierRank}</div>
+                                    </td>
+                                    <td className="p-2">
                                       <div className="font-medium">{winner.username}</div>
+                                    </td>
+                                    <td className="p-2">
+                                      <div className="text-xs font-mono text-gray-600">{winner.userId}</div>
+                                    </td>
+                                    <td className="p-2">
                                       <div className="text-xs text-gray-500">{winner.email}</div>
                                     </td>
                                     <td className="p-2">
@@ -7277,7 +7292,7 @@ export default function Admin() {
             </Button>
             {selectedCycleForWinners && !isRunningSelection && (
               <Button 
-                onClick={() => handleRunWinnerSelection(selectedCycleForWinners.id)}
+                onClick={handleExecuteWinnerSelection}
                 disabled={isRunningSelection}
               >
                 Run Winner Selection

@@ -6805,6 +6805,7 @@ export class MemStorage implements IStorage {
           username: users.username,
           email: users.email,
           tier: cycleWinnerSelections.tier,
+          tierRank: cycleWinnerSelections.tierRank,
           pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
           rewardAmount: cycleWinnerSelections.rewardAmount,
           payoutPercentage: cycleWinnerSelections.payoutPercentage,
@@ -6818,7 +6819,13 @@ export class MemStorage implements IStorage {
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
         .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.selectionDate));
 
-      return { winners };
+      // Calculate overall ranks (1, 2, 3... across all winners)
+      const winnersWithOverallRank = winners.map((winner, index) => ({
+        ...winner,
+        overallRank: index + 1
+      }));
+
+      return { winners: winnersWithOverallRank };
     } catch (error) {
       console.error('Error getting cycle winner details:', error);
       return { winners: [] };
