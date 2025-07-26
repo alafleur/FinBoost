@@ -3725,7 +3725,7 @@ export class MemStorage implements IStorage {
         throw new Error('Cycle setting not found');
       }
 
-      // Get all eligible users with their cycle points
+      // Get all eligible users with their cycle points (including 0-point users)
       const eligibleUsers = await db.select({
         userId: userCyclePoints.userId,
         currentCyclePoints: userCyclePoints.currentCyclePoints,
@@ -3739,8 +3739,7 @@ export class MemStorage implements IStorage {
       .where(
         and(
           eq(userCyclePoints.cycleSettingId, cycleSettingId),
-          eq(userCyclePoints.isActive, true),
-          gt(userCyclePoints.currentCyclePoints, 0)
+          eq(userCyclePoints.isActive, true)
         )
       )
       .orderBy(desc(userCyclePoints.currentCyclePoints));
