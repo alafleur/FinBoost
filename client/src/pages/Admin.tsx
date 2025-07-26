@@ -327,7 +327,7 @@ export default function Admin() {
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
   
   // Payout adjustment state
-  const [payoutPercentages, setPayoutPercentages] = useState<Record<number, number>>({});
+  const [payoutPercentages, setPayoutPercentages] = useState<Record<number, string>>({});
   const [payoutOverrides, setPayoutOverrides] = useState<Record<number, number>>({});
   
   const [newCycleForm, setNewCycleForm] = useState({
@@ -3729,16 +3729,17 @@ export default function Admin() {
                               </thead>
                               <tbody>
                                 {winnerDetails?.map((winner: any) => {
-                                  // Calculate tier size based on current selection results
+                                  // Calculate tier size from total pool and tier allocation percentages
+                                  const totalPool = 750000; // $7,500 * 100 (cents)
                                   const tierSize = (() => {
-                                    if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 0;
-                                    if (winner.tier === 'tier2') return selectionResults?.tierBreakdown?.tier2?.poolAmount || 0;
-                                    if (winner.tier === 'tier3') return selectionResults?.tierBreakdown?.tier3?.poolAmount || 0;
+                                    if (winner.tier === 'tier1') return totalPool * 0.50; // 50% for tier1
+                                    if (winner.tier === 'tier2') return totalPool * 0.30; // 30% for tier2  
+                                    if (winner.tier === 'tier3') return totalPool * 0.20; // 20% for tier3
                                     return 0;
                                   })();
                                   
-                                  const payoutPercentage = payoutPercentages[winner.id] || 0;
-                                  const payoutCalc = (tierSize * payoutPercentage) / 100;
+                                  const payoutPercentage = payoutPercentages[winner.id] || '';
+                                  const payoutCalc = payoutPercentage !== '' ? (tierSize * parseFloat(payoutPercentage)) / 100 : 0;
                                   const payoutOverride = payoutOverrides[winner.id];
                                   const payoutFinal = payoutOverride !== undefined ? payoutOverride : payoutCalc;
                                   
@@ -3777,15 +3778,16 @@ export default function Admin() {
                                       <td className="p-2">
                                         <Input 
                                           type="number" 
-                                          value={payoutPercentages[winner.id] || 0}
+                                          value={payoutPercentages[winner.id] || ''}
                                           min="0" 
                                           max="100" 
-                                          className="w-20"
+                                          step="0.1"
+                                          className="w-20 text-center"
                                           onChange={(e) => {
-                                            const percentage = parseFloat(e.target.value) || 0;
+                                            const value = e.target.value;
                                             setPayoutPercentages(prev => ({
                                               ...prev,
-                                              [winner.id]: percentage
+                                              [winner.id]: value
                                             }));
                                           }}
                                           placeholder="0"
@@ -3797,23 +3799,27 @@ export default function Admin() {
                                       <td className="p-2">
                                         <Input 
                                           type="number" 
-                                          value={payoutOverrides[winner.id] || ''}
+                                          value={payoutOverrides[winner.id] !== undefined ? (payoutOverrides[winner.id] / 100).toFixed(2) : ''}
                                           min="0" 
                                           step="0.01"
-                                          className="w-24"
+                                          className="w-24 text-center"
                                           onChange={(e) => {
-                                            const override = e.target.value ? parseFloat(e.target.value) * 100 : undefined;
-                                            setPayoutOverrides(prev => {
-                                              const updated = { ...prev };
-                                              if (override !== undefined) {
-                                                updated[winner.id] = override;
-                                              } else {
+                                            const value = e.target.value;
+                                            if (value === '') {
+                                              setPayoutOverrides(prev => {
+                                                const updated = { ...prev };
                                                 delete updated[winner.id];
-                                              }
-                                              return updated;
-                                            });
+                                                return updated;
+                                              });
+                                            } else {
+                                              const override = parseFloat(value) * 100;
+                                              setPayoutOverrides(prev => ({
+                                                ...prev,
+                                                [winner.id]: override
+                                              }));
+                                            }
                                           }}
-                                          placeholder="Override..."
+                                          placeholder="0.00"
                                         />
                                       </td>
                                       <td className="p-2">
