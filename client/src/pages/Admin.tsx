@@ -325,6 +325,11 @@ export default function Admin() {
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<any>(null);
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
+  
+  // Payout adjustment state
+  const [payoutPercentages, setPayoutPercentages] = useState<Record<number, number>>({});
+  const [payoutOverrides, setPayoutOverrides] = useState<Record<number, number>>({});
+  
   const [newCycleForm, setNewCycleForm] = useState({
     cycleName: '',
     cycleStartDate: '',
@@ -3715,82 +3720,108 @@ export default function Admin() {
                                   <th className="text-left p-2">Email</th>
                                   <th className="text-left p-2">Tier</th>
                                   <th className="text-left p-2">Points</th>
-                                  <th className="text-left p-2">Base Reward</th>
+                                  <th className="text-left p-2">Tier Size</th>
                                   <th className="text-left p-2">Payout %</th>
-                                  <th className="text-left p-2">Final Amount</th>
-                                  <th className="text-left p-2">Reason</th>
-                                  <th className="text-left p-2">Actions</th>
+                                  <th className="text-left p-2">Payout Calc</th>
+                                  <th className="text-left p-2">Payout Override</th>
+                                  <th className="text-left p-2">Payout Final</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {winnerDetails?.map((winner: any) => (
-                                  <tr key={winner.id} className="border-b">
-                                    <td className="p-2">
-                                      <div className="font-bold text-blue-600">#{winner.overallRank}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="font-medium">#{winner.tierRank}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="font-medium">{winner.username}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="text-xs font-mono text-gray-600">{winner.userId}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="text-xs text-gray-500">{winner.email}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <Badge variant={
-                                        winner.tier === 'tier1' ? 'default' : 
-                                        winner.tier === 'tier2' ? 'secondary' : 'outline'
-                                      }>
-                                        {winner.tier === 'tier1' ? 'Tier 1' : 
-                                         winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
-                                      </Badge>
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="font-bold text-green-600">{winner.pointsAtSelection}</div>
-                                    </td>
-                                    <td className="p-2">${(winner.rewardAmount / 100).toFixed(2)}</td>
-                                    <td className="p-2">
-                                      <Input 
-                                        type="number" 
-                                        defaultValue="100" 
-                                        min="0" 
-                                        max="100" 
-                                        className="w-20"
-                                        onChange={(e) => {
-                                          const percentage = parseInt(e.target.value) || 100;
-                                          handleUpdateWinnerPayout(winner.id, percentage);
-                                        }}
-                                      />
-                                    </td>
-                                    <td className="p-2">
-                                      <div className="font-bold">${(winner.rewardAmount / 100).toFixed(2)}</div>
-                                    </td>
-                                    <td className="p-2">
-                                      <Input 
-                                        placeholder="Optional reason..." 
-                                        className="w-32"
-                                        onBlur={(e) => {
-                                          if (e.target.value) {
-                                            handleUpdateWinnerReason(winner.id, e.target.value);
-                                          }
-                                        }}
-                                      />
-                                    </td>
-                                    <td className="p-2">
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => handleRemoveWinner(winner.id)}
-                                      >
-                                        Remove
-                                      </Button>
-                                    </td>
-                                  </tr>
-                                ))}
+                                {winnerDetails?.map((winner: any) => {
+                                  // Calculate tier size based on current selection results
+                                  const tierSize = (() => {
+                                    if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 0;
+                                    if (winner.tier === 'tier2') return selectionResults?.tierBreakdown?.tier2?.poolAmount || 0;
+                                    if (winner.tier === 'tier3') return selectionResults?.tierBreakdown?.tier3?.poolAmount || 0;
+                                    return 0;
+                                  })();
+                                  
+                                  const payoutPercentage = payoutPercentages[winner.id] || 0;
+                                  const payoutCalc = (tierSize * payoutPercentage) / 100;
+                                  const payoutOverride = payoutOverrides[winner.id];
+                                  const payoutFinal = payoutOverride !== undefined ? payoutOverride : payoutCalc;
+                                  
+                                  return (
+                                    <tr key={winner.id} className="border-b">
+                                      <td className="p-2">
+                                        <div className="font-bold text-blue-600">#{winner.overallRank}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-medium">#{winner.tierRank}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-medium">{winner.username}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-xs font-mono text-gray-600">{winner.userId}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="text-xs text-gray-500">{winner.email}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <Badge variant={
+                                          winner.tier === 'tier1' ? 'default' : 
+                                          winner.tier === 'tier2' ? 'secondary' : 'outline'
+                                        }>
+                                          {winner.tier === 'tier1' ? 'Tier 1' : 
+                                           winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
+                                        </Badge>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-bold text-green-600">{winner.pointsAtSelection}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-medium">${(tierSize / 100).toFixed(2)}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <Input 
+                                          type="number" 
+                                          value={payoutPercentages[winner.id] || 0}
+                                          min="0" 
+                                          max="100" 
+                                          className="w-20"
+                                          onChange={(e) => {
+                                            const percentage = parseFloat(e.target.value) || 0;
+                                            setPayoutPercentages(prev => ({
+                                              ...prev,
+                                              [winner.id]: percentage
+                                            }));
+                                          }}
+                                          placeholder="0"
+                                        />
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-medium">${(payoutCalc / 100).toFixed(2)}</div>
+                                      </td>
+                                      <td className="p-2">
+                                        <Input 
+                                          type="number" 
+                                          value={payoutOverrides[winner.id] || ''}
+                                          min="0" 
+                                          step="0.01"
+                                          className="w-24"
+                                          onChange={(e) => {
+                                            const override = e.target.value ? parseFloat(e.target.value) * 100 : undefined;
+                                            setPayoutOverrides(prev => {
+                                              const updated = { ...prev };
+                                              if (override !== undefined) {
+                                                updated[winner.id] = override;
+                                              } else {
+                                                delete updated[winner.id];
+                                              }
+                                              return updated;
+                                            });
+                                          }}
+                                          placeholder="Override..."
+                                        />
+                                      </td>
+                                      <td className="p-2">
+                                        <div className="font-bold text-blue-600">${(payoutFinal / 100).toFixed(2)}</div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>
