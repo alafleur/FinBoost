@@ -466,6 +466,8 @@ export default function Admin() {
     tier1Pool: number;
     tier2Pool: number;
     tier3Pool: number;
+    premiumUsers?: number | string;
+    totalUsers?: number | string;
   } | null>(null);
 
   // Consolidated states
@@ -664,7 +666,7 @@ export default function Admin() {
       const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
         fetch('/api/admin/users'),
         fetch('/api/admin/modules'),
-        fetch('/api/pool/monthly'),
+        fetch('/api/cycles/pool'),
         fetch('/api/tiers/thresholds')
       ]);
 
@@ -680,7 +682,15 @@ export default function Admin() {
 
       if (poolRes.ok) {
         const data = await poolRes.json();
-        setPoolData(data.pool);
+        // Map cycle API response to expected format
+        setPoolData({
+          totalPool: data.totalPool,
+          tier1Pool: data.tierBreakdown?.tier1 || 0,
+          tier2Pool: data.tierBreakdown?.tier2 || 0,
+          tier3Pool: data.tierBreakdown?.tier3 || 0,
+          premiumUsers: data.premiumUsers,
+          totalUsers: data.totalUsers
+        });
       }
 
       if (tierRes.ok) {
