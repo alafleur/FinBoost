@@ -1,7 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
-import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt } from "drizzle-orm";
+import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt, sum, count, inArray, notInArray, isNull } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
 
@@ -6843,6 +6843,34 @@ export class MemStorage implements IStorage {
 
   async getCycleWinnerDetails(cycleSettingId: number): Promise<any> {
     try {
+      console.log(`[DEBUG] getCycleWinnerDetails called with cycleSettingId: ${cycleSettingId}`);
+      
+      // Step 1: Check if any winner records exist for this cycle
+      const recordCount = await db
+        .select({ count: sql`count(*)`.as('count') })
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+      
+      console.log(`[DEBUG] Found ${recordCount[0]?.count || 0} winner records for cycle ${cycleSettingId}`);
+      
+      if (!recordCount[0]?.count || recordCount[0].count === '0') {
+        console.log(`[DEBUG] No winner records found, returning empty result`);
+        return { winners: [] };
+      }
+      
+      // Step 2: Try a simpler query first - just winner selections without join
+      console.log(`[DEBUG] Attempting simple query without join...`);
+      const simpleWinners = await db
+        .select()
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+        .limit(5);
+      
+      console.log(`[DEBUG] Simple query successful, found ${simpleWinners.length} records`);
+      console.log(`[DEBUG] Sample record:`, simpleWinners[0] ? JSON.stringify(simpleWinners[0], null, 2) : 'none');
+      
+      // Step 3: Try the full query with join
+      console.log(`[DEBUG] Attempting full query with join...`);
       const winners = await db
         .select({
           id: cycleWinnerSelections.id,
@@ -6863,6 +6891,8 @@ export class MemStorage implements IStorage {
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
         .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.tierRank));
 
+      console.log(`[DEBUG] Full query successful, found ${winners.length} records`);
+      
       // Calculate overall ranks (1, 2, 3... across all winners)
       const winnersWithOverallRank = winners.map((winner, index) => ({
         ...winner,
@@ -6873,9 +6903,12 @@ export class MemStorage implements IStorage {
         reason: 'Auto-selected' // Default reason
       }));
 
+      console.log(`[DEBUG] Successfully processed ${winnersWithOverallRank.length} winners with overall ranks`);
       return { winners: winnersWithOverallRank };
     } catch (error) {
-      console.error('Error getting cycle winner details:', error);
+      console.error('[DEBUG] Error getting cycle winner details:', error);
+      console.error('[DEBUG] Error stack:', error.stack);
+      console.error('[DEBUG] Query parameters:', { cycleSettingId });
       return { winners: [] };
     }
   }
