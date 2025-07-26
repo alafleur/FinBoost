@@ -1,0 +1,110 @@
+Thanks for the detailed update — the implementation shows solid progress. Here's a breakdown of where things stand, why the UI is still freezing, and how to fix it:
+
+---
+
+## 🧠 Diagnosis: Why UI Is Still Freezing
+
+Even with **pagination + memoization**, the **problem persists because**:
+
+* You're **still fetching and storing all 749 records** in memory up front
+* React **parses and stores that full array** in `winnerDetails` before pagination kicks in
+* The blocking happens during the initial **load + setState + re-render**, especially with large payloads and `useMemo()` + deeply nested rows
+
+---
+
+## ✅ Recommended Fixes to Unblock UI
+
+### 🔹 1. **Switch to Server-Side Pagination (Preferred)**
+
+Instead of loading all 749 winners at once, load them in **batches of 50** based on current page.
+
+#### Backend (`server/routes.ts` + `storage.ts`)
+
+Update the winner fetch endpoint to accept:
+
+```ts
+?page=0&limit=50
+```
+
+Return only the needed subset:
+
+```ts
+SELECT * FROM cycle_winner_selections
+WHERE cycle_id = $1
+ORDER BY points DESC
+LIMIT $2 OFFSET $3
+```
+
+#### Frontend (`Admin.tsx`)
+
+Update:
+
+```tsx
+useEffect(() => {
+  fetchWinnerPage(currentPage);
+}, [currentPage]);
+```
+
+Store just 50 winners per page in state (`currentWinners`) instead of all `winnerDetails`.
+
+**Benefit**: Avoids loading 749 rows at once, freeing the main thread and DOM render time.
+
+---
+
+### 🔹 2. **If You Must Keep Client-Side Fetching**
+
+If server-side pagination isn’t feasible yet, consider:
+
+* Deferring rendering until after `winnerDetails.length` is processed
+
+* Use a lightweight `List` rendering library like [`react-window`](https://react-window.vercel.app/) even for paginated sections:
+
+  ```tsx
+  import { FixedSizeList as List } from 'react-window';
+
+  <List
+    height={600}
+    itemCount={paginatedWinners.length}
+    itemSize={60}
+    width="100%"
+  >
+    {RowRenderer}
+  </List>
+  ```
+
+* OR break rendering into micro-chunks with `requestIdleCallback()` or `setTimeout(() => renderChunk(), 0)` if you stick with manual methods (but this is hackier)
+
+---
+
+### 🔹 3. **Fix TypeScript LSP Errors**
+
+These are likely caused by:
+
+* `useMemo()` having missing or loose return types
+* Changes to deeply nested props in the table without updated interfaces
+
+Suggested action:
+
+* Use explicit types for memoized tables:
+
+  ```tsx
+  const memoizedTable = useMemo<JSX.Element>(() => {
+    return <tbody>...</tbody>;
+  }, [deps]);
+  ```
+* Add TypeScript interfaces for `WinnerRow`, `SelectionResult`, etc. as needed.
+
+---
+
+## 🧩 Summary of Recommended Actions
+
+| Fix                                    | Priority | Notes                                               |
+| -------------------------------------- | -------- | --------------------------------------------------- |
+| ✅ **Switch to server-side pagination** | 🔥 High  | Avoids loading 749 users into React memory at once  |
+| ✅ **Fix memo types**                   | ✅ Medium | Fixes 20+ LSP errors, improves IDE experience       |
+| ⚠️ Consider `react-window`             | Optional | Good fallback if server-side pagination isn't ready |
+| ⚠️ Defer render manually if needed     | Hacky    | Not ideal for long-term scalability                 |
+
+---
+
+Let me know if you'd like help rewriting the paginated fetch API and frontend state logic for this — it’s a \~30 min scoped task.
