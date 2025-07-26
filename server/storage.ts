@@ -6606,6 +6606,11 @@ export class MemStorage implements IStorage {
         };
       });
 
+      // Clear existing winner selections for this cycle first
+      await db
+        .delete(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
       // Save winners to database
       const savedWinners = await this.saveCycleWinnerSelection(
         cycleSettingId,
