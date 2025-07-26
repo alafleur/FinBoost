@@ -321,6 +321,12 @@ export const cycleSettings = pgTable("cycle_settings", {
   completedAt: timestamp("completed_at"),
   completedBy: integer("completed_by").references(() => users.id),
   
+  // Winner Selection Completion Tracking (CRITICAL for persistence fix)
+  selectionCompleted: boolean("selection_completed").default(false).notNull(),
+  totalWinners: integer("total_winners").default(0).notNull(),
+  totalRewardPool: integer("total_reward_pool").default(0).notNull(), // In cents
+  selectionCompletedAt: timestamp("selection_completed_at"),
+  
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   createdBy: integer("created_by").references(() => users.id),

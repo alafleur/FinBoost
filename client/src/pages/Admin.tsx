@@ -651,13 +651,25 @@ export default function Admin() {
     }
   }, [selectedCycle]);
 
-  // Load paginated winners when Cycle Operations tab is opened
+  // Load paginated winners when Cycle Operations tab is opened or when cycle selection is completed
   useEffect(() => {
-    if (activeTab === 'operations' && currentPoolSettings?.id) {
-      console.log('Loading paginated winners for operations tab');
-      loadPaginatedWinnerDetails(currentPoolSettings.id, 1, winnersPerPage);
+    if (activeTab === 'operations') {
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (activeCycle?.id) {
+        console.log('Loading paginated winners for operations tab');
+        loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
+        // Also check if selection was already completed (persistence fix)
+        if (activeCycle.selectionCompleted) {
+          console.log('Cycle selection already completed, loading existing winners');
+          setSelectionResults({
+            winnersSelected: activeCycle.totalWinners || 0,
+            totalRewardPool: (activeCycle.totalRewardPool || 0) / 100,
+            selectionMode: 'loaded_from_database'
+          });
+        }
+      }
     }
-  }, [activeTab, currentPoolSettings?.id]);
+  }, [activeTab, cycleSettings]);
 
   const fetchData = async () => {
     try {

@@ -6594,6 +6594,9 @@ export class MemStorage implements IStorage {
         poolInfo.totalPool
       );
 
+      // CRITICAL: Mark cycle as having completed selection to ensure persistence
+      await this.markCycleSelectionCompleted(cycleSettingId, savedWinners.length, poolInfo.totalPool);
+
       console.log(`Selected ${selectedWinners.length} winners, saved ${savedWinners.length} successfully`);
 
       return {
@@ -6795,6 +6798,26 @@ export class MemStorage implements IStorage {
 
     console.log(`Save operation complete: ${savedWinners.length} saved, ${errorCount} errors`);
     return savedWinners;
+  }
+
+  // Mark cycle selection as completed to ensure persistence across sessions
+  private async markCycleSelectionCompleted(cycleSettingId: number, winnerCount: number, totalPool: number): Promise<void> {
+    try {
+      await db
+        .update(cycleSettings)
+        .set({
+          selectionCompleted: true,
+          totalWinners: winnerCount,
+          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
+          selectionCompletedAt: new Date()
+        })
+        .where(eq(cycleSettings.id, cycleSettingId));
+      
+      console.log(`Marked cycle ${cycleSettingId} selection as completed with ${winnerCount} winners and $${totalPool} pool`);
+    } catch (error) {
+      console.error('Error marking cycle selection as completed:', error);
+      throw error;
+    }
   }
 
   async getEligibleUsersForSelection(cycleSettingId: number): Promise<any[]> {
