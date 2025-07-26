@@ -3310,10 +3310,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const poolData = await storage.getCyclePoolData(currentCycle.id);
       
-      // Get the actual reward pool percentage from cycle settings
-      const cycleSettings = await storage.getCurrentPoolSettingsForDate(new Date());
-      const rewardPoolPercentage = cycleSettings?.rewardPoolPercentage || 50;
-      const minimumPoolGuarantee = cycleSettings?.minimumPoolGuarantee || 0;
+      // Use the current cycle's actual reward pool percentage instead of separate settings lookup
+      const rewardPoolPercentage = currentCycle.rewardPoolPercentage || 50;
+      const minimumPoolGuarantee = currentCycle.minimumPoolGuarantee || 0;
       
       // Calculate tier-specific pool breakdown
       const tierBreakdown = {
