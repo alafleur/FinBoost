@@ -3796,28 +3796,34 @@ export default function Admin() {
                                         <div className="font-medium">${(payoutCalc / 100).toFixed(2)}</div>
                                       </td>
                                       <td className="p-2">
-                                        <Input 
+                                        <input
                                           type="text"
+                                          inputMode="decimal"
+                                          pattern="^\d+(\.\d{0,2})?$"
+                                          className="w-32 text-center p-2 border rounded bg-background text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                           value={payoutOverrides[winner.id] !== undefined ? (payoutOverrides[winner.id] / 100).toFixed(2) : ''}
-                                          className="w-32 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                           onChange={(e) => {
                                             const value = e.target.value;
-                                            if (value === '') {
+                                            // Allow natural typing without premature validation
+                                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                              // Store raw string value temporarily
                                               setPayoutOverrides(prev => {
-                                                const updated = { ...prev };
-                                                delete updated[winner.id];
-                                                return updated;
+                                                if (value === '') {
+                                                  const updated = { ...prev };
+                                                  delete updated[winner.id];
+                                                  return updated;
+                                                } else {
+                                                  // Convert to cents only if valid number
+                                                  const numValue = parseFloat(value);
+                                                  if (!isNaN(numValue) && numValue >= 0) {
+                                                    return {
+                                                      ...prev,
+                                                      [winner.id]: Math.round(numValue * 100)
+                                                    };
+                                                  }
+                                                  return prev;
+                                                }
                                               });
-                                            } else {
-                                              // Allow any valid dollar amount input
-                                              const numValue = parseFloat(value);
-                                              if (!isNaN(numValue) && numValue >= 0) {
-                                                const override = Math.round(numValue * 100); // Convert to cents
-                                                setPayoutOverrides(prev => ({
-                                                  ...prev,
-                                                  [winner.id]: override
-                                                }));
-                                              }
                                             }
                                           }}
                                           placeholder="0.00"
