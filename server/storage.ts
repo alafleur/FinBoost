@@ -4443,12 +4443,13 @@ export class MemStorage implements IStorage {
       const cycleFeeMultiplier = getCycleFeeMultiplier(cycle.cycleType);
       const totalRevenue = premiumUsers * fullMembershipFee; // Total revenue in cents
       const proportionalPoolContribution = totalRevenue * cycleFeeMultiplier; // Apply cycle multiplier to pool
-      const memberContributions = Math.floor((proportionalPoolContribution * cycle.rewardPoolPercentage) / 100 / 100);
+      const memberContributionsCents = Math.floor((proportionalPoolContribution * cycle.rewardPoolPercentage) / 100);
       
       // Apply minimum pool guarantee - pool is the higher of member contributions or minimum guarantee
-      // minimumPoolGuarantee is in cents, so divide by 100 to convert to dollars
+      // Convert both to dollars for comparison and final result
+      const memberContributionsDollars = Math.floor(memberContributionsCents / 100);
       const minimumGuaranteeDollars = Math.floor(cycle.minimumPoolGuarantee / 100);
-      const totalPool = Math.max(memberContributions, minimumGuaranteeDollars);
+      const totalPool = Math.max(memberContributionsDollars, minimumGuaranteeDollars);
 
       return {
         totalPool,
