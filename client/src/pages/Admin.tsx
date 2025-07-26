@@ -3662,7 +3662,7 @@ export default function Admin() {
                               </div>
                               <div>
                                 <div className="text-blue-600 font-medium">Total Winners</div>
-                                <div>{selectionResults.winnersSelected}</div>
+                                <div>{winnerDetails?.length || 0}</div>
                               </div>
                               <div>
                                 <div className="text-blue-600 font-medium">Total Pool</div>
@@ -3678,14 +3678,14 @@ export default function Admin() {
                           {/* Export/Import Controls */}
                           <div className="flex justify-between items-center mb-4">
                             <div className="text-sm text-gray-600">
-                              {selectionResults?.winnersSelected || 0} winners selected
+                              {winnerDetails?.length || 0} winners selected
                             </div>
                             <div className="flex gap-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={handleExportWinners}
-                                disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
+                                disabled={!winnerDetails || winnerDetails.length === 0}
                                 className="flex items-center gap-2"
                               >
                                 <Download className="w-4 h-4" />
@@ -3695,7 +3695,7 @@ export default function Admin() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setShowImportDialog(true)}
-                                disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
+                                disabled={!winnerDetails || winnerDetails.length === 0}
                                 className="flex items-center gap-2"
                               >
                                 <Upload className="w-4 h-4" />
@@ -3723,7 +3723,7 @@ export default function Admin() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {selectionResults?.winners?.map((winner: any) => (
+                                {winnerDetails?.map((winner: any) => (
                                   <tr key={winner.id} className="border-b">
                                     <td className="p-2">
                                       <div className="font-bold text-blue-600">#{winner.overallRank}</div>
