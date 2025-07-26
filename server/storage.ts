@@ -6606,10 +6606,12 @@ export class MemStorage implements IStorage {
         };
       });
 
-      // Clear existing winner selections for this cycle first
-      await db
+      // Clear existing winner selections for this cycle first (with explicit confirmation)
+      const deleteResult = await db
         .delete(cycleWinnerSelections)
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+      
+      console.log(`Cleared existing winners for cycle ${cycleSettingId}`);
 
       // Save winners to database
       const savedWinners = await this.saveCycleWinnerSelection(
@@ -6618,6 +6620,8 @@ export class MemStorage implements IStorage {
         selectionMode,
         poolInfo.totalPool
       );
+
+      console.log(`Selected ${selectedWinners.length} winners, saved ${savedWinners.length} successfully`);
 
       return {
         selectionMode,
@@ -6732,6 +6736,7 @@ export class MemStorage implements IStorage {
     totalPool: number
   ): Promise<any[]> {
     const savedWinners = [];
+    let errorCount = 0;
 
     // Group winners by tier to calculate tier ranks
     const winnersByTier = {
@@ -6739,6 +6744,12 @@ export class MemStorage implements IStorage {
       tier2: winners.filter(w => w.tier === 'tier2'),
       tier3: winners.filter(w => w.tier === 'tier3')
     };
+
+    console.log(`Attempting to save ${winners.length} winners:`, {
+      tier1: winnersByTier.tier1.length,
+      tier2: winnersByTier.tier2.length,
+      tier3: winnersByTier.tier3.length
+    });
 
     for (const winner of winners) {
       try {
@@ -6767,10 +6778,20 @@ export class MemStorage implements IStorage {
           email: winner.email
         });
       } catch (error) {
-        console.error('Error saving winner:', error);
+        errorCount++;
+        console.error(`Error saving winner ${errorCount}:`, error);
+        console.error('Winner details:', { 
+          id: winner.id, 
+          tier: winner.tier, 
+          username: winner.username,
+          cycleSettingId,
+          pointsAtSelection: winner.currentCyclePoints,
+          rewardAmount: winner.rewardAmount 
+        });
       }
     }
 
+    console.log(`Save operation complete: ${savedWinners.length} saved, ${errorCount} errors`);
     return savedWinners;
   }
 
