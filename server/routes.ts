@@ -3611,11 +3611,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const participants = Number(participantsResult[0]?.count) || 0;
 
-      // Calculate total pool amount with cycle type multiplier (convert from cents to dollars)
-      const cycleFeeMultiplier = getCycleFeeMultiplier(cycle.cycleType);
-      const proportionalFee = cycle.membershipFee * cycleFeeMultiplier;
-      const totalPoolAmountCents = Math.floor((participants * proportionalFee * cycle.rewardPoolPercentage) / 100);
-      const totalPoolAmount = totalPoolAmountCents / 100;
+      // Get total pool amount using the corrected storage method
+      const poolData = await storage.getCyclePoolData(cycleId);
+      const totalPoolAmount = poolData.finalRewardPool / 100; // Convert from cents to dollars
 
       // Get average points (excluding admin users)
       const avgPointsResult = await db
