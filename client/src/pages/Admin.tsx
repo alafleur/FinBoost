@@ -3729,12 +3729,11 @@ export default function Admin() {
                               </thead>
                               <tbody>
                                 {winnerDetails?.map((winner: any) => {
-                                  // Calculate tier size from total pool and tier allocation percentages
-                                  const totalPool = 750000; // $7,500 * 100 (cents)
+                                  // Calculate tier size from selection results to match the Winner Selection section
                                   const tierSize = (() => {
-                                    if (winner.tier === 'tier1') return totalPool * 0.50; // 50% for tier1
-                                    if (winner.tier === 'tier2') return totalPool * 0.30; // 30% for tier2  
-                                    if (winner.tier === 'tier3') return totalPool * 0.20; // 20% for tier3
+                                    if (winner.tier === 'tier1') return selectionResults?.tierBreakdown?.tier1?.poolAmount || 825000; // $8,250 in cents
+                                    if (winner.tier === 'tier2') return selectionResults?.tierBreakdown?.tier2?.poolAmount || 495000; // $4,950 in cents
+                                    if (winner.tier === 'tier3') return selectionResults?.tierBreakdown?.tier3?.poolAmount || 330000; // $3,300 in cents
                                     return 0;
                                   })();
                                   
@@ -3777,18 +3776,18 @@ export default function Admin() {
                                       </td>
                                       <td className="p-2">
                                         <Input 
-                                          type="number" 
+                                          type="text"
                                           value={payoutPercentages[winner.id] || ''}
-                                          min="0" 
-                                          max="100" 
-                                          step="0.1"
-                                          className="w-20 text-center"
+                                          className="w-20 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                           onChange={(e) => {
                                             const value = e.target.value;
-                                            setPayoutPercentages(prev => ({
-                                              ...prev,
-                                              [winner.id]: value
-                                            }));
+                                            // Only allow numeric input for percentages
+                                            if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0 && parseFloat(value) <= 100)) {
+                                              setPayoutPercentages(prev => ({
+                                                ...prev,
+                                                [winner.id]: value
+                                              }));
+                                            }
                                           }}
                                           placeholder="0"
                                         />
@@ -3800,7 +3799,7 @@ export default function Admin() {
                                         <Input 
                                           type="text"
                                           value={payoutOverrides[winner.id] !== undefined ? (payoutOverrides[winner.id] / 100).toFixed(2) : ''}
-                                          className="w-28 text-center"
+                                          className="w-32 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                           onChange={(e) => {
                                             const value = e.target.value;
                                             if (value === '') {
@@ -3810,10 +3809,10 @@ export default function Admin() {
                                                 return updated;
                                               });
                                             } else {
-                                              // Allow any numeric input (including more than 3 digits)
+                                              // Allow any valid dollar amount input
                                               const numValue = parseFloat(value);
                                               if (!isNaN(numValue) && numValue >= 0) {
-                                                const override = numValue * 100;
+                                                const override = Math.round(numValue * 100); // Convert to cents
                                                 setPayoutOverrides(prev => ({
                                                   ...prev,
                                                   [winner.id]: override
