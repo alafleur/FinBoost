@@ -10,6 +10,7 @@ import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersControl
 import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
+import * as XLSX from "xlsx";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -4327,6 +4328,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting winner details:', error);
       res.status(500).json({ error: 'Failed to get winner details' });
+    }
+  });
+
+  // Export winner selection to XLSX
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId/export', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      
+      // Get winner details using existing method
+      const details = await storage.getCycleWinnerDetails(cycleSettingId);
+      
+      if (!details || !details.winners || details.winners.length === 0) {
+        return res.status(404).json({ error: 'No winner data found for this cycle' });
+      }
+
+      // Get cycle information for filename
+      const cycleSettings = await storage.getAllCycleSettings();
+      const currentCycle = cycleSettings.find(c => c.id === cycleSettingId);
+      const cycleName = currentCycle ? currentCycle.cycleName : `Cycle-${cycleSettingId}`;
+
+      // Prepare data for Excel export
+      const excelData = details.winners.map(winner => ({
+        'Overall Rank': winner.overallRank,
+        'Tier Rank': winner.tierRank,
+        'Username': winner.username,
+        'User ID': winner.userId,
+        'Email': winner.email,
+        'Tier': winner.tier,
+        'Points at Selection': winner.pointsAtSelection,
+        'Reward Amount': `$${(winner.rewardAmount / 100).toFixed(2)}`,
+        'Payout Status': winner.payoutStatus,
+        'Selection Date': new Date(winner.selectionDate).toLocaleString('en-US', {
+          year: 'numeric',
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+      }));
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // Auto-size columns
+      const colWidths = [
+        { wch: 12 }, // Overall Rank
+        { wch: 10 }, // Tier Rank  
+        { wch: 15 }, // Username
+        { wch: 8 },  // User ID
+        { wch: 25 }, // Email
+        { wch: 8 },  // Tier
+        { wch: 18 }, // Points at Selection
+        { wch: 12 }, // Reward Amount
+        { wch: 12 }, // Payout Status
+        { wch: 20 }  // Selection Date
+      ];
+      worksheet['!cols'] = colWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Winner Selection');
+
+      // Generate filename with cycle name and timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+      const filename = `${cycleName.replace(/[^a-zA-Z0-9]/g, '-')}-Winners-${timestamp}.xlsx`;
+
+      // Generate Excel buffer
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+      // Set response headers for file download
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', excelBuffer.length);
+
+      // Send the Excel file
+      res.send(excelBuffer);
+
+    } catch (error) {
+      console.error('Error exporting winner details to XLSX:', error);
+      res.status(500).json({ error: 'Failed to export winner details to XLSX' });
     }
   });
 

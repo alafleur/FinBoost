@@ -1487,6 +1487,65 @@ export default function Admin() {
     }
   };
 
+  // Export winner selection to Excel
+  const handleExportWinners = async () => {
+    try {
+      const activeCycle = cycleSettings.find(c => c.isActive);
+      if (!activeCycle) {
+        toast({
+          title: "No active cycle",
+          description: "Please select an active cycle first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-details/${activeCycle.id}/export`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // Get filename from response headers
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = 'winner-selection.xlsx';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export successful",
+        description: `Winner selection exported to ${filename}`,
+      });
+    } catch (error) {
+      console.error('Error exporting winners:', error);
+      toast({
+        title: "Export failed",
+        description: "Unable to export winner selection to Excel.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const loadWinners = async () => {
     if (!selectedCycle) return;
     
@@ -3532,6 +3591,23 @@ export default function Admin() {
                                 <div>Point-Weighted Random</div>
                               </div>
                             </div>
+                          </div>
+
+                          {/* Export Controls */}
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="text-sm text-gray-600">
+                              {selectionResults?.winnersSelected || 0} winners selected
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={handleExportWinners}
+                              disabled={!selectionResults?.winners || selectionResults.winners.length === 0}
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="w-4 h-4" />
+                              Export to Excel
+                            </Button>
                           </div>
 
                           <div className="overflow-x-auto">
