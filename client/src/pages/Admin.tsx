@@ -198,6 +198,7 @@ export default function Admin() {
   
   // Loading states for performance monitoring
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isExecutingSelection, setIsExecutingSelection] = useState(false);
 
   // Analytics state
   const [analyticsData, setAnalyticsData] = useState({
