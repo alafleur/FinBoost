@@ -6646,7 +6646,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // Point-weighted random selection (baseline method)
+  // CORRECTED Point-weighted random selection using cumulative probability distribution
   private selectWeightedRandomWinners(usersByTier: any, tierSettings: any): any[] {
     const winners: any[] = [];
 
@@ -6661,42 +6661,66 @@ export class MemStorage implements IStorage {
         return;
       }
 
-      // Key insight: Log if we can't fulfill the winner count
+      // Ensure we don't try to select more winners than available users
       const actualWinnerCount = Math.min(winnerCount, users.length);
       if (actualWinnerCount < winnerCount) {
-        console.log(`WARNING: ${tier} only has ${users.length} users but needs ${winnerCount} winners. Selecting ${actualWinnerCount} instead.`);
+        console.log(`WARNING: ${tier} only has ${users.length} users but requested ${winnerCount} winners. Selecting ${actualWinnerCount} instead.`);
       }
 
-      const totalWeight = users.reduce((sum: number, user: any) => sum + Math.max(1, user.currentCyclePoints), 0);
-      const tierWinners = [];
-      const availableUsers = [...users];
-
-      for (let i = 0; i < Math.min(winnerCount, availableUsers.length); i++) {
-        let randomWeight = Math.random() * totalWeight;
-        let selectedUser = null;
-        let selectedIndex = -1;
-
-        for (let j = 0; j < availableUsers.length; j++) {
-          randomWeight -= Math.max(1, availableUsers[j].currentCyclePoints);
-          if (randomWeight <= 0) {
-            selectedUser = availableUsers[j];
-            selectedIndex = j;
-            break;
-          }
-        }
-
-        if (selectedUser) {
-          tierWinners.push({ ...selectedUser, tier });
-          availableUsers.splice(selectedIndex, 1);
-        }
-      }
-
+      // Use Fisher-Yates weighted sampling without replacement
+      const selectedUsers = this.weightedSampleWithoutReplacement(users, actualWinnerCount);
+      
+      const tierWinners = selectedUsers.map(user => ({ ...user, tier }));
       winners.push(...tierWinners);
+      
       console.log(`${tier} final result: selected ${tierWinners.length} winners (target was ${winnerCount})`);
     });
 
     console.log(`Total winners selected across all tiers: ${winners.length}`);
     return winners;
+  }
+
+  // DEFINITIVE weighted sampling without replacement - guaranteed to select exact count
+  private weightedSampleWithoutReplacement(users: any[], count: number): any[] {
+    if (count >= users.length) return [...users];
+    if (count === 0) return [];
+    
+    const selected: any[] = [];
+    const remainingUsers = [...users];
+    
+    console.log(`    Weighted sampling: targeting ${count} from ${users.length} users`);
+    
+    // Use simple deterministic approach: select until we reach count
+    while (selected.length < count && remainingUsers.length > 0) {
+      // Calculate weights for current remaining users
+      const weights = remainingUsers.map(user => Math.max(1, user.currentCyclePoints || 0));
+      const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+      
+      // Generate random value and find corresponding user
+      const randomValue = Math.random() * totalWeight;
+      let runningTotal = 0;
+      let selectedIndex = 0; // Default to first user as failsafe
+      
+      for (let i = 0; i < weights.length; i++) {
+        runningTotal += weights[i];
+        if (randomValue <= runningTotal) {
+          selectedIndex = i;
+          break;
+        }
+      }
+      
+      // Always select a user - remove from pool and add to selected
+      const selectedUser = remainingUsers.splice(selectedIndex, 1)[0];
+      selected.push(selectedUser);
+      
+      // Progress logging for large selections
+      if (selected.length % 100 === 0) {
+        console.log(`    Progress: ${selected.length}/${count} selected`);
+      }
+    }
+    
+    console.log(`    Completed: ${selected.length}/${count} winners selected`);
+    return selected;
   }
 
   private selectTopPerformers(usersByTier: any, tierSettings: any): any[] {
