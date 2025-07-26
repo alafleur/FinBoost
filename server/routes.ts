@@ -4281,6 +4281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rolloverPercentage
       } = req.body;
 
+      console.log('Winner selection request received:', {
+        cycleSettingId,
+        selectionMode,
+        tierSettings,
+        requestBody: req.body
+      });
+
       const results = await storage.executeCycleWinnerSelection({
         cycleSettingId,
         selectionMode: selectionMode || 'weighted_random',

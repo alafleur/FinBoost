@@ -6535,6 +6535,12 @@ export class MemStorage implements IStorage {
   }): Promise<any> {
     const { cycleSettingId, selectionMode, tierSettings } = params;
     
+    console.log('executeCycleWinnerSelection called with:', {
+      cycleSettingId,
+      selectionMode,
+      tierSettings: JSON.stringify(tierSettings, null, 2)
+    });
+    
     try {
       // Get eligible users and pool info
       const eligibleUsers = await this.getEligibleUsersForSelection(cycleSettingId);
@@ -6648,7 +6654,12 @@ export class MemStorage implements IStorage {
       const users = usersByTier[tier] || [];
       const winnerCount = tierSettings[tier].winnerCount;
 
-      if (users.length === 0 || winnerCount === 0) return;
+      console.log(`${tier} selection: ${users.length} users available, target ${winnerCount} winners`);
+
+      if (users.length === 0 || winnerCount === 0) {
+        console.log(`Skipping ${tier}: ${users.length === 0 ? 'no users' : 'winnerCount is 0'}`);
+        return;
+      }
 
       const totalWeight = users.reduce((sum: number, user: any) => sum + Math.max(1, user.currentCyclePoints), 0);
       const tierWinners = [];
