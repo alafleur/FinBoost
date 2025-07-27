@@ -361,14 +361,6 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   pointsRolledOver: integer("points_rolled_over").notNull(),
   payoutStatus: text("payout_status").default("pending").notNull(), // pending, processing, completed, failed
   selectionDate: timestamp("selection_date").defaultNow().notNull(),
-  
-  // Enhanced tracking for versioning and audit trail (ChatGPT Suggestion #1)
-  version: integer("version").default(1).notNull(), // Track different versions of winner lists
-  lastModifiedAt: timestamp("last_modified_at").defaultNow().notNull(),
-  modifiedBy: integer("modified_by").references(() => users.id),
-  importSource: text("import_source"), // 'manual', 'csv_import', 'algorithm'
-  originalRewardAmount: integer("original_reward_amount"), // Store original before any manual adjustments
-  adjustmentReason: text("adjustment_reason"), // Why reward was manually adjusted
 });
 
 // Cycle Point History - enhanced version of userPointsHistory with cycle tracking

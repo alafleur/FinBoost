@@ -5158,27 +5158,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced validation endpoint before sealing (ChatGPT Suggestion #3)
-  app.get("/api/admin/cycles/:id/validate-seal", authenticateToken, async (req, res) => {
-    try {
-      const cycleId = parseInt(req.params.id);
-      
-      if (!cycleId) {
-        return res.status(400).json({ isValid: false, errors: ["Invalid cycle ID"] });
-      }
-      
-      const validation = await storage.validateCycleForSealing(cycleId);
-      
-      res.json(validation);
-    } catch (error) {
-      console.error("Error validating cycle for sealing:", error);
-      res.status(500).json({ 
-        isValid: false, 
-        errors: ["Validation error: " + (error as Error).message] 
-      });
-    }
-  });
-
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;
   (httpServer as any).broadcastActivityUpdate = broadcastActivityUpdate;

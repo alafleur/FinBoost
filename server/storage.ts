@@ -6955,40 +6955,8 @@ export class MemStorage implements IStorage {
   }
 
   // Mark cycle selection as completed to ensure persistence across sessions
-  /**
-   * Enhanced cycle selection completion with validation (ChatGPT Suggestion #3)
-   * Validates selection integrity before marking as completed
-   */
   private async markCycleSelectionCompleted(cycleSettingId: number, winnerCount: number, totalPool: number): Promise<void> {
     try {
-      // Validate cycle_winner_selections is populated
-      const actualWinnerCount = await db.select({ count: count() })
-        .from(cycleWinnerSelections)
-        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
-      
-      if (actualWinnerCount[0].count === 0) {
-        throw new Error('Cannot complete selection: No winners found in cycle_winner_selections table');
-      }
-
-      // Validate winner count matches expected
-      if (actualWinnerCount[0].count !== winnerCount) {
-        throw new Error(`Winner count mismatch: Expected ${winnerCount}, found ${actualWinnerCount[0].count}`);
-      }
-
-      // Validate essential fields are not empty
-      const winnersWithMissingData = await db.select({ count: count() })
-        .from(cycleWinnerSelections)
-        .where(
-          and(
-            eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
-            sql`(reward_amount IS NULL OR tier IS NULL OR tier_rank IS NULL)`
-          )
-        );
-
-      if (winnersWithMissingData[0].count > 0) {
-        throw new Error('Cannot complete selection: Some winners have missing essential fields (rewardAmount, tier, or tierRank)');
-      }
-
       await db
         .update(cycleSettings)
         .set({
@@ -6999,108 +6967,10 @@ export class MemStorage implements IStorage {
         })
         .where(eq(cycleSettings.id, cycleSettingId));
       
-      console.log(`✅ Marked cycle ${cycleSettingId} selection as completed with ${winnerCount} winners and $${totalPool} pool`);
+      console.log(`Marked cycle ${cycleSettingId} selection as completed with ${winnerCount} winners and $${totalPool} pool`);
     } catch (error) {
       console.error('Error marking cycle selection as completed:', error);
       throw error;
-    }
-  }
-
-  /**
-   * Enhanced sealing validation (ChatGPT Suggestion #3)
-   * Comprehensive pre-seal validation
-   */
-  async validateCycleForSealing(cycleSettingId: number): Promise<{ isValid: boolean; errors: string[] }> {
-    const errors: string[] = [];
-
-    try {
-      // Check if cycle exists and is not already sealed
-      const cycle = await db.select()
-        .from(cycleSettings)
-        .where(eq(cycleSettings.id, cycleSettingId))
-        .limit(1);
-
-      if (cycle.length === 0) {
-        errors.push('Cycle not found');
-        return { isValid: false, errors };
-      }
-
-      if (cycle[0].selectionSealed) {
-        errors.push('Cycle is already sealed');
-        return { isValid: false, errors };
-      }
-
-      if (!cycle[0].selectionCompleted) {
-        errors.push('Cannot seal: Selection must be completed first');
-      }
-
-      // Validate cycle_winner_selections is populated
-      const winnersResult = await db.select({ count: count() })
-        .from(cycleWinnerSelections)
-        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
-
-      const winnerCount = winnersResult[0].count;
-      if (winnerCount === 0) {
-        errors.push('No winners found in cycle_winner_selections table');
-      }
-
-      // Validate total reward pool alignment
-      if (cycle[0].totalRewardPool && cycle[0].totalRewardPool > 0) {
-        const calculatedTotal = await db.select({ total: sum(cycleWinnerSelections.rewardAmount) })
-          .from(cycleWinnerSelections)
-          .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
-
-        const actualTotal = calculatedTotal[0].total || 0;
-        const expectedTotal = cycle[0].totalRewardPool;
-
-        // Allow 1% variance for rounding
-        const variance = Math.abs(actualTotal - expectedTotal) / expectedTotal;
-        if (variance > 0.01) {
-          errors.push(`Reward pool mismatch: Expected ${expectedTotal}, calculated ${actualTotal}`);
-        }
-      }
-
-      // Validate winner count alignment
-      if (cycle[0].totalWinners && cycle[0].totalWinners !== winnerCount) {
-        errors.push(`Winner count mismatch: Expected ${cycle[0].totalWinners}, found ${winnerCount}`);
-      }
-
-      return { isValid: errors.length === 0, errors };
-    } catch (error) {
-      console.error('Error validating cycle for sealing:', error);
-      errors.push('Validation error occurred');
-      return { isValid: false, errors };
-    }
-  }
-
-  /**
-   * Enhanced import validation (ChatGPT Suggestion #2)
-   * Validates import prerequisites and data integrity
-   */
-  async validateImportPrerequisites(cycleSettingId: number): Promise<{ canImport: boolean; errors: string[] }> {
-    const errors: string[] = [];
-
-    try {
-      // Check if cycle exists and is not sealed
-      const cycle = await db.select()
-        .from(cycleSettings)
-        .where(eq(cycleSettings.id, cycleSettingId))
-        .limit(1);
-
-      if (cycle.length === 0) {
-        errors.push('Cycle not found');
-        return { canImport: false, errors };
-      }
-
-      if (cycle[0].selectionSealed) {
-        errors.push('Cannot import: Cycle is sealed and cannot be modified');
-      }
-
-      return { canImport: errors.length === 0, errors };
-    } catch (error) {
-      console.error('Error validating import prerequisites:', error);
-      errors.push('Validation error occurred');
-      return { canImport: false, errors };
     }
   }
 
