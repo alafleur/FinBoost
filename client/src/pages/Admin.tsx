@@ -20,7 +20,6 @@ import 'react-quill/dist/quill.snow.css';
 import CycleManagementTab from "@/components/admin/CycleManagementTab";
 import CycleOperationsTab from "@/components/admin/CycleOperationsTab";
 import PredictionsTab from "@/components/admin/PredictionsTab";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   Settings,
   Plus,
@@ -3073,12 +3072,10 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="cycle-operations">
-            <ErrorBoundary>
-              <CycleOperationsTab 
-                cycleSettings={cycleSettings} 
-                onRefresh={fetchData}
-              />
-            </ErrorBoundary>
+            <CycleOperationsTab 
+              cycleSettings={cycleSettings} 
+              onRefresh={fetchData}
+            />
           </TabsContent>
 
           <TabsContent value="predictions">

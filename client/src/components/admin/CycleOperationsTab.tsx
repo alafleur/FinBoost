@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Calendar, 
   Users, 
@@ -23,9 +22,7 @@ import {
   Timer,
   BarChart3,
   Save,
-  Lock,
-  Download,
-  Upload
+  Lock
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -77,8 +74,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   // Get active cycle on component mount
   useEffect(() => {
@@ -137,19 +132,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const handleRunWinnerSelection = async () => {
     if (!selectedCycle) return;
 
-    console.log("Starting winner selection for cycle:", selectedCycle.id);
     setIsRunningSelection(true);
-    setError(null);
-    setAuthError(null);
-
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setAuthError("No authentication token found. Please log in again.");
-        return;
-      }
-
-      console.log("Making API call to /api/admin/cycle-winner-selection/execute");
       const response = await fetch(`/api/admin/cycle-winner-selection/execute`, {
         method: 'POST',
         headers: {
@@ -162,53 +147,29 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         })
       });
 
-      console.log("API response status:", response.status);
-      
-      if (response.status === 401 || response.status === 403) {
-        setAuthError("Authentication failed. Please log in again.");
-        return;
-      }
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API error response:", errorText);
-        setError(`API Error (${response.status}): ${errorText}`);
-        return;
-      }
-
       const data = await response.json();
-      console.log("API response data:", data);
-
-      // Handle the actual API response format (not checking data.success)
-      if (data && typeof data.winnersSelected === 'number') {
+      if (data.success) {
         // Store pending winners for save operation
         setPendingWinners(data.winners || []);
         toast({
           title: "Winner Selection Generated",
-          description: `Generated ${data.winnersSelected} winners using ${selectionMode} method. Pool: $${(data.totalRewardPool / 100).toFixed(2)}. Ready to save as draft.`
-        });
-      } else if (data.error) {
-        setError(data.error);
-        toast({
-          title: "Selection Failed",
-          description: data.error,
-          variant: "destructive"
+          description: `Generated ${data.totalWinners} winners using ${selectionMode} method. Ready to save as draft.`
         });
       } else {
-        console.log("Unexpected API response format:", data);
-        setError("Unexpected API response format");
+        toast({
+          title: "Selection Failed",
+          description: data.error || "Failed to run winner selection",
+          variant: "destructive"
+        });
       }
     } catch (error) {
-      console.error("Winner selection error:", error);
-      setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       toast({
         title: "Error",
-        description: "Failed to run winner selection due to network error",
+        description: "Failed to run winner selection",
         variant: "destructive"
       });
     } finally {
       setIsRunningSelection(false);
-      console.log("Winner selection completed");
     }
   };
 
@@ -390,86 +351,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     return new Date(date).toLocaleDateString();
   };
 
-  const handleExportWinners = () => {
-    if (!winners.length) {
-      toast({
-        title: "No Data to Export",
-        description: "No winners selected to export",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const csvData = winners.map(winner => ({
-      username: winner.username,
-      email: winner.email,
-      tier: winner.tier,
-      rewardAmount: (winner.rewardAmount / 100).toFixed(2),
-      paypalEmail: winner.paypalEmail || '',
-      status: winner.isProcessed ? 'Processed' : 'Pending',
-      selectionDate: formatDate(winner.selectionDate)
-    }));
-
-    const headers = ['username', 'email', 'tier', 'rewardAmount', 'paypalEmail', 'status', 'selectionDate'];
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(key => `"${row[key] || ''}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `winners_${selectedCycle?.cycleName || 'export'}_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Winners Exported",
-      description: `Exported ${winners.length} winners to CSV file`
-    });
-  };
-
-  const handleImportWinners = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-      
-      const importedData = lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-        const row: any = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        return row;
-      });
-
-      // Here you would typically validate and process the imported data
-      // For now, we'll just show a success message
-      toast({
-        title: "Import Successful",
-        description: `Imported ${importedData.length} winner records. Note: Import processing not yet implemented.`
-      });
-
-      console.log('Imported winner data:', importedData);
-    } catch (error) {
-      toast({
-        title: "Import Failed",
-        description: "Failed to parse CSV file",
-        variant: "destructive"
-      });
-    }
-
-    // Reset file input
-    event.target.value = '';
-  };
-
   const activeCycle = cycleSettings.find(cycle => cycle.isActive);
 
   return (
@@ -487,39 +368,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           <div className="text-xs text-green-600 font-medium">Monitor Phase: Track cycle performance and execute operations</div>
         </div>
       </div>
-
-      {/* Error Alerts */}
-      {authError && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-700">
-            <strong>Authentication Error:</strong> {authError}
-            <Button 
-              variant="link" 
-              className="text-red-600 p-0 h-auto ml-2"
-              onClick={() => window.location.href = '/auth'}
-            >
-              Log in again
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {error && (
-        <Alert className="border-orange-200 bg-orange-50">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-700">
-            <strong>Error:</strong> {error}
-            <Button 
-              variant="link" 
-              className="text-orange-600 p-0 h-auto ml-2"
-              onClick={() => setError(null)}
-            >
-              Dismiss
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Current Cycle Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -757,29 +605,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      onClick={handleExportWinners}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Export CSV
-                    </Button>
-                    <Button
-                      onClick={() => document.getElementById('import-file')?.click()}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Import CSV
-                    </Button>
-                    <input
-                      id="import-file"
-                      type="file"
-                      accept=".csv"
-                      style={{ display: 'none' }}
-                      onChange={handleImportWinners}
-                    />
                     <Button
                       onClick={() => {
                         if (selectedForDisbursement.size === winners.length) {
