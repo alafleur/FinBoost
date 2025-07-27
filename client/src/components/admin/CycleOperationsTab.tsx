@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Calendar, 
   Users, 
@@ -74,6 +75,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Get active cycle on component mount
   useEffect(() => {
@@ -132,9 +135,19 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const handleRunWinnerSelection = async () => {
     if (!selectedCycle) return;
 
+    console.log("Starting winner selection for cycle:", selectedCycle.id);
     setIsRunningSelection(true);
+    setError(null);
+    setAuthError(null);
+
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setAuthError("No authentication token found. Please log in again.");
+        return;
+      }
+
+      console.log("Making API call to /api/admin/cycle-winner-selection/execute");
       const response = await fetch(`/api/admin/cycle-winner-selection/execute`, {
         method: 'POST',
         headers: {
@@ -147,29 +160,53 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         })
       });
 
+      console.log("API response status:", response.status);
+      
+      if (response.status === 401 || response.status === 403) {
+        setAuthError("Authentication failed. Please log in again.");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API error response:", errorText);
+        setError(`API Error (${response.status}): ${errorText}`);
+        return;
+      }
+
       const data = await response.json();
-      if (data.success) {
+      console.log("API response data:", data);
+
+      // Handle the actual API response format (not checking data.success)
+      if (data && typeof data.winnersSelected === 'number') {
         // Store pending winners for save operation
         setPendingWinners(data.winners || []);
         toast({
           title: "Winner Selection Generated",
-          description: `Generated ${data.totalWinners} winners using ${selectionMode} method. Ready to save as draft.`
+          description: `Generated ${data.winnersSelected} winners using ${selectionMode} method. Pool: $${(data.totalRewardPool / 100).toFixed(2)}. Ready to save as draft.`
         });
-      } else {
+      } else if (data.error) {
+        setError(data.error);
         toast({
           title: "Selection Failed",
-          description: data.error || "Failed to run winner selection",
+          description: data.error,
           variant: "destructive"
         });
+      } else {
+        console.log("Unexpected API response format:", data);
+        setError("Unexpected API response format");
       }
     } catch (error) {
+      console.error("Winner selection error:", error);
+      setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       toast({
         title: "Error",
-        description: "Failed to run winner selection",
+        description: "Failed to run winner selection due to network error",
         variant: "destructive"
       });
     } finally {
       setIsRunningSelection(false);
+      console.log("Winner selection completed");
     }
   };
 
@@ -368,6 +405,39 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           <div className="text-xs text-green-600 font-medium">Monitor Phase: Track cycle performance and execute operations</div>
         </div>
       </div>
+
+      {/* Error Alerts */}
+      {authError && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-700">
+            <strong>Authentication Error:</strong> {authError}
+            <Button 
+              variant="link" 
+              className="text-red-600 p-0 h-auto ml-2"
+              onClick={() => window.location.href = '/auth'}
+            >
+              Log in again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-700">
+            <strong>Error:</strong> {error}
+            <Button 
+              variant="link" 
+              className="text-orange-600 p-0 h-auto ml-2"
+              onClick={() => setError(null)}
+            >
+              Dismiss
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Current Cycle Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
