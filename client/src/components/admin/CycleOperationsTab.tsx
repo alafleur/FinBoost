@@ -20,7 +20,9 @@ import {
   AlertCircle,
   Crown,
   Timer,
-  BarChart3
+  BarChart3,
+  Save,
+  Lock
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -69,6 +71,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isProcessingPayouts, setIsProcessingPayouts] = useState(false);
   const [selectionMode, setSelectionMode] = useState('weighted_random');
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
+  const [isSavingSelection, setIsSavingSelection] = useState(false);
+  const [isSealingSelection, setIsSealingSelection] = useState(false);
+  const [pendingWinners, setPendingWinners] = useState<any[]>([]);
 
   // Get active cycle on component mount
   useEffect(() => {
@@ -139,12 +144,12 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
       const data = await response.json();
       if (data.success) {
+        // Store pending winners for save operation
+        setPendingWinners(data.winners || []);
         toast({
-          title: "Winner Selection Complete",
-          description: `Selected ${data.totalWinners} winners using ${selectionMode} method`
+          title: "Winner Selection Generated",
+          description: `Generated ${data.totalWinners} winners using ${selectionMode} method. Ready to save as draft.`
         });
-        loadWinners();
-        loadCycleAnalytics();
       } else {
         toast({
           title: "Selection Failed",
@@ -160,6 +165,99 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       });
     } finally {
       setIsRunningSelection(false);
+    }
+  };
+
+  const handleSaveWinnerSelection = async () => {
+    if (!selectedCycle || pendingWinners.length === 0) {
+      toast({
+        title: "Error",
+        description: "No winner selection to save. Please run selection first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSavingSelection(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-selection/${selectedCycle.id}/save`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          winners: pendingWinners,
+          selectionMode,
+          totalPool: cycleAnalytics?.rewardPool || 0
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: "Winners Saved as Draft",
+          description: "Winner selection saved. You can now export, modify, and import before sealing."
+        });
+        setPendingWinners([]);
+        loadWinners();
+        loadCycleAnalytics();
+      } else {
+        toast({
+          title: "Save Failed",
+          description: data.error || "Failed to save winner selection",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save winner selection",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSavingSelection(false);
+    }
+  };
+
+  const handleSealWinnerSelection = async () => {
+    if (!selectedCycle) return;
+
+    setIsSealingSelection(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-selection/${selectedCycle.id}/seal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: "Winner Selection Sealed",
+          description: "Winner selection is now final and cannot be modified."
+        });
+        loadWinners();
+        loadCycleAnalytics();
+      } else {
+        toast({
+          title: "Seal Failed",
+          description: data.error || "Failed to seal winner selection",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to seal winner selection",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSealingSelection(false);
     }
   };
 
@@ -404,7 +502,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       ) : (
                         <>
                           <Play className="w-4 h-4 mr-2" />
-                          Run Selection
+                          Generate Winners
                         </>
                       )}
                     </Button>
@@ -417,6 +515,75 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     </Button>
                   </div>
                 </div>
+
+                {/* NEW: Save/Seal Workflow Controls */}
+                {pendingWinners.length > 0 && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertCircle className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-900">
+                        Winner selection generated ({pendingWinners.length} winners)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        onClick={handleSaveWinnerSelection}
+                        disabled={isSavingSelection}
+                        size="sm"
+                      >
+                        {isSavingSelection ? (
+                          <>
+                            <Timer className="w-4 h-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save as Draft
+                          </>
+                        )}
+                      </Button>
+                      <span className="text-xs text-blue-700">
+                        Save to enable export/import workflow
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Seal Selection Controls (only show if executed but not sealed) */}
+                {winners.length > 0 && selectedCycle && (
+                  <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-orange-600" />
+                        <span className="text-sm font-medium text-orange-900">
+                          Selection Status: Draft (can be modified)
+                        </span>
+                      </div>
+                      <Button 
+                        onClick={handleSealWinnerSelection}
+                        disabled={isSealingSelection}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        {isSealingSelection ? (
+                          <>
+                            <Timer className="w-4 h-4 mr-2 animate-spin" />
+                            Sealing...
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4 mr-2" />
+                            Seal Final Selection
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-orange-700 mt-2">
+                      Sealing will lock the selection permanently - no further modifications allowed
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
