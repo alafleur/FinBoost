@@ -6579,35 +6579,18 @@ export class MemStorage implements IStorage {
         };
       });
 
-      // Clear existing winner selections for this cycle first (with explicit confirmation)
-      const deleteResult = await db
-        .delete(cycleWinnerSelections)
-        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
-      
-      console.log(`Cleared existing winners for cycle ${cycleSettingId}`);
-
-      // Save winners to database
-      const savedWinners = await this.saveCycleWinnerSelection(
-        cycleSettingId,
-        winnersWithRewards,
-        selectionMode,
-        poolInfo.totalPool
-      );
-
-      // CRITICAL: Mark cycle as having completed selection to ensure persistence
-      await this.markCycleSelectionCompleted(cycleSettingId, savedWinners.length, poolInfo.totalPool);
-
-      console.log(`Selected ${selectedWinners.length} winners, saved ${savedWinners.length} successfully`);
+      // MODIFIED: Only generate and return winners for preview - DO NOT save to database
+      console.log(`Generated ${selectedWinners.length} winners for preview (not saved to database)`);
 
       return {
         selectionMode,
-        winnersSelected: savedWinners.length,
+        winnersSelected: winnersWithRewards.length,
         totalRewardPool: poolInfo.totalPool,
-        winners: savedWinners,
+        winners: winnersWithRewards,
         tierBreakdown: {
-          tier1: { winners: savedWinners.filter(w => w.tier === 'tier1').length, pool: tier1Pool },
-          tier2: { winners: savedWinners.filter(w => w.tier === 'tier2').length, pool: tier2Pool },
-          tier3: { winners: savedWinners.filter(w => w.tier === 'tier3').length, pool: tier3Pool }
+          tier1: { winners: winnersWithRewards.filter(w => w.tier === 'tier1').length, pool: tier1Pool },
+          tier2: { winners: winnersWithRewards.filter(w => w.tier === 'tier2').length, pool: tier2Pool },
+          tier3: { winners: winnersWithRewards.filter(w => w.tier === 'tier3').length, pool: tier3Pool }
         }
       };
     } catch (error) {
@@ -6798,6 +6781,65 @@ export class MemStorage implements IStorage {
 
     console.log(`Save operation complete: ${savedWinners.length} saved, ${errorCount} errors`);
     return savedWinners;
+  }
+
+  // NEW: Save generated winners to database and mark as executed (draft state)
+  async saveWinnerSelectionDraft(
+    cycleSettingId: number,
+    winners: any[],
+    selectionMode: string,
+    totalPool: number
+  ): Promise<{ winnersSelected: number; totalRewardPool: number; selectionMode: string }> {
+    try {
+      // Clear existing winner selections for this cycle first
+      await db
+        .delete(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+      
+      console.log(`Cleared existing winners for cycle ${cycleSettingId}`);
+
+      // Save winners to database using existing private method logic
+      const savedWinners = await this.saveCycleWinnerSelectionPrivate(
+        cycleSettingId,
+        winners,
+        selectionMode,
+        totalPool
+      );
+
+      // Mark cycle as EXECUTED (not sealed) to enable export/import workflow
+      await this.markCycleSelectionExecuted(cycleSettingId, savedWinners.length, totalPool);
+
+      console.log(`Saved ${savedWinners.length} winners as draft for cycle ${cycleSettingId}`);
+
+      return {
+        winnersSelected: savedWinners.length,
+        totalRewardPool: totalPool,
+        selectionMode
+      };
+    } catch (error) {
+      console.error('Error saving cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  // Mark cycle selection as executed (draft state) - allows export/import before sealing
+  private async markCycleSelectionExecuted(cycleSettingId: number, winnerCount: number, totalPool: number): Promise<void> {
+    try {
+      await db
+        .update(cycleSettings)
+        .set({
+          selectionExecuted: true,
+          totalWinners: winnerCount,
+          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
+          selectionExecutedAt: new Date()
+        })
+        .where(eq(cycleSettings.id, cycleSettingId));
+      
+      console.log(`Marked cycle ${cycleSettingId} selection as executed (draft) with ${winnerCount} winners and $${totalPool} pool`);
+    } catch (error) {
+      console.error('Error marking cycle selection as executed:', error);
+      throw error;
+    }
   }
 
   // Mark cycle selection as completed to ensure persistence across sessions
