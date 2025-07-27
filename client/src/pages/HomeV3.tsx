@@ -502,33 +502,29 @@ function HomeV3() {
         </div>
       </section>
 
-      {/* Simple social proof section */}
-      <section id="social-proof" className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+      {/* Problem/Solution Framing */}
+      <section id="framing" className="py-16 px-4 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="mb-8"
           >
-            <p className="text-lg font-semibold text-green-600 mb-6">
-              "More than half of active members win something each cycle."
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              The Problem: Financial Stress Without Action
+            </h2>
+            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              Millions struggle with debt and financial anxiety, but traditional education feels overwhelming and disconnected from real progress. 
+              You need motivation to take action, not just more information.
             </p>
-            
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-green-100">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-green-600 font-bold text-lg">S</span>
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900">Sarah K.</p>
-                  <p className="text-sm text-gray-600">Won $285 last cycle</p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic">
-                "I was skeptical at first, but FinBoost actually motivated me to pay down $2,000 in credit card debt. 
-                The lessons were practical and the reward structure kept me accountable. Winning money for improving my finances felt incredible."
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-blue-100">
+              <h3 className="text-xl font-semibold text-blue-600 mb-4">
+                Our Solution: Learn → Act → Win, Together
+              </h3>
+              <p className="text-gray-700 leading-relaxed">
+                FinBoost turns financial education into a rewarding game where your progress helps you win real money. 
+                Every lesson completed and action taken moves you closer to cash rewards—while building genuine financial skills.
               </p>
             </div>
             
@@ -537,6 +533,45 @@ function HomeV3() {
                 See full details on how the rewards system works →
               </Link>
             </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Strength in Numbers Section */}
+      <section id="collective-power" className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Why It Works Better Together
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="text-left">
+                <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                  Your $20/month doesn't just fund your own growth—it fuels a collective reward pool that grows with every new member.
+                </p>
+                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                  <strong className="text-green-600">The bigger our community, the bigger the rewards.</strong> Small individual contributions create meaningful prizes that motivate real financial progress.
+                </p>
+                <div className="bg-green-100 rounded-lg p-4 text-green-800">
+                  <p className="font-semibold">More than half of active members win something each cycle.</p>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <div className="w-48 h-48 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{communitySize.toLocaleString()}</div>
+                    <div className="text-sm opacity-90">Members</div>
+                    <div className="text-xl font-semibold mt-2">{rewardsPercentage}%</div>
+                    <div className="text-xs opacity-90">Win Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
