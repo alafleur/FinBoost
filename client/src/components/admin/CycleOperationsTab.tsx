@@ -441,9 +441,31 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Check if cycle is sealed (ChatGPT Suggestion #2)
+    if (selectedCycle?.selectionSealed) {
+      toast({
+        title: "Import Blocked",
+        description: "Cannot import: Cycle is sealed and cannot be modified",
+        variant: "destructive"
+      });
+      event.target.value = '';
+      return;
+    }
+
     try {
       const text = await file.text();
       const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast({
+          title: "Import Failed",
+          description: "CSV file must contain headers and at least one data row",
+          variant: "destructive"
+        });
+        event.target.value = '';
+        return;
+      }
+
       const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
       
       const importedData = lines.slice(1).map(line => {
@@ -455,18 +477,46 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         return row;
       });
 
-      // Here you would typically validate and process the imported data
-      // For now, we'll just show a success message
+      // Validation warnings for winner count mismatch (ChatGPT Suggestion #2)
+      const currentWinnerCount = winners.length;
+      const importedWinnerCount = importedData.length;
+      
+      let warningMessage = '';
+      if (currentWinnerCount > 0 && importedWinnerCount !== currentWinnerCount) {
+        warningMessage = ` Warning: Imported ${importedWinnerCount} winners but current selection has ${currentWinnerCount} winners.`;
+      }
+
+      // Validate essential fields exist
+      const requiredFields = ['username', 'userId', 'tier', 'rewardAmount'];
+      const missingFields = requiredFields.filter(field => !headers.includes(field));
+      
+      if (missingFields.length > 0) {
+        toast({
+          title: "Import Failed",
+          description: `Missing required fields: ${missingFields.join(', ')}`,
+          variant: "destructive"
+        });
+        event.target.value = '';
+        return;
+      }
+
+      // Show success with validation warnings
       toast({
         title: "Import Successful",
-        description: `Imported ${importedData.length} winner records. Note: Import processing not yet implemented.`
+        description: `Imported ${importedData.length} winner records.${warningMessage} Note: Full import processing not yet implemented.`
       });
 
       console.log('Imported winner data:', importedData);
+      console.log('Validation:', {
+        expectedWinners: currentWinnerCount,
+        importedWinners: importedWinnerCount,
+        hasWarnings: warningMessage.length > 0
+      });
+      
     } catch (error) {
       toast({
         title: "Import Failed",
-        description: "Failed to parse CSV file",
+        description: "Failed to parse CSV file. Please check file format.",
         variant: "destructive"
       });
     }
@@ -712,37 +762,61 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   </div>
                 )}
 
-                {/* Seal Selection Controls (only show if executed but not sealed) */}
+                {/* Enhanced Status Display with Visual Feedback (ChatGPT Suggestion #4) */}
                 {winners.length > 0 && selectedCycle && (
-                  <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <div className={`mt-4 p-4 rounded-lg border ${
+                    selectedCycle.selectionSealed 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-orange-50 border-orange-200'
+                  }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-orange-600" />
-                        <span className="text-sm font-medium text-orange-900">
-                          Selection Status: Draft (can be modified)
-                        </span>
-                      </div>
-                      <Button 
-                        onClick={handleSealWinnerSelection}
-                        disabled={isSealingSelection}
-                        variant="destructive"
-                        size="sm"
-                      >
-                        {isSealingSelection ? (
+                        {selectedCycle.selectionSealed ? (
                           <>
-                            <Timer className="w-4 h-4 mr-2 animate-spin" />
-                            Sealing...
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-medium text-green-900">
+                              Finalized on {selectedCycle.selectionSealedAt ? new Date(selectedCycle.selectionSealedAt).toLocaleDateString() : 'Unknown'}
+                            </span>
                           </>
                         ) : (
                           <>
-                            <Lock className="w-4 h-4 mr-2" />
-                            Seal Final Selection
+                            <Lock className="w-4 h-4 text-orange-600" />
+                            <span className="text-sm font-medium text-orange-900">
+                              Selection Draft Saved at {selectedCycle.selectionCompletedAt ? new Date(selectedCycle.selectionCompletedAt).toLocaleString() : 'Unknown'}
+                            </span>
                           </>
                         )}
-                      </Button>
+                      </div>
+                      {!selectedCycle.selectionSealed && (
+                        <Button 
+                          onClick={handleSealWinnerSelection}
+                          disabled={isSealingSelection}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          {isSealingSelection ? (
+                            <>
+                              <Timer className="w-4 h-4 mr-2 animate-spin" />
+                              Sealing...
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-4 h-4 mr-2" />
+                              Seal Final Selection
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
-                    <p className="text-xs text-orange-700 mt-2">
-                      Sealing will lock the selection permanently - no further modifications allowed
+                    <p className={`text-xs mt-2 ${
+                      selectedCycle.selectionSealed 
+                        ? 'text-green-700' 
+                        : 'text-orange-700'
+                    }`}>
+                      {selectedCycle.selectionSealed 
+                        ? 'This selection is permanently sealed and cannot be modified'
+                        : 'Sealing will lock the selection permanently - no further modifications allowed'
+                      }
                     </p>
                   </div>
                 )}
@@ -774,6 +848,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       onClick={() => document.getElementById('import-file')?.click()}
                       variant="outline"
                       size="sm"
+                      disabled={selectedCycle?.selectionSealed}
+                      title={selectedCycle?.selectionSealed ? "Cannot import: Cycle is sealed" : "Import CSV to overwrite current selection"}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Import CSV
@@ -784,6 +860,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       accept=".csv"
                       style={{ display: 'none' }}
                       onChange={handleImportWinners}
+                      disabled={selectedCycle?.selectionSealed}
                     />
                     <Button
                       onClick={() => {
