@@ -502,41 +502,6 @@ function HomeV3() {
         </div>
       </section>
 
-      {/* Problem/Solution Framing */}
-      <section id="framing" className="py-16 px-4 bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              The Problem: Financial Stress Without Action
-            </h2>
-            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-              Millions struggle with debt and financial anxiety, but traditional education feels overwhelming and disconnected from real progress. 
-              You need motivation to take action, not just more information.
-            </p>
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-blue-100">
-              <h3 className="text-xl font-semibold text-blue-600 mb-4">
-                Our Solution: Learn → Act → Win, Together
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                FinBoost turns financial education into a rewarding game where your progress helps you win real money. 
-                Every lesson completed and action taken moves you closer to cash rewards—while building genuine financial skills.
-              </p>
-            </div>
-            
-            <p className="text-center text-gray-600 mt-6">
-              <Link href="/how-it-works" className="text-blue-600 hover:text-blue-700 underline">
-                See full details on how the rewards system works →
-              </Link>
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Strength in Numbers Section */}
       <section id="collective-power" className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="max-w-4xl mx-auto text-center">
@@ -546,8 +511,11 @@ function HomeV3() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">STRENGTH IN NUMBERS</span>
+            </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Why It Works Better Together
+              The Power of Our Collective
             </h2>
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="text-left">
@@ -572,6 +540,12 @@ function HomeV3() {
                 </div>
               </div>
             </div>
+            
+            <p className="text-center text-gray-600 mt-6">
+              <Link href="/how-it-works" className="text-blue-600 hover:text-blue-700 underline">
+                See full details on how the rewards system works →
+              </Link>
+            </p>
           </motion.div>
         </div>
       </section>
@@ -643,12 +617,17 @@ function HomeV3() {
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Join thousands of members already building better financial futures together.
             </p>
-            <Link
-              href="/auth?mode=signup"
-              className="inline-block bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
-            >
-              Join Early Access - $20/month
-            </Link>
+            <div className="flex flex-col items-center">
+              <Link
+                href="/auth?mode=signup"
+                className="inline-block bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg mb-3"
+              >
+                Join Early Access - $20/month
+              </Link>
+              <p className="text-sm text-gray-400">
+                Limited founding spots • $5,000 prize pool guaranteed
+              </p>
+            </div>
           </motion.div>
         </div>
       </section>
