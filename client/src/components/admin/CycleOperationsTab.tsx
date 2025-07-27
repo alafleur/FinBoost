@@ -23,7 +23,9 @@ import {
   Timer,
   BarChart3,
   Save,
-  Lock
+  Lock,
+  Download,
+  Upload
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -388,6 +390,86 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     return new Date(date).toLocaleDateString();
   };
 
+  const handleExportWinners = () => {
+    if (!winners.length) {
+      toast({
+        title: "No Data to Export",
+        description: "No winners selected to export",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const csvData = winners.map(winner => ({
+      username: winner.username,
+      email: winner.email,
+      tier: winner.tier,
+      rewardAmount: (winner.rewardAmount / 100).toFixed(2),
+      paypalEmail: winner.paypalEmail || '',
+      status: winner.isProcessed ? 'Processed' : 'Pending',
+      selectionDate: formatDate(winner.selectionDate)
+    }));
+
+    const headers = ['username', 'email', 'tier', 'rewardAmount', 'paypalEmail', 'status', 'selectionDate'];
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => headers.map(key => `"${row[key] || ''}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `winners_${selectedCycle?.cycleName || 'export'}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Winners Exported",
+      description: `Exported ${winners.length} winners to CSV file`
+    });
+  };
+
+  const handleImportWinners = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      
+      const importedData = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+        const row: any = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] || '';
+        });
+        return row;
+      });
+
+      // Here you would typically validate and process the imported data
+      // For now, we'll just show a success message
+      toast({
+        title: "Import Successful",
+        description: `Imported ${importedData.length} winner records. Note: Import processing not yet implemented.`
+      });
+
+      console.log('Imported winner data:', importedData);
+    } catch (error) {
+      toast({
+        title: "Import Failed",
+        description: "Failed to parse CSV file",
+        variant: "destructive"
+      });
+    }
+
+    // Reset file input
+    event.target.value = '';
+  };
+
   const activeCycle = cycleSettings.find(cycle => cycle.isActive);
 
   return (
@@ -675,6 +757,29 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={handleExportWinners}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </Button>
+                    <Button
+                      onClick={() => document.getElementById('import-file')?.click()}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Import CSV
+                    </Button>
+                    <input
+                      id="import-file"
+                      type="file"
+                      accept=".csv"
+                      style={{ display: 'none' }}
+                      onChange={handleImportWinners}
+                    />
                     <Button
                       onClick={() => {
                         if (selectedForDisbursement.size === winners.length) {
