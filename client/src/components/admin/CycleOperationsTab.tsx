@@ -400,17 +400,22 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       return;
     }
 
-    const csvData = winners.map(winner => ({
+    const csvData = winners.map((winner, index) => ({
+      overallRank: winner.overallRank || (index + 1),
       username: winner.username,
+      userId: winner.userId,
       email: winner.email,
       tier: winner.tier,
+      tierRank: winner.tierRank || '',
+      pointsAtSelection: winner.pointsAtSelection || winner.points || 0,
       rewardAmount: (winner.rewardAmount / 100).toFixed(2),
+      pointsDeducted: winner.pointsDeducted || 0,
+      pointsRolledOver: winner.pointsRolledOver || 0,
       paypalEmail: winner.paypalEmail || '',
-      status: winner.isProcessed ? 'Processed' : 'Pending',
-      selectionDate: formatDate(winner.selectionDate)
+      status: winner.isProcessed || winner.payoutStatus === 'completed' ? 'Processed' : 'Pending'
     }));
 
-    const headers = ['username', 'email', 'tier', 'rewardAmount', 'paypalEmail', 'status', 'selectionDate'];
+    const headers = ['overallRank', 'username', 'userId', 'email', 'tier', 'tierRank', 'pointsAtSelection', 'rewardAmount', 'pointsDeducted', 'pointsRolledOver', 'paypalEmail', 'status'];
     const csvContent = [
       headers.join(','),
       ...csvData.map(row => headers.map(key => `"${row[key] || ''}"`).join(','))
@@ -817,16 +822,21 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">Select</TableHead>
+                      <TableHead>Rank</TableHead>
                       <TableHead>Winner</TableHead>
+                      <TableHead>User ID</TableHead>
                       <TableHead>Tier</TableHead>
-                      <TableHead>Reward Amount</TableHead>
+                      <TableHead>Tier Rank</TableHead>
+                      <TableHead>Points</TableHead>
+                      <TableHead>Reward</TableHead>
+                      <TableHead>Points Deducted</TableHead>
+                      <TableHead>Points Rolled</TableHead>
                       <TableHead>PayPal Email</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Selected Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {winners.map((winner) => (
+                    {winners.map((winner, index) => (
                       <TableRow key={winner.id}>
                         <TableCell>
                           <input
@@ -843,11 +853,17 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                             }}
                           />
                         </TableCell>
+                        <TableCell className="font-medium">
+                          {winner.overallRank || (index + 1)}
+                        </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{winner.username}</div>
                             <div className="text-sm text-gray-500">{winner.email}</div>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">
+                          {winner.userId}
                         </TableCell>
                         <TableCell>
                           <Badge variant={
@@ -858,18 +874,30 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                              winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="text-center">
+                          {winner.tierRank || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {winner.pointsAtSelection || winner.points || 0}
+                        </TableCell>
+                        <TableCell className="font-medium text-right">
                           {formatCurrency(winner.rewardAmount)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {winner.pointsDeducted || 0}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {winner.pointsRolledOver || 0}
                         </TableCell>
                         <TableCell>
                           {winner.paypalEmail ? (
-                            <span className="text-green-600">{winner.paypalEmail}</span>
+                            <span className="text-green-600 text-sm">{winner.paypalEmail}</span>
                           ) : (
-                            <span className="text-red-600">Not configured</span>
+                            <span className="text-red-600 text-sm">Not configured</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          {winner.isProcessed ? (
+                          {winner.isProcessed || winner.payoutStatus === 'completed' ? (
                             <Badge variant="default">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Processed
@@ -880,9 +908,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                               Pending
                             </Badge>
                           )}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(winner.selectionDate)}
                         </TableCell>
                       </TableRow>
                     ))}
