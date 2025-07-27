@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import HomeV2 from "@/pages/Home_v2";
 import HomeV2Clean from "@/pages/HomeV2Clean";
 import HomeV3 from "@/pages/HomeV3";
+import HomeV3Backup from "@/pages/HomeV3_backup";
 import Auth from "@/pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/v2" component={HomeV2} />
       <Route path="/v2clean" component={HomeV2Clean} />
       <Route path="/v3" component={HomeV3} />
+      <Route path="/v3-backup" component={HomeV3Backup} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/education" component={Education} />
