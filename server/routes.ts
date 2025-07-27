@@ -4465,6 +4465,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'No file data provided' });
       }
 
+      // NEW: Validate cycle execution/seal state before allowing import
+      const [cycleSetting] = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      if (!cycleSetting) {
+        return res.status(404).json({ error: 'Cycle setting not found' });
+      }
+
+      if (!cycleSetting.selectionExecuted) {
+        return res.status(400).json({ 
+          error: 'Cannot import - cycle selection has not been executed yet. Please run selection first.' 
+        });
+      }
+
+      if (cycleSetting.selectionSealed) {
+        return res.status(400).json({ 
+          error: 'Cannot import - cycle selection is already sealed. No further modifications allowed.' 
+        });
+      }
+
       // Parse base64 encoded Excel file
       const buffer = Buffer.from(fileData.split(',')[1], 'base64');
       const workbook = XLSX.read(buffer, { type: 'buffer' });
@@ -4582,6 +4604,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating winner payout:', error);
       res.status(500).json({ error: 'Failed to update winner payout' });
+    }
+  });
+
+  // NEW: Save winner selection (draft state) - supports export/import workflow
+  app.post('/api/admin/cycle-winner-selection/:cycleSettingId/save', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const { winners, selectionMode, totalPool } = req.body;
+      
+      if (!winners || !Array.isArray(winners) || winners.length === 0) {
+        return res.status(400).json({ error: 'Winners array is required and cannot be empty' });
+      }
+
+      const result = await storage.saveCycleWinnerSelection(
+        cycleSettingId,
+        winners,
+        selectionMode || 'point-weighted-random',
+        totalPool || 0
+      );
+
+      res.json({ 
+        success: true, 
+        message: 'Winner selection saved as draft. You can now export, modify, and import before sealing.',
+        result 
+      });
+    } catch (error) {
+      console.error('Error saving winner selection:', error);
+      res.status(500).json({ error: 'Failed to save winner selection' });
+    }
+  });
+
+  // NEW: Seal winner selection (final lock state) - prevents further modifications
+  app.post('/api/admin/cycle-winner-selection/:cycleSettingId/seal', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      const result = await storage.sealCycleWinnerSelection(cycleSettingId);
+      
+      res.json({ 
+        success: true, 
+        message: result.message,
+        sealed: result.sealed
+      });
+    } catch (error) {
+      console.error('Error sealing winner selection:', error);
+      res.status(500).json({ error: 'Failed to seal winner selection' });
     }
   });
 

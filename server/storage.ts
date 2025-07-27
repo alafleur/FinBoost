@@ -6798,13 +6798,64 @@ export class MemStorage implements IStorage {
       
       console.log(`Cleared existing winners for cycle ${cycleSettingId}`);
 
-      // Save winners to database using existing private method logic
-      const savedWinners = await this.saveCycleWinnerSelectionPrivate(
-        cycleSettingId,
-        winners,
-        selectionMode,
-        totalPool
-      );
+      // Save winners to database using existing method logic
+      const savedWinners = [];
+      let errorCount = 0;
+
+      // Group winners by tier to calculate tier ranks
+      const winnersByTier = {
+        tier1: winners.filter(w => w.tier === 'tier1'),
+        tier2: winners.filter(w => w.tier === 'tier2'),
+        tier3: winners.filter(w => w.tier === 'tier3')
+      };
+
+      console.log(`Attempting to save ${winners.length} winners:`, {
+        tier1: winnersByTier.tier1.length,
+        tier2: winnersByTier.tier2.length,
+        tier3: winnersByTier.tier3.length
+      });
+
+      for (const winner of winners) {
+        try {
+          // Calculate tier rank based on position within tier
+          const tierWinners = winnersByTier[winner.tier as keyof typeof winnersByTier] || [];
+          const tierRank = tierWinners.findIndex(w => w.id === winner.id) + 1;
+
+          const [saved] = await db
+            .insert(cycleWinnerSelections)
+            .values({
+              cycleSettingId,
+              userId: winner.id,
+              tier: winner.tier,
+              tierRank,
+              pointsAtSelection: winner.currentCyclePoints,
+              rewardAmount: winner.rewardAmount * 100, // Convert to cents
+              pointsDeducted: 0,
+              pointsRolledOver: 0,
+              payoutStatus: winner.payoutStatus || 'pending'
+            })
+            .returning();
+
+          savedWinners.push({
+            ...saved,
+            username: winner.username,
+            email: winner.email
+          });
+        } catch (error) {
+          errorCount++;
+          console.error(`Error saving winner ${errorCount}:`, error);
+          console.error('Winner details:', { 
+            id: winner.id, 
+            tier: winner.tier, 
+            username: winner.username,
+            cycleSettingId,
+            pointsAtSelection: winner.currentCyclePoints,
+            rewardAmount: winner.rewardAmount 
+          });
+        }
+      }
+
+      console.log(`Save operation complete: ${savedWinners.length} saved, ${errorCount} errors`);
 
       // Mark cycle as EXECUTED (not sealed) to enable export/import workflow
       await this.markCycleSelectionExecuted(cycleSettingId, savedWinners.length, totalPool);
@@ -6818,6 +6869,67 @@ export class MemStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error saving cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  // NEW: Seal the winner selection (final lock state) - prevents further modifications
+  async sealCycleWinnerSelection(cycleSettingId: number): Promise<{ sealed: boolean; message: string }> {
+    try {
+      // First validate that selection was executed and winners exist
+      const [cycleSetting] = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      if (!cycleSetting) {
+        throw new Error('Cycle setting not found');
+      }
+
+      if (!cycleSetting.selectionExecuted) {
+        throw new Error('Cannot seal cycle - selection has not been executed yet');
+      }
+
+      if (cycleSetting.selectionSealed) {
+        return {
+          sealed: false,
+          message: 'Cycle selection is already sealed'
+        };
+      }
+
+      // Validate winners exist and data is consistent
+      const winnerCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
+      const actualWinnerCount = winnerCount[0]?.count || 0;
+      
+      if (actualWinnerCount === 0) {
+        throw new Error('Cannot seal cycle - no winners found in database');
+      }
+
+      if (actualWinnerCount !== cycleSetting.totalWinners) {
+        console.warn(`Winner count mismatch: database has ${actualWinnerCount}, cycle setting has ${cycleSetting.totalWinners}`);
+      }
+
+      // Mark cycle as SEALED (final state)
+      await db
+        .update(cycleSettings)
+        .set({
+          selectionSealed: true,
+          selectionSealedAt: new Date()
+        })
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      console.log(`Sealed cycle ${cycleSettingId} with ${actualWinnerCount} winners - no further modifications allowed`);
+
+      return {
+        sealed: true,
+        message: `Cycle ${cycleSettingId} successfully sealed with ${actualWinnerCount} winners`
+      };
+    } catch (error) {
+      console.error('Error sealing cycle winner selection:', error);
       throw error;
     }
   }
