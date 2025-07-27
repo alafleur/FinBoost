@@ -538,6 +538,7 @@ export default function HomeV3() {
               </Link>
             </p>
           </motion.div>
+        </div>
       </section>
 
       {/* Early Access Winner Guarantees Section */}
