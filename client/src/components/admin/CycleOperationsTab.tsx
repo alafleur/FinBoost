@@ -114,13 +114,15 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/winners`, {
+      const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
         const data = await response.json();
         setWinners(data.winners || []);
+      } else {
+        console.error('Failed to load winners:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load winners:', error);
@@ -133,13 +135,16 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     setIsRunningSelection(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/execute-selection`, {
+      const response = await fetch(`/api/admin/cycle-winner-selection/execute`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selectionMode })
+        body: JSON.stringify({ 
+          cycleSettingId: selectedCycle.id,
+          selectionMode: selectionMode 
+        })
       });
 
       const data = await response.json();
