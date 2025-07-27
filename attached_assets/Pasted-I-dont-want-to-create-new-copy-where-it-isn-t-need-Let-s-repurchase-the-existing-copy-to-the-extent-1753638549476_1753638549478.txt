@@ -1,0 +1,134 @@
+I dont want to create new copy where it isn't need. Let's repurchase the existing copy to the extent you think it's relevant
+
+
+ChatGPT said:
+Perfect — here’s a remapped version that reuses your existing V3 landing page copy wherever it aligns well with the new two-page structure. I’ve broken this down into:
+
+✅ Use as-is
+
+✍️ Edit slightly for tone or flow
+
+❌ Move to secondary page
+
+💡 New or missing (minimal)
+
+🔷 PAGE 1: Streamlined Main Landing Page
+✅ Hero Section
+Use as-is with very minor tweaks
+Current:
+
+“Crushed by debt? Can’t build savings? You’re not alone — but now, you’re not on your own.”
+Learn real money skills, take real action, and earn real rewards. Backed by a guaranteed prize pool.
+
+✅ Keep the company guarantee line — very compelling for early access
+
+✅ How It Works (3-Step Preview)
+Use short version of your existing “How It Works” section.
+
+✍️ Adapt from your 5-step version to a concise 3-step preview:
+
+Learn & earn points from short lessons and quizzes
+
+Take real financial actions like paying down debt
+
+Compete for rewards — the more points, the bigger your chances
+
+Add small text:
+
+Want the full breakdown? [See How It Works →]
+
+✅ Why People Join (Membership Value)
+Use this from your current section “How Your Membership Fuels the Movement.”
+✅ Use this paragraph almost exactly:
+
+Your $20/month membership funds your financial growth and helps grow our collective prize pool. The more members, the more opportunity — for everyone.
+
+💡 Add graphic dial reused from your existing CommunityGrowthDial component (already in V3).
+
+✅ Early Access Guarantee
+Repurpose your “Guaranteed Minimums” section:
+✍️ Trim slightly for visual density:
+
+Headline:
+
+“Join Early. We Guarantee the First $5,000 Prize Pool.”
+
+Body:
+
+During early access, FinBoost guarantees a $5,000 prize pool per cycle — even if we don’t hit 500 users.
+We’re also guaranteeing minimum rewards for the top 5 winners. This offer won’t last.
+
+✅ Include CTA: [Join Early Access Now]
+
+✅ Light Social Proof
+Use one line from your "Real People Win Real Rewards" section:
+
+“More than half of active members win something each cycle.”
+
+✍️ Pair this with a testimonial from the existing section.
+
+✅ Pricing Section
+Use as-is from your “What It Costs” section.
+
+$20/month
+No long-term commitment. Cancel anytime.
+No purchase necessary — alternate entry available.
+
+✅ Keep the point that “most members win back more than they pay.”
+
+✅ Final CTA
+Use your existing FinalCTA.tsx copy (with button):
+
+Ready to turn your financial stress into collective strength?
+
+🔷 PAGE 2: “How It Works” Detail Page
+✅ Why FinBoost Exists
+✅ Use existing section from V3.
+
+✍️ Cut redundant lines (as previously discussed) to streamline:
+
+FinBoost exists because traditional financial advice isn't working. We’re not just teaching people — we’re giving them a reason to act. That means lessons tied to real-world rewards, powered by the strength of a collective movement.
+
+✅ Learning & Points
+Use from your “What You Learn” and quiz explanation section.
+
+✍️ Add clarity on:
+
+Lesson frequency (released weekly and mid-cycle)
+
+Daily market lessons with quizzes
+
+Real action submissions (e.g., uploading proof of debt payments)
+
+✅ Tier System (Simplified)
+Keep conceptual explanation, but remove fixed % splits like 50/35/15 (per your preference).
+
+✍️ Say:
+
+Users are grouped into performance tiers each cycle based on total points. More points = higher tier = larger rewards. The system adapts automatically based on participation.
+
+✅ Reward Payout Logic
+Use the structure from your "How Real People Win Real Rewards" section.
+
+✍️ Include:
+
+Rewards distributed based on points, not luck
+
+More than 50% of engaged users win
+
+Admin can adjust rewards before final payout (don’t need to show this but reinforces human oversight)
+
+✅ Show reward examples (top 5, middle tier, lower tier)
+
+✅ FAQs + Legal
+Move from current FAQ.tsx component
+
+✍️ Optionally trim or hide until needed. Could be an accordion layout with:
+
+Is this gambling?
+
+How are winners selected?
+
+Can I participate without paying?
+
+How often are new lessons released?
