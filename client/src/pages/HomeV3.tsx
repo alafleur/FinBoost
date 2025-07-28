@@ -754,10 +754,10 @@ export default function HomeV3() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="mt-16"
+            className="mt-24"
           >
             <div className="max-w-2xl mx-auto">
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8">
+              <div className="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-6 md:p-8 shadow-2xl">
                 {/* Screenshot placeholder - properly sized and styled */}
                 <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-6">
                   <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium">
