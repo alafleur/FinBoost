@@ -748,7 +748,7 @@ export default function HomeV3() {
             ))}
           </div>
 
-          {/* Sample Leaderboard - Phase 3 */}
+          {/* Leaderboard Screenshot - Phase 3 */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -758,32 +758,21 @@ export default function HomeV3() {
           >
             <div className="max-w-2xl mx-auto">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8">
-                <div className="flex items-center mb-6">
-                  <Users className="w-8 h-8 text-blue-400 mr-3" />
-                  <h3 className="text-2xl font-bold text-white">Sample Leaderboard</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 border-l-4 border-l-yellow-500">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="font-semibold text-white text-sm sm:text-base truncate">Sarah: 240 pts → Tier 1</span>
-                      <span className="font-bold text-green-400 text-sm sm:text-base flex-shrink-0">Wins $500</span>
-                    </div>
-                  </div>
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 border-l-4 border-l-blue-500">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="font-semibold text-white text-sm sm:text-base truncate">Alex: 110 pts → Tier 2</span>
-                      <span className="font-bold text-green-400 text-sm sm:text-base flex-shrink-0">Wins $75</span>
-                    </div>
-                  </div>
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 border-l-4 border-l-green-500">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="font-semibold text-white text-sm sm:text-base truncate">Mike: 10 pts → Tier 3</span>
-                      <span className="font-bold text-green-400 text-sm sm:text-base flex-shrink-0">Wins $10</span>
-                    </div>
+                {/* Screenshot placeholder - properly sized and styled */}
+                <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-6">
+                  <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium">
+                    leaderboard-screenshot.png
                   </div>
                 </div>
-                <p className="text-sm text-blue-300 mt-6 text-center font-medium">
-                  More than half of active members receive rewards every cycle
+                
+                {/* Supporting caption */}
+                <p className="text-blue-300 text-sm text-center font-medium leading-relaxed mb-4">
+                  Your points determine your spot on the leaderboard — and your shot at real cash rewards.
+                </p>
+                
+                {/* Reward reinforcement line */}
+                <p className="text-white/70 text-xs text-center font-medium">
+                  More than half of active members receive rewards each cycle.
                 </p>
               </div>
             </div>
