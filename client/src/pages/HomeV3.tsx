@@ -270,11 +270,11 @@ export default function HomeV3() {
 
 
       {/* Why FinBoost Exists - Card Format */}
-      <section id="why" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
+      <section id="why" className="py-20 px-4 bg-gradient-to-r from-zinc-100 to-zinc-200 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-400 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-400 to-transparent"></div>
         </div>
         
         <div className="max-w-5xl mx-auto relative z-10">
@@ -285,10 +285,10 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-300 font-semibold text-sm">OUR PURPOSE</span>
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 border border-zinc-300 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">OUR PURPOSE</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why FinBoost Exists
             </h2>
           </motion.div>
@@ -299,10 +299,10 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-red-400 hover:bg-white/15 transition-all duration-300"
+              className="bg-white rounded-2xl p-6 border border-zinc-300 border-l-4 border-l-red-400 hover:bg-white/95 transition-all duration-300 shadow-lg"
             >
-              <h3 className="text-xl font-semibold text-white mb-3">The Gap Others Miss</h3>
-              <p className="text-white/70">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">The Gap Others Miss</h3>
+              <p className="text-gray-700">
                 Budgeting apps track spending. Financial courses teach theory. But neither motivates real action. Most people know what to do with money—they just need accountability to actually do it.
               </p>
             </motion.div>
@@ -312,10 +312,10 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 border-l-4 border-l-green-400 hover:bg-white/15 transition-all duration-300"
+              className="bg-white rounded-2xl p-6 border border-zinc-300 border-l-4 border-l-green-400 hover:bg-white/95 transition-all duration-300 shadow-lg"
             >
-              <h3 className="text-xl font-semibold text-white mb-3">The FinBoost Difference</h3>
-              <p className="text-white/70">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">The FinBoost Difference</h3>
+              <p className="text-gray-700">
                 We're not another app or course. We're a community competition where your learning funds rewards pool providing you with an opportunity to take home significant cash rewards.
               </p>
             </motion.div>
@@ -795,11 +795,11 @@ export default function HomeV3() {
       </section>
 
       {/* How It Works - Modern Process Flow */}
-      <section id="how-it-works" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
+      <section id="how-it-works" className="py-20 px-4 bg-gradient-to-b from-slate-100 to-slate-200 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-400 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-400 to-transparent"></div>
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
@@ -810,14 +810,14 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 border border-slate-300 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-700 font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
               Compete for Cash While
-              <span className="block text-white"> Learning Finance</span>
+              <span className="block text-gray-900"> Learning Finance</span>
             </h2>
-            <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
               Earn points through financial education. Half of members win real money every 2 weeks.
             </p>
           </motion.div>
@@ -864,19 +864,19 @@ export default function HomeV3() {
                 <div className="relative h-full">
                   {/* Connection line */}
                   {index < 3 && (
-                    <div className="hidden lg:block absolute top-20 -right-4 w-8 h-px bg-gradient-to-r from-white/30 to-transparent z-10"></div>
+                    <div className="hidden lg:block absolute top-20 -right-4 w-8 h-px bg-gradient-to-r from-slate-400/50 to-transparent z-10"></div>
                   )}
                   
                   {/* Card */}
-                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">                    
+                  <div className="relative bg-white rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/95 border border-slate-300 group-hover:border-slate-400 group-hover:-translate-y-2 shadow-lg">                    
                     <div className="flex items-start space-x-4">
                       <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
-                        <p className="text-blue-300 font-semibold mb-3 text-sm">{step.description}</p>
-                        <p className="text-white/70 text-sm leading-relaxed">{step.details}</p>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{step.title}</h3>
+                        <p className="text-blue-600 font-semibold mb-3 text-sm">{step.description}</p>
+                        <p className="text-gray-700 text-sm leading-relaxed">{step.details}</p>
                       </div>
                     </div>
                   </div>
