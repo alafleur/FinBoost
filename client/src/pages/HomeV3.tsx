@@ -826,30 +826,30 @@ export default function HomeV3() {
             {[
               {
                 icon: <BookOpen className="w-8 h-8" />,
-                title: "Lesson Modules",
-                description: "3–5 minutes, earn points",
-                details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more",
+                title: "Complete Financial Lessons",
+                description: "Earn points for knowledge",
+                details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more to build your point total",
                 gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
-                title: "Take Financial Action", 
-                description: "Upload proof, earn points",
-                details: "Submit proof of debt payments, savings, or other financial actions for bonus points",
+                title: "Submit Real Financial Actions", 
+                description: "Prove your progress, earn bonus points",
+                details: "Upload proof of debt payments, savings, or other real financial actions for significant bonus points",
                 gradient: "from-green-500 to-emerald-500"
               },
               {
                 icon: <TrendingUp className="w-8 h-8" />,
-                title: "Real World Bonus Questions",
-                description: "Bonus points for accuracy",
-                details: "Mid-cycle prediction questions test your financial knowledge for extra points",
+                title: "Boost Your Score With Predictions",
+                description: "Answer bonus questions for extra points",
+                details: "Mid-cycle prediction questions based on real-world financial events give you opportunities to gain extra competitive points",
                 gradient: "from-purple-500 to-violet-500"
               },
               {
                 icon: <Trophy className="w-8 h-8" />,
-                title: "Win Cash Rewards",
-                description: "Point-weighted winner selection",
-                details: "Every 2 weeks, half of members win real money from the rewards pool with top rewards into the hundreds or even thousands",
+                title: "Compete to Win Cash Rewards",
+                description: "Higher points = better odds",
+                details: "Every 2 weeks, members with the most points win real cash from the shared prize pool. The more points you earn, the better your chances",
                 gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
