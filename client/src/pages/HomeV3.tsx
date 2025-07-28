@@ -834,8 +834,8 @@ export default function HomeV3() {
               {
                 icon: <Target className="w-8 h-8" />,
                 title: "Submit Real Financial Actions", 
-                description: "Prove your progress, earn bonus points",
-                details: "Upload proof of debt payments, savings, or other real financial actions for significant bonus points",
+                description: "Focus on debt paydown, earn big points",
+                details: "Upload proof of debt payments for significant bonus points. We're currently focused on tracking debt paydown but plan to reward more types of financial progress soon.",
                 gradient: "from-green-500 to-emerald-500"
               },
               {
