@@ -1,0 +1,78 @@
+I’ve reviewed the latest version of `Home.tsx` on GitHub. To combine the **"How It Works"** and **"Rewards Breakdown"** sections into a single, cleaner flow, here's a recommendation that maintains clarity while improving layout and narrative momentum.
+
+---
+
+## 🎯 Goals:
+
+* Reduce visual redundancy
+* Make the user journey more cohesive (learn → take action → earn rewards)
+* Keep competitive structure and payout clarity
+
+---
+
+## ✅ Recommended Combined Section Title:
+
+**How It Works (and How You Win)**
+or
+**Earn While You Learn: How FinBoost Works**
+
+---
+
+## 🧱 Suggested Structure:
+
+```tsx
+<section className="bg-gradient-to-b from-slate-100 to-slate-200 py-16 px-4">
+  <h2 className="text-3xl font-bold text-center mb-8">
+    Earn While You Learn: How FinBoost Works
+  </h2>
+
+  <div className="grid md:grid-cols-3 gap-8 text-center">
+
+    {/* Step 1 */}
+    <div>
+      <h3 className="text-xl font-semibold mb-2">1. Learn Fast</h3>
+      <p>Complete short financial lessons and quizzes to earn points. Topics cover budgeting, debt, saving, investing, and more.</p>
+    </div>
+
+    {/* Step 2 */}
+    <div>
+      <h3 className="text-xl font-semibold mb-2">2. Take Real Action</h3>
+      <p>Submit proof of debt paydown to earn big bonus points. We reward real financial progress.</p>
+    </div>
+
+    {/* Step 3 */}
+    <div>
+      <h3 className="text-xl font-semibold mb-2">3. Compete for Rewards</h3>
+      <p>Your points determine your chances of winning. Top performers earn higher payouts — and more than half of members win something each cycle.</p>
+    </div>
+
+  </div>
+
+  <div className="mt-12 text-center">
+    <h3 className="text-2xl font-bold mb-2">Reward Payouts by Tier</h3>
+    <p className="mb-6">Each cycle, the pool is split across three tiers based on your point totals.</p>
+
+    <ul className="grid md:grid-cols-3 gap-4 text-left max-w-4xl mx-auto">
+      <li><strong>Tier 1:</strong> Top performers — biggest share of the prize pool</li>
+      <li><strong>Tier 2:</strong> Middle scorers — consistent, solid payouts</li>
+      <li><strong>Tier 3:</strong> Lower scorers — still have a chance to win</li>
+    </ul>
+
+    <p className="mt-6 text-sm text-gray-500 italic">
+      Exact distributions may vary. Every cycle, at least half of engaged members win rewards.
+    </p>
+  </div>
+</section>
+```
+
+---
+
+## ✂️ Additional Tips:
+
+* **Remove the standalone “Rewards Breakdown” component** (the content is integrated)
+* Add the **Community Growth Dial** either above or below this section for visual energy
+* Keep the **"Guaranteed Minimums for Top Rewards"** as its own block — it’s a strong value prop
+
+---
+
+Let me know if you want this turned into a React component or integrated into your existing layout.
