@@ -1,0 +1,87 @@
+You're asking the exact right question — this is a positioning tradeoff between focus and inclusivity. Here's the breakdown:
+
+
+---
+
+🧠 Core Dilemma
+
+Option A: Focus only on debt paydown
+
+✅ Clear, trackable, mission-aligned (solving the debt crisis)
+
+✅ Strong hook for users in financial distress
+
+❌ May alienate users not in debt (e.g. crypto bros, fantasy players, budgeters)
+
+
+Option B: Keep broader “financial actions” language
+
+✅ Inclusive of more ICPs (savers, side hustlers, gamers)
+
+✅ Lets you expand tracking later (e.g. savings, retirement, investing)
+
+❌ Vague in the short term, could feel like over-promising
+
+
+
+
+---
+
+✅ Recommendation: Use a tiered framing that leads with debt paydown, but allows for broader participation.
+
+📣 Marketing Copy Example:
+
+> “Get rewarded for taking real financial action — especially paying down debt.”
+We’re building a system that celebrates actual financial progress. Right now, we’re focused on tracking debt paydown — the #1 financial stressor in North America — but soon we’ll support more ways to earn, like saving and investing.
+
+
+
+This does 3 things:
+
+1. ✅ Sets expectations honestly — right now it’s debt-focused
+
+
+2. ✅ Signals broader vision — users not in debt don’t feel excluded
+
+
+3. ✅ Keeps copy flexible — no need to backtrack later
+
+
+
+
+---
+
+👥 ICP Implications
+
+Segment	What They Hear	Effect
+
+Student loan borrowers	"Debt is the focus"	✅ Motivated
+Fantasy sports crowd	"Earn points, win money"	✅ Still in
+Financial upgraders	"Soon I can earn for saving too"	✅ Retained
+
+
+
+---
+
+💡 Pro Tip: Add One Line in FAQ
+
+> Q: What kinds of financial actions earn points?
+A: Right now, we’re focused on verified debt paydown — but we plan to reward more types of progress like savings, investing, and budgeting in the near future.
+
+
+
+
+---
+
+Summary
+
+Decision Point	Recommendation
+
+Narrow to debt only?	Not entirely — lead with it, but leave the door open
+Messaging tactic	Say “currently rewarding debt paydown” but hint at future expansion
+In-product design	Keep backend flexible for future proof-of-action types
+FAQ inclusion	✅ Yes, to clarify short-term vs long-term
+
+
+Let me know if you want help rewriting the current landing page copy to reflect this positioning — it's a key trust-building moment.
+
