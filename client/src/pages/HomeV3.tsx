@@ -808,7 +808,7 @@ export default function HomeV3() {
       </section>
 
       {/* Why Members Trust FinBoost - Emotional Trust Building */}
-      <section id="trust" className="py-20 px-4 bg-slate-50 relative">
+      <section id="trust" className="py-20 px-4 bg-gradient-to-b from-white to-slate-50 relative">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -817,32 +817,36 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
               Why Members Trust FinBoost
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {[
               {
                 icon: "BadgeDollarSign",
                 headline: "Drowning in student loans or credit card debt?",
-                body: "We reward progress, not perfection. Upload proof of debt paydown and start climbing toward real rewards."
+                body: "We reward progress, not perfection. <strong>Upload proof of debt paydown</strong> and start climbing toward real rewards.",
+                boldKey: "We reward real debt paydown"
               },
               {
                 icon: "PiggyBank", 
                 headline: "Saving feels impossible?",
-                body: "You're not alone. 57% of North Americans can't cover a $1,000 emergency. We built FinBoost to turn stress into small wins — and small wins into cash."
+                body: "You're not alone. 57% of North Americans can't cover a $1,000 emergency. <strong>We built FinBoost to turn stress into small wins</strong> — and small wins into cash.",
+                boldKey: "Turn stress into small wins"
               },
               {
                 icon: "BarChart3",
                 headline: "Tired of boring budgeting apps?", 
-                body: "This isn't another tracking tool. It's a financial arena where your knowledge and real actions turn into cash prizes — every two weeks."
+                body: "This isn't another tracking tool. <strong>It's a financial arena where your knowledge and real actions turn into cash prizes</strong> — every two weeks.",
+                boldKey: "Knowledge and real actions = cash prizes"
               },
               {
                 icon: "Users",
                 headline: "We get it — because we've lived it",
-                body: "We know what it's like to live paycheck to paycheck, juggle bills, and still want to build wealth. FinBoost exists because you deserve better."
+                body: "We know what it's like to live paycheck to paycheck, juggle bills, and still want to build wealth. <strong>FinBoost exists because you deserve better.</strong>",
+                boldKey: "You deserve better"
               }
             ].map((card, index) => {
               const IconComponent = card.icon === "BadgeDollarSign" ? BadgeDollarSign :
@@ -858,20 +862,21 @@ export default function HomeV3() {
                   viewport={{ once: true }}
                   className="group"
                 >
-                  <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 h-full">
+                  <div className="bg-white rounded-xl p-8 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all duration-200 h-full border border-gray-100">
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <IconComponent className="w-6 h-6 text-blue-600" />
+                        <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                          <IconComponent className="w-7 h-7 text-blue-600" />
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3 leading-tight">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
                           {card.headline}
                         </h3>
-                        <p className="text-base text-slate-600 leading-relaxed">
-                          {card.body}
-                        </p>
+                        <p 
+                          className="text-base text-slate-600 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: card.body }}
+                        />
                       </div>
                     </div>
                   </div>
