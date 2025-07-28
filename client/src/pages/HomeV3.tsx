@@ -28,7 +28,9 @@ import {
   CreditCard,
   Calculator,
   ExternalLink,
-  AlertTriangle
+  AlertTriangle,
+  BadgeDollarSign,
+  PiggyBank
 } from "lucide-react";
 
 export default function HomeV3() {
@@ -805,8 +807,8 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* See the Platform in Action - Phase 4 */}
-      <section id="platform-preview" className="py-20 px-4 bg-gray-50 relative">
+      {/* Why Members Trust FinBoost - Emotional Trust Building */}
+      <section id="trust" className="py-20 px-4 bg-slate-50 relative">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -815,85 +817,67 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-block bg-gradient-to-r from-green-100 to-blue-100 rounded-full px-6 py-2 mb-6">
-              <span className="text-gray-700 font-semibold text-sm">PLATFORM PREVIEW</span>
-            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-              See the Platform in Action
+              Why Members Trust FinBoost
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Get a closer look at the actual interface and experience that's helping members build financial skills and win real rewards.
-            </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               {
-                title: "Lesson Interface",
-                description: "Interactive financial education modules with progress tracking and point rewards",
-                screenshot: "lesson-interface.png",
-                caption: "Bite-sized lessons designed for mobile learning"
+                icon: "BadgeDollarSign",
+                headline: "Drowning in student loans or credit card debt?",
+                body: "We reward progress, not perfection. Upload proof of debt paydown and start climbing toward real rewards."
               },
               {
-                title: "Debt Submission",
-                description: "Upload proof of debt payments and financial actions for bonus points",
-                screenshot: "debt-submission.png", 
-                caption: "Verify real financial progress for extra rewards"
+                icon: "PiggyBank", 
+                headline: "Saving feels impossible?",
+                body: "You're not alone. 57% of North Americans can't cover a $1,000 emergency. We built FinBoost to turn stress into small wins — and small wins into cash."
               },
               {
-                title: "Live Leaderboard",
-                description: "See how you rank against other members and track your progress",
-                screenshot: "live-leaderboard.png",
-                caption: "Real-time rankings show your competitive position"
+                icon: "BarChart3",
+                headline: "Tired of boring budgeting apps?", 
+                body: "This isn't another tracking tool. It's a financial arena where your knowledge and real actions turn into cash prizes — every two weeks."
               },
               {
-                title: "Payout Screen",
-                description: "Winners receive PayPal payouts with transparent reward distribution",
-                screenshot: "payout-screen.png",
-                caption: "Seamless reward delivery to verified winners"
+                icon: "Users",
+                headline: "We get it — because we've lived it",
+                body: "We know what it's like to live paycheck to paycheck, juggle bills, and still want to build wealth. FinBoost exists because you deserve better."
               }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="group"
-              >
-                <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
-                  {/* Screenshot placeholder */}
-                  <div className="bg-gray-100 border border-gray-200 rounded-xl p-4 mb-6 flex-grow">
-                    <div className="h-[300px] w-full bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm font-medium overflow-hidden">
-                      <img 
-                        src={`/api/placeholder/${feature.screenshot}`} 
-                        alt={`FinBoost ${feature.title.toLowerCase()} interface screenshot`}
-                        className="w-full h-full object-cover rounded-lg"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.innerHTML = `<span class="text-gray-400 text-sm font-medium">${feature.screenshot}</span>`;
-                          }
-                        }}
-                      />
+            ].map((card, index) => {
+              const IconComponent = card.icon === "BadgeDollarSign" ? BadgeDollarSign :
+                                 card.icon === "PiggyBank" ? PiggyBank :
+                                 card.icon === "BarChart3" ? BarChart3 : Users;
+              
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group"
+                >
+                  <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 h-full">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <IconComponent className="w-6 h-6 text-blue-600" />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-3 leading-tight">
+                          {card.headline}
+                        </h3>
+                        <p className="text-base text-slate-600 leading-relaxed">
+                          {card.body}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Content */}
-                  <div className="flex-shrink-0">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4">{feature.description}</p>
-                    
-                    {/* Caption */}
-                    <p className="text-blue-600 text-sm font-medium text-center italic">
-                      {feature.caption}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
