@@ -732,13 +732,25 @@ export default function HomeV3() {
                       
                       {/* Screenshot placeholder - mobile portrait format */}
                       <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-4 flex-grow">
-                        <div className="aspect-[9/16] bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm">
-                          {step.screenshot}
+                        <div className="h-[400px] w-full bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm overflow-hidden">
+                          <img 
+                            src={`/api/placeholder/${step.screenshot}`} 
+                            alt={`FinBoost ${step.title.toLowerCase()} screenshot`}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `<span class="text-white/50 text-sm font-medium">${step.screenshot}</span>`;
+                              }
+                            }}
+                          />
                         </div>
                       </div>
                       
-                      {/* Caption - consistently styled */}
-                      <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2">
+                      {/* Caption - consistently styled with improved spacing */}
+                      <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2 mt-6">
                         {step.caption}
                       </p>
                     </div>
@@ -760,13 +772,25 @@ export default function HomeV3() {
               <div className="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-6 md:p-8 shadow-2xl">
                 {/* Screenshot placeholder - mobile portrait format */}
                 <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
-                  <div className="aspect-[9/16] max-w-xs mx-auto bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm">
-                    leaderboard-screenshot.png
+                  <div className="h-[400px] max-w-xs mx-auto bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm overflow-hidden">
+                    <img 
+                      src="/api/placeholder/leaderboard-screenshot.png" 
+                      alt="FinBoost leaderboard screenshot showing member rankings and cash rewards"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<span class="text-white/50 text-sm font-medium">leaderboard-screenshot.png</span>';
+                        }
+                      }}
+                    />
                   </div>
                 </div>
                 
-                {/* Supporting caption */}
-                <p className="text-blue-300 text-sm text-center font-medium leading-relaxed mb-4">
+                {/* Supporting caption with improved spacing */}
+                <p className="text-blue-300 text-sm text-center font-medium leading-relaxed mb-4 mt-6">
                   Your points determine your spot on the leaderboard — and your shot at real cash rewards.
                 </p>
                 
