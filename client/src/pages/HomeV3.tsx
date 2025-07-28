@@ -818,40 +818,36 @@ export default function HomeV3() {
             className="text-center mb-16"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
-              Why Members Trust FinBoost
+              Why FinBoost Isn't Just Another Finance App
             </h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {[
               {
-                icon: "BadgeDollarSign",
-                headline: "Drowning in student loans or credit card debt?",
-                body: "We reward progress, not perfection. <strong>Upload proof of debt paydown</strong> and start climbing toward real rewards.",
-                boldKey: "We reward real debt paydown"
+                icon: "TrendingUp",
+                headline: "Worried About Retirement, Not Just Next Month",
+                body: "Most budgeting apps focus on this week. <strong>We help you take real actions that set you up for the long term</strong> — with rewards that grow alongside your progress."
               },
               {
-                icon: "PiggyBank", 
-                headline: "Saving feels impossible?",
-                body: "You're not alone. 57% of North Americans can't cover a $1,000 emergency. <strong>We built FinBoost to turn stress into small wins</strong> — and small wins into cash.",
-                boldKey: "Turn stress into small wins"
+                icon: "DollarSign", 
+                headline: "The Cost of Living Keeps Climbing",
+                body: "Groceries, rent, childcare — everything costs more. <strong>FinBoost helps you fight back by turning small wins into meaningful rewards.</strong>"
               },
               {
-                icon: "BarChart3",
-                headline: "Tired of boring budgeting apps?", 
-                body: "This isn't another tracking tool. <strong>It's a financial arena where your knowledge and real actions turn into cash prizes</strong> — every two weeks.",
-                boldKey: "Knowledge and real actions = cash prizes"
+                icon: "CreditCard",
+                headline: "Drowning in Debt with No End in Sight", 
+                body: "Whether it's student loans or credit cards, paying down debt is tough — and often invisible. <strong>At FinBoost, you're rewarded for reducing what you owe.</strong>"
               },
               {
                 icon: "Users",
-                headline: "We get it — because we've lived it",
-                body: "We know what it's like to live paycheck to paycheck, juggle bills, and still want to build wealth. <strong>FinBoost exists because you deserve better.</strong>",
-                boldKey: "You deserve better"
+                headline: "Stronger Together",
+                body: "Alone, it's hard to get ahead. But when thousands contribute together, <strong>we unlock powerful rewards — and give each other a real shot at change.</strong>"
               }
             ].map((card, index) => {
-              const IconComponent = card.icon === "BadgeDollarSign" ? BadgeDollarSign :
-                                 card.icon === "PiggyBank" ? PiggyBank :
-                                 card.icon === "BarChart3" ? BarChart3 : Users;
+              const IconComponent = card.icon === "TrendingUp" ? TrendingUp :
+                                 card.icon === "DollarSign" ? DollarSign :
+                                 card.icon === "CreditCard" ? CreditCard : Users;
               
               return (
                 <motion.div
@@ -874,7 +870,7 @@ export default function HomeV3() {
                           {card.headline}
                         </h3>
                         <p 
-                          className="text-base text-slate-600 leading-relaxed"
+                          className="text-base text-slate-700 leading-relaxed"
                           dangerouslySetInnerHTML={{ __html: card.body }}
                         />
                       </div>
