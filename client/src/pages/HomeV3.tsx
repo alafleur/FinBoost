@@ -718,10 +718,10 @@ export default function HomeV3() {
                   )}
                   
                   {/* Card */}
-                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">                    
-                    <div className="flex flex-col">
+                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:shadow-lg hover:-translate-y-1">                    
+                    <div className="flex flex-col h-full">
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
+                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
                           {index + 1}
                         </div>
                         <div className="flex-1">
@@ -730,15 +730,15 @@ export default function HomeV3() {
                         </div>
                       </div>
                       
-                      {/* Screenshot placeholder */}
-                      <div className="bg-white/10 border border-white/20 rounded-lg p-4 mb-4">
-                        <div className="aspect-video bg-white/5 rounded flex items-center justify-center text-white/50 text-sm">
-                          Screenshot: {step.screenshot}
+                      {/* Screenshot placeholder - properly sized and styled */}
+                      <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-4 flex-grow">
+                        <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium">
+                          {step.screenshot}
                         </div>
                       </div>
                       
-                      {/* Caption */}
-                      <p className="text-blue-300 font-semibold text-sm text-center italic">
+                      {/* Caption - consistently styled */}
+                      <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2">
                         {step.caption}
                       </p>
                     </div>
@@ -747,6 +747,9 @@ export default function HomeV3() {
               </motion.div>
             ))}
           </div>
+
+          {/* TODO: Phase 3 - Insert leaderboard example (Sarah/Alex/Mike) and tier reward explanation here */}
+          
         </div>
       </section>
 
