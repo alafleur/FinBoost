@@ -268,6 +268,25 @@ export default function HomeV3() {
 
       </section>
 
+      {/* How FinBoost Works - Explainer Section */}
+      <section className="text-center py-12 md:py-16 bg-slate-50 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 md:mb-6">
+              How FinBoost Works
+            </h2>
+            <p className="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Join bi-weekly cycles where you complete short financial lessons and actions to earn points. Compete with other members to win your share of the prize pool — the more points you earn, the better your odds.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Why FinBoost Exists - Card Format */}
       <section id="why" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
