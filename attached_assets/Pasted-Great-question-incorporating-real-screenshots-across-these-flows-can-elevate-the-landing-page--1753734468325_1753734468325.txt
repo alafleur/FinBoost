@@ -1,0 +1,87 @@
+Great question — incorporating **real screenshots** across these flows can elevate the landing page dramatically. Here’s a breakdown of how they impact both the **"How It Works"** section and the **"Platform Overview"** section — along with implementation suggestions:
+
+---
+
+## 🧩 Impact on **How It Works** Section
+
+### ✅ Shift from Explanation → Demonstration
+
+Once you include screenshots of:
+
+* A **lesson module**
+* A **completed lesson**
+* A **debt paydown submission**
+* The **leaderboard**
+* The **reward disbursement page**
+
+…the section becomes **much more visual** and **trust-building**.
+
+---
+
+### 🔄 Suggested Adjustments:
+
+#### 1. **Split the 3 steps into tabs or collapsible cards**
+
+Each step could have:
+
+* **Short title + 1-line description**
+* A **real screenshot underneath** (maybe modal-expandable on click)
+
+This helps:
+
+* Avoid overwhelming the user
+* Keep mobile usability high
+* Let users skim, then dive into details visually
+
+#### 2. **Use captions on each screenshot**
+
+Clearly label what’s shown, e.g.:
+
+> *“Complete short lessons like this and earn 20 points.”*
+> *“Verified debt paydown = up to 100 bonus points.”*
+
+#### 3. **Optional**: Add a short subheader like:
+
+> *“Here’s what it actually looks like to earn, learn, and win”*
+
+---
+
+## 🧭 Impact on **Platform Overview** Section
+
+### ✅ From Abstract → Tangible
+
+The Platform Overview currently helps explain core mechanics. Once you have visuals of each key function, you can shift from describing features to **showcasing them**.
+
+---
+
+### 🔄 Suggested Reframe:
+
+Rather than just a bullet-based overview, consider this layout:
+
+| Feature                  | Visual                                    |
+| ------------------------ | ----------------------------------------- |
+| 🧠 Learn & Quiz          | Lesson module screenshot                  |
+| ✅ Complete & Track       | Lesson completion confirmation screenshot |
+| 💸 Submit Debt Paydown   | Debt submission form screenshot           |
+| 📊 Climb the Leaderboard | Live leaderboard screenshot               |
+| 🏆 Win Cash              | Rewards payout screenshot                 |
+
+* Format this either as a **horizontal scroll** (carousel) or as a **stacked grid** (mobile-optimized).
+
+---
+
+### ✍️ Optional Copy to Lead It Off:
+
+> **Everything you do inside FinBoost earns you points. Here's what that looks like:**
+
+---
+
+## 📌 Overall Value of Screenshots
+
+Adding real screenshots:
+
+* Builds **trust** and visual **credibility**
+* Helps differentiate FinBoost from vague “finance app” competitors
+* Lets users *picture themselves* in the flow → huge for conversions
+
+Would you like help drafting the updated JSX or layout recommendations based on these ideas?
