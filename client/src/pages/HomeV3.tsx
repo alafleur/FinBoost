@@ -805,6 +805,99 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* See the Platform in Action - Phase 4 */}
+      <section id="platform-preview" className="py-20 px-4 bg-gray-50 relative">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-green-100 to-blue-100 rounded-full px-6 py-2 mb-6">
+              <span className="text-gray-700 font-semibold text-sm">PLATFORM PREVIEW</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+              See the Platform in Action
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Get a closer look at the actual interface and experience that's helping members build financial skills and win real rewards.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Lesson Interface",
+                description: "Interactive financial education modules with progress tracking and point rewards",
+                screenshot: "lesson-interface.png",
+                caption: "Bite-sized lessons designed for mobile learning"
+              },
+              {
+                title: "Debt Submission",
+                description: "Upload proof of debt payments and financial actions for bonus points",
+                screenshot: "debt-submission.png", 
+                caption: "Verify real financial progress for extra rewards"
+              },
+              {
+                title: "Live Leaderboard",
+                description: "See how you rank against other members and track your progress",
+                screenshot: "live-leaderboard.png",
+                caption: "Real-time rankings show your competitive position"
+              },
+              {
+                title: "Payout Screen",
+                description: "Winners receive PayPal payouts with transparent reward distribution",
+                screenshot: "payout-screen.png",
+                caption: "Seamless reward delivery to verified winners"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="group"
+              >
+                <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                  {/* Screenshot placeholder */}
+                  <div className="bg-gray-100 border border-gray-200 rounded-xl p-4 mb-6 flex-grow">
+                    <div className="h-[300px] w-full bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm font-medium overflow-hidden">
+                      <img 
+                        src={`/api/placeholder/${feature.screenshot}`} 
+                        alt={`FinBoost ${feature.title.toLowerCase()} interface screenshot`}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<span class="text-gray-400 text-sm font-medium">${feature.screenshot}</span>`;
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-shrink-0">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4">{feature.description}</p>
+                    
+                    {/* Caption */}
+                    <p className="text-blue-600 text-sm font-medium text-center italic">
+                      {feature.caption}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Visual divider */}
       <div className="border-t border-gray-200 my-10" />
 
