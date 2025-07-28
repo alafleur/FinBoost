@@ -1,0 +1,87 @@
+Here are the **direct and structured implementation instructions** for Replit based on your plan to incorporate screenshots into the **"How It Works"** and **"Platform Overview"** sections:
+
+---
+
+## 🛠 INSTRUCTIONS FOR REPLIT
+
+### 🔁 General Update Overview
+
+We are upgrading the current "How It Works" and "Platform Overview" sections to be more **visual and trust-building** by integrating real **screenshots** for key user flows.
+
+---
+
+### ✅ 1. HOW IT WORKS SECTION — REBUILD
+
+**File:** `client/src/pages/Home.tsx`
+**Section ID:** `id="how-it-works"`
+
+**Changes:**
+
+* Rename section heading to:
+  `How It Works — See FinBoost in Action`
+
+* Replace the existing 3-step card layout with a **vertical or stacked layout** of 3 collapsible (or tabbed) cards — one per step:
+
+#### Step 1: Learn Financial Skills
+
+* Keep your original copy.
+* Insert screenshot: `lesson-module.png` (screenshot of lesson interface)
+* Caption: *“Complete short lessons like this to earn 20 points.”*
+
+#### Step 2: Submit Real Financial Actions
+
+* Keep your updated debt paydown–focused copy.
+* Insert screenshot: `debt-submission.png`
+* Caption: *“Verified debt payments earn big bonus points.”*
+
+#### Step 3: Compete for Cash Rewards
+
+* Keep your point-weighted language.
+
+* Insert screenshot: `leaderboard.png`
+
+* Caption: *“Your point total determines your odds — the top contributors win real cash.”*
+
+* **Optional:** Make screenshots clickable to view larger (modal or zoom).
+
+---
+
+### ✅ 2. PLATFORM OVERVIEW SECTION — VISUAL CONVERSION
+
+**(If section doesn’t exist yet, create one after How It Works, titled “What You Can Do Inside FinBoost”)**
+
+**Layout:** 5 stacked feature tiles or a horizontal scroll on desktop
+
+| Feature             | Screenshot            | Caption                                                     |
+| ------------------- | --------------------- | ----------------------------------------------------------- |
+| Learn & Quiz        | `lesson-complete.png` | “Earn points for completing financial lessons and quizzes.” |
+| Track Progress      | `lesson-tracking.png` | “See your learning history and point gains.”                |
+| Submit Debt Paydown | `debt-submission.png` | “Get rewarded for real financial progress.”                 |
+| View Leaderboard    | `leaderboard.png`     | “See where you rank in real time.”                          |
+| Win Real Rewards    | `rewards-payout.png`  | “Winners receive real money directly via PayPal.”           |
+
+---
+
+### ✅ 3. VISUAL + TECHNICAL DETAILS
+
+* **Styling:**
+
+  * Use Tailwind or shadcn card components
+  * Keep consistent padding, spacing, and font weights
+  * Maintain mobile responsiveness with clean stacking
+* **Image Assets:**
+
+  * Place all screenshots in `/public/assets/screenshots/` or similar
+  * Use standard image optimization via Next/Image or `<img loading="lazy" />`
+
+---
+
+### 🔁 Optional Enhancements (If Time Permits)
+
+* Add subtle scroll or hover animations to screenshots
+* Anchor link from CTA to “How It Works” for mobile flow
+* Allow screenshot previews to open modals (full screen)
+
+---
+
+Let me know if you'd like this exported as a developer handoff doc (PDF or Markdown).
