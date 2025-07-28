@@ -668,42 +668,38 @@ export default function HomeV3() {
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-              Compete for Cash While
-              <span className="block text-white"> Learning Finance</span>
+              How It Works
+              <span className="block text-white">(and How You Win)</span>
             </h2>
             <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
               Earn points through financial education. Half of members win real money every 2 weeks.
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
             {[
               {
                 icon: <BookOpen className="w-8 h-8" />,
-                title: "Complete Financial Lessons",
-                description: "Earn points for knowledge",
-                details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more to build your point total",
+                title: "Learn Financial Skills",
+                description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn points per module and quiz.",
+                screenshot: "lesson-module.png",
+                caption: "Complete short lessons like this to earn 20 points.",
                 gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
-                title: "Get Rewarded for Paying Down Debt", 
-                description: "Earn points for repaying debt",
-                details: "Upload proof of debt payments for significant bonus points. We're currently focused on tracking debt paydown but plan to reward more types of financial progress soon.",
+                title: "Take Real Financial Actions", 
+                description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus points based on impact.",
+                screenshot: "debt-submission.png",
+                caption: "Verified debt payments earn big bonus points.",
                 gradient: "from-green-500 to-emerald-500"
               },
               {
-                icon: <TrendingUp className="w-8 h-8" />,
-                title: "Boost Your Score With Predictions",
-                description: "Answer bonus questions for extra points",
-                details: "Mid-cycle prediction questions based on real-world financial events give you opportunities to gain extra competitive points",
-                gradient: "from-purple-500 to-violet-500"
-              },
-              {
                 icon: <Trophy className="w-8 h-8" />,
-                title: "Compete to Win Cash Rewards",
-                description: "Higher points = better odds",
-                details: "Every 2 weeks, members with the most points win real cash from the shared prize pool. The more points you earn, the better your chances",
+                title: "Compete for Cash Rewards",
+                description: "Points determine your reward odds — the more you learn and take action, the better your chances. Winners are selected using a point-weighted system.",
+                screenshot: "leaderboard.png",
+                caption: "Your point total determines your odds — the top contributors win real cash.",
                 gradient: "from-orange-500 to-red-500"
               }
             ].map((step, index) => (
@@ -717,21 +713,34 @@ export default function HomeV3() {
               >
                 <div className="relative h-full">
                   {/* Connection line */}
-                  {index < 3 && (
+                  {index < 2 && (
                     <div className="hidden lg:block absolute top-20 -right-4 w-8 h-px bg-gradient-to-r from-white/30 to-transparent z-10"></div>
                   )}
                   
                   {/* Card */}
                   <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:-translate-y-2">                    
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
-                        {index + 1}
+                    <div className="flex flex-col">
+                      <div className="flex items-start space-x-4 mb-6">
+                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
+                          <p className="text-white/70 text-sm leading-relaxed">{step.description}</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
-                        <p className="text-blue-300 font-semibold mb-3 text-sm">{step.description}</p>
-                        <p className="text-white/70 text-sm leading-relaxed">{step.details}</p>
+                      
+                      {/* Screenshot placeholder */}
+                      <div className="bg-white/10 border border-white/20 rounded-lg p-4 mb-4">
+                        <div className="aspect-video bg-white/5 rounded flex items-center justify-center text-white/50 text-sm">
+                          Screenshot: {step.screenshot}
+                        </div>
                       </div>
+                      
+                      {/* Caption */}
+                      <p className="text-blue-300 font-semibold text-sm text-center italic">
+                        {step.caption}
+                      </p>
                     </div>
                   </div>
                 </div>
