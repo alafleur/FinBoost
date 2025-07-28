@@ -826,28 +826,28 @@ export default function HomeV3() {
             {[
               {
                 icon: "TrendingUp",
-                headline: "Worried About Retirement, Not Just Next Month",
-                body: "Most budgeting apps focus on this week. <strong>We help you take real actions that set you up for the long term</strong> — with rewards that grow alongside your progress."
+                headline: "Beyond Daily Tracking",
+                body: "Most apps focus on today's spending. <strong>We help with tomorrow's security.</strong>"
               },
               {
                 icon: "DollarSign", 
-                headline: "The Cost of Living Keeps Climbing",
-                body: "Groceries, rent, childcare — everything costs more. <strong>FinBoost helps you fight back by turning small wins into meaningful rewards.</strong>"
+                headline: "Rising Costs Reality",
+                body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>"
               },
               {
                 icon: "CreditCard",
-                headline: "Drowning in Debt with No End in Sight", 
-                body: "Whether it's student loans or credit cards, paying down debt is tough — and often invisible. <strong>At FinBoost, you're rewarded for reducing what you owe.</strong>"
+                headline: "Debt Progress Pays", 
+                body: "Student loans, credit cards — <strong>every payment forward earns you money back.</strong>"
               },
               {
-                icon: "Users",
-                headline: "Stronger Together",
-                body: "Alone, it's hard to get ahead. But when thousands contribute together, <strong>we unlock powerful rewards — and give each other a real shot at change.</strong>"
+                icon: "Clock",
+                headline: "Retirement Anxiety",
+                body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>"
               }
             ].map((card, index) => {
               const IconComponent = card.icon === "TrendingUp" ? TrendingUp :
                                  card.icon === "DollarSign" ? DollarSign :
-                                 card.icon === "CreditCard" ? CreditCard : Users;
+                                 card.icon === "CreditCard" ? CreditCard : Clock;
               
               return (
                 <motion.div
