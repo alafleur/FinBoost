@@ -730,9 +730,9 @@ export default function HomeV3() {
                         </div>
                       </div>
                       
-                      {/* Screenshot placeholder - properly sized and styled */}
-                      <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-4 flex-grow">
-                        <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium">
+                      {/* Screenshot placeholder - mobile portrait format */}
+                      <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-4 flex-grow">
+                        <div className="aspect-[9/16] bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm">
                           {step.screenshot}
                         </div>
                       </div>
@@ -758,9 +758,9 @@ export default function HomeV3() {
           >
             <div className="max-w-2xl mx-auto">
               <div className="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-6 md:p-8 shadow-2xl">
-                {/* Screenshot placeholder - properly sized and styled */}
-                <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-6">
-                  <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium">
+                {/* Screenshot placeholder - mobile portrait format */}
+                <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
+                  <div className="aspect-[9/16] max-w-xs mx-auto bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm">
                     leaderboard-screenshot.png
                   </div>
                 </div>
