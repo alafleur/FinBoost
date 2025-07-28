@@ -1,0 +1,111 @@
+Yes — these edits are **Replit-ready**. They’re structured to be immediately usable in your existing codebase with minimal styling changes. Here’s the full breakdown with JSX-compatible snippets you can directly pass to your devs or Replit:
+
+---
+
+## ✅ REPLIT-READY EDITS
+
+### 🔹 1. 📍**Add Explainer Section After Hero**
+
+**File:** Likely in `Home.tsx` or `HomeV3.tsx`, right after the `<Hero />` component
+
+```tsx
+<section className="text-center py-8 bg-slate-50 px-4">
+  <h2 className="text-2xl font-bold mb-2">How FinBoost Works</h2>
+  <p className="text-gray-700 max-w-xl mx-auto">
+    Join bi-weekly cycles where you complete short financial lessons and actions to earn points. Compete with other members to win your share of the prize pool — the more points you earn, the better your odds.
+  </p>
+</section>
+```
+
+---
+
+### 🔹 2. 🛠 **Update “How It Works” Step Titles**
+
+**File:** `HowItWorks.tsx` or relevant block in `Home.tsx`
+(You likely already have a `steps` array or component)
+
+Update the step titles like this:
+
+```tsx
+[
+  {
+    title: "Complete Lessons & Actions",
+    description: "Earn points by learning key financial skills and submitting real-life actions like debt payments or savings."
+  },
+  {
+    title: "Boost Your Score With Bonus Questions",
+    description: "Answer mid-cycle prediction questions to gain extra points based on real-world outcomes."
+  },
+  {
+    title: "Compete to Win Cash Rewards",
+    description: "At the end of each cycle, members with the most points win real cash from the shared prize pool."
+  }
+]
+```
+
+---
+
+### 🔹 3. 🧲 **Add CTA Subline Below “Join Early Access”**
+
+**File:** `Hero.tsx` or wherever your main CTA lives
+
+**Below the CTA button:**
+
+```tsx
+<p className="text-sm text-gray-500 mt-2">
+  Earn points. Climb the leaderboard. Win real rewards every cycle.
+</p>
+```
+
+---
+
+### 🔹 4. 🔁 **Optional: Add “Cycle Loop” Timeline or Diagram**
+
+If you're not using graphics yet, a simple horizontal step bar works.
+
+```tsx
+<section className="bg-white py-10 px-4 text-center">
+  <h3 className="text-lg font-semibold mb-4">The Reward Cycle</h3>
+  <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-gray-700 text-sm font-medium">
+    <span>📘 Lessons & Actions</span>
+    <span>➡️</span>
+    <span>💯 Points Earned</span>
+    <span>➡️</span>
+    <span>❓ Bonus Question</span>
+    <span>➡️</span>
+    <span>🏆 Leaderboard Position</span>
+    <span>➡️</span>
+    <span>💰 Cash Rewards</span>
+  </div>
+</section>
+```
+
+Optional: style with a `Card` or timeline style from `shadcn/ui` if used.
+
+---
+
+### 🔹 5. ✂️ **Content Trim Suggestion**
+
+Ask Replit to scan for soft/abstract lines like:
+
+* “Get better with money over time”
+* “Improve your financial literacy”
+
+And replace with:
+
+* “Earn rewards while improving your financial habits”
+* “The more you engage, the more you can win”
+
+---
+
+## ✅ Summary for Replit
+
+**Send this to your Replit team as implementation-ready instructions:**
+
+* Insert 1 new section after Hero
+* Update 3 How It Works step titles
+* Add CTA subtext line under Join button
+* (Optional) Add visual reward cycle diagram with emojis or UI elements
+* Swap soft language for performance- or reward-driven phrasing
+
+Let me know if you want all of these bundled into one file (or visual mockup).
