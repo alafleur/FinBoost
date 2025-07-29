@@ -825,11 +825,6 @@ export default function HomeV3() {
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {[
               {
-                icon: "TrendingUp",
-                headline: "Beyond Daily Tracking",
-                body: "Most apps focus on today's spending. <strong>We help with tomorrow's security.</strong>"
-              },
-              {
                 icon: "DollarSign", 
                 headline: "Rising Costs Reality",
                 body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>"
@@ -837,17 +832,22 @@ export default function HomeV3() {
               {
                 icon: "CreditCard",
                 headline: "Debt Progress Pays", 
-                body: "Student loans, credit cards — <strong>every payment forward earns you money back.</strong>"
+                body: "Every payment forward doesn't just shrink your debt — <strong>it earns you real rewards.</strong>"
               },
               {
                 icon: "Clock",
                 headline: "Retirement Anxiety",
                 body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>"
+              },
+              {
+                icon: "TrendingUp",
+                headline: "Beyond Daily Tracking",
+                body: "Most apps focus on today's spending. <strong>We reward steps toward tomorrow's security.</strong>"
               }
             ].map((card, index) => {
-              const IconComponent = card.icon === "TrendingUp" ? TrendingUp :
-                                 card.icon === "DollarSign" ? DollarSign :
-                                 card.icon === "CreditCard" ? CreditCard : Clock;
+              const IconComponent = card.icon === "DollarSign" ? DollarSign :
+                                 card.icon === "CreditCard" ? CreditCard :
+                                 card.icon === "Clock" ? Clock : TrendingUp;
               
               return (
                 <motion.div
