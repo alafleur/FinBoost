@@ -3687,6 +3687,7 @@ export class MemStorage implements IStorage {
     tierRank: number;
     username: string;
     email: string;
+    cyclePoints: number;
     tierSizeAmount: number;
     payoutPercentage: number;
     payoutCalculated: number;
@@ -3705,6 +3706,7 @@ export class MemStorage implements IStorage {
           tierRank: cycleWinnerSelections.tierRank,
           username: users.username,
           email: users.email,
+          cyclePoints: sql<number>`COALESCE(${userCyclePoints.currentCyclePoints}, 0)`,
           tierSizeAmount: cycleWinnerSelections.tierSizeAmount,
           payoutPercentage: cycleWinnerSelections.payoutPercentage,
           payoutCalculated: cycleWinnerSelections.payoutCalculated,
@@ -3716,6 +3718,10 @@ export class MemStorage implements IStorage {
         })
         .from(cycleWinnerSelections)
         .innerJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .leftJoin(userCyclePoints, and(
+          eq(userCyclePoints.userId, users.id),
+          eq(userCyclePoints.cycleSettingId, cycleSettingId)
+        ))
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
         .orderBy(cycleWinnerSelections.overallRank);
 

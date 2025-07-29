@@ -62,12 +62,13 @@ interface WinnerSelection {
   paypalEmail?: string;
 }
 
-// Enhanced interface for the new 12-column Selected Winners table
+// Enhanced interface for the new 13-column Selected Winners table (Phase 3: Added cyclePoints)
 interface EnhancedWinnerData {
   overallRank: number;
   tierRank: number;
   username: string;
   email: string;
+  cyclePoints: number; // Phase 3: Added cycle points column
   tierSizeAmount: number;
   payoutPercentage: number;
   payoutCalculated: number;
@@ -936,6 +937,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         <TableHead className="w-20">Tier Rank #</TableHead>
                         <TableHead className="w-32">Username</TableHead>
                         <TableHead className="w-48">User Email</TableHead>
+                        <TableHead className="w-24">Cycle Points</TableHead>
                         <TableHead className="w-24">Tier Size $</TableHead>
                         <TableHead className="w-24">% Payout of Tier</TableHead>
                         <TableHead className="w-24">Payout Calc $</TableHead>
@@ -960,6 +962,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                           </TableCell>
                           <TableCell className="text-sm text-gray-600">
                             {winner.email}
+                          </TableCell>
+                          <TableCell className="font-medium text-center text-blue-600">
+                            {winner.cyclePoints}
                           </TableCell>
                           <TableCell className="font-medium text-green-600">
                             ${(winner.tierSizeAmount / 100).toFixed(2)}

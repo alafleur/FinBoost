@@ -4699,6 +4699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Tier Rank #': winner.tierRank,
         'Username': winner.username,
         'User Email': winner.email,
+        'Cycle Points': winner.cyclePoints, // Phase 3: Added cycle points column
         'Tier Size $': (winner.tierSizeAmount / 100).toFixed(2), // Convert cents to dollars
         '% Payout of Tier': (winner.payoutPercentage / 100).toFixed(2), // Convert basis points to percentage
         'Payout Calc $': (winner.payoutCalculated / 100).toFixed(2), // Convert cents to dollars
@@ -4719,6 +4720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { wch: 10 }, // Tier Rank #
         { wch: 15 }, // Username
         { wch: 25 }, // User Email
+        { wch: 12 }, // Cycle Points (Phase 3: Added)
         { wch: 12 }, // Tier Size $
         { wch: 15 }, // % Payout of Tier
         { wch: 12 }, // Payout Calc $
