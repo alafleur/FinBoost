@@ -618,8 +618,8 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Why FinBoost Isn't Just Another Finance App - Matching Platform Overview Format */}
-      <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-white relative">
+      {/* Why FinBoost Isn't Just Another Finance App - Refined Platform Overview Format */}
+      <section id="trust" className="bg-gradient-to-b from-white via-slate-50 to-white py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -633,26 +633,26 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Grid Layout - Exact Platform Overview structure with horizontal flex layout */}
+          {/* Grid Layout - Exact Platform Overview structure with hover effects */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                icon: <PiggyBank className="w-6 h-6 text-slate-600" />,
+                icon: <PiggyBank className="w-6 h-6 text-slate-800" />,
                 title: "Debt Progress Pays",
                 description: "Student loans, credit cards — every payment forward earns you money back."
               },
               {
-                icon: <BarChart3 className="w-6 h-6 text-slate-600" />,
+                icon: <BarChart3 className="w-6 h-6 text-slate-800" />,
                 title: "Rising Costs Reality", 
                 description: "Everything costs more, saving feels impossible. Small wins add up to real rewards."
               },
               {
-                icon: <Clock className="w-6 h-6 text-slate-600" />,
+                icon: <Clock className="w-6 h-6 text-slate-800" />,
                 title: "Worrying About Retirement, Not Just Next Month",
                 description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress."
               },
               {
-                icon: <TrendingUp className="w-6 h-6 text-slate-600" />,
+                icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
                 title: "Beyond Daily Tracking",
                 description: "Most apps focus on today's spending. We reward steps toward tomorrow's security."
               }
@@ -666,7 +666,7 @@ export default function HomeV3() {
                 className="bg-white rounded-xl border p-6 hover:shadow-md transition-all duration-300 space-y-2"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="bg-slate-100 p-3 rounded-full">
+                  <div className="bg-slate-100 p-3 rounded-full text-slate-800">
                     {item.icon}
                   </div>
                   <div>
@@ -679,6 +679,19 @@ export default function HomeV3() {
               </motion.div>
             ))}
           </div>
+
+          {/* Soft Footer Transition */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-12"
+          >
+            <p className="text-center text-base text-slate-500 max-w-xl mx-auto">
+              Whether you're just starting out or already budgeting, FinBoost meets you where you are — and helps you level up.
+            </p>
+          </motion.div>
         </div>
       </section>
 
