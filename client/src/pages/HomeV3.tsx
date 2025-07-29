@@ -413,6 +413,9 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="inline-block bg-gradient-to-r from-slate-100 to-slate-200 rounded-full px-6 py-2 mb-6">
+              <span className="text-slate-700 font-semibold text-sm">OUR DIFFERENCE</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
               Why FinBoost Isn't Just Another Finance App
             </h2>
