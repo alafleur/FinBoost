@@ -293,6 +293,27 @@ export interface IStorage {
     getCycleWinnerDetailsPaginated(cycleSettingId: number, page: number, limit: number): Promise<{winners: any[], totalCount: number}>;
     performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
     
+    // Selected Winners Export/Import (Phase 2)
+    getCycleWinnersForExport(cycleSettingId: number): Promise<Array<{
+      overallRank: number;
+      tierRank: number;
+      username: string;
+      email: string;
+      tierSizeAmount: number;
+      payoutPercentage: number;
+      payoutCalculated: number;
+      payoutOverride: number | null;
+      payoutFinal: number;
+      paypalEmail: string | null;
+      payoutStatus: string;
+      lastModified: Date;
+    }>>;
+    updateWinnerPayoutData(cycleSettingId: number, updates: Array<{
+      email: string;
+      payoutPercentage?: number;
+      payoutOverride?: number | null;
+    }>): Promise<void>;
+    
     // Cycle Analytics and Reporting
     getCycleLeaderboard(cycleSettingId: number, limit?: number): Promise<Array<{rank: number, userId: number, username: string, points: number, tier: string}>>;
     getCycleStats(cycleSettingId: number): Promise<{totalUsers: number, averagePoints: number, tierDistribution: any}>;
@@ -3656,6 +3677,135 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error('Error getting cycle winners:', error);
       return [];
+    }
+  }
+
+  // === SELECTED WINNERS EXPORT/IMPORT METHODS (Phase 2) ===
+
+  async getCycleWinnersForExport(cycleSettingId: number): Promise<Array<{
+    overallRank: number;
+    tierRank: number;
+    username: string;
+    email: string;
+    tierSizeAmount: number;
+    payoutPercentage: number;
+    payoutCalculated: number;
+    payoutOverride: number | null;
+    payoutFinal: number;
+    paypalEmail: string | null;
+    payoutStatus: string;
+    lastModified: Date;
+  }>> {
+    try {
+      console.log(`[getCycleWinnersForExport] Fetching winners for cycle ${cycleSettingId}`);
+      
+      const winners = await db
+        .select({
+          overallRank: cycleWinnerSelections.overallRank,
+          tierRank: cycleWinnerSelections.tierRank,
+          username: users.username,
+          email: users.email,
+          tierSizeAmount: cycleWinnerSelections.tierSizeAmount,
+          payoutPercentage: cycleWinnerSelections.payoutPercentage,
+          payoutCalculated: cycleWinnerSelections.payoutCalculated,
+          payoutOverride: cycleWinnerSelections.payoutOverride,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          paypalEmail: users.paypalEmail,
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          lastModified: cycleWinnerSelections.lastModified,
+        })
+        .from(cycleWinnerSelections)
+        .innerJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
+        .orderBy(cycleWinnerSelections.overallRank);
+
+      console.log(`[getCycleWinnersForExport] Found ${winners.length} winners`);
+      return winners;
+    } catch (error) {
+      console.error('Error getting cycle winners for export:', error);
+      throw error;
+    }
+  }
+
+  async updateWinnerPayoutData(cycleSettingId: number, updates: Array<{
+    email: string;
+    payoutPercentage?: number;
+    payoutOverride?: number | null;
+  }>): Promise<void> {
+    try {
+      console.log(`[updateWinnerPayoutData] Updating ${updates.length} winners for cycle ${cycleSettingId}`);
+      
+      for (const update of updates) {
+        // Find user by email
+        const [user] = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.email, update.email))
+          .limit(1);
+
+        if (!user) {
+          console.warn(`[updateWinnerPayoutData] User not found for email: ${update.email}`);
+          continue;
+        }
+
+        // Find winner selection record
+        const [existingWinner] = await db
+          .select({
+            id: cycleWinnerSelections.id,
+            tierSizeAmount: cycleWinnerSelections.tierSizeAmount,
+            payoutPercentage: cycleWinnerSelections.payoutPercentage,
+            payoutOverride: cycleWinnerSelections.payoutOverride,
+          })
+          .from(cycleWinnerSelections)
+          .where(
+            and(
+              eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
+              eq(cycleWinnerSelections.userId, user.id)
+            )
+          )
+          .limit(1);
+
+        if (!existingWinner) {
+          console.warn(`[updateWinnerPayoutData] Winner record not found for user: ${user.id}`);
+          continue;
+        }
+
+        // Prepare update data
+        const updateData: any = {
+          lastModified: new Date(),
+        };
+
+        // Update payout percentage if provided
+        if (update.payoutPercentage !== undefined) {
+          updateData.payoutPercentage = update.payoutPercentage;
+        }
+
+        // Update payout override if provided
+        if (update.payoutOverride !== undefined) {
+          updateData.payoutOverride = update.payoutOverride;
+        }
+
+        // Calculate new values
+        const newPayoutPercentage = update.payoutPercentage !== undefined ? update.payoutPercentage : existingWinner.payoutPercentage;
+        const newPayoutOverride = update.payoutOverride !== undefined ? update.payoutOverride : existingWinner.payoutOverride;
+        
+        // Calculate payout amounts
+        updateData.payoutCalculated = Math.floor((existingWinner.tierSizeAmount * newPayoutPercentage) / 10000); // Percentage stored as basis points
+        updateData.payoutFinal = newPayoutOverride !== null ? newPayoutOverride : updateData.payoutCalculated;
+
+        // Update the winner record
+        await db
+          .update(cycleWinnerSelections)
+          .set(updateData)
+          .where(eq(cycleWinnerSelections.id, existingWinner.id));
+
+        console.log(`[updateWinnerPayoutData] Updated winner ${user.id} with percentage: ${newPayoutPercentage}, override: ${newPayoutOverride}, final: ${updateData.payoutFinal}`);
+      }
+
+      console.log(`[updateWinnerPayoutData] Successfully updated ${updates.length} winner records`);
+    } catch (error) {
+      console.error('Error updating winner payout data:', error);
+      throw error;
     }
   }
 

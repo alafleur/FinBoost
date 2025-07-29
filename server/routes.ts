@@ -4674,6 +4674,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
+  // SELECTED WINNERS EXPORT/IMPORT ENDPOINTS (Phase 2)
+  // ========================================
+
+  // Export Selected Winners to Excel (.xlsx)
+  app.get('/api/admin/winners/export/:cycleId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      console.log(`[Export] Exporting winners for cycle ${cycleId}`);
+      
+      // Get winners data from storage
+      const winnersData = await storage.getCycleWinnersForExport(cycleId);
+      
+      if (winnersData.length === 0) {
+        return res.status(404).json({ error: 'No winners found for this cycle' });
+      }
+
+      // Prepare data for Excel export with proper formatting
+      const exportData = winnersData.map(winner => ({
+        'Overall Rank #': winner.overallRank,
+        'Tier Rank #': winner.tierRank,
+        'Username': winner.username,
+        'User Email': winner.email,
+        'Tier Size $': (winner.tierSizeAmount / 100).toFixed(2), // Convert cents to dollars
+        '% Payout of Tier': (winner.payoutPercentage / 100).toFixed(2), // Convert basis points to percentage
+        'Payout Calc $': (winner.payoutCalculated / 100).toFixed(2), // Convert cents to dollars
+        'Payout Override $': winner.payoutOverride ? (winner.payoutOverride / 100).toFixed(2) : '', // Convert cents to dollars or empty
+        'Payout Final': (winner.payoutFinal / 100).toFixed(2), // Convert cents to dollars
+        'PayPal Email': winner.paypalEmail || '',
+        'Status': winner.payoutStatus,
+        'Last Modified': winner.lastModified.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      }));
+
+      // Create Excel workbook
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      
+      // Set column widths for better readability
+      const columnWidths = [
+        { wch: 12 }, // Overall Rank #
+        { wch: 10 }, // Tier Rank #
+        { wch: 15 }, // Username
+        { wch: 25 }, // User Email
+        { wch: 12 }, // Tier Size $
+        { wch: 15 }, // % Payout of Tier
+        { wch: 12 }, // Payout Calc $
+        { wch: 15 }, // Payout Override $
+        { wch: 12 }, // Payout Final
+        { wch: 25 }, // PayPal Email
+        { wch: 10 }, // Status
+        { wch: 15 }, // Last Modified
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Selected Winners');
+
+      // Generate Excel file buffer
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+      // Set response headers for file download
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="cycle-${cycleId}-winners-export.xlsx"`);
+      res.setHeader('Content-Length', excelBuffer.length);
+
+      console.log(`[Export] Successfully generated Excel file for ${winnersData.length} winners`);
+      res.send(excelBuffer);
+    } catch (error) {
+      console.error('Error exporting winners:', error);
+      res.status(500).json({ error: 'Failed to export winners data' });
+    }
+  });
+
+  // Import Selected Winners from Excel (.xlsx)
+  app.post('/api/admin/winners/import/:cycleId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      const { importData, confirmOverwrite } = req.body;
+      
+      console.log(`[Import] Importing winners for cycle ${cycleId}, confirmOverwrite: ${confirmOverwrite}`);
+      
+      if (!confirmOverwrite) {
+        return res.status(400).json({ 
+          error: 'Import confirmation required', 
+          requiresConfirmation: true,
+          message: 'This will overwrite existing payout data. Please confirm to proceed.'
+        });
+      }
+
+      if (!importData || !Array.isArray(importData) || importData.length === 0) {
+        return res.status(400).json({ error: 'Import data is required and cannot be empty' });
+      }
+
+      // Process import data and convert to the format expected by storage
+      const updates = importData.map(row => ({
+        email: row['User Email'],
+        payoutPercentage: row['% Payout of Tier'] ? Math.round(parseFloat(row['% Payout of Tier']) * 100) : undefined, // Convert percentage to basis points
+        payoutOverride: row['Payout Override $'] && row['Payout Override $'] !== '' ? Math.round(parseFloat(row['Payout Override $']) * 100) : null, // Convert dollars to cents
+      })).filter(update => update.email); // Only include rows with valid email
+
+      console.log(`[Import] Processing ${updates.length} winner updates`);
+
+      // Update winner payout data using storage method
+      await storage.updateWinnerPayoutData(cycleId, updates);
+
+      console.log(`[Import] Successfully updated ${updates.length} winner records`);
+      res.json({ 
+        success: true, 
+        message: `Successfully updated ${updates.length} winner records`,
+        updatedCount: updates.length
+      });
+    } catch (error) {
+      console.error('Error importing winners:', error);
+      res.status(500).json({ error: 'Failed to import winners data' });
+    }
+  });
+
+  // ========================================
   // PREDICTION SYSTEM API ENDPOINTS (Phase 2)
   // ========================================
 

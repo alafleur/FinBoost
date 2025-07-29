@@ -1,0 +1,44 @@
+[
+  {
+    "Overall Rank #": 1,
+    "Tier Rank #": 94,
+    "Username": "smartseeker695",
+    "User Email": "user695@test.com",
+    "Tier Size $": "3750.00",
+    "% Payout of Tier": "0.10",
+    "Payout Calc $": "0.00",
+    "Payout Override $": "25.00",
+    "Payout Final": "0.00",
+    "PayPal Email": "user695@test.com",
+    "Status": "pending",
+    "Last Modified": "2025-07-29"
+  },
+  {
+    "Overall Rank #": 2,
+    "Tier Rank #": 107,
+    "Username": "budgetcreator183",
+    "User Email": "user183@test.com",
+    "Tier Size $": "3750.00",
+    "% Payout of Tier": "0.10",
+    "Payout Calc $": "0.00",
+    "Payout Override $": "",
+    "Payout Final": "0.00",
+    "PayPal Email": "user183@test.com",
+    "Status": "pending",
+    "Last Modified": "2025-07-29"
+  },
+  {
+    "Overall Rank #": 3,
+    "Tier Rank #": 191,
+    "Username": "budgetmaster303",
+    "User Email": "user303@test.com",
+    "Tier Size $": "3750.00",
+    "% Payout of Tier": "0.10",
+    "Payout Calc $": "0.00",
+    "Payout Override $": "",
+    "Payout Final": "0.00",
+    "PayPal Email": "user303@test.com",
+    "Status": "pending",
+    "Last Modified": "2025-07-29"
+  }
+]
