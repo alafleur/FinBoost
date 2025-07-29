@@ -865,14 +865,44 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {/* Left Column - What You'll Master */}
-            <div className="lg:col-span-2">
+          {/* Two-column layout: Screenshot left, Content right */}
+          <div className="flex flex-col lg:flex-row gap-8 mb-16 items-start">
+            {/* Left Column - Screenshot */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="lg:w-80 w-full lg:flex-shrink-0"
+            >
+              <div className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl p-4 shadow-lg">
+                <div className="h-[400px] w-full max-w-[250px] mx-auto bg-white/10 rounded-lg flex items-center justify-center text-gray-500 text-sm font-medium shadow-sm overflow-hidden">
+                  <img 
+                    src="/api/placeholder/lesson-quiz.png" 
+                    alt="FinBoost lesson module with interactive quiz in progress"
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<span class="text-gray-500 text-sm font-medium">lesson-quiz.png</span>';
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-center text-sm text-gray-600 mt-4 font-medium leading-relaxed">
+                  Complete bite-sized lessons and quizzes like this to earn points and level up.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Right Column - What You'll Master */}
+            <div className="flex-1">
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
                 className="mb-8"
               >
@@ -934,63 +964,33 @@ export default function HomeV3() {
                   </motion.div>
                 ))}
               </div>
-            </div>
-
-            {/* Right Column - Learning Features & Preview */}
-            <div className="space-y-8">
-              {/* Learning Features Card */}
+              
+              {/* Learning Features moved inside right column */}
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg"
+                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg mt-8"
               >
-                <h4 className="text-lg font-bold text-gray-900 mb-6 text-center">
+                <h4 className="text-lg font-bold text-gray-900 mb-6 text-center lg:text-left">
                   Learning Experience
                 </h4>
-                <div className="space-y-4">
+                <div className="grid sm:grid-cols-3 gap-4">
                   {[
                     { icon: "⏱️", text: "3-5 minute lessons", color: "bg-green-100 text-green-700" },
                     { icon: "🧩", text: "Interactive quizzes", color: "bg-blue-100 text-blue-700" },
                     { icon: "🎯", text: "Real-world applications", color: "bg-purple-100 text-purple-700" }
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium`}>
+                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>
                         {feature.icon}
                       </div>
-                      <span className="text-gray-700 font-medium">{feature.text}</span>
+                      <span className="text-gray-700 font-medium text-sm">{feature.text}</span>
                     </div>
                   ))}
                 </div>
               </motion.div>
-
-              {/* Preview CTA Card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                viewport={{ once: true }}
-                className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="w-8 h-8 text-white" />
-                  </div>
-                  <h4 className="text-xl font-bold mb-3">Try Before You Join</h4>
-                  <p className="text-white/90 mb-6 text-sm leading-relaxed">
-                    Experience our interactive lesson format with a free preview
-                  </p>
-                  <Button
-                    className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-2 px-6 rounded-xl transition-all duration-300 border-0 h-auto shadow-lg w-full"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Preview a Lesson
-                  </Button>
-                </div>
-              </motion.div>
-
-
             </div>
           </div>
         </div>
