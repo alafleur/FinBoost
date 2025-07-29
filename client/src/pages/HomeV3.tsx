@@ -729,57 +729,93 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {[
-              {
-                tier: "Tier 1",
-                subtitle: "Top Third",
-                rewardLevel: "Premium Rewards"
-              },
-              {
-                tier: "Tier 2", 
-                subtitle: "Middle Third",
-                rewardLevel: "Standard Rewards"
-              },
-              {
-                tier: "Tier 3",
-                subtitle: "Lower Third", 
-                rewardLevel: "Base Rewards"
-              }
-            ].map((tier, index) => (
+          {/* Two-column layout: Tier explanation left, Screenshot right */}
+          <div className="flex flex-col lg:flex-row gap-8 mb-12 items-start">
+            {/* Left Column - Tier Cards */}
+            <div className="flex-1">
+              <div className="grid md:grid-cols-3 gap-6">
+                {[
+                  {
+                    tier: "Tier 1",
+                    subtitle: "Top Third",
+                    rewardLevel: "Premium Rewards"
+                  },
+                  {
+                    tier: "Tier 2", 
+                    subtitle: "Middle Third",
+                    rewardLevel: "Standard Rewards"
+                  },
+                  {
+                    tier: "Tier 3",
+                    subtitle: "Lower Third", 
+                    rewardLevel: "Base Rewards"
+                  }
+                ].map((tier, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                      <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
+                        <div className="relative z-10">
+                          <h3 className="text-2xl font-semibold text-white mb-1">
+                            {tier.tier}
+                          </h3>
+                          <p className="text-white/90 mb-3">{tier.subtitle} = {tier.rewardLevel}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Caption below tier boxes */}
               <motion.div
-                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
+                className="text-center mt-6"
               >
-                <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
-                    <div className="relative z-10">
-                      <h3 className="text-2xl font-semibold text-white mb-1">
-                        {tier.tier}
-                      </h3>
-                      <p className="text-white/90 mb-3">{tier.subtitle} = {tier.rewardLevel}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <p className="text-lg font-semibold text-gray-700">
+                  Higher Effort → Higher Tier → Larger Rewards
+                </p>
               </motion.div>
-            ))}
-          </div>
+            </div>
 
-          {/* Caption below tier boxes */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="text-center mb-8"
-          >
-            <p className="text-lg font-semibold text-gray-700">
-              Higher Effort → Higher Tier → Larger Rewards
-            </p>
-          </motion.div>
+            {/* Right Column - Screenshot */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="lg:w-80 w-full"
+            >
+              <div className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl p-4 shadow-lg">
+                <div className="h-[400px] w-full bg-white/10 rounded-lg flex items-center justify-center text-gray-500 text-sm font-medium shadow-sm overflow-hidden">
+                  <img 
+                    src="/api/placeholder/tier-dashboard.png" 
+                    alt="FinBoost user dashboard showing tier rankings and point boundaries"
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<span class="text-gray-500 text-sm font-medium">tier-dashboard.png</span>';
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-center text-sm text-gray-600 mt-4 font-medium leading-relaxed">
+                  See where you rank and how your points place you into reward tiers.
+                </p>
+              </div>
+            </motion.div>
+          </div>
 
           <div className="text-center mt-8">
             <motion.div
