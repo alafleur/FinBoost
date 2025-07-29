@@ -618,7 +618,7 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Why FinBoost Isn't Just Another Finance App - Professional Card Format */}
+      {/* Why FinBoost Isn't Just Another Finance App - Consistent with Platform Overview Format */}
       <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-white relative">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -633,55 +633,57 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Grid Layout - 2 columns on desktop, 1 on mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Grid Layout - 2 columns on desktop, 1 on mobile matching Platform Overview format */}
+          <div className="grid sm:grid-cols-2 gap-6">
             {[
               {
-                icon: DollarSign, 
-                headline: "Debt Progress Pays",
-                body: "Student loans, credit cards — every payment forward earns you money back.",
-                iconBg: "bg-blue-100",
-                iconColor: "text-blue-700"
+                icon: <BarChart3 className="h-6 w-6" />,
+                title: "Debt Progress Pays",
+                description: "Student loans, credit cards — every payment forward earns you money back.",
+                gradient: "from-blue-500 to-cyan-500",
+                bgGradient: "from-blue-50 to-cyan-50"
               },
               {
-                icon: BarChart3,
-                headline: "Rising Costs Reality", 
-                body: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
-                iconBg: "bg-green-100",
-                iconColor: "text-green-700"
+                icon: <DollarSign className="h-6 w-6" />,
+                title: "Rising Costs Reality", 
+                description: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
+                gradient: "from-green-500 to-emerald-500",
+                bgGradient: "from-green-50 to-emerald-50"
               },
               {
-                icon: Clock,
-                headline: "Retirement Anxiety",
-                body: "Worried you'll never save enough? Turn long-term stress into short-term wins.",
-                iconBg: "bg-orange-100",
-                iconColor: "text-orange-700"
+                icon: <Clock className="h-6 w-6" />,
+                title: "Retirement Anxiety",
+                description: "Worried you'll never save enough? Turn long-term stress into short-term wins.",
+                gradient: "from-orange-500 to-red-500",
+                bgGradient: "from-orange-50 to-red-50"
               },
               {
-                icon: TrendingUp,
-                headline: "Beyond Daily Tracking",
-                body: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
-                iconBg: "bg-purple-100",
-                iconColor: "text-purple-700"
+                icon: <TrendingUp className="h-6 w-6" />,
+                title: "Beyond Daily Tracking",
+                description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
+                gradient: "from-purple-500 to-violet-500", 
+                bgGradient: "from-purple-50 to-violet-50"
               }
-            ].map((card, index) => (
+            ].map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="flex items-start gap-4 bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition-all duration-300"
+                className={`bg-gradient-to-br ${item.bgGradient} border border-white/60 rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-sm`}
               >
-                <div className={`${card.iconBg} ${card.iconColor} p-3 rounded-full flex-shrink-0`}>
-                  <card.icon className="w-5 h-5" />
+                <div className={`bg-gradient-to-r ${item.gradient} rounded-xl w-12 h-12 flex items-center justify-center mb-4 shadow-lg`}>
+                  <div className="text-white">
+                    {item.icon}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{card.headline}</h3>
-                  <p className="text-sm text-slate-600 leading-snug">
-                    {card.body}
-                  </p>
-                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-3 leading-tight">
+                  {item.title}
+                </h4>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {item.description}
+                </p>
               </motion.div>
             ))}
           </div>
