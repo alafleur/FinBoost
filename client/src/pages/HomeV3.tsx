@@ -28,7 +28,8 @@ import {
   ExternalLink,
   AlertTriangle,
   BadgeDollarSign,
-  PiggyBank
+  PiggyBank,
+  CheckCircle
 } from "lucide-react";
 
 export default function HomeV3() {
