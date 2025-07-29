@@ -808,41 +808,49 @@ export default function HomeV3() {
       </section>
 
       {/* Why Members Trust FinBoost - Emotional Trust Building */}
-      <section id="trust" className="py-20 px-4 bg-gradient-to-b from-white to-slate-50 relative">
-        <div className="max-w-6xl mx-auto">
+      <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-100 to-white relative">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why FinBoost Isn't Just Another Finance App
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="space-y-6">
             {[
               {
                 icon: "DollarSign", 
                 headline: "Rising Costs Reality",
-                body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>"
+                body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>",
+                iconBg: "bg-blue-100",
+                iconColor: "text-blue-600"
               },
               {
                 icon: "CreditCard",
                 headline: "Debt Progress Pays", 
-                body: "Every payment forward doesn't just shrink your debt — <strong>it earns you real rewards.</strong>"
+                body: "Every payment forward doesn't just shrink your debt — <strong>it earns you real rewards.</strong>",
+                iconBg: "bg-green-100",
+                iconColor: "text-green-600"
               },
               {
                 icon: "Clock",
                 headline: "Retirement Anxiety",
-                body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>"
+                body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>",
+                iconBg: "bg-orange-100",
+                iconColor: "text-orange-600"
               },
               {
                 icon: "TrendingUp",
                 headline: "Beyond Daily Tracking",
-                body: "Most apps focus on today's spending. <strong>We reward steps toward tomorrow's security.</strong>"
+                body: "Most apps focus on today's spending. <strong>We reward steps toward tomorrow's security.</strong>",
+                iconBg: "bg-purple-100",
+                iconColor: "text-purple-600"
               }
             ].map((card, index) => {
               const IconComponent = card.icon === "DollarSign" ? DollarSign :
@@ -852,29 +860,23 @@ export default function HomeV3() {
               return (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="group"
+                  className="bg-white shadow-sm rounded-xl p-6 flex gap-4 hover:shadow-md hover:scale-[1.02] transition-all duration-300 group"
                 >
-                  <div className="bg-white rounded-xl p-8 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all duration-200 h-full border border-gray-100">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
-                          <IconComponent className="w-7 h-7 text-blue-600" />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
-                          {card.headline}
-                        </h3>
-                        <p 
-                          className="text-base text-slate-700 leading-relaxed"
-                          dangerouslySetInnerHTML={{ __html: card.body }}
-                        />
-                      </div>
-                    </div>
+                  <div className={`${card.iconBg} ${card.iconColor} p-3 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors duration-300">
+                      {card.headline}
+                    </h3>
+                    <p 
+                      className="text-sm text-slate-600 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: card.body }}
+                    />
                   </div>
                 </motion.div>
               );
