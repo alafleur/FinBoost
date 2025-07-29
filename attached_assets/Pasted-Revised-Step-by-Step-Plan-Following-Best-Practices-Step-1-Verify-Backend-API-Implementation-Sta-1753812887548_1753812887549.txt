@@ -1,0 +1,26 @@
+Revised Step-by-Step Plan (Following Best Practices)
+Step 1: Verify Backend API Implementation
+Start the application and verify /api/admin/winners/data/${cycleId} route exists in server/routes.ts
+Check if the route is properly connected to the getCycleWinnersForExport() method in server/storage.ts
+Test the endpoint directly with cycle ID 18 to confirm it returns proper enhanced data structure
+Verify the database query correctly joins cycle_winner_selections with user data
+Step 2: Validate Database State and Winner Persistence
+Confirm the 750 generated winners are actually saved to cycle_winner_selections table
+Check if the winner selection workflow requires explicit "Save as Draft" step that wasn't completed
+Verify the saveCycleWinnerSelection() method is being called and committing properly
+Ensure the tierRank values are using my selection sequence implementation (1, 2, 3...) not performance ranking
+Step 3: Debug Frontend State Management Flow
+Examine loadEnhancedWinners() function in CycleOperationsTab.tsx for proper error handling
+Add comprehensive logging to identify why enhancedWinners state isn't populating
+Verify the API response structure matches what setEnhancedWinners() expects
+Check if handleSaveWinnerSelection() is properly calling loadEnhancedWinners() after success
+Step 4: Fix Race Conditions and Timing Issues
+Implement proper database transaction completion verification before API calls
+Add retry mechanism or loading states for Enhanced View data loading
+Ensure proper sequential execution: Generate → Save → Load Enhanced Data → Render Table
+Step 5: Complete End-to-End Testing and Verification
+Execute complete workflow with comprehensive logging at each step
+Verify Enhanced View table appears with all 13 columns including Cycle Points
+Confirm Tier Rank shows selection sequence order (1, 2, 3, etc.) with my implementation
+Test Excel export/import functionality with the enhanced data structure
+Key Focus: Start with backend verification first, as the root cause is most likely that the enhanced data API endpoint isn't properly connected to the saved winner data, not a frontend rendering issue.
