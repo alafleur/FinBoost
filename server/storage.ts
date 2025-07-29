@@ -7351,9 +7351,25 @@ export class MemStorage implements IStorage {
 
   async clearCycleWinnerSelection(cycleSettingId: number): Promise<void> {
     try {
+      // Clear winner selections
       await db
         .delete(cycleWinnerSelections)
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
+      // Reset cycle execution state to allow re-running
+      await db
+        .update(cycleSettings)
+        .set({
+          selectionExecuted: false,
+          selectionSealed: false,
+          totalWinners: 0,
+          totalRewardPool: 0,
+          selectionExecutedAt: null,
+          selectionSealedAt: null
+        })
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      console.log(`Cleared winner selection and reset execution state for cycle ${cycleSettingId}`);
     } catch (error) {
       console.error('Error clearing cycle winner selection:', error);
       throw error;

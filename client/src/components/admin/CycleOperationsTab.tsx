@@ -538,8 +538,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/clear-selection`, {
-        method: 'POST',
+      const response = await fetch(`/api/admin/cycle-winner-selection/${selectedCycle.id}`, {
+        method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -548,6 +548,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           title: "Selection Cleared",
           description: "Winner selection has been cleared"
         });
+        // Clear local state immediately
+        setWinners([]);
+        setEnhancedWinners([]);
+        setPendingWinners([]);
         loadWinners();
         loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
