@@ -633,8 +633,8 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Grid Layout - Exact Platform Overview structure */}
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Grid Layout - Exact Platform Overview structure with horizontal flex layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
                 icon: <PiggyBank className="w-6 h-6 text-slate-600" />,
@@ -663,15 +663,15 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-xl border p-6 hover:shadow-md transition-all duration-300"
+                className="bg-white rounded-xl border p-6 hover:shadow-md transition-all duration-300 space-y-2"
               >
                 <div className="flex items-start space-x-4">
                   <div className="bg-slate-100 p-3 rounded-full">
                     {item.icon}
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-slate-900 mb-2">{item.title}</h4>
-                    <p className="text-slate-600 text-sm leading-relaxed">
+                    <h4 className="text-lg font-semibold text-slate-900">{item.title}</h4>
+                    <p className="text-muted-foreground text-sm">
                       {item.description}
                     </p>
                   </div>
