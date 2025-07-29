@@ -1,0 +1,34 @@
+Looking at your issue, I can see the problem clearly. The Enhanced Selected Winners table is not appearing despite successful winner selection execution. Let me analyze the potential causes:
+
+Root Cause Analysis
+Based on the code in CycleOperationsTab.tsx and the logs showing successful winner selection (750 winners), the issue is likely one of these:
+
+1. State Management Issue
+The paginatedWinners state may not be getting updated after winner selection. The table visibility depends on paginatedWinners.winners.length > 0, but if loadPaginatedWinnerDetails() isn't being called or failing silently, the table won't render.
+
+2. API Response Structure Mismatch
+The loadPaginatedWinnerDetails() function expects a specific response structure from /api/admin/cycle-winner-details/${cycleId}/paginated, but there might be a mismatch between what the backend returns and what the frontend expects.
+
+3. Cycle State Not Updated
+The winner selection execution might not be updating the cycle's selectionExecuted flag properly, which could affect the UI rendering logic.
+
+4. Race Condition
+The handleExecuteWinnerSelection() function calls loadPaginatedWinnerDetails() after selection, but there might be a timing issue where the call happens before the database transaction is fully committed.
+
+Key Areas to Check
+In CycleOperationsTab.tsx around lines 346-425: Verify that after successful winner selection, the loadPaginatedWinnerDetails() is being called with the correct cycle ID.
+
+State initialization: Check if paginatedWinners state is being properly initialized and updated.
+
+Backend API: Verify that /api/admin/cycle-winner-details/${cycleId}/paginated is returning data in the expected format.
+
+Database persistence: Confirm that the 750 winners are actually saved to the cycle_winner_selections table.
+
+Most Likely Fix Needed
+The issue is probably in the handleExecuteWinnerSelection() success callback where it should be calling loadPaginatedWinnerDetails() but either:
+
+The call is missing
+The call is happening too early (before DB commit)
+The API endpoint is returning empty results
+The state update isn't triggering a re-render
+The Enhanced View table rendering is conditional on paginatedWinners.winners.length > 0, so if this array is empty, the entire section won't appear, which matches your symptoms exactly.

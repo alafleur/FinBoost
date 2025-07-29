@@ -1,0 +1,31 @@
+Issue Summary: The FinBoost admin portal has a confusing UX where the "Selected Winners - Enhanced View" table (with 13 columns including Cycle Points, Excel export/import, and tier rank selection sequence) is not consistently visible or accessible.
+
+Technical Context:
+
+We implemented a comprehensive Selected Winners table overhaul with 13 specific columns
+Added Excel export/import functionality for payout management
+Fixed the Tier Rank column to show selection sequence order (1, 2, 3, etc.) instead of performance-based ranking
+The table should appear in the "Cycle Operations" tab of the admin portal
+Current Problem:
+
+User successfully executed winner selection (750 winners generated per logs)
+User is on the correct "Cycle Operations" tab
+The "Selected Winners - Enhanced View" section is not visible/accessible
+Previous confusion included duplicate tables showing old vs new data
+We cleared old winner data (751 records) via SQL to fix duplication issue
+New selection executed successfully but Enhanced View table not appearing
+Expected Behavior:
+
+After winner selection execution, "Selected Winners - Enhanced View" table should appear below the "Winner Selection & Distribution" section
+Table should display 13 columns: Overall Rank #, Tier Rank #, Username, User Email, Cycle Points, Tier Size $, % Payout of Tier, Payout Calc $, Payout Override $, Payout Final, PayPal Email, Status, Last Modified
+Tier Rank column should show selection sequence (1, 2, 3, 4...) not performance ranking (94, 107, 191...)
+Export Excel and Import Excel buttons should be functional
+Logs Show: Winner selection completed successfully with 750 total winners (225 tier1, 225 tier2, 300 tier3), but Enhanced View table not appearing in UI despite successful backend execution.
+
+GitHub Code Locations to Review:
+
+Frontend Component: client/src/components/admin/CycleOperationsTab.tsx (lines 65-125 for Enhanced Winner interfaces, lines 346-425 for winner selection logic)
+Backend Storage: server/storage.ts (search for getCycleWinnersForExport, selectWeightedRandomWinners, saveCycleWinnerSelection methods)
+API Routes: server/routes.ts (search for /api/admin/cycle-winner-selection/execute, /api/admin/winners/data/, /api/admin/cycle-winner-details/)
+Database Schema: shared/schema.ts (cycle_winner_selections table definition)
+Request: Please suggest UX improvements to make the Enhanced Selected Winners table consistently accessible and visible after winner selection execution, and explain why it might not be appearing despite successful backend execution. Focus on the component rendering logic in CycleOperationsTab.tsx around the Enhanced View section.
