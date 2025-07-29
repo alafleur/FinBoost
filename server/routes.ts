@@ -4620,7 +4620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Winners array is required and cannot be empty' });
       }
 
-      const result = await storage.saveCycleWinnerSelection(
+      const result = await storage.saveWinnerSelectionDraft(
         cycleSettingId,
         winners,
         selectionMode || 'point-weighted-random',
