@@ -424,22 +424,26 @@ export default function HomeV3() {
               {
                 icon: <PiggyBank className="w-6 h-6 text-slate-800" />,
                 title: "Debt Progress Pays",
-                description: "Student loans, credit cards — every payment forward earns you money back."
+                description: "Student loans, credit cards — every payment forward earns you money back.",
+                borderColor: "border-l-green-400"
               },
               {
                 icon: <BarChart3 className="w-6 h-6 text-slate-800" />,
                 title: "Rising Costs Reality", 
-                description: "Everything costs more, saving feels impossible. Small wins add up to real rewards."
+                description: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
+                borderColor: "border-l-blue-400"
               },
               {
                 icon: <Clock className="w-6 h-6 text-slate-800" />,
                 title: "Worrying About Retirement, Not Just Next Month",
-                description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress."
+                description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress.",
+                borderColor: "border-l-orange-400"
               },
               {
                 icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
                 title: "Beyond Daily Tracking",
-                description: "Most apps focus on today's spending. We reward steps toward tomorrow's security."
+                description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
+                borderColor: "border-l-purple-400"
               }
             ].map((item, index) => (
               <motion.div
@@ -448,7 +452,7 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-xl border p-6 hover:shadow-md transition-all duration-300 space-y-2"
+                className={`bg-white rounded-xl border ${item.borderColor} border-l-4 p-6 hover:shadow-md transition-all duration-300 space-y-2`}
               >
                 <div className="flex items-start space-x-4">
                   <div className="bg-slate-100 p-3 rounded-full text-slate-800">
