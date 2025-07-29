@@ -354,12 +354,19 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   tier: text("tier").notNull(), // tier1, tier2, tier3
+  overallRank: integer("overall_rank").notNull(), // Position across all tiers
   tierRank: integer("tier_rank").notNull(), // Position within tier
   pointsAtSelection: integer("points_at_selection").notNull(),
-  rewardAmount: integer("reward_amount").notNull(), // In cents
+  tierSizeAmount: integer("tier_size_amount").notNull(), // Total pool for this tier in cents
+  payoutPercentage: integer("payout_percentage").default(0).notNull(), // Admin input % as decimal * 10000 (e.g., 1500 = 15%)
+  payoutCalculated: integer("payout_calculated").default(0).notNull(), // tier_size × payout_percentage in cents
+  payoutOverride: integer("payout_override"), // Admin override amount in cents (nullable)
+  payoutFinal: integer("payout_final").default(0).notNull(), // Final payout amount in cents
+  rewardAmount: integer("reward_amount").notNull(), // In cents (legacy field, keeping for compatibility)
   pointsDeducted: integer("points_deducted").notNull(),
   pointsRolledOver: integer("points_rolled_over").notNull(),
   payoutStatus: text("payout_status").default("pending").notNull(), // pending, processing, completed, failed
+  lastModified: timestamp("last_modified").defaultNow().notNull(), // When payout data was last updated
   selectionDate: timestamp("selection_date").defaultNow().notNull(),
 });
 
