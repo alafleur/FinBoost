@@ -632,33 +632,33 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {[
               {
                 icon: "DollarSign", 
                 headline: "Rising Costs Reality",
-                body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>",
+                body: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
                 iconBg: "bg-blue-100",
                 iconColor: "text-blue-600"
               },
               {
                 icon: "CreditCard",
                 headline: "Debt Progress Pays", 
-                body: "Every payment forward doesn't just shrink your debt — <strong>it earns you real rewards.</strong>",
+                body: "Every payment forward doesn't just shrink your debt — it earns you real rewards.",
                 iconBg: "bg-green-100",
                 iconColor: "text-green-600"
               },
               {
                 icon: "Clock",
                 headline: "Retirement Anxiety",
-                body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>",
+                body: "Worried you'll never save enough? Turn long-term stress into short-term wins.",
                 iconBg: "bg-orange-100",
                 iconColor: "text-orange-600"
               },
               {
                 icon: "TrendingUp",
                 headline: "Beyond Daily Tracking",
-                body: "Most apps focus on today's spending. <strong>We reward steps toward tomorrow's security.</strong>",
+                body: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
                 iconBg: "bg-purple-100",
                 iconColor: "text-purple-600"
               }
@@ -674,19 +674,20 @@ export default function HomeV3() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-white shadow-sm rounded-xl p-6 flex gap-4 hover:shadow-md hover:scale-[1.02] transition-all duration-300 group"
+                  className="bg-white border border-slate-200 rounded-xl p-5 lg:p-6 hover:shadow-md hover:border-slate-300 transition-all duration-300"
                 >
-                  <div className={`${card.iconBg} ${card.iconColor} p-3 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors duration-300">
-                      {card.headline}
-                    </h3>
-                    <p 
-                      className="text-sm text-slate-600 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: card.body }}
-                    />
+                  <div className="flex items-start space-x-3 lg:space-x-4">
+                    <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center ${card.iconBg}`}>
+                      <IconComponent className={`w-5 h-5 lg:w-6 lg:h-6 ${card.iconColor}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-base lg:text-lg text-slate-900 mb-1 lg:mb-2">
+                        {card.headline}
+                      </h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">
+                        {card.body}
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               );
