@@ -21,7 +21,7 @@ async function testWinnerPersistence() {
 
     // Step 1: Use existing admin token
     console.log('1. 🔐 Using existing admin token...');
-    const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1MzU3NTcwMSwiZXhwIjoxNzUzNjYyMTAxfQ.TorqSG4knwA1nd_fmP_38nhYGu4iFgd9E0K4LsW-TCc';
+    const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1MzgxMzk5NiwiZXhwIjoxNzUzOTAwMzk2fQ.MnD-PnDjoEVV9--cmBLW1tngrQ0eMdCIIr02JODYFwc';
     console.log('   ✓ Admin token loaded\n');
 
     // Step 2: Verify cycle 18 state before selection

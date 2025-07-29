@@ -6969,6 +6969,21 @@ export class MemStorage implements IStorage {
       
       console.log(`Cleared existing winners for cycle ${cycleSettingId}`);
 
+      // Get cycle settings to calculate tier pool amounts
+      const [cycleSetting] = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      if (!cycleSetting) {
+        throw new Error('Cycle setting not found');
+      }
+
+      // Calculate tier pool amounts based on total pool and percentages
+      const tier1PoolAmount = Math.floor(totalPool * (cycleSetting.tier1PoolPercentage / 100));
+      const tier2PoolAmount = Math.floor(totalPool * (cycleSetting.tier2PoolPercentage / 100));
+      const tier3PoolAmount = totalPool - tier1PoolAmount - tier2PoolAmount; // Remaining amount
+
       // Save winners to database using existing method logic
       const savedWinners = [];
       let errorCount = 0;
@@ -6986,11 +7001,31 @@ export class MemStorage implements IStorage {
         tier3: winnersByTier.tier3.length
       });
 
-      for (const winner of winners) {
+      for (let overallIndex = 0; overallIndex < winners.length; overallIndex++) {
+        const winner = winners[overallIndex];
         try {
           // Calculate tier rank based on position within tier
           const tierWinners = winnersByTier[winner.tier as keyof typeof winnersByTier] || [];
           const tierRank = tierWinners.findIndex(w => w.id === winner.id) + 1;
+
+          // Overall rank is position in the full winners array + 1
+          const overallRank = overallIndex + 1;
+
+          // Get tier pool amount based on winner's tier
+          let tierSizeAmount: number;
+          switch (winner.tier) {
+            case 'tier1':
+              tierSizeAmount = tier1PoolAmount;
+              break;
+            case 'tier2':
+              tierSizeAmount = tier2PoolAmount;
+              break;
+            case 'tier3':
+              tierSizeAmount = tier3PoolAmount;
+              break;
+            default:
+              tierSizeAmount = 0;
+          }
 
           const [saved] = await db
             .insert(cycleWinnerSelections)
@@ -6998,8 +7033,10 @@ export class MemStorage implements IStorage {
               cycleSettingId,
               userId: winner.id,
               tier: winner.tier,
+              overallRank, // Add overall ranking
               tierRank,
               pointsAtSelection: winner.currentCyclePoints,
+              tierSizeAmount, // Add the missing required field
               rewardAmount: winner.rewardAmount * 100, // Convert to cents
               pointsDeducted: 0,
               pointsRolledOver: 0,
