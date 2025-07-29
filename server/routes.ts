@@ -4795,6 +4795,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Selected Winners JSON data for frontend table display
+  app.get('/api/admin/winners/data/:cycleId', authenticateToken, async (req, res) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      console.log(`[JSON Data] Fetching winners JSON data for cycle ${cycleId}`);
+      
+      // Get winners data using the same method as export but return as JSON
+      const winnersData = await storage.getCycleWinnersForExport(cycleId);
+      
+      console.log(`[JSON Data] Returning ${winnersData.length} winner records as JSON`);
+      res.json(winnersData);
+    } catch (error) {
+      console.error('Error getting winners JSON data:', error);
+      res.status(500).json({ error: 'Failed to get winners data' });
+    }
+  });
+
   // ========================================
   // PREDICTION SYSTEM API ENDPOINTS (Phase 2)
   // ========================================

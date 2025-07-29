@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 import { 
   Calendar, 
   Users, 
@@ -22,7 +23,11 @@ import {
   Timer,
   BarChart3,
   Save,
-  Lock
+  Lock,
+  Download,
+  Upload,
+  FileSpreadsheet,
+  ExternalLink
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -57,6 +62,22 @@ interface WinnerSelection {
   paypalEmail?: string;
 }
 
+// Enhanced interface for the new 12-column Selected Winners table
+interface EnhancedWinnerData {
+  overallRank: number;
+  tierRank: number;
+  username: string;
+  email: string;
+  tierSizeAmount: number;
+  payoutPercentage: number;
+  payoutCalculated: number;
+  payoutOverride: number | null;
+  payoutFinal: number;
+  paypalEmail: string | null;
+  payoutStatus: string;
+  lastModified: Date;
+}
+
 interface CycleOperationsTabProps {
   cycleSettings: CycleSetting[];
   onRefresh: () => void;
@@ -74,6 +95,16 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
+  
+  // === PHASE 3: ENHANCED SELECTED WINNERS STATE ===
+  const [enhancedWinners, setEnhancedWinners] = useState<EnhancedWinnerData[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importData, setImportData] = useState<any[]>([]);
+  const [importPreview, setImportPreview] = useState<any[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get active cycle on component mount
   useEffect(() => {
@@ -88,6 +119,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     if (selectedCycle) {
       loadCycleAnalytics();
       loadWinners();
+      loadEnhancedWinners(); // Phase 3: Load enhanced winner data
     }
   }, [selectedCycle]);
 
@@ -126,6 +158,187 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       }
     } catch (error) {
       console.error('Failed to load winners:', error);
+    }
+  };
+
+  // === PHASE 3: ENHANCED WINNERS DATA LOADING ===
+  const loadEnhancedWinners = async () => {
+    if (!selectedCycle) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}`);
+      
+      const response = await fetch(`/api/admin/winners/data/${selectedCycle.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const winnersData = await response.json();
+        setEnhancedWinners(winnersData);
+        console.log(`[Frontend] Loaded ${winnersData.length} enhanced winner records`);
+      } else {
+        console.log(`[Frontend] No enhanced winners data available (${response.status})`);
+        setEnhancedWinners([]);
+      }
+    } catch (error) {
+      console.error('Failed to load enhanced winners:', error);
+      setEnhancedWinners([]);
+    }
+  };
+
+  // === PHASE 3: EXCEL EXPORT FUNCTIONALITY ===
+  const handleExportWinners = async () => {
+    if (!selectedCycle) {
+      toast({
+        title: "Error",
+        description: "Please select a cycle first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log(`[Export] Starting export for cycle ${selectedCycle.id}`);
+      
+      const response = await fetch(`/api/admin/winners/export/${selectedCycle.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cycle-${selectedCycle.id}-winners-export.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        console.log(`[Export] Successfully downloaded Excel file`);
+        toast({
+          title: "Export Successful",
+          description: `Winners data exported to Excel file`,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Export failed');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Failed to export winners data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // === PHASE 3: EXCEL IMPORT FUNCTIONALITY ===
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportFile(file);
+    
+    // Read and preview the Excel file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        setImportData(jsonData);
+        setImportPreview(jsonData.slice(0, 5)); // Show first 5 rows for preview
+        
+        console.log(`[Import] Loaded ${jsonData.length} rows for preview`);
+        toast({
+          title: "File Loaded",
+          description: `Ready to import ${jsonData.length} records`,
+        });
+      } catch (error) {
+        console.error('File parsing failed:', error);
+        toast({
+          title: "File Error",
+          description: "Failed to parse Excel file. Please check the file format.",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleImportWinners = async (confirmOverwrite: boolean = false) => {
+    if (!selectedCycle || importData.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select a file and cycle first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log(`[Import] Starting import for cycle ${selectedCycle.id} with ${importData.length} records`);
+      
+      const response = await fetch(`/api/admin/winners/import/${selectedCycle.id}`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          importData,
+          confirmOverwrite
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log(`[Import] Successfully imported ${result.updatedCount} records`);
+        toast({
+          title: "Import Successful",
+          description: `Updated ${result.updatedCount} winner records`,
+        });
+        
+        // Refresh the data and close dialog
+        loadEnhancedWinners();
+        setShowImportDialog(false);
+        setImportFile(null);
+        setImportData([]);
+        setImportPreview([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else if (result.requiresConfirmation) {
+        // Show confirmation dialog for overwrite
+        const confirmed = window.confirm(result.message + "\n\nDo you want to proceed?");
+        if (confirmed) {
+          handleImportWinners(true); // Retry with confirmation
+        }
+      } else {
+        throw new Error(result.error || 'Import failed');
+      }
+    } catch (error) {
+      console.error('Import failed:', error);
+      toast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import winners data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -207,6 +420,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         });
         setPendingWinners([]);
         loadWinners();
+        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
       } else {
         toast({
@@ -247,6 +461,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: "Winner selection is now final and cannot be modified."
         });
         loadWinners();
+        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
       } else {
         toast({
@@ -298,6 +513,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         });
         setSelectedForDisbursement(new Set());
         loadWinners();
+        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
       } else {
         toast({
           title: "Error",
@@ -332,6 +548,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: "Winner selection has been cleared"
         });
         loadWinners();
+        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
       }
     } catch (error) {
@@ -593,126 +810,223 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
             </CardContent>
           </Card>
 
-          {/* Winners Table */}
-          {winners.length > 0 && (
+          {/* === PHASE 3: ENHANCED SELECTED WINNERS TABLE === */}
+          {enhancedWinners.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Selected Winners</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileSpreadsheet className="w-5 h-5" />
+                      Selected Winners - Enhanced View
+                    </CardTitle>
                     <CardDescription>
-                      {winners.length} winners selected for current cycle
+                      {enhancedWinners.length} winners with complete payout details and Excel export/import capabilities
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => {
-                        if (selectedForDisbursement.size === winners.length) {
-                          setSelectedForDisbursement(new Set());
-                        } else {
-                          setSelectedForDisbursement(new Set(winners.map(w => w.id)));
-                        }
-                      }}
+                      onClick={handleExportWinners}
+                      disabled={isExporting}
                       variant="outline"
                       size="sm"
                     >
-                      {selectedForDisbursement.size === winners.length ? 'Deselect All' : 'Select All'}
-                    </Button>
-                    <Button
-                      onClick={handleProcessPayouts}
-                      disabled={isProcessingPayouts || selectedForDisbursement.size === 0}
-                    >
-                      {isProcessingPayouts ? (
+                      {isExporting ? (
                         <>
                           <Timer className="w-4 h-4 mr-2 animate-spin" />
-                          Processing...
+                          Exporting...
                         </>
                       ) : (
                         <>
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Process Selected ({selectedForDisbursement.size})
+                          <Download className="w-4 h-4 mr-2" />
+                          Export Excel
                         </>
                       )}
                     </Button>
+                    <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Import Excel
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                          <DialogTitle>Import Winners Data from Excel</DialogTitle>
+                          <DialogDescription>
+                            Upload an Excel file to update winner payout information. The system will match records by email address.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="excel-file">Select Excel File</Label>
+                            <Input
+                              id="excel-file"
+                              type="file"
+                              accept=".xlsx,.xls"
+                              onChange={handleFileSelect}
+                              ref={fileInputRef}
+                            />
+                          </div>
+                          
+                          {importPreview.length > 0 && (
+                            <div>
+                              <Label>Data Preview (First 5 Rows)</Label>
+                              <div className="border rounded-lg p-4 bg-gray-50 max-h-64 overflow-auto">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      {Object.keys(importPreview[0] || {}).map((key) => (
+                                        <TableHead key={key} className="text-xs">{key}</TableHead>
+                                      ))}
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {importPreview.map((row, index) => (
+                                      <TableRow key={index}>
+                                        {Object.values(row).map((value: any, cellIndex) => (
+                                          <TableCell key={cellIndex} className="text-xs">
+                                            {String(value)}
+                                          </TableCell>
+                                        ))}
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setShowImportDialog(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={() => handleImportWinners(false)}
+                              disabled={importData.length === 0 || isImporting}
+                            >
+                              {isImporting ? (
+                                <>
+                                  <Timer className="w-4 h-4 mr-2 animate-spin" />
+                                  Importing...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="w-4 h-4 mr-2" />
+                                  Import Data ({importData.length} records)
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">Select</TableHead>
-                      <TableHead>Winner</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Reward Amount</TableHead>
-                      <TableHead>PayPal Email</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Selected Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {winners.map((winner) => (
-                      <TableRow key={winner.id}>
-                        <TableCell>
-                          <input
-                            type="checkbox"
-                            checked={selectedForDisbursement.has(winner.id)}
-                            onChange={(e) => {
-                              const newSet = new Set(selectedForDisbursement);
-                              if (e.target.checked) {
-                                newSet.add(winner.id);
-                              } else {
-                                newSet.delete(winner.id);
-                              }
-                              setSelectedForDisbursement(newSet);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{winner.username}</div>
-                            <div className="text-sm text-gray-500">{winner.email}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={
-                            winner.tier === 'tier1' ? 'default' : 
-                            winner.tier === 'tier2' ? 'secondary' : 'outline'
-                          }>
-                            {winner.tier === 'tier1' ? 'Tier 1' : 
-                             winner.tier === 'tier2' ? 'Tier 2' : 'Tier 3'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(winner.rewardAmount)}
-                        </TableCell>
-                        <TableCell>
-                          {winner.paypalEmail ? (
-                            <span className="text-green-600">{winner.paypalEmail}</span>
-                          ) : (
-                            <span className="text-red-600">Not configured</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {winner.isProcessed ? (
-                            <Badge variant="default">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Processed
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">
-                              <AlertCircle className="w-3 h-3 mr-1" />
-                              Pending
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(winner.selectionDate)}
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-20">Overall Rank #</TableHead>
+                        <TableHead className="w-20">Tier Rank #</TableHead>
+                        <TableHead className="w-32">Username</TableHead>
+                        <TableHead className="w-48">User Email</TableHead>
+                        <TableHead className="w-24">Tier Size $</TableHead>
+                        <TableHead className="w-24">% Payout of Tier</TableHead>
+                        <TableHead className="w-24">Payout Calc $</TableHead>
+                        <TableHead className="w-24">Payout Override $</TableHead>
+                        <TableHead className="w-24">Payout Final</TableHead>
+                        <TableHead className="w-48">PayPal Email</TableHead>
+                        <TableHead className="w-20">Status</TableHead>
+                        <TableHead className="w-32">Last Modified</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {enhancedWinners.map((winner, index) => (
+                        <TableRow key={`${winner.email}-${index}`}>
+                          <TableCell className="font-medium text-center">
+                            {winner.overallRank}
+                          </TableCell>
+                          <TableCell className="font-medium text-center">
+                            {winner.tierRank}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {winner.username}
+                          </TableCell>
+                          <TableCell className="text-sm text-gray-600">
+                            {winner.email}
+                          </TableCell>
+                          <TableCell className="font-medium text-green-600">
+                            ${(winner.tierSizeAmount / 100).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {(winner.payoutPercentage / 100).toFixed(2)}%
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            ${(winner.payoutCalculated / 100).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="font-medium text-blue-600">
+                            {winner.payoutOverride ? `$${(winner.payoutOverride / 100).toFixed(2)}` : '-'}
+                          </TableCell>
+                          <TableCell className="font-bold text-green-700">
+                            ${(winner.payoutFinal / 100).toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            {winner.paypalEmail ? (
+                              <span className="text-green-600 text-sm">{winner.paypalEmail}</span>
+                            ) : (
+                              <span className="text-red-600 text-sm">Not configured</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              winner.payoutStatus === 'processed' ? 'default' : 
+                              winner.payoutStatus === 'pending' ? 'outline' : 'secondary'
+                            }>
+                              {winner.payoutStatus}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-500">
+                            {new Date(winner.lastModified).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Legacy Winners Table - Keep for fallback */}
+          {winners.length > 0 && enhancedWinners.length === 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Selected Winners (Legacy View)</CardTitle>
+                    <CardDescription>
+                      {winners.length} winners selected for current cycle - Enhanced view loading...
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Timer className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-500">Loading enhanced winner details...</p>
+                </div>
               </CardContent>
             </Card>
           )}
