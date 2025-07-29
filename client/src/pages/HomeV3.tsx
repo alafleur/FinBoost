@@ -618,6 +618,66 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Guaranteed Minimums for Top Rewards */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Guaranteed Minimums for Top Rewards
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Early Access cycles are backed by FinBoost to ensure meaningful rewards for our founding members.
+            </p>
+          </motion.div>
+
+          {/* Prize Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            {[
+              { place: "1st", amount: "$500+", gradient: "from-yellow-400 to-orange-500" },
+              { place: "2nd", amount: "$300+", gradient: "from-gray-300 to-gray-500" },
+              { place: "3rd", amount: "$200+", gradient: "from-orange-400 to-orange-600" },
+              { place: "4th", amount: "$75+", gradient: "from-blue-400 to-blue-600" },
+              { place: "5th", amount: "$50+", gradient: "from-green-400 to-green-600" }
+            ].map((prize, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-xl border-2 border-slate-200 p-6 hover:shadow-lg transition-all duration-300"
+              >
+                <div className={`bg-gradient-to-r ${prize.gradient} rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4`}>
+                  <span className="text-white font-bold text-lg">{prize.place}</span>
+                </div>
+                <div className="text-2xl font-bold text-slate-900 mb-1">{prize.amount}</div>
+                <div className="text-sm text-slate-600">minimum</div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Guarantee Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-full px-6 py-3"
+          >
+            <Shield className="w-5 h-5 text-green-600" />
+            <span className="text-sm font-semibold text-slate-700">
+              Early Access cycles are guaranteed by FinBoost
+            </span>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Why FinBoost Isn't Just Another Finance App - Refined Platform Overview Format */}
       <section id="trust" className="bg-gradient-to-b from-white via-slate-50 to-white py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-6xl mx-auto">
