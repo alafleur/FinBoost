@@ -618,9 +618,9 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Why Members Trust FinBoost - Emotional Trust Building */}
-      <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-100 to-white relative">
-        <div className="max-w-4xl mx-auto">
+      {/* Why FinBoost Isn't Just Another Finance App - Professional Card Format */}
+      <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-white relative">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -628,71 +628,62 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
               Why FinBoost Isn't Just Another Finance App
             </h2>
           </motion.div>
 
-          <div className="space-y-4">
+          {/* Grid Layout - 2 columns on desktop, 1 on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                icon: "DollarSign", 
-                headline: "Rising Costs Reality",
-                body: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
+                icon: DollarSign, 
+                headline: "Debt Progress Pays",
+                body: "Student loans, credit cards — every payment forward earns you money back.",
                 iconBg: "bg-blue-100",
-                iconColor: "text-blue-600"
+                iconColor: "text-blue-700"
               },
               {
-                icon: "CreditCard",
-                headline: "Debt Progress Pays", 
-                body: "Every payment forward doesn't just shrink your debt — it earns you real rewards.",
+                icon: BarChart3,
+                headline: "Rising Costs Reality", 
+                body: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
                 iconBg: "bg-green-100",
-                iconColor: "text-green-600"
+                iconColor: "text-green-700"
               },
               {
-                icon: "Clock",
+                icon: Clock,
                 headline: "Retirement Anxiety",
                 body: "Worried you'll never save enough? Turn long-term stress into short-term wins.",
                 iconBg: "bg-orange-100",
-                iconColor: "text-orange-600"
+                iconColor: "text-orange-700"
               },
               {
-                icon: "TrendingUp",
+                icon: TrendingUp,
                 headline: "Beyond Daily Tracking",
                 body: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
                 iconBg: "bg-purple-100",
-                iconColor: "text-purple-600"
+                iconColor: "text-purple-700"
               }
-            ].map((card, index) => {
-              const IconComponent = card.icon === "DollarSign" ? DollarSign :
-                                 card.icon === "CreditCard" ? CreditCard :
-                                 card.icon === "Clock" ? Clock : TrendingUp;
-              
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-white border border-slate-200 rounded-xl p-5 lg:p-6 hover:shadow-md hover:border-slate-300 transition-all duration-300"
-                >
-                  <div className="flex items-start space-x-3 lg:space-x-4">
-                    <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center ${card.iconBg}`}>
-                      <IconComponent className={`w-5 h-5 lg:w-6 lg:h-6 ${card.iconColor}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base lg:text-lg text-slate-900 mb-1 lg:mb-2">
-                        {card.headline}
-                      </h3>
-                      <p className="text-slate-600 text-sm leading-relaxed">
-                        {card.body}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+            ].map((card, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="flex items-start gap-4 bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition-all duration-300"
+              >
+                <div className={`${card.iconBg} ${card.iconColor} p-3 rounded-full flex-shrink-0`}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{card.headline}</h3>
+                  <p className="text-sm text-slate-600 leading-snug">
+                    {card.body}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
