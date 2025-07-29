@@ -6735,14 +6735,19 @@ export class MemStorage implements IStorage {
         };
       });
 
-      // MODIFIED: Only generate and return winners for preview - DO NOT save to database
-      console.log(`Generated ${selectedWinners.length} winners for preview (not saved to database)`);
-
+      // MODIFIED: Save winners immediately as draft to prevent memory issues with large datasets
+      console.log(`Generated ${selectedWinners.length} winners - saving as draft to prevent frontend memory issues`);
+      
+      // Save as draft immediately to avoid frontend memory problems
+      await this.saveWinnerSelectionDraft(cycleSettingId, winnersWithRewards, selectionMode, poolInfo.totalPool);
+      
+      // Return only summary to prevent frontend crashes with large arrays
       return {
+        success: true,
         selectionMode,
-        winnersSelected: winnersWithRewards.length,
+        totalWinners: winnersWithRewards.length,
         totalRewardPool: poolInfo.totalPool,
-        winners: winnersWithRewards,
+        message: "Winner selection generated and saved as draft",
         tierBreakdown: {
           tier1: { winners: winnersWithRewards.filter(w => w.tier === 'tier1').length, pool: tier1Pool },
           tier2: { winners: winnersWithRewards.filter(w => w.tier === 'tier2').length, pool: tier2Pool },

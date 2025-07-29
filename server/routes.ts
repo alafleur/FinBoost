@@ -4614,18 +4614,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
-      const { winners, selectionMode, totalPool } = req.body;
+      const { selectionMode, totalPool } = req.body;
       
-      if (!winners || !Array.isArray(winners) || winners.length === 0) {
-        return res.status(400).json({ error: 'Winners array is required and cannot be empty' });
+      // Winners are already saved as draft by executeCycleWinnerSelection
+      // This endpoint now just confirms the draft is ready
+      const existingWinners = await storage.getCycleWinnerDetails(cycleSettingId);
+      
+      if (!existingWinners || !existingWinners.winners || existingWinners.winners.length === 0) {
+        return res.status(400).json({ error: 'No winner selection found. Please run winner selection first.' });
       }
 
-      const result = await storage.saveWinnerSelectionDraft(
-        cycleSettingId,
-        winners,
-        selectionMode || 'point-weighted-random',
-        totalPool || 0
-      );
+      // Winners already saved - just return success
+      const result = { 
+        success: true, 
+        message: 'Winner selection already saved as draft',
+        winnerCount: existingWinners.winners.length 
+      };
 
       res.json({ 
         success: true, 

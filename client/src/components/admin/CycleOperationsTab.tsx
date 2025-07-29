@@ -363,12 +363,17 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
       const data = await response.json();
       if (data.success) {
-        // Store pending winners for save operation
-        setPendingWinners(data.winners || []);
+        // Don't store large winner arrays in state - causes memory issues
+        // Instead, store only the selection summary and let tables load via API
+        setPendingWinners([]); // Clear any previous selection
+        
         toast({
           title: "Winner Selection Generated",
-          description: `Generated ${data.totalWinners} winners using ${selectionMode} method. Ready to save as draft.`
+          description: `Generated ${data.totalWinners} winners using ${selectionMode} method and saved as draft. Ready to view or export.`
         });
+        
+        // Refresh the enhanced winners table to show the new selection
+        loadEnhancedWinners();
       } else {
         toast({
           title: "Selection Failed",
@@ -388,10 +393,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   };
 
   const handleSaveWinnerSelection = async () => {
-    if (!selectedCycle || pendingWinners.length === 0) {
+    if (!selectedCycle) {
       toast({
         title: "Error",
-        description: "No winner selection to save. Please run selection first.",
+        description: "Please select a cycle first.",
         variant: "destructive"
       });
       return;
@@ -407,7 +412,6 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          winners: pendingWinners,
           selectionMode,
           totalPool: cycleAnalytics?.rewardPool || 0
         })
@@ -416,8 +420,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       const data = await response.json();
       if (data.success) {
         toast({
-          title: "Winners Saved as Draft",
-          description: "Winner selection saved. You can now export, modify, and import before sealing."
+          title: "Draft Confirmed",
+          description: `Winner selection confirmed with ${data.winnerCount} winners. You can now export, modify, and import before sealing.`
         });
         setPendingWinners([]);
         loadWinners();
