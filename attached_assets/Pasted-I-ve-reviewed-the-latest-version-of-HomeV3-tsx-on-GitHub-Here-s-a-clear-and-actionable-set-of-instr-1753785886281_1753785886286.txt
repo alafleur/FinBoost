@@ -1,0 +1,80 @@
+I've reviewed the latest version of HomeV3.tsx on GitHub. Here's a clear and actionable set of instructions for Replit to implement the hybrid screenshot enhancement for the Tier System and Financial Education sections while maintaining visual clarity and flow:
+
+
+---
+
+🔧 Implementation Instructions for Replit
+
+✅ Goal
+
+Integrate 1 screenshot each into the Tier System and Financial Education sections to enhance clarity and trust—without cluttering the layout.
+
+
+---
+
+📌 1. Tier System Section Update
+
+Location: Section with heading: "FinBoost’s Tier System Rewards Progress" (around line 770)
+
+Instructions:
+
+Add a right-aligned screenshot image (desktop-style) that shows the current Tier 1 / Tier 2 / Tier 3 boundaries or a point distribution graph from the admin panel or leaderboard.
+
+Use a 2-column layout on desktop:
+
+Left: current explanatory text and reward percentages
+
+Right: image (with a Tailwind rounded-xl and shadow-lg)
+
+
+On mobile, stack vertically with the image below the text.
+
+Add caption below the image:
+
+"See where you rank and how your points place you into reward tiers."
+
+
+
+---
+
+📌 2. Financial Education Section Update
+
+Location: Section with heading: "Financial Education That Pays Off" (around line 860)
+
+Instructions:
+
+Add a left-aligned mobile-format screenshot of a learning module in-progress (e.g. a lesson page with quiz results visible).
+
+Use a 2-column layout on desktop:
+
+Left: image (responsive, mobile-screenshot format, max-w-[250px])
+
+Right: existing copy content
+
+
+On mobile, stack with image above the text.
+
+Add caption:
+
+"Complete bite-sized lessons and quizzes like this to earn points and level up."
+
+
+
+---
+
+💡 Notes for Implementation
+
+Ensure the images are placed within /public/assets or wherever your screenshot assets are stored.
+
+Use responsive utility classes for Tailwind (flex flex-col lg:flex-row, gap-6, etc.).
+
+Maintain consistent styling with previous "How It Works" section (rounded, bordered, soft drop shadows).
+
+Avoid excessive whitespace between text and image.
+
+
+
+---
+
+Let me know once Replit implements the changes so I can review.
+
