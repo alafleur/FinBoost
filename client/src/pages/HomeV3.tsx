@@ -14,10 +14,8 @@ import {
   Clock,
   DollarSign,
   Star,
-  CheckCircle,
   ArrowRight,
   Target,
-  Zap,
   Shield,
   BarChart3,
   Lock,
@@ -35,7 +33,6 @@ import {
 
 export default function HomeV3() {
   const [location, navigate] = useLocation();
-  const [activeScreenshot, setActiveScreenshot] = useState(0);
   const [communitySize, setCommunitySize] = useState(5000);
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   
@@ -73,29 +70,7 @@ export default function HomeV3() {
     setRewardsPercentage(Math.round(percentage));
   }, [communitySize]);
 
-  // Mock app screenshots data
-  const screenshots = [
-    {
-      title: "Learning Progress Dashboard",
-      description: "Track your progress through financial modules with clear point totals and completion rates",
-      mockContent: "Dashboard showing 4 of 8 lessons complete, 285 total points, Tier 2 status"
-    },
-    {
-      title: "Quiz Completion & Points",
-      description: "Earn immediate points for completing quizzes and demonstrating knowledge",
-      mockContent: "Quiz complete screen: +15 points earned, streak bonus +5, total: 20 points"
-    },
-    {
-      title: "Reward Tiers & Cycle Progress",
-      description: "See your tier placement and cycle progress with clear reward potential",
-      mockContent: "Tier 2 status, 67 points this cycle, 14 days remaining, $118 tier pool"
-    },
-    {
-      title: "Daily Streak Tracker",
-      description: "Build momentum with daily learning streaks and bonus point multipliers",
-      mockContent: "7-day streak active, 2x point multiplier, next lesson worth 20 points"
-    }
-  ];
+
 
   const calculateRewardsPool = (members: number) => {
     const totalRevenue = members * 20; // Total monthly revenue
@@ -338,172 +313,7 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* App Preview - Modern Sleek Design */}
-      <section id="preview" className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-700 font-semibold text-sm">PLATFORM PREVIEW</span>
-            </div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
-              See What Progress
-              <span className="block text-slate-900"> Looks Like</span>
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-              Interactive previews from the FinBoost platform showing your journey to financial rewards
-            </p>
-          </motion.div>
 
-          {/* Unified Responsive Layout */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-            {/* Phone Preview - Mobile Centered, Desktop Right */}
-            <div className="order-1 lg:order-2 flex justify-center lg:justify-start">
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="relative"
-              >
-                {/* Responsive Phone mockup */}
-                <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
-                    {/* Status bar */}
-                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
-                      <span>9:41</span>
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm"></div>
-                      </div>
-                    </div>
-                    
-                    {/* App content */}
-                    <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
-                      <div className="text-center h-full flex flex-col justify-center">
-                        <motion.div
-                          key={`icon-${activeScreenshot}`}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg"
-                        >
-                          {activeScreenshot === 0 && <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
-                          {activeScreenshot === 1 && <CheckCircle className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
-                          {activeScreenshot === 2 && <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
-                          {activeScreenshot === 3 && <Zap className="w-7 h-7 lg:w-10 lg:h-10 text-white" />}
-                        </motion.div>
-                        
-                        <motion.div
-                          key={`text-${activeScreenshot}`}
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1, duration: 0.3 }}
-                        >
-                          <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                            {screenshots[activeScreenshot].mockContent}
-                          </p>
-                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                            <span className="text-xs font-medium text-blue-700">Live Preview Coming Soon</span>
-                          </div>
-                        </motion.div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
-                </div>
-                
-
-              </motion.div>
-            </div>
-
-            {/* Interactive Cards - Mobile Below Phone, Desktop Left */}
-            <div className="order-2 lg:order-1">
-              {/* Mobile instruction hint */}
-              <div className="lg:hidden text-center mb-4">
-                <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
-                  <span className="mr-2">👆</span>
-                  Tap cards to preview different features
-                </div>
-              </div>
-              
-              {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
-              <div className="lg:space-y-3">
-                <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
-                  {screenshots.map((screenshot, index) => (
-                    <motion.div
-                      key={index}
-                      className={`flex-shrink-0 w-72 lg:w-full group p-5 lg:p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                        activeScreenshot === index 
-                          ? 'bg-white border-2 border-blue-200 shadow-lg shadow-blue-100/50' 
-                          : 'bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
-                      }`}
-                      onClick={() => setActiveScreenshot(index)}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center transition-colors ${
-                          activeScreenshot === index 
-                            ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
-                            : 'bg-slate-100 group-hover:bg-slate-200'
-                        }`}>
-                          {index === 0 && <BookOpen className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                          {index === 1 && <CheckCircle className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                          {index === 2 && <Trophy className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                          {index === 3 && <Zap className={`w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`} />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1 lg:mb-2">
-                            <h3 className="font-semibold text-base lg:text-lg text-slate-900">
-                              {screenshot.title}
-                            </h3>
-                            {/* Mobile chevron indicator */}
-                            <div className={`lg:hidden w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                              activeScreenshot === index 
-                                ? 'bg-blue-100' 
-                                : 'bg-slate-100 group-hover:bg-slate-200'
-                            }`}>
-                              <ArrowRight className={`w-3 h-3 transition-colors ${
-                                activeScreenshot === index ? 'text-blue-600' : 'text-slate-400'
-                              }`} />
-                            </div>
-                          </div>
-                          <p className="text-slate-600 text-sm leading-relaxed">
-                            {screenshot.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-                
-                {/* Mobile navigation dots */}
-                <div className="lg:hidden flex justify-center space-x-2 mt-6">
-                  {screenshots.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveScreenshot(index)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        activeScreenshot === index 
-                          ? 'bg-blue-600 w-8' 
-                          : 'bg-slate-300 hover:bg-slate-400'
-                      }`}
-                      aria-label={`View ${screenshots[index].title}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
 
