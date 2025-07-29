@@ -808,79 +808,83 @@ export default function HomeV3() {
       </section>
 
       {/* Why Members Trust FinBoost - Emotional Trust Building */}
-      <section id="trust" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-100 to-white relative">
-        <div className="max-w-4xl mx-auto">
+      <section id="trust" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+        </div>
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+              <span className="text-blue-300 font-semibold text-sm">WHY FINBOOST</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
               Why FinBoost Isn't Just Another Finance App
             </h2>
+            <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
+              We address the real financial challenges that traditional apps ignore.
+            </p>
           </motion.div>
 
-          <div className="space-y-6">
+          <div className="grid lg:grid-cols-2 gap-8">
             {[
               {
-                icon: "DollarSign", 
+                icon: <DollarSign className="w-8 h-8" />,
                 headline: "Rising Costs Reality",
                 body: "Everything costs more, saving feels impossible. <strong>Small wins add up to real rewards.</strong>",
-                iconBg: "bg-blue-100",
-                iconColor: "text-blue-600"
+                gradient: "from-blue-500 to-cyan-500"
               },
               {
-                icon: "CreditCard",
+                icon: <CreditCard className="w-8 h-8" />,
                 headline: "Debt Progress Pays", 
                 body: "Every payment forward doesn't just shrink your debt — <strong>it earns you real rewards.</strong>",
-                iconBg: "bg-green-100",
-                iconColor: "text-green-600"
+                gradient: "from-green-500 to-emerald-500"
               },
               {
-                icon: "Clock",
+                icon: <Clock className="w-8 h-8" />,
                 headline: "Retirement Anxiety",
                 body: "Worried you'll never save enough? <strong>Turn long-term stress into short-term wins.</strong>",
-                iconBg: "bg-orange-100",
-                iconColor: "text-orange-600"
+                gradient: "from-orange-500 to-red-500"
               },
               {
-                icon: "TrendingUp",
+                icon: <TrendingUp className="w-8 h-8" />,
                 headline: "Beyond Daily Tracking",
                 body: "Most apps focus on today's spending. <strong>We reward steps toward tomorrow's security.</strong>",
-                iconBg: "bg-purple-100",
-                iconColor: "text-purple-600"
+                gradient: "from-purple-500 to-pink-500"
               }
-            ].map((card, index) => {
-              const IconComponent = card.icon === "DollarSign" ? DollarSign :
-                                 card.icon === "CreditCard" ? CreditCard :
-                                 card.icon === "Clock" ? Clock : TrendingUp;
-              
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-white shadow-sm rounded-xl p-6 flex gap-4 hover:shadow-md hover:scale-[1.02] transition-all duration-300 group"
-                >
-                  <div className={`${card.iconBg} ${card.iconColor} p-3 rounded-full flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-5 h-5" />
+            ].map((card, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="group"
+              >
+                <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:shadow-lg hover:-translate-y-1">                    
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-white mb-3">{card.headline}</h3>
+                      <p 
+                        className="text-white/70 text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: card.body }}
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors duration-300">
-                      {card.headline}
-                    </h3>
-                    <p 
-                      className="text-sm text-slate-600 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: card.body }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
