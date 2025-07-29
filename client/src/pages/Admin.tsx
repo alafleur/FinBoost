@@ -540,13 +540,12 @@ export default function Admin() {
 
   const exportUserEnrollment = (format: 'csv' | 'xlsx') => {
     const exportData = userCyclePoints.map((userPoints) => {
-      const user = users.find(u => u.id === userPoints.userId);
       const userPredictions = userPoints.predictions || [];
       
       return {
         'User ID': userPoints.userId,
-        'Username': user?.username || 'Unknown',
-        'Email': user?.email || '',
+        'Username': userPoints.username || 'Unknown',
+        'Email': userPoints.email || '',
         'Current Points': userPoints.currentCyclePoints,
         'Tier': userPoints.tier.replace('tier', 'Tier '),
         'Joined': new Date(userPoints.joinedCycleAt).toLocaleDateString(),
@@ -3455,17 +3454,16 @@ export default function Admin() {
                                 const paginatedUsers = userCyclePoints.slice(startIndex, endIndex);
 
                                 return paginatedUsers.map((userPoints) => {
-                                  const user = users.find(u => u.id === userPoints.userId);
                                   return (
                                     <tr key={userPoints.userId} className="border-b">
                                       <td className="p-2">
                                         <div className="text-sm font-mono text-gray-600">{userPoints.userId}</div>
                                       </td>
                                       <td className="p-2">
-                                        <div className="font-medium">{user?.username || 'Unknown'}</div>
+                                        <div className="font-medium">{userPoints.username || 'Unknown'}</div>
                                       </td>
                                       <td className="p-2">
-                                        <div className="text-sm text-gray-700">{user?.email}</div>
+                                        <div className="text-sm text-gray-700">{userPoints.email}</div>
                                       </td>
                                       <td className="p-2">
                                         <div className="font-bold text-green-600">
