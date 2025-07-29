@@ -6779,7 +6779,12 @@ export class MemStorage implements IStorage {
       // Use weighted sampling without replacement - guaranteed to achieve exact count
       const selectedUsers = this.weightedSampleWithoutReplacement(users, actualWinnerCount);
       
-      const tierWinners = selectedUsers.map(user => ({ ...user, tier }));
+      // Add selection sequence order as tierRankSequence (1st selected = 1, 2nd selected = 2, etc.)
+      const tierWinners = selectedUsers.map((user, selectionIndex) => ({ 
+        ...user, 
+        tier,
+        tierRankSequence: selectionIndex + 1  // Capture the actual selection order within tier
+      }));
       winners.push(...tierWinners);
       
       console.log(`${tier} final result: selected ${tierWinners.length} winners (target was ${winnerCount})`);
@@ -6836,7 +6841,11 @@ export class MemStorage implements IStorage {
       const topPerformers = users
         .sort((a: any, b: any) => b.currentCyclePoints - a.currentCyclePoints)
         .slice(0, winnerCount)
-        .map(user => ({ ...user, tier }));
+        .map((user, selectionIndex) => ({ 
+          ...user, 
+          tier,
+          tierRankSequence: selectionIndex + 1  // 1st highest = 1, 2nd highest = 2, etc.
+        }));
 
       winners.push(...topPerformers);
     });
@@ -6856,7 +6865,11 @@ export class MemStorage implements IStorage {
       const shuffled = [...users].sort(() => Math.random() - 0.5);
       const randomWinners = shuffled
         .slice(0, winnerCount)
-        .map(user => ({ ...user, tier }));
+        .map((user, selectionIndex) => ({ 
+          ...user, 
+          tier,
+          tierRankSequence: selectionIndex + 1  // 1st randomly selected = 1, 2nd = 2, etc.
+        }));
 
       winners.push(...randomWinners);
     });
@@ -6866,9 +6879,12 @@ export class MemStorage implements IStorage {
 
   private selectManualWinners(eligibleUsers: any[], customWinnerIds: number[]): any[] {
     return customWinnerIds
-      .map(userId => {
+      .map((userId, selectionIndex) => {
         const user = eligibleUsers.find(u => u.id === userId);
-        return user ? { ...user } : null;
+        return user ? { 
+          ...user, 
+          tierRankSequence: selectionIndex + 1  // Order based on admin selection sequence
+        } : null;
       })
       .filter(user => user);
   }
@@ -6897,9 +6913,8 @@ export class MemStorage implements IStorage {
 
     for (const winner of winners) {
       try {
-        // Calculate tier rank based on position within tier
-        const tierWinners = winnersByTier[winner.tier as keyof typeof winnersByTier] || [];
-        const tierRank = tierWinners.findIndex(w => w.id === winner.id) + 1;
+        // Use actual selection sequence order instead of performance-based ranking
+        const tierRank = winner.tierRankSequence || 1; // Use selection sequence (1st selected, 2nd selected, etc.)
 
         const [saved] = await db
           .insert(cycleWinnerSelections)
