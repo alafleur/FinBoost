@@ -1045,7 +1045,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {enhancedWinnersData.winners.map((winner, index) => (
+                      {enhancedWinners.map((winner, index) => (
                         <TableRow key={`${winner.email}-${index}`}>
                           <TableCell className="font-medium text-center">
                             {winner.overallRank}
