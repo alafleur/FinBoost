@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { DollarSign, Crown, Target } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
-// import { useProfileDrawer } from '@/hooks/useProfileDrawer';
 
 interface RewardsData {
   disbursements: any[];
@@ -17,7 +16,6 @@ export default function RewardsSummary() {
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  // const { openProfileDrawer } = useProfileDrawer();
 
   useEffect(() => {
     fetchRewardsHistory();
@@ -67,8 +65,7 @@ export default function RewardsSummary() {
   };
 
   const handleProfileClick = () => {
-    // Temporarily disabled - Open ProfileDrawer instead of navigating to profile tab
-    // openProfileDrawer();
+    // Navigate to dashboard with profile tab active
     setLocation('/dashboard?tab=profile');
   };
 

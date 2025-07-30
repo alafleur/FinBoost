@@ -22,10 +22,6 @@ export default function DashboardStats({
   totalLessonsCount, 
   getTierDisplayName 
 }: DashboardStatsProps) {
-  // Add null checks
-  if (!poolData) {
-    return <div>Loading stats...</div>;
-  }
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Rewards Pool Size */}
