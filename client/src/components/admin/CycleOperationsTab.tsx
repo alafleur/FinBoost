@@ -230,6 +230,33 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         }
     };
 
+  // === TIER SIZE UPDATE HANDLER ===
+  const handleTierSizeUpdate = (winnerEmail: string, newAmount: number) => {
+    // Update the enhanced winners state
+    setEnhancedWinners(prevWinners => 
+      prevWinners.map(winner => 
+        winner.email === winnerEmail 
+          ? { ...winner, tierSizeAmount: newAmount }
+          : winner
+      )
+    );
+
+    // Also update paginated data if it exists
+    setEnhancedWinnersData(prevData => ({
+      ...prevData,
+      winners: prevData.winners.map(winner => 
+        winner.email === winnerEmail 
+          ? { ...winner, tierSizeAmount: newAmount }
+          : winner
+      )
+    }));
+
+    toast({
+      title: "Tier Size Updated",
+      description: `Updated tier size to $${(newAmount / 100).toFixed(2)} for ${winnerEmail}`,
+    });
+  };
+
   // === PHASE 3: EXCEL EXPORT FUNCTIONALITY ===
   const handleExportWinners = async () => {
     if (!selectedCycle) {
@@ -1035,7 +1062,17 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                             {winner.cyclePoints}
                           </TableCell>
                           <TableCell className="font-medium text-green-600">
-                            ${(winner.tierSizeAmount / 100).toFixed(2)}
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={(winner.tierSizeAmount / 100).toFixed(2)}
+                              onChange={(e) => {
+                                const newAmount = Math.round(parseFloat(e.target.value || '0') * 100);
+                                handleTierSizeUpdate(winner.email, newAmount);
+                              }}
+                              className="w-20 h-8 text-sm text-center border-green-300 focus:border-green-500"
+                            />
                           </TableCell>
                           <TableCell className="text-center">
                             {(winner.payoutPercentage / 100).toFixed(2)}%
