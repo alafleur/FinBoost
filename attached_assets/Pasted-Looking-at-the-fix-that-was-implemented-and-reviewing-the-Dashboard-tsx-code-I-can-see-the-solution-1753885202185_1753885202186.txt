@@ -1,0 +1,40 @@
+Looking at the fix that was implemented and reviewing the Dashboard.tsx code, I can see the solution was correctly applied but there's still an issue preventing the profile tab navigation from working.
+
+Analysis of the Current State
+✅ The Fix Was Correctly Applied:
+
+The circular dependency was properly removed by changing [location, activeTab] to just [location]
+The useEffect is now clean and should only run when the location changes
+Console logs were removed as intended
+❌ However, There's Still a Problem:
+
+Looking at line 247 in the Dashboard.tsx code, I can see the issue:
+
+// Separate useEffect for URL parameter handling
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
+    setActiveTab(tabParam);
+  }
+}, [location]); // Re-run when location changes only
+The Problem: The valid tabs array is missing 'predictions' and 'leaderboard', but it includes 'board' and 'profile'. However, looking at the actual TabsTrigger values in the code:
+
+Mobile tabs use: "overview", "learn", "referrals", "predictions", "rewards", "leaderboard"
+Desktop tabs use: "overview", "learn", "referrals", "predictions", "rewards", "leaderboard"
+But the URL parameter validation array uses: ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile']
+
+The Core Issue
+The tab validation array doesn't match the actual tab values used in the TabsTrigger components. When someone navigates to /dashboard?tab=profile, the URL parameter 'profile' is being validated against an array that should include 'profile', but the actual tabs in the UI don't have a 'profile' tab - they use different tab names.
+
+Looking at the actual tab structure:
+
+There is NO 'profile' tab in the current TabsTrigger setup
+There is NO 'board' tab in the current TabsTrigger setup
+The actual tabs are: overview, learn, referrals, predictions, rewards, leaderboard
+Why It's Not Working
+When the "Setup Payment Info" button navigates to /dashboard?tab=profile, the useEffect correctly detects this, but there's no actual 'profile' tab in the Tabs component to display. The tab switching appears to fail because the profile content is likely embedded within another tab or missing entirely.
+
+The Real Issue: The profile functionality seems to be accessed via a button in the header that calls setActiveTab('profile'), but there's no corresponding <TabsTrigger value="profile"> or <TabsContent value="profile"> in either the mobile or desktop layout.
+
+The fix was implemented correctly, but the fundamental architecture issue is that the profile functionality is being called as a tab that doesn't actually exist in the current tab structure.
