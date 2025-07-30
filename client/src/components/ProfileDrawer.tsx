@@ -61,12 +61,9 @@ export function ProfileDrawer({ user, onUserUpdate }: ProfileDrawerProps) {
 
     setSavingPayment(true);
     try {
-      await apiRequest('/api/user/payment-info', {
-        method: 'POST',
-        body: JSON.stringify({
-          paypalEmail: paypalEmail.trim(),
-          payoutMethod,
-        }),
+      await apiRequest('/api/user/payment-info', 'POST', {
+        paypalEmail: paypalEmail.trim(),
+        payoutMethod,
       });
 
       toast({
