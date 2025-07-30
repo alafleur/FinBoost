@@ -107,6 +107,12 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // === ENHANCED VIEW PAGINATION STATE ===
+  const [enhancedViewPage, setEnhancedViewPage] = useState(1);
+  const [enhancedViewLimit] = useState(50); // 50 per page as requested
+  const [enhancedViewTotal, setEnhancedViewTotal] = useState(0);
+  const [isLoadingEnhancedView, setIsLoadingEnhancedView] = useState(false);
+
   // Get active cycle on component mount
   useEffect(() => {
     const activeCycle = cycleSettings.find(cycle => cycle.isActive);
@@ -176,15 +182,51 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       
       if (response.ok) {
         const winnersData = await response.json();
-        setEnhancedWinners(winnersData);
+        setEnhancedViewTotal(winnersData.length); // Set total count for pagination
         console.log(`[Frontend] Loaded ${winnersData.length} enhanced winner records`);
+        
+        // Load first page of paginated data
+        loadEnhancedWinnersPaginated(1);
       } else {
         console.log(`[Frontend] No enhanced winners data available (${response.status})`);
         setEnhancedWinners([]);
+        setEnhancedViewTotal(0);
       }
     } catch (error) {
       console.error('Failed to load enhanced winners:', error);
       setEnhancedWinners([]);
+      setEnhancedViewTotal(0);
+    }
+  };
+
+  // === ENHANCED WINNERS PAGINATED LOADING ===
+  const loadEnhancedWinnersPaginated = async (page: number) => {
+    if (!selectedCycle) return;
+
+    setIsLoadingEnhancedView(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log(`[Frontend] Loading enhanced winners page ${page} for cycle ${selectedCycle.id}`);
+      
+      const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?page=${page}&limit=${enhancedViewLimit}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setEnhancedWinners(data.winners || []);
+        setEnhancedViewTotal(data.total || 0);
+        setEnhancedViewPage(page);
+        console.log(`[Frontend] Loaded page ${page}: ${data.winners?.length || 0} enhanced winner records (${data.total} total)`);
+      } else {
+        console.log(`[Frontend] No enhanced winners data available for page ${page} (${response.status})`);
+        setEnhancedWinners([]);
+      }
+    } catch (error) {
+      console.error('Failed to load enhanced winners page:', error);
+      setEnhancedWinners([]);
+    } finally {
+      setIsLoadingEnhancedView(false);
     }
   };
 
@@ -314,6 +356,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         });
         
         // Refresh the data and close dialog
+        setEnhancedViewPage(1); // Reset to page 1
         loadEnhancedWinners();
         setShowImportDialog(false);
         setImportFile(null);
@@ -372,7 +415,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Generated ${data.totalWinners} winners using ${selectionMode} method and saved as draft. Ready to view or export.`
         });
         
-        // Refresh the enhanced winners table to show the new selection
+        // Refresh the enhanced winners table to show the new selection  
+        setEnhancedViewPage(1); // Reset to page 1
         loadEnhancedWinners();
       } else {
         toast({
@@ -425,6 +469,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         });
         setPendingWinners([]);
         loadWinners();
+        setEnhancedViewPage(1); // Reset to page 1
         loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
       } else {
@@ -466,6 +511,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: "Winner selection is now final and cannot be modified."
         });
         loadWinners();
+        setEnhancedViewPage(1); // Reset to page 1
         loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
       } else {
@@ -518,6 +564,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         });
         setSelectedForDisbursement(new Set());
         loadWinners();
+        setEnhancedViewPage(1); // Reset to page 1
         loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
       } else {
         toast({
@@ -556,6 +603,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         setWinners([]);
         setEnhancedWinners([]);
         setPendingWinners([]);
+        setEnhancedViewPage(1); // Reset to page 1
         loadWinners();
         loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
         loadCycleAnalytics();
@@ -830,7 +878,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       Selected Winners - Enhanced View
                     </CardTitle>
                     <CardDescription>
-                      {enhancedWinners.length} winners with complete payout details and Excel export/import capabilities
+                      Showing {((enhancedViewPage - 1) * enhancedViewLimit) + 1}-{Math.min(enhancedViewPage * enhancedViewLimit, enhancedViewTotal)} of {enhancedViewTotal} winners (Page {enhancedViewPage} of {Math.ceil(enhancedViewTotal / enhancedViewLimit)})
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -937,87 +985,126 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-20">Overall Rank #</TableHead>
-                        <TableHead className="w-20">Tier Rank #</TableHead>
-                        <TableHead className="w-32">Username</TableHead>
-                        <TableHead className="w-48">User Email</TableHead>
-                        <TableHead className="w-24">Cycle Points</TableHead>
-                        <TableHead className="w-24">Tier Size $</TableHead>
-                        <TableHead className="w-24">% Payout of Tier</TableHead>
-                        <TableHead className="w-24">Payout Calc $</TableHead>
-                        <TableHead className="w-24">Payout Override $</TableHead>
-                        <TableHead className="w-24">Payout Final</TableHead>
-                        <TableHead className="w-48">PayPal Email</TableHead>
-                        <TableHead className="w-20">Status</TableHead>
-                        <TableHead className="w-32">Last Modified</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {enhancedWinners.map((winner, index) => (
-                        <TableRow key={`${winner.email}-${index}`}>
-                          <TableCell className="font-medium text-center">
-                            {winner.overallRank}
-                          </TableCell>
-                          <TableCell className="font-medium text-center">
-                            {winner.tierRank}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {winner.username}
-                          </TableCell>
-                          <TableCell className="text-sm text-gray-600">
-                            {winner.email}
-                          </TableCell>
-                          <TableCell className="font-medium text-center text-blue-600">
-                            {winner.cyclePoints}
-                          </TableCell>
-                          <TableCell className="font-medium text-green-600">
-                            ${(winner.tierSizeAmount / 100).toFixed(2)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {(winner.payoutPercentage / 100).toFixed(2)}%
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            ${(winner.payoutCalculated / 100).toFixed(2)}
-                          </TableCell>
-                          <TableCell className="font-medium text-blue-600">
-                            {winner.payoutOverride ? `$${(winner.payoutOverride / 100).toFixed(2)}` : '-'}
-                          </TableCell>
-                          <TableCell className="font-bold text-green-700">
-                            ${(winner.payoutFinal / 100).toFixed(2)}
-                          </TableCell>
-                          <TableCell>
-                            {winner.paypalEmail ? (
-                              <span className="text-green-600 text-sm">{winner.paypalEmail}</span>
-                            ) : (
-                              <span className="text-red-600 text-sm">Not configured</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              winner.payoutStatus === 'processed' ? 'default' : 
-                              winner.payoutStatus === 'pending' ? 'outline' : 'secondary'
-                            }>
-                              {winner.payoutStatus}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs text-gray-500">
-                            {new Date(winner.lastModified).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                {isLoadingEnhancedView ? (
+                  <div className="text-center py-8">
+                    <Timer className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-500">Loading enhanced winner details...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-20">Overall Rank #</TableHead>
+                            <TableHead className="w-20">Tier Rank #</TableHead>
+                            <TableHead className="w-32">Username</TableHead>
+                            <TableHead className="w-48">User Email</TableHead>
+                            <TableHead className="w-24">Cycle Points</TableHead>
+                            <TableHead className="w-24">Tier Size $</TableHead>
+                            <TableHead className="w-24">% Payout of Tier</TableHead>
+                            <TableHead className="w-24">Payout Calc $</TableHead>
+                            <TableHead className="w-24">Payout Override $</TableHead>
+                            <TableHead className="w-24">Payout Final</TableHead>
+                            <TableHead className="w-48">PayPal Email</TableHead>
+                            <TableHead className="w-20">Status</TableHead>
+                            <TableHead className="w-32">Last Modified</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {enhancedWinners.map((winner, index) => (
+                            <TableRow key={`${winner.email}-${index}`}>
+                              <TableCell className="font-medium text-center">
+                                {winner.overallRank}
+                              </TableCell>
+                              <TableCell className="font-medium text-center">
+                                {winner.tierRank}
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                {winner.username}
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-600">
+                                {winner.email}
+                              </TableCell>
+                              <TableCell className="font-medium text-center text-blue-600">
+                                {winner.cyclePoints}
+                              </TableCell>
+                              <TableCell className="font-medium text-green-600">
+                                ${(winner.tierSizeAmount / 100).toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {(winner.payoutPercentage / 100).toFixed(2)}%
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                ${(winner.payoutCalculated / 100).toFixed(2)}
+                              </TableCell>
+                              <TableCell className="font-medium text-blue-600">
+                                {winner.payoutOverride ? `$${(winner.payoutOverride / 100).toFixed(2)}` : '-'}
+                              </TableCell>
+                              <TableCell className="font-bold text-green-700">
+                                ${(winner.payoutFinal / 100).toFixed(2)}
+                              </TableCell>
+                              <TableCell>
+                                {winner.paypalEmail ? (
+                                  <span className="text-green-600 text-sm">{winner.paypalEmail}</span>
+                                ) : (
+                                  <span className="text-red-600 text-sm">Not configured</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={
+                                  winner.payoutStatus === 'processed' ? 'default' : 
+                                  winner.payoutStatus === 'pending' ? 'outline' : 'secondary'
+                                }>
+                                  {winner.payoutStatus}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs text-gray-500">
+                                {new Date(winner.lastModified).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {enhancedViewTotal > enhancedViewLimit && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="text-sm text-gray-600">
+                          Showing {((enhancedViewPage - 1) * enhancedViewLimit) + 1}-{Math.min(enhancedViewPage * enhancedViewLimit, enhancedViewTotal)} of {enhancedViewTotal} winners
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => loadEnhancedWinnersPaginated(enhancedViewPage - 1)}
+                            disabled={enhancedViewPage <= 1 || isLoadingEnhancedView}
+                          >
+                            Previous
+                          </Button>
+                          <span className="text-sm text-gray-600 px-3">
+                            Page {enhancedViewPage} of {Math.ceil(enhancedViewTotal / enhancedViewLimit)}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => loadEnhancedWinnersPaginated(enhancedViewPage + 1)}
+                            disabled={enhancedViewPage >= Math.ceil(enhancedViewTotal / enhancedViewLimit) || isLoadingEnhancedView}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
