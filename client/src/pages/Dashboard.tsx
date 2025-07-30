@@ -87,7 +87,7 @@ interface User {
 }
 
 export default function Dashboard() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [user, setUser] = useState<User | null>(null);
@@ -146,14 +146,16 @@ export default function Dashboard() {
 
 
 
+  // Separate useEffect for URL parameter handling
   useEffect(() => {
-    // Check URL parameters for tab selection
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
+  }, [location]); // Re-run when location changes
 
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
