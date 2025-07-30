@@ -1,0 +1,82 @@
+✅ Fix Plan: Dashboard Profile UX Refactor
+🧩 1. Remove Redundant Profile Tabs
+File: client/src/pages/Dashboard.tsx
+
+Action:
+
+Mobile View: Delete TabsTrigger with value="profile" in the TabsList around lines 450–470
+
+Desktop View: Delete TabsTrigger with value="profile" in the TabsList around lines 480–500
+
+Grid Class: Change grid-cols-7 back to grid-cols-6 to match original layout
+
+🔄 2. Update "Setup Payment Info" Button Flow
+File: client/src/components/RewardsSummary.tsx
+
+Current Code:
+
+tsx
+Copy
+Edit
+const handleSetupPayment = () => {
+  navigate('/dashboard?tab=profile');
+};
+Updated Code (Suggested):
+Replace with a direct call to trigger the existing header Profile modal or sidebar drawer, assuming the profile access is handled via a context or component method:
+
+tsx
+Copy
+Edit
+import { useProfileModal } from '@/hooks/useProfileModal'; // adjust if different
+
+const { openProfileModal } = useProfileModal();
+
+const handleSetupPayment = () => {
+  openProfileModal('paypal'); // pass context if needed (e.g., focus PayPal config section)
+};
+🔧 If modal is not yet modularized, consider abstracting openProfileModal into a global context or header-linked component for access across components like RewardsSummary.
+
+🧠 3. Ensure Header Profile Button Triggers PayPal Configuration
+File: client/src/pages/Dashboard.tsx
+
+Lines ~200–220: Header section with Profile avatar dropdown/modal
+
+Action:
+
+Ensure the header Profile button opens a modal or drawer that includes:
+
+PayPal info setup section
+
+User info / account management area
+
+Enhancement (optional):
+
+Allow openProfileModal('paypal') to auto-scroll/focus the PayPal config input within the modal
+
+🔄 4. Preserve 6-Tab Architecture
+Action: Confirm that final structure maintains this tab order:
+
+Overview
+
+Learn
+
+Referrals
+
+Predictions
+
+Rewards
+
+Leaderboard
+
+This maintains architectural clarity and avoids tab bloat by treating Profile access as distinct from gamified flow tabs.
+
+📌 Summary of Benefits
+✅ Removes UX confusion from duplicate navigation
+
+✅ Fixes broken Setup Payment Info path
+
+✅ Restores original design architecture (6 tabs)
+
+✅ Aligns with dashboard UX norms (Profile via header)
+
+Let me know if you'd like a GitHub issue template version of this or a Replit dev prompt for the fix.
