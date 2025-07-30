@@ -44,8 +44,8 @@ import SectionHeader from "@/components/SectionHeader";
 import PredictionsContent from "@/components/PredictionsContent";
 import DashboardStats from "@/components/DashboardStats";
 import { educationContent } from "@/data/educationContent";
-import { useProfileDrawer } from "@/hooks/useProfileDrawer";
-import { ProfileDrawer } from "@/components/ProfileDrawer";
+// import { useProfileDrawer } from "@/hooks/useProfileDrawer";
+// import { ProfileDrawer } from "@/components/ProfileDrawer";
 
 // Custom hook to determine if the screen is mobile
 function useIsMobile() {
@@ -92,7 +92,7 @@ export default function Dashboard() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { openProfileDrawer } = useProfileDrawer();
+  // const { openProfileDrawer } = useProfileDrawer();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
@@ -462,7 +462,7 @@ export default function Dashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={openProfileDrawer}
+                onClick={() => setLocation('/dashboard?tab=profile')}
                 aria-label="View profile and subscription details"
                 className="flex items-center space-x-1"
               >
@@ -1156,8 +1156,8 @@ export default function Dashboard() {
         </Tabs>
       )}
       
-      {/* Profile Drawer Component */}
-      <ProfileDrawer user={user} onUserUpdate={fetchUserData} />
+      {/* Profile Drawer Component - Temporarily disabled */}
+      {/* <ProfileDrawer user={user} onUserUpdate={fetchUserData} /> */}
     </div>
   );
 }

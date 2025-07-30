@@ -15,6 +15,11 @@ interface TierStatsProps {
 }
 
 export default function TierStats({ tierThresholds, user }: TierStatsProps) {
+  // Add null check
+  if (!tierThresholds) {
+    return <div>Loading tier information...</div>;
+  }
+  
   // Fix the tier logic: tier1 should be highest, tier3 should be lowest
   // Current API returns: {"tier1":33,"tier2":67,"tier3":0}
   // But tier1 should require the MOST points (67+), not the least
