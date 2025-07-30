@@ -1,6 +1,7 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt, sum, count, inArray, notInArray, isNull } from "drizzle-orm";
 import { db } from "./db";
 import crypto from "crypto";
@@ -2186,7 +2187,6 @@ export class MemStorage implements IStorage {
   async getUserByToken(token: string): Promise<User | null> {
     try {
       // Use JWT verification instead of token storage
-      const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
       return await this.getUserById(decoded.userId);
     } catch (error) {
