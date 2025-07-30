@@ -64,9 +64,9 @@ export default function RewardsSummary() {
     setLocation('/subscribe');
   };
 
+  // Temporary alert until profile tab navigation is fixed
   const handleProfileClick = () => {
-    // Navigate to dashboard with profile tab active
-    setLocation('/dashboard?tab=profile');
+    alert("Please update your PayPal email using the Profile button in the header.");
   };
 
   if (loading) {
