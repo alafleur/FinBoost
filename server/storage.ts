@@ -3558,6 +3558,34 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async synchronizeTierAssignments(cycleSettingId: number, usersWithFreshTiers: any[]): Promise<void> {
+    try {
+      console.log('[TIER SYNC] Starting database tier synchronization');
+      let correctedCount = 0;
+
+      for (const user of usersWithFreshTiers) {
+        // Update user_cycle_points table with correct tier
+        const existingCyclePoints = await this.getUserCyclePoints(user.id, cycleSettingId);
+        
+        if (existingCyclePoints && existingCyclePoints.tier !== user.tier) {
+          await this.updateUserCyclePoints(user.id, cycleSettingId, { tier: user.tier });
+          correctedCount++;
+          console.log(`[TIER SYNC] Updated ${user.email}: ${existingCyclePoints.tier} → ${user.tier}`);
+        }
+        
+        // Also update main users table tier (for consistency)
+        await db.update(users)
+          .set({ tier: user.tier })
+          .where(eq(users.id, user.id));
+      }
+
+      console.log(`[TIER SYNC] Synchronized ${correctedCount} tier assignments in database`);
+    } catch (error) {
+      console.error('Error synchronizing tier assignments:', error);
+      throw error;
+    }
+  }
+
   async calculateDynamicTierThresholds(cycleSettingId: number): Promise<{ 
     tier1: number, 
     tier2: number, 
@@ -6672,9 +6700,50 @@ export class MemStorage implements IStorage {
       if (!cycleSetting) {
         throw new Error('Cycle setting not found');
       }
+
+      // === CRITICAL FIX: REAL-TIME TIER RECALCULATION ===
+      // Calculate current dynamic tier thresholds based on actual cycle points
+      console.log('[TIER RECALCULATION] Starting real-time tier assignment before winner selection');
+      
+      let currentThresholds;
+      try {
+        currentThresholds = await this.calculateDynamicTierThresholds(cycleSettingId);
+        console.log('[TIER RECALCULATION] Current thresholds:', currentThresholds);
+      } catch (error) {
+        console.error('[TIER RECALCULATION] Failed to calculate thresholds, aborting selection:', error);
+        throw new Error('Failed to calculate tier thresholds - cannot proceed with winner selection');
+      }
+
+      // Recalculate tier assignments for all eligible users based on their current cycle points
+      const usersWithFreshTiers = eligibleUsers.map(user => {
+        let correctTier = 'tier3'; // Default to tier3
+        
+        if (user.currentCyclePoints >= currentThresholds.tier1) {
+          correctTier = 'tier1';
+        } else if (user.currentCyclePoints >= currentThresholds.tier2) {
+          correctTier = 'tier2';
+        }
+        
+        // Log tier corrections for verification
+        if (user.tier !== correctTier) {
+          console.log(`[TIER CORRECTION] User ${user.email}: ${user.currentCyclePoints} points, was ${user.tier}, now ${correctTier}`);
+        }
+        
+        return {
+          ...user,
+          tier: correctTier // Use freshly calculated tier
+        };
+      });
+
+      console.log(`[TIER RECALCULATION] Completed tier recalculation for ${usersWithFreshTiers.length} users`);
+
+      // === SYNCHRONIZE DATABASE TIER ASSIGNMENTS ===
+      // Update stored tier assignments to match fresh calculations
+      console.log('[TIER SYNC] Synchronizing database tier assignments with fresh calculations');
+      await this.synchronizeTierAssignments(cycleSettingId, usersWithFreshTiers);
       
       // Get premium user count for pool calculation
-      const premiumUserCount = eligibleUsers.length;
+      const premiumUserCount = usersWithFreshTiers.length;
       
       // Calculate member contributions with cycle type multiplier
       // Users pay full fee, but pool allocation is proportional to cycle duration
@@ -6693,12 +6762,34 @@ export class MemStorage implements IStorage {
       const tier2Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier2.poolPercentage / 100));
       const tier3Pool = Math.floor(poolInfo.totalPool * (tierSettings.tier3.poolPercentage / 100));
 
-      // Group users by tier
+      // Group users by FRESHLY CALCULATED tiers (not outdated database tiers)
       const usersByTier = {
-        tier1: eligibleUsers.filter(u => u.tier === 'tier1'),
-        tier2: eligibleUsers.filter(u => u.tier === 'tier2'),
-        tier3: eligibleUsers.filter(u => u.tier === 'tier3')
+        tier1: usersWithFreshTiers.filter(u => u.tier === 'tier1'),
+        tier2: usersWithFreshTiers.filter(u => u.tier === 'tier2'),
+        tier3: usersWithFreshTiers.filter(u => u.tier === 'tier3')
       };
+
+      console.log(`[TIER DISTRIBUTION] Tier 1: ${usersByTier.tier1.length}, Tier 2: ${usersByTier.tier2.length}, Tier 3: ${usersByTier.tier3.length}`);
+
+      // === VALIDATION: VERIFY TIER ASSIGNMENTS ARE CORRECT ===
+      const tierValidationErrors: string[] = [];
+      usersWithFreshTiers.forEach(user => {
+        let expectedTier = 'tier3';
+        if (user.currentCyclePoints >= currentThresholds.tier1) expectedTier = 'tier1';
+        else if (user.currentCyclePoints >= currentThresholds.tier2) expectedTier = 'tier2';
+        
+        if (user.tier !== expectedTier) {
+          tierValidationErrors.push(`User ${user.email}: ${user.currentCyclePoints} points assigned to ${user.tier}, expected ${expectedTier}`);
+        }
+      });
+
+      if (tierValidationErrors.length > 0) {
+        console.error('[VALIDATION ERROR] Tier assignment validation failed:');
+        tierValidationErrors.forEach(error => console.error(`  - ${error}`));
+        throw new Error(`Tier validation failed: ${tierValidationErrors.length} users have incorrect assignments`);
+      }
+
+      console.log('[VALIDATION PASSED] All tier assignments are correct based on current cycle points');
 
       let selectedWinners: any[] = [];
 
@@ -6714,7 +6805,7 @@ export class MemStorage implements IStorage {
           selectedWinners = this.selectPureRandomWinners(usersByTier, tierSettings);
           break;
         case 'manual':
-          selectedWinners = this.selectManualWinners(eligibleUsers, params.customWinnerIds || []);
+          selectedWinners = this.selectManualWinners(usersWithFreshTiers, params.customWinnerIds || []);
           break;
         default:
           selectedWinners = this.selectWeightedRandomWinners(usersByTier, tierSettings);
