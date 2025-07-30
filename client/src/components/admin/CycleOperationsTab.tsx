@@ -384,6 +384,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
         // Refresh the data and close dialog
         loadEnhancedWinners();
+        loadEnhancedWinnersPaginated(enhancedWinnersPage);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
