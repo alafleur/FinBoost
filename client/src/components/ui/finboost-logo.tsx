@@ -1,5 +1,5 @@
 
-import logoPath from "@assets/FinBoost logo v2_1749413292436.png";
+import logoPath from "@/assets/finboost-logo-v7.png";
 
 interface FinBoostLogoProps {
   className?: string;

@@ -30,7 +30,7 @@ import {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import TierStats from "@/components/TierStats";
-import finboostLogo from "@/assets/finboost-logo.png";
+import finboostLogo from "@/assets/finboost-logo-v7.png";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
 import RewardsHistory from "@/components/RewardsHistory";
