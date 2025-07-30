@@ -1063,9 +1063,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                           </TableCell>
                           <TableCell className="font-medium text-green-600">
                             <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
+                              type="text"
                               value={(winner.tierSizeAmount / 100).toFixed(2)}
                               onChange={(e) => {
                                 const newAmount = Math.round(parseFloat(e.target.value || '0') * 100);
