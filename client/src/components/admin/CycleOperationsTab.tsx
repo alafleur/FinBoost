@@ -1069,7 +1069,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                                 const newAmount = Math.round(parseFloat(e.target.value || '0') * 100);
                                 handleTierSizeUpdate(winner.email, newAmount);
                               }}
-                              className="w-20 h-8 text-sm text-center border-green-300 focus:border-green-500"
+                              className="h-8 text-sm"
                             />
                           </TableCell>
                           <TableCell className="text-center">
