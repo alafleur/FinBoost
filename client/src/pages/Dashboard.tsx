@@ -148,12 +148,16 @@ export default function Dashboard() {
 
   // Separate useEffect for URL parameter handling
   useEffect(() => {
+    console.log('URL parameter effect triggered, location:', location);
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
+    console.log('Tab parameter from URL:', tabParam);
+    console.log('Current activeTab before update:', activeTab);
     if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
+      console.log('Setting activeTab to:', tabParam);
       setActiveTab(tabParam);
     }
-  }, [location]); // Re-run when location changes
+  }, [location, activeTab]); // Re-run when location changes
 
   useEffect(() => {
     const fetchData = async () => {
