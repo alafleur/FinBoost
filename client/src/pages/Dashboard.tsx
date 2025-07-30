@@ -95,7 +95,16 @@ export default function Dashboard() {
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
   const [tierThresholds, setTierThresholds] = useState<any>(null);
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("overview");
+  // Initialize activeTab from URL parameters
+  const getInitialTab = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
+      return tabParam;
+    }
+    return 'overview';
+  };
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [publishedModules, setPublishedModules] = useState<any[]>([]);
   const [poolData, setPoolData] = useState({ totalPool: 0, premiumUsers: 0, totalUsers: 0 });
   const [distributionInfo, setDistributionInfo] = useState<any>(null);
@@ -147,13 +156,6 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-    // Check URL parameters for tab selection
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-
     const fetchData = async () => {
       setIsLoading(true);
       try {

@@ -1,0 +1,89 @@
+Thanks — and based on the screenshot, **you’re absolutely right to flag this**. Even though Replit says the `/dashboard?tab=profile` navigation is wired up, **it’s clearly not activating the Profile tab**. Instead, you're still seeing the **Overview** tab on load — not Profile.
+
+---
+
+## 🔍 Root Cause
+
+Here’s the likely issue:
+
+### ❌ Problem:
+
+The Dashboard tab state is likely **defaulting to "overview"**, ignoring the `tab` URL parameter unless explicitly handled.
+
+### 🧠 Even though the URL says:
+
+```
+/dashboard?tab=profile
+```
+
+…the internal state probably still does:
+
+```ts
+const [activeTab, setActiveTab] = useState('overview'); // ← hardcoded fallback
+```
+
+Unless your code *explicitly* pulls from `useSearchParams()` or `window.location.search` on mount and sets `activeTab`, the tab won’t switch.
+
+---
+
+## ✅ How to Fix It (for Replit or you)
+
+### In `Dashboard.tsx`:
+
+1. **Import**:
+
+```ts
+import { useSearchParams } from 'react-router-dom';
+```
+
+2. **Initialize from URL param**:
+   Replace:
+
+```ts
+const [activeTab, setActiveTab] = useState('overview');
+```
+
+With:
+
+```ts
+const [searchParams] = useSearchParams();
+const defaultTab = searchParams.get('tab') || 'overview';
+const [activeTab, setActiveTab] = useState(defaultTab);
+```
+
+> ✅ This ensures that on initial load, if `tab=profile`, the profile tab is selected.
+
+---
+
+## ✅ Optional: Sync URL When Changing Tabs
+
+To make the experience consistent and navigable by back button:
+
+```ts
+useEffect(() => {
+  navigate(`/dashboard?tab=${activeTab}`, { replace: true });
+}, [activeTab]);
+```
+
+> You may already have this in place — just confirming it works both directions.
+
+---
+
+## 🧪 Testing Instructions
+
+Once this fix is in:
+
+1. Go to `/dashboard?tab=profile`
+2. You should **immediately land on the Profile tab** (not Overview)
+3. Clicking "Setup Payment Info" should now visually activate the tab
+
+---
+
+## 📝 Summary
+
+| Issue                                       | Cause                            | Fix                                    |
+| ------------------------------------------- | -------------------------------- | -------------------------------------- |
+| `/dashboard?tab=profile` loads Overview tab | `useState('overview')` hardcoded | Parse URL `tab` param as initial state |
+| Replit says it's working, but it's not      | They didn't test actual behavior | Add `useSearchParams()` + fallback     |
+
+Let me know if you want a ready-to-copy code block or a Replit prompt to send.
