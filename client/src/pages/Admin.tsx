@@ -245,6 +245,15 @@ function AdminComponent() {
   const [winnerTablePage, setWinnerTablePage] = useState(1);
   const winnersPerPage = 50;
   
+  // Enhanced Winners pagination state
+  const [enhancedWinnersPage, setEnhancedWinnersPage] = useState(1);
+  const [enhancedWinnersData, setEnhancedWinnersData] = useState({
+    winners: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0
+  });
+  
   // Loading states for performance monitoring
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isExecutingSelection, setIsExecutingSelection] = useState(false);
@@ -1540,6 +1549,56 @@ function AdminComponent() {
     } catch (error) {
       console.error('Error loading paginated winner details:', error);
       setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
+    }
+  };
+
+  // Load Enhanced Winners with pagination
+  const loadEnhancedWinnersPaginated = async (cycleSettingId: number, page: number = 1, limit: number = 50) => {
+    if (!cycleSettingId) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      console.log(`[Frontend] Loading enhanced winners page ${page} for cycle ${cycleSettingId}`);
+      
+      const response = await fetch(`/api/admin/cycle-winner-details/${cycleSettingId}/paginated?page=${page}&limit=${limit}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Transform the paginated data to enhanced format
+        const enhancedData = data.winners.map((winner: any, index: number) => ({
+          overallRank: ((page - 1) * limit) + index + 1,
+          tierRank: winner.tierRank || index + 1,
+          username: winner.username,
+          email: winner.email || winner.userEmail,
+          cyclePoints: winner.cyclePoints || winner.points || 0,
+          tierSize: winner.rewardAmount || 0,
+          payoutPercentage: winner.payoutPercentage || 100,
+          payoutCalc: winner.rewardAmount || 0,
+          payoutOverride: winner.payoutOverride || 0,
+          payoutFinal: winner.finalAmount || winner.rewardAmount || 0,
+          paypalEmail: winner.paypalEmail || 'Not set',
+          status: winner.payoutStatus || 'pending',
+          lastModified: winner.lastModified || new Date().toISOString()
+        }));
+
+        setEnhancedWinnersData({
+          winners: enhancedData,
+          totalCount: data.totalCount || 0,
+          currentPage: page,
+          totalPages: Math.ceil((data.totalCount || 0) / limit)
+        });
+
+        console.log(`[Frontend] Loaded ${enhancedData.length} enhanced winner records for page ${page}`);
+      } else {
+        console.log(`[Frontend] No enhanced winners data available (${response.status})`);
+        setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
+      }
+    } catch (error) {
+      console.error('Failed to load enhanced winners:', error);
+      setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
     }
   };
 

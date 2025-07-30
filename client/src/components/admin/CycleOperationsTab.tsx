@@ -27,7 +27,9 @@ import {
   Download,
   Upload,
   FileSpreadsheet,
-  ExternalLink
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -96,9 +98,19 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
-  
+
   // === PHASE 3: ENHANCED SELECTED WINNERS STATE ===
-  const [enhancedWinners, setEnhancedWinners] = useState<EnhancedWinnerData[]>([]);
+  const [enhancedWinners, setEnhancedWinners] = useState([]);
+
+  // Enhanced Winners pagination state
+  const [enhancedWinnersPage, setEnhancedWinnersPage] = useState(1);
+  const [enhancedWinnersData, setEnhancedWinnersData] = useState({
+    winners: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0
+  });
+  const enhancedWinnersPerPage = 50;
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -132,7 +144,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       const response = await fetch(`/api/admin/cycles/${selectedCycle.id}/analytics`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setCycleAnalytics(data);
@@ -150,7 +162,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setWinners(data.winners || []);
@@ -169,11 +181,11 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     try {
       const token = localStorage.getItem('token');
       console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}`);
-      
+
       const response = await fetch(`/api/admin/winners/data/${selectedCycle.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const winnersData = await response.json();
         setEnhancedWinners(winnersData);
@@ -187,6 +199,36 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       setEnhancedWinners([]);
     }
   };
+
+   const loadEnhancedWinnersPaginated = async (page: number) => {
+        if (!selectedCycle) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}, page ${page}`);
+
+            const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?page=${page}&pageSize=${enhancedWinnersPerPage}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setEnhancedWinnersData({
+                    winners: data.winners || [],
+                    totalCount: data.totalCount || 0,
+                    currentPage: data.currentPage || 1,
+                    totalPages: data.totalPages || 1
+                });
+                console.log(`[Frontend] Loaded ${data.winners.length} enhanced winner records (page ${page})`);
+            } else {
+                console.log(`[Frontend] No enhanced winners data available (${response.status})`);
+                setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
+            }
+        } catch (error) {
+            console.error('Failed to load enhanced winners:', error);
+            setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
+        }
+    };
 
   // === PHASE 3: EXCEL EXPORT FUNCTIONALITY ===
   const handleExportWinners = async () => {
@@ -203,7 +245,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     try {
       const token = localStorage.getItem('token');
       console.log(`[Export] Starting export for cycle ${selectedCycle.id}`);
-      
+
       const response = await fetch(`/api/admin/winners/export/${selectedCycle.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -246,7 +288,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     if (!file) return;
 
     setImportFile(file);
-    
+
     // Read and preview the Excel file
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -259,7 +301,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
         setImportData(jsonData);
         setImportPreview(jsonData.slice(0, 5)); // Show first 5 rows for preview
-        
+
         console.log(`[Import] Loaded ${jsonData.length} rows for preview`);
         toast({
           title: "File Loaded",
@@ -291,7 +333,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     try {
       const token = localStorage.getItem('token');
       console.log(`[Import] Starting import for cycle ${selectedCycle.id} with ${importData.length} records`);
-      
+
       const response = await fetch(`/api/admin/winners/import/${selectedCycle.id}`, {
         method: 'POST',
         headers: { 
@@ -305,14 +347,14 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         console.log(`[Import] Successfully imported ${result.updatedCount} records`);
         toast({
           title: "Import Successful",
           description: `Updated ${result.updatedCount} winner records`,
         });
-        
+
         // Refresh the data and close dialog
         loadEnhancedWinners();
         setShowImportDialog(false);
@@ -366,12 +408,12 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         // Don't store large winner arrays in state - causes memory issues
         // Instead, store only the selection summary and let tables load via API
         setPendingWinners([]); // Clear any previous selection
-        
+
         toast({
           title: "Winner Selection Generated",
           description: `Generated ${data.totalWinners} winners using ${selectionMode} method and saved as draft. Ready to view or export.`
         });
-        
+
         // Refresh the enhanced winners table to show the new selection
         loadEnhancedWinners();
       } else {
@@ -500,7 +542,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     try {
       const token = localStorage.getItem('token');
       const selectedWinnerIds = Array.from(selectedForDisbursement);
-      
+
       const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
         method: 'POST',
         headers: { 
@@ -509,7 +551,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         },
         body: JSON.stringify({ selectedWinnerIds })
       });
-      
+
       const data = await response.json();
       if (data.success) {
         toast({
@@ -568,6 +610,24 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       });
     }
   };
+
+    const loadPaginatedWinnerDetails = async (cycleId: number, page: number, pageSize: number) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/admin/cycle-winner-details/${cycleId}/paginated?page=${page}&pageSize=${pageSize}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setWinners(data.winners || []);
+            } else {
+                console.error('Failed to load winners:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Failed to load winners:', error);
+        }
+    };
 
   const formatCurrency = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
@@ -877,7 +937,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                               ref={fileInputRef}
                             />
                           </div>
-                          
+
                           {importPreview.length > 0 && (
                             <div>
                               <Label>Data Preview (First 5 Rows)</Label>
@@ -905,7 +965,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                               </div>
                             </div>
                           )}
-                          
+
                           <div className="flex justify-end gap-2">
                             <Button 
                               variant="outline" 
@@ -1017,10 +1077,46 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       ))}
                     </TableBody>
                   </Table>
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mt-4 px-6 pb-6">
+                <div className="text-sm text-gray-600">
+                  Showing {Math.min((enhancedWinnersData.currentPage - 1) * enhancedWinnersPerPage + 1, enhancedWinnersData.totalCount)} to {Math.min(enhancedWinnersData.currentPage * enhancedWinnersPerPage, enhancedWinnersData.totalCount)} of {enhancedWinnersData.totalCount} winners
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newPage = Math.max(1, enhancedWinnersData.currentPage - 1);
+                      setEnhancedWinnersPage(newPage);
+                    }}
+                    disabled={enhancedWinnersData.currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {enhancedWinnersData.currentPage} of {enhancedWinnersData.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newPage = Math.min(enhancedWinnersData.totalPages, enhancedWinnersData.currentPage + 1);
+                      setEnhancedWinnersPage(newPage);
+                    }}
+                    disabled={enhancedWinnersData.currentPage >= enhancedWinnersData.totalPages}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
           {/* Legacy Winners Table - Keep for fallback */}
           {winners.length > 0 && enhancedWinners.length === 0 && (
