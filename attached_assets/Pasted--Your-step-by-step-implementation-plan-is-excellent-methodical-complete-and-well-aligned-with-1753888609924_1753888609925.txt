@@ -1,0 +1,100 @@
+✅ Your step-by-step implementation plan is **excellent**—methodical, complete, and well aligned with standard UX and dashboard architecture best practices.
+
+Here’s a quick **validation + enhancement checklist** to support you as you move into execution:
+
+---
+
+### ✅ **Step-by-Step Execution Validation**
+
+#### **Step 1: Remove Duplicate Profile Tabs**
+
+✔️ *Correct Actions*:
+
+* Remove `TabsTrigger` for `"profile"` from:
+
+  * Mobile `TabsList` (lines \~450–470)
+  * Desktop `TabsList` (lines \~480–500)
+* Change `grid-cols-7` → `grid-cols-6` in both
+* Remove `TabsContent` for `"profile"`
+* Update tab validation logic:
+
+  ```ts
+  const validTabs = ['overview', 'learn', 'referrals', 'predictions', 'rewards', 'leaderboard'];
+  ```
+
+#### **Step 2: Implement Header Profile Modal/Drawer**
+
+✔️ *Smart Choice*: Slide-over modal is widely used (e.g. Tailwind UI, Stripe dashboards)
+
+* Create a new component:
+
+  * `ProfileDrawer.tsx` (or `.tsx` and `.css` combo)
+  * Include: Account Info, Subscription, PayPal Config, and Stats (copy from removed tab)
+* State management:
+
+  * Add a hook like `useProfileDrawer()`
+  * Include optional param for `initialSection` to focus PayPal config if triggered externally
+* Trigger it from:
+
+  * Header avatar button → `openProfileDrawer()`
+
+#### **Step 3: Fix "Setup Payment Info" Flow**
+
+✔️ *Update Navigation Code* in `RewardsSummary.tsx`:
+
+```ts
+import { useProfileDrawer } from '@/hooks/useProfileDrawer';
+
+const { openProfileDrawer } = useProfileDrawer();
+
+const handleSetupPayment = () => {
+  openProfileDrawer('paypal');
+};
+```
+
+#### **Step 4: Full QA & Integration**
+
+✔️ *What to Test*:
+
+* [ ] “Setup Payment Info” opens drawer, scrolls to PayPal
+* [ ] Header avatar opens drawer as expected
+* [ ] Drawer content fully responsive (mobile/desktop)
+* [ ] No `"profile"` tab remains in tab layout or logic
+* [ ] State is managed globally or via context (if drawer needed outside Dashboard)
+
+---
+
+### 📁 Suggested File Structure (if helpful)
+
+```txt
+client/
+├── src/
+│   ├── components/
+│   │   ├── ProfileDrawer/
+│   │   │   ├── ProfileDrawer.tsx
+│   │   │   └── ProfileDrawer.css (or .module.css/.scss)
+│   ├── hooks/
+│   │   └── useProfileDrawer.ts
+│   ├── context/
+│   │   └── ProfileDrawerContext.tsx (if using context pattern)
+```
+
+---
+
+### 🧠 Optional Enhancements
+
+* Animate the slide-in drawer with `framer-motion` or `@headlessui/react` if you want polish
+* Lazy-load drawer content for performance
+* Auto-scroll to PayPal section on trigger:
+
+  ```tsx
+  useEffect(() => {
+    if (initialSection === 'paypal') {
+      document.getElementById('paypal-config')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [initialSection]);
+  ```
+
+---
+
+You’re fully on track. If you'd like a starter `ProfileDrawer.tsx` scaffold or a GitHub issue write-up version, just say the word.

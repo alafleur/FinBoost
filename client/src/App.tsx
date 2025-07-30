@@ -24,6 +24,7 @@ import { useEffect } from "react";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initGTM, addGTMNoScript } from "./lib/gtm";
+import { ProfileDrawerProvider } from "./hooks/useProfileDrawer";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -74,10 +75,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ProfileDrawerProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ProfileDrawerProvider>
     </QueryClientProvider>
   );
 }
