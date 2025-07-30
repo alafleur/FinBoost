@@ -150,7 +150,7 @@ export default function Dashboard() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
+    if (tabParam && ['overview', 'learn', 'referrals', 'predictions', 'rewards', 'leaderboard', 'profile'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location]); // Re-run when location changes only
@@ -487,7 +487,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-0.5 rounded-none">
+            <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-0.5 rounded-none">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -535,6 +535,14 @@ export default function Dashboard() {
               >
                 <Trophy className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium text-[10px]">Board</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="profile" 
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Profile and settings tab"
+              >
+                <UserIcon className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Profile</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1133,7 +1141,7 @@ export default function Dashboard() {
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
+              <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -1181,6 +1189,14 @@ export default function Dashboard() {
                 >
                   <Trophy className="h-4 w-4" aria-hidden="true" />
                   <span className="font-medium">Board</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="profile" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Profile and settings tab"
+                >
+                  <UserIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Profile</span>
                 </TabsTrigger>
 
               </TabsList>
