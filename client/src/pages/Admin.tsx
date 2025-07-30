@@ -2072,9 +2072,9 @@ function AdminComponent() {
     if (!poolData || !users.length) return;
 
     const tiers = {
-      tier1: users.filter((user: any) => (user.points || 0) < tierThresholds.tier2),
-      tier2: users.filter((user: any) => (user.points || 0) >= tierThresholds.tier2 && (user.points || 0) < tierThresholds.tier3),
-      tier3: users.filter((user: any) => (user.points || 0) >= tierThresholds.tier3)
+      tier1: users.filter((user: any) => (user.points || 0) >= tierThresholds.tier1),
+      tier2: users.filter((user: any) => (user.points || 0) >= tierThresholds.tier2 && (user.points || 0) < tierThresholds.tier1),
+      tier3: users.filter((user: any) => (user.points || 0) < tierThresholds.tier2)
     };
 
     const ratios = {
