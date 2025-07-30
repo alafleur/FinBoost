@@ -1,0 +1,36 @@
+Step-by-Step Plan: Add Missing Profile Tab Components (Option 1)
+Step 1: Locate Profile Content
+Search for existing profile/payment functionality components in the codebase
+Check if there's a separate Profile component or if it's embedded elsewhere
+Identify what content should be displayed in the Profile tab
+Step 2: Add Profile Tab Trigger
+Add <TabsTrigger value="profile">Profile</TabsTrigger> to both mobile and desktop tab navigation sections
+Ensure consistent placement and styling with other tabs
+Add appropriate icon (likely user profile or settings icon)
+Step 3: Create Profile Tab Content
+Add <TabsContent value="profile"> sections for both mobile and desktop layouts
+Include the PayPal payment configuration form
+Add subscription details display
+Include account management options
+Step 4: Update Tab Validation Array
+Update the URL parameter validation array to match actual tab structure
+Remove 'board' if it doesn't exist
+Ensure all actual tabs are included: ['overview', 'learn', 'referrals', 'predictions', 'rewards', 'leaderboard', 'profile']
+Step 5: Maintain Single Component Architecture
+Ensure Profile tab content uses shared components between mobile and desktop
+Avoid duplicate profile logic - use same components with responsive styling
+Follow existing pattern of identical content across both layouts
+Step 6: Handle Profile-Specific Functionality
+Move existing PayPal email configuration into the Profile tab
+Ensure subscription details are properly displayed
+Add any missing account management features
+Step 7: Update Navigation References
+Verify header Profile button behavior aligns with new tab structure
+Update any other components that might reference profile navigation
+Ensure consistent navigation patterns throughout the app
+Step 8: Test Integration
+Test "Setup Payment Info" button navigation
+Verify Profile tab displays correctly on both mobile and desktop
+Confirm payment configuration works within the tab structure
+Validate URL parameter handling works with new tab
+This approach maintains the existing architecture while properly implementing the missing Profile tab that the navigation logic expects to exist.
