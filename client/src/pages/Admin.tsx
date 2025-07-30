@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useState, useEffect, useMemo, memo, Component, ErrorInfo, ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import * as XLSX from 'xlsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +58,55 @@ import {
   Download
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+// Error Boundary Component
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends Component<{children: ReactNode}, ErrorBoundaryState> {
+  constructor(props: {children: ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Admin component error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-red-600">Admin Panel Error</CardTitle>
+              <CardDescription>Something went wrong loading the admin panel</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">
+                {this.state.error?.message || 'An unexpected error occurred'}
+              </p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="w-full"
+              >
+                Reload Page
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 interface LearningModule {
   id: number;
@@ -173,7 +222,7 @@ interface CycleWinnerSelection {
   processedAt?: Date;
 }
 
-export default function Admin() {
+function AdminComponent() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [user, setUser] = useState(null);
@@ -617,19 +666,26 @@ export default function Admin() {
       setIsLoadingData(true);
       
       try {
-        // Group API calls by priority and dependencies
-        await Promise.allSettled([
-          fetchData(), // Core data first
-          fetchCycleSettings(), // Essential cycle data
-          fetchUserCyclePoints(),
-          fetchPendingProofs(),
-          fetchPointActions(),
-          fetchSupportTickets(),
-          fetchCyclePoolSettings(),
-          fetchCurrentPoolSettings(),
-          fetchCycleWinnerSelections()
-          // Removed duplicate fetchCycleWinnerSelections()
+        console.log('Loading admin data...');
+        // Group API calls by priority and dependencies with individual error handling
+        const results = await Promise.allSettled([
+          fetchData().catch(e => console.error('fetchData failed:', e)), // Core data first
+          fetchCycleSettings().catch(e => console.error('fetchCycleSettings failed:', e)), // Essential cycle data
+          fetchUserCyclePoints().catch(e => console.error('fetchUserCyclePoints failed:', e)),
+          fetchPendingProofs().catch(e => console.error('fetchPendingProofs failed:', e)),
+          fetchPointActions().catch(e => console.error('fetchPointActions failed:', e)),
+          fetchSupportTickets().catch(e => console.error('fetchSupportTickets failed:', e)),
+          fetchCyclePoolSettings().catch(e => console.error('fetchCyclePoolSettings failed:', e)),
+          fetchCurrentPoolSettings().catch(e => console.error('fetchCurrentPoolSettings failed:', e)),
+          fetchCycleWinnerSelections().catch(e => console.error('fetchCycleWinnerSelections failed:', e))
         ]);
+        
+        // Log which calls failed
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`API call ${index} failed:`, result.reason);
+          }
+        });
         
         const loadTime = performance.now() - startTime;
         console.log(`Admin data loaded in ${Math.round(loadTime)}ms`);
@@ -7947,5 +8003,13 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function Admin() {
+  return (
+    <ErrorBoundary>
+      <AdminComponent />
+    </ErrorBoundary>
   );
 }
