@@ -64,6 +64,11 @@ export default function RewardsSummary() {
     setLocation('/subscribe');
   };
 
+  const handleProfileClick = () => {
+    // Navigate to dashboard with profile tab active
+    setLocation('/dashboard?tab=profile');
+  };
+
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -110,7 +115,7 @@ export default function RewardsSummary() {
                   }
                 </p>
                 <Button 
-                  onClick={() => setLocation('/dashboard')}
+                  onClick={handleProfileClick}
                   className="bg-gray-900 hover:bg-gray-800 text-white"
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
@@ -185,7 +190,7 @@ export default function RewardsSummary() {
               }
             </p>
             <Button 
-              onClick={() => setLocation('/dashboard')}
+              onClick={handleProfileClick}
               className="bg-gray-900 hover:bg-gray-800 text-white"
             >
               <DollarSign className="w-4 h-4 mr-2" />
