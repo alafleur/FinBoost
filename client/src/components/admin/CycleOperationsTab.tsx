@@ -132,7 +132,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     if (selectedCycle) {
       loadCycleAnalytics();
       loadWinners();
-      loadEnhancedWinners(); // Phase 3: Load enhanced winner data
+      loadEnhancedWinnersPaginated(1); // Phase 3: Load enhanced winners with pagination
+      setEnhancedWinnersPage(1); // Reset to first page
     }
   }, [selectedCycle]);
 
@@ -232,16 +233,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
   // === TIER SIZE UPDATE HANDLER ===
   const handleTierSizeUpdate = (winnerEmail: string, newAmount: number) => {
-    // Update the enhanced winners state
-    setEnhancedWinners(prevWinners => 
-      prevWinners.map(winner => 
-        winner.email === winnerEmail 
-          ? { ...winner, tierSizeAmount: newAmount }
-          : winner
-      )
-    );
-
-    // Also update paginated data if it exists
+    // Update paginated data (primary data source)
     setEnhancedWinnersData(prevData => ({
       ...prevData,
       winners: prevData.winners.map(winner => 
@@ -382,9 +374,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Updated ${result.updatedCount} winner records`,
         });
 
-        // Refresh the data and close dialog
-        loadEnhancedWinners();
-        loadEnhancedWinnersPaginated(enhancedWinnersPage);
+        // Refresh the data and close dialog  
+        await loadEnhancedWinnersPaginated(enhancedWinnersPage);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
@@ -908,7 +899,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           </Card>
 
           {/* === PHASE 3: ENHANCED SELECTED WINNERS TABLE === */}
-          {enhancedWinners.length > 0 && (
+          {enhancedWinnersData.winners.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -918,7 +909,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       Selected Winners - Enhanced View
                     </CardTitle>
                     <CardDescription>
-                      {enhancedWinners.length} winners with complete payout details and Excel export/import capabilities
+                      {enhancedWinnersData.totalCount} winners with complete payout details and Excel export/import capabilities
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -1045,7 +1036,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {enhancedWinners.map((winner, index) => (
+                      {enhancedWinnersData.winners.map((winner, index) => (
                         <TableRow key={`${winner.email}-${index}`}>
                           <TableCell className="font-medium text-center">
                             {winner.overallRank}
@@ -1127,6 +1118,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     onClick={() => {
                       const newPage = Math.max(1, enhancedWinnersData.currentPage - 1);
                       setEnhancedWinnersPage(newPage);
+                      loadEnhancedWinnersPaginated(newPage);
                     }}
                     disabled={enhancedWinnersData.currentPage === 1}
                   >
@@ -1142,6 +1134,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     onClick={() => {
                       const newPage = Math.min(enhancedWinnersData.totalPages, enhancedWinnersData.currentPage + 1);
                       setEnhancedWinnersPage(newPage);
+                      loadEnhancedWinnersPaginated(newPage);
                     }}
                     disabled={enhancedWinnersData.currentPage >= enhancedWinnersData.totalPages}
                   >
