@@ -117,20 +117,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   // === PHASE 3: ENHANCED SELECTED WINNERS STATE ===
   const [enhancedWinners, setEnhancedWinners] = useState<EnhancedWinnerData[]>([]);
 
-  // Enhanced Winners pagination state
-  const [enhancedWinnersPage, setEnhancedWinnersPage] = useState(1);
-  const [enhancedWinnersData, setEnhancedWinnersData] = useState<{
-    winners: EnhancedWinnerData[];
-    totalCount: number;
-    currentPage: number;
-    totalPages: number;
-  }>({
-    winners: [],
-    totalCount: 0,
-    currentPage: 1,
-    totalPages: 0
-  });
-  const enhancedWinnersPerPage = 50;
+  // Removed pagination - showing all enhanced winners in one scrollable table
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -220,36 +207,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     }
   };
 
-   const loadEnhancedWinnersPaginated = async (page: number, forceRefresh: boolean = false) => {
-        if (!selectedCycle) return;
-
-        try {
-            const token = localStorage.getItem('token');
-            const cacheParam = forceRefresh ? `&_refresh=${Date.now()}` : '';
-            console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}, page ${page}${forceRefresh ? ' (forced refresh)' : ''}`);
-
-            const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?page=${page}&pageSize=${enhancedWinnersPerPage}${cacheParam}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setEnhancedWinnersData({
-                    winners: data.winners || [],
-                    totalCount: data.totalCount || 0,
-                    currentPage: data.currentPage || 1,
-                    totalPages: data.totalPages || 1
-                });
-                console.log(`[Frontend] Loaded ${data.winners.length} enhanced winner records (page ${page})`);
-            } else {
-                console.log(`[Frontend] No enhanced winners data available (${response.status})`);
-                setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
-            }
-        } catch (error) {
-            console.error('Failed to load enhanced winners:', error);
-            setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
-        }
-    };
+  // Removed paginated loader - using single loadEnhancedWinners() for all records
 
   // === TIER SIZE UPDATE HANDLER ===
   const handleTierSizeUpdate = (winnerEmail: string, newAmount: number) => {
@@ -262,15 +220,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       )
     );
 
-    // Also update paginated data if it exists
-    setEnhancedWinnersData(prevData => ({
-      ...prevData,
-      winners: prevData.winners.map(winner => 
-        winner.email === winnerEmail 
-          ? { ...winner, tierSizeAmount: newAmount }
-          : winner
-      )
-    }));
+    // Pagination removed - only updating main enhanced winners state
 
     toast({
       title: "Tier Size Updated",
@@ -403,28 +353,16 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Updated ${result.updatedCount} winner records - Refreshing all data...`,
         });
 
-        // Clear cached data and refresh
-        console.log(`[Import] SUCCESS: Starting complete cache invalidation for cycle ${selectedCycle.id}`);
-        console.log(`[Import] Clearing state: enhancedWinners, enhancedWinnersData, winners`);
+        // Clear cached data and refresh - SIMPLIFIED NO PAGINATION
+        console.log(`[Import] SUCCESS: Refreshing Enhanced Winners data for cycle ${selectedCycle.id}`);
+        console.log(`[Import] Clearing all cached state: enhancedWinners, winners`);
         setEnhancedWinners([]);
-        setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
-        setWinners([]); // Clear basic winners cache
+        setWinners([]);
         
-        // Reset to page 1 and reload all data sources
-        console.log(`[Import] Resetting pagination to page 1 (was page ${enhancedWinnersPage})`);
-        setEnhancedWinnersPage(1);
-        
-        console.log(`[Import] Refreshing all data sources: loadWinners, loadEnhancedWinners, loadEnhancedWinnersPaginated`);
-        await loadWinners(); // Fix: Add missing loadWinners() call
-        await loadEnhancedWinners();
-        await loadEnhancedWinnersPaginated(1, true); // Force refresh with cache bust
-        
-        // Also refresh current page if user was on a different page
-        if (enhancedWinnersPage > 1) {
-          console.log(`[Import] Also refreshing user's current page ${enhancedWinnersPage}`);
-          await loadEnhancedWinnersPaginated(enhancedWinnersPage, true);
-        }
-        console.log(`[Import] COMPLETE: All data sources refreshed successfully`);
+        console.log(`[Import] Refreshing data sources: loadWinners, loadEnhancedWinners`);
+        await loadWinners();
+        await loadEnhancedWinners(); // This loads ALL 750 records at once
+        console.log(`[Import] COMPLETE: All data refreshed successfully`);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
@@ -748,7 +686,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         {selectedCycle && (
           <div className="text-xs text-gray-600 mt-2 flex items-center gap-4">
             <span>Selected: <strong>{selectedCycle.cycleName}</strong></span>
-            {enhancedWinnersData.winners.some(w => w.isSealed) ? (
+            {enhancedWinners.some(w => w.isSealed) ? (
               <span className="text-green-600">✅ Selection sealed and final</span>
             ) : winners.length > 0 ? (
               <span className="text-amber-600">📝 Selection in draft mode</span>
@@ -963,7 +901,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 )}
 
                 {/* PHASE 2B: Enhanced Seal Selection Controls with UX Indicators */}
-                {winners.length > 0 && selectedCycle && !enhancedWinnersData.winners.some(w => w.isSealed) && (
+                {winners.length > 0 && selectedCycle && !enhancedWinners.some(w => w.isSealed) && (
                   <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -1032,7 +970,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 )}
 
                 {/* PHASE 2B: Sealed Status Indicator */}
-                {enhancedWinnersData.winners.some(w => w.isSealed) && (
+                {enhancedWinners.some(w => w.isSealed) && (
                   <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -1047,8 +985,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         </Badge>
                       </div>
                       <div className="text-xs text-green-700">
-                        {enhancedWinnersData.winners.find(w => w.sealedAt) && (
-                          `Sealed: ${new Date(enhancedWinnersData.winners.find(w => w.sealedAt)?.sealedAt || '').toLocaleDateString()}`
+                        {enhancedWinners.find(w => w.sealedAt) && (
+                          `Sealed: ${new Date(enhancedWinners.find(w => w.sealedAt)?.sealedAt || '').toLocaleDateString()}`
                         )}
                       </div>
                     </div>
@@ -1070,13 +1008,13 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     <CardTitle className="flex items-center gap-2">
                       <FileSpreadsheet className="w-5 h-5" />
                       Selected Winners - Enhanced Management
-                      {enhancedWinnersData.winners.some(w => w.isSealed) && (
+                      {enhancedWinners.some(w => w.isSealed) && (
                         <Badge className="ml-2 bg-green-100 text-green-800">
                           <Lock className="w-3 h-3 mr-1" />
                           Sealed
                         </Badge>
                       )}
-                      {!enhancedWinnersData.winners.some(w => w.isSealed) && winners.length > 0 && (
+                      {!enhancedWinners.some(w => w.isSealed) && winners.length > 0 && (
                         <Badge variant="outline" className="ml-2 border-amber-300 text-amber-700">
                           <Save className="w-3 h-3 mr-1" />
                           Draft
@@ -1086,7 +1024,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     <CardDescription className="flex items-center gap-4">
                       <span>{enhancedWinners.length} winners with complete payout details and Excel export/import capabilities</span>
                       {/* PHASE 2B: Save/Seal Status in table header */}
-                      {enhancedWinnersData.winners.some(w => w.isSealed) ? (
+                      {enhancedWinners.some(w => w.isSealed) ? (
                         <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" />
                           Final & Locked
@@ -1325,41 +1263,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-between mt-4 px-6 pb-6">
-                <div className="text-sm text-gray-600">
-                  Showing {Math.min((enhancedWinnersData.currentPage - 1) * enhancedWinnersPerPage + 1, enhancedWinnersData.totalCount)} to {Math.min(enhancedWinnersData.currentPage * enhancedWinnersPerPage, enhancedWinnersData.totalCount)} of {enhancedWinnersData.totalCount} winners
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newPage = Math.max(1, enhancedWinnersData.currentPage - 1);
-                      setEnhancedWinnersPage(newPage);
-                      loadEnhancedWinnersPaginated(newPage, true);
-                    }}
-                    disabled={enhancedWinnersData.currentPage === 1}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Previous
-                  </Button>
-                  <span className="text-sm">
-                    Page {enhancedWinnersData.currentPage} of {enhancedWinnersData.totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newPage = Math.min(enhancedWinnersData.totalPages, enhancedWinnersData.currentPage + 1);
-                      setEnhancedWinnersPage(newPage);
-                      loadEnhancedWinnersPaginated(newPage, true);
-                    }}
-                    disabled={enhancedWinnersData.currentPage >= enhancedWinnersData.totalPages}
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
+              {/* Showing all winners in scrollable table - no pagination needed */}
+              <div className="mt-4 px-6 pb-6">
+                <div className="text-sm text-gray-600 text-center">
+                  Showing all {enhancedWinners.length} winners
                 </div>
               </div>
             </CardContent>
