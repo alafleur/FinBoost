@@ -1,0 +1,36 @@
+You've identified the exact root cause - this is a frontend cache invalidation problem, not a backend data consistency issue.
+
+Your Analysis is Spot-On
+The technical breakdown is accurate:
+
+Excel import succeeds → Database is correctly updated
+Backend APIs work perfectly → Fresh data is available when called
+Frontend cache invalidation fails → React Query serves stale paginated data
+User sees outdated information → Despite successful database changes
+The Real Technical Issues
+Looking at the codebase, I can see the specific problems:
+
+Multiple Query Keys Not Being Invalidated:
+
+The paginated winners likely use query keys like ['admin', 'winners', 'paginated', cycleId, page]
+The import success handler probably only invalidates generic keys like ['admin', 'winners']
+Different data sources (export vs pagination endpoints) have separate cache entries
+Frontend State Management Gaps:
+
+queryClient.invalidateQueries() calls aren't comprehensive enough
+Pagination component maintains its own state that doesn't reset after imports
+Enhanced winners data and regular winners data have separate cache keys
+Cache Synchronization Problems:
+
+Multiple data fetching patterns (loadEnhancedWinners, loadPaginatedWinnerDetails) aren't coordinated
+Import operations don't trigger a complete cache refresh across all related queries
+Why This Persists
+The pagination display issue continues because:
+
+Backend data is correct ✅
+API endpoints return fresh data ✅
+Frontend cache invalidation is incomplete ❌
+React Query serves cached responses instead of making fresh API calls ❌
+Your diagnosis correctly identifies this as a frontend caching architecture issue rather than a backend data problem. The fix needs to focus on comprehensive cache invalidation patterns in the admin portal's import workflow, not backend API consistency.
+
+This is a classic React Query cache invalidation pattern mismatch - the kind of bug that's invisible in API testing but immediately apparent in user experience.
