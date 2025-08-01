@@ -7382,6 +7382,10 @@ export class MemStorage implements IStorage {
     };
   } | null> {
     try {
+      // Input validation
+      if (!Number.isInteger(userId) || userId <= 0) {
+        throw new Error(`Invalid user ID: ${userId}`);
+      }
       // Step 2.1: Simplified logic - Check if user is a winner in most recent sealed cycle
       const [winnerRecord] = await db
         .select({
@@ -7424,7 +7428,11 @@ export class MemStorage implements IStorage {
             totalRewardPool = cycleSettingsResult.totalRewardPool;
           }
         } catch (error) {
-          console.error(`[WINNER STATUS] Error fetching cycle settings for cycle ${winnerRecord.cycleId}:`, error);
+          console.error(`[WINNER STATUS] Error fetching cycle settings for cycle ${winnerRecord.cycleId}:`, {
+            error: error.message,
+            stack: error.stack,
+            query: 'cycleSettings.totalRewardPool'
+          });
         }
 
         try {
@@ -7444,7 +7452,11 @@ export class MemStorage implements IStorage {
             totalWinners = totalWinnersResult.totalWinners;
           }
         } catch (error) {
-          console.error(`[WINNER STATUS] Error counting winners for cycle ${winnerRecord.cycleId}:`, error);
+          console.error(`[WINNER STATUS] Error counting winners for cycle ${winnerRecord.cycleId}:`, {
+            error: error.message,
+            stack: error.stack,
+            query: 'cycleWinnerSelections COUNT'
+          });
         }
 
         // User is a winner - show banner regardless of notification_displayed status
@@ -7499,7 +7511,11 @@ export class MemStorage implements IStorage {
           totalRewardPool = cycleSettingsResult.totalRewardPool;
         }
       } catch (error) {
-        console.error(`[WINNER STATUS] Error fetching cycle settings for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, error);
+        console.error(`[WINNER STATUS] Error fetching cycle settings for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
+          error: error.message,
+          stack: error.stack,
+          query: 'cycleSettings.totalRewardPool for non-winner'
+        });
       }
 
       try {
@@ -7519,7 +7535,11 @@ export class MemStorage implements IStorage {
           totalWinners = totalWinnersResult.totalWinners;
         }
       } catch (error) {
-        console.error(`[WINNER STATUS] Error counting winners for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, error);
+        console.error(`[WINNER STATUS] Error counting winners for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
+          error: error.message,
+          stack: error.stack,
+          query: 'cycleWinnerSelections COUNT for non-winner'
+        });
       }
 
       // Check if non-winner notification has been dismissed for this cycle
