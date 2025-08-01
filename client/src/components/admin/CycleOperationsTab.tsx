@@ -675,18 +675,44 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
   return (
     <div className="space-y-6">
-      {/* Workflow Breadcrumb */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">1. Setup</span>
-            <span className="text-gray-400">→</span>
-            <span className="bg-green-600 text-white px-2 py-1 rounded">2. Monitor</span>
-            <span className="text-green-600">→</span>
-            <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded">3. Execute</span>
+      {/* PHASE 2B: Enhanced Workflow Progress Indicator */}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-3 text-sm">
+            <div className="flex items-center gap-1">
+              <CheckCircle className="w-4 h-4 text-gray-400" />
+              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">1. Setup</span>
+            </div>
+            <div className="w-8 h-px bg-green-300"></div>
+            <div className="flex items-center gap-1">
+              <Activity className="w-4 h-4 text-green-600" />
+              <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">2. Operations</span>
+            </div>
+            <div className="w-8 h-px bg-gray-200"></div>
+            <div className="flex items-center gap-1">
+              <Timer className="w-4 h-4 text-gray-400" />
+              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">3. Execute</span>
+            </div>
           </div>
-          <div className="text-xs text-green-600 font-medium">Monitor Phase: Track cycle performance and execute operations</div>
+          <div className="text-xs text-green-700 font-medium bg-green-100 px-2 py-1 rounded">
+            🎯 Operations Phase: Generate & manage winner selections
+          </div>
         </div>
+        {/* PHASE 2B: Dynamic Status Based on Current State */}
+        {selectedCycle && (
+          <div className="text-xs text-gray-600 mt-2 flex items-center gap-4">
+            <span>Selected: <strong>{selectedCycle.cycleName}</strong></span>
+            {enhancedWinnersData.winners.some(w => w.isSealed) ? (
+              <span className="text-green-600">✅ Selection sealed and final</span>
+            ) : winners.length > 0 ? (
+              <span className="text-amber-600">📝 Selection in draft mode</span>
+            ) : pendingWinners.length > 0 ? (
+              <span className="text-blue-600">⏳ Selection generated, needs saving</span>
+            ) : (
+              <span className="text-gray-500">🎲 Ready for winner selection</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Current Cycle Dashboard */}
@@ -790,10 +816,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="w-5 h-5" />
-                Winner Selection
+                Winner Selection Management
               </CardTitle>
               <CardDescription>
-                Run winner selection algorithm and manage results
+                Generate, save, and finalize winner selections with full audit trail
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -841,55 +867,76 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   </div>
                 </div>
 
-                {/* NEW: Save/Seal Workflow Controls */}
+                {/* PHASE 2B: Enhanced UX Indicators - Save/Seal Workflow Controls */}
                 {pendingWinners.length > 0 && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
-                      <AlertCircle className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-900">
-                        Winner selection generated ({pendingWinners.length} winners)
+                      <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full">
+                        <AlertCircle className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-semibold text-blue-900">
+                        Step 1: Winner Selection Complete ({pendingWinners.length} winners generated)
                       </span>
+                      <Badge variant="secondary" className="ml-auto bg-blue-100 text-blue-800">
+                        Temporary
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        onClick={handleSaveWinnerSelection}
-                        disabled={isSavingSelection}
-                        size="sm"
-                      >
-                        {isSavingSelection ? (
-                          <>
-                            <Timer className="w-4 h-4 mr-2 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="w-4 h-4 mr-2" />
-                            Save as Draft
-                          </>
-                        )}
-                      </Button>
-                      <span className="text-xs text-blue-700">
-                        Save to enable export/import workflow
-                      </span>
+                    <div className="bg-white rounded-md p-3 mb-3">
+                      <p className="text-xs text-gray-600 mb-2">
+                        <strong>Next Action Required:</strong> Save as draft to persist data and enable export/import workflow
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          onClick={handleSaveWinnerSelection}
+                          disabled={isSavingSelection}
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          {isSavingSelection ? (
+                            <>
+                              <Timer className="w-4 h-4 mr-2 animate-spin" />
+                              Saving Draft...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4 mr-2" />
+                              Save as Draft
+                            </>
+                          )}
+                        </Button>
+                        <div className="text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                          💡 This creates a recoverable draft you can modify later
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-blue-600">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                      <span>Data is temporary until saved</span>
                     </div>
                   </div>
                 )}
 
-                {/* Seal Selection Controls (only show if executed but not sealed) */}
-                {winners.length > 0 && selectedCycle && (
-                  <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="flex items-center justify-between">
+                {/* PHASE 2B: Enhanced Seal Selection Controls with UX Indicators */}
+                {winners.length > 0 && selectedCycle && !enhancedWinnersData.winners.some(w => w.isSealed) && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-orange-600" />
-                        <span className="text-sm font-medium text-orange-900">
-                          Selection Status: Draft (can be modified)
+                        <div className="flex items-center justify-center w-6 h-6 bg-amber-100 rounded-full">
+                          <Lock className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <span className="text-sm font-semibold text-amber-900">
+                          Step 2: Review & Finalize Selection
                         </span>
+                        <Badge variant="outline" className="border-amber-300 text-amber-700">
+                          Draft Mode
+                        </Badge>
                       </div>
                       <Button 
                         onClick={handleSealWinnerSelection}
                         disabled={isSealingSelection}
                         variant="destructive"
                         size="sm"
+                        className="bg-red-600 hover:bg-red-700"
                       >
                         {isSealingSelection ? (
                           <>
@@ -904,16 +951,71 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         )}
                       </Button>
                     </div>
-                    <p className="text-xs text-orange-700 mt-2">
-                      Sealing will lock the selection permanently - no further modifications allowed
-                    </p>
+                    <div className="bg-white rounded-md p-3 mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <p className="font-medium text-gray-700 mb-1">✅ What you can do now:</p>
+                          <ul className="text-gray-600 space-y-1">
+                            <li>• Export winner data to Excel</li>
+                            <li>• Modify payout amounts</li>
+                            <li>• Import updated data</li>
+                            <li>• Review all selections</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="font-medium text-red-700 mb-1">⚠️ After sealing:</p>
+                          <ul className="text-red-600 space-y-1">
+                            <li>• No modifications allowed</li>
+                            <li>• Selection becomes permanent</li>
+                            <li>• Ready for payout processing</li>
+                            <li>• Cannot regenerate winners</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-amber-600">
+                        <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                        <span>Selection is modifiable in draft mode</span>
+                      </div>
+                      <span className="text-red-600 font-medium">
+                        ⚠️ Sealing is irreversible
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* PHASE 2B: Sealed Status Indicator */}
+                {enhancedWinnersData.winners.some(w => w.isSealed) && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        </div>
+                        <span className="text-sm font-semibold text-green-900">
+                          Selection Sealed & Finalized
+                        </span>
+                        <Badge className="ml-2 bg-green-100 text-green-800">
+                          Locked
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-green-700">
+                        {enhancedWinnersData.winners.find(w => w.sealedAt) && (
+                          `Sealed: ${new Date(enhancedWinnersData.winners.find(w => w.sealedAt)?.sealedAt || '').toLocaleDateString()}`
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-green-700 bg-green-50 p-2 rounded">
+                      🔒 This selection is permanently locked and ready for payout processing
+                    </div>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* === PHASE 3: ENHANCED SELECTED WINNERS TABLE === */}
+          {/* PHASE 2B: ENHANCED SELECTED WINNERS TABLE WITH UX INDICATORS */}
           {enhancedWinners.length > 0 && (
             <Card>
               <CardHeader>
@@ -921,10 +1023,34 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <FileSpreadsheet className="w-5 h-5" />
-                      Selected Winners - Enhanced View
+                      Selected Winners - Enhanced Management
+                      {enhancedWinnersData.winners.some(w => w.isSealed) && (
+                        <Badge className="ml-2 bg-green-100 text-green-800">
+                          <Lock className="w-3 h-3 mr-1" />
+                          Sealed
+                        </Badge>
+                      )}
+                      {!enhancedWinnersData.winners.some(w => w.isSealed) && winners.length > 0 && (
+                        <Badge variant="outline" className="ml-2 border-amber-300 text-amber-700">
+                          <Save className="w-3 h-3 mr-1" />
+                          Draft
+                        </Badge>
+                      )}
                     </CardTitle>
-                    <CardDescription>
-                      {enhancedWinners.length} winners with complete payout details and Excel export/import capabilities
+                    <CardDescription className="flex items-center gap-4">
+                      <span>{enhancedWinners.length} winners with complete payout details and Excel export/import capabilities</span>
+                      {/* PHASE 2B: Save/Seal Status in table header */}
+                      {enhancedWinnersData.winners.some(w => w.isSealed) ? (
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Final & Locked
+                        </span>
+                      ) : winners.length > 0 ? (
+                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          Draft - Modifiable
+                        </span>
+                      ) : null}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
