@@ -376,6 +376,9 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   sealedBy: integer("sealed_by").references(() => users.id), // Admin who sealed this winner
   savedAt: timestamp("saved_at").defaultNow().notNull(), // When selection was initially saved
   savedBy: integer("saved_by").references(() => users.id).notNull(), // Admin who executed the selection
+  
+  // Winner Notification Fields (for UI celebration banners)
+  notificationDisplayed: boolean("notification_displayed").default(false).notNull(), // Whether user has seen winner notification
 });
 
 // Cycle Point History - enhanced version of userPointsHistory with cycle tracking
