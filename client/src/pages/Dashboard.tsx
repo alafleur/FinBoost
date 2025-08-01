@@ -1248,31 +1248,37 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
-                    iconColor="yellow"
+                    iconColor="neutral"
                     title="Tier Thresholds"
                     titleSize="lg"
                   />
-                  <TierStats 
-                    tierThresholds={tierThresholds}
-                    user={user}
-                  />
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.neutral}`}></div>
+                    <TierStats 
+                      tierThresholds={tierThresholds}
+                      user={user}
+                    />
+                  </div>
                 </div>
               )}
 
-              {/* Community Growth Only */}
-              <div className="w-full">
-                {user && poolData && (
+              {/* Desktop Community Growth Dial - Enhanced Visual */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="primary"
+                  title="Community Growth"
+                  titleSize="lg"
+                />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
+                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
                   <CommunityGrowthDial 
                     poolData={poolData}
-                    user={{
-                      subscriptionStatus: user.subscriptionStatus,
-                      totalPoints: user.totalPoints || 0,
-                      currentCyclePoints: user.currentCyclePoints || 0
-                    }}
+                    user={user as any}
                     distributionInfo={distributionInfo}
-                    onUpgradeClick={() => setActiveTab('profile')}
+                    onUpgradeClick={() => setLocation('/subscribe')}
                   />
-                )}
+                </div>
               </div>
 
               {/* BACKUP: Desktop Continue Learning Section - COMMENTED OUT FOR CTA REPLACEMENT
