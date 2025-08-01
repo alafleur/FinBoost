@@ -147,36 +147,62 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     }
   }, [selectedCycle]);
 
-  const loadCycleAnalytics = async () => {
+  // PHASE 4 STEP 4: Enhanced Cycle Analytics Loading with Cache Busting
+  const loadCycleAnalytics = async (forceFresh = false) => {
     if (!selectedCycle) return;
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/cycles/${selectedCycle.id}/analytics`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      
+      // Add cache-busting timestamp if forcing fresh data
+      const url = forceFresh 
+        ? `/api/admin/cycles/${selectedCycle.id}/analytics?t=${Date.now()}`
+        : `/api/admin/cycles/${selectedCycle.id}/analytics`;
+
+      const response = await fetch(url, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
 
       if (response.ok) {
         const data = await response.json();
         setCycleAnalytics(data);
+        console.log(`[FRONTEND] Cycle analytics refreshed - forceFresh: ${forceFresh}`);
+      } else {
+        console.error('Failed to load cycle analytics:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load cycle analytics:', error);
     }
   };
 
-  const loadWinners = async () => {
+  // PHASE 4 STEP 4: Enhanced Winners Loading with Cache Busting
+  const loadWinners = async (forceFresh = false) => {
     if (!selectedCycle) return;
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      
+      // Add cache-busting timestamp if forcing fresh data
+      const url = forceFresh 
+        ? `/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?t=${Date.now()}`
+        : `/api/admin/cycle-winner-details/${selectedCycle.id}/paginated`;
+
+      const response = await fetch(url, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
 
       if (response.ok) {
         const data = await response.json();
         setWinners(data.winners || []);
+        console.log(`[FRONTEND] Winners data refreshed - forceFresh: ${forceFresh}`);
       } else {
         console.error('Failed to load winners:', response.status, response.statusText);
       }
@@ -391,16 +417,13 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Updated ${result.updatedCount} winner records - Refreshing all data...`,
         });
 
-        // Clear cached data and refresh with force fresh - CACHE BUSTING FIX
-        console.log(`[IMPORT] SUCCESS: Refreshing Enhanced Winners data for cycle ${selectedCycle.id} with forced cache bust`);
-        console.log(`[IMPORT] Clearing all cached state: enhancedWinners, winners`);
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        console.log(`[IMPORT] SUCCESS: Using comprehensive state refresh for cycle ${selectedCycle.id}`);
         setEnhancedWinners([]);
         setWinners([]);
         
-        console.log(`[IMPORT] Refreshing data sources with FORCED REFRESH to prevent stale cache`);
-        await loadWinners();
-        await loadEnhancedWinners(true); // FORCE FRESH DATA with cache busting timestamp
-        console.log(`[IMPORT] COMPLETE: All data refreshed successfully with cache bust`);
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
+        console.log(`[IMPORT] COMPLETE: All data refreshed successfully with comprehensive refresh`);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
@@ -458,8 +481,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Generated ${data.totalWinners} winners using ${selectionMode} method and saved as draft. Ready to view or export.`
         });
 
-        // Refresh the enhanced winners table to show the new selection
-        loadEnhancedWinners();
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       } else {
         toast({
           title: "Selection Failed",
@@ -510,9 +533,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Winner selection confirmed with ${data.winnerCount} winners. You can now export, modify, and import before sealing.`
         });
         setPendingWinners([]);
-        loadWinners();
-        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
-        loadCycleAnalytics();
+        
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       } else {
         toast({
           title: "Save Failed",
@@ -563,9 +586,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Selection for ${selectedCycle.cycleName} is now permanently locked and ready for payout processing.`
         });
         setShowSealConfirmation(false);
-        loadWinners();
-        loadEnhancedWinners();
-        loadCycleAnalytics();
+        
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       } else {
         toast({
           title: "Seal Failed",
@@ -581,6 +604,46 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       });
     } finally {
       setIsSealingSelection(false);
+    }
+  };
+
+  // PHASE 4 STEP 4: Comprehensive State Refresh for UI Consistency
+  const refreshAllCycleData = async (options: { forceFresh?: boolean; showToast?: boolean } = {}) => {
+    const { forceFresh = false, showToast = false } = options;
+    
+    if (!selectedCycle) return;
+
+    try {
+      console.log(`[FRONTEND] Starting comprehensive data refresh - forceFresh: ${forceFresh}`);
+      
+      // Start all refresh operations simultaneously for better performance
+      const refreshPromises = [
+        loadCycleAnalytics(forceFresh),
+        loadWinners(forceFresh),
+        loadEnhancedWinners(forceFresh)
+      ];
+
+      // Wait for all refresh operations to complete
+      await Promise.all(refreshPromises);
+
+      console.log(`[FRONTEND] Comprehensive data refresh completed successfully`);
+      
+      if (showToast) {
+        toast({
+          title: "Data Refreshed",
+          description: "All cycle data has been updated to reflect the latest changes.",
+        });
+      }
+    } catch (error) {
+      console.error('[FRONTEND] Error during comprehensive data refresh:', error);
+      
+      if (showToast) {
+        toast({
+          title: "Refresh Error",
+          description: "Some data may not have refreshed properly. Please try again if needed.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -610,10 +673,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Selection for ${selectedCycle.cycleName} has been reopened for modifications. This action has been logged for audit.`
         });
         setShowUnsealConfirmation(false);
-        // Force refresh all data to ensure UI consistency
-        loadWinners();
-        loadEnhancedWinners(true); // Force fresh data with cache bust
-        loadCycleAnalytics();
+        
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       } else {
         toast({
           title: "Unseal Failed",
@@ -663,8 +725,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Successfully processed ${selectedWinnerIds.length} payouts`
         });
         setSelectedForDisbursement(new Set());
-        loadWinners();
-        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
+        
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       } else {
         toast({
           title: "Error",
@@ -702,9 +765,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         setWinners([]);
         setEnhancedWinners([]);
         setPendingWinners([]);
-        loadWinners();
-        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
-        loadCycleAnalytics();
+        
+        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        await refreshAllCycleData({ forceFresh: true, showToast: false });
       }
     } catch (error) {
       toast({
@@ -1146,8 +1209,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
+                    {/* PHASE 4 STEP 4: Enhanced Force Refresh with Comprehensive State Management */}
                     <Button
-                      onClick={() => loadEnhancedWinners(true)}
+                      onClick={() => refreshAllCycleData({ forceFresh: true, showToast: true })}
                       disabled={loadingEnhanced}
                       variant="outline"
                       size="sm"
@@ -1303,7 +1367,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                             {winner.email}
                           </TableCell>
                           <TableCell className="font-medium text-center text-blue-600">
-                            {winner.pointsAtSelection || winner.cyclePoints || winner.totalPoints || '-'}
+                            {winner.cyclePoints || '-'}
                           </TableCell>
                           <TableCell className="font-medium text-green-600">
                             <Input
