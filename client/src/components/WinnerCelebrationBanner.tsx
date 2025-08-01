@@ -218,16 +218,6 @@ export default function WinnerCelebrationBanner() {
                       <h3 className={`text-lg font-bold ${colors.text}`}>
                         ⚡ Next Cycle Loading...
                       </h3>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 1
-                        }}
-                      >
-                        <Users className="h-4 w-4 text-blue-500" />
-                      </motion.div>
                     </div>
                     
                     <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
