@@ -104,6 +104,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [selectedForDisbursement, setSelectedForDisbursement] = useState<Set<number>>(new Set());
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
+  const [isUnsealingSelection, setIsUnsealingSelection] = useState(false);
+  const [showUnsealConfirmation, setShowUnsealConfirmation] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
   
   // PHASE 2C: Seal Workflow Refinement - Additional state for confirmation workflow
@@ -582,6 +584,54 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     }
   };
 
+  // PHASE 4 STEP 3: Reversible Seal - Unseal Handler with Safety Confirmation
+  const handleUnsealWinnerSelection = async () => {
+    setShowUnsealConfirmation(true);
+  };
+
+  const proceedWithUnsealing = async () => {
+    if (!selectedCycle) return;
+
+    setIsUnsealingSelection(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/cycle-winner-selection/${selectedCycle.id}/unseal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: "Winner Selection Unsealed Successfully",
+          description: `Selection for ${selectedCycle.cycleName} has been reopened for modifications. This action has been logged for audit.`
+        });
+        setShowUnsealConfirmation(false);
+        // Force refresh all data to ensure UI consistency
+        loadWinners();
+        loadEnhancedWinners(true); // Force fresh data with cache bust
+        loadCycleAnalytics();
+      } else {
+        toast({
+          title: "Unseal Failed",
+          description: data.error || "Failed to unseal winner selection. Check if payouts have been processed.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unseal winner selection. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUnsealingSelection(false);
+    }
+  };
+
   const handleProcessPayouts = async () => {
     if (!selectedCycle || selectedForDisbursement.size === 0) {
       toast({
@@ -1005,7 +1055,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                   </div>
                 )}
 
-                {/* PHASE 2B: Sealed Status Indicator */}
+                {/* PHASE 2B: Sealed Status Indicator with PHASE 4 STEP 3: Reversible Seal Controls */}
                 {enhancedWinners.some(w => w.isSealed) && (
                   <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 shadow-sm">
                     <div className="flex items-center justify-between">
@@ -1020,10 +1070,32 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                           Locked
                         </Badge>
                       </div>
-                      <div className="text-xs text-green-700">
-                        {enhancedWinners.find(w => w.sealedAt) && (
-                          `Sealed: ${new Date(enhancedWinners.find(w => w.sealedAt)?.sealedAt || '').toLocaleDateString()}`
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="text-xs text-green-700">
+                          {enhancedWinners.find(w => w.sealedAt) && (
+                            `Sealed: ${new Date(enhancedWinners.find(w => w.sealedAt)?.sealedAt || '').toLocaleDateString()}`
+                          )}
+                        </div>
+                        {/* PHASE 4 STEP 3: Unseal Button with Warning Style */}
+                        <Button 
+                          onClick={handleUnsealWinnerSelection}
+                          disabled={isUnsealingSelection}
+                          variant="outline"
+                          size="sm"
+                          className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400"
+                        >
+                          {isUnsealingSelection ? (
+                            <>
+                              <Timer className="w-4 h-4 mr-2 animate-spin" />
+                              Unsealing...
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="w-4 h-4 mr-2" />
+                              Unseal for Testing
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-green-700 bg-green-50 p-2 rounded">
@@ -1544,6 +1616,86 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 <>
                   <Lock className="w-4 h-4 mr-2" />
                   Seal Final Selection
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PHASE 4 STEP 3: Unseal Confirmation Dialog with Safety Warning */}
+      <Dialog open={showUnsealConfirmation} onOpenChange={setShowUnsealConfirmation}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              Unseal Winner Selection - Testing Mode
+            </DialogTitle>
+            <DialogDescription>
+              This will reopen the sealed selection for <strong>{selectedCycle?.cycleName}</strong> for testing purposes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Warning Box */}
+            <div className="p-4 rounded-lg border border-amber-200 bg-amber-50">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium text-amber-800 mb-2">⚠️ Important Safety Notes</div>
+                  <ul className="text-sm text-amber-700 space-y-1">
+                    <li>• This action will reopen the selection for modifications</li>
+                    <li>• Winner celebration banners will be reset for fresh testing</li>
+                    <li>• Cannot unseal if payouts have already been processed</li>
+                    <li>• This action is logged for audit trail purposes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Audit Trail Notice */}
+            <div className="p-3 rounded border border-blue-200 bg-blue-50">
+              <div className="text-sm text-blue-700">
+                <strong>🔍 Audit Trail:</strong> This unseal operation will be logged with your admin ID and timestamp 
+                for complete accountability and testing workflow documentation.
+              </div>
+            </div>
+
+            {/* Current Status Summary */}
+            <div className="p-3 rounded border border-gray-200 bg-gray-50">
+              <div className="text-sm text-gray-700">
+                <div className="font-medium mb-1">Current Selection Status:</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>Winners: {enhancedWinners.length}</div>
+                  <div>Sealed: {enhancedWinners.some(w => w.isSealed) ? 'Yes' : 'No'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setShowUnsealConfirmation(false)}
+              disabled={isUnsealingSelection}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={proceedWithUnsealing}
+              disabled={isUnsealingSelection}
+              variant="outline"
+              className="border-amber-400 text-amber-700 hover:bg-amber-50"
+            >
+              {isUnsealingSelection ? (
+                <>
+                  <Timer className="w-4 h-4 mr-2 animate-spin" />
+                  Unsealing...
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4 mr-2" />
+                  Proceed with Unseal
                 </>
               )}
             </Button>
