@@ -7227,13 +7227,14 @@ export class MemStorage implements IStorage {
       const sealTimestamp = new Date();
       const sealedByAdmin = adminUserId || 1;
 
-      // Update individual winner records
+      // Update individual winner records - Step 2: Reset notification flags on seal
       await db
         .update(cycleWinnerSelections)
         .set({
           isSealed: true,
           sealedAt: sealTimestamp,
-          sealedBy: sealedByAdmin
+          sealedBy: sealedByAdmin,
+          notificationDisplayed: false // Reset notification flags when sealing
         })
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
 
@@ -7255,6 +7256,80 @@ export class MemStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error sealing cycle winner selection:', error);
+      throw error;
+    }
+  }
+
+  // Step 2: Get user winner status and notification state for celebration banners
+  async getUserWinnerStatus(userId: number): Promise<{
+    isWinner: boolean;
+    cycleId?: number;
+    cycleName?: string;
+    rewardAmount?: number;
+    tier?: string;
+    notificationDisplayed: boolean;
+    payoutStatus?: string;
+  } | null> {
+    try {
+      // Get the most recent sealed cycle winner selection for this user
+      const [winnerRecord] = await db
+        .select({
+          cycleId: cycleWinnerSelections.cycleSettingId,
+          cycleName: cycleSettings.cycleName,
+          rewardAmount: cycleWinnerSelections.rewardAmount,
+          tier: cycleWinnerSelections.tier,
+          notificationDisplayed: cycleWinnerSelections.notificationDisplayed,
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          isSealed: cycleWinnerSelections.isSealed,
+          sealedAt: cycleWinnerSelections.sealedAt
+        })
+        .from(cycleWinnerSelections)
+        .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
+        .where(
+          and(
+            eq(cycleWinnerSelections.userId, userId),
+            eq(cycleWinnerSelections.isSealed, true) // Only sealed cycles
+          )
+        )
+        .orderBy(desc(cycleWinnerSelections.sealedAt))
+        .limit(1);
+
+      if (!winnerRecord) {
+        return null;
+      }
+
+      return {
+        isWinner: true,
+        cycleId: winnerRecord.cycleId,
+        cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
+        rewardAmount: winnerRecord.rewardAmount,
+        tier: winnerRecord.tier,
+        notificationDisplayed: winnerRecord.notificationDisplayed,
+        payoutStatus: winnerRecord.payoutStatus || 'pending'
+      };
+    } catch (error) {
+      console.error('Error getting user winner status:', error);
+      return null;
+    }
+  }
+
+  // Step 2: Mark winner notification as displayed
+  async markWinnerNotificationDisplayed(userId: number, cycleId: number): Promise<void> {
+    try {
+      await db
+        .update(cycleWinnerSelections)
+        .set({ notificationDisplayed: true })
+        .where(
+          and(
+            eq(cycleWinnerSelections.userId, userId),
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            eq(cycleWinnerSelections.isSealed, true)
+          )
+        );
+      
+      console.log(`Marked winner notification as displayed for user ${userId} in cycle ${cycleId}`);
+    } catch (error) {
+      console.error('Error marking winner notification as displayed:', error);
       throw error;
     }
   }

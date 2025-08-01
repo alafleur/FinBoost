@@ -3032,6 +3032,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // STEP 2: USER WINNER STATUS ENDPOINTS
+  // Winner celebration banner notification system
+  // ========================================
+
+  // Get user winner status for celebration banners  
+  app.get("/api/user/winner-status", authenticateToken, async (req, res) => {
+    try {
+      const winnerStatus = await storage.getUserWinnerStatus(req.user.id);
+      res.json({ 
+        success: true, 
+        winner: winnerStatus || { isWinner: false, notificationDisplayed: false }
+      });
+    } catch (error) {
+      console.error("Error getting user winner status:", error);
+      res.status(500).json({ error: "Failed to get winner status" });
+    }
+  });
+
+  // Mark winner notification as displayed (dismiss celebration banner)
+  app.post("/api/user/winner-notification/dismiss", authenticateToken, async (req, res) => {
+    try {
+      const { cycleId } = req.body;
+      
+      if (!cycleId) {
+        return res.status(400).json({ error: "Cycle ID is required" });
+      }
+
+      await storage.markWinnerNotificationDisplayed(req.user.id, cycleId);
+      res.json({ success: true, message: "Winner notification marked as displayed" });
+    } catch (error) {
+      console.error("Error marking winner notification as displayed:", error);
+      res.status(500).json({ error: "Failed to mark winner notification as displayed" });
+    }
+  });
+
   // Cycle Leaderboard and Analytics
   app.get("/api/cycle/:cycleId/leaderboard", async (req, res) => {
     try {
