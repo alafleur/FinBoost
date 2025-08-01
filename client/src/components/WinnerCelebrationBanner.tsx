@@ -246,13 +246,11 @@ export default function WinnerCelebrationBanner() {
                       {winnerStatus?.communityStats && (
                         <>
                           <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
-                            <DollarSign className="h-4 w-4" />
                             <span>{formatCurrency(winnerStatus.communityStats.totalDistributed)}</span>
                             <span className="text-xs text-gray-600">distributed</span>
                           </div>
 
                           <div className="flex items-center gap-1 text-sm font-semibold text-blue-600">
-                            <Trophy className="h-4 w-4" />
                             <span>{winnerStatus.communityStats.totalWinners}</span>
                             <span className="text-xs text-gray-600">winners</span>
                           </div>
