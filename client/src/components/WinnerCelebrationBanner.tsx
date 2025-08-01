@@ -36,6 +36,22 @@ export default function WinnerCelebrationBanner() {
     }).format(amount);
   };
 
+  const formatCurrencyWithSmallCents = (amount: number) => {
+    const formatted = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+    
+    // Split into dollars and cents: "$3.70" -> ["$3", "70"]
+    const parts = formatted.split('.');
+    if (parts.length === 2) {
+      return { dollars: parts[0], cents: parts[1] };
+    }
+    return { dollars: formatted, cents: null };
+  };
+
   const getTierIcon = (tier: string) => {
     switch (tier?.toLowerCase()) {
       case 'tier1':
@@ -171,7 +187,16 @@ export default function WinnerCelebrationBanner() {
                       {/* Step 2.2: ALWAYS use finalPayoutAmount (override) instead of rewardAmount */}
                       {(winnerStatus?.finalPayoutAmount || winnerStatus?.payoutFinal || winnerStatus?.payoutOverride || winnerStatus?.rewardAmount) && (
                         <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
-                          <span>{formatCurrency((winnerStatus.finalPayoutAmount || winnerStatus.payoutFinal || winnerStatus.payoutOverride || winnerStatus.rewardAmount) / 100)}</span>
+                          {(() => {
+                            const payoutAmount = (winnerStatus.finalPayoutAmount || winnerStatus.payoutFinal || winnerStatus.payoutOverride || winnerStatus.rewardAmount) / 100;
+                            const { dollars, cents } = formatCurrencyWithSmallCents(payoutAmount);
+                            return (
+                              <span className="flex items-baseline">
+                                <span>{dollars}</span>
+                                {cents && <span className="text-xs">.{cents}</span>}
+                              </span>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
