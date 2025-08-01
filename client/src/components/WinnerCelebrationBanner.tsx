@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, X, Sparkles, DollarSign, Crown } from "lucide-react";
+import { Trophy, X, Sparkles, DollarSign, Crown, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useWinnerCelebration } from "@/hooks/use-winner-status";
 
@@ -18,10 +18,14 @@ export default function WinnerCelebrationBanner() {
     isDismissing
   } = useWinnerCelebration();
 
-  // Don't render if not a winner or notification already displayed
+  // Don't render if no celebration needed or still loading
   if (!shouldShowCelebration() || isLoading) {
     return null;
   }
+
+  // Step 3: Determine if this is a winner or non-winner celebration
+  const isWinner = winnerStatus?.isWinner === true;
+  const isNonWinner = winnerStatus?.isWinner === false && winnerStatus?.communityStats;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -87,7 +91,15 @@ export default function WinnerCelebrationBanner() {
     }
   };
 
-  const colors = getTierColors(winnerStatus?.tier || '');
+  // Step 3: Choose appropriate styling based on winner/non-winner status
+  const colors = isWinner 
+    ? getTierColors(winnerStatus?.tier || '') 
+    : {
+        gradient: 'from-blue-500 to-indigo-500',
+        bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
+        border: 'border-blue-200',
+        text: 'text-blue-800'
+      };
 
   return (
     <motion.div
@@ -146,63 +158,128 @@ export default function WinnerCelebrationBanner() {
                 }}
                 className={`p-3 bg-white rounded-full shadow-sm border ${colors.border}`}
               >
-                {getTierIcon(winnerStatus?.tier || '')}
+                {isWinner ? getTierIcon(winnerStatus?.tier || '') : <Users className="h-5 w-5 text-blue-500" />}
               </motion.div>
 
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className={`text-lg font-bold ${colors.text}`}>
-                    🎉 Congratulations!
-                  </h3>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                  >
-                    <Sparkles className="h-4 w-4 text-yellow-500" />
-                  </motion.div>
-                </div>
-                
-                <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
-                  You're a winner in <strong>{winnerStatus?.cycleName}</strong>!
-                </p>
-
-                {/* Winner details */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge 
-                    variant="secondary" 
-                    className={`${colors.text} bg-white/70 border ${colors.border} font-semibold`}
-                  >
-                    {getTierDisplayName(winnerStatus?.tier || '')} Winner
-                  </Badge>
-                  
-                  {winnerStatus?.rewardAmount && (
-                    <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
-                      <DollarSign className="h-4 w-4" />
-                      <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
+                {/* Step 3: Winner vs Non-Winner Content */}
+                {isWinner ? (
+                  // Winner Content
+                  <>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`text-lg font-bold ${colors.text}`}>
+                        🎉 Congratulations!
+                      </h3>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }}
+                      >
+                        <Sparkles className="h-4 w-4 text-yellow-500" />
+                      </motion.div>
                     </div>
-                  )}
+                    
+                    <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
+                      You're a winner in <strong>{winnerStatus?.cycleName}</strong>!
+                    </p>
 
-                  <div className="text-xs text-gray-600 font-medium">
-                    Status: <span className="capitalize">{winnerStatus?.payoutStatus || 'Pending'}</span>
-                  </div>
-                </div>
+                    {/* Winner details */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge 
+                        variant="secondary" 
+                        className={`${colors.text} bg-white/70 border ${colors.border} font-semibold`}
+                      >
+                        {getTierDisplayName(winnerStatus?.tier || '')} Winner
+                      </Badge>
+                      
+                      {winnerStatus?.rewardAmount && (
+                        <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                          <DollarSign className="h-4 w-4" />
+                          <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
+                        </div>
+                      )}
 
-                {/* Payout status message */}
-                <div className="mt-3 text-xs text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                    <span>
-                      {winnerStatus?.payoutStatus === 'completed' 
-                        ? 'Your reward has been processed!' 
-                        : 'Your reward will be processed within 3-5 business days'
-                      }
-                    </span>
-                  </div>
-                </div>
+                      <div className="text-xs text-gray-600 font-medium">
+                        Status: <span className="capitalize">{winnerStatus?.payoutStatus || 'Pending'}</span>
+                      </div>
+                    </div>
+
+                    {/* Payout status message */}
+                    <div className="mt-3 text-xs text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        <span>
+                          {winnerStatus?.payoutStatus === 'completed' 
+                            ? 'Your reward has been processed!' 
+                            : 'Your reward will be processed within 3-5 business days'
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Non-Winner Content with Community Stats
+                  <>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`text-lg font-bold ${colors.text}`}>
+                        🎊 Community Achievement!
+                      </h3>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 1
+                        }}
+                      >
+                        <Users className="h-4 w-4 text-blue-500" />
+                      </motion.div>
+                    </div>
+                    
+                    <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
+                      <strong>{winnerStatus?.cycleName}</strong> rewards have been distributed!
+                    </p>
+
+                    {/* Community achievement stats */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge 
+                        variant="secondary" 
+                        className={`${colors.text} bg-white/70 border ${colors.border} font-semibold`}
+                      >
+                        Community Member
+                      </Badge>
+                      
+                      {winnerStatus?.communityStats && (
+                        <>
+                          <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                            <DollarSign className="h-4 w-4" />
+                            <span>{formatCurrency(winnerStatus.communityStats.totalDistributed)}</span>
+                            <span className="text-xs text-gray-600">distributed</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-sm font-semibold text-blue-600">
+                            <Trophy className="h-4 w-4" />
+                            <span>{winnerStatus.communityStats.totalWinners}</span>
+                            <span className="text-xs text-gray-600">winners</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Community participation message */}
+                    <div className="mt-3 text-xs text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                        <span>
+                          Thank you for participating! Keep learning and earning points for the next cycle.
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

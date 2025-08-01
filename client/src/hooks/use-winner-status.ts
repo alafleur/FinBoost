@@ -13,6 +13,12 @@ export interface WinnerStatus {
   tier?: string;
   notificationDisplayed: boolean;
   payoutStatus?: string;
+  // Step 3: Community stats for non-winners
+  communityStats?: {
+    totalDistributed: number;
+    totalWinners: number;
+    currentCycleName?: string;
+  };
 }
 
 export interface WinnerStatusResponse {
@@ -90,14 +96,15 @@ export function useWinnerCelebration() {
   const winnerStatusQuery = useWinnerStatus();
   const dismissNotificationMutation = useDismissWinnerNotification();
 
-  // Helper function to check if winner celebration should be shown
+  // Step 3: Enhanced helper function to check if celebration should be shown for both winners and non-winners
   const shouldShowCelebration = (): boolean => {
     const data = winnerStatusQuery.data as WinnerStatusResponse | undefined;
     const winner = data?.winner;
     return Boolean(
-      winner?.isWinner && 
+      winner && 
       !winner.notificationDisplayed && 
-      winner.cycleId
+      winner.cycleId &&
+      (winner.isWinner || winner.communityStats) // Show for winners OR non-winners with community stats
     );
   };
 

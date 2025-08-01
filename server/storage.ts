@@ -433,6 +433,8 @@ export class MemStorage implements IStorage {
   private tierThresholdCache: { tier1: number, tier2: number, tier3: number } | null = null;
   private tierThresholdCacheTime: number | null = null;
   private tokens = new Map<string, { userId: number; createdAt: Date }>();
+  // Step 3: Session cache for non-winner notification dismissals
+  sessionCache = new Map<string, boolean>();
 
   constructor() {
     this.users = new Map();
@@ -7363,6 +7365,7 @@ export class MemStorage implements IStorage {
   }
 
   // Step 2: Get user winner status and notification state for celebration banners
+  // Step 3: Enhanced getUserWinnerStatus - Support for both winners and non-winners with community stats
   async getUserWinnerStatus(userId: number): Promise<{
     isWinner: boolean;
     cycleId?: number;
@@ -7371,6 +7374,12 @@ export class MemStorage implements IStorage {
     tier?: string;
     notificationDisplayed: boolean;
     payoutStatus?: string;
+    // Community stats for non-winners
+    communityStats?: {
+      totalDistributed: number;
+      totalWinners: number;
+      currentCycleName?: string;
+    };
   } | null> {
     try {
       // Get the most recent sealed cycle winner selection for this user
@@ -7396,18 +7405,91 @@ export class MemStorage implements IStorage {
         .orderBy(desc(cycleWinnerSelections.sealedAt))
         .limit(1);
 
-      if (!winnerRecord) {
-        return null;
+      if (winnerRecord) {
+        // User is a winner
+        return {
+          isWinner: true,
+          cycleId: winnerRecord.cycleId,
+          cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
+          rewardAmount: winnerRecord.rewardAmount,
+          tier: winnerRecord.tier,
+          notificationDisplayed: winnerRecord.notificationDisplayed,
+          payoutStatus: winnerRecord.payoutStatus || 'pending'
+        };
       }
 
+      // User is not a winner - check if user participated in most recent sealed cycle and provide community stats
+      const [mostRecentSealedCycle] = await db
+        .select({
+          cycleId: cycleSettings.id,
+          cycleName: cycleSettings.cycleName,
+          sealedAt: cycleWinnerSelections.sealedAt
+        })
+        .from(cycleSettings)
+        .leftJoin(cycleWinnerSelections, eq(cycleSettings.id, cycleWinnerSelections.cycleSettingId))
+        .where(eq(cycleWinnerSelections.isSealed, true))
+        .orderBy(desc(cycleWinnerSelections.sealedAt))
+        .limit(1);
+
+      if (!mostRecentSealedCycle) {
+        return null; // No sealed cycles yet
+      }
+
+      // Check if user participated in the most recent sealed cycle
+      const [userParticipation] = await db
+        .select({ userId: userCyclePoints.userId })
+        .from(userCyclePoints)
+        .where(
+          and(
+            eq(userCyclePoints.userId, userId),
+            eq(userCyclePoints.cycleSettingId, mostRecentSealedCycle.cycleId)
+          )
+        )
+        .limit(1);
+
+      if (!userParticipation) {
+        return null; // User didn't participate in the most recent cycle
+      }
+
+      // Get community stats for non-winner notification
+      const [totalDistributedResult] = await db
+        .select({
+          totalDistributed: sql<number>`COALESCE(SUM(reward_amount), 0)`
+        })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            eq(cycleWinnerSelections.cycleSettingId, mostRecentSealedCycle.cycleId),
+            eq(cycleWinnerSelections.isSealed, true)
+          )
+        );
+
+      const [totalWinnersResult] = await db
+        .select({
+          totalWinners: sql<number>`COUNT(*)`
+        })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            eq(cycleWinnerSelections.cycleSettingId, mostRecentSealedCycle.cycleId),
+            eq(cycleWinnerSelections.isSealed, true)
+          )
+        );
+
+      // Check if non-winner notification has been dismissed for this cycle
+      const dismissalKey = `non-winner-${userId}-${mostRecentSealedCycle.cycleId}`;
+      const isDismissed = this.sessionCache?.get(dismissalKey) || false;
+
       return {
-        isWinner: true,
-        cycleId: winnerRecord.cycleId,
-        cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
-        rewardAmount: winnerRecord.rewardAmount,
-        tier: winnerRecord.tier,
-        notificationDisplayed: winnerRecord.notificationDisplayed,
-        payoutStatus: winnerRecord.payoutStatus || 'pending'
+        isWinner: false,
+        cycleId: mostRecentSealedCycle.cycleId,
+        cycleName: mostRecentSealedCycle.cycleName || `Cycle ${mostRecentSealedCycle.cycleId}`,
+        notificationDisplayed: isDismissed,
+        communityStats: {
+          totalDistributed: totalDistributedResult?.totalDistributed || 0,
+          totalWinners: totalWinnersResult?.totalWinners || 0,
+          currentCycleName: mostRecentSealedCycle.cycleName
+        }
       };
     } catch (error) {
       console.error('Error getting user winner status:', error);
@@ -7415,10 +7497,10 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // Step 2: Mark winner notification as displayed (Enhanced with return validation)
+  // Step 3: Enhanced notification dismissal - handles both winners and non-winners
   async markWinnerNotificationDisplayed(userId: number, cycleSettingId: number): Promise<{ success: boolean; message: string }> {
     try {
-      // First verify the user is actually a winner in this sealed cycle
+      // First check if the user is a winner in this sealed cycle
       const [winnerRecord] = await db
         .select({ id: cycleWinnerSelections.id })
         .from(cycleWinnerSelections)
@@ -7430,33 +7512,63 @@ export class MemStorage implements IStorage {
           )
         );
 
-      if (!winnerRecord) {
+      if (winnerRecord) {
+        // User is a winner - update their winner record
+        await db
+          .update(cycleWinnerSelections)
+          .set({ notificationDisplayed: true })
+          .where(
+            and(
+              eq(cycleWinnerSelections.userId, userId),
+              eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
+              eq(cycleWinnerSelections.isSealed, true)
+            )
+          );
+        
+        console.log(`[NOTIFICATION] Marked winner notification as displayed for user ${userId} in cycle ${cycleSettingId}`);
+        
         return {
-          success: false,
-          message: `User ${userId} is not a winner in sealed cycle ${cycleSettingId}`
+          success: true,
+          message: `Winner notification dismissed for user ${userId} in cycle ${cycleSettingId}`
         };
       }
 
-      // Update notification flag
-      await db
-        .update(cycleWinnerSelections)
-        .set({ notificationDisplayed: true })
+      // User is not a winner - check if they participated in this cycle
+      const [userParticipation] = await db
+        .select({ userId: userCyclePoints.userId })
+        .from(userCyclePoints)
         .where(
           and(
-            eq(cycleWinnerSelections.userId, userId),
-            eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
-            eq(cycleWinnerSelections.isSealed, true)
+            eq(userCyclePoints.userId, userId),
+            eq(userCyclePoints.cycleSettingId, cycleSettingId)
           )
-        );
+        )
+        .limit(1);
+
+      if (!userParticipation) {
+        return {
+          success: false,
+          message: `User ${userId} did not participate in cycle ${cycleSettingId}`
+        };
+      }
+
+      // For non-winners, we'll store dismissal using a simple in-memory cache for the session
+      // This is acceptable since non-winner notifications are less critical than winner notifications
+      // and only need to persist for the current session
+      const dismissalKey = `non-winner-${userId}-${cycleSettingId}`;
+      if (!this.sessionCache) {
+        this.sessionCache = new Map();
+      }
+      this.sessionCache.set(dismissalKey, true);
       
-      console.log(`[NOTIFICATION] Marked winner notification as displayed for user ${userId} in cycle ${cycleSettingId}`);
+      console.log(`[NOTIFICATION] Marked non-winner notification as displayed for user ${userId} in cycle ${cycleSettingId}`);
       
       return {
         success: true,
-        message: `Winner notification dismissed for user ${userId} in cycle ${cycleSettingId}`
+        message: `Community notification dismissed for user ${userId} in cycle ${cycleSettingId}`
       };
     } catch (error) {
-      console.error('Error marking winner notification as displayed:', error);
+      console.error('Error marking notification as displayed:', error);
       return {
         success: false,
         message: `Failed to dismiss notification: ${error.message}`
