@@ -163,7 +163,8 @@ export default function Dashboard() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          setLocation('/login');
+          console.log('No authentication token found, redirecting to login');
+          setLocation('/auth');
           return;
         }
 
@@ -193,6 +194,11 @@ export default function Dashboard() {
           // Populate PayPal form with existing data
           setPaypalEmail(userData.user.paypalEmail || '');
           setPayoutMethod(userData.user.payoutMethod || 'paypal');
+        } else if (userResponse.status === 401) {
+          console.log('Authentication failed, redirecting to login');
+          localStorage.removeItem('token');
+          setLocation('/auth');
+          return;
         }
 
         // Fetch lesson progress
@@ -374,7 +380,7 @@ export default function Dashboard() {
   const completedLessonIds = lessonProgress.map(progress => progress.moduleId.toString());
 
   // Validate module data integrity before rendering
-  const validateModule = (module) => {
+  const validateModule = (module: any) => {
     return module && 
            module.id && 
            module.title && 
