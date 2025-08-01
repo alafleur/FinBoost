@@ -1828,21 +1828,25 @@ function AdminComponent() {
           setImportResults(result.results);
           
           // Clear cached data and refresh from page 1
-          console.log(`[Import] Clearing cache and refreshing data for cycle ${activeCycle.id}`);
+          console.log(`[Import] SUCCESS: Starting complete cache invalidation for cycle ${activeCycle.id}`);
+          console.log(`[Import] Clearing state: paginatedWinners, enhancedWinnersData`);
           setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
           setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
           
           // Reset pagination state to page 1 in UI
+          console.log(`[Import] Resetting pagination UI: winnerTablePage=${winnerTablePage}→1, enhancedWinnersPage=${enhancedWinnersPage}→1`);
           setWinnerTablePage(1);
           setEnhancedWinnersPage(1);
           
           // Refresh all winner data sources from page 1
+          console.log(`[Import] Refreshing data sources: loadEnhancedWinnersPaginated, loadPaginatedWinnerDetails`);
           await loadEnhancedWinnersPaginated(activeCycle.id, 1, winnersPerPage);
           await loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
+          console.log(`[Import] COMPLETE: All data sources refreshed, user now on page 1`);
 
           toast({
             title: "Import completed",
-            description: `Processed ${result.results.processed} rows, updated ${result.results.updated} winners`,
+            description: `Processed ${result.results.processed} rows, updated ${result.results.updated} winners - All data refreshed`,
           });
         } catch (error) {
           console.error('Error importing winners:', error);

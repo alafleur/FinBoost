@@ -399,20 +399,25 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         console.log(`[Import] Successfully imported ${result.updatedCount} records`);
         toast({
           title: "Import Successful",
-          description: `Updated ${result.updatedCount} winner records`,
+          description: `Updated ${result.updatedCount} winner records - Refreshing all data...`,
         });
 
         // Clear cached data and refresh
-        console.log(`[Import] Clearing cache and refreshing data for page ${enhancedWinnersPage}`);
+        console.log(`[Import] SUCCESS: Starting complete cache invalidation for cycle ${selectedCycle.id}`);
+        console.log(`[Import] Clearing state: enhancedWinners, enhancedWinnersData, winners`);
         setEnhancedWinners([]);
         setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
         setWinners([]); // Clear basic winners cache
         
         // Reset to page 1 and reload all data sources
+        console.log(`[Import] Resetting pagination to page 1 (was page ${enhancedWinnersPage})`);
         setEnhancedWinnersPage(1);
+        
+        console.log(`[Import] Refreshing all data sources: loadWinners, loadEnhancedWinners, loadEnhancedWinnersPaginated`);
         await loadWinners(); // Fix: Add missing loadWinners() call
         await loadEnhancedWinners();
         await loadEnhancedWinnersPaginated(1);
+        console.log(`[Import] COMPLETE: All data sources refreshed successfully`);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
