@@ -104,13 +104,27 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   const [isSavingSelection, setIsSavingSelection] = useState(false);
   const [isSealingSelection, setIsSealingSelection] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
+  
+  // PHASE 2C: Seal Workflow Refinement - Additional state for confirmation workflow
+  const [showSealConfirmation, setShowSealConfirmation] = useState(false);
+  const [sealConfirmationStep, setSealConfirmationStep] = useState(1);
+  const [sealConfirmationChecks, setSealConfirmationChecks] = useState({
+    reviewedData: false,
+    confirmedFinal: false,
+    understoodIrreversible: false
+  });
 
   // === PHASE 3: ENHANCED SELECTED WINNERS STATE ===
-  const [enhancedWinners, setEnhancedWinners] = useState([]);
+  const [enhancedWinners, setEnhancedWinners] = useState<EnhancedWinnerData[]>([]);
 
   // Enhanced Winners pagination state
   const [enhancedWinnersPage, setEnhancedWinnersPage] = useState(1);
-  const [enhancedWinnersData, setEnhancedWinnersData] = useState({
+  const [enhancedWinnersData, setEnhancedWinnersData] = useState<{
+    winners: EnhancedWinnerData[];
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+  }>({
     winners: [],
     totalCount: 0,
     currentPage: 1,
@@ -521,7 +535,18 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     }
   };
 
+  // PHASE 2C: Enhanced seal workflow with multi-step confirmation
   const handleSealWinnerSelection = async () => {
+    setShowSealConfirmation(true);
+    setSealConfirmationStep(1);
+    setSealConfirmationChecks({
+      reviewedData: false,
+      confirmedFinal: false,
+      understoodIrreversible: false
+    });
+  };
+
+  const proceedWithSealing = async () => {
     if (!selectedCycle) return;
 
     setIsSealingSelection(true);
@@ -538,11 +563,12 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
       const data = await response.json();
       if (data.success) {
         toast({
-          title: "Winner Selection Sealed",
-          description: "Winner selection is now final and cannot be modified."
+          title: "Winner Selection Sealed Successfully",
+          description: `Selection for ${selectedCycle.cycleName} is now permanently locked and ready for payout processing.`
         });
+        setShowSealConfirmation(false);
         loadWinners();
-        loadEnhancedWinners(); // Phase 3: Also refresh enhanced winners
+        loadEnhancedWinners();
         loadCycleAnalytics();
       } else {
         toast({
@@ -1396,6 +1422,151 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           )}
         </>
       )}
+
+      {/* PHASE 2C: Enhanced Seal Confirmation Dialog */}
+      <Dialog open={showSealConfirmation} onOpenChange={setShowSealConfirmation}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              Seal Winner Selection - Confirmation Required
+            </DialogTitle>
+            <DialogDescription>
+              This action will permanently lock the selection for <strong>{selectedCycle?.cycleName}</strong>. 
+              Please complete all confirmation steps below.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Step 1: Data Review */}
+            <div className={`p-4 rounded-lg border ${sealConfirmationStep >= 1 ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                  sealConfirmationChecks.reviewedData ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {sealConfirmationChecks.reviewedData ? '✓' : '1'}
+                </div>
+                <span className="font-medium">Review Selection Data</span>
+              </div>
+              <div className="text-sm text-gray-600 mb-3">
+                Confirm you have reviewed all winner data, payout amounts, and PayPal email addresses.
+              </div>
+              <div className="bg-white p-3 rounded border text-xs">
+                <div className="grid grid-cols-3 gap-4 mb-2">
+                  <div><strong>Total Winners:</strong> {enhancedWinners.length}</div>
+                  <div><strong>Total Payout:</strong> ${enhancedWinners.reduce((sum, w) => sum + w.payoutFinal, 0) / 100}</div>
+                  <div><strong>Cycle:</strong> {selectedCycle?.cycleName}</div>
+                </div>
+                <div className="text-gray-500">
+                  Missing PayPal: {enhancedWinners.filter(w => !w.paypalEmail).length} winners
+                </div>
+              </div>
+              <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sealConfirmationChecks.reviewedData}
+                  onChange={(e) => setSealConfirmationChecks(prev => ({
+                    ...prev,
+                    reviewedData: e.target.checked
+                  }))}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm">I have reviewed all selection data and amounts</span>
+              </label>
+            </div>
+
+            {/* Step 2: Final Confirmation */}
+            <div className={`p-4 rounded-lg border ${sealConfirmationStep >= 2 || sealConfirmationChecks.reviewedData ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                  sealConfirmationChecks.confirmedFinal ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                }`}>
+                  {sealConfirmationChecks.confirmedFinal ? '✓' : '2'}
+                </div>
+                <span className="font-medium">Confirm Final Selection</span>
+              </div>
+              <div className="text-sm text-gray-600 mb-3">
+                This selection is final and ready for payout processing.
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sealConfirmationChecks.confirmedFinal}
+                  onChange={(e) => setSealConfirmationChecks(prev => ({
+                    ...prev,
+                    confirmedFinal: e.target.checked
+                  }))}
+                  disabled={!sealConfirmationChecks.reviewedData}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm">This selection is accurate and final</span>
+              </label>
+            </div>
+
+            {/* Step 3: Irreversible Warning */}
+            <div className={`p-4 rounded-lg border ${sealConfirmationChecks.confirmedFinal ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                  sealConfirmationChecks.understoodIrreversible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {sealConfirmationChecks.understoodIrreversible ? '✓' : '⚠'}
+                </div>
+                <span className="font-medium text-red-800">Understand Irreversible Action</span>
+              </div>
+              <div className="text-sm text-red-700 mb-3 bg-red-100 p-2 rounded">
+                <strong>⚠️ WARNING:</strong> Once sealed, you cannot modify winners, amounts, or regenerate the selection. 
+                The data becomes permanently locked for payout processing.
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sealConfirmationChecks.understoodIrreversible}
+                  onChange={(e) => setSealConfirmationChecks(prev => ({
+                    ...prev,
+                    understoodIrreversible: e.target.checked
+                  }))}
+                  disabled={!sealConfirmationChecks.confirmedFinal}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm font-medium">I understand this action is irreversible</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setShowSealConfirmation(false)}
+              disabled={isSealingSelection}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={proceedWithSealing}
+              disabled={
+                !sealConfirmationChecks.reviewedData || 
+                !sealConfirmationChecks.confirmedFinal || 
+                !sealConfirmationChecks.understoodIrreversible ||
+                isSealingSelection
+              }
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isSealingSelection ? (
+                <>
+                  <Timer className="w-4 h-4 mr-2 animate-spin" />
+                  Sealing Selection...
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Seal Final Selection
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
