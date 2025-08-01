@@ -93,7 +93,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
   const [tierThresholds, setTierThresholds] = useState<any>(null);
   const [lessonProgress, setLessonProgress] = useState<any[]>([]);
@@ -194,8 +194,8 @@ export default function Dashboard() {
           // Populate PayPal form with existing data
           setPaypalEmail(userData.user.paypalEmail || '');
           setPayoutMethod(userData.user.payoutMethod || 'paypal');
-        } else if (userResponse.status === 401) {
-          console.log('Authentication failed, redirecting to login');
+        } else if (userResponse.status === 401 || userResponse.status === 500) {
+          console.log('Authentication failed (malformed token), clearing and redirecting to login');
           localStorage.removeItem('token');
           setLocation('/auth');
           return;
