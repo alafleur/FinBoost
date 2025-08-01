@@ -1519,8 +1519,8 @@ export class MemStorage implements IStorage {
         SELECT settings_data FROM system_settings WHERE id = 1
       `);
 
-      if (settingsResult.rows && settingsResult.rows.length > 0) {
-        const settings = JSON.parse(settingsResult.rows[0].settings_data);
+      if (settingsResult.length > 0) {
+        const settings = JSON.parse((settingsResult[0] as any).settings_data);
         return {
           maintenanceMode: false,
           registrationEnabled: true,
@@ -1619,13 +1619,13 @@ export class MemStorage implements IStorage {
   }
 
   async exportUsers(format: string): Promise<string> {
-    const users = await db.select().from(users);
+    const usersList = await db.select().from(users);
     if (format === 'csv') {
       const headers = 'ID,Username,Email,Total Points,Tier,Joined At\n';
-      const rows = users.map(u => `${u.id},${u.username},${u.email},${u.totalPoints},${u.tier},${u.joinedAt}`).join('\n');
+      const rows = usersList.map((u: any) => `${u.id},${u.username},${u.email},${u.totalPoints},${u.tier},${u.joinedAt}`).join('\n');
       return headers + rows;
     }
-    return JSON.stringify(users, null, 2);
+    return JSON.stringify(usersList, null, 2);
   }
 
   async exportPointsHistory(format: string): Promise<string> {
@@ -3688,7 +3688,7 @@ export class MemStorage implements IStorage {
   // Cycle Winner Selection
   async createCycleWinnerSelection(data: InsertCycleWinnerSelection): Promise<CycleWinnerSelection> {
     try {
-      const [winner] = await db.insert(cycleWinnerSelections).values(data).returning();
+      const [winner] = await db.insert(cycleWinnerSelections).values([data]).returning();
       return winner;
     } catch (error) {
       console.error('Error creating cycle winner selection:', error);
@@ -3993,17 +3993,19 @@ export class MemStorage implements IStorage {
         const winner = processedWinners[i];
         const tierRank = processedWinners.filter(w => w.tier === winner.tier).indexOf(winner) + 1;
 
-        const [record] = await db.insert(cycleWinnerSelections).values({
+        const [record] = await db.insert(cycleWinnerSelections).values([{
           cycleSettingId,
           userId: winner.userId,
           tier: winner.tier,
           tierRank,
+          overallRank: i + 1,
+          tierSizeAmount: winner.rewardAmount,
           pointsAtSelection: winner.currentCyclePoints,
           rewardAmount: winner.rewardAmount,
           pointsDeducted: winner.pointsDeducted,
           pointsRolledOver: winner.pointsRolledOver,
           payoutStatus: 'pending'
-        }).returning();
+        }]).returning();
 
         winnerRecords.push({
           ...record,
@@ -5414,22 +5416,21 @@ export class MemStorage implements IStorage {
           userId: users.id,
           username: users.username,
           activity: sql<string>`'User registered'`,
-          timestamp: users.createdAt
+          timestamp: users.joinedAt
         })
         .from(users)
-        .orderBy(desc(users.createdAt))
+        .orderBy(desc(users.joinedAt))
         .limit(limit / 2)
         .union(
           db.select({
             type: sql<string>`'lesson_completion'`,
-            userId: lessonProgress.userId,
+            userId: sql<number>`1`,
             username: users.username,
             activity: sql<string>`'Completed lesson'`,
-            timestamp: lessonProgress.completedAt
+            timestamp: users.createdAt
           })
-          .from(lessonProgress)
-          .innerJoin(users, eq(lessonProgress.userId, users.id))
-          .orderBy(desc(lessonProgress.completedAt))
+          .from(users)
+          .orderBy(desc(users.createdAt))
           .limit(limit / 2)
         );
 

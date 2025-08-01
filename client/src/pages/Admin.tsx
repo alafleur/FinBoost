@@ -597,7 +597,7 @@ function AdminComponent() {
   };
 
   const exportUserEnrollment = (format: 'csv' | 'xlsx') => {
-    const exportData = userCyclePoints.map((userPoints) => {
+    const exportData = userCyclePoints.map((userPoints: any) => {
       const userPredictions = userPoints.predictions || [];
       
       return {
@@ -611,7 +611,7 @@ function AdminComponent() {
           ? new Date(userPoints.lastActivityDate).toLocaleDateString()
           : 'No activity',
         'Predictions Count': userPredictions.length,
-        'Prediction Answers': userPredictions.map(p => 
+        'Prediction Answers': userPredictions.map((p: any) => 
           `${p.question.substring(0, 20)}...: ${String.fromCharCode(65 + p.selectedOptionIndex)}`
         ).join('; ')
       };
@@ -710,7 +710,7 @@ function AdminComponent() {
 
   // Load winners when selected cycle changes
   useEffect(() => {
-    if (selectedCycle?.selectionCompleted) {
+    if ((selectedCycle as any)?.selectionCompleted) {
       loadWinners();
     }
   }, [selectedCycle]);
@@ -723,11 +723,11 @@ function AdminComponent() {
         console.log('Loading paginated winners for operations tab');
         loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
         // Also check if selection was already completed (persistence fix)
-        if (activeCycle.selectionCompleted) {
+        if ((activeCycle as any).selectionCompleted) {
           console.log('Cycle selection already completed, loading existing winners');
           setSelectionResults({
-            winnersSelected: activeCycle.totalWinners || 0,
-            totalRewardPool: (activeCycle.totalRewardPool || 0) / 100,
+            winnersSelected: (activeCycle as any).totalWinners || 0,
+            totalRewardPool: ((activeCycle as any).totalRewardPool || 0) / 100,
             selectionMode: 'loaded_from_database'
           });
         }
@@ -2092,7 +2092,7 @@ function AdminComponent() {
     // Calculate ratio for each tier: average_reward_amount / average_points
     Object.keys(tiers).forEach((tierKey) => {
       const tierUsers = tiers[tierKey as keyof typeof tiers];
-      const tierPool = poolData[`${tierKey}Pool` as keyof typeof poolData] || 0;
+      const tierPool = (poolData as any)[`${tierKey}Pool`] || 0;
       
       if (tierUsers.length > 0) {
         const avgReward = tierPool / tierUsers.length;
@@ -3186,7 +3186,7 @@ function AdminComponent() {
 
           <TabsContent value="cycle-management">
             <CycleManagementTab 
-              cycleSettings={cycleSettings} 
+              cycleSettings={cycleSettings as any} 
               onRefresh={fetchData}
             />
           </TabsContent>
