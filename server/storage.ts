@@ -294,6 +294,10 @@ export interface IStorage {
     getCycleWinnerDetailsPaginated(cycleSettingId: number, page: number, limit: number): Promise<{winners: any[], totalCount: number}>;
     performCycleWinnerSelection(cycleSettingId: number): Promise<CycleWinnerSelection[]>;
     
+    // Seal and Unseal Operations
+    sealCycleWinnerSelection(cycleSettingId: number, adminUserId?: number): Promise<{ sealed: boolean; message: string }>;
+    unsealCycleWinnerSelection(cycleSettingId: number, adminUserId: number): Promise<{ unsealed: boolean; message: string }>;
+    
     // Selected Winners Export/Import (Phase 2)
     getCycleWinnersForExport(cycleSettingId: number): Promise<Array<{
       overallRank: number;
@@ -398,6 +402,18 @@ export interface IStorage {
       totalPointsEarned: number;
       accuracyRate: number;
     }>;
+    
+    // Winner Celebration Notification System
+    getUserWinnerStatus(userId: number): Promise<{
+      isWinner: boolean;
+      tier?: string;
+      rank?: number;
+      cycleId?: number;
+      cycleName?: string;
+      notificationDisplayed?: boolean;
+      isSealed?: boolean;
+    } | null>;
+    markWinnerNotificationDisplayed(userId: number, cycleSettingId: number): Promise<{ success: boolean; message: string }>;
 }
 
 import fs from 'fs/promises';
@@ -7260,6 +7276,92 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // NEW: Unseal the winner selection (reversible for testing) - Enhanced Step 1 Implementation
+  async unsealCycleWinnerSelection(cycleSettingId: number, adminUserId: number): Promise<{ unsealed: boolean; message: string }> {
+    try {
+      // First validate that cycle exists and is currently sealed
+      const [cycleSetting] = await db
+        .select()
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      if (!cycleSetting) {
+        throw new Error('Cycle setting not found');
+      }
+
+      if (!cycleSetting.selectionSealed) {
+        return {
+          unsealed: false,
+          message: 'Cycle selection is not currently sealed - nothing to unseal'
+        };
+      }
+
+      // Safety validation: Prevent unsealing if payouts have been processed
+      const processedPayouts = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
+            ne(cycleWinnerSelections.payoutStatus, 'pending')
+          )
+        );
+
+      const processedPayoutCount = processedPayouts[0]?.count || 0;
+      
+      if (processedPayoutCount > 0) {
+        throw new Error('Cannot unseal cycle - payouts have been processed. This operation is not reversible.');
+      }
+
+      // Validate winners exist before unsealing
+      const winnerCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
+      const actualWinnerCount = winnerCount[0]?.count || 0;
+      
+      if (actualWinnerCount === 0) {
+        throw new Error('Cannot unseal cycle - no winners found in database');
+      }
+
+      // Enhanced Step 1: Comprehensive state reset with audit trail
+      const unsealTimestamp = new Date();
+
+      // Reset individual winner records to draft state
+      await db
+        .update(cycleWinnerSelections)
+        .set({
+          isSealed: false,
+          sealedAt: null,
+          sealedBy: null,
+          notificationDisplayed: false // Reset notification flags for fresh celebration testing
+        })
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
+      // Reset cycle to unsealed state (returns to draft)
+      await db
+        .update(cycleSettings)
+        .set({
+          selectionSealed: false,
+          selectionSealedAt: null,
+          selectionSealedBy: null
+        })
+        .where(eq(cycleSettings.id, cycleSettingId));
+
+      // Audit trail: Log the unseal action for admin accountability
+      console.log(`[UNSEAL AUDIT] Cycle ${cycleSettingId} unsealed by admin ${adminUserId} at ${unsealTimestamp.toISOString()} - ${actualWinnerCount} winners returned to draft state`);
+
+      return {
+        unsealed: true,
+        message: `Cycle ${cycleSettingId} successfully unsealed with ${actualWinnerCount} winners. Winner selections returned to draft state for testing.`
+      };
+    } catch (error) {
+      console.error('Error unsealing cycle winner selection:', error);
+      throw error;
+    }
+  }
+
   // Step 2: Get user winner status and notification state for celebration banners
   async getUserWinnerStatus(userId: number): Promise<{
     isWinner: boolean;
@@ -7313,24 +7415,52 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // Step 2: Mark winner notification as displayed
-  async markWinnerNotificationDisplayed(userId: number, cycleId: number): Promise<void> {
+  // Step 2: Mark winner notification as displayed (Enhanced with return validation)
+  async markWinnerNotificationDisplayed(userId: number, cycleSettingId: number): Promise<{ success: boolean; message: string }> {
     try {
+      // First verify the user is actually a winner in this sealed cycle
+      const [winnerRecord] = await db
+        .select({ id: cycleWinnerSelections.id })
+        .from(cycleWinnerSelections)
+        .where(
+          and(
+            eq(cycleWinnerSelections.userId, userId),
+            eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
+            eq(cycleWinnerSelections.isSealed, true)
+          )
+        );
+
+      if (!winnerRecord) {
+        return {
+          success: false,
+          message: `User ${userId} is not a winner in sealed cycle ${cycleSettingId}`
+        };
+      }
+
+      // Update notification flag
       await db
         .update(cycleWinnerSelections)
         .set({ notificationDisplayed: true })
         .where(
           and(
             eq(cycleWinnerSelections.userId, userId),
-            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            eq(cycleWinnerSelections.cycleSettingId, cycleSettingId),
             eq(cycleWinnerSelections.isSealed, true)
           )
         );
       
-      console.log(`Marked winner notification as displayed for user ${userId} in cycle ${cycleId}`);
+      console.log(`[NOTIFICATION] Marked winner notification as displayed for user ${userId} in cycle ${cycleSettingId}`);
+      
+      return {
+        success: true,
+        message: `Winner notification dismissed for user ${userId} in cycle ${cycleSettingId}`
+      };
     } catch (error) {
       console.error('Error marking winner notification as displayed:', error);
-      throw error;
+      return {
+        success: false,
+        message: `Failed to dismiss notification: ${error.message}`
+      };
     }
   }
 
