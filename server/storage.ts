@@ -7382,7 +7382,7 @@ export class MemStorage implements IStorage {
     };
   } | null> {
     try {
-      // Get the most recent sealed cycle winner selection for this user
+      // Step 2.1: Simplified logic - Check if user is a winner in most recent sealed cycle
       const [winnerRecord] = await db
         .select({
           cycleId: cycleWinnerSelections.cycleSettingId,
