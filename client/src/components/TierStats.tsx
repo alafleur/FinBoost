@@ -1,3 +1,5 @@
+import { DashboardColors } from "@/lib/colors";
+
 interface TierThresholds {
   tier1: number;
   tier2: number;
@@ -32,14 +34,10 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
 
   const getTierColors = (tierId: string, isCurrentTier: boolean) => {
     if (isCurrentTier) {
-      return 'border-gray-300 bg-gray-50 relative overflow-hidden';
+      return 'border-gray-300 bg-gradient-to-br from-gray-50 to-slate-50 relative overflow-hidden';
     } else {
       return 'border-gray-200 bg-white';
     }
-  };
-
-  const getCurrentBadgeColor = (tierId: string) => {
-    return 'bg-gray-900 text-white';
   };
 
   const tiers = [
@@ -71,13 +69,13 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
           className={`border rounded-lg p-4 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
         >
           {tier.isCurrentTier && (
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+            <div className={`absolute top-0 left-0 w-full h-1 ${DashboardColors.accent.primary}`}></div>
           )}
           
-          <div className="text-sm font-semibold text-gray-900 mb-1">
+          <div className={`text-sm font-semibold ${DashboardColors.text.primary} mb-1`}>
             {tier.name}
           </div>
-          <div className="text-xs text-gray-500">
+          <div className={`text-xs ${DashboardColors.text.muted}`}>
             {tier.range} pts
           </div>
         </div>

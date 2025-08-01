@@ -31,6 +31,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import TierStats from "@/components/TierStats";
 import finboostLogo from "@/assets/finboost-logo-v10.png";
+import { DashboardColors } from "@/lib/colors";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
 import RewardsHistory from "@/components/RewardsHistory";
@@ -125,9 +126,9 @@ export default function Dashboard() {
               {leaderboardData.tier1?.slice(0, 3).map((entry: any, index: number) => (
                 <div key={entry.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-shrink-0">
-                    {index === 0 && <Crown className="h-5 w-5 text-yellow-500" />}
-                    {index === 1 && <Medal className="h-5 w-5 text-gray-400" />}
-                    {index === 2 && <Medal className="h-5 w-5 text-orange-500" />}
+                    {index === 0 && <Crown className={`h-5 w-5 ${DashboardColors.iconColor.primary}`} />}
+                    {index === 1 && <Medal className={`h-5 w-5 ${DashboardColors.iconColor.neutral}`} />}
+                    {index === 2 && <Medal className={`h-5 w-5 ${DashboardColors.iconColor.neutral}`} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{entry.username}</p>
@@ -280,17 +281,8 @@ export default function Dashboard() {
   }, [setLocation, toast]);
 
   const getTierColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case 'platinum':
-        return 'bg-gradient-to-r from-gray-200 to-gray-400';
-      case 'gold':
-        return 'bg-gradient-to-r from-yellow-300 to-yellow-500';
-      case 'silver':
-        return 'bg-gradient-to-r from-gray-300 to-gray-500';
-      case 'bronze':
-      default:
-        return 'bg-gradient-to-r from-orange-400 to-orange-600';
-    }
+    // Use consistent neutral colors for all tier badges
+    return DashboardColors.accent.neutral;
   };
 
   const getTierDisplayName = (tier: string) => {
