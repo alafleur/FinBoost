@@ -552,7 +552,7 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
-                    iconColor="neutral"
+                    iconColor="blue"
                     title="Tier Thresholds"
                   />
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
@@ -569,7 +569,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Users}
-                  iconColor="primary"
+                  iconColor="blue"
                   title="Community Growth"
                 />
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
@@ -1248,7 +1248,7 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
-                    iconColor="neutral"
+                    iconColor="blue"
                     title="Tier Thresholds"
                     titleSize="lg"
                   />
@@ -1266,7 +1266,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Users}
-                  iconColor="primary"
+                  iconColor="blue"
                   title="Community Growth"
                   titleSize="lg"
                 />
