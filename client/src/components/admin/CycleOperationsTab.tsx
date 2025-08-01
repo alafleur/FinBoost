@@ -117,6 +117,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
 
   // === PHASE 3: ENHANCED SELECTED WINNERS STATE ===
   const [enhancedWinners, setEnhancedWinners] = useState<EnhancedWinnerData[]>([]);
+  const [loadingEnhanced, setLoadingEnhanced] = useState(false);
 
   // Removed pagination - showing all enhanced winners in one scrollable table
   const [isExporting, setIsExporting] = useState(false);
@@ -187,6 +188,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     if (!selectedCycle) return;
 
     try {
+      setLoadingEnhanced(true);
       const token = localStorage.getItem('token');
       console.log(`[FRONTEND] Loading enhanced winners for cycle ${selectedCycle.id} - forceFresh: ${forceFresh}`);
 
@@ -236,6 +238,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         variant: "destructive"
       });
       setEnhancedWinners([]);
+    } finally {
+      setLoadingEnhanced(false);
     }
   };
 
