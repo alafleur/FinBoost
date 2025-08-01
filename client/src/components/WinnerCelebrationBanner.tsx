@@ -59,36 +59,13 @@ export default function WinnerCelebrationBanner() {
   };
 
   const getTierColors = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case 'tier1':
-        return {
-          gradient: 'from-yellow-500 to-amber-500',
-          bg: 'bg-gradient-to-br from-yellow-50 to-amber-50',
-          border: 'border-yellow-200',
-          text: 'text-yellow-800'
-        };
-      case 'tier2':
-        return {
-          gradient: 'from-gray-500 to-slate-500',
-          bg: 'bg-gradient-to-br from-gray-50 to-slate-50',
-          border: 'border-gray-200',
-          text: 'text-gray-800'
-        };
-      case 'tier3':
-        return {
-          gradient: 'from-orange-500 to-red-500',
-          bg: 'bg-gradient-to-br from-orange-50 to-red-50',
-          border: 'border-orange-200',
-          text: 'text-orange-800'
-        };
-      default:
-        return {
-          gradient: 'from-blue-500 to-indigo-500',
-          bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
-          border: 'border-blue-200',
-          text: 'text-blue-800'
-        };
-    }
+    // Changed to green styling for all tiers as requested
+    return {
+      gradient: 'from-green-500 to-emerald-500',
+      bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
+      border: 'border-green-200',
+      text: 'text-green-800'
+    };
   };
 
   // Step 3: Choose appropriate styling based on winner/non-winner status
@@ -201,21 +178,14 @@ export default function WinnerCelebrationBanner() {
                           <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
                         </div>
                       )}
-
-                      <div className="text-xs text-gray-600 font-medium">
-                        Status: <span className="capitalize">{winnerStatus?.payoutStatus || 'Pending'}</span>
-                      </div>
                     </div>
 
-                    {/* Payout status message */}
+                    {/* Community stats for current cycle */}
                     <div className="mt-3 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
                         <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                         <span>
-                          {winnerStatus?.payoutStatus === 'completed' 
-                            ? 'Your reward has been processed!' 
-                            : 'Your reward will be processed within 3-5 business days'
-                          }
+                          {formatCurrency(winnerStatus?.communityStats?.totalDistributed || 0)} total pool rewards distributed to {winnerStatus?.communityStats?.totalWinners || 0} members
                         </span>
                       </div>
                     </div>

@@ -7406,6 +7406,31 @@ export class MemStorage implements IStorage {
         .limit(1);
 
       if (winnerRecord) {
+        // Get community stats for winner's cycle as well
+        const [totalDistributedResult] = await db
+          .select({
+            totalDistributed: sql<number>`COALESCE(SUM(reward_amount), 0)`
+          })
+          .from(cycleWinnerSelections)
+          .where(
+            and(
+              eq(cycleWinnerSelections.cycleSettingId, winnerRecord.cycleId),
+              eq(cycleWinnerSelections.isSealed, true)
+            )
+          );
+
+        const [totalWinnersResult] = await db
+          .select({
+            totalWinners: sql<number>`COUNT(*)`
+          })
+          .from(cycleWinnerSelections)
+          .where(
+            and(
+              eq(cycleWinnerSelections.cycleSettingId, winnerRecord.cycleId),
+              eq(cycleWinnerSelections.isSealed, true)
+            )
+          );
+
         // User is a winner
         return {
           isWinner: true,
@@ -7414,7 +7439,12 @@ export class MemStorage implements IStorage {
           rewardAmount: winnerRecord.rewardAmount,
           tier: winnerRecord.tier,
           notificationDisplayed: winnerRecord.notificationDisplayed,
-          payoutStatus: winnerRecord.payoutStatus || 'pending'
+          payoutStatus: winnerRecord.payoutStatus || 'pending',
+          communityStats: {
+            totalDistributed: totalDistributedResult?.totalDistributed || 0,
+            totalWinners: totalWinnersResult?.totalWinners || 0,
+            currentCycleName: winnerRecord.cycleName
+          }
         };
       }
 
