@@ -409,7 +409,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center" role="status" aria-live="polite">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" aria-hidden="true" />
+          <div className={`animate-spin w-8 h-8 border-4 ${DashboardColors.accent.primary.replace('bg-gradient-to-r', 'border-blue-600')} border-t-transparent rounded-full mx-auto`} aria-hidden="true" />
           <div className="space-y-2">
             <p className="text-lg font-semibold text-gray-900">Loading your dashboard...</p>
             <p className="text-sm text-gray-600">Getting your latest progress and rewards</p>
@@ -552,11 +552,11 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
-                    iconColor="yellow"
+                    iconColor="neutral"
                     title="Tier Thresholds"
                   />
-                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border border-yellow-200 shadow-lg p-6 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-500 to-amber-500"></div>
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.neutral}`}></div>
                     <TierStats 
                       tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
                       user={user}
@@ -569,11 +569,11 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Users}
-                  iconColor="purple"
+                  iconColor="primary"
                   title="Community Growth"
                 />
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200 shadow-lg overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-violet-500"></div>
+                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
+                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
                   <CommunityGrowthDial 
                     poolData={poolData}
                     user={user as any}

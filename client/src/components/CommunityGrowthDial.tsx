@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Users, DollarSign, TrendingUp, Gift, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardColors } from "@/lib/colors";
 
 interface CommunityGrowthDialProps {
   poolData: {
@@ -295,7 +296,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               </svg>
               {/* Center text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold text-blue-800">{rewardsPercentage}%</div>
+                <div className={`text-2xl font-bold ${DashboardColors.text.primary}`}>{rewardsPercentage}%</div>
                 <div className="text-xs text-gray-600 text-center">to rewards</div>
               </div>
             </div>

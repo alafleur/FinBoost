@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Zap
 } from 'lucide-react';
+import { DashboardColors } from '@/lib/colors';
 
 interface User {
   id: number;
@@ -154,7 +155,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
               }
             </div>
             {user.subscriptionStatus !== 'active' && (
-              <p className="text-xs text-orange-600 mt-1">
+              <p className={`text-xs ${DashboardColors.text.muted} mt-1`}>
                 Upgrade to claim as real points
               </p>
             )}
@@ -171,7 +172,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             </div>
             <div className="text-2xl font-bold">{user.currentCyclePoints}</div>
             {user.subscriptionStatus !== 'active' && (
-              <p className="text-xs text-orange-600 mt-1">
+              <p className={`text-xs ${DashboardColors.text.muted} mt-1`}>
                 Theoretical points only
               </p>
             )}
@@ -244,7 +245,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
               <div key={activity.id} className="flex items-center justify-between text-sm">
                 <span className="text-gray-600 truncate">{activity.description}</span>
                 <div className="flex items-center space-x-1">
-                  <span className={`font-bold ${activity.points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`font-bold ${activity.points >= 0 ? DashboardColors.text.success : 'text-red-600'}`}>
                     {activity.points >= 0 ? '+' : ''}{activity.points}
                   </span>
                   {activity.status === 'pending' && (

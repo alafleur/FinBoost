@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, X, Sparkles, DollarSign, Crown, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useWinnerCelebration } from "@/hooks/use-winner-status";
+import { DashboardColors } from "@/lib/colors";
 
 // Step 3: Winner Celebration Banner Component
 // Responsive celebration banner for dashboard overview tab
@@ -55,13 +56,13 @@ export default function WinnerCelebrationBanner() {
   const getTierIcon = (tier: string) => {
     switch (tier?.toLowerCase()) {
       case 'tier1':
-        return <Crown className="h-5 w-5 text-yellow-500" />;
+        return <Crown className={`h-5 w-5 ${DashboardColors.iconColor.primary}`} />;
       case 'tier2':
-        return <Trophy className="h-5 w-5 text-gray-400" />;
+        return <Trophy className={`h-5 w-5 ${DashboardColors.iconColor.neutral}`} />;
       case 'tier3':
-        return <Trophy className="h-5 w-5 text-orange-500" />;
+        return <Trophy className={`h-5 w-5 ${DashboardColors.iconColor.neutral}`} />;
       default:
-        return <Trophy className="h-5 w-5 text-blue-500" />;
+        return <Trophy className={`h-5 w-5 ${DashboardColors.iconColor.primary}`} />;
     }
   };
 
@@ -75,12 +76,12 @@ export default function WinnerCelebrationBanner() {
   };
 
   const getTierColors = (tier: string) => {
-    // Changed to green styling for all tiers as requested
+    // Use professional color system for winners (success theme for financial gains)
     return {
-      gradient: 'from-green-500 to-emerald-500',
-      bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
-      border: 'border-green-200',
-      text: 'text-green-800'
+      gradient: DashboardColors.accent.success,
+      bg: 'bg-gradient-to-br from-emerald-50 to-green-50',
+      border: 'border-emerald-200',
+      text: DashboardColors.text.success
     };
   };
 
@@ -88,10 +89,10 @@ export default function WinnerCelebrationBanner() {
   const colors = isWinner 
     ? getTierColors(winnerStatus?.tier || '') 
     : {
-        gradient: 'from-blue-500 to-indigo-500',
+        gradient: DashboardColors.accent.primary,
         bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
         border: 'border-blue-200',
-        text: 'text-blue-800'
+        text: DashboardColors.text.primary
       };
 
   return (
@@ -151,7 +152,7 @@ export default function WinnerCelebrationBanner() {
                 }}
                 className={`p-3 bg-white rounded-full shadow-sm border ${colors.border}`}
               >
-                {isWinner ? getTierIcon(winnerStatus?.tier || '') : <Users className="h-5 w-5 text-blue-500" />}
+                {isWinner ? getTierIcon(winnerStatus?.tier || '') : <Users className={`h-5 w-5 ${DashboardColors.iconColor.primary}`} />}
               </motion.div>
 
               <div className="flex-1">
@@ -171,7 +172,7 @@ export default function WinnerCelebrationBanner() {
                           ease: "linear"
                         }}
                       >
-                        <Sparkles className="h-4 w-4 text-yellow-500" />
+                        <Sparkles className={`h-4 w-4 ${DashboardColors.iconColor.primary}`} />
                       </motion.div>
                     </div>
 
@@ -186,7 +187,7 @@ export default function WinnerCelebrationBanner() {
                       
                       {/* Step 2.2: ALWAYS use finalPayoutAmount (override) instead of rewardAmount */}
                       {(winnerStatus?.finalPayoutAmount || winnerStatus?.payoutFinal || winnerStatus?.payoutOverride || winnerStatus?.rewardAmount) && (
-                        <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                        <div className={`flex items-center gap-1 text-sm font-semibold ${DashboardColors.text.success}`}>
                           {(() => {
                             const payoutAmount = (winnerStatus.finalPayoutAmount || winnerStatus.payoutFinal || winnerStatus.payoutOverride || winnerStatus.rewardAmount) / 100;
                             const { dollars, cents } = formatCurrencyWithSmallCents(payoutAmount);
@@ -204,7 +205,7 @@ export default function WinnerCelebrationBanner() {
                     {/* Community stats for current cycle */}
                     <div className="mt-3 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        <div className={`w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse`} />
                         <span>
                           {formatCurrency(winnerStatus?.communityStats?.totalDistributed || 0)} total pool rewards distributed to {winnerStatus?.communityStats?.totalWinners || 0} members
                         </span>
@@ -235,12 +236,12 @@ export default function WinnerCelebrationBanner() {
                       
                       {winnerStatus?.communityStats && (
                         <>
-                          <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                          <div className={`flex items-center gap-1 text-sm font-semibold ${DashboardColors.text.success}`}>
                             <span>{formatCurrency(winnerStatus.communityStats.totalDistributed)}</span>
                             <span className="text-xs text-gray-600">distributed</span>
                           </div>
 
-                          <div className="flex items-center gap-1 text-sm font-semibold text-blue-600">
+                          <div className={`flex items-center gap-1 text-sm font-semibold ${DashboardColors.text.primary}`}>
                             <span>{winnerStatus.communityStats.totalWinners}</span>
                             <span className="text-xs text-gray-600">winners</span>
                           </div>
@@ -251,7 +252,7 @@ export default function WinnerCelebrationBanner() {
                     {/* Community participation message */}
                     <div className="mt-3 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                        <div className={`w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse`} />
                         <span>
                           Thank you for being a valued member of the movement! We're continually growing the pool together and you'll have a shot at larger rewards next cycle!
                         </span>
