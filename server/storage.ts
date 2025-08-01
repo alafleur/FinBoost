@@ -7406,25 +7406,46 @@ export class MemStorage implements IStorage {
         .limit(1);
 
       if (winnerRecord) {
-        // Get community stats for winner's cycle - use correct pool amount instead of inflated database values
-        const [cycleSettingsResult] = await db
-          .select({
-            totalRewardPool: cycleSettings.totalRewardPool
-          })
-          .from(cycleSettings)
-          .where(eq(cycleSettings.id, winnerRecord.cycleId));
+        console.log(`[WINNER STATUS] Found winner record for user ${userId} in cycle ${winnerRecord.cycleId}`);
+        
+        // Step 2.2: Add proper error handling for community stats queries
+        let totalRewardPool = 7500; // Default fallback
+        let totalWinners = 0;
+        
+        try {
+          const [cycleSettingsResult] = await db
+            .select({
+              totalRewardPool: cycleSettings.totalRewardPool
+            })
+            .from(cycleSettings)
+            .where(eq(cycleSettings.id, winnerRecord.cycleId));
+          
+          if (cycleSettingsResult?.totalRewardPool) {
+            totalRewardPool = cycleSettingsResult.totalRewardPool;
+          }
+        } catch (error) {
+          console.error(`[WINNER STATUS] Error fetching cycle settings for cycle ${winnerRecord.cycleId}:`, error);
+        }
 
-        const [totalWinnersResult] = await db
-          .select({
-            totalWinners: sql<number>`COUNT(*)`
-          })
-          .from(cycleWinnerSelections)
-          .where(
-            and(
-              eq(cycleWinnerSelections.cycleSettingId, winnerRecord.cycleId),
-              eq(cycleWinnerSelections.isSealed, true)
-            )
-          );
+        try {
+          const [totalWinnersResult] = await db
+            .select({
+              totalWinners: sql<number>`COUNT(*)`
+            })
+            .from(cycleWinnerSelections)
+            .where(
+              and(
+                eq(cycleWinnerSelections.cycleSettingId, winnerRecord.cycleId),
+                eq(cycleWinnerSelections.isSealed, true)
+              )
+            );
+          
+          if (totalWinnersResult?.totalWinners) {
+            totalWinners = totalWinnersResult.totalWinners;
+          }
+        } catch (error) {
+          console.error(`[WINNER STATUS] Error counting winners for cycle ${winnerRecord.cycleId}:`, error);
+        }
 
         // User is a winner - show banner regardless of notification_displayed status
         return {
@@ -7436,8 +7457,8 @@ export class MemStorage implements IStorage {
           notificationDisplayed: winnerRecord.notificationDisplayed,
           payoutStatus: winnerRecord.payoutStatus || 'pending',
           communityStats: {
-            totalDistributed: cycleSettingsResult?.totalRewardPool || 7500, // Use correct pool amount
-            totalWinners: totalWinnersResult?.totalWinners || 0,
+            totalDistributed: totalRewardPool,
+            totalWinners: totalWinners,
             currentCycleName: winnerRecord.cycleName
           }
         };
@@ -7460,25 +7481,46 @@ export class MemStorage implements IStorage {
         return null; // No sealed cycles yet
       }
 
-      // Get community stats for non-winner notification - use correct pool amount
-      const [cycleSettingsResult] = await db
-        .select({
-          totalRewardPool: cycleSettings.totalRewardPool
-        })
-        .from(cycleSettings)
-        .where(eq(cycleSettings.id, mostRecentSealedCycle.cycleId));
+      console.log(`[WINNER STATUS] Non-winner user ${userId} - showing community stats for cycle ${mostRecentSealedCycle.cycleId}`);
+      
+      // Step 2.2: Add error handling for non-winner community stats queries
+      let totalRewardPool = 7500; // Default fallback
+      let totalWinners = 0;
+      
+      try {
+        const [cycleSettingsResult] = await db
+          .select({
+            totalRewardPool: cycleSettings.totalRewardPool
+          })
+          .from(cycleSettings)
+          .where(eq(cycleSettings.id, mostRecentSealedCycle.cycleId));
+        
+        if (cycleSettingsResult?.totalRewardPool) {
+          totalRewardPool = cycleSettingsResult.totalRewardPool;
+        }
+      } catch (error) {
+        console.error(`[WINNER STATUS] Error fetching cycle settings for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, error);
+      }
 
-      const [totalWinnersResult] = await db
-        .select({
-          totalWinners: sql<number>`COUNT(*)`
-        })
-        .from(cycleWinnerSelections)
-        .where(
-          and(
-            eq(cycleWinnerSelections.cycleSettingId, mostRecentSealedCycle.cycleId),
-            eq(cycleWinnerSelections.isSealed, true)
-          )
-        );
+      try {
+        const [totalWinnersResult] = await db
+          .select({
+            totalWinners: sql<number>`COUNT(*)`
+          })
+          .from(cycleWinnerSelections)
+          .where(
+            and(
+              eq(cycleWinnerSelections.cycleSettingId, mostRecentSealedCycle.cycleId),
+              eq(cycleWinnerSelections.isSealed, true)
+            )
+          );
+        
+        if (totalWinnersResult?.totalWinners) {
+          totalWinners = totalWinnersResult.totalWinners;
+        }
+      } catch (error) {
+        console.error(`[WINNER STATUS] Error counting winners for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, error);
+      }
 
       // Check if non-winner notification has been dismissed for this cycle
       const dismissalKey = `non-winner-${userId}-${mostRecentSealedCycle.cycleId}`;
@@ -7490,8 +7532,8 @@ export class MemStorage implements IStorage {
         cycleName: mostRecentSealedCycle.cycleName || `Cycle ${mostRecentSealedCycle.cycleId}`,
         notificationDisplayed: isDismissed,
         communityStats: {
-          totalDistributed: cycleSettingsResult?.totalRewardPool || 7500, // Use correct pool amount
-          totalWinners: totalWinnersResult?.totalWinners || 0,
+          totalDistributed: totalRewardPool,
+          totalWinners: totalWinners,
           currentCycleName: mostRecentSealedCycle.cycleName
         }
       };
