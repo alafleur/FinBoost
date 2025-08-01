@@ -1371,32 +1371,45 @@ export default function Dashboard() {
               </div>
               END BACKUP COMMENT */}
 
-              {/* Professional Continue Learning Section */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6 cursor-pointer hover:border-gray-300 transition-colors" onClick={() => setLocation("/education")}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Continue Learning
-                  </h3>
-                  <Button size="sm" variant="outline" className="text-gray-600 border-gray-300">
-                    {completedLessonIds.length > 0 ? "Continue" : "Start"}
-                  </Button>
-                </div>
-                <p className="text-gray-600 mb-3">
-                  Master essential money management skills with interactive lessons designed for real-world application.
-                </p>
-                <div className="text-sm text-gray-500">
-                  {completedLessonIds.length} of {publishedLessons.length} lessons completed
+              {/* Desktop Continue Learning Section - Enhanced Visual */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={BookOpen}
+                  iconColor="blue"
+                  title="Continue Learning"
+                  titleSize="lg"
+                />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative cursor-pointer hover:shadow-xl transition-all duration-300" onClick={() => setLocation("/education")}>
+                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Master Essential Skills
+                      </h3>
+                      <Button size="sm" variant="outline" className={`${DashboardColors.text.primary} border-blue-200 hover:bg-blue-50`}>
+                        {completedLessonIds.length > 0 ? "Continue" : "Start"}
+                      </Button>
+                    </div>
+                    <p className="text-gray-600 mb-3">
+                      Interactive lessons designed for real-world financial management application.
+                    </p>
+                    <div className="text-sm text-gray-500">
+                      {completedLessonIds.length} of {publishedLessons.length} lessons completed
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Desktop Rewards Summary */}
+              {/* Desktop Rewards Summary - Enhanced Visual */}
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
                   iconColor="green"
                   title="Rewards Summary"
+                  titleSize="lg"
                 />
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
+                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.success}`}></div>
                   <RewardsSummary />
                 </div>
               </div>
