@@ -29,7 +29,8 @@ import {
   FileSpreadsheet,
   ExternalLink,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -182,27 +183,58 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
   };
 
   // === PHASE 3: ENHANCED WINNERS DATA LOADING ===
-  const loadEnhancedWinners = async () => {
+  const loadEnhancedWinners = async (forceFresh = false) => {
     if (!selectedCycle) return;
 
     try {
       const token = localStorage.getItem('token');
-      console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}`);
+      console.log(`[FRONTEND] Loading enhanced winners for cycle ${selectedCycle.id} - forceFresh: ${forceFresh}`);
 
-      const response = await fetch(`/api/admin/winners/data/${selectedCycle.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      // Add cache-busting timestamp if forcing fresh data
+      const url = forceFresh 
+        ? `/api/admin/winners/data/${selectedCycle.id}?t=${Date.now()}`
+        : `/api/admin/winners/data/${selectedCycle.id}`;
+
+      const response = await fetch(url, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
+
+      if (response.status === 403) {
+        console.warn('[FRONTEND] Admin session expired or insufficient permissions');
+        toast({
+          title: "Session Expired",
+          description: "Please refresh the page and log in again",
+          variant: "destructive"
+        });
+        return;
+      }
 
       if (response.ok) {
         const winnersData = await response.json();
+        console.log(`[FRONTEND] Successfully loaded ${winnersData.length} enhanced winner records`);
         setEnhancedWinners(winnersData);
-        console.log(`[Frontend] Loaded ${winnersData.length} enhanced winner records`);
+        
+        // Validate data integrity - check for key fields
+        const sampleRecord = winnersData[0];
+        if (sampleRecord) {
+          console.log(`[FRONTEND] Sample record fields:`, Object.keys(sampleRecord));
+          console.log(`[FRONTEND] Sample pointsAtSelection:`, sampleRecord.pointsAtSelection);
+        }
       } else {
-        console.log(`[Frontend] No enhanced winners data available (${response.status})`);
+        console.log(`[FRONTEND] No enhanced winners data available (${response.status})`);
         setEnhancedWinners([]);
       }
     } catch (error) {
-      console.error('Failed to load enhanced winners:', error);
+      console.error('[FRONTEND] Failed to load enhanced winners:', error);
+      toast({
+        title: "Error Loading Data",
+        description: "Failed to load winner data. Please try refreshing the page.",
+        variant: "destructive"
+      });
       setEnhancedWinners([]);
     }
   };
@@ -353,16 +385,16 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Updated ${result.updatedCount} winner records - Refreshing all data...`,
         });
 
-        // Clear cached data and refresh - SIMPLIFIED NO PAGINATION
-        console.log(`[Import] SUCCESS: Refreshing Enhanced Winners data for cycle ${selectedCycle.id}`);
-        console.log(`[Import] Clearing all cached state: enhancedWinners, winners`);
+        // Clear cached data and refresh with force fresh - CACHE BUSTING FIX
+        console.log(`[IMPORT] SUCCESS: Refreshing Enhanced Winners data for cycle ${selectedCycle.id} with forced cache bust`);
+        console.log(`[IMPORT] Clearing all cached state: enhancedWinners, winners`);
         setEnhancedWinners([]);
         setWinners([]);
         
-        console.log(`[Import] Refreshing data sources: loadWinners, loadEnhancedWinners`);
+        console.log(`[IMPORT] Refreshing data sources with FORCED REFRESH to prevent stale cache`);
         await loadWinners();
-        await loadEnhancedWinners(); // This loads ALL 750 records at once
-        console.log(`[Import] COMPLETE: All data refreshed successfully`);
+        await loadEnhancedWinners(true); // FORCE FRESH DATA with cache busting timestamp
+        console.log(`[IMPORT] COMPLETE: All data refreshed successfully with cache bust`);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);
@@ -1038,6 +1070,24 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={() => loadEnhancedWinners(true)}
+                      disabled={loadingEnhanced}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {loadingEnhanced ? (
+                        <>
+                          <Timer className="w-4 h-4 mr-2 animate-spin" />
+                          Refreshing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Force Refresh
+                        </>
+                      )}
+                    </Button>
                     <Button
                       onClick={handleExportWinners}
                       disabled={isExporting}

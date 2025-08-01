@@ -4789,19 +4789,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get Selected Winners JSON data for frontend table display
   app.get('/api/admin/winners/data/:cycleId', authenticateToken, async (req, res) => {
     if (!req.user?.isAdmin) {
+      console.log(`[AUTH ERROR] Non-admin user attempted winners data access: ${req.user?.email || 'unknown'}`);
       return res.status(403).json({ error: "Admin access required" });
     }
     try {
       const cycleId = parseInt(req.params.cycleId);
-      console.log(`[JSON Data] Fetching winners JSON data for cycle ${cycleId}`);
+      console.log(`[FETCH] Fetching winners JSON data for cycle ${cycleId} - timestamp: ${new Date().toISOString()}`);
+      
+      // Force no-cache headers to prevent stale data
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       
       // Use consistent pagination method with high limit to get all data
       const winnersData = await storage.getCycleWinnerDetailsPaginated(cycleId, 1, 10000);
       
-      console.log(`[JSON Data] Returning ${winnersData.winners.length} winner records as JSON`);
+      console.log(`[FETCH] Successfully returning ${winnersData.winners.length} winner records from cycleWinnerSelections table`);
+      
+      // Add metadata for debugging
+      const responseData = {
+        winners: winnersData.winners,
+        metadata: {
+          totalCount: winnersData.winners.length,
+          cycleId: cycleId,
+          fetchedAt: new Date().toISOString(),
+          source: 'cycleWinnerSelections'
+        }
+      };
+      
       res.json(winnersData.winners);
     } catch (error) {
-      console.error('Error getting winners JSON data:', error);
+      console.error('[FETCH ERROR] Error getting winners JSON data:', error);
       res.status(500).json({ error: 'Failed to get winners data' });
     }
   });

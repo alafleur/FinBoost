@@ -1,0 +1,136 @@
+This is a strong and clear diagnostic — you're already 90% of the way there. You're correct: the problem isn't in the database write layer or import logic — it's a **data sync + session expiration + frontend cache invalidation** issue. Let's break it down and then recommend a clean technical fix across all layers.
+
+---
+
+## ✅ Root Problems Recap
+
+| Area                        | Problem                                                                               | Symptom                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Authentication**          | Token expired or invalid during post-import refresh                                   | 403 errors in logs, especially on `loadEnhancedWinners()` |
+| **Frontend**                | `loadEnhancedWinners()` does not force cache-busting or display updated data          | Table doesn't refresh even after successful import        |
+| **Data Source Consistency** | `getCycleWinnerDetailsPaginated()` might use stale query logic or old cache layer     | Frontend fetches out-of-sync records                      |
+| **Field Mismatch**          | `pointsAtSelection` possibly outdated or misaligned                                   | Frontend shows incorrect or unchanged values              |
+| **No Invalidation Hook**    | Nothing explicitly tells the frontend to fully reload or revalidate data after import | Perceived “no update” bug                                 |
+
+---
+
+## ✅ Recommended Multi-Layer Fix Plan
+
+### 1. **Fix Token Expiration / 403 Errors**
+
+**Backend:**
+
+* Confirm that `authenticateToken` middleware logs *why* the token is failing (expired vs malformed vs missing role).
+* If using short-lived JWTs, you must add a **refresh token mechanism** or at minimum a **re-auth fallback** for admin users.
+
+**Frontend:**
+In `loadEnhancedWinners()`:
+
+```ts
+if (response.status === 403) {
+  console.warn('Admin session expired. Please log in again.');
+  // Optional: redirect to login or show modal
+}
+```
+
+Also consider wrapping fetch logic in a common hook that retries once with a refreshed token if available.
+
+---
+
+### 2. **Force Fresh Data After Import**
+
+Update `handleImportSuccess()` like so:
+
+```ts
+const handleImportSuccess = () => {
+  setImportResults(null);
+  // Invalidate cache, if applicable
+  loadEnhancedWinners(); // Already called — but not sufficient alone
+  window.location.reload(); // TEMPORARY: Full reload to reset stale state
+};
+```
+
+Better solution (replace `window.location.reload()` eventually):
+
+* Add a query param to force fetch bypass (e.g., `/winners/data/${id}?t=${Date.now()}`)
+* Or use `Cache-Control: no-store` on backend response headers
+
+---
+
+### 3. **Ensure Display Reads the Updated Table**
+
+If `getCycleWinnerDetailsPaginated()` fetches from a view or cached join — confirm:
+
+* It **pulls from the same `cycleWinnerSelections` table** that the Excel import updates
+* No residual `WHERE` clause (e.g., `AND finalized = true`) filters updated rows
+
+Add a log right before returning data in the API:
+
+```ts
+console.log(`[API] Returning ${winners.length} winners from cycleWinnerSelections for cycle ${cycleId}`);
+```
+
+Then compare this count with the 750 updated from the import.
+
+---
+
+### 4. **Add Logging and Debug UI**
+
+**Backend**: Add a log tag at every phase:
+
+```ts
+console.log(`[IMPORT] Updated ${updatedRows.length} rows`);
+console.log(`[FETCH] Returning ${winners.length} rows for cycle ${cycleId}`);
+```
+
+**Frontend**:
+Display this to admin users during import:
+
+* “750 records imported. Refreshing data...”
+* Show count of fetched records next to table as a sanity check
+
+---
+
+### 5. **Validate Field Mapping Consistency**
+
+Make sure `pointsAtSelection` in your query:
+
+```ts
+pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
+```
+
+... is **populated by the import**.
+
+If the import modifies a different field (e.g., `rawPoints`, `finalPoints`, etc.), but the frontend expects `pointsAtSelection`, there’s a **field mapping mismatch**.
+
+Check your import handler — is it updating the right column?
+
+---
+
+## ✅ Summary Fix Table
+
+| Fix                                                                  | Owner    | Priority |
+| -------------------------------------------------------------------- | -------- | -------- |
+| Add admin token expiry handling to frontend                          | Frontend | High     |
+| Add `Cache-Control: no-store` to `/winners/data/:id` endpoint        | Backend  | Medium   |
+| Add forced reload or query param to bust frontend cache              | Frontend | High     |
+| Confirm import writes to `pointsAtSelection` and that fetch reads it | Backend  | High     |
+| Add logging for `import`, `fetch`, and record counts                 | Backend  | Medium   |
+
+---
+
+### Optional Enhancements
+
+* Add a **“Last Updated” timestamp** to `cycleWinnerSelections` and display it on the frontend
+* Add a **refresh button** for admins to manually trigger `loadEnhancedWinners()`
+* Build a **Revalidate button** in the admin portal that triggers backend-side data rebuild + forced reload
+
+---
+
+Would you like:
+
+* A GitHub issue draft describing this?
+* Suggested edits to the import handler and the fetch logic?
+* Or help converting this into a Replit implementation task?
+
+Just let me know.
