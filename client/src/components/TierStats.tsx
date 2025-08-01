@@ -83,27 +83,43 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`border rounded-lg p-4 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
+          className={`border rounded-lg transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)} 
+            p-4 sm:p-5 text-center min-h-[72px] sm:min-h-[88px]
+            ${tier.isCurrentTier ? 'ring-2 ring-blue-200 ring-opacity-50' : ''}
+          `}
         >
           {tier.isCurrentTier && (
             <div className={`absolute top-0 left-0 w-full h-1 ${DashboardColors.accent.primary}`}></div>
           )}
           
-          <div className={`text-sm font-semibold ${DashboardColors.text.primary} mb-1`}>
-            {tier.name}
-          </div>
-          <div className={`text-xs ${DashboardColors.text.muted} mb-2`}>
-            {tier.range} pts
-          </div>
-          {tier.reward && (
-            <div className="text-sm font-bold text-green-600">
-              {formatCurrency(tier.reward)}
+          {/* Mobile: Horizontal layout, Desktop: Vertical layout */}
+          <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center space-x-4 sm:space-x-0 sm:space-y-2">
+            <div className="flex-shrink-0 min-w-0 flex-1 sm:flex-initial">
+              <div className={`text-base sm:text-lg font-semibold ${DashboardColors.text.primary} mb-1`}>
+                {tier.name}
+              </div>
+              <div className={`text-xs sm:text-sm ${DashboardColors.text.muted}`}>
+                {tier.range} pts
+              </div>
             </div>
-          )}
+            
+            <div className="flex-shrink-0 text-right sm:text-center">
+              {tier.reward ? (
+                <div className="text-base sm:text-lg font-bold text-green-600 leading-tight">
+                  <span className="sm:hidden">{formatCurrency(tier.reward).replace('$', '$')}</span>
+                  <span className="hidden sm:inline">{formatCurrency(tier.reward)}</span>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-400">
+                  No data
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       ))}
     </div>

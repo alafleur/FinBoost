@@ -564,7 +564,7 @@ export default function Dashboard() {
                   <SectionHeader 
                     icon={Target}
                     iconColor="blue"
-                    title="Tier Thresholds"
+                    title="Tier Thresholds & Rewards"
                   />
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
                     <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.neutral}`}></div>
@@ -1261,7 +1261,7 @@ export default function Dashboard() {
                   <SectionHeader 
                     icon={Target}
                     iconColor="blue"
-                    title="Tier Thresholds"
+                    title="Tier Thresholds & Rewards"
                     titleSize="lg"
                   />
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
