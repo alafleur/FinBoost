@@ -1,0 +1,48 @@
+Looking at the Agent's analysis and the code, I can confirm the diagnosis is accurate. The winner celebration banner system has several architectural issues preventing proper display.
+
+Root Cause Analysis
+1. Overly Restrictive Logic in getUserWinnerStatus()
+The current implementation has too many gatekeeping conditions:
+
+Winners must have notificationDisplayed = false
+Non-winners must pass participation checks
+Complex session cache dismissal logic
+2. Database Query Issues
+From the console logs, there's a Drizzle ORM error:
+
+Error getting user winner status: TypeError: Cannot convert undefined or null to object
+This suggests the query is failing silently, causing the method to return null/empty results.
+
+3. Premature notificationDisplayed Flag Setting
+The flag appears to be set to true before users actually see the banner, permanently excluding them from celebrations.
+
+Key Issues to Address
+Backend (server/storage.ts - getUserWinnerStatus method):
+
+Query Error: The Drizzle query is throwing errors due to malformed field selection
+Logic Flow: Too many early returns prevent banner display
+Sealed Cycle Logic: Overly restrictive sealed cycle requirements
+Frontend (WinnerCelebrationBanner.tsx):
+
+Display Logic: shouldShowCelebration() may have additional restrictions
+State Management: The hook might not be handling loading/error states properly
+Database State:
+
+User 1980: Likely has notificationDisplayed = true when it should be false
+Cycle 18: May have sealing issues affecting winner queries
+Recommended Fix Strategy
+Phase 1: Simplify Banner Logic
+
+Remove notificationDisplayed restrictions for initial display
+Show banners for ALL winners in most recent sealed cycle
+Show community stats for ALL non-winners
+Only respect dismissal AFTER manual user action
+Phase 2: Fix Database Query
+
+Resolve the Drizzle ORM error in the winner status query
+Ensure proper field selection and join conditions
+Phase 3: Reset Banner State
+
+Reset notificationDisplayed = false for affected users (like user 1980)
+Implement proper dismissal workflow that doesn't permanently exclude users
+The Agent's analysis correctly identifies that this is a systemic issue with the banner display logic being too restrictive, combined with database query failures. The solution requires both simplifying the logic and fixing the underlying technical errors.

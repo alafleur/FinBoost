@@ -1,0 +1,61 @@
+Detailed Issue Analysis: Winner Celebration Banner Not Displaying
+The Problems:
+1. Overly Restrictive Banner Logic
+The current getUserWinnerStatus() method has multiple gatekeeping conditions that prevent banner display:
+
+Winners: Only show if isSealed = true AND notificationDisplayed = false
+Non-winners: Only show if they participated in most recent sealed cycle AND haven't dismissed
+Result: Most users see no banner when they should see either winner celebration or community achievement
+2. User 1980 (user180@test.com) - Known Winner Not Showing Banner
+This is the smoking gun. If a confirmed winner sees no banner, the logic is fundamentally broken.
+
+Root Cause Analysis:
+Primary Suspect: notificationDisplayed Flag Logic
+The most likely cause is that user 1980's winner record has notificationDisplayed = true, meaning:
+
+They were flagged as "already shown the banner"
+But they never actually saw it due to other bugs
+Now they're permanently excluded from seeing celebration
+Secondary Suspects:
+
+Drizzle Query Error: The logs show Drizzle errors which might be silently failing the winner status queries
+
+Sealed Cycle Issues: The winner query requires isSealed = true, but if Cycle 18 sealing has issues, no banners appear
+
+Session Cache Problems: Non-winner dismissal uses session cache which might be corrupted or inconsistent
+
+Current Faulty Logic Flow:
+getUserWinnerStatus(userId) {
+  1. Check if user is winner in sealed cycle with notificationDisplayed = false
+     → If yes: return winner data
+     → If no: continue to step 2
+  
+  2. Check if user participated in most recent sealed cycle
+     → If no: return null (NO BANNER)
+     → If yes: continue to step 3
+     
+  3. Check session cache for dismissal
+     → If dismissed: return null (NO BANNER)
+     → If not dismissed: return community stats
+}
+Required Fixes:
+1. Simplify Banner Logic
+
+Remove notificationDisplayed restriction for initial display
+Show winner banners for ALL winners in most recent sealed cycle
+Show community banners for ALL non-winners
+Only respect dismissal after user manually dismisses
+2. Fix Winner Detection
+
+Query should find winners regardless of notificationDisplayed status
+Only set notificationDisplayed = true AFTER user dismisses, not before
+3. Remove Participation Restrictions
+
+Non-winners shouldn't need participation checks to see community achievement
+All users should see appropriate banner type until manually dismissed
+4. Debug Data Issues
+
+Check user 1980's actual database records
+Verify Cycle 18 sealing status
+Confirm winner records exist and are properly flagged
+The fundamental issue is that the banner system was designed with too many restrictions, preventing the intended "show to everyone until dismissed" behavior.
