@@ -1,0 +1,35 @@
+Looking at the screenshot and the code, I can identify two distinct formatting/calculation issues:
+
+Issues Identified
+Winner Banner Payout Display Error: The banner shows "$1,000" instead of "$3.70" (the correct override amount)
+Total Pool Display Error: Shows "$750,500" instead of "$7,500" - this appears to be a formatting issue where the value is being multiplied by 100 or displayed incorrectly
+Root Cause Analysis
+From examining the codebase:
+
+Issue 1: Winner Banner Payout Amount
+In WinnerCelebrationBanner.tsx, the payout amount is likely being pulled from the wrong field or not properly formatted. The banner should display the final payout amount (considering overrides), not a default calculated amount.
+
+Issue 2: Total Pool Display
+The pool amount formatting is incorrect - showing $750,500 instead of $7,500. This suggests:
+
+Values stored in cents (750,500 cents = $7,505) but being displayed as dollars
+Or a multiplication error in the display logic
+Or incorrect data being fetched from the backend
+Proposed Fix Plan
+Step 1: Fix Winner Banner Payout Display
+Check WinnerCelebrationBanner.tsx component
+Ensure it's using payoutFinal or the correct override amount from the winner status API
+Verify the /api/user/winner-status endpoint returns the correct payout amount
+Step 2: Fix Total Pool Display
+Check the pool calculation in the banner display logic
+Verify the backend /api/cycles/pool endpoint returns values in the correct format
+Ensure frontend formatting divides by 100 if values are stored in cents
+Step 3: Data Integrity Check
+Verify the database values for user608@test.com winner record
+Confirm the payoutOverride field contains 370 (cents) for $3.70
+Check the cycle's totalRewardPool field contains 7500 (cents) for $75.00
+Step 4: Testing
+Test the winner banner display with the corrected user
+Verify total pool amounts display correctly across the dashboard
+Confirm override amounts are properly reflected in all displays
+The core issue appears to be inconsistent handling of cent-based values vs dollar-based values in the display components, particularly in the winner celebration banner and pool amount formatting.
