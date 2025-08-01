@@ -7040,7 +7040,7 @@ export class MemStorage implements IStorage {
             tier: winner.tier,
             tierRank,
             pointsAtSelection: winner.currentCyclePoints,
-            rewardAmount: winner.rewardAmount, // Store in dollars as expected by display
+            rewardAmount: winner.rewardAmount * 100, // Convert to cents
             pointsDeducted: 0,
             pointsRolledOver: 0,
             payoutStatus: winner.payoutStatus || 'pending'
@@ -7153,7 +7153,7 @@ export class MemStorage implements IStorage {
               tierRank,
               pointsAtSelection: winner.currentCyclePoints,
               tierSizeAmount, // Add the missing required field
-              rewardAmount: winner.rewardAmount, // Store in dollars as expected by display
+              rewardAmount: winner.rewardAmount * 100, // Convert to cents
               pointsDeducted: 0,
               pointsRolledOver: 0,
               payoutStatus: winner.payoutStatus || 'pending',
@@ -7364,8 +7364,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-
-
+  // Step 2: Get user winner status and notification state for celebration banners
   // Step 3: Enhanced getUserWinnerStatus - Support for both winners and non-winners with community stats
   async getUserWinnerStatus(userId: number): Promise<{
     isWinner: boolean;
@@ -7413,15 +7412,27 @@ export class MemStorage implements IStorage {
       if (winnerRecord) {
         console.log(`[WINNER STATUS] Found winner record for user ${userId} in cycle ${winnerRecord.cycleId}`);
         
-        // Get pool data using existing calculation method
+        // Step 2.2: Add proper error handling for community stats queries
         let totalRewardPool = 7500; // Default fallback
         let totalWinners = 0;
         
         try {
-          const poolData = await this.getCyclePoolData(winnerRecord.cycleId);
-          totalRewardPool = poolData.totalPool;
+          const [cycleSettingsResult] = await db
+            .select({
+              totalRewardPool: cycleSettings.totalRewardPool
+            })
+            .from(cycleSettings)
+            .where(eq(cycleSettings.id, winnerRecord.cycleId));
+          
+          if (cycleSettingsResult?.totalRewardPool) {
+            totalRewardPool = cycleSettingsResult.totalRewardPool;
+          }
         } catch (error) {
-          console.error(`[WINNER STATUS] Error fetching pool data:`, error);
+          console.error(`[WINNER STATUS] Error fetching cycle settings for cycle ${winnerRecord.cycleId}:`, {
+            error: error.message,
+            stack: error.stack,
+            query: 'cycleSettings.totalRewardPool'
+          });
         }
 
         try {
@@ -7484,15 +7495,27 @@ export class MemStorage implements IStorage {
 
       console.log(`[WINNER STATUS] Non-winner user ${userId} - showing community stats for cycle ${mostRecentSealedCycle.cycleId}`);
       
-      // Get pool data for community stats
+      // Step 2.2: Add error handling for non-winner community stats queries
       let totalRewardPool = 7500; // Default fallback
       let totalWinners = 0;
       
       try {
-        const poolData = await this.getCyclePoolData(mostRecentSealedCycle.cycleId);
-        totalRewardPool = poolData.totalPool;
+        const [cycleSettingsResult] = await db
+          .select({
+            totalRewardPool: cycleSettings.totalRewardPool
+          })
+          .from(cycleSettings)
+          .where(eq(cycleSettings.id, mostRecentSealedCycle.cycleId));
+        
+        if (cycleSettingsResult?.totalRewardPool) {
+          totalRewardPool = cycleSettingsResult.totalRewardPool;
+        }
       } catch (error) {
-        console.error(`[WINNER STATUS] Error fetching pool data for non-winner:`, error);
+        console.error(`[WINNER STATUS] Error fetching cycle settings for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
+          error: error.message,
+          stack: error.stack,
+          query: 'cycleSettings.totalRewardPool for non-winner'
+        });
       }
 
       try {
@@ -7627,7 +7650,7 @@ export class MemStorage implements IStorage {
         .set({
           selectionExecuted: true,
           totalWinners: winnerCount,
-          totalRewardPool: Math.floor(totalPool), // Store in dollars as expected by display
+          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
           selectionExecutedAt: new Date()
         })
         .where(eq(cycleSettings.id, cycleSettingId));
@@ -7647,7 +7670,7 @@ export class MemStorage implements IStorage {
         .set({
           selectionCompleted: true,
           totalWinners: winnerCount,
-          totalRewardPool: Math.floor(totalPool), // Store in dollars as expected by display
+          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
           selectionCompletedAt: new Date()
         })
         .where(eq(cycleSettings.id, cycleSettingId));
