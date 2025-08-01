@@ -1,0 +1,60 @@
+Step-by-Step Fix Plan for Winner Celebration Banner
+Phase 1: Diagnose Current State
+Step 1.1: Check user 1980's current database state
+
+Query their winner record in cycle_winner_selections
+Verify notificationDisplayed status
+Confirm cycle sealing status
+Step 1.2: Identify Drizzle query error
+
+Check LSP diagnostics for specific query issues
+Locate malformed field selection causing "Cannot convert undefined or null to object"
+Phase 2: Simplify Banner Logic (Backend)
+Step 2.1: Rewrite getUserWinnerStatus() method
+
+Remove notificationDisplayed = false restriction for initial winner queries
+Remove participation checks for non-winner community stats
+Simplify logic to: "Is user a winner? Show winner banner. Not a winner? Show community banner."
+Step 2.2: Fix Drizzle query errors
+
+Correct field selection syntax in winner status queries
+Ensure proper join conditions between tables
+Add proper error handling and logging
+Step 2.3: Update dismissal logic
+
+Only set notificationDisplayed = true when user manually dismisses
+Keep session-based dismissal for non-winners
+Ensure dismissal doesn't permanently exclude users from future cycles
+Phase 3: Frontend Validation
+Step 3.1: Verify banner display logic
+
+Check shouldShowCelebration() conditions in hook
+Ensure loading/error states don't prevent display
+Confirm API response handling
+Phase 4: Data Cleanup
+Step 4.1: Reset affected user states
+
+Set notificationDisplayed = false for users who should see banners
+Specifically fix user 1980's record
+Clear problematic session cache entries
+Step 4.2: Verify cycle sealing
+
+Confirm Cycle 18 is properly sealed
+Ensure winner records have correct isSealed = true status
+Phase 5: Testing & Validation
+Step 5.1: Test with multiple user types
+
+Winner users (like user 1980)
+Non-winner users
+Users who previously dismissed banners
+Step 5.2: Verify correct behavior
+
+Winners see celebration with reward amount
+Non-winners see community achievement stats
+Manual dismissal works correctly
+Banners reappear for new cycles
+Expected Outcome:
+ALL users see appropriate banners (winner celebration or community achievement)
+Banners only disappear when manually dismissed
+Clean error-free queries
+Correct $7,500 pool amount displayed
