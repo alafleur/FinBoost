@@ -216,7 +216,7 @@ export default function WinnerCelebrationBanner() {
                   <>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className={`text-lg font-bold ${colors.text}`}>
-                        🎊 Community Achievement!
+                        ⚡ Next Cycle Loading...
                       </h3>
                       <motion.div
                         animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
@@ -231,7 +231,7 @@ export default function WinnerCelebrationBanner() {
                     </div>
                     
                     <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
-                      <strong>{winnerStatus?.cycleName}</strong> rewards have been distributed!
+                      <strong>{winnerStatus?.cycleName}</strong> rewards have been distributed
                     </p>
 
                     {/* Community achievement stats */}
@@ -265,7 +265,7 @@ export default function WinnerCelebrationBanner() {
                       <div className="flex items-center gap-1">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
                         <span>
-                          Thank you for participating! Keep learning and earning points for the next cycle.
+                          Thank you for being a valued member of the movement! We're continually growing the pool together and you'll have a shot at larger rewards next cycle!
                         </span>
                       </div>
                     </div>
