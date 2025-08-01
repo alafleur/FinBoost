@@ -1567,18 +1567,18 @@ function AdminComponent() {
       if (response.ok) {
         const data = await response.json();
         
-        // Transform the paginated data to enhanced format
-        const enhancedData = data.winners.map((winner: any, index: number) => ({
-          overallRank: winner.overallRank || ((page - 1) * limit) + index + 1,
-          tierRank: winner.tierRank || index + 1,
+        // Transform the paginated data to enhanced format with proper field mapping
+        const enhancedData = data.winners.map((winner: any) => ({
+          overallRank: winner.overallRank,
+          tierRank: winner.tierRank,
           username: winner.username,
-          email: winner.email || winner.userEmail,
-          cyclePoints: winner.pointsAtSelection || winner.cyclePoints || winner.points || 0,
-          tierSize: winner.tierSizeAmount || winner.rewardAmount || 0,
+          email: winner.email,
+          cyclePoints: winner.pointsAtSelection || 0,
+          tierSize: winner.tierSizeAmount || 0,
           payoutPercentage: winner.payoutPercentage || 100,
-          payoutCalc: winner.payoutCalculated || winner.rewardAmount || 0,
+          payoutCalc: winner.payoutCalculated || 0,
           payoutOverride: winner.payoutOverride || 0,
-          payoutFinal: winner.payoutFinal || winner.finalAmount || winner.rewardAmount || 0,
+          payoutFinal: winner.payoutFinal || 0,
           paypalEmail: winner.paypalEmail || 'Not set',
           status: winner.payoutStatus || 'pending',
           lastModified: winner.lastModified || new Date().toISOString()
@@ -1827,8 +1827,14 @@ function AdminComponent() {
 
           setImportResults(result.results);
           
-          // Refresh winner details to show updated data with pagination
-          await loadPaginatedWinnerDetails(activeCycle.id, paginatedWinners.currentPage || 1, winnersPerPage);
+          // Clear cached data and refresh from page 1
+          console.log(`[Import] Clearing cache and refreshing data for cycle ${activeCycle.id}`);
+          setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
+          setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
+          
+          // Refresh enhanced winners data from page 1
+          await loadEnhancedWinnersPaginated(activeCycle.id, 1, winnersPerPage);
+          await loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
 
           toast({
             title: "Import completed",

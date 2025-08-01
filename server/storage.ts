@@ -7363,6 +7363,7 @@ export class MemStorage implements IStorage {
           email: users.email,
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
+          overallRank: cycleWinnerSelections.overallRank,
           pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
           rewardAmount: cycleWinnerSelections.rewardAmount,
           pointsDeducted: cycleWinnerSelections.pointsDeducted,
@@ -7379,14 +7380,14 @@ export class MemStorage implements IStorage {
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
-        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.tierRank));
+        .orderBy(asc(cycleWinnerSelections.overallRank));
 
       console.log(`[DEBUG] Full query successful, found ${winners.length} records`);
       
-      // Calculate overall ranks (1, 2, 3... across all winners)
-      const winnersWithOverallRank = winners.map((winner, index) => ({
+      // Use actual overall ranks from database (don't calculate from index)
+      const winnersWithOverallRank = winners.map((winner) => ({
         ...winner,
-        overallRank: index + 1,
+        overallRank: winner.overallRank || 0,
         payoutPercentage: 100, // Default to 100% since this field doesn't exist in schema
         baseReward: (winner.rewardAmount || 0) / 100, // Convert cents to dollars for display
         finalAmount: (winner.rewardAmount || 0) / 100, // Same as base since 100%

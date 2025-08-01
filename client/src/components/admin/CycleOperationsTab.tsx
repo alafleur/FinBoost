@@ -402,9 +402,15 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
           description: `Updated ${result.updatedCount} winner records`,
         });
 
-        // Refresh the data and close dialog
-        loadEnhancedWinners();
-        loadEnhancedWinnersPaginated(enhancedWinnersPage);
+        // Clear cached data and refresh
+        console.log(`[Import] Clearing cache and refreshing data for page ${enhancedWinnersPage}`);
+        setEnhancedWinners([]);
+        setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
+        
+        // Reset to page 1 and reload data
+        setEnhancedWinnersPage(1);
+        await loadEnhancedWinners();
+        await loadEnhancedWinnersPaginated(1);
         setShowImportDialog(false);
         setImportFile(null);
         setImportData([]);

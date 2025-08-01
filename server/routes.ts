@@ -4795,11 +4795,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cycleId = parseInt(req.params.cycleId);
       console.log(`[JSON Data] Fetching winners JSON data for cycle ${cycleId}`);
       
-      // Get winners data using the same method as export but return as JSON
-      const winnersData = await storage.getCycleWinnersForExport(cycleId);
+      // Use consistent pagination method with high limit to get all data
+      const winnersData = await storage.getCycleWinnerDetailsPaginated(cycleId, 1, 10000);
       
-      console.log(`[JSON Data] Returning ${winnersData.length} winner records as JSON`);
-      res.json(winnersData);
+      console.log(`[JSON Data] Returning ${winnersData.winners.length} winner records as JSON`);
+      res.json(winnersData.winners);
     } catch (error) {
       console.error('Error getting winners JSON data:', error);
       res.status(500).json({ error: 'Failed to get winners data' });
