@@ -1569,16 +1569,16 @@ function AdminComponent() {
         
         // Transform the paginated data to enhanced format
         const enhancedData = data.winners.map((winner: any, index: number) => ({
-          overallRank: ((page - 1) * limit) + index + 1,
+          overallRank: winner.overallRank || ((page - 1) * limit) + index + 1,
           tierRank: winner.tierRank || index + 1,
           username: winner.username,
           email: winner.email || winner.userEmail,
-          cyclePoints: winner.cyclePoints || winner.points || 0,
-          tierSize: winner.rewardAmount || 0,
+          cyclePoints: winner.pointsAtSelection || winner.cyclePoints || winner.points || 0,
+          tierSize: winner.tierSizeAmount || winner.rewardAmount || 0,
           payoutPercentage: winner.payoutPercentage || 100,
-          payoutCalc: winner.rewardAmount || 0,
+          payoutCalc: winner.payoutCalculated || winner.rewardAmount || 0,
           payoutOverride: winner.payoutOverride || 0,
-          payoutFinal: winner.finalAmount || winner.rewardAmount || 0,
+          payoutFinal: winner.payoutFinal || winner.finalAmount || winner.rewardAmount || 0,
           paypalEmail: winner.paypalEmail || 'Not set',
           status: winner.payoutStatus || 'pending',
           lastModified: winner.lastModified || new Date().toISOString()

@@ -7438,6 +7438,13 @@ export class MemStorage implements IStorage {
           pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
           payoutStatus: cycleWinnerSelections.payoutStatus,
           selectionDate: cycleWinnerSelections.selectionDate,
+          // Phase 2: Enhanced payout columns
+          tierSizeAmount: cycleWinnerSelections.tierSizeAmount,
+          payoutPercentage: cycleWinnerSelections.payoutPercentage,
+          payoutCalculated: cycleWinnerSelections.payoutCalculated,
+          payoutOverride: cycleWinnerSelections.payoutOverride,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          lastModified: cycleWinnerSelections.lastModified,
           // Phase 2A: Enhanced audit fields for save/seal workflow
           isSealed: cycleWinnerSelections.isSealed,
           sealedAt: cycleWinnerSelections.sealedAt,
@@ -7458,9 +7465,9 @@ export class MemStorage implements IStorage {
       const winnersWithOverallRank = winners.map((winner, index) => ({
         ...winner,
         overallRank: offset + index + 1, // Correct rank based on pagination
-        payoutPercentage: 100,
-        baseReward: (winner.rewardAmount || 0) / 100,
-        finalAmount: (winner.rewardAmount || 0) / 100,
+        payoutPercentage: winner.payoutPercentage || 100,
+        baseReward: (winner.payoutCalculated || winner.rewardAmount || 0) / 100,
+        finalAmount: (winner.payoutFinal || winner.rewardAmount || 0) / 100,
         reason: 'Auto-selected'
       }));
 
