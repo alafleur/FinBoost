@@ -3903,13 +3903,15 @@ export class MemStorage implements IStorage {
       )
       .orderBy(desc(userCyclePoints.currentCyclePoints));
 
-      // Calculate total reward pool
+      // Calculate total reward pool (excluding admin users)
       const totalSubscribers = await db.select({ count: sql<number>`count(*)` })
         .from(userCyclePoints)
+        .leftJoin(users, eq(userCyclePoints.userId, users.id))
         .where(
           and(
             eq(userCyclePoints.cycleSettingId, cycleSettingId),
-            eq(userCyclePoints.isActive, true)
+            eq(userCyclePoints.isActive, true),
+            eq(users.isAdmin, false)
           )
         );
 
