@@ -4689,11 +4689,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Username': winner.username,
         'User Email': winner.email,
         'Cycle Points': winner.cyclePoints, // Phase 3: Added cycle points column
-        'Tier Size $': (winner.tierSizeAmount / 100).toFixed(2), // Convert cents to dollars
-        '% Payout of Tier': (winner.payoutPercentage / 100).toFixed(2), // Convert basis points to percentage
-        'Payout Calc $': (winner.payoutCalculated / 100).toFixed(2), // Convert cents to dollars
-        'Payout Override $': winner.payoutOverride ? (winner.payoutOverride / 100).toFixed(2) : '', // Convert cents to dollars or empty
-        'Payout Final': (winner.payoutFinal / 100).toFixed(2), // Convert cents to dollars
+        'Tier Size $': winner.tierSizeAmount / 100, // Convert cents to dollars (numeric)
+        '% Payout of Tier': winner.payoutPercentage / 100, // Convert basis points to percentage (numeric)
+        'Payout Calc $': winner.payoutCalculated / 100, // Convert cents to dollars (numeric)
+        'Payout Override $': winner.payoutOverride ? (winner.payoutOverride / 100) : null, // Convert cents to dollars (numeric) or null
+        'Payout Final': winner.payoutFinal / 100, // Convert cents to dollars (numeric)
         'PayPal Email': winner.paypalEmail || '',
         'Status': winner.payoutStatus,
         'Last Modified': winner.lastModified.toISOString().split('T')[0], // Format as YYYY-MM-DD
