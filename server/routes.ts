@@ -60,6 +60,7 @@ const authenticateToken = async (req: AuthenticatedRequest, res: express.Respons
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.error('[Auth] No token provided in request');
     return res.status(401).json({ error: 'Access token required' });
   }
 
@@ -68,13 +69,53 @@ const authenticateToken = async (req: AuthenticatedRequest, res: express.Respons
     const user = await storage.getUserById(decoded.userId);
     
     if (!user) {
-      return res.status(401).json({ error: 'Invalid token' });
+      console.error(`[Auth] User not found for token userId: ${decoded.userId}`);
+      return res.status(401).json({ error: 'Invalid token - user not found' });
     }
     
+    console.log(`[Auth] User authenticated: ${user.email} (ID: ${user.id}, Admin: ${user.isAdmin})`);
     req.user = user;
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Invalid token' });
+    console.error('[Auth] Token verification failed:', error);
+    return res.status(403).json({ error: 'Invalid token - verification failed' });
+  }
+};
+
+// Unified Admin Authentication Middleware (Phase 1 Fix)
+const requireAdmin = async (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    console.error('[Admin Auth] No token provided in admin request');
+    return res.status(401).json({ error: 'Admin access requires authentication token' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
+    const user = await storage.getUserById(decoded.userId);
+    
+    if (!user) {
+      console.error(`[Admin Auth] User not found for admin token userId: ${decoded.userId}`);
+      return res.status(401).json({ error: 'Invalid admin token - user not found' });
+    }
+
+    // Check admin privileges using both methods for maximum reliability
+    const isAdminByFlag = user.isAdmin === true;
+    const isAdminByEmail = user.email === 'lafleur.andrew@gmail.com';
+    
+    if (!isAdminByFlag && !isAdminByEmail) {
+      console.error(`[Admin Auth] Access denied for user: ${user.email} (Admin flag: ${user.isAdmin})`);
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    console.log(`[Admin Auth] Admin authenticated: ${user.email} (ID: ${user.id}, Method: ${isAdminByFlag ? 'flag' : 'email'})`);
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('[Admin Auth] Admin token verification failed:', error);
+    return res.status(401).json({ error: 'Unauthorized - invalid admin token' });
   }
 };
 
@@ -1498,34 +1539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin middleware - using JWT authentication
-  const requireAdmin = async (req: any, res: any, next: any) => {
-    try {
-      const authHeader = req.headers['authorization'];
-      const token = authHeader && authHeader.split(' ')[1];
-
-      if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-      }
-
-      const decoded = jwt.verify(token, 'finboost-secret-key-2024') as any;
-      const user = await storage.getUserById(decoded.userId);
-      
-      if (!user) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-
-      if (!user.isAdmin && user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      req.user = user;
-      next();
-    } catch (error) {
-      console.error('Admin auth error:', error);
-      res.status(401).json({ message: "Unauthorized" });
-    }
-  };
+  // Note: Using unified requireAdmin middleware defined at top of file
 
   // Cycle settings routes (admin only) - consolidated from monthly
   app.get("/api/admin/cycle-settings", requireAdmin, async (req, res) => {
@@ -2041,11 +2055,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // PayPal Disbursement Routes
-  app.post("/api/admin/disbursements/calculate", authenticateToken, async (req, res) => {
+  app.post("/api/admin/disbursements/calculate", requireAdmin, async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
       // Get all premium users with points
       const premiumUsers = await storage.getPremiumUsersForRewards();
@@ -2065,11 +2076,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/disbursements/process", authenticateToken, async (req, res) => {
+  app.post("/api/admin/disbursements/process", requireAdmin, async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
       const { selectedUsers, totalAmount } = req.body;
 
@@ -2122,11 +2130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/disbursements/history", authenticateToken, async (req, res) => {
+  app.get("/api/admin/disbursements/history", requireAdmin, async (req, res) => {
     try {
-      if (!req.user?.isAdmin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
       const payouts = await db
         .select({
@@ -4311,10 +4316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get eligible users for manual selection
-  app.get('/api/admin/eligible-users/:cycleSettingId', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.get('/api/admin/eligible-users/:cycleSettingId', requireAdmin, async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const users = await storage.getEligibleUsersForSelection(cycleSettingId);
@@ -4326,10 +4328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get winner details for adjustment (original - returns all results)
-  app.get('/api/admin/cycle-winner-details/:cycleSettingId', authenticateToken, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId', requireAdmin, async (req, res) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const details = await storage.getCycleWinnerDetails(cycleSettingId);
@@ -4341,10 +4340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get paginated winner details (new - for performance)
-  app.get('/api/admin/cycle-winner-details/:cycleSettingId/paginated', authenticateToken, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId/paginated', requireAdmin, async (req, res) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const page = parseInt(req.query.page as string) || 1;
@@ -4369,10 +4365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export winner selection to XLSX
-  app.get('/api/admin/cycle-winner-details/:cycleSettingId/export', authenticateToken, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.get('/api/admin/cycle-winner-details/:cycleSettingId/export', requireAdmin, async (req, res) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       
@@ -4453,10 +4446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Import winner selection from XLSX
-  app.post('/api/admin/cycle-winner-details/:cycleSettingId/import', authenticateToken, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.post('/api/admin/cycle-winner-details/:cycleSettingId/import', requireAdmin, async (req, res) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
       const { fileData } = req.body;
