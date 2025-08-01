@@ -10,6 +10,10 @@ export interface WinnerStatus {
   cycleId?: number;
   cycleName?: string;
   rewardAmount?: number;
+  // Step 2.4: Added payout override fields for accurate banner display
+  payoutOverride?: number;
+  payoutFinal?: number;
+  finalPayoutAmount?: number; // Always contains the correct override amount
   tier?: string;
   notificationDisplayed: boolean;
   payoutStatus?: string;

@@ -7386,12 +7386,14 @@ export class MemStorage implements IStorage {
       if (!Number.isInteger(userId) || userId <= 0) {
         throw new Error(`Invalid user ID: ${userId}`);
       }
-      // Step 2.1: Simplified logic - Check if user is a winner in most recent sealed cycle
+      // Step 2.1: Enhanced logic - Include payout override fields for accurate banner display
       const [winnerRecord] = await db
         .select({
           cycleId: cycleWinnerSelections.cycleSettingId,
           cycleName: cycleSettings.cycleName,
           rewardAmount: cycleWinnerSelections.rewardAmount,
+          payoutOverride: cycleWinnerSelections.payoutOverride,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
           tier: cycleWinnerSelections.tier,
           notificationDisplayed: cycleWinnerSelections.notificationDisplayed,
           payoutStatus: cycleWinnerSelections.payoutStatus,
@@ -7459,12 +7461,17 @@ export class MemStorage implements IStorage {
           });
         }
 
-        // User is a winner - show banner regardless of notification_displayed status
+        // Step 2.1: User is a winner - ALWAYS prioritize payout override amounts
+        const finalPayoutAmount = winnerRecord.payoutFinal || winnerRecord.payoutOverride || winnerRecord.rewardAmount;
+        
         return {
           isWinner: true,
           cycleId: winnerRecord.cycleId,
           cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
           rewardAmount: winnerRecord.rewardAmount,
+          payoutOverride: winnerRecord.payoutOverride,
+          payoutFinal: winnerRecord.payoutFinal,
+          finalPayoutAmount: finalPayoutAmount, // Always the correct override amount
           tier: winnerRecord.tier,
           notificationDisplayed: winnerRecord.notificationDisplayed,
           payoutStatus: winnerRecord.payoutStatus || 'pending',

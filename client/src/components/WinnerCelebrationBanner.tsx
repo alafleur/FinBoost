@@ -168,9 +168,10 @@ export default function WinnerCelebrationBanner() {
                         {getTierDisplayName(winnerStatus?.tier || '')} Winner
                       </Badge>
                       
-                      {winnerStatus?.rewardAmount && (
+                      {/* Step 2.2: ALWAYS use finalPayoutAmount (override) instead of rewardAmount */}
+                      {(winnerStatus?.finalPayoutAmount || winnerStatus?.payoutFinal || winnerStatus?.payoutOverride || winnerStatus?.rewardAmount) && (
                         <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
-                          <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
+                          <span>{formatCurrency((winnerStatus.finalPayoutAmount || winnerStatus.payoutFinal || winnerStatus.payoutOverride || winnerStatus.rewardAmount) / 100)}</span>
                         </div>
                       )}
                     </div>
