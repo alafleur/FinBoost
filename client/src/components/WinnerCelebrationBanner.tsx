@@ -145,7 +145,7 @@ export default function WinnerCelebrationBanner() {
                   <>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className={`text-lg font-bold ${colors.text}`}>
-                        🎉 Congratulations!
+                        🎉 You're a winner!
                       </h3>
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -158,10 +158,6 @@ export default function WinnerCelebrationBanner() {
                         <Sparkles className="h-4 w-4 text-yellow-500" />
                       </motion.div>
                     </div>
-                    
-                    <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
-                      You're a winner in <strong>{winnerStatus?.cycleName}</strong>!
-                    </p>
 
                     {/* Winner details */}
                     <div className="flex flex-wrap items-center gap-3">
@@ -174,7 +170,6 @@ export default function WinnerCelebrationBanner() {
                       
                       {winnerStatus?.rewardAmount && (
                         <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
-                          <DollarSign className="h-4 w-4" />
                           <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
                         </div>
                       )}

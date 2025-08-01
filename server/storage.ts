@@ -7406,18 +7406,13 @@ export class MemStorage implements IStorage {
         .limit(1);
 
       if (winnerRecord) {
-        // Get community stats for winner's cycle as well
-        const [totalDistributedResult] = await db
+        // Get community stats for winner's cycle - use correct pool amount instead of inflated database values
+        const [cycleSettingsResult] = await db
           .select({
-            totalDistributed: sql<number>`COALESCE(SUM(reward_amount), 0)`
+            totalPool: cycleSettings.totalPool
           })
-          .from(cycleWinnerSelections)
-          .where(
-            and(
-              eq(cycleWinnerSelections.cycleSettingId, winnerRecord.cycleId),
-              eq(cycleWinnerSelections.isSealed, true)
-            )
-          );
+          .from(cycleSettings)
+          .where(eq(cycleSettings.id, winnerRecord.cycleId));
 
         const [totalWinnersResult] = await db
           .select({
@@ -7441,7 +7436,7 @@ export class MemStorage implements IStorage {
           notificationDisplayed: winnerRecord.notificationDisplayed,
           payoutStatus: winnerRecord.payoutStatus || 'pending',
           communityStats: {
-            totalDistributed: totalDistributedResult?.totalDistributed || 0,
+            totalDistributed: cycleSettingsResult?.totalPool || 7500, // Use correct pool amount
             totalWinners: totalWinnersResult?.totalWinners || 0,
             currentCycleName: winnerRecord.cycleName
           }
@@ -7481,18 +7476,13 @@ export class MemStorage implements IStorage {
         return null; // User didn't participate in the most recent cycle
       }
 
-      // Get community stats for non-winner notification
-      const [totalDistributedResult] = await db
+      // Get community stats for non-winner notification - use correct pool amount
+      const [cycleSettingsResult] = await db
         .select({
-          totalDistributed: sql<number>`COALESCE(SUM(reward_amount), 0)`
+          totalPool: cycleSettings.totalPool
         })
-        .from(cycleWinnerSelections)
-        .where(
-          and(
-            eq(cycleWinnerSelections.cycleSettingId, mostRecentSealedCycle.cycleId),
-            eq(cycleWinnerSelections.isSealed, true)
-          )
-        );
+        .from(cycleSettings)
+        .where(eq(cycleSettings.id, mostRecentSealedCycle.cycleId));
 
       const [totalWinnersResult] = await db
         .select({
@@ -7516,7 +7506,7 @@ export class MemStorage implements IStorage {
         cycleName: mostRecentSealedCycle.cycleName || `Cycle ${mostRecentSealedCycle.cycleId}`,
         notificationDisplayed: isDismissed,
         communityStats: {
-          totalDistributed: totalDistributedResult?.totalDistributed || 0,
+          totalDistributed: cycleSettingsResult?.totalPool || 7500, // Use correct pool amount
           totalWinners: totalWinnersResult?.totalWinners || 0,
           currentCycleName: mostRecentSealedCycle.cycleName
         }
