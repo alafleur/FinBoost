@@ -1177,7 +1177,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                             {winner.email}
                           </TableCell>
                           <TableCell className="font-medium text-center text-blue-600">
-                            {winner.cyclePoints}
+                            {winner.pointsAtSelection || winner.cyclePoints || winner.totalPoints || '-'}
                           </TableCell>
                           <TableCell className="font-medium text-green-600">
                             <Input
