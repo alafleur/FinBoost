@@ -6678,6 +6678,7 @@ export class MemStorage implements IStorage {
     customWinnerIds?: number[];
     pointDeductionPercentage: number;
     rolloverPercentage: number;
+    adminUserId?: number; // Phase 2A: Track admin who executed selection
   }): Promise<any> {
     const { cycleSettingId, selectionMode, tierSettings } = params;
     
@@ -7136,7 +7137,11 @@ export class MemStorage implements IStorage {
               rewardAmount: winner.rewardAmount * 100, // Convert to cents
               pointsDeducted: 0,
               pointsRolledOver: 0,
-              payoutStatus: winner.payoutStatus || 'pending'
+              payoutStatus: winner.payoutStatus || 'pending',
+              // Phase 2A: Enhanced audit fields for save/seal workflow (Issue #2)
+              isSealed: false, // Initially unsealed (draft state)
+              savedAt: new Date(), // Track when selection was saved
+              savedBy: params.adminUserId || 1 // Track admin who executed selection
             })
             .returning();
 
@@ -7178,7 +7183,7 @@ export class MemStorage implements IStorage {
   }
 
   // NEW: Seal the winner selection (final lock state) - prevents further modifications
-  async sealCycleWinnerSelection(cycleSettingId: number): Promise<{ sealed: boolean; message: string }> {
+  async sealCycleWinnerSelection(cycleSettingId: number, adminUserId?: number): Promise<{ sealed: boolean; message: string }> {
     try {
       // First validate that selection was executed and winners exist
       const [cycleSetting] = await db
@@ -7217,20 +7222,35 @@ export class MemStorage implements IStorage {
         console.warn(`Winner count mismatch: database has ${actualWinnerCount}, cycle setting has ${cycleSetting.totalWinners}`);
       }
 
-      // Mark cycle as SEALED (final state)
+      // Phase 2A: Enhanced seal implementation with individual winner record tracking
+      const sealTimestamp = new Date();
+      const sealedByAdmin = adminUserId || 1;
+
+      // Update individual winner records
+      await db
+        .update(cycleWinnerSelections)
+        .set({
+          isSealed: true,
+          sealedAt: sealTimestamp,
+          sealedBy: sealedByAdmin
+        })
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId));
+
+      // Mark cycle as SEALED (final state) with enhanced audit trail
       await db
         .update(cycleSettings)
         .set({
           selectionSealed: true,
-          selectionSealedAt: new Date()
+          selectionSealedAt: sealTimestamp,
+          selectionSealedBy: sealedByAdmin
         })
         .where(eq(cycleSettings.id, cycleSettingId));
 
-      console.log(`Sealed cycle ${cycleSettingId} with ${actualWinnerCount} winners - no further modifications allowed`);
+      console.log(`[PHASE 2A] Sealed cycle ${cycleSettingId} with ${actualWinnerCount} winners by admin ${sealedByAdmin} - no further modifications allowed`);
 
       return {
         sealed: true,
-        message: `Cycle ${cycleSettingId} successfully sealed with ${actualWinnerCount} winners`
+        message: `Cycle ${cycleSettingId} successfully sealed with ${actualWinnerCount} winners. All modifications are now prevented.`
       };
     } catch (error) {
       console.error('Error sealing cycle winner selection:', error);
@@ -7333,7 +7353,7 @@ export class MemStorage implements IStorage {
       console.log(`[DEBUG] Simple query successful, found ${simpleWinners.length} records`);
       console.log(`[DEBUG] Sample record:`, simpleWinners[0] ? JSON.stringify(simpleWinners[0], null, 2) : 'none');
       
-      // Step 3: Try the full query with join
+      // Step 3: Try the full query with join (Phase 2A: Include audit fields)
       console.log(`[DEBUG] Attempting full query with join...`);
       const winners = await db
         .select({
@@ -7348,7 +7368,13 @@ export class MemStorage implements IStorage {
           pointsDeducted: cycleWinnerSelections.pointsDeducted,
           pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
           payoutStatus: cycleWinnerSelections.payoutStatus,
-          selectionDate: cycleWinnerSelections.selectionDate
+          selectionDate: cycleWinnerSelections.selectionDate,
+          // Phase 2A: Enhanced audit fields for save/seal workflow
+          isSealed: cycleWinnerSelections.isSealed,
+          sealedAt: cycleWinnerSelections.sealedAt,
+          sealedBy: cycleWinnerSelections.sealedBy,
+          savedAt: cycleWinnerSelections.savedAt,
+          savedBy: cycleWinnerSelections.savedBy
         })
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
@@ -7411,7 +7437,13 @@ export class MemStorage implements IStorage {
           pointsDeducted: cycleWinnerSelections.pointsDeducted,
           pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
           payoutStatus: cycleWinnerSelections.payoutStatus,
-          selectionDate: cycleWinnerSelections.selectionDate
+          selectionDate: cycleWinnerSelections.selectionDate,
+          // Phase 2A: Enhanced audit fields for save/seal workflow
+          isSealed: cycleWinnerSelections.isSealed,
+          sealedAt: cycleWinnerSelections.sealedAt,
+          sealedBy: cycleWinnerSelections.sealedBy,
+          savedAt: cycleWinnerSelections.savedAt,
+          savedBy: cycleWinnerSelections.savedBy
         })
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))

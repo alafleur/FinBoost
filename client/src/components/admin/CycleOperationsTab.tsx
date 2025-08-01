@@ -64,7 +64,7 @@ interface WinnerSelection {
   paypalEmail?: string;
 }
 
-// Enhanced interface for the new 13-column Selected Winners table (Phase 3: Added cyclePoints)
+// Enhanced interface for the new 13-column Selected Winners table (Phase 3: Added cyclePoints, Phase 2A: Added audit fields)
 interface EnhancedWinnerData {
   overallRank: number;
   tierRank: number;
@@ -79,6 +79,12 @@ interface EnhancedWinnerData {
   paypalEmail: string | null;
   payoutStatus: string;
   lastModified: Date;
+  // Phase 2A: Enhanced save/seal workflow audit fields (Issue #2 Resolution)
+  isSealed?: boolean;
+  sealedAt?: Date;
+  sealedBy?: number;
+  savedAt?: Date;
+  savedBy?: number;
 }
 
 interface CycleOperationsTabProps {
@@ -1040,7 +1046,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         <TableHead className="w-24">Payout Override $</TableHead>
                         <TableHead className="w-24">Payout Final</TableHead>
                         <TableHead className="w-48">PayPal Email</TableHead>
-                        <TableHead className="w-20">Status</TableHead>
+                        <TableHead className="w-20">Payout Status</TableHead>
+                        <TableHead className="w-32">Save/Seal Status</TableHead>
                         <TableHead className="w-32">Last Modified</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -1099,6 +1106,37 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                             }>
                               {winner.payoutStatus}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {/* Phase 2A: Save/Seal Status Column - resolves Issue #2 UX confusion */}
+                            <div className="flex flex-col gap-1">
+                              <Badge 
+                                variant={winner.isSealed ? 'default' : 'outline'}
+                                className={winner.isSealed ? 'bg-green-100 text-green-800 border-green-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300'}
+                              >
+                                {winner.isSealed ? (
+                                  <>
+                                    <Lock className="w-3 h-3 mr-1" />
+                                    Sealed
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="w-3 h-3 mr-1" />
+                                    Draft
+                                  </>
+                                )}
+                              </Badge>
+                              {winner.savedAt && (
+                                <span className="text-xs text-gray-500">
+                                  Saved: {new Date(winner.savedAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs text-gray-500">
                             {new Date(winner.lastModified).toLocaleDateString('en-US', {

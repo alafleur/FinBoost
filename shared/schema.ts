@@ -328,6 +328,7 @@ export const cycleSettings = pgTable("cycle_settings", {
   totalRewardPool: integer("total_reward_pool").default(0).notNull(), // In cents
   selectionExecutedAt: timestamp("selection_executed_at"),
   selectionSealedAt: timestamp("selection_sealed_at"),
+  selectionSealedBy: integer("selection_sealed_by").references(() => users.id), // Admin who sealed the entire cycle
   
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -368,6 +369,13 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   payoutStatus: text("payout_status").default("pending").notNull(), // pending, processing, completed, failed
   lastModified: timestamp("last_modified").defaultNow().notNull(), // When payout data was last updated
   selectionDate: timestamp("selection_date").defaultNow().notNull(),
+  
+  // Phase 2A: Enhanced Save/Seal Workflow Fields (Issue #2 Resolution)
+  isSealed: boolean("is_sealed").default(false).notNull(), // Individual winner record seal status
+  sealedAt: timestamp("sealed_at"), // When this specific winner was sealed
+  sealedBy: integer("sealed_by").references(() => users.id), // Admin who sealed this winner
+  savedAt: timestamp("saved_at").defaultNow().notNull(), // When selection was initially saved
+  savedBy: integer("saved_by").references(() => users.id).notNull(), // Admin who executed the selection
 });
 
 // Cycle Point History - enhanced version of userPointsHistory with cycle tracking

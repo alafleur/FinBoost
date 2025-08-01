@@ -4274,10 +4274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Execute flexible winner selection with point-weighted random as baseline
-  app.post('/api/admin/cycle-winner-selection/execute', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.post('/api/admin/cycle-winner-selection/execute', requireAdmin, async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { 
         cycleSettingId, 
@@ -4305,7 +4302,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         customWinnerIds,
         pointDeductionPercentage: pointDeductionPercentage || 50,
-        rolloverPercentage: rolloverPercentage || 50
+        rolloverPercentage: rolloverPercentage || 50,
+        adminUserId: req.user?.id // Phase 2A: Track admin who executed selection
       });
 
       res.json(results);
@@ -4633,13 +4631,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // NEW: Seal winner selection (final lock state) - prevents further modifications
-  app.post('/api/admin/cycle-winner-selection/:cycleSettingId/seal', authenticateToken, async (req, res) => {
-    if (!req.user?.isAdmin) {
-      return res.status(403).json({ error: "Admin access required" });
-    }
+  app.post('/api/admin/cycle-winner-selection/:cycleSettingId/seal', requireAdmin, async (req, res) => {
     try {
       const cycleSettingId = parseInt(req.params.cycleSettingId);
-      const result = await storage.sealCycleWinnerSelection(cycleSettingId);
+      const result = await storage.sealCycleWinnerSelection(cycleSettingId, req.user?.id);
       
       res.json({ 
         success: true, 
