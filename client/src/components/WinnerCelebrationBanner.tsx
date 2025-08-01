@@ -1,0 +1,213 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trophy, X, Sparkles, DollarSign, Crown } from "lucide-react";
+import { motion } from "framer-motion";
+import { useWinnerCelebration } from "@/hooks/use-winner-status";
+
+// Step 3: Winner Celebration Banner Component
+// Responsive celebration banner for dashboard overview tab
+// Mobile-first design with professional styling
+
+export default function WinnerCelebrationBanner() {
+  const {
+    winnerStatus,
+    shouldShowCelebration,
+    dismissCelebration,
+    isLoading,
+    isDismissing
+  } = useWinnerCelebration();
+
+  // Don't render if not a winner or notification already displayed
+  if (!shouldShowCelebration() || isLoading) {
+    return null;
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getTierIcon = (tier: string) => {
+    switch (tier?.toLowerCase()) {
+      case 'tier1':
+        return <Crown className="h-5 w-5 text-yellow-500" />;
+      case 'tier2':
+        return <Trophy className="h-5 w-5 text-gray-400" />;
+      case 'tier3':
+        return <Trophy className="h-5 w-5 text-orange-500" />;
+      default:
+        return <Trophy className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
+  const getTierDisplayName = (tier: string) => {
+    switch (tier?.toLowerCase()) {
+      case 'tier1': return 'Tier 1';
+      case 'tier2': return 'Tier 2';
+      case 'tier3': return 'Tier 3';
+      default: return 'Winner';
+    }
+  };
+
+  const getTierColors = (tier: string) => {
+    switch (tier?.toLowerCase()) {
+      case 'tier1':
+        return {
+          gradient: 'from-yellow-500 to-amber-500',
+          bg: 'bg-gradient-to-br from-yellow-50 to-amber-50',
+          border: 'border-yellow-200',
+          text: 'text-yellow-800'
+        };
+      case 'tier2':
+        return {
+          gradient: 'from-gray-500 to-slate-500',
+          bg: 'bg-gradient-to-br from-gray-50 to-slate-50',
+          border: 'border-gray-200',
+          text: 'text-gray-800'
+        };
+      case 'tier3':
+        return {
+          gradient: 'from-orange-500 to-red-500',
+          bg: 'bg-gradient-to-br from-orange-50 to-red-50',
+          border: 'border-orange-200',
+          text: 'text-orange-800'
+        };
+      default:
+        return {
+          gradient: 'from-blue-500 to-indigo-500',
+          bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
+          border: 'border-blue-200',
+          text: 'text-blue-800'
+        };
+    }
+  };
+
+  const colors = getTierColors(winnerStatus?.tier || '');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ 
+        duration: 0.5, 
+        ease: "easeOut",
+        delay: 0.2 // Small delay for dramatic effect
+      }}
+      className="mb-6"
+    >
+      <Card className={`${colors.bg} ${colors.border} border-2 shadow-lg relative overflow-hidden`}>
+        {/* Animated gradient top border */}
+        <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${colors.gradient}`}>
+          <motion.div
+            className="h-full w-full bg-white opacity-30"
+            animate={{ 
+              x: ['-100%', '100%'],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "loop",
+              ease: "linear"
+            }}
+          />
+        </div>
+
+        {/* Dismiss button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-3 right-3 h-8 w-8 p-0 hover:bg-white/50 transition-colors"
+          onClick={() => dismissCelebration(winnerStatus?.cycleId)}
+          disabled={isDismissing}
+          aria-label="Dismiss celebration banner"
+        >
+          <X className="h-4 w-4 text-gray-500" />
+        </Button>
+
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Icon and celebration message */}
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ 
+                  rotate: [0, -10, 10, -5, 5, 0],
+                  scale: [1, 1.1, 1, 1.05, 1]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3
+                }}
+                className={`p-3 bg-white rounded-full shadow-sm border ${colors.border}`}
+              >
+                {getTierIcon(winnerStatus?.tier || '')}
+              </motion.div>
+
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className={`text-lg font-bold ${colors.text}`}>
+                    🎉 Congratulations!
+                  </h3>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  >
+                    <Sparkles className="h-4 w-4 text-yellow-500" />
+                  </motion.div>
+                </div>
+                
+                <p className={`text-sm ${colors.text} opacity-90 mb-2`}>
+                  You're a winner in <strong>{winnerStatus?.cycleName}</strong>!
+                </p>
+
+                {/* Winner details */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge 
+                    variant="secondary" 
+                    className={`${colors.text} bg-white/70 border ${colors.border} font-semibold`}
+                  >
+                    {getTierDisplayName(winnerStatus?.tier || '')} Winner
+                  </Badge>
+                  
+                  {winnerStatus?.rewardAmount && (
+                    <div className="flex items-center gap-1 text-sm font-semibold text-green-700">
+                      <DollarSign className="h-4 w-4" />
+                      <span>{formatCurrency(winnerStatus.rewardAmount)}</span>
+                    </div>
+                  )}
+
+                  <div className="text-xs text-gray-600 font-medium">
+                    Status: <span className="capitalize">{winnerStatus?.payoutStatus || 'Pending'}</span>
+                  </div>
+                </div>
+
+                {/* Payout status message */}
+                <div className="mt-3 text-xs text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <span>
+                      {winnerStatus?.payoutStatus === 'completed' 
+                        ? 'Your reward has been processed!' 
+                        : 'Your reward will be processed within 3-5 business days'
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}

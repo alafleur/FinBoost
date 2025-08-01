@@ -43,6 +43,7 @@ import TierProgressTable from "@/components/TierProgressTable";
 import SectionHeader from "@/components/SectionHeader";
 import PredictionsContent from "@/components/PredictionsContent";
 import DashboardStats from "@/components/DashboardStats";
+import WinnerCelebrationBanner from "@/components/WinnerCelebrationBanner";
 import { educationContent } from "@/data/educationContent";
 
 // Custom hook to determine if the screen is mobile
@@ -542,6 +543,9 @@ export default function Dashboard() {
           {/* Mobile Tab Content with Full Desktop Features */}
           <div className="max-w-7xl mx-auto px-4 py-6 pb-20">
             <TabsContent value="overview" className="mt-0 space-y-6">
+              {/* Step 3: Winner Celebration Banner - Prominent placement on Overview tab */}
+              <WinnerCelebrationBanner />
+
               {/* Unified Stats Cards Component */}
               <DashboardStats 
                 user={user}
@@ -1223,6 +1227,8 @@ export default function Dashboard() {
 
             {/* Overview Tab - Complete Content from Mobile */}
             <TabsContent value="overview" className="mt-0 space-y-6">
+              {/* Step 3: Winner Celebration Banner - Desktop Overview tab */}
+              <WinnerCelebrationBanner />
 
               {/* Unified Stats Cards Component */}
               <DashboardStats 
