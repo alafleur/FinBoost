@@ -7040,7 +7040,7 @@ export class MemStorage implements IStorage {
             tier: winner.tier,
             tierRank,
             pointsAtSelection: winner.currentCyclePoints,
-            rewardAmount: winner.rewardAmount * 100, // Convert to cents
+            rewardAmount: winner.rewardAmount, // Store in dollars as expected by display
             pointsDeducted: 0,
             pointsRolledOver: 0,
             payoutStatus: winner.payoutStatus || 'pending'
@@ -7153,7 +7153,7 @@ export class MemStorage implements IStorage {
               tierRank,
               pointsAtSelection: winner.currentCyclePoints,
               tierSizeAmount, // Add the missing required field
-              rewardAmount: winner.rewardAmount * 100, // Convert to cents
+              rewardAmount: winner.rewardAmount, // Store in dollars as expected by display
               pointsDeducted: 0,
               pointsRolledOver: 0,
               payoutStatus: winner.payoutStatus || 'pending',
@@ -7364,62 +7364,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // Step 2: Helper method to calculate correct reward amount using existing tier logic
-  private async calculateCorrectRewardAmount(cycleId: number, tier: string): Promise<number> {
-    try {
-      // Get cycle settings and pool data using existing working method
-      const poolData = await this.getCyclePoolData(cycleId);
-      
-      // Get current cycle settings to get tier configuration
-      const [cycleSetting] = await db
-        .select()
-        .from(cycleSettings)
-        .where(eq(cycleSettings.id, cycleId))
-        .limit(1);
-      
-      if (!cycleSetting) {
-        return 0;
-      }
-      
-      // Use same tier pool calculation as winner selection
-      const tier1Pool = Math.floor(poolData.totalPool * 0.50); // 50% to Tier 1
-      const tier2Pool = Math.floor(poolData.totalPool * 0.30); // 30% to Tier 2  
-      const tier3Pool = Math.floor(poolData.totalPool * 0.20); // 20% to Tier 3
-      
-      // Get winner counts from current sealed cycle
-      const tierWinnerCounts = await db
-        .select({
-          tier: cycleWinnerSelections.tier,
-          count: sql<number>`COUNT(*)`
-        })
-        .from(cycleWinnerSelections)
-        .where(
-          and(
-            eq(cycleWinnerSelections.cycleSettingId, cycleId),
-            eq(cycleWinnerSelections.isSealed, true)
-          )
-        )
-        .groupBy(cycleWinnerSelections.tier);
-      
-      // Create winner count map
-      const winnerCountMap = tierWinnerCounts.reduce((acc, item) => {
-        acc[item.tier] = item.count;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      // Calculate individual reward using same logic as winner selection
-      const tierPool = { tier1: tier1Pool, tier2: tier2Pool, tier3: tier3Pool }[tier] || 0;
-      const winnerCount = winnerCountMap[tier] || 1;
-      const individualReward = winnerCount > 0 ? Math.floor(tierPool / winnerCount) : 0;
-      
-      console.log(`[REWARD CALC] Tier ${tier}: Pool $${tierPool}, Winners ${winnerCount}, Individual $${individualReward}`);
-      return individualReward;
-      
-    } catch (error) {
-      console.error(`[REWARD CALC] Error calculating reward for tier ${tier} in cycle ${cycleId}:`, error);
-      return 0;
-    }
-  }
+
 
   // Step 3: Enhanced getUserWinnerStatus - Support for both winners and non-winners with community stats
   async getUserWinnerStatus(userId: number): Promise<{
@@ -7468,23 +7413,15 @@ export class MemStorage implements IStorage {
       if (winnerRecord) {
         console.log(`[WINNER STATUS] Found winner record for user ${userId} in cycle ${winnerRecord.cycleId}`);
         
-        // DEBUG: Check if new code path is executing
-        console.log(`[DEBUG] Executing new pool and reward calculation logic`);
-        
-        // Step 1: Use existing pool calculation instead of corrupted database field
+        // Get pool data using existing calculation method
         let totalRewardPool = 7500; // Default fallback
         let totalWinners = 0;
         
         try {
           const poolData = await this.getCyclePoolData(winnerRecord.cycleId);
           totalRewardPool = poolData.totalPool;
-          console.log(`[WINNER STATUS] Using calculated pool amount: $${totalRewardPool} for cycle ${winnerRecord.cycleId}`);
         } catch (error) {
-          console.error(`[WINNER STATUS] Error fetching calculated pool data for cycle ${winnerRecord.cycleId}:`, {
-            error: error.message,
-            stack: error.stack,
-            query: 'getCyclePoolData'
-          });
+          console.error(`[WINNER STATUS] Error fetching pool data:`, error);
         }
 
         try {
@@ -7511,21 +7448,12 @@ export class MemStorage implements IStorage {
           });
         }
 
-        // Step 2: Calculate correct reward amount using existing tier logic
-        let correctRewardAmount = winnerRecord.rewardAmount; // Fallback to database value
-        try {
-          correctRewardAmount = await this.calculateCorrectRewardAmount(winnerRecord.cycleId, winnerRecord.tier);
-          console.log(`[WINNER STATUS] Calculated correct reward: $${correctRewardAmount} (was $${winnerRecord.rewardAmount})`);
-        } catch (error) {
-          console.error(`[WINNER STATUS] Error calculating correct reward, using database value:`, error);
-        }
-
         // User is a winner - show banner regardless of notification_displayed status
         return {
           isWinner: true,
           cycleId: winnerRecord.cycleId,
           cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
-          rewardAmount: correctRewardAmount,
+          rewardAmount: winnerRecord.rewardAmount,
           tier: winnerRecord.tier,
           notificationDisplayed: winnerRecord.notificationDisplayed,
           payoutStatus: winnerRecord.payoutStatus || 'pending',
@@ -7556,20 +7484,15 @@ export class MemStorage implements IStorage {
 
       console.log(`[WINNER STATUS] Non-winner user ${userId} - showing community stats for cycle ${mostRecentSealedCycle.cycleId}`);
       
-      // Step 1: Use existing pool calculation for non-winners too
+      // Get pool data for community stats
       let totalRewardPool = 7500; // Default fallback
       let totalWinners = 0;
       
       try {
         const poolData = await this.getCyclePoolData(mostRecentSealedCycle.cycleId);
         totalRewardPool = poolData.totalPool;
-        console.log(`[WINNER STATUS] Using calculated pool amount for non-winner: $${totalRewardPool} for cycle ${mostRecentSealedCycle.cycleId}`);
       } catch (error) {
-        console.error(`[WINNER STATUS] Error fetching calculated pool data for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
-          error: error.message,
-          stack: error.stack,
-          query: 'getCyclePoolData for non-winner'
-        });
+        console.error(`[WINNER STATUS] Error fetching pool data for non-winner:`, error);
       }
 
       try {
@@ -7704,7 +7627,7 @@ export class MemStorage implements IStorage {
         .set({
           selectionExecuted: true,
           totalWinners: winnerCount,
-          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
+          totalRewardPool: Math.floor(totalPool), // Store in dollars as expected by display
           selectionExecutedAt: new Date()
         })
         .where(eq(cycleSettings.id, cycleSettingId));
@@ -7724,7 +7647,7 @@ export class MemStorage implements IStorage {
         .set({
           selectionCompleted: true,
           totalWinners: winnerCount,
-          totalRewardPool: Math.floor(totalPool * 100), // Store in cents
+          totalRewardPool: Math.floor(totalPool), // Store in dollars as expected by display
           selectionCompletedAt: new Date()
         })
         .where(eq(cycleSettings.id, cycleSettingId));
