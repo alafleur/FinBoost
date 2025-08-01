@@ -108,7 +108,12 @@ export default function Dashboard() {
   };
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [publishedModules, setPublishedModules] = useState<any[]>([]);
-  const [poolData, setPoolData] = useState({ totalPool: 0, premiumUsers: 0, totalUsers: 0 });
+  const [poolData, setPoolData] = useState({ 
+    totalPool: 0, 
+    premiumUsers: 0, 
+    totalUsers: 0,
+    tierBreakdown: undefined as { tier1: number; tier2: number; tier3: number; } | undefined
+  });
   const [distributionInfo, setDistributionInfo] = useState<any>(null);
   const [paypalEmail, setPaypalEmail] = useState('');
   const [payoutMethod, setPayoutMethod] = useState('paypal');
@@ -1262,6 +1267,7 @@ export default function Dashboard() {
                     <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.neutral}`}></div>
                     <TierStats 
                       tierThresholds={tierThresholds}
+                      tierRewards={poolData.tierBreakdown}
                       user={user}
                     />
                   </div>

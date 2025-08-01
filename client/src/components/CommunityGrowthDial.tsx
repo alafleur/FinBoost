@@ -40,8 +40,8 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
   const isPremiumUser = user.subscriptionStatus === 'active';
   const memberCount = poolData.premiumUsers || 0;
   
-  // Use actual reward pool percentage from current cycle - no fallbacks
-  const rewardsPercentage = poolData.rewardPoolPercentage;
+  // Use actual reward pool percentage from current cycle with safe fallback
+  const rewardsPercentage = poolData.rewardPoolPercentage ?? 50;
   
   // Fetch current referral points from admin configuration
   useEffect(() => {

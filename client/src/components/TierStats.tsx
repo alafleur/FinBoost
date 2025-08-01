@@ -6,17 +6,35 @@ interface TierThresholds {
   tier3: number;
 }
 
+interface TierBreakdown {
+  tier1: number;
+  tier2: number;
+  tier3: number;
+}
+
 interface User {
   tier?: string;
   currentCyclePoints?: number;
+  currentMonthPoints?: number;
 }
 
 interface TierStatsProps {
   tierThresholds: TierThresholds;
+  tierRewards?: TierBreakdown;
   user: User;
 }
 
-export default function TierStats({ tierThresholds, user }: TierStatsProps) {
+export default function TierStats({ tierThresholds, tierRewards, user }: TierStatsProps) {
+  // Utility function for currency formatting
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   // Fix the tier logic: tier1 should be highest, tier3 should be lowest
   // Current API returns: {"tier1":33,"tier2":67,"tier3":0}
   // But tier1 should require the MOST points (67+), not the least
@@ -45,18 +63,21 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
       id: 'tier1',
       name: 'Tier 1',
       range: `${highestThreshold}+`,
+      reward: tierRewards?.tier1,
       isCurrentTier: currentTier === 'tier1'
     },
     {
       id: 'tier2',
       name: 'Tier 2', 
       range: `${lowestThreshold}-${highestThreshold - 1}`,
+      reward: tierRewards?.tier2,
       isCurrentTier: currentTier === 'tier2'
     },
     {
       id: 'tier3',
       name: 'Tier 3',
       range: `0-${lowestThreshold - 1}`,
+      reward: tierRewards?.tier3,
       isCurrentTier: currentTier === 'tier3'
     }
   ];
