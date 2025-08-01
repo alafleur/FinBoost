@@ -7414,26 +7414,18 @@ export class MemStorage implements IStorage {
       if (winnerRecord) {
         console.log(`[WINNER STATUS] Found winner record for user ${userId} in cycle ${winnerRecord.cycleId}`);
         
-        // Step 2.2: Add proper error handling for community stats queries
+        // Step 3: Use same pool calculation as /api/cycles/pool endpoint
         let totalRewardPool = 7500; // Default fallback
         let totalWinners = 0;
         
         try {
-          const [cycleSettingsResult] = await db
-            .select({
-              totalRewardPool: cycleSettings.totalRewardPool
-            })
-            .from(cycleSettings)
-            .where(eq(cycleSettings.id, winnerRecord.cycleId));
-          
-          if (cycleSettingsResult?.totalRewardPool) {
-            totalRewardPool = cycleSettingsResult.totalRewardPool;
-          }
+          const poolData = await this.getCyclePoolData(winnerRecord.cycleId);
+          totalRewardPool = poolData.totalPool;
         } catch (error) {
-          console.error(`[WINNER STATUS] Error fetching cycle settings for cycle ${winnerRecord.cycleId}:`, {
+          console.error(`[WINNER STATUS] Error fetching pool data for cycle ${winnerRecord.cycleId}:`, {
             error: error.message,
             stack: error.stack,
-            query: 'cycleSettings.totalRewardPool'
+            query: 'getCyclePoolData'
           });
         }
 
@@ -7502,26 +7494,18 @@ export class MemStorage implements IStorage {
 
       console.log(`[WINNER STATUS] Non-winner user ${userId} - showing community stats for cycle ${mostRecentSealedCycle.cycleId}`);
       
-      // Step 2.2: Add error handling for non-winner community stats queries
+      // Step 3: Use same pool calculation as /api/cycles/pool endpoint
       let totalRewardPool = 7500; // Default fallback
       let totalWinners = 0;
       
       try {
-        const [cycleSettingsResult] = await db
-          .select({
-            totalRewardPool: cycleSettings.totalRewardPool
-          })
-          .from(cycleSettings)
-          .where(eq(cycleSettings.id, mostRecentSealedCycle.cycleId));
-        
-        if (cycleSettingsResult?.totalRewardPool) {
-          totalRewardPool = cycleSettingsResult.totalRewardPool;
-        }
+        const poolData = await this.getCyclePoolData(mostRecentSealedCycle.cycleId);
+        totalRewardPool = poolData.totalPool;
       } catch (error) {
-        console.error(`[WINNER STATUS] Error fetching cycle settings for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
+        console.error(`[WINNER STATUS] Error fetching pool data for non-winner in cycle ${mostRecentSealedCycle.cycleId}:`, {
           error: error.message,
           stack: error.stack,
-          query: 'cycleSettings.totalRewardPool for non-winner'
+          query: 'getCyclePoolData for non-winner'
         });
       }
 
