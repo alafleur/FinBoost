@@ -71,9 +71,9 @@ export default function RewardsSummary() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full" />
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-transparent rounded-full" />
         </div>
       </div>
     );
@@ -81,34 +81,34 @@ export default function RewardsSummary() {
 
   if (!rewardsData || rewardsData.totalCount === 0) {
     return (
-      <div className="p-8">
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">Rewards Overview</h3>
-          <p className="text-base text-gray-700 font-medium">
-            Celebrating your financial learning achievements
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Rewards Overview</h3>
+          <p className="text-sm text-gray-600">
+            Keep learning and earning points to become eligible for cycle cash rewards
           </p>
         </div>
-        <div className="space-y-6">
-          <div className="text-center py-8">
-            <h4 className="text-xl font-bold text-gray-900 mb-4">Ready to Earn Cash Rewards?</h4>
-            <p className="text-base text-gray-700 font-medium mb-6">
+        <div className="space-y-4">
+          <div className="text-center py-6">
+            <h4 className="font-semibold text-gray-900 mb-2">Ready to Earn Cash Rewards?</h4>
+            <p className="text-gray-600 mb-4">
               Complete financial modules, earn points, and join our cycle winner selection for cash prizes!
             </p>
             
             {/* CTA based on user subscription status */}
             {user?.subscriptionStatus === 'active' ? (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 shadow-lg">
-                <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   {user?.paypalEmail ? (
-                    <DollarSign className="w-6 h-6 text-green-600" />
+                    <DollarSign className="w-5 h-5 text-gray-600" />
                   ) : (
-                    <Target className="w-6 h-6 text-green-600" />
+                    <Target className="w-5 h-5 text-gray-600" />
                   )}
-                  <h4 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                  <h4 className="font-semibold text-gray-900">
                     {user?.paypalEmail ? 'Payment Details Configured' : 'Setup Payment Details'}
                   </h4>
                 </div>
-                <p className="text-green-700 font-medium text-center mb-6">
+                <p className="text-gray-600 text-sm mb-3">
                   {user?.paypalEmail ? 
                     `Rewards will be sent to ${user.paypalEmail}` : 
                     'Configure your PayPal email to receive cycle rewards'
@@ -116,26 +116,26 @@ export default function RewardsSummary() {
                 </p>
                 <Button 
                   onClick={handleProfileClick}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
                 >
-                  <DollarSign className="w-5 h-5 mr-2" />
+                  <DollarSign className="w-4 h-4 mr-2" />
                   {user?.paypalEmail ? 'View Profile' : 'Setup Payment Info'}
                 </Button>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-6 shadow-lg">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <Crown className="w-6 h-6 text-yellow-600" />
-                  <h4 className="text-lg font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Unlock Premium Rewards</h4>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Crown className="w-5 h-5 text-gray-600" />
+                  <h4 className="font-semibold text-gray-900">Unlock Premium Rewards</h4>
                 </div>
-                <p className="text-yellow-700 font-medium text-center mb-6">
+                <p className="text-gray-600 text-sm mb-3">
                   Premium members have better odds and access to exclusive reward tiers
                 </p>
                 <Button 
                   onClick={handleUpgradeClick}
-                  className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
                 >
-                  <Crown className="w-5 h-5 mr-2" />
+                  <Crown className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Upgrade to Premium - $20/month</span>
                   <span className="sm:hidden">Upgrade - $20/mo</span>
                 </Button>
@@ -148,42 +148,42 @@ export default function RewardsSummary() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">Rewards Overview</h3>
-        <p className="text-base text-gray-700 font-medium">
+    <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Rewards Overview</h3>
+        <p className="text-sm text-gray-600">
           Celebrating your financial learning achievements
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 text-center shadow-lg">
-          <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-1 text-gray-900">
             ${((rewardsData?.totalEarned || 0) / 100).toFixed(2)}
           </div>
-          <p className="text-green-700 font-semibold">Total Earned</p>
+          <p className="text-gray-600 text-sm">Total Earned</p>
         </div>
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 text-center shadow-lg">
-          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-1 text-gray-900">
             {rewardsData?.totalCount || 0}
           </div>
-          <p className="text-blue-700 font-semibold">Rewards Received</p>
+          <p className="text-gray-600 text-sm">Rewards Received</p>
         </div>
       </div>
         
         {/* CTA based on user subscription status */}
         {user?.subscriptionStatus === 'active' ? (
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 shadow-lg text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="text-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-center gap-2 mb-2">
               {user?.paypalEmail ? (
-                <DollarSign className="w-6 h-6 text-green-600" />
+                <DollarSign className="w-5 h-5 text-gray-600" />
               ) : (
-                <Target className="w-6 h-6 text-green-600" />
+                <Target className="w-5 h-5 text-gray-600" />
               )}
-              <h4 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <h4 className="font-semibold text-gray-900">
                 {user?.paypalEmail ? 'Setup Rewards Collection Info' : 'Setup Payment Details'}
               </h4>
             </div>
-            <p className="text-green-700 font-medium mb-6">
+            <p className="text-gray-600 text-sm mb-3">
               {user?.paypalEmail ? 
                 'Configure your payment collection information to receive your rewards' : 
                 'Configure your PayPal email to receive rewards'
@@ -191,26 +191,26 @@ export default function RewardsSummary() {
             </p>
             <Button 
               onClick={handleProfileClick}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gray-900 hover:bg-gray-800 text-white"
             >
-              <DollarSign className="w-5 h-5 mr-2" />
+              <DollarSign className="w-4 h-4 mr-2" />
               {user?.paypalEmail ? 'Setup Payment Info' : 'Setup Payment Info'}
             </Button>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-6 shadow-lg text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Crown className="w-6 h-6 text-yellow-600" />
-              <h4 className="text-lg font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Unlock Premium Rewards</h4>
+          <div className="text-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Crown className="w-5 h-5 text-gray-600" />
+              <h4 className="font-semibold text-gray-900">Unlock Premium Rewards</h4>
             </div>
-            <p className="text-yellow-700 font-medium mb-6">
+            <p className="text-gray-600 text-sm mb-3">
               Premium members have better odds and access to exclusive reward tiers
             </p>
             <Button 
               onClick={handleUpgradeClick}
-              className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gray-900 hover:bg-gray-800 text-white"
             >
-              <Crown className="w-5 h-5 mr-2" />
+              <Crown className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Upgrade to Premium - $20/month</span>
               <span className="sm:hidden">Upgrade - $20/mo</span>
             </Button>

@@ -32,14 +32,14 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
 
   const getTierColors = (tierId: string, isCurrentTier: boolean) => {
     if (isCurrentTier) {
-      return 'border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 relative overflow-hidden shadow-lg';
+      return 'border-gray-300 bg-gray-50 relative overflow-hidden';
     } else {
-      return 'border border-gray-200 bg-white hover:bg-gray-50';
+      return 'border-gray-200 bg-white';
     }
   };
 
   const getCurrentBadgeColor = (tierId: string) => {
-    return 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg';
+    return 'bg-gray-900 text-white';
   };
 
   const tiers = [
@@ -64,27 +64,22 @@ export default function TierStats({ tierThresholds, user }: TierStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-3">
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`rounded-xl p-6 text-center transition-all duration-300 hover:shadow-xl ${getTierColors(tier.id, tier.isCurrentTier)}`}
+          className={`border rounded-lg p-4 text-center transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)}`}
         >
           {tier.isCurrentTier && (
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 rounded-t-xl"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
           )}
           
-          <div className="text-lg font-bold text-gray-900 mb-2">
+          <div className="text-sm font-semibold text-gray-900 mb-1">
             {tier.name}
           </div>
-          <div className="text-sm font-medium text-gray-700 mb-3">
+          <div className="text-xs text-gray-500">
             {tier.range} pts
           </div>
-          {tier.isCurrentTier && (
-            <div className={`inline-block px-4 py-2 rounded-lg text-sm font-bold ${getCurrentBadgeColor(tier.id)}`}>
-              Your Tier
-            </div>
-          )}
         </div>
       ))}
     </div>
