@@ -541,8 +541,8 @@ export default function Dashboard() {
           </div>
 
           {/* Mobile Tab Content with Full Desktop Features */}
-          <div className="max-w-7xl mx-auto px-4 py-6 pb-20">
-            <TabsContent value="overview" className="mt-0 space-y-6">
+          <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
+            <TabsContent value="overview" className="mt-0 space-y-8">
               {/* Step 3: Winner Celebration Banner - Prominent placement on Overview tab */}
               <WinnerCelebrationBanner />
 
@@ -557,13 +557,14 @@ export default function Dashboard() {
 
               {/* Tier Stats */}
               {user && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <SectionHeader 
                     icon={Target}
                     iconColor="yellow"
                     title="Tier Thresholds"
+                    titleSize="xl"
                   />
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 p-8">
                     <TierStats 
                       tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
                       user={user}
@@ -573,13 +574,14 @@ export default function Dashboard() {
               )}
 
               {/* Mobile Community Growth Dial - Same as Desktop */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <SectionHeader 
                   icon={Users}
                   iconColor="purple"
                   title="Community Growth"
+                  titleSize="xl"
                 />
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-br from-white to-purple-50/30 rounded-2xl border-2 border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                   <CommunityGrowthDial 
                     poolData={poolData}
                     user={user as any}
@@ -684,43 +686,50 @@ export default function Dashboard() {
               END BACKUP COMMENT */}
 
               {/* Mobile Learning CTA - Replacing Module Grid */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <SectionHeader 
                     icon={BookOpen}
                     iconColor="blue"
                     title="Continue Learning"
+                    titleSize="xl"
                   />
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
+                  <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-300 text-sm font-semibold px-4 py-2 shadow-sm">
                     {completedLessonIds.length} of {publishedLessons.length} completed
                   </Badge>
                 </div>
                 
                 <Card
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 hover:border-purple-300 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
                   onClick={() => setLocation("/education")}
                 >
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                      <div className="flex items-start space-x-3 flex-1">
-                        <div className="p-3 bg-white rounded-lg shadow-sm flex-shrink-0">
-                          <BookOpen className="h-6 w-6 text-blue-600" />
+                  {/* Subtle animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <CardContent className="p-6 sm:p-8 relative">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-6 sm:space-y-0 sm:space-x-6">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg flex-shrink-0">
+                          <BookOpen className="h-8 w-8 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-800 to-purple-800 bg-clip-text text-transparent mb-3">
                             Explore All Lessons
                           </h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            Continue your financial education journey with {publishedLessons.length} available lessons.
+                          <p className="text-base text-gray-700 mb-4 leading-relaxed">
+                            Continue your financial education journey with {publishedLessons.length} expertly crafted lessons.
                           </p>
-                          <p className="text-xs text-gray-500">
-                            You have completed {completedLessonIds.length} of {publishedLessons.length} lessons
-                          </p>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
+                            <p className="text-sm text-blue-700 font-medium">
+                              {completedLessonIds.length} of {publishedLessons.length} completed
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <div className="flex-shrink-0 w-full sm:w-auto">
                         <Button
-                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm w-full sm:w-auto"
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl w-full sm:w-auto text-lg py-3 px-6 rounded-xl transition-all duration-200"
                           size="default"
                         >
                           {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
@@ -732,13 +741,14 @@ export default function Dashboard() {
               </div>
 
               {/* Mobile Rewards Summary */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <SectionHeader 
                   icon={Award}
                   iconColor="green"
                   title="Rewards Summary"
+                  titleSize="xl"
                 />
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-br from-white to-green-50/30 rounded-2xl border-2 border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                   <RewardsSummary />
                 </div>
               </div>

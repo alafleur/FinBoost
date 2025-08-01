@@ -75,12 +75,12 @@ export default function WinnerCelebrationBanner() {
   };
 
   const getTierColors = (tier: string) => {
-    // Changed to green styling for all tiers as requested
+    // Enhanced gradient styling for all winner tiers
     return {
-      gradient: 'from-green-500 to-emerald-500',
-      bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
-      border: 'border-green-200',
-      text: 'text-green-800'
+      gradient: 'from-yellow-400 via-orange-500 to-amber-600',
+      bg: 'bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50',
+      border: 'border-2 border-yellow-300',
+      text: 'text-yellow-900'
     };
   };
 
@@ -88,10 +88,10 @@ export default function WinnerCelebrationBanner() {
   const colors = isWinner 
     ? getTierColors(winnerStatus?.tier || '') 
     : {
-        gradient: 'from-blue-500 to-indigo-500',
-        bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
-        border: 'border-blue-200',
-        text: 'text-blue-800'
+        gradient: 'from-blue-400 via-indigo-500 to-purple-600',
+        bg: 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50',
+        border: 'border-2 border-blue-300',
+        text: 'text-blue-900'
       };
 
   return (
@@ -106,9 +106,9 @@ export default function WinnerCelebrationBanner() {
       }}
       className="mb-6"
     >
-      <Card className={`${colors.bg} ${colors.border} border-2 shadow-lg relative overflow-hidden`}>
-        {/* Animated gradient top border */}
-        <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${colors.gradient}`}>
+      <Card className={`${colors.bg} ${colors.border} shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden`}>
+        {/* Enhanced animated gradient top border */}
+        <div className={`absolute top-0 left-0 w-full h-3 bg-gradient-to-r ${colors.gradient}`}>
           <motion.div
             className="h-full w-full bg-white opacity-30"
             animate={{ 
