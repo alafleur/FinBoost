@@ -7432,6 +7432,7 @@ export class MemStorage implements IStorage {
           email: users.email,
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
+          overallRank: cycleWinnerSelections.overallRank,
           pointsAtSelection: cycleWinnerSelections.pointsAtSelection,
           rewardAmount: cycleWinnerSelections.rewardAmount,
           pointsDeducted: cycleWinnerSelections.pointsDeducted,
@@ -7455,16 +7456,16 @@ export class MemStorage implements IStorage {
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(users.id, cycleWinnerSelections.userId))
         .where(eq(cycleWinnerSelections.cycleSettingId, cycleSettingId))
-        .orderBy(cycleWinnerSelections.tier, asc(cycleWinnerSelections.tierRank))
+        .orderBy(asc(cycleWinnerSelections.overallRank))
         .limit(limit)
         .offset(offset);
 
       console.log(`[DEBUG] Retrieved ${winners.length} winners for current page`);
       
-      // Step 3: Calculate overall ranks (accounting for pagination)
+      // Step 3: Format winners data (use actual overallRank from database)
       const winnersWithOverallRank = winners.map((winner, index) => ({
         ...winner,
-        overallRank: offset + index + 1, // Correct rank based on pagination
+        overallRank: winner.overallRank, // Use actual overall rank from database
         payoutPercentage: winner.payoutPercentage || 100,
         baseReward: (winner.payoutCalculated || winner.rewardAmount || 0) / 100,
         finalAmount: (winner.payoutFinal || winner.rewardAmount || 0) / 100,
