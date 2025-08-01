@@ -220,14 +220,15 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
     }
   };
 
-   const loadEnhancedWinnersPaginated = async (page: number) => {
+   const loadEnhancedWinnersPaginated = async (page: number, forceRefresh: boolean = false) => {
         if (!selectedCycle) return;
 
         try {
             const token = localStorage.getItem('token');
-            console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}, page ${page}`);
+            const cacheParam = forceRefresh ? `&_refresh=${Date.now()}` : '';
+            console.log(`[Frontend] Loading enhanced winners for cycle ${selectedCycle.id}, page ${page}${forceRefresh ? ' (forced refresh)' : ''}`);
 
-            const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?page=${page}&pageSize=${enhancedWinnersPerPage}`, {
+            const response = await fetch(`/api/admin/cycle-winner-details/${selectedCycle.id}/paginated?page=${page}&pageSize=${enhancedWinnersPerPage}${cacheParam}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -416,7 +417,13 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         console.log(`[Import] Refreshing all data sources: loadWinners, loadEnhancedWinners, loadEnhancedWinnersPaginated`);
         await loadWinners(); // Fix: Add missing loadWinners() call
         await loadEnhancedWinners();
-        await loadEnhancedWinnersPaginated(1);
+        await loadEnhancedWinnersPaginated(1, true); // Force refresh with cache bust
+        
+        // Also refresh current page if user was on a different page
+        if (enhancedWinnersPage > 1) {
+          console.log(`[Import] Also refreshing user's current page ${enhancedWinnersPage}`);
+          await loadEnhancedWinnersPaginated(enhancedWinnersPage, true);
+        }
         console.log(`[Import] COMPLETE: All data sources refreshed successfully`);
         setShowImportDialog(false);
         setImportFile(null);
@@ -1330,6 +1337,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     onClick={() => {
                       const newPage = Math.max(1, enhancedWinnersData.currentPage - 1);
                       setEnhancedWinnersPage(newPage);
+                      loadEnhancedWinnersPaginated(newPage, true);
                     }}
                     disabled={enhancedWinnersData.currentPage === 1}
                   >
@@ -1345,6 +1353,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     onClick={() => {
                       const newPage = Math.min(enhancedWinnersData.totalPages, enhancedWinnersData.currentPage + 1);
                       setEnhancedWinnersPage(newPage);
+                      loadEnhancedWinnersPaginated(newPage, true);
                     }}
                     disabled={enhancedWinnersData.currentPage >= enhancedWinnersData.totalPages}
                   >
