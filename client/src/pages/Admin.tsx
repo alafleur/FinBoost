@@ -1832,7 +1832,11 @@ function AdminComponent() {
           setPaginatedWinners({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
           setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 0 });
           
-          // Refresh enhanced winners data from page 1
+          // Reset pagination state to page 1 in UI
+          setWinnerTablePage(1);
+          setEnhancedWinnersPage(1);
+          
+          // Refresh all winner data sources from page 1
           await loadEnhancedWinnersPaginated(activeCycle.id, 1, winnersPerPage);
           await loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
 

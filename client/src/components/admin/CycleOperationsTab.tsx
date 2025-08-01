@@ -406,9 +406,11 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
         console.log(`[Import] Clearing cache and refreshing data for page ${enhancedWinnersPage}`);
         setEnhancedWinners([]);
         setEnhancedWinnersData({ winners: [], totalCount: 0, currentPage: 1, totalPages: 1 });
+        setWinners([]); // Clear basic winners cache
         
-        // Reset to page 1 and reload data
+        // Reset to page 1 and reload all data sources
         setEnhancedWinnersPage(1);
+        await loadWinners(); // Fix: Add missing loadWinners() call
         await loadEnhancedWinners();
         await loadEnhancedWinnersPaginated(1);
         setShowImportDialog(false);
