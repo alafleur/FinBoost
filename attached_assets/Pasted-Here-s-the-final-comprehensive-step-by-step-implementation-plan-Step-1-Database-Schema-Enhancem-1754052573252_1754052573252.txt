@@ -1,0 +1,43 @@
+Here's the final comprehensive step-by-step implementation plan:
+
+Step 1: Database Schema Enhancement
+Add notificationDisplayed boolean field to existing cycleWinnerSelections table
+Leverage existing userCyclePoints table to identify all cycle participants
+Use existing cycle analytics data for community stats (no new tables needed)
+Step 2: Backend API Enhancements
+Enhance existing /api/admin/cycle-winner-selection/${cycleId}/seal endpoint to:
+Mark all participants with winner/non-winner status using batch database transaction
+Set notificationDisplayed: false for all affected users in single operation
+Calculate community stats using existing analytics functions
+Return confirmation of notification setup completion
+Create /api/cycles/current/user-status endpoint to return:
+User's winner status for current cycle
+Community achievement stats (total distributed, number of winners)
+Whether notification has been displayed
+Handle loading states and error conditions
+Step 3: Frontend Components
+Create CycleResultsBanner component using existing Card and Badge patterns
+Build winner and non-winner variants within same component
+Follow existing mobile-first patterns from Dashboard.tsx
+Use established SectionHeader styling for consistency
+Include loading and error states matching existing dashboard patterns
+Step 4: Overview Tab Integration
+Enhance existing Dashboard Overview tab to call /api/cycles/current/user-status
+Use established useEffect and loadCycleAnalytics() patterns
+Display loading state while fetching user status (consistent with existing UX)
+Display CycleResultsBanner at top of Overview when active notifications exist
+Mark notification as displayed after showing
+Handle error states gracefully
+Step 5: Admin Integration
+Connect existing "Seal Winners" button to enhanced seal endpoint
+Add visual confirmation that user notifications have been triggered
+Show batch update progress and completion status
+Maintain existing admin workflow without disruption
+Step 6: Testing & Screenshots
+Run cycle selection → seal → verify banners appear for both winner/non-winner users
+Test banner persistence across user sessions until next cycle
+Verify banners clear correctly when new cycle begins (reset notification state)
+Validate batch database operations complete successfully
+Capture mobile screenshots of both winner and non-winner experiences
+Test loading states and error handling
+This plan builds entirely on existing infrastructure while ensuring production-ready implementation with proper error handling, performance optimization, and UX consistency.
