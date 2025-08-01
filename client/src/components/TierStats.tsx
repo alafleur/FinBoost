@@ -96,9 +96,14 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
           <div className={`text-sm font-semibold ${DashboardColors.text.primary} mb-1`}>
             {tier.name}
           </div>
-          <div className={`text-xs ${DashboardColors.text.muted}`}>
+          <div className={`text-xs ${DashboardColors.text.muted} mb-2`}>
             {tier.range} pts
           </div>
+          {tier.reward && (
+            <div className="text-sm font-bold text-green-600">
+              {formatCurrency(tier.reward)}
+            </div>
+          )}
         </div>
       ))}
     </div>

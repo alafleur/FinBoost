@@ -570,6 +570,7 @@ export default function Dashboard() {
                     <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.neutral}`}></div>
                     <TierStats 
                       tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
+                      tierRewards={poolData.tierBreakdown}
                       user={user}
                     />
                   </div>
