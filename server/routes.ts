@@ -4683,6 +4683,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // NEW: Unseal winner selection (reversible for testing) - Enhanced Step 2 Implementation  
+  app.post('/api/admin/cycle-winner-selection/:cycleSettingId/unseal', requireAdmin, async (req, res) => {
+    try {
+      const cycleSettingId = parseInt(req.params.cycleSettingId);
+      
+      // Validate cycle setting ID
+      if (isNaN(cycleSettingId) || cycleSettingId <= 0) {
+        return res.status(400).json({ 
+          error: 'Invalid cycle setting ID provided',
+          success: false 
+        });
+      }
+
+      // Ensure admin user ID is available
+      if (!req.user?.id) {
+        return res.status(401).json({ 
+          error: 'Admin user identification required for unseal operation',
+          success: false 
+        });
+      }
+
+      console.log(`[UNSEAL API] Admin ${req.user.email} (ID: ${req.user.id}) requesting unseal for cycle ${cycleSettingId}`);
+      
+      // Call storage method with comprehensive validation
+      const result = await storage.unsealCycleWinnerSelection(cycleSettingId, req.user.id);
+      
+      // Log successful unseal for audit trail
+      if (result.unsealed) {
+        console.log(`[UNSEAL API] Success: ${result.message}`);
+      } else {
+        console.log(`[UNSEAL API] No action: ${result.message}`);
+      }
+      
+      res.json({ 
+        success: result.unsealed, 
+        message: result.message,
+        unsealed: result.unsealed,
+        cycleSettingId: cycleSettingId,
+        adminId: req.user.id
+      });
+    } catch (error) {
+      console.error('[UNSEAL API] Error unsealing winner selection:', error);
+      
+      // Enhanced error handling with descriptive messages
+      const errorMessage = error.message || 'Unknown error occurred';
+      
+      if (errorMessage.includes('payouts have been processed')) {
+        return res.status(409).json({ 
+          error: 'Cannot unseal cycle - payouts have been processed. This operation is not reversible.',
+          success: false,
+          code: 'PAYOUTS_PROCESSED' 
+        });
+      }
+      
+      if (errorMessage.includes('not found')) {
+        return res.status(404).json({ 
+          error: 'Cycle setting not found',
+          success: false,
+          code: 'CYCLE_NOT_FOUND' 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: `Failed to unseal winner selection: ${errorMessage}`,
+        success: false,
+        code: 'UNSEAL_FAILED' 
+      });
+    }
+  });
+
   // Clear winner selection for re-running
   app.delete('/api/admin/cycle-winner-selection/:cycleSettingId', authenticateToken, async (req, res) => {
     if (!req.user?.isAdmin) {
