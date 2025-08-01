@@ -141,17 +141,17 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
           {/* Stats Display */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-5 text-center shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="text-sm text-purple-700 font-semibold mb-2">Rewards Allocation</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-5 text-center shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-sm text-blue-700 font-semibold mb-2">Rewards Allocation</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent mb-2">
                   {rewardsPercentage}%
                 </div>
-                <div className="text-sm text-purple-600 font-medium">of membership fees</div>
+                <div className="text-sm text-blue-600 font-medium">of membership fees</div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 text-center shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-5 text-center shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="text-sm text-blue-700 font-semibold mb-2">Cycle Pool Size</div>
-                <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent mb-2">
                   <span className="hidden sm:inline">{formatCurrency(poolData.totalPool)}</span>
                   <span className="sm:hidden">{formatCurrencyMobile(poolData.totalPool)}</span>
                 </div>
@@ -164,24 +164,24 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             {/* Tier Breakdown - Separate Row */}
             {poolData.tierBreakdown && (
               <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 to-amber-500"></div>
-                  <div className="text-sm text-yellow-700 font-semibold mb-2">Tier 1</div>
-                  <div className="text-lg font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-sky-500"></div>
+                  <div className="text-sm text-blue-700 font-semibold mb-2">Tier 1</div>
+                  <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                     {formatCurrency(poolData.tierBreakdown.tier1)}
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-gray-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gray-400 to-slate-500"></div>
-                  <div className="text-sm text-gray-700 font-semibold mb-2">Tier 2</div>
-                  <div className="text-lg font-bold bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-sky-500"></div>
+                  <div className="text-sm text-blue-700 font-semibold mb-2">Tier 2</div>
+                  <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                     {formatCurrency(poolData.tierBreakdown.tier2)}
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 to-red-500"></div>
-                  <div className="text-sm text-orange-700 font-semibold mb-2">Tier 3</div>
-                  <div className="text-lg font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-4 text-center relative overflow-hidden shadow-md">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-sky-500"></div>
+                  <div className="text-sm text-blue-700 font-semibold mb-2">Tier 3</div>
+                  <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
                     {formatCurrency(poolData.tierBreakdown.tier3)}
                   </div>
                 </div>
@@ -189,18 +189,18 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
             )}
 
             {/* Call to Action */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-xl p-6 shadow-lg">
               {!isPremiumUser ? (
                 <>
                   <div className="text-center mb-6">
-                    <h4 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">Unlock Your Share</h4>
+                    <h4 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent mb-3">Unlock Your Share</h4>
                     <p className="text-base text-gray-700 font-medium mb-4">
                       Join {formatNumber(memberCount)} premium members earning real rewards every cycle
                     </p>
                   </div>
                   <Button 
                     onClick={onUpgradeClick}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <span className="hidden sm:inline">Join Premium Members - $20/month</span>
                     <span className="sm:hidden">Upgrade to Premium - $20/mo</span>
