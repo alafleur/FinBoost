@@ -577,118 +577,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Mobile Community Growth Dial - Enhanced Visual */}
-              <div className="space-y-4">
-                <SectionHeader 
-                  icon={Users}
-                  iconColor="blue"
-                  title="Community Growth"
-                />
-                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
-                  <CommunityGrowthDial 
-                    poolData={poolData}
-                    user={user as any}
-                    distributionInfo={distributionInfo}
-                    onUpgradeClick={() => setLocation('/subscribe')}
-                  />
-                </div>
-              </div>
-
-              {/* BACKUP: Mobile Learning Preview with enhanced design - COMMENTED OUT FOR CTA REPLACEMENT
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <SectionHeader 
-                    icon={BookOpen}
-                    iconColor="blue"
-                    title="Continue Learning"
-                  />
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium">
-                    {completedLessonIds.length} of {publishedLessons.length} completed
-                  </Badge>
-                </div>
-                
-                <div className="space-y-3">
-                  {availableLessons.map((module) => {
-                    const isCompleted = completedLessonIds.includes(module.id.toString());
-                    const isPremiumModule = module.accessType === 'premium';
-                    return (
-                      <Card 
-                        key={module.id} 
-                        className={`group border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                          isCompleted 
-                            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
-                            : isPremiumModule && !isUserPremium
-                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                            : 'bg-white hover:bg-gray-50 border-gray-100'
-                        }`} 
-                        onClick={() => {
-                          console.log(`Overview tab - Module clicked: ID=${module.id}, Title=${module.title}`);
-                          console.log(`Overview tab - Module validation:`, validateModule(module));
-                          console.log(`Overview tab - Route being used: /lesson/${module.id}`);
-                          
-                          if (!validateModule(module)) {
-                            console.error('Overview tab - Invalid module data, preventing navigation:', module);
-                            return;
-                          }
-                          
-                          setLocation(`/lesson/${module.id}`);
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 pr-3">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight mb-1">{module.title}</h4>
-                              <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description?.substring(0, 100)}...</p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full capitalize font-medium">
-                                  {module.category}
-                                </span>
-                                {!isCompleted && (
-                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    isPremiumModule && !isUserPremium 
-                                      ? 'text-yellow-700 bg-yellow-100' 
-                                      : 'text-blue-600 bg-blue-100'
-                                  }`}>
-                                    {isPremiumModule && !isUserPremium ? 'Premium' : `${module.pointsReward} pts`}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {isCompleted ? (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm">
-                                  ✓ Done
-                                </Badge>
-                              ) : isPremiumModule && !isUserPremium ? (
-                                <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm transition-colors">
-                                  Upgrade
-                                </Button>
-                              ) : (
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
-                                  Start
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setLocation('/education')} 
-                  className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  View All Learning Modules
-                </Button>
-              </div>
-              END BACKUP COMMENT */}
-
               {/* Mobile Learning CTA - Enhanced Visual Design */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -744,6 +632,24 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* Mobile Community Growth Dial - Enhanced Visual */}
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Users}
+                  iconColor="blue"
+                  title="Community Growth"
+                />
+                <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
+                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
+                  <CommunityGrowthDial 
+                    poolData={poolData}
+                    user={user as any}
+                    distributionInfo={distributionInfo}
+                    onUpgradeClick={() => setLocation('/subscribe')}
+                  />
+                </div>
               </div>
 
               {/* Mobile Rewards Summary */}
