@@ -567,7 +567,7 @@ export default function Dashboard() {
                     title="Tier Thresholds & Rewards"
                   />
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
-                    {console.log('DEBUG: Rendering Tier Thresholds accent border')}
+
                     <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-neutral"></div>
                     <TierStats 
                       tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
