@@ -239,14 +239,8 @@ export default function Leaderboard() {
     }
   };
 
-  const getRankIcon = (rank: string | number, isCurrentUser: boolean = false) => {
-    const numRank = Number(rank);
-    if (numRank <= 3) {
-      const icons = [Crown, Trophy, Medal];
-      const Icon = icons[numRank - 1];
-      return <Icon className={`h-4 w-4 md:h-5 md:w-5 ${isCurrentUser ? 'text-blue-600' : 'text-yellow-500'}`} />;
-    }
-    return <span className={`text-sm md:text-lg font-bold ${isCurrentUser ? 'text-blue-600' : 'text-gray-600'}`}>#{rank}</span>;
+  const getRankNumber = (rank: string | number) => {
+    return `#${rank}`;
   };
 
   const renderPerformanceStats = (data: LeaderboardData | null) => {
@@ -410,11 +404,9 @@ export default function Leaderboard() {
                   <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full font-bold text-sm shadow-sm ${
                     entry.isCurrentUser
                       ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
-                      : Number(entry.rank) <= 3
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-white'
                       : 'bg-gray-100 text-gray-700'
                   }`}>
-                    {Number(entry.rank) <= 3 ? getRankIcon(entry.rank, entry.isCurrentUser) : entry.rank}
+                    {getRankNumber(entry.rank)}
                   </div>
                   <div>
                     <p className={`font-semibold text-sm md:text-base ${
