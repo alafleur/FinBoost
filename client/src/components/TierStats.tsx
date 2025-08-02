@@ -52,9 +52,9 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
 
   const getTierColors = (tierId: string, isCurrentTier: boolean) => {
     if (isCurrentTier) {
-      return 'border-gray-300 bg-gradient-to-br from-gray-50 to-slate-50 relative overflow-hidden';
+      return 'bg-gradient-to-br from-gray-50 to-slate-50 relative overflow-hidden border-gray-200';
     } else {
-      return 'border-gray-200 bg-white';
+      return 'bg-white border-gray-100';
     }
   };
 
@@ -87,9 +87,9 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
       {tiers.map((tier) => (
         <div
           key={tier.id}
-          className={`border rounded-lg transition-all duration-200 hover:shadow-md ${getTierColors(tier.id, tier.isCurrentTier)} 
+          className={`border rounded-xl transition-all duration-200 hover:shadow-sm ${getTierColors(tier.id, tier.isCurrentTier)} 
             p-4 sm:p-5 text-center min-h-[72px] sm:min-h-[88px]
-            ${tier.isCurrentTier ? 'ring-2 ring-blue-200 ring-opacity-50' : ''}
+            ${tier.isCurrentTier ? 'ring-1 ring-blue-200 ring-opacity-30' : ''}
           `}
         >
           {tier.isCurrentTier && (
