@@ -1,0 +1,60 @@
+That’s exactly the right strategic question to be asking—and you're already thinking about it the way a high-performing product + growth lead should.
+
+Here’s a breakdown of both options based on your current early-access phase and long-term positioning goals:
+
+---
+
+## 🧠 **Option 1: Increase the Reward Allocation (e.g. from 50% → 70–100%)**
+
+### ✅ Pros
+
+* **Stronger Early Conversion Hook:** “We’re giving 70%+ of fees back to the community” sounds exciting and generous, especially to early adopters.
+* **Aligns With Pre-Launch Priorities:** Right now you care more about *growth and trust* than monetization—so why not lean into generosity?
+* **Reduces Churn Risk From Transparency:** If you’re going to show the % visibly, 70–80% looks a lot better than 50% and may reduce bounce or doubt.
+* **Makes Your AMOE Legally Cleaner (slightly):** A higher reward-to-fee ratio strengthens the argument that the platform is not operating like a commercial lottery.
+
+### ❌ Cons
+
+* **Expectations Set Early Can Stick:** If you start at 80%, reducing it to 50% later might cause pushback—even if you do so after early access ends.
+* **You’ll Still Likely Hide the % Later:** If your long-term goal is to *not show the % at all*, it might be better to experiment without it now.
+
+---
+
+## 🔒 **Option 2: Hide the % Altogether (Test With Simpler Framing)**
+
+### ✅ Pros
+
+* **More Flexible Messaging:** You retain the ability to evolve the reward logic over time without contradicting yourself publicly.
+* **Lets You Lead With Outcomes, Not Mechanics:** “X users won \$Y last cycle” or “Over 50% of users won rewards last week” is more compelling than any percentage.
+* **Better Long-Term Design Alignment:** Most platforms (e.g. Underdog, Mistplay, Drop) never show the underlying economic %—and that’s probably for a reason.
+
+### ❌ Cons
+
+* **Slight Trust Tradeoff (if users are skeptical):** Especially in a space with scams/fake reward apps, not showing any math could leave some users unconvinced.
+* **Removes the “we’re different” transparency edge:** You lose the ability to credibly say “we’re one of the only apps that shows you exactly how the rewards work.”
+
+---
+
+## 🔁 **Recommended Hybrid Approach**
+
+1. **Temporarily increase the reward allocation (e.g., 75–80%)** for early access.
+
+2. **Do *not* show the % visibly on the dashboard**—at least not initially.
+
+3. **Instead, emphasize:**
+
+   * “This cycle’s pool: \$7,500”
+   * “More than half of active members win”
+   * “100% of early access rewards are funded directly by FinBoost to guarantee payouts”
+
+4. **Monitor behavior + feedback**, then test visibility and phrasing of the % later.
+
+---
+
+### 🔚 Final Verdict
+
+> If you're already planning to subsidize rewards in early access, *yes*, increase the allocation—but **don't display the %** unless there's a compelling reason to.
+
+Transparency ≠ showing every detail on the UI. You can build trust through **proof of payout**, **clear rules**, and **celebrated winners**, not internal math.
+
+Want help rewriting the Overview UI copy or crafting the early access guarantee language?
