@@ -17,8 +17,8 @@ export default function WhyItWorks() {
       title: "Community-powered progress",
       description: "Learn alongside others who share your financial goals and challenges.",
       icon: <Users className="h-5 w-5" />,
-      bgColor: "bg-purple-100",
-      iconColor: "text-purple-600",
+      bgColor: "bg-blue-100",
+      iconColor: "text-blue-600",
     },
     {
       id: 2,

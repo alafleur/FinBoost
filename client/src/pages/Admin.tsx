@@ -2605,7 +2605,7 @@ function AdminComponent() {
                             <TableCell className="font-medium">
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-sm font-medium">
                                     {user.username?.charAt(0)?.toUpperCase() || 'U'}
                                   </div>
                                   <div>
@@ -3424,7 +3424,7 @@ function AdminComponent() {
                       <div className="text-sm text-gray-500">Per Member</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">${(currentPoolSettings.membershipFee / 100).toFixed(2)}</div>
+                      <div className="text-2xl font-bold text-blue-600">${(currentPoolSettings.membershipFee / 100).toFixed(2)}</div>
                       <div className="text-sm text-gray-500">Monthly Fee</div>
                     </div>
                     <div className="text-center">
@@ -4333,7 +4333,7 @@ function AdminComponent() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Avg Per User</CardTitle>
-                    <Target className="h-4 w-4 text-purple-500" />
+                    <Target className="h-4 w-4 text-blue-600" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -4728,7 +4728,7 @@ function AdminComponent() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total</CardTitle>
-                    <HelpCircle className="h-4 w-4 text-purple-500" />
+                    <HelpCircle className="h-4 w-4 text-blue-600" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{supportTickets.length}</div>
@@ -4781,7 +4781,7 @@ function AdminComponent() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                  <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-xs font-medium">
                                     {ticket.name?.charAt(0)?.toUpperCase() || 'A'}
                                   </div>
                                   <div>
@@ -5087,7 +5087,7 @@ function AdminComponent() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Current Selection</CardTitle>
-                    <Clock className="h-4 w-4 text-purple-500" />
+                    <Clock className="h-4 w-4 text-blue-600" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -5298,8 +5298,8 @@ function AdminComponent() {
                         </div>
                         <div className="text-sm text-gray-600">Monthly Revenue</div>
                       </div>
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
                           {selectionResults.poolCalculation.rewardPoolPercentage}%
                         </div>
                         <div className="text-sm text-gray-600">Pool Percentage</div>
@@ -5933,7 +5933,7 @@ function AdminComponent() {
                       <div className="text-sm text-gray-500">Per Subscription</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">$20.00</div>
+                      <div className="text-2xl font-bold text-blue-600">$20.00</div>
                       <div className="text-sm text-gray-500">Membership Fee</div>
                     </div>
                     <div className="text-center">

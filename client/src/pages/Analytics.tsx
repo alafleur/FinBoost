@@ -458,7 +458,7 @@ export default function Analytics() {
                           "h-10 w-10 rounded-full flex items-center justify-center",
                           activity.type === 'signup' && "bg-green-100 text-green-600",
                           activity.type === 'completion' && "bg-blue-100 text-blue-600",
-                          activity.type === 'subscription' && "bg-purple-100 text-purple-600",
+                          activity.type === 'subscription' && "bg-blue-100 text-blue-600",
                           activity.type === 'payout' && "bg-orange-100 text-orange-600"
                         )}>
                           {activity.type === 'signup' && <Users className="h-5 w-5" />}

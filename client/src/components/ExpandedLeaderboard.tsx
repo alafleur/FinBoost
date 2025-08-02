@@ -101,7 +101,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
 
   const getTierBadgeColor = (tier: string) => {
     switch (tier.toLowerCase()) {
-      case 'platinum': return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'platinum': return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'gold': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'silver': return 'bg-gray-100 text-gray-800 border-gray-300';
       case 'bronze': return 'bg-orange-100 text-orange-800 border-orange-300';
@@ -163,7 +163,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
           <div className="flex-1 overflow-y-auto">
             {/* Current User Stats */}
             {currentUser && (
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
@@ -175,7 +175,7 @@ export default function ExpandedLeaderboard({ isOpen, onClose }: ExpandedLeaderb
 
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Star className="h-5 w-5 text-purple-500 mr-1" />
+                      <Star className="h-5 w-5 text-blue-600 mr-1" />
                       <span className="text-lg font-bold text-gray-800">{currentUser.points || 0}</span>
                     </div>
                     <p className="text-xs text-gray-600">Points</p>

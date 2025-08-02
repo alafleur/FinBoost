@@ -49,8 +49,8 @@ export default function WhatYouLearn() {
       id: 4,
       title: "Student loan paydown hacks",
       icon: "🎓",
-      color: "bg-purple-100",
-      textColor: "text-purple-600"
+      color: "bg-blue-100",
+      textColor: "text-blue-600"
     }
   ];
   
@@ -130,7 +130,7 @@ export default function WhatYouLearn() {
                 <span>Interactive quizzes</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
                 <span>Real-world applications</span>
               </div>
             </div>

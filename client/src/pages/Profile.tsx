@@ -463,12 +463,12 @@ export default function Profile() {
                       </div>
                       <span className="text-blue-600 font-bold">85</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <TrendingUp className="h-5 w-5 text-purple-500" />
+                        <TrendingUp className="h-5 w-5 text-blue-600" />
                         <span className="font-medium">Learning Streak</span>
                       </div>
-                      <span className="text-purple-600 font-bold">7 days</span>
+                      <span className="text-blue-600 font-bold">7 days</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                       <div className="flex items-center gap-3">

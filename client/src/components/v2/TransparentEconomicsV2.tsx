@@ -38,8 +38,8 @@ export default function TransparentEconomicsV2() {
                 </div>
                 
                 <div className="flex items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-purple-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Shield className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-800">Fully transparent - no hidden fees</p>
@@ -49,7 +49,7 @@ export default function TransparentEconomicsV2() {
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+            <div className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-lg p-6 text-white">
               <h4 className="font-semibold mb-2">Community-Powered Growth</h4>
               <p className="text-blue-100">Your success helps fund others' rewards. Their success helps fund yours.</p>
             </div>
@@ -82,7 +82,7 @@ export default function TransparentEconomicsV2() {
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200">
                 <div className="flex items-center gap-3">
                   <Users className="h-5 w-5 text-blue-600" />
                   <span className="font-medium">1,000 members</span>

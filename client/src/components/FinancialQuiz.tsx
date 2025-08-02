@@ -41,7 +41,7 @@ const FinancialPersona = {
     title: "The Balanced Achiever",
     description: "You take a well-rounded approach to finances. A mix of learning and community engagement will help you earn consistent rewards.",
     icon: <BarChart2 className="h-8 w-8" />,
-    color: "bg-purple-500"
+    color: "bg-blue-600"
   },
   growth: {
     title: "The Growth Seeker",
@@ -277,15 +277,15 @@ export default function FinancialQuiz() {
                   {persona === "balanced" && (
                     <>
                       <li className="flex items-start">
-                        <span className="bg-purple-100 p-1 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5">✓</span>
+                        <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
                         <span>Mix quick daily tips with weekly deeper lessons</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="bg-purple-100 p-1 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5">✓</span>
+                        <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
                         <span>Refer 1-2 friends each month for tier boosting points</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="bg-purple-100 p-1 rounded-full mr-2 text-purple-600 flex-shrink-0 mt-0.5">✓</span>
+                        <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
                         <span>Balance learning with sharing your financial wins</span>
                       </li>
                     </>

@@ -213,7 +213,7 @@ export default function PointsManagement() {
     switch (category) {
       case 'education': return <Trophy className="h-5 w-5 text-blue-600" />;
       case 'action': return <Target className="h-5 w-5 text-green-600" />;
-      case 'social': return <Star className="h-5 w-5 text-purple-600" />;
+      case 'social': return <Star className="h-5 w-5 text-blue-600" />;
       case 'achievement': return <Award className="h-5 w-5 text-yellow-600" />;
       default: return <Activity className="h-5 w-5 text-gray-600" />;
     }

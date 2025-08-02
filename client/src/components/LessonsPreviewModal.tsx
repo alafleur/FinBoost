@@ -35,8 +35,8 @@ export default function LessonsPreviewModal() {
       id: 4,
       title: "Student loan paydown hacks",
       icon: "🎓",
-      color: "bg-purple-100",
-      textColor: "text-purple-600"
+      color: "bg-blue-100",
+      textColor: "text-blue-600"
     }
   ];
 

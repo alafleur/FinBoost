@@ -34,8 +34,8 @@ export default function FlywheelFeatures() {
       </div>
       
       <div className="flex items-start">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-          <span className="text-purple-500"><RefreshCw className="h-5 w-5" /></span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <span className="text-blue-600"><RefreshCw className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Virtuous cycle of financial growth</h3>

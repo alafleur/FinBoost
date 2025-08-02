@@ -32,7 +32,7 @@ export default function BiggerPurposeV2() {
           </div>
           
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <Shield className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+            <Shield className="h-8 w-8 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-800 mb-2">Built for Trust</h3>
             <p className="text-sm text-gray-600">Transparent, fair, and designed to help you succeed</p>
           </div>

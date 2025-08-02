@@ -31,7 +31,7 @@ export default function FinancialMoodEgg() {
     {
       emoji: <Clock className="h-6 w-6" />,
       text: "Time to check in on your money goals",
-      color: "bg-purple-500"
+      color: "bg-blue-600"
     },
     {
       emoji: <ThumbsUp className="h-6 w-6" />,

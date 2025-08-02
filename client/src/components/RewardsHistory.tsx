@@ -198,8 +198,8 @@ export default function RewardsHistory() {
                 <p className="text-sm font-medium">Learn & Earn</p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <TrendingUp className="w-6 h-6 text-blue-600" />
                 </div>
                 <p className="text-sm font-medium">Climb Tiers</p>
               </div>
@@ -413,20 +413,20 @@ export default function RewardsHistory() {
       </Card>
 
       {/* Encouragement Card */}
-      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-700">
+          <CardTitle className="flex items-center gap-2 text-blue-700">
             <Sparkles className="w-5 h-5" />
             Keep Going, You're Doing Amazing!
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-4">
-            <p className="text-purple-600 mb-4">
+            <p className="text-blue-600 mb-4">
               Every module you complete brings you closer to your next reward. 
               Your financial education journey is paying off - literally!
             </p>
-            <div className="flex items-center justify-center gap-4 text-sm text-purple-500">
+            <div className="flex items-center justify-center gap-4 text-sm text-blue-600">
               <div className="flex items-center gap-1">
                 <Target className="w-4 h-4" />
                 Keep Learning

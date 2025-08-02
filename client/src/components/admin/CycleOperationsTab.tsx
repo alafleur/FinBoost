@@ -1530,7 +1530,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                     )}
                   </div>
                   <div className="text-center p-4 border rounded">
-                    <div className="text-2xl font-bold text-purple-600">
+                    <div className="text-2xl font-bold text-blue-600">
                       {cycleAnalytics.averagePoints || 0}
                     </div>
                     <div className="text-sm text-gray-500">Avg Points</div>

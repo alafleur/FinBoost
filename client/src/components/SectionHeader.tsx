@@ -2,7 +2,7 @@ import { LucideIcon } from "lucide-react";
 
 interface SectionHeaderProps {
   icon: LucideIcon;
-  iconColor: 'blue' | 'purple' | 'yellow' | 'green' | 'orange' | 'red';
+  iconColor: 'blue' | 'yellow' | 'green' | 'orange' | 'red';
   title: string;
   titleSize?: 'lg' | 'xl' | '2xl';
   className?: string;
@@ -10,7 +10,6 @@ interface SectionHeaderProps {
 
 const iconColorClasses = {
   blue: 'bg-gray-50 text-gray-600 border border-gray-100',
-  purple: 'bg-gray-50 text-gray-600 border border-gray-100', 
   yellow: 'bg-gray-50 text-gray-600 border border-gray-100',
   green: 'bg-gray-50 text-gray-600 border border-gray-100',
   orange: 'bg-gray-50 text-gray-600 border border-gray-100',

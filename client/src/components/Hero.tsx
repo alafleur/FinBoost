@@ -48,7 +48,7 @@ export default function Hero({ onSubscribeSuccess }: HeroProps) {
                   Financial assessment
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-1 text-purple-600" />
+                  <Users className="h-4 w-4 mr-1 text-blue-600" />
                   Cash rewards
                 </div>
               </div>

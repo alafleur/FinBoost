@@ -16,7 +16,7 @@ export default function FinalCTAV2({ onSubscribeSuccess }: FinalCTAV2Props) {
   };
 
   return (
-    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="font-heading font-bold text-3xl md:text-4xl mb-6">
           Ready to Turn Financial Stress into Financial Progress?
@@ -39,7 +39,7 @@ export default function FinalCTAV2({ onSubscribeSuccess }: FinalCTAV2Props) {
           </div>
           
           <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-            <Clock className="h-6 w-6 text-purple-300 mx-auto mb-2" />
+            <Clock className="h-6 w-6 text-blue-300 mx-auto mb-2" />
             <p className="text-sm text-blue-100">Community-funded model - transparent and fair</p>
           </div>
         </div>

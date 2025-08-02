@@ -31,8 +31,8 @@ export default function HowItWorksV2() {
           
           {/* Step 3 */}
           <div className="text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <DollarSign className="h-8 w-8 text-purple-600" />
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <DollarSign className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="font-semibold text-lg mb-2 text-gray-800">3. Earn Points</h3>
             <p className="text-gray-600 text-sm">Build your tier status with points from lessons, quizzes, and verified financial actions</p>

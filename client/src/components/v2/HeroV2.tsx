@@ -47,7 +47,7 @@ export default function HeroV2({ onSubscribeSuccess }: HeroV2Props) {
                   Over 50% win rate
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-1 text-purple-600" />
+                  <Users className="h-4 w-4 mr-1 text-blue-600" />
                   Limited Early Access
                 </div>
               </div>
@@ -82,8 +82,8 @@ export default function HeroV2({ onSubscribeSuccess }: HeroV2Props) {
                   <p className="ml-3 text-gray-700">Over half of members win each cycle</p>
                 </li>
                 <li className="flex items-center">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 border border-purple-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>

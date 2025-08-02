@@ -770,7 +770,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Users}
-                  iconColor="purple"
+                  iconColor="blue"
                   title="Referral System"
                 />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -1251,7 +1251,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Users}
-                  iconColor="purple"
+                  iconColor="blue"
                   title="Referral System"
                   titleSize="2xl"
                 />

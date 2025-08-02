@@ -824,7 +824,7 @@ export default function HomeV3() {
             >
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                className="bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-800 hover:to-blue-950 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 h-5 w-5" />
@@ -837,12 +837,12 @@ export default function HomeV3() {
       </section>
 
       {/* Learning Module Section - Enhanced Design */}
-      <section id="learn" className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
+      <section id="learn" className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-blue-50/30 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/20 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-200/20 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-100/10 to-purple-100/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-200/20 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-100/10 to-blue-200/10 rounded-full blur-2xl"></div>
         </div>
         
         <div className="max-w-6xl mx-auto relative z-10">
@@ -854,7 +854,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6">
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-700 font-semibold text-sm">FINANCIAL EDUCATION</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
@@ -980,7 +980,7 @@ export default function HomeV3() {
                   {[
                     { icon: "⏱️", text: "3-5 minute lessons", color: "bg-green-100 text-green-700" },
                     { icon: "🧩", text: "Interactive quizzes", color: "bg-blue-100 text-blue-700" },
-                    { icon: "🎯", text: "Real-world applications", color: "bg-purple-100 text-purple-700" }
+                    { icon: "🎯", text: "Real-world applications", color: "bg-blue-100 text-blue-700" }
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>

@@ -136,7 +136,7 @@ export default function Subscribe() {
       description: "Unlock premium lessons with bigger point rewards"
     },
     {
-      icon: <Users className="h-5 w-5 text-purple-600" />,
+      icon: <Users className="h-5 w-5 text-blue-600" />,
       title: "Exclusive Community Access",
       description: "Join premium-only discussions and events"
     },

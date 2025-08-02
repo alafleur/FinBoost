@@ -31,8 +31,8 @@ export default function HighWinRatesV2() {
           </div>
           
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-6 w-6 text-purple-600" />
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="font-semibold text-gray-800 mb-2 text-center">Bi-Weekly Cycles</h3>
             <p className="text-gray-600 text-sm text-center">26 opportunities to win throughout the year</p>
@@ -68,7 +68,7 @@ export default function HighWinRatesV2() {
             </div>
           </div>
           
-          <div className="mt-6 text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+          <div className="mt-6 text-center bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
             <p className="font-semibold text-gray-800 text-lg">Over 50% Win Rate</p>
             <p className="text-sm text-gray-600">Multiple winners across all tiers every cycle</p>
           </div>

@@ -17,7 +17,7 @@ export function WinnerCard({ winner, selectedForDisbursement, onSelectionChange 
           onChange={(e) => onSelectionChange(winner.id, e.target.checked)}
           disabled={winner.disbursed}
         />
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+        <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-sm font-medium">
           {winner.username?.charAt(0)?.toUpperCase() || 'U'}
         </div>
         <div>
