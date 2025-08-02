@@ -1163,7 +1163,7 @@ export default function Dashboard() {
               />
 
               {/* Tier Thresholds */}
-              {tierThresholds && user && (
+              {user && (
                 <div className="space-y-4">
                   <SectionHeader 
                     icon={Target}
@@ -1174,7 +1174,7 @@ export default function Dashboard() {
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-neutral"></div>
                     <TierStats 
-                      tierThresholds={tierThresholds}
+                      tierThresholds={tierThresholds || { tier1: 56, tier2: 21, tier3: 0 }}
                       tierRewards={poolData.tierBreakdown}
                       user={user}
                     />
