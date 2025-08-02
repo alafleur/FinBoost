@@ -103,8 +103,8 @@ export default function HomeV3() {
       {/* Hero Section - Enhanced with Animated Gradient */}
       <section id="hero" className="relative min-h-screen flex items-center pt-20 sm:pt-16 pb-12 px-6 overflow-hidden">
         {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-purple-50/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-blue-100/30">
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-blue-100/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
         </div>
         
         {/* Enhanced floating background elements */}
@@ -122,7 +122,7 @@ export default function HomeV3() {
             }}
           ></motion.div>
           <motion.div 
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-100/40 to-pink-100/30 rounded-full blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-100/40 to-cyan-100/30 rounded-full blur-3xl"
             animate={{ 
               scale: [1, 1.2, 1],
               opacity: [0.2, 0.4, 0.2]
@@ -168,7 +168,7 @@ export default function HomeV3() {
                 Turn Financial Stress into
               </motion.span>
               <motion.span 
-                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1"
+                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 pb-1"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
@@ -205,10 +205,10 @@ export default function HomeV3() {
               className="relative"
             >
               {/* Enhanced glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-700 to-blue-900 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <Button 
                 size="lg" 
-                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
+                className="relative bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-800 hover:to-blue-950 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-600/40"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6" />
@@ -251,7 +251,7 @@ export default function HomeV3() {
         {/* Background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-600 to-transparent"></div>
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
@@ -262,7 +262,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-blue-800/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
@@ -446,7 +446,7 @@ export default function HomeV3() {
                 icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
                 title: "Beyond Daily Tracking",
                 description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
-                borderColor: "border-l-purple-400"
+                borderColor: "border-l-blue-400"
               }
             ].map((item, index) => (
               <motion.div
@@ -500,7 +500,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-blue-200 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-700 font-semibold text-sm">MEMBERSHIP VALUE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
@@ -517,7 +517,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
                 <GraduationCap className="w-8 h-8 text-white" />
@@ -533,7 +533,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-white" />
@@ -557,7 +557,7 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-blue-200 rounded-full px-6 py-2 mb-6">
               <span className="text-blue-700 font-semibold text-sm">STRENGTH IN NUMBERS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -759,7 +759,7 @@ export default function HomeV3() {
                     viewport={{ once: true }}
                   >
                     <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
+                      <CardContent className="p-6 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative">
                         <div className="relative z-10">
                           <h3 className="text-2xl font-semibold text-white mb-1">
                             {tier.tier}
@@ -938,8 +938,8 @@ export default function HomeV3() {
                     icon: <TrendingUp className="h-6 w-6" />,
                     title: "Start Investing Even with Small Amounts",
                     description: "Simple, low-risk ways to begin building wealth",
-                    gradient: "from-purple-500 to-violet-500", 
-                    bgGradient: "from-purple-50 to-violet-50"
+                    gradient: "from-blue-600 to-blue-800", 
+                    bgGradient: "from-blue-50 to-blue-100"
                   }
                 ].map((item, index) => (
                   <motion.div

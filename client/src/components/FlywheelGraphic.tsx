@@ -35,8 +35,8 @@ export default function FlywheelGraphic() {
     {
       icon: <Zap className="h-6 w-6" />,
       title: "Improve",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100"
+      color: "text-blue-600",
+      bgColor: "bg-blue-100"
     }
   ];
   

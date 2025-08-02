@@ -2,7 +2,7 @@ import { Star, Shield, Clock } from "lucide-react";
 
 export default function EarlyAccessV2() {
   return (
-    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4">

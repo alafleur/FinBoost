@@ -30,7 +30,7 @@ export default function FinalCTA({ onSubscribeSuccess }: FinalCTAProps) {
           <Button 
             onClick={handleStartLearning}
             size="lg"
-            className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 hover:from-blue-600 hover:via-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-2xl transition duration-300 transform hover:scale-105 border border-blue-400"
+            className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-2xl transition duration-300 transform hover:scale-105 border border-blue-500"
           >
             Join the FinBoost Movement
           </Button>

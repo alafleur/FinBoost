@@ -38,7 +38,7 @@ export default function BiggerPurposeV2() {
           </div>
         </div>
         
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-white">
+        <div className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-lg p-8 text-white">
           <h3 className="font-semibold text-xl mb-4">Our Mission</h3>
           <p className="text-blue-100 leading-relaxed max-w-2xl mx-auto">
             Financial stress affects millions, but individual solutions aren't enough. We're building a community where your progress matters, where learning pays off, and where taking control of your money comes with real rewards along the way.

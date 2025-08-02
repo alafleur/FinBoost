@@ -30,7 +30,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-indigo-50/80 to-purple-50/60" id="how-it-works">
+    <section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-indigo-50/80 to-blue-50/60" id="how-it-works">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">🧭 How It Works</h2>
@@ -44,7 +44,7 @@ export default function HowItWorks() {
               key={index}
               className="text-center p-6 rounded-xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200 hover:border-blue-300 transform hover:-translate-y-1"
             >
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center shadow-lg">
                 <div className="text-white">
                   {step.icon}
                 </div>
