@@ -594,7 +594,7 @@ export default function Dashboard() {
                   className="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] relative overflow-hidden"
                   onClick={() => setLocation("/education")}
                 >
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600"></div>
+                  <div className="absolute top-0 left-0 w-full h-2 gloss-accent-indigo"></div>
                   <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
                       <div className="flex items-start space-x-4 flex-1">
@@ -642,7 +642,7 @@ export default function Dashboard() {
                   title="Community Growth"
                 />
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
+                  <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-primary"></div>
                   <CommunityGrowthDial 
                     poolData={poolData}
                     user={user as any}
@@ -660,7 +660,7 @@ export default function Dashboard() {
                   title="Rewards Summary"
                 />
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-lg overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                  <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-success"></div>
                   <RewardsSummary />
                 </div>
               </div>
@@ -1190,7 +1190,7 @@ export default function Dashboard() {
                   titleSize="lg"
                 />
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative cursor-pointer hover:shadow-xl transition-all duration-300" onClick={() => setLocation("/education")}>
-                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
+                  <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-primary"></div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">
@@ -1219,7 +1219,7 @@ export default function Dashboard() {
                   titleSize="lg"
                 />
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.primary}`}></div>
+                  <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-primary"></div>
                   <CommunityGrowthDial 
                     poolData={poolData}
                     user={user as any}
@@ -1238,7 +1238,7 @@ export default function Dashboard() {
                   titleSize="lg"
                 />
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden relative">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${DashboardColors.accent.success}`}></div>
+                  <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-success"></div>
                   <RewardsSummary />
                 </div>
               </div>

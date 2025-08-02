@@ -108,8 +108,8 @@ export default function WinnerCelebrationBanner() {
       className="mb-6"
     >
       <Card className={`${colors.bg} ${colors.border} border-2 shadow-lg relative overflow-hidden`}>
-        {/* Animated gradient top border */}
-        <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${colors.gradient}`}>
+        {/* Animated gradient top border with gloss effect */}
+        <div className={`absolute top-0 left-0 w-full h-2 ${isWinner ? 'dashboard-accent-success' : 'dashboard-accent-primary'}`}>
           <motion.div
             className="h-full w-full bg-white opacity-30"
             animate={{ 
