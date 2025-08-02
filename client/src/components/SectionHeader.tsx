@@ -31,11 +31,11 @@ export default function SectionHeader({
   className = '' 
 }: SectionHeaderProps) {
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
-      <div className={`p-2 ${iconColorClasses[iconColor]} rounded-lg`}>
-        <Icon className="h-4 w-4" />
+    <div className={`flex items-center space-x-3 ${className}`}>
+      <div className={`p-2.5 ${iconColorClasses[iconColor]} rounded-xl shadow-sm`}>
+        <Icon className="h-5 w-5" />
       </div>
-      <h3 className={`font-heading font-bold ${titleSizeClasses[titleSize]} text-gray-900`}>
+      <h3 className={`font-heading font-semibold ${titleSizeClasses[titleSize]} text-gray-900 tracking-tight`}>
         {title}
       </h3>
     </div>
