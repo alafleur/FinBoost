@@ -143,11 +143,11 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                <div className="text-xs text-gray-500 font-medium mb-1">Rewards Allocation</div>
+                <div className="text-xs text-gray-500 font-medium mb-1">Member Rewards</div>
                 <div className="text-xl font-bold text-gray-900 mb-1">
-                  {rewardsPercentage}%
+                  {rewardsPercentage}% Guarantee
                 </div>
-                <div className="text-xs text-gray-500">of membership fees</div>
+                <div className="text-xs text-gray-500">back to members</div>
               </div>
 
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
@@ -268,7 +268,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
               {/* Center text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <div className={`text-2xl font-bold ${DashboardColors.text.primary}`}>{rewardsPercentage}%</div>
-                <div className="text-xs text-gray-600 text-center">to rewards</div>
+                <div className="text-xs text-gray-600 text-center">guaranteed back</div>
               </div>
             </div>
 

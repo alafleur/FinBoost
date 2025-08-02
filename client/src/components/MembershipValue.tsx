@@ -78,7 +78,7 @@ export default function MembershipValue() {
             Strength in Numbers
           </h2>
           <p className="text-gray-600 max-w-3xl mx-auto mb-6">
-            The more members who join, the larger the monthly rewards pool.
+            Every membership dollar, 50¢ goes directly back to members as rewards.
             <br />
             <span className="font-medium text-primary-600">Real people. Real money. Real financial progress.</span>
           </p>
@@ -86,7 +86,7 @@ export default function MembershipValue() {
           {/* Membership Fee Breakdown - Integrated with Descriptions */}
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-4xl mx-auto">
             <div className="text-center mb-4">
-              <span className="text-gray-600 font-medium">Your $20/month goes to:</span>
+              <span className="text-gray-600 font-medium">Your $20/month membership delivers:</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-start gap-3">
@@ -144,11 +144,11 @@ export default function MembershipValue() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-4 sm:p-6 text-center">
-                  <div className="text-sm text-primary-600 font-medium mb-1">Rewards Allocation</div>
+                  <div className="text-sm text-primary-600 font-medium mb-1">Member Rewards</div>
                   <div className="text-2xl sm:text-3xl font-bold text-primary-700 mb-1">
-                    {rewardsPercentage}%
+                    {rewardsPercentage}% Guarantee
                   </div>
-                  <div className="text-xs text-primary-500">of membership fees</div>
+                  <div className="text-xs text-primary-500">back to members</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 text-center">
@@ -220,7 +220,7 @@ export default function MembershipValue() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span>{rewardsPercentage}% → Collective Rewards Pool</span>
+                  <span>{rewardsPercentage}% → Member Rewards Guarantee</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-blue-500 rounded"></div>
