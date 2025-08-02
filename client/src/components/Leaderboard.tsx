@@ -444,13 +444,6 @@ export default function Leaderboard() {
     <div className="space-y-6 md:space-y-8">
       {/* Header Section */}
       <div className="space-y-4">
-        <SectionHeader
-          icon={Trophy}
-          iconColor="blue"
-          title="Leaderboard"
-          titleSize="2xl"
-        />
-        <p className="text-gray-600 -mt-2">Track your performance and see how you rank against other members</p>
         
         <Tabs value={activeTab} onValueChange={(tab) => {
           setActiveTab(tab);
@@ -500,13 +493,6 @@ export default function Leaderboard() {
 
             {/* Rankings Section */}
             <div className="space-y-4">
-              <SectionHeader
-                icon={Users}
-                iconColor="blue"
-                title="Current Rankings"
-                titleSize="lg"
-              />
-              <p className="text-gray-600 text-sm -mt-2">See where you stand among all members</p>
               {renderLeaderboard(cycleData)}
             </div>
           </TabsContent>
@@ -528,13 +514,6 @@ export default function Leaderboard() {
 
             {/* All Time Rankings */}
             <div className="space-y-4">
-              <SectionHeader
-                icon={Crown}
-                iconColor="blue"
-                title="All-Time Rankings"
-                titleSize="lg"
-              />
-              <p className="text-gray-600 text-sm -mt-2">Hall of fame across all cycles</p>
               {renderLeaderboard(allTimeData)}
             </div>
           </TabsContent>
