@@ -1344,7 +1344,7 @@ export default function HomeV3() {
           {/* Two-column layout: Tier explanation left, Screenshot right */}
           <div className="flex flex-col lg:flex-row gap-1 mb-12 items-center lg:items-start">
             {/* Left Column - Tier Cards */}
-            <div className="flex-1 lg:pr-2">
+            <div className="flex-1">
               <div className="flex flex-col gap-4 max-w-lg mx-auto">
                 {[
                   {
@@ -1404,7 +1404,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="flex-shrink-0 flex justify-center"
+              className="flex-shrink-0 flex justify-center lg:-ml-12"
             >
               <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
                 <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
