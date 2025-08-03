@@ -34,6 +34,7 @@ import finboostLogo from "@/assets/finboost-logo-v10.png";
 import { DashboardColors } from "@/lib/colors";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
+import PointsActions from "@/components/PointsActions";
 import RewardsHistory from "@/components/RewardsHistory";
 import RewardsSummary from "@/components/RewardsSummary";
 import Leaderboard from "@/components/Leaderboard";
@@ -492,7 +493,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
           <div className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-16 z-40 shadow-sm">
-            <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
+            <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -508,6 +509,14 @@ export default function Dashboard() {
               >
                 <BookOpen className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium text-[10px]">Learn</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="actions" 
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Financial actions tab"
+              >
+                <Upload className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Actions</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
@@ -763,6 +772,19 @@ export default function Dashboard() {
                       </Card>
                     );
                   })}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="actions" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Upload}
+                  iconColor="blue"
+                  title="Financial Actions"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <PointsActions />
                 </div>
               </div>
             </TabsContent>
@@ -1067,7 +1089,7 @@ export default function Dashboard() {
           {/* Desktop Tab Navigation */}
           <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <TabsList className="grid w-full grid-cols-6 h-auto bg-transparent border-0 p-1 rounded-none">
+              <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -1083,6 +1105,14 @@ export default function Dashboard() {
                 >
                   <BookOpen className="h-4 w-4" aria-hidden="true" />
                   <span className="font-medium">Learn</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="actions" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Financial actions tab"
+                >
+                  <Upload className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Actions</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="leaderboard" 
@@ -1359,6 +1389,21 @@ export default function Dashboard() {
                       </Card>
                     );
                   })}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Actions Tab */}
+            <TabsContent value="actions" className="mt-0 space-y-6">
+              <div className="space-y-4">
+                <SectionHeader 
+                  icon={Upload}
+                  iconColor="blue"
+                  title="Financial Actions"
+                  titleSize="2xl"
+                />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <PointsActions />
                 </div>
               </div>
             </TabsContent>
