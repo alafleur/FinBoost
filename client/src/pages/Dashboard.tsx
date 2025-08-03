@@ -509,20 +509,12 @@ export default function Dashboard() {
                 <span className="font-medium text-[10px]">Learn</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="referrals" 
+                value="leaderboard" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Referral system tab"
+                aria-label="Leaderboard tab"
               >
-                <Users className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Referrals</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="predictions" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Predictions tab"
-              >
-                <Target className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Predict</span>
+                <Trophy className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Board</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
@@ -533,12 +525,20 @@ export default function Dashboard() {
                 <span className="font-medium text-[10px]">Rewards</span>
               </TabsTrigger>
               <TabsTrigger 
-                value="leaderboard" 
+                value="predictions" 
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                aria-label="Leaderboard tab"
+                aria-label="Bonus predictions tab"
               >
-                <Trophy className="h-4 w-4" aria-hidden="true" />
-                <span className="font-medium text-[10px]">Board</span>
+                <Target className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Bonus</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="referrals" 
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Referral system tab"
+              >
+                <Users className="h-4 w-4" aria-hidden="true" />
+                <span className="font-medium text-[10px]">Referrals</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1078,20 +1078,12 @@ export default function Dashboard() {
                   <span className="font-medium">Learn</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="referrals" 
+                  value="leaderboard" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Referral system tab"
+                  aria-label="Leaderboard tab"
                 >
-                  <Users className="h-4 w-4" aria-hidden="true" />
-                  <span className="font-medium">Referrals</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="predictions" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Predictions tab"
-                >
-                  <Target className="h-4 w-4" aria-hidden="true" />
-                  <span className="font-medium">Predictions</span>
+                  <Trophy className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Board</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="rewards" 
@@ -1102,12 +1094,20 @@ export default function Dashboard() {
                   <span className="font-medium">Rewards</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="leaderboard" 
+                  value="predictions" 
                   className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Leaderboard tab"
+                  aria-label="Bonus predictions tab"
                 >
-                  <Trophy className="h-4 w-4" aria-hidden="true" />
-                  <span className="font-medium">Board</span>
+                  <Target className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Bonus</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="referrals" 
+                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Referral system tab"
+                >
+                  <Users className="h-4 w-4" aria-hidden="true" />
+                  <span className="font-medium">Referrals</span>
                 </TabsTrigger>
 
               </TabsList>
