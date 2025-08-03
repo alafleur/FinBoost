@@ -1390,7 +1390,7 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="text-center mt-6"
               >
-                <p className="text-lg font-semibold text-gray-700">
+                <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                   Higher Effort → Higher Tier → Larger Rewards
                 </p>
               </motion.div>
