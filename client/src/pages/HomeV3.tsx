@@ -687,7 +687,7 @@ export default function HomeV3() {
                 Turn Financial Stress into
               </motion.span>
               <motion.span 
-                className="block gradient-text pb-1"
+                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
