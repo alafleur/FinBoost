@@ -433,13 +433,13 @@
   
   /* Premium Button Styles with Unified Dark Blue System */
   .btn-primary {
-    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 30%, #1e3a8a 100%);
-    color: white;
+    background: var(--finboost-gradient-primary);
+    color: var(--finboost-text-inverted);
     border: none;
     border-radius: 0.5rem;
     padding: 0.75rem 1.5rem;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: var(--finboost-shadow-md), inset 0 1px 0 var(--finboost-hover-overlay);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -452,76 +452,114 @@
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+    background: var(--finboost-gradient-gloss);
     border-radius: inherit;
     z-index: 1;
   }
   
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 30%, #172554 100%);
+    box-shadow: var(--finboost-shadow-lg), inset 0 1px 0 var(--finboost-active-overlay);
+    background: linear-gradient(135deg, var(--finboost-primary-hover) 0%, var(--finboost-primary-base) 50%, var(--finboost-primary-dark) 100%);
   }
   
   .btn-primary:active {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(30, 58, 138, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: var(--finboost-shadow-sm), inset 0 1px 0 var(--finboost-hover-overlay);
   }
   
   .btn-secondary {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(29, 78, 216, 0.05) 100%);
-    color: #1e3a8a;
-    border: 1px solid #bfdbfe;
+    background: var(--finboost-button-secondary-bg);
+    color: var(--finboost-primary-base);
+    border: 1px solid var(--finboost-border-light);
     border-radius: 0.5rem;
     padding: 0.75rem 1.5rem;
     font-weight: 500;
-    box-shadow: 0 1px 3px rgba(30, 58, 138, 0.1);
+    box-shadow: var(--finboost-shadow-sm);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .btn-secondary:hover {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(29, 78, 216, 0.1) 100%);
-    border-color: #93c5fd;
-    box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15);
+    background: var(--finboost-button-secondary-hover);
+    border-color: var(--finboost-border-medium);
+    box-shadow: var(--finboost-shadow-md);
     transform: translateY(-1px);
   }
   
   /* Enhanced Card Styles with Consistent Theme */
   .card-premium {
-    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 30%, #1e3a8a 100%);
-    border: 1px solid #3b82f6;
+    background: var(--finboost-gradient-primary);
+    border: 1px solid var(--finboost-primary-light);
     border-radius: 1rem;
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 1px 3px rgba(30, 58, 138, 0.3);
+    box-shadow: var(--finboost-shadow-lg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .card-premium:hover {
-    box-shadow: 0 8px 24px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.4);
+    box-shadow: var(--finboost-shadow-xl);
     transform: translateY(-2px);
-    border-color: #60a5fa;
+    border-color: var(--finboost-primary-hover);
+    background: linear-gradient(135deg, var(--finboost-primary-hover) 0%, var(--finboost-primary-base) 50%, var(--finboost-primary-dark) 100%);
+  }
+
+  /* Premium Button for Card Context */
+  .card-premium-button {
+    background: var(--finboost-gradient-primary);
+    color: var(--finboost-text-inverted);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    box-shadow: var(--finboost-shadow-md), inset 0 1px 0 var(--finboost-hover-overlay);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-premium-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: var(--finboost-gradient-gloss);
+    border-radius: inherit;
+    z-index: 1;
+  }
+
+  .card-premium-button:hover {
+    background: linear-gradient(135deg, var(--finboost-primary-hover) 0%, var(--finboost-primary-base) 50%, var(--finboost-primary-dark) 100%);
+    box-shadow: var(--finboost-shadow-lg), inset 0 1px 0 var(--finboost-active-overlay);
+    transform: translateY(-2px);
+  }
+
+  .card-premium-button:active {
+    transform: translateY(0);
+    box-shadow: var(--finboost-shadow-sm), inset 0 1px 0 var(--finboost-hover-overlay);
   }
   
   /* Text Enhancement Utilities */
   .text-accent {
-    color: #1e3a8a;
+    color: var(--finboost-primary-base);
     font-weight: 600;
   }
   
   .text-accent-light {
-    color: #1d4ed8;
+    color: var(--finboost-primary-light);
     font-weight: 500;
   }
   
   .border-accent {
-    border-color: #93c5fd;
+    border-color: var(--finboost-border-medium);
   }
   
   .bg-accent {
-    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 30%, #1e3a8a 100%);
+    background: var(--finboost-gradient-primary);
   }
   
   .bg-accent-light {
-    background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0.4) 100%);
+    background: var(--finboost-gradient-card);
   }
 
   /* Enhanced Slider Styles for Professional Dial Control */
@@ -530,49 +568,51 @@
     height: 24px;
     width: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, var(--finboost-primary-base) 0%, var(--finboost-primary-light) 100%);
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
-    border: 3px solid white;
+    box-shadow: var(--finboost-shadow-lg);
+    border: 3px solid var(--finboost-bg-primary);
     transition: all 0.2s ease;
   }
 
   .slider-enhanced::-webkit-slider-thumb:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
+    box-shadow: var(--finboost-shadow-xl);
+    background: linear-gradient(135deg, var(--finboost-primary-hover) 0%, var(--finboost-primary-base) 100%);
   }
 
   .slider-enhanced::-webkit-slider-thumb:active {
     transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+    box-shadow: var(--finboost-shadow-md);
   }
 
   .slider-enhanced::-moz-range-thumb {
     height: 24px;
     width: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, var(--finboost-primary-base) 0%, var(--finboost-primary-light) 100%);
     cursor: pointer;
-    border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
+    border: 3px solid var(--finboost-bg-primary);
+    box-shadow: var(--finboost-shadow-lg);
     transition: all 0.2s ease;
   }
 
   .slider-enhanced::-moz-range-thumb:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
+    box-shadow: var(--finboost-shadow-xl);
+    background: linear-gradient(135deg, var(--finboost-primary-hover) 0%, var(--finboost-primary-base) 100%);
   }
 
   .slider-enhanced::-moz-range-thumb:active {
     transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+    box-shadow: var(--finboost-shadow-md);
   }
 
   /* Slider track styling for continuous axis appearance */
   .slider-enhanced::-webkit-slider-track {
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    background: linear-gradient(90deg, var(--finboost-border-medium) 0%, rgba(30, 58, 138, 0.2) 50%, var(--finboost-primary-base) 100%);
     border: none;
     outline: none;
   }
@@ -580,7 +620,7 @@
   .slider-enhanced::-moz-range-track {
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    background: linear-gradient(90deg, var(--finboost-border-medium) 0%, rgba(30, 58, 138, 0.2) 50%, var(--finboost-primary-base) 100%);
     border: none;
     outline: none;
   }
