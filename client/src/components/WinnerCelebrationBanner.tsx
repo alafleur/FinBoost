@@ -76,12 +76,12 @@ export default function WinnerCelebrationBanner() {
   };
 
   const getTierColors = (tier: string) => {
-    // Use professional color system for winners (success theme for financial gains)
+    // Use blue→purple gradient system for unified branding
     return {
-      gradient: DashboardColors.accent.success,
-      bg: 'bg-gradient-to-br from-emerald-50 to-green-50',
-      border: 'border-emerald-200',
-      text: DashboardColors.text.success
+      gradient: DashboardColors.accent.primary,
+      bg: 'bg-gradient-to-br from-blue-50/80 to-purple-50/60',
+      border: 'border-blue-200/40',
+      text: DashboardColors.text.primary
     };
   };
 
