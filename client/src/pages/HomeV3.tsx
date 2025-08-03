@@ -793,9 +793,8 @@ export default function HomeV3() {
               onTouchEnd={handleTouchEnd}
               data-testid="carousel-container"
             >
-              {/* Desktop: Side-by-side layout, Mobile: Single card */}
+              {/* Mobile: Single card layout */}
               <div className="block lg:hidden">
-                {/* Mobile Single Card Layout */}
                 <motion.div
                   key={`mobile-${carousel.currentStep}`}
                   initial={{ opacity: 0, x: 100 }}
@@ -819,7 +818,7 @@ export default function HomeV3() {
                       </div>
                       
                       {/* Phone Frame */}
-                      <div className="mb-6">
+                      <div className="mb-4">
                         <PhoneFrame 
                           className="max-w-[240px]"
                           ariaLabel={`Mobile app screenshot showing ${stepsData[carousel.currentStep].title.toLowerCase()}`}
@@ -833,6 +832,53 @@ export default function HomeV3() {
                             data-testid={`screenshot-mobile-step-${carousel.currentStep + 1}`}
                           />
                         </PhoneFrame>
+                      </div>
+                      
+                      {/* Mobile Navigation Controls - Right below phone */}
+                      <div className="mb-4">
+                        {/* Progress Indicators */}
+                        <div className="flex justify-center items-center space-x-2 mb-4">
+                          {stepsData.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => carousel.goToStep(index)}
+                              className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                                index === carousel.currentStep
+                                  ? 'bg-accent scale-125 shadow-lg'
+                                  : 'bg-white/30 hover:bg-white/50'
+                              }`}
+                              aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
+                              data-testid={`mobile-progress-dot-${index + 1}`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Navigation Arrows */}
+                        <div className="flex justify-center items-center space-x-6">
+                          <button
+                            onClick={carousel.prevStep}
+                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                            aria-label="Previous step"
+                            data-testid="mobile-carousel-prev-btn"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+
+                          <div className="text-white/70 text-sm font-medium px-3 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                            <span className="text-accent font-semibold">{carousel.currentStep + 1}</span>
+                            <span className="mx-1">/</span>
+                            <span>{stepsData.length}</span>
+                          </div>
+
+                          <button
+                            onClick={carousel.nextStep}
+                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                            aria-label="Next step"
+                            data-testid="mobile-carousel-next-btn"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
                       
                       {/* Description */}
@@ -849,79 +895,69 @@ export default function HomeV3() {
                 </motion.div>
               </div>
 
-              {/* Desktop Multi-Card Layout */}
+              {/* Desktop: Single card layout */}
               <div className="hidden lg:block">
-                <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-6 px-4">
-                  {stepsData.map((step, index) => {
-                    const isActive = index === carousel.currentStep;
-                    const isAdjacent = Math.abs(index - carousel.currentStep) === 1;
-                    const isVisible = isActive || isAdjacent || 
-                      (carousel.currentStep === 0 && index === stepsData.length - 1) ||
-                      (carousel.currentStep === stepsData.length - 1 && index === 0);
-
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ 
-                          opacity: isActive ? 1 : isVisible ? 0.6 : 0.3,
-                          scale: isActive ? 1.05 : 1,
-                          filter: isActive ? 'brightness(1)' : 'brightness(0.7)'
-                        }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        className={`group cursor-pointer ${isActive ? 'z-20' : 'z-10'}`}
-                        onClick={() => carousel.goToStep(index)}
-                        data-testid={`desktop-step-${index + 1}`}
-                      >
-                        <div className={`relative h-full transition-all duration-500 ${
-                          isActive 
-                            ? 'bg-white/10 border-accent/50 shadow-xl' 
-                            : 'bg-white/5 border-white/10 hover:bg-white/8'
-                        } backdrop-blur-sm border rounded-2xl p-6`}>
-                          {/* Step Indicator */}
-                          <div className="flex items-start space-x-4 mb-6">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 transition-colors duration-300 ${
-                              isActive ? 'bg-accent text-white' : 'bg-white/20 text-white/70'
-                            }`}>
-                              {index + 1}
+                <div className="max-w-2xl mx-auto">
+                  <motion.div
+                    key={`desktop-${carousel.currentStep}`}
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="w-full"
+                  >
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
+                      <div className="flex flex-col lg:flex-row items-center gap-8">
+                        {/* Left: Content */}
+                        <div className="flex-1 text-center lg:text-left">
+                          {/* Step Header */}
+                          <div className="flex items-center justify-center lg:justify-start space-x-4 mb-6">
+                            <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
+                              {carousel.currentStep + 1}
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                              <p className="text-white/70 text-sm leading-relaxed">{step.description}</p>
+                              <h3 className="text-2xl font-semibold text-white mb-2">
+                                {stepsData[carousel.currentStep].title}
+                              </h3>
                             </div>
                           </div>
                           
-                          {/* Phone Frame */}
-                          <div className="flex justify-center mb-4">
-                            <PhoneFrame 
-                              className="max-w-[200px]"
-                              ariaLabel={`Mobile app screenshot showing ${step.title.toLowerCase()}`}
-                              testId={`phone-frame-desktop-step-${index + 1}`}
-                            >
-                              <img 
-                                src={`/api/placeholder/${step.screenshot}`} 
-                                alt={`FinBoost app screenshot: ${step.title}`}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                                data-testid={`screenshot-desktop-step-${index + 1}`}
-                              />
-                            </PhoneFrame>
-                          </div>
+                          {/* Description */}
+                          <p className="text-white/70 text-base leading-relaxed mb-6">
+                            {stepsData[carousel.currentStep].description}
+                          </p>
                           
                           {/* Caption */}
-                          <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2">
-                            {step.caption}
+                          <p className="text-blue-300 text-sm font-medium">
+                            {stepsData[carousel.currentStep].caption}
                           </p>
                         </div>
-                      </motion.div>
-                    );
-                  })}
+
+                        {/* Right: Phone Frame */}
+                        <div className="flex-shrink-0">
+                          <PhoneFrame 
+                            className="max-w-[280px]"
+                            ariaLabel={`Mobile app screenshot showing ${stepsData[carousel.currentStep].title.toLowerCase()}`}
+                            testId={`phone-frame-desktop-step-${carousel.currentStep + 1}`}
+                          >
+                            <img 
+                              src={`/api/placeholder/${stepsData[carousel.currentStep].screenshot}`} 
+                              alt={`FinBoost app screenshot: ${stepsData[carousel.currentStep].title}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              data-testid={`screenshot-desktop-step-${carousel.currentStep + 1}`}
+                            />
+                          </PhoneFrame>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
             </div>
 
-            {/* Carousel Navigation Controls */}
-            <div className="mt-8 lg:mt-12">
+            {/* Desktop Navigation Controls Only */}
+            <div className="hidden lg:block mt-8">
               {/* Progress Indicators */}
               <div className="flex justify-center items-center space-x-2 mb-6">
                 {stepsData.map((_, index) => (
@@ -934,43 +970,40 @@ export default function HomeV3() {
                         : 'bg-white/30 hover:bg-white/50'
                     }`}
                     aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
-                    data-testid={`progress-dot-${index + 1}`}
+                    data-testid={`desktop-progress-dot-${index + 1}`}
                   />
                 ))}
               </div>
 
               {/* Navigation Arrows & Controls */}
               <div className="flex justify-center items-center space-x-6">
-                {/* Previous Button */}
                 <button
                   onClick={carousel.prevStep}
-                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
                   aria-label="Previous step"
-                  data-testid="carousel-prev-btn"
+                  data-testid="desktop-carousel-prev-btn"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
 
-                {/* Step Counter */}
                 <div className="text-white/70 text-sm font-medium px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm">
                   <span className="text-accent font-semibold">{carousel.currentStep + 1}</span>
                   <span className="mx-2">/</span>
                   <span>{stepsData.length}</span>
                 </div>
 
-                {/* Next Button */}
                 <button
                   onClick={carousel.nextStep}
-                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
                   aria-label="Next step"
-                  data-testid="carousel-next-btn"
+                  data-testid="desktop-carousel-next-btn"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
               </div>
 
-              {/* Auto-play Controls (Desktop Only) */}
-              <div className="hidden lg:flex justify-center items-center mt-6 space-x-4">
+              {/* Auto-play Controls */}
+              <div className="flex justify-center items-center mt-6 space-x-4">
                 <button
                   onClick={carousel.toggleAutoPlay}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent ${
@@ -993,7 +1026,6 @@ export default function HomeV3() {
                   )}
                 </button>
 
-                {/* Keyboard Navigation Hint */}
                 <div className="text-xs text-white/50 bg-white/5 px-3 py-1 rounded-full">
                   Use ← → keys or numbers 1-4
                 </div>
