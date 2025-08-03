@@ -145,9 +145,17 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'action': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'achievement': return 'bg-purple-50 text-purple-700 border-purple-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'action': return 'bg-blue-100 text-blue-800 border border-blue-300 font-medium';
+      case 'achievement': return 'bg-purple-100 text-purple-800 border border-purple-300 font-medium';
+      default: return 'bg-gray-100 text-gray-800 border border-gray-300 font-medium';
+    }
+  };
+
+  const getCategoryDisplayText = (category: string) => {
+    switch (category) {
+      case 'action': return 'Submit';
+      case 'achievement': return 'Submit';
+      default: return 'Submit';
     }
   };
 
@@ -205,43 +213,66 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Inspirational Message */}
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-start space-x-4">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+              <Upload className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Rewarded for Your Financial Progress!</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Get rewarded with more points by showing proof of debt paydown! Upload documents showing your financial actions and earn points toward monthly rewards.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {actions.map((action) => (
           <Card 
             key={action.id} 
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-gray-200 ${
+            className={`cursor-pointer transition-all duration-300 hover:shadow-xl group border ${
               selectedAction === action.id 
-                ? 'ring-2 ring-blue-500 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50' 
-                : 'hover:border-blue-200'
+                ? 'ring-2 ring-blue-500 shadow-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-300' 
+                : 'border-gray-200 hover:border-blue-300 hover:shadow-lg bg-white'
             }`}
             onClick={() => setSelectedAction(action.id)}
           >
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{action.name}</CardTitle>
-                <Badge className={getCategoryColor(action.category)}>
-                  {action.category}
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-start gap-3">
+                <CardTitle className="text-lg font-semibold text-gray-900 leading-tight group-hover:text-blue-900 transition-colors">
+                  {action.name}
+                </CardTitle>
+                <Badge className={`${getCategoryColor(action.category)} px-3 py-1 text-xs uppercase tracking-wide`}>
+                  {getCategoryDisplayText(action.category)}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-3">{action.description}</p>
+            <CardContent className="pt-0">
+              <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {selectedAction && (
-        <Card className="bg-gradient-to-br from-blue-50 via-white to-purple-50 border-blue-200 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Upload className="h-5 w-5 text-blue-600" />
+        <Card className="bg-gradient-to-br from-blue-50 via-white to-purple-50 border-2 border-blue-300 shadow-xl">
+          <CardHeader className="border-b border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                <Upload className="h-5 w-5 text-white" />
+              </div>
               Submit Proof for {actions.find(a => a.id === selectedAction)?.name}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="proof-file">Upload Proof Document/Image</Label>
+          <CardContent className="space-y-6 p-6">
+            <div className="space-y-3">
+              <Label htmlFor="proof-file" className="text-sm font-semibold text-gray-900">
+                Upload Proof Document/Image
+              </Label>
               <FileUpload 
                 onFileUploaded={(fileUrl, fileName, fileSize) => {
                   // Create a File-like object for backward compatibility
@@ -249,36 +280,40 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
                   setProofFile(file);
                 }}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Accepted formats: Images, PDF, Word documents
+              <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                Accepted formats: Images, PDF, Word documents (max 10MB)
               </p>
             </div>
 
-            <div>
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-sm font-semibold text-gray-900">
+                Description
+              </Label>
               <Textarea
                 id="description"
-                placeholder="Provide details about your financial action (e.g., 'Paid $500 toward credit card debt', 'Invested $200 in my 401k')"
+                placeholder="Provide details about your financial action (e.g., 'Paid $500 toward credit card debt', 'Completed debt consolidation')"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1"
+                className="mt-1 min-h-[100px] bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                rows={4}
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3 pt-2">
               <Button 
                 onClick={submitProof}
                 disabled={submitting || !proofFile || !description.trim()}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3 px-6"
+                size="lg"
               >
                 {submitting ? (
                   <>
-                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                    <Clock className="h-5 w-5 mr-2 animate-spin" />
                     Submitting...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-5 w-5 mr-2" />
                     Submit for Review
                   </>
                 )}
@@ -290,9 +325,10 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
                   setProofFile(null);
                   setDescription('');
                 }}
-                className="border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                className="border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-4"
+                size="lg"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           </CardContent>
