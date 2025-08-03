@@ -28,10 +28,13 @@ export default function Navbar() {
             </div>
           </a>
           <Button 
-            className="btn-primary font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300"
+            className="btn-primary font-medium px-3 py-2 text-xs md:text-sm rounded-lg shadow-md transition duration-300 leading-tight"
             onClick={handleSignUpClick}
           >
-            Join Early Access
+            <div className="flex flex-col text-center">
+              <span>Join Early</span>
+              <span>Access</span>
+            </div>
           </Button>
         </div>
       </div>
