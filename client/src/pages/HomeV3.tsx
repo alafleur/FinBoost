@@ -790,7 +790,23 @@ export default function HomeV3() {
           {/* Unified Responsive Layout */}
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
             {/* Phone Preview - Mobile Centered, Desktop Right */}
-            <div className="order-1 lg:order-2 flex justify-center lg:justify-start">
+            <div className="order-1 lg:order-2 flex flex-col items-center lg:items-start">
+              {/* Mobile navigation dots - positioned above phone */}
+              <div className="lg:hidden flex justify-center space-x-2 mb-4">
+                {screenshots.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveScreenshot(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      activeScreenshot === index 
+                        ? 'bg-blue-600 w-8' 
+                        : 'bg-slate-300 hover:bg-slate-400'
+                    }`}
+                    aria-label={`View ${screenshots[index].title}`}
+                  />
+                ))}
+              </div>
+              
               <motion.div
                 key={activeScreenshot}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -855,21 +871,7 @@ export default function HomeV3() {
                 </div>
               </div>
               
-              {/* Mobile navigation dots - moved to top */}
-              <div className="lg:hidden flex justify-center space-x-2 mb-6">
-                {screenshots.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveScreenshot(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      activeScreenshot === index 
-                        ? 'bg-blue-600 w-8' 
-                        : 'bg-slate-300 hover:bg-slate-400'
-                    }`}
-                    aria-label={`View ${screenshots[index].title}`}
-                  />
-                ))}
-              </div>
+
               
               {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
               <div className="lg:space-y-3">
