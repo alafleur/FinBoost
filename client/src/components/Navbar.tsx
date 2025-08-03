@@ -28,7 +28,7 @@ export default function Navbar() {
             </div>
           </a>
           <Button 
-            className="btn-primary font-medium px-2 py-2 text-xs md:text-sm rounded-lg shadow-md transition duration-300 leading-tight"
+            className="btn-primary font-medium px-2 md:px-4 py-2 text-xs md:text-sm rounded-lg shadow-md transition duration-300 leading-tight"
             onClick={handleSignUpClick}
           >
             <div className="flex flex-col text-center">
