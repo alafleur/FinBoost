@@ -238,19 +238,25 @@
   }
   
   .dashboard-card-primary {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 2px solid #f59e0b;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: 2px solid #1d4ed8;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    color: white;
   }
 
   .dashboard-card-primary:hover {
-    background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
-    border-color: #d97706;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-color: #1e40af;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(-2px);
+  }
+
+  .dashboard-card-primary h3,
+  .dashboard-card-primary p {
+    color: white;
   }
 
   .dashboard-card-primary::before {
