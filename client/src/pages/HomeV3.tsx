@@ -275,7 +275,7 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-4 gap-6 xl:gap-8">
             {[
               {
                 icon: <BookOpen className="w-8 h-8" />,
@@ -294,11 +294,19 @@ export default function HomeV3() {
                 gradient: "from-accent to-accent-light"
               },
               {
+                icon: <BarChart3 className="w-8 h-8" />,
+                title: "Track Your Leaderboard Position",
+                description: "Your points determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
+                screenshot: "leaderboard-screenshot.png",
+                caption: "Your point total determines your leaderboard position and reward odds.",
+                gradient: "from-accent to-accent-light"
+              },
+              {
                 icon: <Trophy className="w-8 h-8" />,
                 title: "Compete for Cash Rewards",
-                description: "Points determine your reward odds — the more you learn and take action, the better your chances. Winners are selected using a point-weighted system.",
-                screenshot: "leaderboard.png",
-                caption: "Your point total determines your odds — the top contributors win real cash.",
+                description: "Winners are selected using a point-weighted system — the more you learn and take action, the better your chances. Real cash rewards distributed monthly.",
+                screenshot: "tier-dashboard.png",
+                caption: "Top contributors win real cash through our point-weighted reward system.",
                 gradient: "from-accent to-accent-light"
               }
             ].map((step, index) => (
