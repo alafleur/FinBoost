@@ -819,8 +819,8 @@ export default function HomeV3() {
                         </div>
                       </div>
                       
-                      {/* Phone Frame */}
-                      <div className="mb-4">
+                      {/* Phone Frame with Integrated Navigation */}
+                      <div className="relative mb-4">
                         <PhoneFrame 
                           className="max-w-[240px]"
                           ariaLabel={`Mobile app screenshot showing ${stepsData[carousel.currentStep].title.toLowerCase()}`}
@@ -834,20 +834,17 @@ export default function HomeV3() {
                             data-testid={`screenshot-mobile-step-${carousel.currentStep + 1}`}
                           />
                         </PhoneFrame>
-                      </div>
-                      
-                      {/* Mobile Navigation Controls - Right below phone */}
-                      <div className="mb-4">
-                        {/* Progress Indicators */}
-                        <div className="flex justify-center items-center space-x-2 mb-4">
+
+                        {/* Progress Dots - On Phone Frame */}
+                        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex justify-center items-center space-x-2">
                           {stepsData.map((_, index) => (
                             <button
                               key={index}
                               onClick={() => carousel.goToStep(index)}
-                              className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-white ${
                                 index === carousel.currentStep
                                   ? 'bg-accent scale-125 shadow-lg'
-                                  : 'bg-white/30 hover:bg-white/50'
+                                  : 'bg-slate-300 hover:bg-slate-400'
                               }`}
                               aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
                               data-testid={`mobile-progress-dot-${index + 1}`}
@@ -855,28 +852,28 @@ export default function HomeV3() {
                           ))}
                         </div>
 
-                        {/* Navigation Arrows */}
-                        <div className="flex justify-center items-center space-x-6">
+                        {/* Navigation Controls - On Phone Frame */}
+                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex justify-center items-center space-x-3">
                           <button
                             onClick={carousel.prevStep}
-                            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
+                            className="p-1.5 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                             aria-label="Previous step"
                             data-testid="mobile-carousel-prev-btn"
                           >
-                            <ChevronLeft className="w-5 h-5" />
+                            <ChevronLeft className="w-4 h-4" />
                           </button>
 
-                          <div className="text-slate-600 text-sm font-medium px-3 py-1 bg-slate-100 rounded-full backdrop-blur-sm">
-                            {carousel.currentStep + 1} / {stepsData.length}
+                          <div className="text-slate-600 text-xs font-medium px-2 py-1 bg-white/90 rounded-full shadow-lg backdrop-blur-sm">
+                            <span className="text-accent font-semibold">{carousel.currentStep + 1}</span> / {stepsData.length}
                           </div>
 
                           <button
                             onClick={carousel.nextStep}
-                            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
+                            className="p-1.5 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                             aria-label="Next step"
                             data-testid="mobile-carousel-next-btn"
                           >
-                            <ChevronRight className="w-5 h-5" />
+                            <ChevronRight className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
