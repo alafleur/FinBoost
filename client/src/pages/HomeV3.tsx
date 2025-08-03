@@ -455,7 +455,7 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={`bg-white rounded-xl border ${item.borderColor} border-l-4 p-6 hover:shadow-md transition-all duration-300 space-y-2`}
+                className={`bg-white rounded-xl border border-accent-light/30 ${item.borderColor} border-l-4 p-6 hover:shadow-md transition-all duration-300 space-y-2`}
               >
                 <div className="flex items-start space-x-4">
                   <div className="bg-accent-light/20 p-3 rounded-full">
