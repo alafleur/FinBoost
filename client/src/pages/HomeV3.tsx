@@ -205,7 +205,7 @@ export default function HomeV3() {
               className="relative"
             >
               {/* Enhanced glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-700 to-blue-900 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+              <div className="absolute -inset-1 bg-accent rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <Button 
                 size="lg" 
                 className="relative btn-primary px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl border-0 h-auto"
@@ -235,7 +235,7 @@ export default function HomeV3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600 px-4">
+            <p className="text-lg font-semibold gradient-text px-4">
               At least half of members win from our company-guaranteed $5,000 early access reward pool.
             </p>
           </motion.div>
@@ -250,8 +250,8 @@ export default function HomeV3() {
       <section id="how-it-works" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
         {/* Background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-600 to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent-light to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent to-transparent"></div>
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
@@ -262,8 +262,8 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-600/20 to-blue-800/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-300 font-semibold text-sm">HOW IT WORKS</span>
+            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6">
+              <span className="text-accent-light font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
               How It Works
@@ -388,7 +388,7 @@ export default function HomeV3() {
                 </div>
                 
                 {/* Supporting caption with improved spacing */}
-                <p className="text-blue-300 text-sm text-center font-medium leading-relaxed mb-4 mt-6">
+                <p className="text-accent-light text-sm text-center font-medium leading-relaxed mb-4 mt-6">
                   Your points determine your spot on the leaderboard — and your shot at real cash rewards.
                 </p>
                 
@@ -413,8 +413,8 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-block bg-gradient-to-r from-slate-100 to-slate-200 rounded-full px-6 py-2 mb-6">
-              <span className="text-slate-700 font-semibold text-sm">OUR DIFFERENCE</span>
+            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6">
+              <span className="text-accent font-semibold text-sm">OUR DIFFERENCE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
               Why FinBoost Isn't Just Another Finance App
@@ -434,7 +434,7 @@ export default function HomeV3() {
                 icon: <BarChart3 className="w-6 h-6 text-slate-800" />,
                 title: "Rising Costs Reality", 
                 description: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
-                borderColor: "border-l-blue-400"
+                borderColor: "border-l-accent"
               },
               {
                 icon: <Clock className="w-6 h-6 text-slate-800" />,
@@ -446,7 +446,7 @@ export default function HomeV3() {
                 icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
                 title: "Beyond Daily Tracking",
                 description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
-                borderColor: "border-l-blue-400"
+                borderColor: "border-l-accent"
               }
             ].map((item, index) => (
               <motion.div
@@ -500,8 +500,8 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-100 to-blue-200 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-700 font-semibold text-sm">MEMBERSHIP VALUE</span>
+            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6">
+              <span className="text-accent font-semibold text-sm">MEMBERSHIP VALUE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
               How Your Membership Fuels the Movement
@@ -517,7 +517,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="card-premium rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
                 <GraduationCap className="w-8 h-8 text-white" />
@@ -533,7 +533,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="card-premium rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-white" />
@@ -557,8 +557,8 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-gradient-to-r from-blue-100 to-blue-200 rounded-full px-6 py-2 mb-6">
-              <span className="text-blue-700 font-semibold text-sm">STRENGTH IN NUMBERS</span>
+            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6">
+              <span className="text-accent font-semibold text-sm">STRENGTH IN NUMBERS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Toggle the Dial to See the Power of the Collective
@@ -571,10 +571,10 @@ export default function HomeV3() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-600" />
+                    <Users className="h-5 w-5 text-accent" />
                     Community Size
                   </label>
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-2xl font-bold text-accent">
                     {formatMembers(communitySize)} members
                   </span>
                 </div>
@@ -585,7 +585,7 @@ export default function HomeV3() {
                   max={10000}
                   min={250}
                   step={250}
-                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-2 bg-accent-light/30 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-2">
                   <span>250</span>
@@ -595,12 +595,12 @@ export default function HomeV3() {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 text-center">
-                  <div className="text-sm text-blue-600 font-medium mb-1">Rewards Allocation</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">
+                <div className="bg-gradient-to-br from-accent-light/20 to-accent-light/30 rounded-lg p-4 sm:p-6 text-center">
+                  <div className="text-sm text-accent font-medium mb-1">Rewards Allocation</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-accent mb-1">
                     {rewardsPercentage}%
                   </div>
-                  <div className="text-xs text-blue-500">of membership fees</div>
+                  <div className="text-xs text-accent-light">of membership fees</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 text-center">
@@ -648,7 +648,7 @@ export default function HomeV3() {
                     cy="50"
                     r="35"
                     fill="none"
-                    stroke="#3b82f6"
+                    stroke="var(--accent)"
                     strokeWidth="10"
                     strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
                     strokeDashoffset={`-${rewardsPercentage * 2.199}`}
@@ -676,7 +676,7 @@ export default function HomeV3() {
                   <span>{rewardsPercentage}% → Collective Rewards Pool</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                  <div className="w-4 h-4 bg-accent rounded"></div>
                   <span>{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
@@ -718,8 +718,8 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-gradient-to-r from-green-100 to-yellow-100 rounded-full px-6 py-2 mb-6">
-              <span className="text-green-700 font-semibold text-sm">TIER SYSTEM</span>
+            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6">
+              <span className="text-accent font-semibold text-sm">TIER SYSTEM</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Half of Members Earn Rewards Each Cycle
@@ -938,8 +938,8 @@ export default function HomeV3() {
                     icon: <TrendingUp className="h-6 w-6" />,
                     title: "Start Investing Even with Small Amounts",
                     description: "Simple, low-risk ways to begin building wealth",
-                    gradient: "from-blue-600 to-blue-800", 
-                    bgGradient: "from-blue-50 to-blue-100"
+                    gradient: "from-accent to-accent-light", 
+                    bgGradient: "from-accent-light/20 to-accent-light/30"
                   }
                 ].map((item, index) => (
                   <motion.div
@@ -979,8 +979,8 @@ export default function HomeV3() {
                 <div className="grid sm:grid-cols-3 gap-4">
                   {[
                     { icon: "⏱️", text: "3-5 minute lessons", color: "bg-green-100 text-green-700" },
-                    { icon: "🧩", text: "Interactive quizzes", color: "bg-blue-100 text-blue-700" },
-                    { icon: "🎯", text: "Real-world applications", color: "bg-blue-100 text-blue-700" }
+                    { icon: "🧩", text: "Interactive quizzes", color: "bg-accent-light/30 text-accent" },
+                    { icon: "🎯", text: "Real-world applications", color: "bg-accent-light/30 text-accent" }
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>
