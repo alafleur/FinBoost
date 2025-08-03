@@ -1027,51 +1027,43 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Grid Layout - Exact Platform Overview structure with hover effects */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Clean Tier Card Format - Responsive Single Component */}
+          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
             {[
               {
-                icon: <PiggyBank className="w-6 h-6 text-accent" />,
                 title: "Debt Progress Pays",
-                description: "Student loans, credit cards — every payment forward earns you money back.",
-                borderColor: "border-l-accent"
+                subtitle: "Student loans, credit cards — every payment forward earns you money back."
               },
               {
-                icon: <BarChart3 className="w-6 h-6 text-accent" />,
                 title: "Rising Costs Reality", 
-                description: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
-                borderColor: "border-l-accent"
+                subtitle: "Everything costs more, saving feels impossible. Small wins add up to real rewards."
               },
               {
-                icon: <Clock className="w-6 h-6 text-accent" />,
                 title: "Worrying About Retirement, Not Just Next Month",
-                description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress.",
-                borderColor: "border-l-accent"
+                subtitle: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress."
               },
               {
-                icon: <TrendingUp className="w-6 h-6 text-accent" />,
                 title: "Beyond Daily Tracking",
-                description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
-                borderColor: "border-l-accent"
+                subtitle: "Most apps focus on today's spending. We reward steps toward tomorrow's security."
               }
             ].map((item, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="card-premium card-section-gloss card-floating rounded-2xl p-6 text-white"
               >
-                <div className="flex items-start space-x-4 mb-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0 magnetic-hover">
-                    {React.cloneElement(item.icon, { className: "w-6 h-6 text-white icon-bounce" })}
-                  </div>
-                  <h4 className="text-lg font-bold text-white leading-tight">{item.title}</h4>
-                </div>
-                <p className="text-white/90 text-sm leading-relaxed">
-                  {item.description}
-                </p>
+                <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
+                    <div className="relative z-10">
+                      <h3 className="text-xl font-semibold text-white mb-3">
+                        {item.title}
+                      </h3>
+                      <p className="text-white/90 text-sm leading-relaxed">{item.subtitle}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
