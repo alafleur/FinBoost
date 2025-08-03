@@ -794,10 +794,13 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="rewards" className="mt-0 space-y-6">
+              {/* Winner Celebration Banner */}
+              <WinnerCelebrationBanner />
+              
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
-                  iconColor="green"
+                  iconColor="blue"
                   title="Rewards History"
                 />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -1135,6 +1138,9 @@ export default function Dashboard() {
 
             {/* Rewards Tab - Simplest Implementation */}
             <TabsContent value="rewards" className="mt-0 space-y-6">
+              {/* Winner Celebration Banner */}
+              <WinnerCelebrationBanner />
+              
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
