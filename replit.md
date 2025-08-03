@@ -17,11 +17,24 @@ Preferred communication style: Simple, everyday language.
 - Document exact changes made for transparency and accountability
 - Use systematic debugging approach - identify, isolate, fix, verify
 
+**Current Priority Tasks (January 2025):**
+- Fix upload functionality to properly connect frontend to backend for proof submissions
+- Eliminate duplicate mobile/desktop components in favor of single responsive components
+- Update landing page phone images with actual application screenshots for marketing purposes
+
 ## System Architecture
 
 ### Frontend
 - **Technology Stack**: React 18 with TypeScript, Vite, Wouter for routing, TailwindCSS with shadcn/ui for styling, Tanstack Query for server state management, React Hook Form for form validation, Framer Motion for animations.
 - **UI/UX Decisions**: Prioritizes a clean, professional aesthetic with consistent white cards, subtle gray borders, and a cohesive typography hierarchy. Subtle color accents (e.g., stats cards, tier stats) are used while avoiding bright, game-like schemes. The design emphasizes mobile-first responsiveness and unified component architecture across all screen sizes. Recent enhancements include a unified blue→purple gradient theme for consistency across landing page and dashboard elements (buttons, navigation tabs, tier badges) and an interactive phone preview system on the landing page. The Leaderboard UI has also been redesigned for a professional look, matching the Overview tab's aesthetic.
+
+**Recent UI Improvements (January 2025):**
+- Added "Actions" tab between Learn and Board tabs with professional styling
+- Implemented proof upload functionality with FileUpload component integration
+- Enhanced PointsActions component with inspiring messaging and refined aesthetics
+- Removed redundant description text when it matches action titles
+- Applied consistent blue→purple gradient styling throughout Actions interface
+- Added responsive grid layout and improved card hover effects
 
 ### Backend
 - **Technology Stack**: Express.js with TypeScript, PostgreSQL database with Drizzle ORM, JWT for authentication, bcrypt for password hashing, Multer for file upload handling.
