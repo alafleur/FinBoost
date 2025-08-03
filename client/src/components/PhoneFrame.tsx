@@ -187,23 +187,12 @@ const PhoneFrame = memo(function PhoneFrame({
           fill={`url(#buttonGrad-${testId})`}
         />
         
-        {/* Camera module area (top) */}
-        <rect
-          x="20"
-          y="20"
-          width="300"
-          height="50"
-          rx="25"
-          ry="25"
-          fill="rgba(0,0,0,0.8)"
-        />
-        
         {/* Screen Bezel - More realistic black border */}
         <rect
           x="25"
-          y="75"
+          y="25"
           width="290"
-          height="530"
+          height="630"
           rx="45"
           ry="45"
           fill="#000000"
@@ -214,7 +203,7 @@ const PhoneFrame = memo(function PhoneFrame({
         {/* Dynamic Island - More accurate size and position */}
         <rect
           x="140"
-          y="35"
+          y="45"
           width="60"
           height="24"
           rx="12"
@@ -225,8 +214,8 @@ const PhoneFrame = memo(function PhoneFrame({
         {/* Front camera (visible through Dynamic Island) */}
         <circle
           cx="155"
-          cy="47"
-          r="4"
+          cy="57"
+          r="3"
           fill="#1a1a1a"
         />
         
@@ -273,10 +262,10 @@ const PhoneFrame = memo(function PhoneFrame({
       <div 
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          top: '11.8%',
+          top: '10.5%',
           left: '8.2%',
           width: '83.5%',
-          height: '76.5%'
+          height: '82%'
         }}
         data-testid={`${testId}-content-area`}
       >
