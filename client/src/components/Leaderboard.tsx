@@ -396,8 +396,8 @@ export default function Leaderboard() {
                 <div className="flex items-center space-x-3 md:space-x-4">
                   <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full font-semibold text-sm shadow-md border-2 transition-all duration-200 ${
                     entry.isCurrentUser
-                      ? 'bg-gradient-to-br from-blue-400 to-purple-500 text-white border-blue-300 shadow-lg'
-                      : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 border-blue-200 hover:from-blue-100 hover:to-purple-100 hover:text-blue-700 hover:border-blue-400 hover:shadow-lg'
+                      ? 'bg-gradient-to-br from-blue-400 to-purple-500 text-white border-blue-400 shadow-lg'
+                      : 'bg-gradient-to-br from-gray-50 to-white text-gray-800 border-gray-400 hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 hover:border-blue-500 hover:shadow-lg'
                   }`}>
                     {getRankNumber(entry.rank)}
                   </div>
