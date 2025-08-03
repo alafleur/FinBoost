@@ -86,92 +86,186 @@ const PhoneFrame = memo(function PhoneFrame({
         }
       }}
     >
-      {/* Optimized Phone Frame SVG */}
+      {/* Premium Modern Phone Frame SVG */}
       <svg
-        viewBox="0 0 320 640"
-        className="w-full h-full max-w-[280px] max-h-[560px] drop-shadow-2xl filter hover:drop-shadow-3xl transition-all duration-300"
+        viewBox="0 0 340 680"
+        className="w-full h-full max-w-[300px] max-h-[600px] drop-shadow-2xl filter hover:drop-shadow-3xl transition-all duration-300"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
         focusable="false"
       >
-        {/* Consolidated Definitions for Performance */}
+        {/* Enhanced Definitions for Premium Look */}
         <defs>
+          {/* Main phone gradient - more realistic titanium/space gray */}
           <linearGradient id={`phoneGrad-${testId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#374151" />
-            <stop offset="50%" stopColor="#1f2937" />
-            <stop offset="100%" stopColor="#111827" />
+            <stop offset="0%" stopColor="#8b9dc3" />
+            <stop offset="30%" stopColor="#6b7280" />
+            <stop offset="70%" stopColor="#374151" />
+            <stop offset="100%" stopColor="#1f2937" />
           </linearGradient>
+          
+          {/* Phone body shadow for depth */}
+          <linearGradient id={`phoneShadow-${testId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#000000" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.1" />
+          </linearGradient>
+          
+          {/* Screen reflection effect */}
           <linearGradient id={`screenReflection-${testId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.2" />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
+            <stop offset="50%" stopColor="#ffffff" stopOpacity="0.05" />
             <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
           </linearGradient>
-          <filter id={`phoneShadow-${testId}`}>
-            <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#000000" floodOpacity="0.3"/>
+
+          {/* Button highlights */}
+          <linearGradient id={`buttonGrad-${testId}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#9ca3af" />
+            <stop offset="50%" stopColor="#6b7280" />
+            <stop offset="100%" stopColor="#4b5563" />
+          </linearGradient>
+          
+          {/* Enhanced shadow filter */}
+          <filter id={`phoneShadow-${testId}`} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+            <feOffset dx="0" dy="8" result="offset"/>
+            <feFlood floodColor="#000000" floodOpacity="0.25"/>
+            <feComposite in2="offset" operator="in"/>
+            <feMerge>
+              <feMergeNode/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
           </filter>
+          
+          {/* Screen clip path with proper rounded corners */}
           <clipPath id={`screen-clip-${testId}`}>
-            <rect x="25" y="65" width="270" height="510" rx="30" ry="30" />
+            <rect x="28" y="80" width="284" height="520" rx="40" ry="40" />
           </clipPath>
         </defs>
         
-        {/* Phone Body - Outer Frame */}
+        {/* Phone Body - Main Frame with realistic proportions */}
         <rect
-          x="10"
-          y="10"
-          width="300"
-          height="620"
-          rx="50"
-          ry="50"
+          x="8"
+          y="8"
+          width="324"
+          height="664"
+          rx="58"
+          ry="58"
           fill={`url(#phoneGrad-${testId})`}
-          stroke="#4b5563"
-          strokeWidth="1"
+          stroke="rgba(255,255,255,0.1)"
+          strokeWidth="0.5"
           filter={`url(#phoneShadow-${testId})`}
         />
         
-        {/* Screen Bezel */}
+        {/* Side button details - Volume buttons */}
+        <rect
+          x="4"
+          y="140"
+          width="4"
+          height="28"
+          rx="2"
+          ry="2"
+          fill={`url(#buttonGrad-${testId})`}
+        />
+        <rect
+          x="4"
+          y="180"
+          width="4"
+          height="28"
+          rx="2"
+          ry="2"
+          fill={`url(#buttonGrad-${testId})`}
+        />
+        
+        {/* Power button */}
+        <rect
+          x="332"
+          y="160"
+          width="4"
+          height="48"
+          rx="2"
+          ry="2"
+          fill={`url(#buttonGrad-${testId})`}
+        />
+        
+        {/* Camera module area (top) */}
         <rect
           x="20"
-          y="60"
-          width="280"
-          height="520"
-          rx="35"
-          ry="35"
-          fill="#000000"
-          stroke="#1f2937"
-          strokeWidth="0.5"
+          y="20"
+          width="300"
+          height="50"
+          rx="25"
+          ry="25"
+          fill="rgba(0,0,0,0.8)"
         />
         
-        {/* Screen Reflection Effect */}
+        {/* Screen Bezel - More realistic black border */}
         <rect
           x="25"
-          y="65"
-          width="270"
-          height="510"
-          rx="30"
-          ry="30"
-          fill={`url(#screenReflection-${testId})`}
-          opacity="0.1"
+          y="75"
+          width="290"
+          height="530"
+          rx="45"
+          ry="45"
+          fill="#000000"
+          stroke="rgba(255,255,255,0.05)"
+          strokeWidth="0.3"
         />
         
-        {/* Dynamic Island */}
+        {/* Dynamic Island - More accurate size and position */}
         <rect
-          x="130"
-          y="25"
+          x="140"
+          y="35"
           width="60"
-          height="20"
-          rx="10"
-          ry="10"
+          height="24"
+          rx="12"
+          ry="12"
           fill="#000000"
         />
         
-        {/* Home Indicator */}
+        {/* Front camera (visible through Dynamic Island) */}
+        <circle
+          cx="155"
+          cy="47"
+          r="4"
+          fill="#1a1a1a"
+        />
+        
+        {/* Screen reflection overlay for realism */}
         <rect
-          x="140"
-          y="600"
+          x="28"
+          y="80"
+          width="284"
+          height="520"
+          rx="40"
+          ry="40"
+          fill={`url(#screenReflection-${testId})`}
+          opacity="0.6"
+        />
+        
+        {/* Home indicator - Modern swipe bar */}
+        <rect
+          x="150"
+          y="625"
           width="40"
           height="4"
           rx="2"
           ry="2"
-          fill="#6b7280"
+          fill="#666666"
+          opacity="0.8"
+        />
+        
+        {/* Subtle edge highlights for premium feel */}
+        <rect
+          x="8"
+          y="8"
+          width="324"
+          height="664"
+          rx="58"
+          ry="58"
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="0.5"
+          opacity="0.6"
         />
       </svg>
       
@@ -179,17 +273,17 @@ const PhoneFrame = memo(function PhoneFrame({
       <div 
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          top: '10.15%',
-          left: '7.8%',
-          width: '84.4%',
-          height: '79.7%'
+          top: '11.8%',
+          left: '8.2%',
+          width: '83.5%',
+          height: '76.5%'
         }}
         data-testid={`${testId}-content-area`}
       >
         <div 
-          className="w-full h-full rounded-[20px] overflow-hidden bg-white shadow-inner pointer-events-auto"
+          className="w-full h-full rounded-[32px] overflow-hidden bg-white shadow-inner pointer-events-auto"
           style={{
-            clipPath: 'inset(0 round 20px)'
+            clipPath: 'inset(0 round 32px)'
           }}
           role="presentation"
         >
