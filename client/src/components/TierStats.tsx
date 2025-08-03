@@ -107,7 +107,7 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
             
             <div className="flex-shrink-0 text-right sm:text-center">
               {tier.reward ? (
-                <div className="text-base sm:text-lg font-bold text-green-600 leading-tight">
+                <div className="text-base sm:text-lg font-bold text-blue-600 leading-tight">
                   <span className="sm:hidden">{formatCurrency(tier.reward).replace('$', '$')}</span>
                   <span className="hidden sm:inline">{formatCurrency(tier.reward)}</span>
                 </div>

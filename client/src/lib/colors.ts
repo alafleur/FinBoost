@@ -58,18 +58,18 @@ export const DashboardColors = {
 } as const;
 
 /**
- * Professional Color Strategy:
+ * Professional Color Strategy - Updated for Blue→Purple Brand Consistency:
  * 
- * 1. SUCCESS (Green) - Only for monetary values and positive financial outcomes
- *    - Pool Size, Rewards, Earnings
+ * 1. PRIMARY (Blue) - Brand accent for key financial metrics and highlights  
+ *    - Pool Size, Current Tier, Monetary values
  * 
- * 2. PRIMARY (Blue) - Brand accent for key actions and highlights  
- *    - Current Tier (user's standing)
- * 
- * 3. NEUTRAL (Gray) - Everything else for clean, professional look
+ * 2. NEUTRAL (Gray) - Everything else for clean, professional look
  *    - Cycle Points, Lessons, General stats
  * 
- * This creates a sophisticated, banking-grade aesthetic while maintaining
+ * 3. SUCCESS (Green) - Reserved for completion states and positive outcomes only
+ *    - Achievement badges, completion status
+ * 
+ * This creates a sophisticated, unified blue→purple gradient aesthetic while maintaining
  * visual hierarchy through typography weight rather than color chaos.
  */
 
@@ -80,7 +80,7 @@ export type ColorTheme = 'neutral' | 'primary' | 'success';
  * Maps each stat card to its appropriate color theme
  */
 export const StatCardColors = {
-  poolSize: 'success' as ColorTheme,    // Green - monetary value
+  poolSize: 'primary' as ColorTheme,    // Blue - aligns with brand gradient
   currentTier: 'primary' as ColorTheme, // Blue - brand accent for user status
   cyclePoints: 'neutral' as ColorTheme, // Gray - neutral stat
   lessons: 'neutral' as ColorTheme      // Gray - neutral stat

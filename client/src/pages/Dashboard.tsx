@@ -657,10 +657,10 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
-                  iconColor="green"
+                  iconColor="blue"
                   title="Rewards Summary"
                 />
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-lg overflow-hidden relative">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-lg overflow-hidden relative">
                   <div className="absolute top-0 left-0 w-full h-2 dashboard-accent-success"></div>
                   <RewardsSummary />
                 </div>
@@ -1138,7 +1138,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
-                  iconColor="green"
+                  iconColor="blue"
                   title="Rewards History"
                   titleSize="2xl"
                 />
@@ -1234,7 +1234,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
-                  iconColor="green"
+                  iconColor="blue"
                   title="Rewards Summary"
                   titleSize="lg"
                 />
