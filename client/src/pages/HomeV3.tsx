@@ -602,70 +602,83 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Interactive Controls */}
-            <div className="space-y-8 order-2 lg:order-1">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <label className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-accent" />
-                    Community Size
-                  </label>
-                  <span className="text-2xl font-bold text-accent">
-                    {formatMembers(communitySize)} members
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  value={communitySize}
-                  onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                  max={10000}
-                  min={250}
-                  step={250}
-                  className="w-full h-2 bg-accent-light/30 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <div className="flex justify-between text-sm text-gray-500 mt-2">
-                  <span>250</span>
-                  <span>5K</span>
-                  <span>10K+</span>
-                </div>
+          {/* Top Row: Interactive Controls */}
+          <div className="mb-12">
+            {/* Dial Control */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="mb-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-accent" />
+                  Community Size
+                </label>
+                <span className="text-2xl font-bold text-accent">
+                  {formatMembers(communitySize)} members
+                </span>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  viewport={{ once: true }}
-                  className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
-                >
-                  <div className="text-sm font-medium text-slate-600 mb-2">Rewards Allocation</div>
-                  <div className="text-3xl font-bold text-accent mb-2">
-                    {rewardsPercentage}%
-                  </div>
-                  <div className="text-xs text-slate-500">of membership fees</div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  viewport={{ once: true }}
-                  className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
-                >
-                  <div className="text-sm font-medium text-slate-600 mb-2">Monthly Pool Size</div>
-                  <div className="text-3xl font-bold text-accent mb-2">
-                    {formatCurrency(calculateRewardsPool(communitySize))}
-                  </div>
-                  <div className="text-xs text-slate-500">available for rewards</div>
-                </motion.div>
+              <input
+                type="range"
+                value={communitySize}
+                onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                max={10000}
+                min={250}
+                step={250}
+                className="w-full h-2 bg-accent-light/30 rounded-lg appearance-none cursor-pointer slider"
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>250</span>
+                <span>5K</span>
+                <span>10K+</span>
               </div>
+            </motion.div>
 
+            {/* Stats Cards Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
+              >
+                <div className="text-sm font-medium text-slate-600 mb-2">Rewards Allocation</div>
+                <div className="text-3xl font-bold text-accent mb-2">
+                  {rewardsPercentage}%
+                </div>
+                <div className="text-xs text-slate-500">of membership fees</div>
+              </motion.div>
 
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
+              >
+                <div className="text-sm font-medium text-slate-600 mb-2">Monthly Pool Size</div>
+                <div className="text-3xl font-bold text-accent mb-2">
+                  {formatCurrency(calculateRewardsPool(communitySize))}
+                </div>
+                <div className="text-xs text-slate-500">available for rewards</div>
+              </motion.div>
             </div>
+          </div>
 
+          {/* Bottom Row: Visual Results */}
+          <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Dynamic Donut Chart */}
-            <div className="flex flex-col items-center order-1 lg:order-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="flex flex-col items-center"
+            >
               <div className="relative w-64 h-64 mb-6">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   {/* Background circle */}
@@ -719,7 +732,7 @@ export default function HomeV3() {
               </div>
 
               {/* Legend */}
-              <div className="space-y-2 text-sm mb-6">
+              <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-accent rounded"></div>
                   <span className="text-slate-700">{rewardsPercentage}% → Collective Rewards Pool</span>
@@ -729,15 +742,17 @@ export default function HomeV3() {
                   <span className="text-slate-700">{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
+            </motion.div>
 
-              {/* Top Reward Callout */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 w-full max-w-sm relative z-10"
-              >
+            {/* Top Reward Callout */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="flex justify-center"
+            >
+              <div className="dashboard-card-primary rounded-xl p-6 w-full max-w-sm relative z-10">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
                     <Trophy className="w-6 h-6 text-white" />
@@ -750,8 +765,8 @@ export default function HomeV3() {
                     5% of rewards pool goes to top performer
                   </p>
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </div>
           
           {/* Disclaimer */}
