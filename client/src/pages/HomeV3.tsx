@@ -31,7 +31,11 @@ import {
   BadgeDollarSign,
   PiggyBank,
   CheckCircle,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause
 } from "lucide-react";
 
 /**
@@ -733,12 +737,30 @@ export default function HomeV3() {
 
       </section>
 
-      {/* How It Works - Modern Process Flow */}
-      <section id="how-it-works" className="py-20 px-4 bg-slate-900 relative overflow-hidden">
+      {/* How It Works - Interactive Carousel */}
+      <section 
+        id="how-it-works" 
+        className="py-20 px-4 bg-slate-900 relative overflow-hidden"
+        ref={setSectionRef}
+        onKeyDown={handleKeyNavigation}
+        tabIndex={0}
+        aria-label="How FinBoost works - Interactive carousel"
+        data-testid="how-it-works-carousel"
+      >
         {/* Background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent-light to-transparent"></div>
           <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+        </div>
+        
+        {/* Screen reader announcements */}
+        <div 
+          aria-live="polite" 
+          aria-atomic="true" 
+          className="sr-only"
+          data-testid="carousel-announcer"
+        >
+          {announceText}
         </div>
         
         <div className="max-w-7xl mx-auto relative z-10">
@@ -747,7 +769,7 @@ export default function HomeV3() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-12"
           >
             <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
               <span className="text-accent-light font-semibold text-sm">HOW IT WORKS</span>
@@ -761,146 +783,223 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-4 gap-6 xl:gap-8">
-            {[
-              {
-                icon: <BookOpen className="w-8 h-8" />,
-                title: "Learn Financial Skills",
-                description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn points per module and quiz.",
-                screenshot: "lesson-module.png",
-                caption: "Complete short lessons like this to earn 20 points.",
-                gradient: "from-accent to-accent-light"
-              },
-              {
-                icon: <Target className="w-8 h-8" />,
-                title: "Take Real Financial Actions", 
-                description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus points based on impact.",
-                screenshot: "debt-submission.png",
-                caption: "Verified debt payments earn big bonus points.",
-                gradient: "from-accent to-accent-light"
-              },
-              {
-                icon: <BarChart3 className="w-8 h-8" />,
-                title: "Track Your Leaderboard Position",
-                description: "Your points determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
-                screenshot: "leaderboard-screenshot.png",
-                caption: "Your point total determines your leaderboard position and reward odds.",
-                gradient: "from-accent to-accent-light"
-              },
-              {
-                icon: <Trophy className="w-8 h-8" />,
-                title: "Compete for Cash Rewards",
-                description: "Winners are selected using a point-weighted system — the more you learn and take action, the better your chances. Real cash rewards distributed monthly.",
-                screenshot: "tier-dashboard.png",
-                caption: "Top contributors win real cash through our point-weighted reward system.",
-                gradient: "from-accent to-accent-light"
-              }
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="group"
-              >
-                <div className="relative h-full">
-                  {/* Connection line */}
-                  {index < 2 && (
-                    <div className="hidden lg:block absolute top-20 -right-4 w-8 h-px bg-gradient-to-r from-white/30 to-transparent z-10"></div>
-                  )}
-                  
-                  {/* Card */}
-                  <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:shadow-lg hover:-translate-y-1 card-floating">                    
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 magnetic-hover">
-                          {index + 1}
+          {/* Carousel Container */}
+          <div className="relative">
+            {/* Main Carousel Content */}
+            <div 
+              className="relative overflow-hidden rounded-2xl"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              data-testid="carousel-container"
+            >
+              {/* Desktop: Side-by-side layout, Mobile: Single card */}
+              <div className="block lg:hidden">
+                {/* Mobile Single Card Layout */}
+                <motion.div
+                  key={`mobile-${carousel.currentStep}`}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="w-full"
+                >
+                  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mx-4">
+                    <div className="flex flex-col items-center text-center">
+                      {/* Step Header */}
+                      <div className="flex items-center space-x-4 mb-6 w-full">
+                        <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
+                          {carousel.currentStep + 1}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                          <p className="text-white/70 text-sm leading-relaxed">{step.description}</p>
+                        <div className="flex-1 text-left">
+                          <h3 className="text-xl font-semibold text-white mb-2">
+                            {stepsData[carousel.currentStep].title}
+                          </h3>
                         </div>
                       </div>
                       
-                      {/* Phone Frame with Screenshot */}
-                      <div className="flex justify-center mb-4 flex-grow">
+                      {/* Phone Frame */}
+                      <div className="mb-6">
                         <PhoneFrame 
-                          className="max-w-[200px] lg:max-w-[240px]"
-                          ariaLabel={`Mobile app screenshot showing ${step.title.toLowerCase()}`}
-                          testId={`phone-frame-step-${index + 1}`}
+                          className="max-w-[240px]"
+                          ariaLabel={`Mobile app screenshot showing ${stepsData[carousel.currentStep].title.toLowerCase()}`}
+                          testId={`phone-frame-mobile-step-${carousel.currentStep + 1}`}
                         >
                           <img 
-                            src={`/api/placeholder/${step.screenshot}`} 
-                            alt={`FinBoost app screenshot demonstrating ${step.title.toLowerCase()}: ${step.description.substring(0, 100)}...`}
+                            src={`/api/placeholder/${stepsData[carousel.currentStep].screenshot}`} 
+                            alt={`FinBoost app screenshot: ${stepsData[carousel.currentStep].title}`}
                             className="w-full h-full object-cover"
                             loading="lazy"
-                            data-testid={`screenshot-step-${index + 1}`}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-medium" role="img" aria-label="Screenshot placeholder for ${step.screenshot}">${step.screenshot}</div>`;
-                              }
-                            }}
+                            data-testid={`screenshot-mobile-step-${carousel.currentStep + 1}`}
                           />
                         </PhoneFrame>
                       </div>
                       
-                      {/* Caption - consistently styled with improved spacing */}
-                      <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2 mt-6">
-                        {step.caption}
+                      {/* Description */}
+                      <p className="text-white/70 text-sm leading-relaxed mb-4">
+                        {stepsData[carousel.currentStep].description}
+                      </p>
+                      
+                      {/* Caption */}
+                      <p className="text-blue-300 text-sm font-medium">
+                        {stepsData[carousel.currentStep].caption}
                       </p>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              </div>
 
-          {/* Leaderboard Screenshot - Phase 3 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="mt-24"
-          >
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-6 md:p-8 shadow-2xl">
-                {/* Screenshot placeholder - mobile portrait format */}
-                <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
-                  <div className="h-[400px] max-w-xs mx-auto bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm overflow-hidden">
-                    <img 
-                      src="/api/placeholder/leaderboard-screenshot.png" 
-                      alt="FinBoost leaderboard screenshot showing member rankings and cash rewards"
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent) {
-                          parent.innerHTML = '<span class="text-white/50 text-sm font-medium">leaderboard-screenshot.png</span>';
-                        }
-                      }}
-                    />
-                  </div>
+              {/* Desktop Multi-Card Layout */}
+              <div className="hidden lg:block">
+                <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-6 px-4">
+                  {stepsData.map((step, index) => {
+                    const isActive = index === carousel.currentStep;
+                    const isAdjacent = Math.abs(index - carousel.currentStep) === 1;
+                    const isVisible = isActive || isAdjacent || 
+                      (carousel.currentStep === 0 && index === stepsData.length - 1) ||
+                      (carousel.currentStep === stepsData.length - 1 && index === 0);
+
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ 
+                          opacity: isActive ? 1 : isVisible ? 0.6 : 0.3,
+                          scale: isActive ? 1.05 : 1,
+                          filter: isActive ? 'brightness(1)' : 'brightness(0.7)'
+                        }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className={`group cursor-pointer ${isActive ? 'z-20' : 'z-10'}`}
+                        onClick={() => carousel.goToStep(index)}
+                        data-testid={`desktop-step-${index + 1}`}
+                      >
+                        <div className={`relative h-full transition-all duration-500 ${
+                          isActive 
+                            ? 'bg-white/10 border-accent/50 shadow-xl' 
+                            : 'bg-white/5 border-white/10 hover:bg-white/8'
+                        } backdrop-blur-sm border rounded-2xl p-6`}>
+                          {/* Step Indicator */}
+                          <div className="flex items-start space-x-4 mb-6">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 transition-colors duration-300 ${
+                              isActive ? 'bg-accent text-white' : 'bg-white/20 text-white/70'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
+                              <p className="text-white/70 text-sm leading-relaxed">{step.description}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Phone Frame */}
+                          <div className="flex justify-center mb-4">
+                            <PhoneFrame 
+                              className="max-w-[200px]"
+                              ariaLabel={`Mobile app screenshot showing ${step.title.toLowerCase()}`}
+                              testId={`phone-frame-desktop-step-${index + 1}`}
+                            >
+                              <img 
+                                src={`/api/placeholder/${step.screenshot}`} 
+                                alt={`FinBoost app screenshot: ${step.title}`}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                data-testid={`screenshot-desktop-step-${index + 1}`}
+                              />
+                            </PhoneFrame>
+                          </div>
+                          
+                          {/* Caption */}
+                          <p className="text-blue-300 text-sm text-center font-medium leading-relaxed px-2">
+                            {step.caption}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-                
-                {/* Supporting caption with improved spacing */}
-                <p className="text-accent-light text-sm text-center font-medium leading-relaxed mb-4 mt-6">
-                  Your points determine your spot on the leaderboard — and your shot at real cash rewards.
-                </p>
-                
-                {/* Reward reinforcement line */}
-                <p className="text-white/70 text-xs text-center font-medium">
-                  More than half of active members receive rewards each cycle.
-                </p>
               </div>
             </div>
-          </motion.div>
-          
+
+            {/* Carousel Navigation Controls */}
+            <div className="mt-8 lg:mt-12">
+              {/* Progress Indicators */}
+              <div className="flex justify-center items-center space-x-2 mb-6">
+                {stepsData.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => carousel.goToStep(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                      index === carousel.currentStep
+                        ? 'bg-accent scale-125 shadow-lg'
+                        : 'bg-white/30 hover:bg-white/50'
+                    }`}
+                    aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
+                    data-testid={`progress-dot-${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Arrows & Controls */}
+              <div className="flex justify-center items-center space-x-6">
+                {/* Previous Button */}
+                <button
+                  onClick={carousel.prevStep}
+                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Previous step"
+                  data-testid="carousel-prev-btn"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+
+                {/* Step Counter */}
+                <div className="text-white/70 text-sm font-medium px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm">
+                  <span className="text-accent font-semibold">{carousel.currentStep + 1}</span>
+                  <span className="mx-2">/</span>
+                  <span>{stepsData.length}</span>
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={carousel.nextStep}
+                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Next step"
+                  data-testid="carousel-next-btn"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Auto-play Controls (Desktop Only) */}
+              <div className="hidden lg:flex justify-center items-center mt-6 space-x-4">
+                <button
+                  onClick={carousel.toggleAutoPlay}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent ${
+                    carousel.isAutoPlaying && !carousel.isPaused
+                      ? 'bg-accent text-white hover:bg-accent/80'
+                      : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                  }`}
+                  data-testid="carousel-autoplay-btn"
+                >
+                  {carousel.isAutoPlaying && !carousel.isPaused ? (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      <span>Pause Auto-play</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      <span>Auto-play</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Keyboard Navigation Hint */}
+                <div className="text-xs text-white/50 bg-white/5 px-3 py-1 rounded-full">
+                  Use ← → keys or numbers 1-4
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
