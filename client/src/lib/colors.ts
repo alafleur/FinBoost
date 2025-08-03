@@ -80,8 +80,8 @@ export type ColorTheme = 'neutral' | 'primary' | 'success';
  * Maps each stat card to its appropriate color theme
  */
 export const StatCardColors = {
-  poolSize: 'primary' as ColorTheme,    // Blue - aligns with brand gradient
-  currentTier: 'primary' as ColorTheme, // Blue - brand accent for user status
+  poolSize: 'neutral' as ColorTheme,    // Gray - consistent with other stats
+  currentTier: 'primary' as ColorTheme, // Blue - brand accent for user status (keeps distinctive badge)
   cyclePoints: 'neutral' as ColorTheme, // Gray - neutral stat
   lessons: 'neutral' as ColorTheme      // Gray - neutral stat
 } as const;
