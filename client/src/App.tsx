@@ -61,15 +61,16 @@ function Router() {
 }
 
 function App() {
-  // Initialize tracking when app starts
+  // Initialize tracking when app starts (temporarily disabled for debugging)
   useEffect(() => {
-    initGA();
-    initGTM();
+    // Temporarily disabled to debug loading issues
+    // initGA();
+    // initGTM();
     
     // Add GTM noscript fallback after DOM is ready
-    setTimeout(() => {
-      addGTMNoScript();
-    }, 100);
+    // setTimeout(() => {
+    //   addGTMNoScript();
+    // }, 100);
   }, []);
 
   return (
