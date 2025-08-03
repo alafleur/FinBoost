@@ -132,9 +132,9 @@
   }
   
   .dashboard-card-primary {
-    background: linear-gradient(135deg, rgba(219, 234, 254, 0.9) 0%, rgba(191, 219, 254, 0.5) 100%);
-    border: 1px solid #93c5fd;
-    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.12);
+    background: linear-gradient(135deg, rgba(243, 232, 255, 0.9) 0%, rgba(233, 213, 255, 0.5) 100%);
+    border: 1px solid #d8b4fe;
+    box-shadow: 0 2px 4px rgba(147, 51, 234, 0.12);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -147,15 +147,15 @@
     left: 0;
     right: 0;
     height: 60%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(219, 234, 254, 0.25) 30%, rgba(255, 255, 255, 0.15) 60%, rgba(219, 234, 254, 0.08) 80%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(243, 232, 255, 0.25) 30%, rgba(255, 255, 255, 0.15) 60%, rgba(243, 232, 255, 0.08) 80%, transparent 100%);
     border-radius: inherit;
     z-index: 1;
     pointer-events: none;
   }
   
   .dashboard-card-primary:hover {
-    border-color: #60a5fa;
-    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.2), 0 2px 6px rgba(30, 58, 138, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: #c084fc;
+    box-shadow: 0 6px 16px rgba(147, 51, 234, 0.2), 0 2px 6px rgba(147, 51, 234, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
     transform: translateY(-2px);
   }
   
