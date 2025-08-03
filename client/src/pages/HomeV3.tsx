@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PhoneFrame from "@/components/PhoneFrame";
 import { motion } from "framer-motion";
 import { 
   BookOpen, 
@@ -337,23 +338,23 @@ export default function HomeV3() {
                         </div>
                       </div>
                       
-                      {/* Screenshot placeholder - mobile portrait format */}
-                      <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-4 flex-grow">
-                        <div className="h-[400px] w-full bg-white/5 rounded-lg flex items-center justify-center text-white/50 text-sm font-medium shadow-sm overflow-hidden">
+                      {/* Phone Frame with Screenshot */}
+                      <div className="flex justify-center mb-4 flex-grow">
+                        <PhoneFrame className="max-w-[200px] lg:max-w-[240px]">
                           <img 
                             src={`/api/placeholder/${step.screenshot}`} 
                             alt={`FinBoost ${step.title.toLowerCase()} screenshot`}
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
                               const parent = target.parentElement;
                               if (parent) {
-                                parent.innerHTML = `<span class="text-white/50 text-sm font-medium">${step.screenshot}</span>`;
+                                parent.innerHTML = `<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-medium">${step.screenshot}</div>`;
                               }
                             }}
                           />
-                        </div>
+                        </PhoneFrame>
                       </div>
                       
                       {/* Caption - consistently styled with improved spacing */}
