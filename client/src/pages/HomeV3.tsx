@@ -459,12 +459,14 @@ export default function HomeV3() {
                 className={`dashboard-card-primary rounded-xl ${item.borderColor} border-l-4 p-6 space-y-2`}
               >
                 <div className="flex items-start space-x-4 relative z-10">
-                  <div className="bg-accent-light/20 p-3 rounded-full">
-                    {item.icon}
+                  <div className="bg-white/20 p-3 rounded-full">
+                    <div className="text-white">
+                      {item.icon}
+                    </div>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-slate-900">{item.title}</h4>
-                    <p className="text-muted-foreground text-sm">
+                    <h4 className="text-lg font-semibold text-white">{item.title}</h4>
+                    <p className="text-white/90 text-sm">
                       {item.description}
                     </p>
                   </div>
@@ -614,8 +616,8 @@ export default function HomeV3() {
             >
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center gap-3">
-                  <Users className="w-5 h-5 text-accent" />
-                  <span className="text-lg font-semibold text-slate-800">Community Size</span>
+                  <Users className="w-5 h-5 text-white" />
+                  <span className="text-lg font-semibold text-white">Community Size</span>
                 </div>
                 
                 <div className="space-y-3">
@@ -627,16 +629,16 @@ export default function HomeV3() {
                       step={250}
                       value={communitySize}
                       onChange={(e) => setCommunitySize(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #1e3a8a 0%, #1e3a8a ${((communitySize - 250) / (10000 - 250)) * 100}%, #e2e8f0 ${((communitySize - 250) / (10000 - 250)) * 100}%, #e2e8f0 100%)`
+                        background: `linear-gradient(to right, #ffffff 0%, #ffffff ${((communitySize - 250) / (10000 - 250)) * 100}%, rgba(255,255,255,0.3) ${((communitySize - 250) / (10000 - 250)) * 100}%, rgba(255,255,255,0.3) 100%)`
                       }}
                     />
                   </div>
                   
-                  <div className="flex justify-between items-center text-sm text-slate-600">
+                  <div className="flex justify-between items-center text-sm text-white/80">
                     <span>250</span>
-                    <div className="text-2xl font-bold text-accent">
+                    <div className="text-2xl font-bold text-white">
                       {formatMembers(communitySize)}
                     </div>
                     <span>10K+</span>
@@ -654,11 +656,11 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="dashboard-card-primary rounded-xl p-6 text-center"
               >
-                <div className="text-sm text-slate-600 mb-2">Monthly Pool</div>
-                <div className="text-3xl font-bold text-accent mb-1">
+                <div className="text-sm text-white/80 mb-2">Monthly Pool</div>
+                <div className="text-3xl font-bold text-white mb-1">
                   {formatCurrency(calculateRewardsPool(communitySize))}
                 </div>
-                <div className="text-xs text-slate-500">available for rewards</div>
+                <div className="text-xs text-white/70">available for rewards</div>
               </motion.div>
 
               <motion.div
@@ -696,11 +698,11 @@ export default function HomeV3() {
                   </svg>
                   {/* Center content */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-lg font-bold text-accent">{rewardsPercentage}%</div>
+                    <div className="text-lg font-bold text-white">{rewardsPercentage}%</div>
                   </div>
                 </div>
-                <div className="text-sm text-slate-600 mb-1">Fee Allocation</div>
-                <div className="text-xs text-slate-500">to rewards pool</div>
+                <div className="text-sm text-white/80 mb-1">Fee Allocation</div>
+                <div className="text-xs text-white/70">to rewards pool</div>
               </motion.div>
 
               <motion.div
@@ -710,14 +712,14 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="dashboard-card-primary rounded-xl p-6 text-center"
               >
-                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Trophy className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-sm text-slate-600 mb-2">Top Reward</div>
-                <div className="text-3xl font-bold text-accent mb-1">
+                <div className="text-sm text-white/80 mb-2">Top Reward</div>
+                <div className="text-3xl font-bold text-white mb-1">
                   {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                 </div>
-                <div className="text-xs text-slate-500">5% of total pool</div>
+                <div className="text-xs text-white/70">5% of total pool</div>
               </motion.div>
             </div>
           </div>
