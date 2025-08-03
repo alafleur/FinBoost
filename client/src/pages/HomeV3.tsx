@@ -457,7 +457,7 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className={`dashboard-card-primary rounded-xl ${item.borderColor} border-l-4 p-6 space-y-2`}
               >
-                <div className="flex items-start space-x-4">
+                <div className="flex items-start space-x-4 relative z-10">
                   <div className="bg-accent-light/20 p-3 rounded-full">
                     {item.icon}
                   </div>
