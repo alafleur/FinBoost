@@ -340,17 +340,23 @@ export default function HomeV3() {
                       
                       {/* Phone Frame with Screenshot */}
                       <div className="flex justify-center mb-4 flex-grow">
-                        <PhoneFrame className="max-w-[200px] lg:max-w-[240px]">
+                        <PhoneFrame 
+                          className="max-w-[200px] lg:max-w-[240px]"
+                          ariaLabel={`Mobile app screenshot showing ${step.title.toLowerCase()}`}
+                          testId={`phone-frame-step-${index + 1}`}
+                        >
                           <img 
                             src={`/api/placeholder/${step.screenshot}`} 
-                            alt={`FinBoost ${step.title.toLowerCase()} screenshot`}
+                            alt={`FinBoost app screenshot demonstrating ${step.title.toLowerCase()}: ${step.description.substring(0, 100)}...`}
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            data-testid={`screenshot-step-${index + 1}`}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
                               const parent = target.parentElement;
                               if (parent) {
-                                parent.innerHTML = `<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-medium">${step.screenshot}</div>`;
+                                parent.innerHTML = `<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-medium" role="img" aria-label="Screenshot placeholder for ${step.screenshot}">${step.screenshot}</div>`;
                               }
                             }}
                           />
