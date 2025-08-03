@@ -931,10 +931,10 @@ export default function HomeV3() {
                           </p>
                         </div>
 
-                        {/* Right: Phone Frame */}
-                        <div className="flex-shrink-0">
+                        {/* Right: Phone Frame with Navigation */}
+                        <div className="flex-shrink-0 flex flex-col items-center">
                           <PhoneFrame 
-                            className="max-w-[280px]"
+                            className="max-w-[280px] mb-4"
                             ariaLabel={`Mobile app screenshot showing ${stepsData[carousel.currentStep].title.toLowerCase()}`}
                             testId={`phone-frame-desktop-step-${carousel.currentStep + 1}`}
                           >
@@ -946,6 +946,51 @@ export default function HomeV3() {
                               data-testid={`screenshot-desktop-step-${carousel.currentStep + 1}`}
                             />
                           </PhoneFrame>
+                          
+                          {/* Desktop Navigation Controls - Right below phone */}
+                          <div className="flex flex-col items-center space-y-3">
+                            {/* Progress Indicators */}
+                            <div className="flex justify-center items-center space-x-2">
+                              {stepsData.map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => carousel.goToStep(index)}
+                                  className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                                    index === carousel.currentStep
+                                      ? 'bg-accent scale-125 shadow-lg'
+                                      : 'bg-white/30 hover:bg-white/50'
+                                  }`}
+                                  aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
+                                  data-testid={`desktop-progress-dot-${index + 1}`}
+                                />
+                              ))}
+                            </div>
+
+                            {/* Navigation Arrows & Controls */}
+                            <div className="flex justify-center items-center space-x-4">
+                              <button
+                                onClick={carousel.prevStep}
+                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                                aria-label="Previous step"
+                                data-testid="desktop-carousel-prev-btn"
+                              >
+                                <ChevronLeft className="w-5 h-5" />
+                              </button>
+
+                              <div className="text-white/70 text-sm font-medium px-3 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                                <span className="text-accent font-semibold">{carousel.currentStep + 1}</span> / {stepsData.length}
+                              </div>
+
+                              <button
+                                onClick={carousel.nextStep}
+                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                                aria-label="Next step"
+                                data-testid="desktop-carousel-next-btn"
+                              >
+                                <ChevronRight className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -954,77 +999,32 @@ export default function HomeV3() {
               </div>
             </div>
 
-            {/* Desktop Navigation Controls Only */}
-            <div className="hidden lg:block mt-8">
-              {/* Progress Indicators */}
-              <div className="flex justify-center items-center space-x-2 mb-6">
-                {stepsData.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => carousel.goToStep(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                      index === carousel.currentStep
-                        ? 'bg-accent scale-125 shadow-lg'
-                        : 'bg-white/30 hover:bg-white/50'
-                    }`}
-                    aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
-                    data-testid={`desktop-progress-dot-${index + 1}`}
-                  />
-                ))}
-              </div>
+            {/* Desktop Auto-play Controls Only */}
+            <div className="hidden lg:flex justify-center items-center mt-6 space-x-4">
+              <button
+                onClick={carousel.toggleAutoPlay}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent ${
+                  carousel.isAutoPlaying && !carousel.isPaused
+                    ? 'bg-accent text-white hover:bg-accent/80'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                }`}
+                data-testid="carousel-autoplay-btn"
+              >
+                {carousel.isAutoPlaying && !carousel.isPaused ? (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    <span>Pause Auto-play</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    <span>Auto-play</span>
+                  </>
+                )}
+              </button>
 
-              {/* Navigation Arrows & Controls */}
-              <div className="flex justify-center items-center space-x-6">
-                <button
-                  onClick={carousel.prevStep}
-                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
-                  aria-label="Previous step"
-                  data-testid="desktop-carousel-prev-btn"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-
-                <div className="text-white/70 text-sm font-medium px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm">
-                  <span className="text-accent font-semibold">{carousel.currentStep + 1}</span> / {stepsData.length}
-                </div>
-
-                <button
-                  onClick={carousel.nextStep}
-                  className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
-                  aria-label="Next step"
-                  data-testid="desktop-carousel-next-btn"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-
-              {/* Auto-play Controls */}
-              <div className="flex justify-center items-center mt-6 space-x-4">
-                <button
-                  onClick={carousel.toggleAutoPlay}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent ${
-                    carousel.isAutoPlaying && !carousel.isPaused
-                      ? 'bg-accent text-white hover:bg-accent/80'
-                      : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
-                  }`}
-                  data-testid="carousel-autoplay-btn"
-                >
-                  {carousel.isAutoPlaying && !carousel.isPaused ? (
-                    <>
-                      <Pause className="w-4 h-4" />
-                      <span>Pause Auto-play</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4" />
-                      <span>Auto-play</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="text-xs text-white/50 bg-white/5 px-3 py-1 rounded-full">
-                  Use ← → keys or numbers 1-4
-                </div>
+              <div className="text-xs text-white/50 bg-white/5 px-3 py-1 rounded-full">
+                Use ← → keys or numbers 1-4
               </div>
             </div>
           </div>
