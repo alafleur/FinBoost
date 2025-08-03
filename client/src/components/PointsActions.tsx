@@ -267,7 +267,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
                 <Upload className="h-5 w-5 text-white" />
               </div>
-              Submit Proof for {actions.find(a => a.id === selectedAction)?.name}
+              Submit Proof of {actions.find(a => a.id === selectedAction)?.name}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 p-6">
