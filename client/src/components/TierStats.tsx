@@ -1,4 +1,6 @@
 import { DashboardColors } from "@/lib/colors";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, Target, Users, Award } from "lucide-react";
 
 interface TierThresholds {
   tier1: number;
@@ -50,11 +52,36 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
 
   const currentTier = user.tier || getCurrentTier();
 
+  const getTierIcon = (tierId: string) => {
+    switch (tierId) {
+      case 'tier1':
+        return TrendingUp;
+      case 'tier2':
+        return Target;
+      case 'tier3':
+        return Users;
+      default:
+        return Award;
+    }
+  };
+
   const getTierColors = (tierId: string, isCurrentTier: boolean) => {
     if (isCurrentTier) {
-      return 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200';
+      return {
+        card: 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 shadow-md',
+        accent: 'bg-gradient-to-r from-blue-500 to-purple-600',
+        iconBg: 'bg-white border-blue-100',
+        iconColor: 'text-blue-600',
+        badge: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg'
+      };
     } else {
-      return 'bg-white border-gray-100';
+      return {
+        card: 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm',
+        accent: 'bg-gray-300',
+        iconBg: 'bg-gray-50 border-gray-200',
+        iconColor: 'text-gray-500',
+        badge: 'bg-gray-100 text-gray-700 border-gray-200'
+      };
     }
   };
 
@@ -83,43 +110,64 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-      {tiers.map((tier) => (
-        <div
-          key={tier.id}
-          className={`border rounded-xl transition-all duration-200 hover:shadow-sm ${getTierColors(tier.id, tier.isCurrentTier)} 
-            p-4 sm:p-5 text-center min-h-[72px] sm:min-h-[88px]
-            ${tier.isCurrentTier ? 'ring-1 ring-blue-200 ring-opacity-30' : ''}
-          `}
-        >
-
-          
-          {/* Mobile: Horizontal layout, Desktop: Vertical layout */}
-          <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center space-x-4 sm:space-x-0 sm:space-y-2">
-            <div className="flex-shrink-0 min-w-0 flex-1 sm:flex-initial">
-              <div className={`text-base sm:text-lg ${DashboardColors.text.primary} mb-1`}>
-                {tier.name}
-              </div>
-              <div className={`text-xs sm:text-sm ${DashboardColors.text.muted}`}>
-                {tier.range} pts
-              </div>
-            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {tiers.map((tier) => {
+        const TierIcon = getTierIcon(tier.id);
+        const colors = getTierColors(tier.id, tier.isCurrentTier);
+        
+        return (
+          <div
+            key={tier.id}
+            className={`relative border rounded-xl transition-all duration-300 ${colors.card} overflow-hidden`}
+          >
+            {/* Accent Bar */}
+            <div className={`absolute top-0 left-0 w-full h-1.5 ${colors.accent}`}></div>
             
-            <div className="flex-shrink-0 text-right sm:text-center">
-              {tier.reward ? (
-                <div className={`text-base sm:text-lg ${DashboardColors.text.accent} leading-tight`}>
-                  <span className="sm:hidden">{formatCurrency(tier.reward).replace('$', '$')}</span>
-                  <span className="hidden sm:inline">{formatCurrency(tier.reward)}</span>
+            <div className="p-5">
+              {/* Header with Icon and Badge */}
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-xl border ${colors.iconBg}`}>
+                  <TierIcon className={`h-6 w-6 ${colors.iconColor}`} />
                 </div>
-              ) : (
-                <div className="text-xs text-gray-400">
-                  No data
-                </div>
-              )}
+                {tier.isCurrentTier && (
+                  <Badge className={colors.badge}>
+                    Your Tier
+                  </Badge>
+                )}
+              </div>
+
+              {/* Tier Name */}
+              <h3 className={`text-lg font-semibold ${DashboardColors.text.primary} mb-1`}>
+                {tier.name}
+              </h3>
+
+              {/* Point Range */}
+              <p className={`text-sm ${DashboardColors.text.secondary} mb-3`}>
+                {tier.range} points
+              </p>
+
+              {/* Reward Amount */}
+              <div className="pt-2 border-t border-gray-100">
+                {tier.reward ? (
+                  <div>
+                    <p className={`text-xs ${DashboardColors.text.muted} mb-1`}>Pool Allocation</p>
+                    <p className={`text-xl font-bold ${tier.isCurrentTier ? 'text-blue-600' : 'text-gray-900'}`}>
+                      {formatCurrency(tier.reward)}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className={`text-xs ${DashboardColors.text.muted} mb-1`}>Pool Allocation</p>
+                    <p className="text-sm text-gray-400">
+                      Not available
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
