@@ -32,8 +32,8 @@ export default function Navbar() {
             onClick={handleSignUpClick}
           >
             <div className="flex flex-col text-center">
-              <span>Join Early</span>
-              <span>Access</span>
+              <span>Join</span>
+              <span>Early Access</span>
             </div>
           </Button>
         </div>
