@@ -991,19 +991,15 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={`dashboard-card-primary rounded-xl ${item.borderColor} border-l-4 p-6 space-y-2`}
+                className="card-premium card-section-gloss card-floating rounded-2xl p-8 text-white"
               >
-                <div className="flex items-start space-x-4 relative z-10">
-                  <div className="bg-accent-light/20 p-3 rounded-full">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-slate-900">{item.title}</h4>
-                    <p className="text-muted-foreground text-sm">
-                      {item.description}
-                    </p>
-                  </div>
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
+                  {React.cloneElement(item.icon, { className: "w-8 h-8 text-white icon-bounce" })}
                 </div>
+                <h4 className="text-xl font-bold text-white mb-4">{item.title}</h4>
+                <p className="text-white/90 leading-relaxed">
+                  {item.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -1053,7 +1049,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="card-premium card-section-gloss card-floating rounded-2xl p-8 text-white"
+              className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
                 <GraduationCap className="w-8 h-8 text-white icon-bounce" />
@@ -1069,7 +1065,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="card-premium card-section-gloss card-floating rounded-2xl p-8 text-white"
+              className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
                 <Users className="w-8 h-8 text-white icon-bounce" />
