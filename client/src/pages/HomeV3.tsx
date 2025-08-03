@@ -849,9 +849,10 @@ export default function HomeV3() {
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.1, duration: 0.3 }}
                         >
-                          <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                            {screenshots[activeScreenshot].mockContent}
-                          </p>
+                          <p 
+                            className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4"
+                            dangerouslySetInnerHTML={{ __html: screenshots[activeScreenshot].mockContent }}
+                          />
                           <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
                             <span className="text-xs font-medium text-blue-700">Live Preview Coming Soon</span>
                           </div>
