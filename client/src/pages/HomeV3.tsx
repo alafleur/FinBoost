@@ -1040,7 +1040,7 @@ export default function HomeV3() {
               },
               {
                 title: "Addressing Beyond Just Next Month",
-                subtitle: "FinBoost isn't just about surviving the month — it's about freedom from near-term stress and building momentum toward long-term goals."
+                subtitle: "FinBoost is about freedom from near-term stress and building momentum toward long-term goals."
               },
               {
                 title: "A Better Approach",
