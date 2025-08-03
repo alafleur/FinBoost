@@ -1,0 +1,171 @@
+{
+  "fb201": {
+    "id": "fb201",
+    "title": "How Interest Accrues Daily (and Why It Matters)",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>How Interest Accrues Daily (and Why It Matters)</h2><p>Most credit cards and many loans apply interest on a daily basis. That means the balance compounds even when you're not actively using the card. Even a few days of carrying a balance can increase your total owed. Understanding daily accrual is key to managing and reducing interest cost over time.</p><h3>Key Concepts</h3><ul><li><strong>Daily periodic rate</strong>: Your APR divided by 365.</li><li><strong>Compound timing</strong>: Daily interest builds on the previous day's balance, not just the original amount.</li><li><strong>Real impact</strong>: A $5,000 balance at 20% APR accrues ~$2.74 in interest per day.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does the daily periodic rate represent?",
+        "options": ["Interest paid per billing cycle", "Your credit utilization", "The fraction of APR applied each day"],
+        "correctAnswer": 2,
+        "explanation": "It's your APR divided by 365—applied to your balance daily."
+      },
+      {
+        "id": "q2",
+        "question": "Why does carrying a balance for just a few days increase total interest?",
+        "options": ["Late fees are added immediately", "Daily compounding adds interest on top of interest", "Credit scores update daily"],
+        "correctAnswer": 1,
+        "explanation": "Interest compounds daily, meaning each day's interest adds to the next day's balance."
+      },
+      {
+        "id": "q3",
+        "question": "Approximately how much interest accrues daily on a $5,000 balance at 20% APR?",
+        "options": ["$0.27", "$1.92", "$2.74"],
+        "correctAnswer": 2,
+        "explanation": "Using daily compounding, that balance adds about $2.74 per day."
+      }
+    ]
+  },
+
+  "fb202": {
+    "id": "fb202",
+    "title": "Asset Allocation: Why 100% Stocks Isn’t Always the Answer",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Asset Allocation: Why 100% Stocks Isn’t Always the Answer</h2><p>Many online creators advocate going all-in on equities, citing long-term returns. While equities offer growth, risk tolerance and time horizon still matter. In practice, proper allocation balances risk and return based on your financial goals, not just potential upside.</p><h3>Common Considerations</h3><ul><li><strong>Volatility</strong>: Equities can drop 30%+ in short windows.</li><li><strong>Liquidity needs</strong>: If you might need funds within 2–5 years, high equity exposure may backfire.</li><li><strong>Personal context</strong>: Risk capacity isn't just about age—income stability, debt, and other assets matter.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "Why might 100% equities be risky for some investors?",
+        "options": ["They don’t grow over time", "They offer low returns", "They can be highly volatile in short-term periods"],
+        "correctAnswer": 2,
+        "explanation": "Equities are volatile and can decline significantly, which matters if you need near-term liquidity."
+      },
+      {
+        "id": "q2",
+        "question": "What does asset allocation aim to balance?",
+        "options": ["Tax rates and inflation", "Risk and return based on your goals", "Interest rates and credit scores"],
+        "correctAnswer": 1,
+        "explanation": "Allocation is about managing your risk-return profile relative to your personal financial goals."
+      },
+      {
+        "id": "q3",
+        "question": "When might a more conservative allocation make sense?",
+        "options": ["If you plan to hold for 30 years", "If you expect to withdraw funds soon", "If stocks are outperforming this year"],
+        "correctAnswer": 1,
+        "explanation": "If you need funds within a few years, downside protection becomes more important than maximizing returns."
+      }
+    ]
+  },
+
+  "fb203": {
+    "id": "fb203",
+    "title": "Understanding APR vs APY: A Subtle but Costly Difference",
+    "category": "Credit",
+    "difficulty": "Advanced",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Understanding APR vs APY: A Subtle but Costly Difference</h2><p>APR and APY both measure interest, but they are not interchangeable. APR is a simple interest rate, while APY includes compounding effects. This makes APY a more accurate measure of what you’ll actually pay or earn over time.</p><h3>Why It Matters</h3><ul><li><strong>Credit cards</strong> advertise APR, but interest compounds daily—so your effective rate is higher.</li><li><strong>Savings products</strong> often use APY to highlight compounding returns.</li><li>Understanding the distinction helps compare products and assess real costs or gains.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does APY account for that APR does not?",
+        "options": ["Credit score impact", "Loan term length", "Compound interest over time"],
+        "correctAnswer": 2,
+        "explanation": "APY factors in compounding, showing the true annualized return or cost."
+      },
+      {
+        "id": "q2",
+        "question": "Why do credit cards advertise APR instead of APY?",
+        "options": ["APR is easier to calculate", "APR looks lower than APY", "APY is illegal to display on credit products"],
+        "correctAnswer": 1,
+        "explanation": "APR excludes compounding, which makes the interest rate appear lower than the effective cost."
+      },
+      {
+        "id": "q3",
+        "question": "Which metric is more useful for comparing savings accounts?",
+        "options": ["APR", "APY", "FICO"],
+        "correctAnswer": 1,
+        "explanation": "APY reflects compounding and is the standard for comparing savings products."
+      }
+    ]
+  },
+
+  "fb204": {
+    "id": "fb204",
+    "title": "Rent-to-Income Ratio: Why 30% Isn’t a Rule",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Rent-to-Income Ratio: Why 30% Isn’t a Rule</h2><p>You've likely heard that you shouldn't spend more than 30% of your income on rent. But that rule is dated and doesn’t account for location, lifestyle, or debt. For some, 40% may be sustainable; for others, 25% is too high. The real question is: what else are you trading off?</p><h3>What to Consider</h3><ul><li><strong>Fixed vs variable costs</strong>: Can you control other expenses if rent is high?</li><li><strong>Debt load</strong>: High fixed obligations + high rent = squeezed cash flow.</li><li><strong>Priorities</strong>: Some trade higher rent for shorter commutes or mental health benefits.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is the origin of the 30% rent guideline?",
+        "options": ["It's a modern budgeting trend", "It's based on HUD guidance from the 1980s", "It's required by law"],
+        "correctAnswer": 1,
+        "explanation": "The 30% rule comes from older federal housing benchmarks, not personal finance science."
+      },
+      {
+        "id": "q2",
+        "question": "What’s a key tradeoff when spending more than 30% on rent?",
+        "options": ["Higher taxes", "Lower credit score", "Less flexibility for other expenses"],
+        "correctAnswer": 2,
+        "explanation": "Spending more on rent means you need to be tighter elsewhere or risk overextending."
+      },
+      {
+        "id": "q3",
+        "question": "In what situation might spending 35–40% on rent make sense?",
+        "options": ["If housing prices are falling", "If you save money elsewhere and the location improves quality of life", "If your income is irregular"],
+        "correctAnswer": 1,
+        "explanation": "Higher rent may be worth it if you're making other tradeoffs that still support your financial goals."
+      }
+    ]
+  },
+
+  "fb205": {
+    "id": "fb205",
+    "title": "The Real Risk of Buy Now, Pay Later",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>The Real Risk of Buy Now, Pay Later</h2><p>Buy Now, Pay Later (BNPL) services offer split payments over weeks or months—often interest-free. But these programs aren’t without cost. Missed payments, overuse, and stacking multiple BNPL plans can damage cash flow and credit health.</p><h3>What to Watch</h3><ul><li><strong>No regulation</strong>: BNPL isn’t regulated like credit cards—protections are weaker.</li><li><strong>Credit reporting</strong>: Some providers now report late payments to bureaus.</li><li><strong>Cash flow mismatch</strong>: Spreading out $200 across four payments doesn’t change affordability.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s a key financial risk of overusing BNPL plans?",
+        "options": ["Credit card interest applies automatically", "It delays payments but doesn’t improve affordability", "The payments are tax-deductible"],
+        "correctAnswer": 1,
+        "explanation": "BNPL spreads payments but doesn’t reduce the total owed—cash flow can suffer with multiple plans."
+      },
+      {
+        "id": "q2",
+        "question": "Are BNPL providers required to offer the same consumer protections as credit cards?",
+        "options": ["Yes", "No", "Only in the U.S."],
+        "correctAnswer": 1,
+        "explanation": "BNPL regulation is limited, and consumer protections vary widely across platforms."
+      },
+      {
+        "id": "q3",
+        "question": "How can BNPL affect your credit?",
+        "options": ["It improves your credit score automatically", "Late payments may be reported to credit bureaus", "It replaces credit utilization metrics"],
+        "correctAnswer": 1,
+        "explanation": "Some BNPL providers now report missed payments, which can harm your credit."
+      }
+    ]
+  }
+}
