@@ -1032,18 +1032,18 @@ export default function HomeV3() {
             {[
               {
                 title: "Debt Progress Pays",
-                subtitle: "Student loans, credit cards — every payment forward earns you money back."
+                subtitle: "Student loans, credit cards, buy now pay later — every payment forward can earn you money back."
               },
               {
                 title: "Rising Costs Reality", 
                 subtitle: "Everything costs more, saving feels impossible. Small wins add up to real rewards."
               },
               {
-                title: "Worrying About Retirement, Not Just Next Month",
+                title: "Addressing Beyond Just Next Month",
                 subtitle: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress."
               },
               {
-                title: "Beyond Daily Tracking",
+                title: "A Better Approach",
                 subtitle: "Most apps focus on today's spending. We reward steps toward tomorrow's security."
               }
             ].map((item, index) => (
