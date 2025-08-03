@@ -238,18 +238,18 @@
   }
   
   .dashboard-card-primary {
-    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-    border: 1px solid #c4b5fd;
-    box-shadow: 0 4px 12px rgba(196, 181, 253, 0.15), 0 2px 4px rgba(196, 181, 253, 0.08);
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
   }
 
   .dashboard-card-primary:hover {
-    background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%);
-    border-color: #a78bfa;
-    box-shadow: 0 8px 25px rgba(167, 139, 250, 0.2), 0 3px 8px rgba(167, 139, 250, 0.12);
+    background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+    border-color: #d97706;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(-2px);
   }
 
