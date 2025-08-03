@@ -76,23 +76,6 @@ export default function DashboardStats({
         </CardContent>
       </Card>
 
-      {/* 3. Current Tier - MOVED TO SECOND POSITION */}
-      <Card className={getCardClasses(StatCardColors.currentTier)}>
-        <div className={`absolute top-0 left-0 w-full h-1.5 ${getAccentClasses(StatCardColors.currentTier)}`}></div>
-        <CardContent className="p-5">
-          <div className="flex items-start justify-between mb-3">
-            <div className={getIconContainerClasses(StatCardColors.currentTier)}>
-              <Target className={`h-6 w-6 ${getIconColorClasses(StatCardColors.currentTier)}`} />
-            </div>
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 text-xs font-medium px-3 py-1.5 shadow-lg">
-              {getTierDisplayName(user?.tier || 'tier1')}
-            </Badge>
-          </div>
-          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Current Tier</h3>
-          <p className={`text-xs ${DashboardColors.text.muted}`}>Cycle standing</p>
-        </CardContent>
-      </Card>
-
       {/* 3. Cycle Points */}
       <Card className={getCardClasses(StatCardColors.cyclePoints)}>
         <div className={`absolute top-0 left-0 w-full h-1.5 ${getAccentClasses(StatCardColors.cyclePoints)}`}></div>
@@ -102,7 +85,7 @@ export default function DashboardStats({
               <TrendingUp className={`h-6 w-6 ${getIconColorClasses(StatCardColors.cyclePoints)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl ${getTextClasses(StatCardColors.cyclePoints)}`}>{user?.currentCyclePoints || 0}</div>
+              <div className={`text-2xl ${DashboardColors.text.primary}`}>{user?.currentCyclePoints || 0}</div>
             </div>
           </div>
           <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Cycle Points</h3>
@@ -119,7 +102,7 @@ export default function DashboardStats({
               <BookOpen className={`h-6 w-6 ${getIconColorClasses(StatCardColors.lessons)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl ${getTextClasses(StatCardColors.lessons)}`}>{completedLessonsCount}</div>
+              <div className={`text-2xl ${DashboardColors.text.primary}`}>{completedLessonsCount}</div>
               <div className={`text-xs ${DashboardColors.text.muted}`}>of {totalLessonsCount}</div>
             </div>
           </div>
