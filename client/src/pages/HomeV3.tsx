@@ -629,7 +629,7 @@ export default function HomeV3() {
                       onChange={(e) => setCommunitySize(Number(e.target.value))}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${((communitySize - 250) / (10000 - 250)) * 100}%, #1e3a8a ${((communitySize - 250) / (10000 - 250)) * 100}%, #1e3a8a 100%)`
+                        background: `linear-gradient(to right, #1e3a8a 0%, #1e3a8a ${((communitySize - 250) / (10000 - 250)) * 100}%, #e2e8f0 ${((communitySize - 250) / (10000 - 250)) * 100}%, #e2e8f0 100%)`
                       }}
                     />
                   </div>
@@ -662,9 +662,51 @@ export default function HomeV3() {
               </motion.div>
 
               <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="dashboard-card-primary rounded-xl p-6 flex flex-col items-center"
+              >
+                <div className="relative w-24 h-24 mb-3">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    {/* Background circle */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                    />
+                    {/* Rewards portion */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#1e3a8a"
+                      strokeWidth="8"
+                      strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                      strokeLinecap="round"
+                      initial={{ strokeDasharray: "0 219.9" }}
+                      animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
+                      transition={{ duration: 0.8, ease: "easeInOut" }}
+                    />
+                  </svg>
+                  {/* Center content */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-lg font-bold text-accent">{rewardsPercentage}%</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-600 mb-1">Fee Allocation</div>
+                <div className="text-xs text-slate-500">to rewards pool</div>
+              </motion.div>
+
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
                 viewport={{ once: true }}
                 className="dashboard-card-primary rounded-xl p-6 text-center"
               >
@@ -676,20 +718,6 @@ export default function HomeV3() {
                   {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                 </div>
                 <div className="text-xs text-slate-500">5% of total pool</div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 text-center"
-              >
-                <div className="text-sm text-slate-600 mb-2">Rewards Share</div>
-                <div className="text-3xl font-bold text-accent mb-1">
-                  {rewardsPercentage}%
-                </div>
-                <div className="text-xs text-slate-500">of membership fees</div>
               </motion.div>
             </div>
           </div>
