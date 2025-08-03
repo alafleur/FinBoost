@@ -123,19 +123,19 @@ const PhoneFrame = memo(function PhoneFrame({
         
         {/* Screen */}
         <rect
-          x="18"
-          y="18"
-          width="264"
-          height="564"
-          rx="38"
-          ry="38"
+          x="12"
+          y="12"
+          width="276"
+          height="576"
+          rx="42"
+          ry="42"
           fill="#000000"
         />
         
         {/* Dynamic Island */}
         <rect
           x="125"
-          y="32"
+          y="26"
           width="50"
           height="18"
           rx="9"
@@ -146,7 +146,7 @@ const PhoneFrame = memo(function PhoneFrame({
         {/* Home indicator */}
         <rect
           x="135"
-          y="570"
+          y="576"
           width="30"
           height="3"
           rx="1.5"
@@ -164,15 +164,15 @@ const PhoneFrame = memo(function PhoneFrame({
       <div 
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
-          top: '6%',
-          left: '6%',
-          width: '88%',
-          height: '88%'
+          top: '4%',
+          left: '4%',
+          width: '92%',
+          height: '92%'
         }}
         data-testid={`${testId}-content-area`}
       >
         <div 
-          className="w-full h-full rounded-[38px] overflow-hidden bg-white pointer-events-auto"
+          className="w-full h-full rounded-[42px] overflow-hidden bg-white pointer-events-auto"
           role="presentation"
         >
           <div className="w-full h-full relative">
