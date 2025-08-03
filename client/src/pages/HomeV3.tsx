@@ -603,14 +603,14 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Top Row: Interactive Controls */}
-          <div className="mb-12">
+          <div className="mb-16">
             {/* Dial Control */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="mb-8"
+              className="mb-10"
             >
               <div className="flex items-center justify-between mb-4">
                 <label className="text-lg font-semibold text-slate-800 flex items-center gap-2">
@@ -672,7 +672,7 @@ export default function HomeV3() {
           </div>
 
           {/* Bottom Row: Visual Results */}
-          <div className="flex flex-wrap justify-center gap-8 items-start">
+          <div className="flex flex-wrap justify-center gap-12 items-center">
             {/* Dynamic Donut Chart */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -681,7 +681,7 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="flex flex-col items-center"
             >
-              <div className="relative w-52 h-52 mb-4">
+              <div className="relative w-56 h-56 mb-6">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   {/* Background circle */}
                   <circle
@@ -728,20 +728,20 @@ export default function HomeV3() {
 
                 {/* Center content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-gray-800">$20</div>
-                  <div className="text-sm text-gray-500">monthly membership</div>
+                  <div className="text-3xl font-bold text-slate-800">$20</div>
+                  <div className="text-sm font-medium text-slate-600">monthly membership</div>
                 </div>
               </div>
 
               {/* Legend */}
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-accent rounded"></div>
-                  <span className="text-slate-700">{rewardsPercentage}% → Collective Rewards Pool</span>
+              <div className="space-y-2 text-sm mt-6 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-accent rounded-sm shadow-sm"></div>
+                  <span className="text-slate-700 font-medium">{rewardsPercentage}% → Collective Rewards Pool</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-slate-500 rounded"></div>
-                  <span className="text-slate-700">{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-slate-500 rounded-sm shadow-sm"></div>
+                  <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
             </motion.div>
@@ -754,16 +754,16 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="flex justify-center"
             >
-              <div className="dashboard-card-primary rounded-xl p-4 w-full max-w-[240px] relative z-10">
+              <div className="dashboard-card-primary rounded-xl p-6 w-full max-w-[280px] relative z-10">
                 <div className="text-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
-                    <Trophy className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <Trophy className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-base font-semibold text-slate-800 mb-1">Top Reward</h4>
-                  <div className="text-xl font-bold text-accent mb-1">
+                  <h4 className="text-lg font-semibold text-slate-800 mb-2">Top Reward</h4>
+                  <div className="text-2xl font-bold text-accent mb-2">
                     {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-sm text-slate-600 leading-relaxed">
                     5% of rewards pool goes to top performer
                   </p>
                 </div>
@@ -775,11 +775,11 @@ export default function HomeV3() {
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mt-12"
+            className="text-center mt-16"
           >
-            <p className="text-sm text-slate-500 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">
               * Rewards pool statistics shown are illustrative and based on projected membership levels. Actual rewards may vary based on community growth and platform performance.
             </p>
           </motion.div>
