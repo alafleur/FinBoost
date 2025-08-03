@@ -252,7 +252,9 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
+              {action.description && action.description.toLowerCase() !== action.name.toLowerCase() && (
+                <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
+              )}
             </CardContent>
           </Card>
         ))}
