@@ -28,7 +28,7 @@ export default function Navbar() {
             </div>
           </a>
           <Button 
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-2 border-blue-600"
+            className="btn-primary font-medium px-3 py-2 md:px-6 text-xs md:text-sm rounded-lg shadow-md transition duration-300"
             onClick={handleSignUpClick}
           >
             Join Early Access
