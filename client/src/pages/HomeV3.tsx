@@ -855,6 +855,22 @@ export default function HomeV3() {
                 </div>
               </div>
               
+              {/* Mobile navigation dots - moved to top */}
+              <div className="lg:hidden flex justify-center space-x-2 mb-6">
+                {screenshots.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveScreenshot(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      activeScreenshot === index 
+                        ? 'bg-blue-600 w-8' 
+                        : 'bg-slate-300 hover:bg-slate-400'
+                    }`}
+                    aria-label={`View ${screenshots[index].title}`}
+                  />
+                ))}
+              </div>
+              
               {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
               <div className="lg:space-y-3">
                 <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
@@ -902,22 +918,6 @@ export default function HomeV3() {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
-                </div>
-                
-                {/* Mobile navigation dots */}
-                <div className="lg:hidden flex justify-center space-x-2 mt-6">
-                  {screenshots.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveScreenshot(index)}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        activeScreenshot === index 
-                          ? 'bg-blue-600 w-8' 
-                          : 'bg-slate-300 hover:bg-slate-400'
-                      }`}
-                      aria-label={`View ${screenshots[index].title}`}
-                    />
                   ))}
                 </div>
               </div>
