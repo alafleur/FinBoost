@@ -19,7 +19,7 @@ export default function KeepGoingMessage({ onTabChange }: KeepGoingMessageProps)
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Keep Going, You're Doing Amazing!</h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 mb-4">
             Every module you complete brings you closer to your next reward. Your financial education journey is paying off - literally!
           </p>
           <div className="flex flex-wrap gap-3">
