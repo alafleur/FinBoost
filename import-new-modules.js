@@ -52,8 +52,8 @@ async function importNewModules() {
           estimated_minutes: moduleData.estimatedTime,
           is_active: true,
           order: currentOrder,
-          is_published: true,
-          published_at: new Date().toISOString(),
+          is_published: false,
+          published_at: null,
           quiz: JSON.stringify(moduleData.quiz), // Convert quiz object to JSON string
           access_type: 'premium' // Default to premium, adjust as needed
         };
@@ -74,7 +74,7 @@ async function importNewModules() {
           insertData.access_type
         ]);
 
-        console.log(`✅ Imported: ${result.rows[0].title} (ID: ${result.rows[0].id})`);
+        console.log(`✅ Imported: ${result.rows[0].title} (ID: ${result.rows[0].id}) - UNPUBLISHED`);
         importedCount++;
 
       } catch (moduleError) {
@@ -83,9 +83,10 @@ async function importNewModules() {
     }
 
     console.log('\n📊 Import Summary:');
-    console.log(`✅ Successfully imported: ${importedCount} modules`);
+    console.log(`✅ Successfully imported: ${importedCount} modules (unpublished)`);
     console.log(`⚠️  Skipped existing: ${skippedCount} modules`);
     console.log(`📚 Total modules in database: ${importedCount + skippedCount + (maxOrderResult.rows[0].max_order)}`);
+    console.log(`\n📝 Note: New modules are imported as unpublished. Use admin panel to publish when ready.`);
 
   } catch (error) {
     console.error('❌ Import failed:', error);
