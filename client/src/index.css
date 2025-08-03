@@ -667,7 +667,6 @@
   .badge-premium-gloss {
     position: relative;
     overflow: hidden;
-    background: var(--finboost-gradient-primary);
   }
 
   .badge-premium-gloss::before {
@@ -679,13 +678,18 @@
     height: 50%;
     background: linear-gradient(
       180deg, 
-      rgba(255, 255, 255, 0.2) 0%, 
-      rgba(255, 255, 255, 0.1) 60%, 
+      rgba(255, 255, 255, 0.15) 0%, 
+      rgba(255, 255, 255, 0.08) 60%, 
       transparent 100%
     );
     border-radius: inherit;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
+  }
+
+  .badge-premium-gloss > * {
+    position: relative;
+    z-index: 1;
   }
 
   /* Tier Badge Enhanced Gloss */
