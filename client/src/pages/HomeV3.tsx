@@ -871,13 +871,7 @@ export default function HomeV3() {
 
             {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
             <div className="order-2 lg:order-1">
-              {/* Mobile instruction hint */}
-              <div className="lg:hidden text-center mb-4">
-                <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
-                  <span className="mr-2">👆</span>
-                  Tap card to see all features
-                </div>
-              </div>
+
 
               {/* Mobile: Single Flipping Card */}
               <div className="lg:hidden px-4">
