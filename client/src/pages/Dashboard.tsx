@@ -797,6 +797,46 @@ export default function Dashboard() {
               {/* Winner Celebration Banner */}
               <WinnerCelebrationBanner />
               
+              {/* Keep Going Inspirational Message */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2">Keep Going, You're Doing Amazing!</h3>
+                    <p className="text-blue-700 mb-4">
+                      Every module you complete brings you closer to your next reward. Your financial education journey is paying off - literally!
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button 
+                        onClick={() => setLocation('/education')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Keep Learning
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('leaderboard')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200"
+                      >
+                        <TrendingUp className="w-4 h-4" />
+                        Climb Higher
+                      </button>
+                      <button 
+                        onClick={() => setLocation('/subscribe')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                      >
+                        <DollarSign className="w-4 h-4" />
+                        Earn More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="space-y-4">
                 <SectionHeader 
                   icon={Award}
@@ -1140,6 +1180,46 @@ export default function Dashboard() {
             <TabsContent value="rewards" className="mt-0 space-y-6">
               {/* Winner Celebration Banner */}
               <WinnerCelebrationBanner />
+              
+              {/* Keep Going Inspirational Message */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2">Keep Going, You're Doing Amazing!</h3>
+                    <p className="text-blue-700 mb-4">
+                      Every module you complete brings you closer to your next reward. Your financial education journey is paying off - literally!
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button 
+                        onClick={() => setLocation('/education')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Keep Learning
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('leaderboard')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200"
+                      >
+                        <TrendingUp className="w-4 h-4" />
+                        Climb Higher
+                      </button>
+                      <button 
+                        onClick={() => setLocation('/subscribe')}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                      >
+                        <DollarSign className="w-4 h-4" />
+                        Earn More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div className="space-y-4">
                 <SectionHeader 
