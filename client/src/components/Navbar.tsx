@@ -28,7 +28,7 @@ export default function Navbar() {
             </div>
           </a>
           <Button 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-2 md:px-4 py-3 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-0"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-2 md:px-4 py-3 text-xs md:text-sm rounded-lg shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 border-0 hover:shadow-blue-500/25"
             onClick={handleSignUpClick}
           >
             Join Early Access
