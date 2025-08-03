@@ -1636,8 +1636,8 @@ export default function HomeV3() {
       </section>
 
 
-      {/* Final CTA - Strong Blue Background */}
-      <section id="cta" className="bg-accent text-white py-20 px-6 text-center">
+      {/* Final CTA - Blue to Purple Gradient Background */}
+      <section id="cta" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
