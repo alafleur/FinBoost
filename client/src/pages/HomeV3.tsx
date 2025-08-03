@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,17 +34,262 @@ import {
   ChevronDown
 } from "lucide-react";
 
+/**
+ * Carousel state management interface
+ */
+interface CarouselState {
+  currentStep: number;
+  isAutoPlaying: boolean;
+  isPaused: boolean;
+  hasUserInteracted: boolean;
+}
+
+/**
+ * Custom hook for carousel state management with comprehensive controls
+ */
+function useCarouselState(totalSteps: number, autoAdvanceInterval: number = 5000) {
+  const [state, setState] = useState<CarouselState>({
+    currentStep: 0,
+    isAutoPlaying: false,
+    isPaused: false,
+    hasUserInteracted: false
+  });
+
+  // Navigation functions with comprehensive error handling, analytics, and bounds checking
+  const goToStep = useCallback((stepIndex: number) => {
+    // Input validation
+    if (typeof stepIndex !== 'number' || isNaN(stepIndex)) {
+      console.error(`Invalid step index type: ${typeof stepIndex}. Expected number.`);
+      return;
+    }
+    
+    if (stepIndex < 0 || stepIndex >= totalSteps) {
+      console.warn(`Invalid step index: ${stepIndex}. Must be between 0 and ${totalSteps - 1}`);
+      return;
+    }
+    
+    try {
+      setState(prev => {
+        // Analytics tracking
+        if (typeof window !== 'undefined' && window.gtag) {
+          window.gtag('event', 'carousel_navigate', {
+            event_category: 'engagement',
+            from_step: prev.currentStep,
+            to_step: stepIndex,
+            navigation_type: 'direct',
+            total_steps: totalSteps
+          });
+        }
+        
+        return {
+          ...prev,
+          currentStep: stepIndex,
+          hasUserInteracted: true,
+          isPaused: true // Pause auto-advance when user interacts
+        };
+      });
+    } catch (error) {
+      console.error('Error navigating to step:', error);
+    }
+  }, [totalSteps]);
+
+  const nextStep = useCallback(() => {
+    try {
+      setState(prev => {
+        const nextStepIndex = (prev.currentStep + 1) % totalSteps;
+        
+        // Analytics tracking
+        if (typeof window !== 'undefined' && window.gtag) {
+          window.gtag('event', 'carousel_navigate', {
+            event_category: 'engagement',
+            from_step: prev.currentStep,
+            to_step: nextStepIndex,
+            navigation_type: 'next',
+            total_steps: totalSteps
+          });
+        }
+        
+        return {
+          ...prev,
+          currentStep: nextStepIndex,
+          hasUserInteracted: true,
+          isPaused: true
+        };
+      });
+    } catch (error) {
+      console.error('Error navigating to next step:', error);
+    }
+  }, [totalSteps]);
+
+  const prevStep = useCallback(() => {
+    try {
+      setState(prev => {
+        const prevStepIndex = prev.currentStep === 0 ? totalSteps - 1 : prev.currentStep - 1;
+        
+        // Analytics tracking
+        if (typeof window !== 'undefined' && window.gtag) {
+          window.gtag('event', 'carousel_navigate', {
+            event_category: 'engagement',
+            from_step: prev.currentStep,
+            to_step: prevStepIndex,
+            navigation_type: 'previous',
+            total_steps: totalSteps
+          });
+        }
+        
+        return {
+          ...prev,
+          currentStep: prevStepIndex,
+          hasUserInteracted: true,
+          isPaused: true
+        };
+      });
+    } catch (error) {
+      console.error('Error navigating to previous step:', error);
+    }
+  }, [totalSteps]);
+
+  const toggleAutoPlay = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isAutoPlaying: !prev.isAutoPlaying,
+      isPaused: false
+    }));
+  }, []);
+
+  const pauseAutoPlay = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isPaused: true
+    }));
+  }, []);
+
+  const resumeAutoPlay = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isPaused: false
+    }));
+  }, []);
+
+  // Auto-advance logic with proper cleanup and error handling
+  useEffect(() => {
+    if (!state.isAutoPlaying || state.isPaused || state.hasUserInteracted) {
+      return;
+    }
+
+    let interval: NodeJS.Timeout;
+    
+    try {
+      interval = setInterval(() => {
+        setState(prev => {
+          const nextStep = (prev.currentStep + 1) % totalSteps;
+          
+          // Analytics tracking for auto-advance
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'carousel_auto_advance', {
+              event_category: 'engagement',
+              current_step: prev.currentStep,
+              next_step: nextStep,
+              total_steps: totalSteps
+            });
+          }
+          
+          return {
+            ...prev,
+            currentStep: nextStep
+          };
+        });
+      }, autoAdvanceInterval);
+    } catch (error) {
+      console.error('Error setting up carousel auto-advance:', error);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [state.isAutoPlaying, state.isPaused, state.hasUserInteracted, totalSteps, autoAdvanceInterval]);
+
+  // Performance monitoring for state changes
+  useEffect(() => {
+    const startTime = performance.now();
+    
+    return () => {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      // Log performance metrics for optimization
+      if (duration > 100) { // Only log if state update took longer than 100ms
+        console.warn(`Carousel state update took ${duration.toFixed(2)}ms`);
+      }
+    };
+  }, [state.currentStep]);
+
+  return {
+    currentStep: state.currentStep,
+    isAutoPlaying: state.isAutoPlaying,
+    isPaused: state.isPaused,
+    hasUserInteracted: state.hasUserInteracted,
+    goToStep,
+    nextStep,
+    prevStep,
+    toggleAutoPlay,
+    pauseAutoPlay,
+    resumeAutoPlay
+  };
+}
+
 export default function HomeV3() {
   const [location, navigate] = useLocation();
   const [communitySize, setCommunitySize] = useState(5000);
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   
-  const handleJoinEarlyAccess = () => {
+  // Memoized steps data for performance
+  const stepsData = useMemo(() => [
+    {
+      icon: <BookOpen className="w-8 h-8" />,
+      title: "Learn Financial Skills",
+      description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn points per module and quiz.",
+      screenshot: "lesson-module.png",
+      caption: "Complete short lessons like this to earn 20 points.",
+      gradient: "from-accent to-accent-light"
+    },
+    {
+      icon: <Target className="w-8 h-8" />,
+      title: "Take Real Financial Actions", 
+      description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus points based on impact.",
+      screenshot: "debt-submission.png",
+      caption: "Verified debt payments earn big bonus points.",
+      gradient: "from-accent to-accent-light"
+    },
+    {
+      icon: <BarChart3 className="w-8 h-8" />,
+      title: "Track Your Leaderboard Position",
+      description: "Your points determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
+      screenshot: "leaderboard-screenshot.png",
+      caption: "Your point total determines your leaderboard position and reward odds.",
+      gradient: "from-accent to-accent-light"
+    },
+    {
+      icon: <Trophy className="w-8 h-8" />,
+      title: "Compete for Cash Rewards",
+      description: "Winners are selected using a point-weighted system — the more you learn and take action, the better your chances. Real cash rewards distributed monthly.",
+      screenshot: "tier-dashboard.png",
+      caption: "Top contributors win real cash through our point-weighted reward system.",
+      gradient: "from-accent to-accent-light"
+    }
+  ], []);
+
+  // Initialize carousel state management
+  const carousel = useCarouselState(stepsData.length, 5000);
+
+  const handleJoinEarlyAccess = useCallback(() => {
     // Set URL search params and navigate
     const url = new URL('/auth', window.location.origin);
     url.searchParams.set('mode', 'signup');
     navigate(url.pathname + url.search);
-  };
+  }, [navigate]);
 
   // Calculate scaling percentage based on member count (250-10,000+ range)
   useEffect(() => {
@@ -75,13 +320,14 @@ export default function HomeV3() {
 
 
 
-  const calculateRewardsPool = (members: number) => {
+  // Utility functions - memoized for performance
+  const calculateRewardsPool = useCallback((members: number) => {
     const totalRevenue = members * 20; // Total monthly revenue
     const rewardsAllocation = totalRevenue * (rewardsPercentage / 100); // Dynamic percentage
     return rewardsAllocation;
-  };
+  }, [rewardsPercentage]);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(1)}M`;
     } else if (amount >= 1000) {
@@ -89,14 +335,253 @@ export default function HomeV3() {
     } else {
       return `$${amount}`;
     }
-  };
+  }, []);
 
-  const formatMembers = (count: number) => {
+  const formatMembers = useCallback((count: number) => {
     if (count >= 1000) {
       return `${(count / 1000).toFixed(0)}K`;
     }
     return count.toString();
-  };
+  }, []);
+
+  // Comprehensive touch/swipe gesture handling for mobile
+  const [touchState, setTouchState] = useState({
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    isDragging: false,
+    threshold: 50 // Minimum swipe distance in pixels
+  });
+
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    
+    setTouchState(prev => ({
+      ...prev,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      currentX: touch.clientX,
+      currentY: touch.clientY,
+      isDragging: true
+    }));
+    
+    // Pause auto-advance during touch interaction
+    carousel.pauseAutoPlay();
+  }, [carousel]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!touchState.isDragging) return;
+    
+    const touch = event.touches[0];
+    if (!touch) return;
+    
+    setTouchState(prev => ({
+      ...prev,
+      currentX: touch.clientX,
+      currentY: touch.clientY
+    }));
+    
+    // Prevent default scroll behavior during horizontal swipes
+    const deltaX = Math.abs(touch.clientX - touchState.startX);
+    const deltaY = Math.abs(touch.clientY - touchState.startY);
+    
+    if (deltaX > deltaY && deltaX > 10) {
+      event.preventDefault();
+    }
+  }, [touchState]);
+
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    if (!touchState.isDragging) return;
+    
+    const deltaX = touchState.currentX - touchState.startX;
+    const deltaY = touchState.currentY - touchState.startY;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    
+    // Only process horizontal swipes that exceed threshold
+    if (absX > touchState.threshold && absX > absY) {
+      try {
+        if (deltaX > 0) {
+          // Swipe right - go to previous step
+          carousel.prevStep();
+          
+          // Analytics tracking
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'carousel_swipe', {
+              event_category: 'engagement',
+              direction: 'right',
+              current_step: carousel.currentStep,
+              swipe_distance: absX
+            });
+          }
+        } else {
+          // Swipe left - go to next step
+          carousel.nextStep();
+          
+          // Analytics tracking
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'carousel_swipe', {
+              event_category: 'engagement',
+              direction: 'left',
+              current_step: carousel.currentStep,
+              swipe_distance: absX
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error handling swipe gesture:', error);
+      }
+    }
+    
+    // Reset touch state
+    setTouchState(prev => ({
+      ...prev,
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0
+    }));
+    
+    // Resume auto-advance after touch interaction
+    setTimeout(() => carousel.resumeAutoPlay(), 100);
+  }, [touchState, carousel]);
+
+  // Legacy swipe handler for compatibility
+  const handleSwipeGesture = useCallback((direction: 'left' | 'right') => {
+    if (direction === 'left') {
+      carousel.nextStep();
+    } else if (direction === 'right') {
+      carousel.prevStep();
+    }
+  }, [carousel]);
+
+  // Comprehensive keyboard navigation for accessibility
+  const handleKeyNavigation = useCallback((event: React.KeyboardEvent) => {
+    try {
+      let handled = false;
+      
+      switch (event.key) {
+        case 'ArrowLeft':
+        case 'h': // Vim-style navigation
+          event.preventDefault();
+          carousel.prevStep();
+          handled = true;
+          break;
+          
+        case 'ArrowRight':
+        case 'l': // Vim-style navigation
+          event.preventDefault();
+          carousel.nextStep();
+          handled = true;
+          break;
+          
+        case 'Home':
+        case 'g': // Vim-style "go to beginning"
+          event.preventDefault();
+          carousel.goToStep(0);
+          handled = true;
+          break;
+          
+        case 'End':
+        case 'G': // Vim-style "go to end"
+          event.preventDefault();
+          carousel.goToStep(stepsData.length - 1);
+          handled = true;
+          break;
+          
+        case ' ':
+        case 'p': // Pause/play
+          event.preventDefault();
+          carousel.toggleAutoPlay();
+          handled = true;
+          break;
+          
+        case 'Escape':
+          event.preventDefault();
+          carousel.pauseAutoPlay();
+          handled = true;
+          break;
+          
+        default:
+          // Handle number keys (1-4) for direct navigation
+          const stepNumber = parseInt(event.key);
+          if (stepNumber >= 1 && stepNumber <= stepsData.length) {
+            event.preventDefault();
+            carousel.goToStep(stepNumber - 1);
+            handled = true;
+          }
+          break;
+      }
+      
+      // Analytics tracking for keyboard navigation
+      if (handled && typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'carousel_keyboard_nav', {
+          event_category: 'engagement',
+          key_pressed: event.key,
+          current_step: carousel.currentStep,
+          total_steps: stepsData.length
+        });
+      }
+    } catch (error) {
+      console.error('Error handling keyboard navigation:', error);
+    }
+  }, [carousel, stepsData.length]);
+
+  // Intersection Observer for performance optimization
+  const [sectionRef, setSectionRef] = useState<HTMLElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    if (!sectionRef) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        const inView = entry.isIntersecting;
+        
+        setIsInView(inView);
+        
+        // Pause/resume auto-advance based on visibility
+        if (inView && !carousel.hasUserInteracted) {
+          carousel.resumeAutoPlay();
+        } else {
+          carousel.pauseAutoPlay();
+        }
+        
+        // Analytics tracking for viewport visibility
+        if (typeof window !== 'undefined' && window.gtag) {
+          window.gtag('event', 'carousel_visibility', {
+            event_category: 'engagement',
+            is_visible: inView,
+            current_step: carousel.currentStep
+          });
+        }
+      },
+      {
+        threshold: 0.5, // Trigger when 50% of element is visible
+        rootMargin: '0px'
+      }
+    );
+
+    observer.observe(sectionRef);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [sectionRef, carousel]);
+
+  // Accessibility: Announce step changes to screen readers
+  const [announceText, setAnnounceText] = useState('');
+  
+  useEffect(() => {
+    const currentStepData = stepsData[carousel.currentStep];
+    if (currentStepData) {
+      setAnnounceText(`Step ${carousel.currentStep + 1} of ${stepsData.length}: ${currentStepData.title}`);
+    }
+  }, [carousel.currentStep, stepsData]);
 
   return (
     <div className="min-h-screen bg-white">
