@@ -101,6 +101,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 600;
+    /* Force cache refresh */
   }
   
   .gradient-text-light {
