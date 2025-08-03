@@ -724,10 +724,10 @@ export default function HomeV3() {
               className="relative"
             >
               {/* Enhanced glow effect */}
-              <div className="absolute -inset-1 bg-accent rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <Button 
                 size="lg" 
-                className="relative btn-primary btn-hero-gloss btn-enhanced-hover interactive-glow px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl border-0 h-auto"
+                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 icon-bounce" />
