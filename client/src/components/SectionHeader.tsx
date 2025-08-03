@@ -9,11 +9,11 @@ interface SectionHeaderProps {
 }
 
 const iconColorClasses = {
-  blue: 'bg-gray-50 text-gray-600 border border-gray-100',
-  yellow: 'bg-gray-50 text-gray-600 border border-gray-100',
-  green: 'bg-gray-50 text-gray-600 border border-gray-100',
-  orange: 'bg-gray-50 text-gray-600 border border-gray-100',
-  red: 'bg-gray-50 text-gray-600 border border-gray-100',
+  blue: 'dashboard-icon-primary text-accent',
+  yellow: 'dashboard-icon-neutral text-gray-600',
+  green: 'dashboard-icon-success text-emerald-600',
+  orange: 'dashboard-icon-neutral text-orange-600',
+  red: 'dashboard-icon-neutral text-red-600',
 };
 
 const titleSizeClasses = {
@@ -31,7 +31,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
-      <div className={`p-2.5 ${iconColorClasses[iconColor]} rounded-xl shadow-sm`}>
+      <div className={`${iconColorClasses[iconColor]}`}>
         <Icon className="h-5 w-5" />
       </div>
       <h3 className={`font-heading font-semibold ${titleSizeClasses[titleSize]} text-gray-900 tracking-tight`}>

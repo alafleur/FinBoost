@@ -25,26 +25,35 @@ export const DashboardColors = {
     success: 'dashboard-icon-success'
   },
   
-  // Text Colors
+  // Text Colors - Unified Dark Blue System
   text: {
     primary: 'text-gray-900',
-    secondary: 'text-gray-600',
+    secondary: 'text-gray-600', 
     muted: 'text-gray-500',
     success: 'text-emerald-800',
-    accent: 'text-blue-800'
+    accent: 'text-accent',
+    accentLight: 'text-accent-light',
+    gradient: 'gradient-text'
   },
   
-  // Icon Colors
+  // Icon Colors - Enhanced with Dark Blue
   iconColor: {
     neutral: 'text-gray-600',
-    primary: 'text-blue-600',
+    primary: 'text-accent',
     success: 'text-emerald-600'
   },
   
-  // Badge Colors (for tier display)
+  // Badge Colors (for tier display) - Unified Dark Blue
   badge: {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    primary: 'bg-accent text-white hover:shadow-lg transition-all duration-200',
     neutral: 'bg-gray-600 hover:bg-gray-700 text-white'
+  },
+  
+  // Premium Button Classes
+  button: {
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    accent: 'bg-accent text-white hover:shadow-lg transition-all duration-300'
   }
 } as const;
 

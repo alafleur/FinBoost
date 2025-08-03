@@ -394,26 +394,26 @@ export default function Leaderboard() {
             {data.leaderboard.map((entry, index) => (
               <div
                 key={entry.rank}
-                className={`flex items-center justify-between p-3 md:p-4 transition-all duration-200 hover:bg-blue-50/50 ${
+                className={`flex items-center justify-between p-3 md:p-4 transition-all duration-200 hover:bg-accent-light/30 ${
                   index !== data.leaderboard.length - 1 ? 'border-b border-gray-100' : ''
                 } ${
-                  entry.isCurrentUser ? 'bg-blue-50 hover:bg-blue-100' : ''
+                  entry.isCurrentUser ? 'bg-accent-light/20 hover:bg-accent-light/40' : ''
                 }`}
               >
                 <div className="flex items-center space-x-3 md:space-x-4">
                   <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full font-bold text-sm shadow-sm ${
                     entry.isCurrentUser
-                      ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
+                      ? 'bg-accent text-white'
                       : 'bg-gray-100 text-gray-700'
                   }`}>
                     {getRankNumber(entry.rank)}
                   </div>
                   <div>
                     <p className={`font-semibold text-sm md:text-base ${
-                      entry.isCurrentUser ? 'text-blue-700' : 'text-gray-900'
+                      entry.isCurrentUser ? 'text-accent' : 'text-gray-900'
                     }`}>
                       {entry.username}
-                      {entry.isCurrentUser && <span className="ml-2 text-blue-600 font-medium text-xs">(You)</span>}
+                      {entry.isCurrentUser && <span className="ml-2 text-accent-light font-medium text-xs">(You)</span>}
                     </p>
                     <p className="text-xs md:text-sm text-gray-600 font-medium">
                       {entry.points.toLocaleString()} points
@@ -434,7 +434,7 @@ export default function Leaderboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
         <span className="ml-3 text-gray-600">Loading leaderboard...</span>
       </div>
     );

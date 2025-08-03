@@ -168,7 +168,7 @@ export default function HomeV3() {
                 Turn Financial Stress into
               </motion.span>
               <motion.span 
-                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 pb-1"
+                className="block gradient-text pb-1"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
@@ -208,7 +208,7 @@ export default function HomeV3() {
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-700 to-blue-900 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <Button 
                 size="lg" 
-                className="relative bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-800 hover:to-blue-950 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-600/40"
+                className="relative btn-primary px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl border-0 h-auto"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6" />
@@ -319,7 +319,7 @@ export default function HomeV3() {
                   <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 h-full transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:shadow-lg hover:-translate-y-1">                    
                     <div className="flex flex-col h-full">
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">
                           {index + 1}
                         </div>
                         <div className="flex-1">
@@ -998,7 +998,7 @@ export default function HomeV3() {
 
 
       {/* Final CTA - Strong Blue Background */}
-      <section id="cta" className="bg-blue-600 text-white py-20 px-6 text-center">
+      <section id="cta" className="bg-accent text-white py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1018,7 +1018,7 @@ export default function HomeV3() {
             >
               <Button 
                 size="lg" 
-                className="bg-white text-blue-600 font-semibold py-3 px-8 text-lg rounded-xl hover:bg-gray-100 transition-all duration-300 border-0 h-auto shadow-lg"
+                className="btn-secondary py-3 px-8 text-lg rounded-xl border-0 h-auto shadow-lg"
                 onClick={() => window.location.href = '/auth?mode=signup'}
               >
                 <Trophy className="mr-2 h-5 w-5" />
