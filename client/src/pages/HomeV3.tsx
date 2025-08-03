@@ -459,14 +459,12 @@ export default function HomeV3() {
                 className={`dashboard-card-primary rounded-xl ${item.borderColor} border-l-4 p-6 space-y-2`}
               >
                 <div className="flex items-start space-x-4 relative z-10">
-                  <div className="bg-white/20 p-3 rounded-full">
-                    <div className="text-white">
-                      {item.icon}
-                    </div>
+                  <div className="bg-accent-light/20 p-3 rounded-full">
+                    {item.icon}
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-white">{item.title}</h4>
-                    <p className="text-white/90 text-sm">
+                    <h4 className="text-lg font-semibold text-slate-900">{item.title}</h4>
+                    <p className="text-muted-foreground text-sm">
                       {item.description}
                     </p>
                   </div>
@@ -604,135 +602,184 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Clean Single Component Layout */}
-          <div className="max-w-4xl mx-auto">
-            {/* Slider Control */}
+          {/* Top Row: Interactive Controls */}
+          <div className="mb-12">
+            {/* Dial Control */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="dashboard-card-primary rounded-xl p-6 mb-8"
+              className="mb-8"
             >
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-3">
-                  <Users className="w-5 h-5 text-white" />
-                  <span className="text-lg font-semibold text-white">Community Size</span>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min={250}
-                      max={10000}
-                      step={250}
-                      value={communitySize}
-                      onChange={(e) => setCommunitySize(Number(e.target.value))}
-                      className="w-full h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
-                      style={{
-                        background: `linear-gradient(to right, #ffffff 0%, #ffffff ${((communitySize - 250) / (10000 - 250)) * 100}%, rgba(255,255,255,0.3) ${((communitySize - 250) / (10000 - 250)) * 100}%, rgba(255,255,255,0.3) 100%)`
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between items-center text-sm text-white/80">
-                    <span>250</span>
-                    <div className="text-2xl font-bold text-white">
-                      {formatMembers(communitySize)}
-                    </div>
-                    <span>10K+</span>
-                  </div>
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-accent" />
+                  Community Size
+                </label>
+                <span className="text-2xl font-bold text-accent">
+                  {formatMembers(communitySize)} members
+                </span>
+              </div>
+              <div className="relative">
+                <input
+                  type="range"
+                  value={communitySize}
+                  onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                  max={10000}
+                  min={250}
+                  step={250}
+                  className="w-full h-3 bg-gradient-to-r from-slate-300 via-accent-light/60 to-accent rounded-lg appearance-none cursor-pointer slider-enhanced"
+                />
+                <div className="flex justify-between text-sm font-medium text-slate-600 mt-3">
+                  <span>250 members</span>
+                  <span className="text-accent">5K members</span>
+                  <span>10K+ members</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Results Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stats Cards Row */}
+            <div className="flex flex-wrap justify-center gap-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 text-center"
+                className="dashboard-card-primary rounded-xl p-4 text-center relative z-10 min-w-[200px] max-w-[240px]"
               >
-                <div className="text-sm text-white/80 mb-2">Monthly Pool</div>
-                <div className="text-3xl font-bold text-white mb-1">
-                  {formatCurrency(calculateRewardsPool(communitySize))}
+                <div className="text-sm font-medium text-slate-600 mb-1">Rewards Allocation</div>
+                <div className="text-2xl font-bold text-accent mb-1">
+                  {rewardsPercentage}%
                 </div>
-                <div className="text-xs text-white/70">available for rewards</div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 flex flex-col items-center"
-              >
-                <div className="relative w-24 h-24 mb-3">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    {/* Background circle */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                    />
-                    {/* Rewards portion */}
-                    <motion.circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#1e3a8a"
-                      strokeWidth="8"
-                      strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "0 219.9" }}
-                      animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
-                      transition={{ duration: 0.8, ease: "easeInOut" }}
-                    />
-                  </svg>
-                  {/* Center content */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-lg font-bold text-white">{rewardsPercentage}%</div>
-                  </div>
-                </div>
-                <div className="text-sm text-white/80 mb-1">Fee Allocation</div>
-                <div className="text-xs text-white/70">to rewards pool</div>
+                <div className="text-xs text-slate-500">of membership fees</div>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 text-center"
+                className="dashboard-card-primary rounded-xl p-4 text-center relative z-10 min-w-[200px] max-w-[240px]"
               >
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Trophy className="w-6 h-6 text-white" />
+                <div className="text-sm font-medium text-slate-600 mb-1">Monthly Pool Size</div>
+                <div className="text-2xl font-bold text-accent mb-1">
+                  {formatCurrency(calculateRewardsPool(communitySize))}
                 </div>
-                <div className="text-sm text-white/80 mb-2">Top Reward</div>
-                <div className="text-3xl font-bold text-white mb-1">
-                  {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
-                </div>
-                <div className="text-xs text-white/70">5% of total pool</div>
+                <div className="text-xs text-slate-500">available for rewards</div>
               </motion.div>
             </div>
+          </div>
+
+          {/* Bottom Row: Visual Results */}
+          <div className="flex flex-wrap justify-center gap-8 items-start">
+            {/* Dynamic Donut Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="flex flex-col items-center"
+            >
+              <div className="relative w-52 h-52 mb-4">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                  />
+                  {/* Rewards percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#1e3a8a"
+                    strokeWidth="10"
+                    strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}` }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                  {/* Operations percentage */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="35"
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="10"
+                    strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
+                    strokeDashoffset={`-${rewardsPercentage * 2.199}`}
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: "109.95 109.95" }}
+                    animate={{ 
+                      strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
+                      strokeDashoffset: `-${rewardsPercentage * 2.199}`
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
+                </svg>
+
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold text-gray-800">$20</div>
+                  <div className="text-sm text-gray-500">monthly membership</div>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-accent rounded"></div>
+                  <span className="text-slate-700">{rewardsPercentage}% → Collective Rewards Pool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-slate-500 rounded"></div>
+                  <span className="text-slate-700">{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Top Reward Callout */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="flex justify-center"
+            >
+              <div className="dashboard-card-primary rounded-xl p-4 w-full max-w-[240px] relative z-10">
+                <div className="text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <h4 className="text-base font-semibold text-slate-800 mb-1">Top Reward</h4>
+                  <div className="text-xl font-bold text-accent mb-1">
+                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
+                  </div>
+                  <p className="text-xs text-slate-600">
+                    5% of rewards pool goes to top performer
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           </div>
           
           {/* Disclaimer */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-center mt-16"
+            className="text-center mt-12"
           >
-            <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-500 max-w-2xl mx-auto">
               * Rewards pool statistics shown are illustrative and based on projected membership levels. Actual rewards may vary based on community growth and platform performance.
             </p>
           </motion.div>

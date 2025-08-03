@@ -132,13 +132,12 @@
   }
   
   .dashboard-card-primary {
-    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 30%, #4c1d95 100%);
-    border: 1px solid #8b5cf6;
-    box-shadow: 0 2px 4px rgba(76, 29, 149, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(219, 234, 254, 0.9) 0%, rgba(191, 219, 254, 0.5) 100%);
+    border: 1px solid #93c5fd;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.12);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    color: white;
   }
   
   .dashboard-card-primary::before {
@@ -148,15 +147,15 @@
     left: 0;
     right: 0;
     height: 60%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(219, 234, 254, 0.25) 30%, rgba(255, 255, 255, 0.15) 60%, rgba(219, 234, 254, 0.08) 80%, transparent 100%);
     border-radius: inherit;
     z-index: 1;
     pointer-events: none;
   }
   
   .dashboard-card-primary:hover {
-    border-color: #a78bfa;
-    box-shadow: 0 4px 12px rgba(76, 29, 149, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: #60a5fa;
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.2), 0 2px 6px rgba(30, 58, 138, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
     transform: translateY(-2px);
   }
   
@@ -416,40 +415,67 @@
   }
   
   .bg-accent-light {
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.8) 0%, rgba(126, 34, 206, 0.4) 100%);
+    background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0.4) 100%);
   }
 
-  /* Simple Range Slider Styles */
-  input[type="range"] {
-    -webkit-appearance: none;
+  /* Enhanced Slider Styles for Professional Dial Control */
+  .slider-enhanced::-webkit-slider-thumb {
     appearance: none;
-    background: transparent;
-    cursor: pointer;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 18px;
-    width: 18px;
+    height: 24px;
+    width: 24px;
     border-radius: 50%;
-    background: #1e3a8a;
-    border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
+    border: 3px solid white;
+    transition: all 0.2s ease;
   }
 
-  input[type="range"]::-webkit-slider-thumb:hover {
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+  .slider-enhanced::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
   }
 
-  input[type="range"]::-moz-range-thumb {
-    height: 18px;
-    width: 18px;
+  .slider-enhanced::-webkit-slider-thumb:active {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+  }
+
+  .slider-enhanced::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
     border-radius: 50%;
-    background: #1e3a8a;
-    border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .slider-enhanced::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
+  }
+
+  .slider-enhanced::-moz-range-thumb:active {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+  }
+
+  /* Slider track styling for continuous axis appearance */
+  .slider-enhanced::-webkit-slider-track {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    border: none;
+    outline: none;
+  }
+
+  .slider-enhanced::-moz-range-track {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    border: none;
+    outline: none;
   }
 }
