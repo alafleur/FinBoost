@@ -547,6 +547,25 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Bridge Section - Connect Trust to Action */}
+      <section className="py-12 px-4 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-2xl font-semibold text-slate-900 mb-4">
+              See the Collective Power in Action
+            </h3>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              The rewards pool described above isn't just theory. Move the slider below to see how community growth translates to real reward potential for every member.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Reward Pool Mechanics - Show Real Impact */}
       <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-accent-light/10 to-accent-light/20">
         <div className="max-w-6xl mx-auto">
