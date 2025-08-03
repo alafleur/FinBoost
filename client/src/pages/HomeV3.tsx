@@ -1345,7 +1345,7 @@ export default function HomeV3() {
           <div className="flex flex-col lg:flex-row gap-12 mb-12 items-center lg:items-start">
             {/* Left Column - Tier Cards */}
             <div className="flex-1 lg:pr-8">
-              <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
+              <div className="flex flex-col gap-4 max-w-lg mx-auto">
                 {[
                   {
                     tier: "Tier 1",
