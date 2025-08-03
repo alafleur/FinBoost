@@ -29,7 +29,8 @@ import {
   AlertTriangle,
   BadgeDollarSign,
   PiggyBank,
-  CheckCircle
+  CheckCircle,
+  ChevronDown
 } from "lucide-react";
 
 export default function HomeV3() {
@@ -559,9 +560,26 @@ export default function HomeV3() {
             <h3 className="text-2xl font-semibold text-slate-900 mb-4">
               See the Collective Power in Action
             </h3>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">
               The rewards pool described above isn't just theory. Move the slider below to see how community growth translates to real reward potential for every member.
             </p>
+            
+            {/* Subtle Arrow */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="flex justify-center"
+            >
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center shadow-sm"
+              >
+                <ChevronDown className="w-4 h-4 text-accent" />
+              </motion.div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
