@@ -796,7 +796,10 @@ export default function HomeV3() {
                 {screenshots.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => setActiveScreenshot(index)}
+                    onClick={() => {
+                      console.log('Dot clicked:', index, 'Previous state:', activeScreenshot);
+                      setActiveScreenshot(index);
+                    }}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
                       activeScreenshot === index 
                         ? 'bg-blue-600 w-8' 
@@ -884,7 +887,10 @@ export default function HomeV3() {
                           ? 'dashboard-card-primary' 
                           : 'bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
                       }`}
-                      onClick={() => setActiveScreenshot(index)}
+                      onClick={() => {
+                        console.log('Card clicked:', index, 'Previous state:', activeScreenshot);
+                        setActiveScreenshot(index);
+                      }}
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       animate={{ 
