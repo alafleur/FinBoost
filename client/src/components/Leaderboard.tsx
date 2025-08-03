@@ -394,10 +394,10 @@ export default function Leaderboard() {
                 }`}
               >
                 <div className="flex items-center space-x-3 md:space-x-4">
-                  <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full font-bold text-sm shadow-sm ${
+                  <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full font-semibold text-sm shadow-sm border ${
                     entry.isCurrentUser
-                      ? 'bg-accent text-white'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white border-blue-400'
+                      : 'bg-gray-100 text-gray-700 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200'
                   }`}>
                     {getRankNumber(entry.rank)}
                   </div>
