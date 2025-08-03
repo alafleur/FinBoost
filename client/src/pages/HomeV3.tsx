@@ -1342,10 +1342,10 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Two-column layout: Tier explanation left, Screenshot right */}
-          <div className="flex flex-col lg:flex-row gap-8 mb-12 items-start">
+          <div className="flex flex-col lg:flex-row gap-12 mb-12 items-center lg:items-start">
             {/* Left Column - Tier Cards */}
-            <div className="flex-1">
-              <div className="flex flex-col gap-4 max-w-md">
+            <div className="flex-1 lg:pr-8">
+              <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
                 {[
                   {
                     tier: "Tier 1",
@@ -1390,7 +1390,7 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-center mt-6"
+                className="text-center mt-8"
               >
                 <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                   Higher Effort → Higher Tier → Larger Rewards
@@ -1404,7 +1404,7 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="lg:w-80 w-full flex justify-center"
+              className="flex-shrink-0 flex justify-center"
             >
               <div className="relative w-56 h-[500px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
                 <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden">
