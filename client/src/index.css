@@ -624,4 +624,139 @@
     border: none;
     outline: none;
   }
+
+  /* === Phase 3: Selective Professional Gloss Effects === */
+  
+  /* Hero Button Enhanced Gloss */
+  .btn-hero-gloss {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-hero-gloss::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.25) 0%, 
+      rgba(255, 255, 255, 0.15) 40%, 
+      rgba(255, 255, 255, 0.05) 70%, 
+      transparent 100%
+    );
+    border-radius: inherit;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-hero-gloss:hover::before {
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.35) 0%, 
+      rgba(255, 255, 255, 0.25) 40%, 
+      rgba(255, 255, 255, 0.1) 70%, 
+      transparent 100%
+    );
+  }
+
+  /* Premium Badge Gloss */
+  .badge-premium-gloss {
+    position: relative;
+    overflow: hidden;
+    background: var(--finboost-gradient-primary);
+  }
+
+  .badge-premium-gloss::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.2) 0%, 
+      rgba(255, 255, 255, 0.1) 60%, 
+      transparent 100%
+    );
+    border-radius: inherit;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Tier Badge Enhanced Gloss */
+  .tier-badge-gloss {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tier-badge-gloss::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.15) 0%, 
+      rgba(255, 255, 255, 0.08) 50%, 
+      transparent 100%
+    );
+    border-radius: inherit;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Premium Card Section Gloss */
+  .card-section-gloss {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-section-gloss::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.06) 60%, 
+      transparent 100%
+    );
+    border-radius: inherit;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Stats Card Subtle Gloss */
+  .stats-card-gloss {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stats-card-gloss::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 25%;
+    background: linear-gradient(
+      180deg, 
+      rgba(255, 255, 255, 0.08) 0%, 
+      rgba(255, 255, 255, 0.04) 70%, 
+      transparent 100%
+    );
+    border-radius: inherit;
+    z-index: 1;
+    pointer-events: none;
+  }
 }
