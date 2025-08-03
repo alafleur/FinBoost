@@ -623,7 +623,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-shrink-0 w-full sm:w-auto">
                         <Button
-                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg w-full sm:w-auto px-6 py-3 text-base font-semibold transition-all duration-200"
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg w-full sm:w-auto px-6 py-3 text-base font-semibold transition-all duration-200"
                           size="default"
                         >
                           {completedLessonIds.length > 0 ? "Continue Learning" : "Start Learning"}
@@ -1197,7 +1197,7 @@ export default function Dashboard() {
                       <h3 className="text-lg font-semibold text-gray-900">
                         Master Essential Skills
                       </h3>
-                      <Button size="sm" variant="outline" className={`${DashboardColors.text.primary} border-blue-200 hover:bg-blue-50`}>
+                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
                         {completedLessonIds.length > 0 ? "Continue" : "Start"}
                       </Button>
                     </div>
