@@ -844,17 +844,21 @@ export default function HomeV3() {
                         </motion.div>
                         
                         <motion.div
-                          key={`text-${activeScreenshot}`}
+                          key={`text-${activeScreenshot}-${screenshots[activeScreenshot].title}`}
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.1, duration: 0.3 }}
                         >
-                          <p 
-                            className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4"
-                            dangerouslySetInnerHTML={{ __html: screenshots[activeScreenshot].mockContent }}
-                          />
+                          <div className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
+                            {screenshots[activeScreenshot].mockContent.split('<br/>').map((line, i, arr) => (
+                              <span key={i}>
+                                {line}
+                                {i < arr.length - 1 && <br />}
+                              </span>
+                            ))}
+                          </div>
                           <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                            <span className="text-xs font-medium text-blue-700">Live Preview Coming Soon</span>
+                            <span className="text-xs font-medium text-blue-700">{screenshots[activeScreenshot].title.replace('Step ', 'Step ')}</span>
                           </div>
                         </motion.div>
                       </div>
