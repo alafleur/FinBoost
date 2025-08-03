@@ -249,30 +249,30 @@ export default function HomeV3() {
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   
-  // Interactive app screenshots data for the phone mockup
+  // How It Works step-by-step process data for the phone mockup
   const screenshots = useMemo(() => [
     {
-      title: "Learning Progress Dashboard",
-      description: "Track your progress through financial modules with clear point totals and completion rates",
-      mockContent: "Dashboard showing 4 of 8 lessons complete, 285 total points, Tier 2 status",
+      title: "Step 1: Learn & Complete Lessons",
+      description: "Complete bite-sized financial lessons and quizzes to earn points and build your knowledge",
+      mockContent: "Current Lesson:<br/>Credit Score Basics<br/>Progress: 75% Complete",
       icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
-      title: "Quiz Completion & Points",
-      description: "Earn immediate points for completing quizzes and demonstrating knowledge",
-      mockContent: "Quiz complete screen: +15 points earned, streak bonus +5, total: 20 points",
+      title: "Step 2: Earn Points & Build Streaks",
+      description: "Every lesson, quiz, and action earns you points. Daily streaks multiply your rewards",
+      mockContent: "Quiz Complete!<br/>+15 points earned<br/>Streak bonus: +5 points",
       icon: <CheckCircle className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
-      title: "Reward Tiers & Cycle Progress",
-      description: "See your tier placement and cycle progress with clear reward potential",
-      mockContent: "Tier 2 status, 67 points this cycle, 14 days remaining, $118 tier pool",
+      title: "Step 3: Climb Tiers & Compete",
+      description: "Your points determine your tier placement. Higher tiers get larger shares of the reward pool",
+      mockContent: "Current Tier: Tier 2<br/>Points: 847<br/>Rank: #23 of 156",
       icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
-      title: "Daily Streak Tracker",
-      description: "Build momentum with daily learning streaks and bonus point multipliers",
-      mockContent: "7-day streak active, 2x point multiplier, next lesson worth 20 points",
+      title: "Step 4: Win Real Cash Rewards",
+      description: "At cycle end, winners are selected based on points. The more points, the better your odds",
+      mockContent: "Cycle 18 Complete!<br/>You placed Tier 1<br/>Reward: $127 won!",
       icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     }
   ], []);
@@ -776,14 +776,14 @@ export default function HomeV3() {
             className="text-center mb-16"
           >
             <div className="inline-block bg-accent/10 backdrop-blur-sm border border-accent/20 rounded-full px-6 py-2 mb-6">
-              <span className="text-accent font-semibold text-sm">PLATFORM PREVIEW</span>
+              <span className="text-accent font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              See What Progress
-              <span className="block text-slate-900"> Looks Like</span>
+              How FinBoost Works
+              <span className="block text-slate-900">(and How You Win)</span>
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Interactive previews from the FinBoost platform showing your journey to financial rewards
+              Four simple steps to turn your financial learning into real cash rewards
             </p>
           </motion.div>
 
