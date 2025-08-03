@@ -1345,7 +1345,7 @@ export default function HomeV3() {
           <div className="flex flex-col lg:flex-row gap-8 mb-12 items-start">
             {/* Left Column - Tier Cards */}
             <div className="flex-1">
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="flex flex-col gap-4">
                 {[
                   {
                     tier: "Tier 1",
@@ -1371,12 +1371,12 @@ export default function HomeV3() {
                     viewport={{ once: true }}
                   >
                     <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <CardContent className="p-6 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
+                      <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
                         <div className="relative z-10">
-                          <h3 className="text-2xl font-semibold text-white mb-1">
+                          <h3 className="text-xl font-semibold text-white mb-1">
                             {tier.tier}
                           </h3>
-                          <p className="text-white/90 mb-3">{tier.subtitle} = {tier.rewardLevel}</p>
+                          <p className="text-white/90 text-sm">{tier.subtitle} = {tier.rewardLevel}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -1398,33 +1398,47 @@ export default function HomeV3() {
               </motion.div>
             </div>
 
-            {/* Right Column - Screenshot */}
+            {/* Right Column - Phone Frame */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="lg:w-80 w-full"
+              className="lg:w-80 w-full flex justify-center"
             >
-              <div className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl p-4 shadow-lg">
-                <div className="h-[400px] w-full bg-white/10 rounded-lg flex items-center justify-center text-gray-500 text-sm font-medium shadow-sm overflow-hidden">
-                  <img 
-                    src="/api/placeholder/tier-dashboard.png" 
-                    alt="FinBoost user dashboard showing tier rankings and point boundaries"
-                    className="w-full h-full object-cover rounded-lg"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = '<span class="text-gray-500 text-sm font-medium">tier-dashboard.png</span>';
-                      }
-                    }}
-                  />
+              <div className="relative w-64 h-[400px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] p-2 shadow-xl shadow-slate-900/50">
+                <div className="w-full h-full bg-white rounded-[1.5rem] overflow-hidden">
+                  {/* Status bar */}
+                  <div className="bg-slate-50 h-8 flex items-center justify-between px-4 text-xs font-medium text-slate-600">
+                    <span>9:41</span>
+                    <div className="flex space-x-1">
+                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                      <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
+                    </div>
+                  </div>
+                  
+                  {/* App content */}
+                  <div className="p-4 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)]">
+                    <div className="text-center h-full flex flex-col justify-center">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <Trophy className="w-7 h-7 text-white" />
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs font-semibold text-slate-800 leading-relaxed mb-3">
+                          Current Tier: Tier 2<br/>
+                          Points: 847<br/>
+                          Rank: #23 of 156
+                        </p>
+                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 border border-blue-200/50">
+                          <span className="text-xs font-medium text-blue-700">Tier Dashboard</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-center text-sm text-gray-600 mt-4 font-medium leading-relaxed">
-                  See where you rank and how your points place you into reward tiers.
-                </p>
+                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-white/30 rounded-full"></div>
               </div>
             </motion.div>
           </div>
@@ -1436,7 +1450,7 @@ export default function HomeV3() {
             >
               <Button 
                 size="lg" 
-                className="card-premium-button btn-hero-gloss btn-enhanced-hover interactive-glow text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hero-gloss btn-enhanced-hover interactive-glow text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 h-5 w-5 icon-bounce" />
