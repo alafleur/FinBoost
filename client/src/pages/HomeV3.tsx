@@ -517,13 +517,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="card-premium rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="dashboard-card-primary rounded-2xl p-8"
             >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
-                <GraduationCap className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-accent-light/30 rounded-xl flex items-center justify-center mb-6">
+                <GraduationCap className="w-8 h-8 text-accent" />
               </div>
-              <h4 className="text-xl font-bold text-white mb-4">Financial Modules</h4>
-              <p className="text-white/90 leading-relaxed">
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Financial Modules</h4>
+              <p className="text-gray-700 leading-relaxed">
                 You unlock full access to our growing library of financial lessons, quizzes, and real-world action incentives that build genuine financial skills.
               </p>
             </motion.div>
@@ -533,13 +533,13 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="card-premium rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="dashboard-card-primary rounded-2xl p-8"
             >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6">
-                <Users className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-accent-light/30 rounded-xl flex items-center justify-center mb-6">
+                <Users className="w-8 h-8 text-accent" />
               </div>
-              <h4 className="text-xl font-bold text-white mb-4">Rewards Pool</h4>
-              <p className="text-white/90 leading-relaxed">
+              <h4 className="text-xl font-bold text-gray-900 mb-4">Rewards Pool</h4>
+              <p className="text-gray-700 leading-relaxed">
                 Part of every membership funds the rewards pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
               </p>
             </motion.div>
