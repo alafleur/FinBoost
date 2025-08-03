@@ -878,7 +878,7 @@ export default function HomeV3() {
                 <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
                   {screenshots.map((screenshot, index) => (
                     <motion.div
-                      key={index}
+                      key={`card-${index}-${activeScreenshot}`}
                       className={`flex-shrink-0 w-72 lg:w-full group p-5 lg:p-6 rounded-xl cursor-pointer transition-all duration-300 ${
                         activeScreenshot === index 
                           ? 'dashboard-card-primary' 
@@ -887,6 +887,10 @@ export default function HomeV3() {
                       onClick={() => setActiveScreenshot(index)}
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
+                      animate={{ 
+                        scale: activeScreenshot === index ? 1.02 : 1,
+                      }}
+                      transition={{ duration: 0.2 }}
                     >
                       <div className="flex items-start space-x-3 lg:space-x-4">
                         <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center transition-colors ${
