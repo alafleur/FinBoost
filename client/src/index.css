@@ -132,12 +132,13 @@
   }
   
   .dashboard-card-primary {
-    background: linear-gradient(135deg, rgba(233, 213, 255, 0.8) 0%, rgba(196, 181, 253, 0.4) 100%);
-    border: 1px solid #c4b5fd;
-    box-shadow: 0 1px 3px rgba(147, 51, 234, 0.1);
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 30%, #4c1d95 100%);
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 2px 4px rgba(76, 29, 149, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    color: white;
   }
   
   .dashboard-card-primary::before {
@@ -147,7 +148,7 @@
     left: 0;
     right: 0;
     height: 60%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(233, 213, 255, 0.25) 30%, rgba(255, 255, 255, 0.15) 60%, rgba(233, 213, 255, 0.08) 80%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
     border-radius: inherit;
     z-index: 1;
     pointer-events: none;
@@ -155,8 +156,8 @@
   
   .dashboard-card-primary:hover {
     border-color: #a78bfa;
-    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15), 0 2px 4px rgba(147, 51, 234, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 29, 149, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
   }
   
   .dashboard-card-success {
