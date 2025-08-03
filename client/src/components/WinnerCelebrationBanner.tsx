@@ -76,11 +76,11 @@ export default function WinnerCelebrationBanner() {
   };
 
   const getTierColors = (tier: string) => {
-    // Use blue→purple gradient system for unified branding
+    // Enhanced blue→purple gradient system for celebratory winner banner
     return {
       gradient: DashboardColors.accent.primary,
-      bg: 'bg-gradient-to-br from-blue-50/80 to-purple-50/60',
-      border: 'border-blue-200/40',
+      bg: 'bg-gradient-to-br from-blue-100/90 to-purple-100/80',
+      border: 'border-blue-300/60',
       text: DashboardColors.text.primary
     };
   };
