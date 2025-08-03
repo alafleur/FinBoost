@@ -1028,7 +1028,7 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Clean Tier Card Format - Responsive 2x2 Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto items-stretch">
             {[
               {
                 title: "Debt Progress Pays",
@@ -1040,7 +1040,7 @@ export default function HomeV3() {
               },
               {
                 title: "Addressing Beyond Just Next Month",
-                subtitle: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress."
+                subtitle: "FinBoost isn't just about surviving the month — it's about freedom from near-term stress and building momentum toward long-term goals."
               },
               {
                 title: "A Better Approach",
