@@ -425,25 +425,25 @@ export default function HomeV3() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               {
-                icon: <PiggyBank className="w-6 h-6 text-slate-800" />,
+                icon: <PiggyBank className="w-6 h-6 text-accent" />,
                 title: "Debt Progress Pays",
                 description: "Student loans, credit cards — every payment forward earns you money back.",
                 borderColor: "border-l-accent"
               },
               {
-                icon: <BarChart3 className="w-6 h-6 text-slate-800" />,
+                icon: <BarChart3 className="w-6 h-6 text-accent" />,
                 title: "Rising Costs Reality", 
                 description: "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
                 borderColor: "border-l-accent"
               },
               {
-                icon: <Clock className="w-6 h-6 text-slate-800" />,
+                icon: <Clock className="w-6 h-6 text-accent" />,
                 title: "Worrying About Retirement, Not Just Next Month",
                 description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress.",
                 borderColor: "border-l-accent"
               },
               {
-                icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
+                icon: <TrendingUp className="w-6 h-6 text-accent" />,
                 title: "Beyond Daily Tracking",
                 description: "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
                 borderColor: "border-l-accent"
@@ -458,7 +458,7 @@ export default function HomeV3() {
                 className={`bg-white rounded-xl border ${item.borderColor} border-l-4 p-6 hover:shadow-md transition-all duration-300 space-y-2`}
               >
                 <div className="flex items-start space-x-4">
-                  <div className="bg-slate-100 p-3 rounded-full text-slate-800">
+                  <div className="bg-accent-light/20 p-3 rounded-full">
                     {item.icon}
                   </div>
                   <div>
