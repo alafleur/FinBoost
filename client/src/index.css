@@ -417,4 +417,65 @@
   .bg-accent-light {
     background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0.4) 100%);
   }
+
+  /* Enhanced Slider Styles for Professional Dial Control */
+  .slider-enhanced::-webkit-slider-thumb {
+    appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
+    border: 3px solid white;
+    transition: all 0.2s ease;
+  }
+
+  .slider-enhanced::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
+  }
+
+  .slider-enhanced::-webkit-slider-thumb:active {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+  }
+
+  .slider-enhanced::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4), 0 2px 4px rgba(30, 58, 138, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .slider-enhanced::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.5), 0 2px 6px rgba(30, 58, 138, 0.3);
+  }
+
+  .slider-enhanced::-moz-range-thumb:active {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.6);
+  }
+
+  /* Slider track styling for continuous axis appearance */
+  .slider-enhanced::-webkit-slider-track {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    border: none;
+    outline: none;
+  }
+
+  .slider-enhanced::-moz-range-track {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #cbd5e1 0%, #1e3a8a20 50%, #1e3a8a 100%);
+    border: none;
+    outline: none;
+  }
 }

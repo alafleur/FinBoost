@@ -621,19 +621,21 @@ export default function HomeV3() {
                   {formatMembers(communitySize)} members
                 </span>
               </div>
-              <input
-                type="range"
-                value={communitySize}
-                onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                max={10000}
-                min={250}
-                step={250}
-                className="w-full h-2 bg-accent-light/30 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <div className="flex justify-between text-sm text-gray-500 mt-2">
-                <span>250</span>
-                <span>5K</span>
-                <span>10K+</span>
+              <div className="relative">
+                <input
+                  type="range"
+                  value={communitySize}
+                  onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                  max={10000}
+                  min={250}
+                  step={250}
+                  className="w-full h-3 bg-gradient-to-r from-slate-300 via-accent-light/60 to-accent rounded-lg appearance-none cursor-pointer slider-enhanced"
+                />
+                <div className="flex justify-between text-sm font-medium text-slate-600 mt-3">
+                  <span>250 members</span>
+                  <span className="text-accent">5K members</span>
+                  <span>10K+ members</span>
+                </div>
               </div>
             </motion.div>
 
