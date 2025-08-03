@@ -1495,7 +1495,7 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Two-column layout: Screenshot left, Content right */}
-          <div className="flex flex-col lg:flex-row gap-8 mb-16 items-start">
+          <div className="flex flex-col lg:flex-row gap-8 mb-16 items-start lg:items-center">
             {/* Left Column - Phone Frame */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
