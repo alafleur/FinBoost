@@ -1344,7 +1344,7 @@ export default function HomeV3() {
           {/* Tier explanation with integrated phone */}
           <div className="relative mb-12">
             {/* Main content container */}
-            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start">
+            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:justify-center">
               {/* Left side - Tier Cards */}
               <div className="w-full lg:w-auto lg:flex-shrink-0">
                 <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
