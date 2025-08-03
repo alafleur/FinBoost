@@ -123,47 +123,45 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
             {/* Accent Bar */}
             <div className={`absolute top-0 left-0 w-full h-1.5 ${colors.accent}`}></div>
             
-            <div className="p-4">
+            <div className="p-3">
               {/* Header with Icon and Badge */}
-              <div className="flex items-start justify-between mb-3">
-                <div className={`p-2.5 rounded-lg border ${colors.iconBg}`}>
-                  <TierIcon className={`h-5 w-5 ${colors.iconColor}`} />
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-lg border ${colors.iconBg}`}>
+                  <TierIcon className={`h-4 w-4 ${colors.iconColor}`} />
                 </div>
                 {tier.isCurrentTier && (
-                  <Badge className={`${colors.badge} text-xs px-2 py-1`}>
+                  <Badge className={`${colors.badge} text-xs px-2 py-0.5`}>
                     Your Tier
                   </Badge>
                 )}
               </div>
 
-              {/* Tier Name */}
-              <h3 className={`text-base font-semibold ${DashboardColors.text.primary} mb-1`}>
-                {tier.name}
-              </h3>
-
-              {/* Point Range */}
-              <p className={`text-xs ${DashboardColors.text.secondary} mb-2`}>
-                {tier.range} points
-              </p>
-
-              {/* Reward Amount */}
-              <div className="pt-2 border-t border-gray-100">
-                {tier.reward ? (
-                  <div>
-                    <p className={`text-xs ${DashboardColors.text.muted} mb-1`}>Pool Allocation</p>
-                    <p className={`text-lg font-bold text-gray-900`}>
-                      {formatCurrency(tier.reward)}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className={`text-xs ${DashboardColors.text.muted} mb-1`}>Pool Allocation</p>
-                    <p className="text-sm text-gray-400">
-                      Not available
-                    </p>
-                  </div>
-                )}
+              {/* Tier Name and Points on same line */}
+              <div className="mb-2">
+                <h3 className={`text-sm font-semibold ${DashboardColors.text.primary}`}>
+                  {tier.name}
+                </h3>
+                <p className={`text-xs ${DashboardColors.text.secondary}`}>
+                  {tier.range} points
+                </p>
               </div>
+
+              {/* Reward Amount - Compact */}
+              {tier.reward ? (
+                <div>
+                  <p className={`text-xs ${DashboardColors.text.muted}`}>Pool Allocation</p>
+                  <p className={`text-base font-bold text-gray-900`}>
+                    {formatCurrency(tier.reward)}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className={`text-xs ${DashboardColors.text.muted}`}>Pool Allocation</p>
+                  <p className="text-xs text-gray-400">
+                    Not available
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         );
