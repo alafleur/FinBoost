@@ -123,26 +123,26 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
             {/* Accent Bar */}
             <div className={`absolute top-0 left-0 w-full h-1.5 ${colors.accent}`}></div>
             
-            <div className="p-5">
+            <div className="p-4">
               {/* Header with Icon and Badge */}
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl border ${colors.iconBg}`}>
-                  <TierIcon className={`h-6 w-6 ${colors.iconColor}`} />
+              <div className="flex items-start justify-between mb-3">
+                <div className={`p-2.5 rounded-lg border ${colors.iconBg}`}>
+                  <TierIcon className={`h-5 w-5 ${colors.iconColor}`} />
                 </div>
                 {tier.isCurrentTier && (
-                  <Badge className={colors.badge}>
+                  <Badge className={`${colors.badge} text-xs px-2 py-1`}>
                     Your Tier
                   </Badge>
                 )}
               </div>
 
               {/* Tier Name */}
-              <h3 className={`text-lg font-semibold ${DashboardColors.text.primary} mb-1`}>
+              <h3 className={`text-base font-semibold ${DashboardColors.text.primary} mb-1`}>
                 {tier.name}
               </h3>
 
               {/* Point Range */}
-              <p className={`text-sm ${DashboardColors.text.secondary} mb-3`}>
+              <p className={`text-xs ${DashboardColors.text.secondary} mb-2`}>
                 {tier.range} points
               </p>
 
@@ -151,7 +151,7 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
                 {tier.reward ? (
                   <div>
                     <p className={`text-xs ${DashboardColors.text.muted} mb-1`}>Pool Allocation</p>
-                    <p className={`text-xl font-bold ${tier.isCurrentTier ? 'text-blue-600' : 'text-gray-900'}`}>
+                    <p className={`text-lg font-bold text-gray-900`}>
                       {formatCurrency(tier.reward)}
                     </p>
                   </div>
