@@ -869,74 +869,91 @@ export default function HomeV3() {
               </motion.div>
             </div>
 
-            {/* Interactive Cards - Mobile Below Phone, Desktop Left */}
+            {/* Interactive Single Card - Mobile Below Phone, Desktop Left */}
             <div className="order-2 lg:order-1">
               {/* Mobile instruction hint */}
               <div className="lg:hidden text-center mb-4">
                 <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
                   <span className="mr-2">👆</span>
-                  Tap cards to preview different features
+                  Tap card to see all features
                 </div>
               </div>
-              
 
-              
-              {/* Mobile: Horizontal scroll, Desktop: Vertical stack */}
-              <div className="lg:space-y-3">
-                <div className="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 px-4 lg:px-0">
-                  {screenshots.map((screenshot, index) => (
-                    <motion.div
-                      key={`card-${index}-${activeScreenshot}`}
-                      className={`flex-shrink-0 w-72 lg:w-full group p-5 lg:p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                        activeScreenshot === index 
-                          ? 'dashboard-card-primary' 
-                          : 'bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
-                      }`}
-                      onClick={() => {
-                        console.log('Card clicked:', index, 'Previous state:', activeScreenshot);
-                        setActiveScreenshot(index);
-                      }}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      animate={{ 
-                        scale: activeScreenshot === index ? 1.02 : 1,
-                      }}
-                      transition={{ duration: 0.2 }}
+              {/* Single Flipping Card */}
+              <div className="px-4 lg:px-0">
+                <motion.div
+                  key={`unified-card-${activeScreenshot}`}
+                  className="dashboard-card-primary p-5 lg:p-6 rounded-xl cursor-pointer"
+                  onClick={() => {
+                    const nextIndex = (activeScreenshot + 1) % screenshots.length;
+                    console.log('Card flipped to:', nextIndex, 'Previous state:', activeScreenshot);
+                    setActiveScreenshot(nextIndex);
+                  }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-start space-x-3 lg:space-x-4">
+                    <motion.div 
+                      key={`icon-${activeScreenshot}`}
+                      className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
                     >
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center transition-colors ${
-                          activeScreenshot === index 
-                            ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
-                            : 'bg-slate-100 group-hover:bg-slate-200'
-                        }`}>
-                          {React.cloneElement(screenshot.icon, {
-                            className: `w-5 h-5 lg:w-6 lg:h-6 ${activeScreenshot === index ? 'text-white' : 'text-slate-600'}`
-                          })}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1 lg:mb-2">
-                            <h3 className="font-semibold text-base lg:text-lg text-slate-900">
-                              {screenshot.title}
-                            </h3>
-                            {/* Mobile chevron indicator */}
-                            <div className={`lg:hidden w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                              activeScreenshot === index 
-                                ? 'bg-blue-100' 
-                                : 'bg-slate-100 group-hover:bg-slate-200'
-                            }`}>
-                              <ArrowRight className={`w-3 h-3 transition-colors ${
-                                activeScreenshot === index ? 'text-blue-600' : 'text-slate-400'
-                              }`} />
-                            </div>
-                          </div>
-                          <p className="text-slate-600 text-sm leading-relaxed">
-                            {screenshot.description}
-                          </p>
+                      {React.cloneElement(screenshots[activeScreenshot].icon, {
+                        className: "w-6 h-6 lg:w-7 lg:h-7 text-white"
+                      })}
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <motion.h3 
+                          key={`title-${activeScreenshot}`}
+                          className="font-semibold text-lg lg:text-xl text-slate-900"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1, duration: 0.3 }}
+                        >
+                          {screenshots[activeScreenshot].title}
+                        </motion.h3>
+                        {/* Flip indicator */}
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                          <ArrowRight className="w-4 h-4 text-blue-600" />
                         </div>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
+                      <motion.p 
+                        key={`desc-${activeScreenshot}`}
+                        className="text-slate-600 text-sm lg:text-base leading-relaxed mb-4"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                      >
+                        {screenshots[activeScreenshot].description}
+                      </motion.p>
+                      
+                      {/* Step indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-2">
+                          {screenshots.map((_, index) => (
+                            <div
+                              key={index}
+                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                activeScreenshot === index 
+                                  ? 'bg-blue-600 w-6' 
+                                  : 'bg-slate-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-slate-500 font-medium">
+                          {activeScreenshot + 1} of {screenshots.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </div>
