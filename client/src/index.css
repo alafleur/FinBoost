@@ -303,7 +303,7 @@
   .dashboard-accent-neutral {
     background: var(--finboost-gradient-primary);
     position: relative;
-    box-shadow: var(--finboost-shadow-md), inset 0 1px 0 var(--finboost-active-overlay);
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
   
   .dashboard-accent-neutral::before {
