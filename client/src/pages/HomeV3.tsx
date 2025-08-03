@@ -865,9 +865,7 @@ export default function HomeV3() {
                           </button>
 
                           <div className="text-white/70 text-sm font-medium px-3 py-1 bg-white/10 rounded-full backdrop-blur-sm">
-                            <span className="text-accent font-semibold">{carousel.currentStep + 1}</span>
-                            <span className="mx-1">/</span>
-                            <span>{stepsData.length}</span>
+                            {carousel.currentStep + 1} / {stepsData.length}
                           </div>
 
                           <button
@@ -987,9 +985,7 @@ export default function HomeV3() {
                 </button>
 
                 <div className="text-white/70 text-sm font-medium px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm">
-                  <span className="text-accent font-semibold">{carousel.currentStep + 1}</span>
-                  <span className="mx-2">/</span>
-                  <span>{stepsData.length}</span>
+                  <span className="text-accent font-semibold">{carousel.currentStep + 1}</span> / {stepsData.length}
                 </div>
 
                 <button
