@@ -740,7 +740,7 @@ export default function HomeV3() {
       {/* How It Works - Interactive Carousel */}
       <section 
         id="how-it-works" 
-        className="py-20 px-4 bg-slate-900 relative overflow-hidden"
+        className="py-20 px-4 bg-gradient-to-b from-slate-50 via-white to-slate-50 relative overflow-hidden"
         ref={setSectionRef}
         onKeyDown={handleKeyNavigation}
         tabIndex={0}
@@ -749,8 +749,10 @@ export default function HomeV3() {
       >
         {/* Background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent-light to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl pointer-events-none" />
         </div>
         
         {/* Screen reader announcements */}
@@ -771,14 +773,14 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-accent-light font-semibold text-sm">HOW IT WORKS</span>
+            <div className="inline-block bg-accent/10 backdrop-blur-sm border border-accent/20 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-accent font-semibold text-sm">HOW IT WORKS</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
               How It Works
-              <span className="block text-white">(and How You Win)</span>
+              <span className="block text-slate-900">(and How You Win)</span>
             </h2>
-            <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
               Earn points through financial education. Half of members win real money every 2 weeks.
             </p>
           </motion.div>
@@ -803,7 +805,7 @@ export default function HomeV3() {
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   className="w-full"
                 >
-                  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mx-4">
+                  <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 mx-4 shadow-lg">
                     <div className="flex flex-col items-center text-center">
                       {/* Step Header */}
                       <div className="flex items-center space-x-4 mb-6 w-full">
@@ -811,7 +813,7 @@ export default function HomeV3() {
                           {carousel.currentStep + 1}
                         </div>
                         <div className="flex-1 text-left">
-                          <h3 className="text-xl font-semibold text-white mb-2">
+                          <h3 className="text-xl font-semibold text-slate-900 mb-2">
                             {stepsData[carousel.currentStep].title}
                           </h3>
                         </div>
@@ -857,20 +859,20 @@ export default function HomeV3() {
                         <div className="flex justify-center items-center space-x-6">
                           <button
                             onClick={carousel.prevStep}
-                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                             aria-label="Previous step"
                             data-testid="mobile-carousel-prev-btn"
                           >
                             <ChevronLeft className="w-5 h-5" />
                           </button>
 
-                          <div className="text-white/70 text-sm font-medium px-3 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                          <div className="text-slate-600 text-sm font-medium px-3 py-1 bg-slate-100 rounded-full backdrop-blur-sm">
                             {carousel.currentStep + 1} / {stepsData.length}
                           </div>
 
                           <button
                             onClick={carousel.nextStep}
-                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                             aria-label="Next step"
                             data-testid="mobile-carousel-next-btn"
                           >
@@ -880,12 +882,12 @@ export default function HomeV3() {
                       </div>
                       
                       {/* Description */}
-                      <p className="text-white/70 text-sm leading-relaxed mb-4">
+                      <p className="text-slate-600 text-sm leading-relaxed mb-4">
                         {stepsData[carousel.currentStep].description}
                       </p>
                       
                       {/* Caption */}
-                      <p className="text-blue-300 text-sm font-medium">
+                      <p className="text-accent text-sm font-medium">
                         {stepsData[carousel.currentStep].caption}
                       </p>
                     </div>
@@ -904,7 +906,7 @@ export default function HomeV3() {
                     transition={{ duration: 0.4, ease: "easeOut" }}
                     className="w-full"
                   >
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
+                    <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl p-8 shadow-lg">
                       <div className="flex flex-col lg:flex-row items-center gap-8">
                         {/* Left: Content */}
                         <div className="flex-1 text-center lg:text-left">
@@ -914,19 +916,19 @@ export default function HomeV3() {
                               {carousel.currentStep + 1}
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-2xl font-semibold text-white mb-2">
+                              <h3 className="text-2xl font-semibold text-slate-900 mb-2">
                                 {stepsData[carousel.currentStep].title}
                               </h3>
                             </div>
                           </div>
                           
                           {/* Description */}
-                          <p className="text-white/70 text-base leading-relaxed mb-6">
+                          <p className="text-slate-600 text-base leading-relaxed mb-6">
                             {stepsData[carousel.currentStep].description}
                           </p>
                           
                           {/* Caption */}
-                          <p className="text-blue-300 text-sm font-medium">
+                          <p className="text-accent text-sm font-medium">
                             {stepsData[carousel.currentStep].caption}
                           </p>
                         </div>
@@ -955,10 +957,10 @@ export default function HomeV3() {
                                 <button
                                   key={index}
                                   onClick={() => carousel.goToStep(index)}
-                                  className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                                  className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-white ${
                                     index === carousel.currentStep
                                       ? 'bg-accent scale-125 shadow-lg'
-                                      : 'bg-white/30 hover:bg-white/50'
+                                      : 'bg-slate-300 hover:bg-slate-400'
                                   }`}
                                   aria-label={`Go to step ${index + 1}: ${stepsData[index].title}`}
                                   data-testid={`desktop-progress-dot-${index + 1}`}
@@ -970,20 +972,20 @@ export default function HomeV3() {
                             <div className="flex justify-center items-center space-x-4">
                               <button
                                 onClick={carousel.prevStep}
-                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                                 aria-label="Previous step"
                                 data-testid="desktop-carousel-prev-btn"
                               >
                                 <ChevronLeft className="w-5 h-5" />
                               </button>
 
-                              <div className="text-white/70 text-sm font-medium px-3 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                              <div className="text-slate-600 text-sm font-medium px-3 py-1 bg-slate-100 rounded-full backdrop-blur-sm">
                                 <span className="text-accent font-semibold">{carousel.currentStep + 1}</span> / {stepsData.length}
                               </div>
 
                               <button
                                 onClick={carousel.nextStep}
-                                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-white/70 hover:text-white"
+                                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent text-slate-600 hover:text-slate-900"
                                 aria-label="Next step"
                                 data-testid="desktop-carousel-next-btn"
                               >
@@ -1006,7 +1008,7 @@ export default function HomeV3() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent ${
                   carousel.isAutoPlaying && !carousel.isPaused
                     ? 'bg-accent text-white hover:bg-accent/80'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
                 }`}
                 data-testid="carousel-autoplay-btn"
               >
@@ -1023,7 +1025,7 @@ export default function HomeV3() {
                 )}
               </button>
 
-              <div className="text-xs text-white/50 bg-white/5 px-3 py-1 rounded-full">
+              <div className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
                 Use ← → keys or numbers 1-4
               </div>
             </div>
