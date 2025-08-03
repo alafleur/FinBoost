@@ -224,7 +224,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Rewarded for Your Financial Progress!</h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Get rewarded with more points by showing proof of debt paydown! Upload documents showing your financial actions and earn points toward monthly rewards.
+              Get rewarded with more points by uploading proof of debt paydown!
             </p>
           </div>
         </div>
