@@ -776,7 +776,7 @@ export default function HomeV3() {
             className="text-center mb-16"
           >
             <div className="inline-block bg-accent/10 backdrop-blur-sm border border-accent/20 rounded-full px-6 py-2 mb-6">
-              <span className="text-accent font-semibold text-sm">HOW IT WORKS</span>
+              <span className="text-blue-700 font-semibold text-sm">HOW IT WORKS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
               How FinBoost Works
@@ -1026,7 +1026,7 @@ export default function HomeV3() {
             className="text-center mb-16"
           >
             <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-accent font-semibold text-sm">OUR DIFFERENCE</span>
+              <span className="text-blue-700 font-semibold text-sm">WHY FINBOOST</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
               Why FinBoost Isn't Just Another Finance App
@@ -1111,7 +1111,7 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-accent font-semibold text-sm">MEMBERSHIP VALUE</span>
+              <span className="text-blue-700 font-semibold text-sm">MEMBERSHIP VALUE</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
               How Your Membership Fuels the Movement
@@ -1204,7 +1204,7 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-accent font-semibold text-sm">STRENGTH IN NUMBERS</span>
+              <span className="text-blue-700 font-semibold text-sm">STRENGTH IN NUMBERS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
               Toggle the Dial to See the Power of the Collective
@@ -1407,7 +1407,7 @@ export default function HomeV3() {
             className="text-center mb-12"
           >
             <div className="inline-block bg-accent-light/20 backdrop-blur-sm border border-accent-light/30 rounded-full px-6 py-2 mb-6">
-              <span className="text-accent font-semibold text-sm">TIER SYSTEM</span>
+              <span className="text-blue-700 font-semibold text-sm">REWARDS SYSTEM</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Half of Members Earn Rewards Each Cycle
