@@ -43,7 +43,7 @@ interface PointsActionsProps {
 
 export default function PointsActions({ onPointsEarned, quickWinActions }: PointsActionsProps) {
   const [actions, setActions] = useState<PointAction[]>([]);
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [selectedAction, setSelectedAction] = useState<number | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -65,17 +65,15 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
       if (response.ok) {
         const data = await response.json();
-        setActions(data.actions || []);
+        // Filter out Investment Contribution actions
+        const filteredActions = (data.actions || []).filter((action: PointAction) => 
+          !action.name.toLowerCase().includes('investment contribution') &&
+          !action.actionId.toLowerCase().includes('investment')
+        );
+        setActions(filteredActions);
       }
     } catch (error) {
       console.error('Failed to fetch actions:', error);
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProofFile(file);
     }
   };
 
@@ -104,7 +102,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          actionId: selectedAction,
+          actionId: selectedAction.toString(),
           proofUrl,
           description,
           metadata: {
@@ -147,9 +145,9 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'action': return 'bg-accent-light/20 text-accent';
-      case 'achievement': return 'bg-accent-light/20 text-accent';
-      default: return 'bg-accent-light/20 text-accent';
+      case 'action': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'achievement': return 'bg-purple-50 text-purple-700 border-purple-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -211,8 +209,10 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
         {actions.map((action) => (
           <Card 
             key={action.id} 
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedAction === action.id ? 'ring-2 ring-blue-500' : ''
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-gray-200 ${
+              selectedAction === action.id 
+                ? 'ring-2 ring-blue-500 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50' 
+                : 'hover:border-blue-200'
             }`}
             onClick={() => setSelectedAction(action.id)}
           >
@@ -220,40 +220,35 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
               <div className="flex justify-between items-start">
                 <CardTitle className="text-lg">{action.name}</CardTitle>
                 <Badge className={getCategoryColor(action.category)}>
-                  {action.basePoints} pts
+                  {action.category}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-3">{action.description}</p>
-              {(action.maxDaily || action.maxMonthly || action.maxTotal) && (
-                <div className="text-xs text-gray-500">
-                  {action.maxMonthly ? (
-                    <span>Max {action.maxMonthly}/month</span>
-                  ) : action.maxDaily ? (
-                    <span>Max {action.maxDaily}/day</span>
-                  ) : null}
-                  {((action.maxMonthly || action.maxDaily) && action.maxTotal) && <span> • </span>}
-                  {action.maxTotal && <span>Max {action.maxTotal} total</span>}
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
       {selectedAction && (
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-50 via-white to-purple-50 border-blue-200 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-gray-900">
+              <Upload className="h-5 w-5 text-blue-600" />
               Submit Proof for {actions.find(a => a.id === selectedAction)?.name}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="proof-file">Upload Proof Document/Image</Label>
-              <FileUpload setProofFile={setProofFile}/>
+              <FileUpload 
+                onFileUploaded={(fileUrl, fileName, fileSize) => {
+                  // Create a File-like object for backward compatibility
+                  const file = new File([], fileName, { type: 'application/octet-stream' });
+                  setProofFile(file);
+                }}
+              />
               <p className="text-xs text-gray-500 mt-1">
                 Accepted formats: Images, PDF, Word documents
               </p>
@@ -274,7 +269,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
               <Button 
                 onClick={submitProof}
                 disabled={submitting || !proofFile || !description.trim()}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 {submitting ? (
                   <>
@@ -295,6 +290,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
                   setProofFile(null);
                   setDescription('');
                 }}
+                className="border-gray-300 hover:border-gray-400 hover:bg-gray-50"
               >
                 <X className="h-4 w-4" />
               </Button>
