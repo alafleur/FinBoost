@@ -1055,12 +1055,12 @@ export default function HomeV3() {
                 viewport={{ once: true }}
               >
                 <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <CardContent className="p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 relative">
+                  <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
                     <div className="relative z-10">
-                      <h3 className="text-xl font-semibold text-white mb-3">
+                      <h3 className="text-xl font-semibold text-white mb-1">
                         {item.title}
                       </h3>
-                      <p className="text-white/90 text-sm leading-relaxed">{item.subtitle}</p>
+                      <p className="text-white/90 text-sm">{item.subtitle}</p>
                     </div>
                   </CardContent>
                 </Card>
