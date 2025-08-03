@@ -97,7 +97,7 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
           {/* Mobile: Horizontal layout, Desktop: Vertical layout */}
           <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center space-x-4 sm:space-x-0 sm:space-y-2">
             <div className="flex-shrink-0 min-w-0 flex-1 sm:flex-initial">
-              <div className={`text-base sm:text-lg font-semibold ${DashboardColors.text.primary} mb-1`}>
+              <div className={`text-base sm:text-lg ${DashboardColors.text.primary} mb-1`}>
                 {tier.name}
               </div>
               <div className={`text-xs sm:text-sm ${DashboardColors.text.muted}`}>
@@ -107,7 +107,7 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
             
             <div className="flex-shrink-0 text-right sm:text-center">
               {tier.reward ? (
-                <div className="text-base sm:text-lg font-bold text-blue-600 leading-tight">
+                <div className={`text-base sm:text-lg ${DashboardColors.text.accent} leading-tight`}>
                   <span className="sm:hidden">{formatCurrency(tier.reward).replace('$', '$')}</span>
                   <span className="hidden sm:inline">{formatCurrency(tier.reward)}</span>
                 </div>

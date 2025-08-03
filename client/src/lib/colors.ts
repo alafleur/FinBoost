@@ -25,15 +25,15 @@ export const DashboardColors = {
     success: 'dashboard-icon-success'
   },
   
-  // Text Colors - Unified Dark Blue System
+  // Text Colors - Unified Professional Typography System
   text: {
-    primary: 'text-gray-900',
-    secondary: 'text-gray-600', 
-    muted: 'text-gray-500',
-    success: 'text-emerald-800',
-    accent: 'text-accent',
-    accentLight: 'text-accent-light',
-    gradient: 'gradient-text'
+    primary: 'text-gray-900 font-semibold',       // Main headings and values
+    secondary: 'text-gray-600 font-medium',      // Subheadings and labels  
+    muted: 'text-gray-500 font-normal',          // Descriptions and helper text
+    success: 'text-emerald-800 font-medium',     // Success states (kept for compatibility)
+    accent: 'text-accent font-semibold',         // Brand accent values (monetary amounts)
+    accentLight: 'text-accent-light font-medium', // Lighter brand accent
+    gradient: 'gradient-text'                    // Special gradient text
   },
   
   // Icon Colors - Enhanced with Dark Blue

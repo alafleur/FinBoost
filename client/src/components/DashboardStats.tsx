@@ -51,11 +51,11 @@ export default function DashboardStats({
               <Trophy className={`h-6 w-6 ${getIconColorClasses(StatCardColors.poolSize)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl font-bold ${getTextClasses(StatCardColors.poolSize)}`}>{formatCurrency(poolData.totalPool || 0)}</div>
+              <div className={`text-2xl ${getTextClasses(StatCardColors.poolSize)}`}>{formatCurrency(poolData.totalPool || 0)}</div>
             </div>
           </div>
-          <h3 className={`text-sm font-semibold ${getTextClasses(StatCardColors.poolSize)} mb-1`}>Pool Size</h3>
-          <p className={`text-xs ${DashboardColors.text.secondary}`}>Total rewards available</p>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Pool Size</h3>
+          <p className={`text-xs ${DashboardColors.text.muted}`}>Total rewards available</p>
         </CardContent>
       </Card>
 
@@ -71,8 +71,8 @@ export default function DashboardStats({
               {getTierDisplayName(user?.tier || 'tier1')}
             </Badge>
           </div>
-          <h3 className={`text-sm font-semibold ${getTextClasses(StatCardColors.currentTier)} mb-1`}>Current Tier</h3>
-          <p className={`text-xs ${DashboardColors.text.secondary}`}>Cycle standing</p>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Current Tier</h3>
+          <p className={`text-xs ${DashboardColors.text.muted}`}>Cycle standing</p>
         </CardContent>
       </Card>
 
@@ -85,11 +85,11 @@ export default function DashboardStats({
               <TrendingUp className={`h-6 w-6 ${getIconColorClasses(StatCardColors.cyclePoints)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl font-bold ${getTextClasses(StatCardColors.cyclePoints)}`}>{user?.currentCyclePoints || 0}</div>
+              <div className={`text-2xl ${getTextClasses(StatCardColors.cyclePoints)}`}>{user?.currentCyclePoints || 0}</div>
             </div>
           </div>
-          <h3 className={`text-sm font-semibold ${getTextClasses(StatCardColors.cyclePoints)} mb-1`}>Cycle Points</h3>
-          <p className={`text-xs ${DashboardColors.text.secondary}`}>Current progress</p>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Cycle Points</h3>
+          <p className={`text-xs ${DashboardColors.text.muted}`}>Current progress</p>
         </CardContent>
       </Card>
 
@@ -102,12 +102,12 @@ export default function DashboardStats({
               <BookOpen className={`h-6 w-6 ${getIconColorClasses(StatCardColors.lessons)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl font-bold ${getTextClasses(StatCardColors.lessons)}`}>{completedLessonsCount}</div>
-              <div className={`text-xs ${DashboardColors.text.secondary}`}>of {totalLessonsCount}</div>
+              <div className={`text-2xl ${getTextClasses(StatCardColors.lessons)}`}>{completedLessonsCount}</div>
+              <div className={`text-xs ${DashboardColors.text.muted}`}>of {totalLessonsCount}</div>
             </div>
           </div>
-          <h3 className={`text-sm font-semibold ${getTextClasses(StatCardColors.lessons)} mb-1`}>Lessons</h3>
-          <p className={`text-xs ${DashboardColors.text.secondary}`}>Completed</p>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Lessons</h3>
+          <p className={`text-xs ${DashboardColors.text.muted}`}>Completed</p>
         </CardContent>
       </Card>
     </div>
