@@ -991,13 +991,15 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="card-premium card-section-gloss card-floating rounded-2xl p-8 text-white"
+                className="card-premium card-section-gloss card-floating rounded-2xl p-6 text-white"
               >
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
-                  {React.cloneElement(item.icon, { className: "w-8 h-8 text-white icon-bounce" })}
+                <div className="flex items-start space-x-4 mb-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0 magnetic-hover">
+                    {React.cloneElement(item.icon, { className: "w-6 h-6 text-white icon-bounce" })}
+                  </div>
+                  <h4 className="text-lg font-bold text-white leading-tight">{item.title}</h4>
                 </div>
-                <h4 className="text-xl font-bold text-white mb-4">{item.title}</h4>
-                <p className="text-white/90 leading-relaxed">
+                <p className="text-white/90 text-sm leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>
