@@ -28,13 +28,10 @@ export default function Navbar() {
             </div>
           </a>
           <Button 
-            className="btn-primary font-medium px-2 md:px-4 py-2 text-xs md:text-sm rounded-lg shadow-md transition duration-300 leading-tight"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium px-2 md:px-4 py-3 text-xs md:text-sm rounded-lg shadow-md transition duration-300 border-0"
             onClick={handleSignUpClick}
           >
-            <div className="flex flex-col text-center">
-              <span>Join</span>
-              <span>Early Access</span>
-            </div>
+            Join Early Access
           </Button>
         </div>
       </div>
