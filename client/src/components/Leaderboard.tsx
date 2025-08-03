@@ -216,15 +216,8 @@ export default function Leaderboard() {
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case 'tier1':
-        return 'dashboard-accent-primary text-white text-xs font-bold px-2 py-1 rounded-full';
-      case 'tier2':
-        return 'dashboard-accent-neutral text-white text-xs font-bold px-2 py-1 rounded-full';
-      case 'tier3':
-      default:
-        return 'dashboard-accent-success text-white text-xs font-bold px-2 py-1 rounded-full';
-    }
+    // Use unified blue→purple gradient system for all tier badges
+    return 'bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-sm';
   };
 
   const getTierName = (tier: string) => {
@@ -254,10 +247,10 @@ export default function Leaderboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-gray-600 mb-1">Current Rank</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900">#{data.currentUser.rank}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">#{data.currentUser.rank}</p>
               </div>
-              <div className="dashboard-accent-primary rounded-lg p-2 md:p-3">
-                <Trophy className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <div className="bg-gray-100 rounded-lg p-2 md:p-3">
+                <Trophy className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
               </div>
             </div>
           </CardContent>
@@ -269,10 +262,10 @@ export default function Leaderboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-gray-600 mb-1">Cycle Points</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900">{data.currentUser.points.toLocaleString()}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{data.currentUser.points.toLocaleString()}</p>
               </div>
-              <div className="dashboard-accent-primary rounded-lg p-2 md:p-3">
-                <Star className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <div className="bg-gray-100 rounded-lg p-2 md:p-3">
+                <Star className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
               </div>
             </div>
           </CardContent>
@@ -284,10 +277,10 @@ export default function Leaderboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-gray-600 mb-1">Current Tier</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900">{getTierName(data.currentUser.tier)}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{getTierName(data.currentUser.tier)}</p>
               </div>
-              <div className="dashboard-accent-primary rounded-lg p-2 md:p-3">
-                <Award className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <div className="bg-gray-100 rounded-lg p-2 md:p-3">
+                <Award className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
               </div>
             </div>
           </CardContent>
@@ -299,12 +292,12 @@ export default function Leaderboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-gray-600 mb-1">To Next Tier</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900">
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">
                   {userTierStats?.pointsToNext > 0 ? userTierStats.pointsToNext : '—'}
                 </p>
               </div>
-              <div className="dashboard-accent-primary rounded-lg p-2 md:p-3">
-                <Target className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <div className="bg-gray-100 rounded-lg p-2 md:p-3">
+                <Target className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
               </div>
             </div>
           </CardContent>
@@ -320,7 +313,7 @@ export default function Leaderboard() {
       <Card className="dashboard-card-primary">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Activity className="h-5 w-5" />
+            <Activity className="h-5 w-5 text-gray-600" />
             <span>Tier Progress</span>
           </CardTitle>
         </CardHeader>
@@ -357,7 +350,7 @@ export default function Leaderboard() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
+              <Users className="h-5 w-5 text-gray-600" />
               <span>Rankings</span>
             </div>
             {totalPages > 1 && (
@@ -451,12 +444,12 @@ export default function Leaderboard() {
         }}>
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="cycle" className="flex items-center space-x-2">
-              <Star className="h-4 w-4" />
+              <Star className="h-4 w-4 text-gray-600" />
               <span className="hidden sm:inline">This Cycle</span>
               <span className="sm:hidden">Cycle</span>
             </TabsTrigger>
             <TabsTrigger value="allTime" className="flex items-center space-x-2">
-              <Trophy className="h-4 w-4" />
+              <Trophy className="h-4 w-4 text-gray-600" />
               <span className="hidden sm:inline">All Time</span>
               <span className="sm:hidden">All Time</span>
             </TabsTrigger>
