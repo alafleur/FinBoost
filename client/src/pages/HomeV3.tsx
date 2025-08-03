@@ -1341,106 +1341,109 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          {/* Two-column layout: Tier explanation left, Screenshot right */}
-          <div className="flex flex-col lg:flex-row gap-1 mb-12 items-center lg:items-start">
-            {/* Left Column - Tier Cards */}
-            <div className="flex-1">
-              <div className="flex flex-col gap-4 max-w-lg mx-auto">
-                {[
-                  {
-                    tier: "Tier 1",
-                    subtitle: "Top Third",
-                    rewardLevel: "Premium Rewards"
-                  },
-                  {
-                    tier: "Tier 2", 
-                    subtitle: "Middle Third",
-                    rewardLevel: "Standard Rewards"
-                  },
-                  {
-                    tier: "Tier 3",
-                    subtitle: "Lower Third", 
-                    rewardLevel: "Base Rewards"
-                  }
-                ].map((tier, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                  >
-                    <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
-                        <div className="relative z-10">
-                          <h3 className="text-xl font-semibold text-white mb-1">
-                            {tier.tier}
-                          </h3>
-                          <p className="text-white/90 text-sm">{tier.subtitle} = {tier.rewardLevel}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+          {/* Tier explanation with integrated phone */}
+          <div className="relative mb-12">
+            {/* Main content container */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start">
+              {/* Left side - Tier Cards */}
+              <div className="w-full lg:w-auto lg:flex-shrink-0">
+                <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
+                  {[
+                    {
+                      tier: "Tier 1",
+                      subtitle: "Top Third",
+                      rewardLevel: "Premium Rewards"
+                    },
+                    {
+                      tier: "Tier 2", 
+                      subtitle: "Middle Third",
+                      rewardLevel: "Standard Rewards"
+                    },
+                    {
+                      tier: "Tier 3",
+                      subtitle: "Lower Third", 
+                      rewardLevel: "Base Rewards"
+                    }
+                  ].map((tier, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
+                          <div className="relative z-10">
+                            <h3 className="text-xl font-semibold text-white mb-1">
+                              {tier.tier}
+                            </h3>
+                            <p className="text-white/90 text-sm">{tier.subtitle} = {tier.rewardLevel}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Caption below tier boxes */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="text-center mt-8"
+                >
+                  <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    Higher Effort → Higher Tier → Larger Rewards
+                  </p>
+                </motion.div>
               </div>
-              
-              {/* Caption below tier boxes */}
+
+              {/* Right side - Phone Frame (positioned closer on desktop) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="text-center mt-8"
+                className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
-                <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                  Higher Effort → Higher Tier → Larger Rewards
-                </p>
+                <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                        <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
+                      </div>
+                    </div>
+                    
+                    {/* App content */}
+                    <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
+                      <div className="text-center h-full flex flex-col justify-center">
+                        <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
+                          <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
+                        </div>
+                        
+                        <div>
+                          <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
+                            Current Tier: Tier 2<br/>
+                            Points: 847<br/>
+                            Rank: #23 of 156
+                          </p>
+                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
+                            <span className="text-xs font-medium text-blue-700">Tier Dashboard</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                </div>
               </motion.div>
             </div>
-
-            {/* Right Column - Phone Frame */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="flex-shrink-0 flex justify-center lg:-ml-12"
-            >
-              <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
-                <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
-                  {/* Status bar */}
-                  <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
-                    <span>9:41</span>
-                    <div className="flex space-x-1">
-                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                      <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
-                    </div>
-                  </div>
-                  
-                  {/* App content */}
-                  <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
-                    <div className="text-center h-full flex flex-col justify-center">
-                      <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
-                        <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                          Current Tier: Tier 2<br/>
-                          Points: 847<br/>
-                          Rank: #23 of 156
-                        </p>
-                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                          <span className="text-xs font-medium text-blue-700">Tier Dashboard</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
-              </div>
-            </motion.div>
           </div>
 
           <div className="text-center mt-8">
