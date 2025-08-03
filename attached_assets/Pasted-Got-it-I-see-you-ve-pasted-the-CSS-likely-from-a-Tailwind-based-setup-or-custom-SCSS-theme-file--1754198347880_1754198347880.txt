@@ -1,0 +1,59 @@
+Got it — I see you’ve pasted the CSS (likely from a Tailwind-based setup or custom SCSS theme file). Let’s modernize and strengthen the color scheme to reflect your updated design intent:
+
+---
+
+### 🎯 Goals:
+
+* **Primary Color**: Rich dark blue with a clean, slightly glossy look (trusted, modern, fintech-credible)
+* **Secondary Color**: Cooler contrast (e.g., light teal or soft blue-gray) to provide balance
+* **Accent Color**: Something fresh/subtle for success states, tags, and small UI highlights
+
+---
+
+### ✅ Updated Color System Proposal:
+
+```css
+:root {
+  /* === Primary Brand Colors === */
+  --primary-color: #0a2c61; /* Deep fintech blue */
+  --primary-gloss: linear-gradient(180deg, #1a3e7c 0%, #0a2c61 100%); /* Gloss effect overlay */
+
+  /* === Secondary / Support === */
+  --secondary-color: #c7e4ed; /* Pale teal-blue, soft on eyes */
+  --background-light: #f9fafc; /* Off-white for cleaner whitespace */
+  --background-dark: #f1f5f9; /* Muted slate for subtle panels */
+
+  /* === Text === */
+  --text-main: #111827; /* Deep slate */
+  --text-muted: #6b7280; /* Cool gray-500 */
+  --text-inverted: #ffffff;
+
+  /* === UI / Accent === */
+  --success-color: #2dd4bf; /* Teal green */
+  --warning-color: #fbbf24; /* Amber */
+  --error-color: #ef4444; /* Red-500 */
+
+  /* === Borders & Dividers === */
+  --border-color: #e5e7eb; /* Gray-200 */
+
+  /* === CTA === */
+  --button-primary-bg: #0a2c61;
+  --button-primary-hover: #1a3e7c;
+  --button-secondary-bg: #e0f2f1;
+  --button-secondary-hover: #c7e4ed;
+}
+```
+
+---
+
+### 💡 Notes:
+
+* The **dark blue (#0a2c61)** provides a strong foundation and reads as “trusted” in fintech
+* **Glossy gradient overlay** can be used in buttons, headers, or icons (subtly)
+* **Soft teal (#c7e4ed)** is user-friendly and gender-neutral for broad accessibility
+* Keep buttons clean: solid fill with slight hover darkening is enough
+* Text and border contrast ensure visual hierarchy, especially for mobile UX
+
+---
+
+Let me know if you're using Tailwind, CSS Modules, or SCSS, and I’ll translate this system into that format directly if needed. Would you like example button or header components using this palette?
