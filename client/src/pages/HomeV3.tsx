@@ -585,8 +585,8 @@ export default function HomeV3() {
       </section>
 
       {/* Reward Pool Mechanics - Show Real Impact */}
-      <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-accent-light/10 to-accent-light/20">
-        <div className="max-w-6xl mx-auto">
+      <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-accent-light/10 to-accent-light/20 overflow-hidden">
+        <div className="max-w-6xl mx-auto pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -679,9 +679,9 @@ export default function HomeV3() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center"
+              className="flex flex-col items-center mb-8"
             >
-              <div className="relative w-52 h-52 mb-4">
+              <div className="relative w-52 h-52 mb-6">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   {/* Background circle */}
                   <circle
@@ -734,14 +734,14 @@ export default function HomeV3() {
               </div>
 
               {/* Legend */}
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-accent rounded"></div>
-                  <span className="text-slate-700">{rewardsPercentage}% → Collective Rewards Pool</span>
+              <div className="space-y-2 text-xs w-full max-w-[280px] px-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-accent rounded flex-shrink-0"></div>
+                  <span className="text-slate-700 leading-relaxed">{rewardsPercentage}% → Collective Rewards Pool</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-slate-500 rounded"></div>
-                  <span className="text-slate-700">{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-slate-500 rounded flex-shrink-0"></div>
+                  <span className="text-slate-700 leading-relaxed">{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
             </motion.div>
@@ -777,7 +777,7 @@ export default function HomeV3() {
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="text-center mt-12"
+            className="text-center mt-16"
           >
             <p className="text-sm text-slate-500 max-w-2xl mx-auto">
               * Rewards pool statistics shown are illustrative and based on projected membership levels. Actual rewards may vary based on community growth and platform performance.
