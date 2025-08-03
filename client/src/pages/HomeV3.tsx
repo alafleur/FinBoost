@@ -1027,8 +1027,8 @@ export default function HomeV3() {
             </h2>
           </motion.div>
 
-          {/* Clean Tier Card Format - Responsive Single Component */}
-          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
+          {/* Clean Tier Card Format - Responsive 2x2 Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
             {[
               {
                 title: "Debt Progress Pays",
