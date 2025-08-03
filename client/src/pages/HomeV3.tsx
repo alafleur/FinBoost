@@ -1342,7 +1342,7 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Two-column layout: Tier explanation left, Screenshot right */}
-          <div className="flex flex-col lg:flex-row gap-12 mb-12 items-center lg:items-start">
+          <div className="flex flex-col lg:flex-row gap-6 mb-12 items-center lg:items-start">
             {/* Left Column - Tier Cards */}
             <div className="flex-1 lg:pr-8">
               <div className="flex flex-col gap-4 max-w-lg mx-auto">
@@ -1406,10 +1406,10 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="flex-shrink-0 flex justify-center"
             >
-              <div className="relative w-56 h-[500px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
-                <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden">
+              <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+                <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
                   {/* Status bar */}
-                  <div className="bg-slate-50 h-10 flex items-center justify-between px-4 text-xs font-medium text-slate-600">
+                  <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
                     <span>9:41</span>
                     <div className="flex space-x-1">
                       <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
@@ -1419,26 +1419,26 @@ export default function HomeV3() {
                   </div>
                   
                   {/* App content */}
-                  <div className="p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2.5rem)]">
+                  <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
                     <div className="text-center h-full flex flex-col justify-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <Trophy className="w-8 h-8 text-white" />
+                      <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
+                        <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
                       </div>
                       
                       <div>
-                        <p className="text-sm font-semibold text-slate-800 leading-relaxed mb-4">
+                        <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
                           Current Tier: Tier 2<br/>
                           Points: 847<br/>
                           Rank: #23 of 156
                         </p>
-                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-blue-200/50">
+                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
                           <span className="text-xs font-medium text-blue-700">Tier Dashboard</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-white/30 rounded-full"></div>
+                <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
               </div>
             </motion.div>
           </div>
