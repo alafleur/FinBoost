@@ -77,7 +77,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
   };
 
   const getTierColor = (tier: string) => {
-    return 'bg-gray-900';
+    return 'dashboard-accent-primary';
   };
 
   const getTierDisplayName = (tier: string) => {

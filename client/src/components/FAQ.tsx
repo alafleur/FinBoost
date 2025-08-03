@@ -89,15 +89,15 @@ export default function FAQ() {
           {faqs.map((faq) => (
             <div 
               key={faq.id}
-              className={`relative border border-gray-200 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-primary-500 hover:shadow-md ${
-                selectedFAQ === faq.id ? 'border-primary-500 bg-primary-50' : 'bg-white hover:bg-gray-50'
+              className={`relative border border-gray-200 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-accent hover:shadow-md ${
+                selectedFAQ === faq.id ? 'border-accent bg-accent-light/10' : 'bg-white hover:bg-gray-50'
               }`}
               onClick={() => toggleFAQ(faq.id)}
             >
               <div className="flex items-start justify-between">
                 <h4 className="font-heading font-medium text-sm leading-tight pr-2">{faq.question}</h4>
                 <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center transition-all duration-200 ${
-                  selectedFAQ === faq.id ? 'border-primary-500 bg-primary-500' : ''
+                  selectedFAQ === faq.id ? 'border-accent bg-accent' : ''
                 }`}>
                   <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
                     selectedFAQ === faq.id ? 'bg-white' : ''

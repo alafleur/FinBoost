@@ -16,27 +16,27 @@ export default function FinancialMoodEgg() {
     {
       emoji: <DollarSign className="h-6 w-6" />,
       text: "Feeling a little richer today!",
-      color: "bg-green-500"
+      color: "dashboard-accent-success"
     },
     {
       emoji: <Heart className="h-6 w-6" />,
       text: "Financial self-care is important",
-      color: "bg-pink-500"
+      color: "dashboard-accent-primary"
     },
     {
       emoji: <TrendingUp className="h-6 w-6" />,
       text: "Today's a good day to grow your wealth",
-      color: "bg-blue-500"
+      color: "dashboard-accent-primary"
     },
     {
       emoji: <Clock className="h-6 w-6" />,
       text: "Time to check in on your money goals",
-      color: "bg-blue-600"
+      color: "dashboard-accent-primary"
     },
     {
       emoji: <ThumbsUp className="h-6 w-6" />,
       text: "Take the next step in improving your finances",
-      color: "bg-amber-500"
+      color: "dashboard-accent-primary"
     }
   ];
 

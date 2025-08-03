@@ -2,7 +2,7 @@ import { Star, Shield, Clock } from "lucide-react";
 
 export default function EarlyAccessV2() {
   return (
-    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+    <section className="py-16 md:py-20 px-4 bg-gradient-to-br from-accent to-slate-900 text-white">
       <div className="container mx-auto max-w-4xl text-center">
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4">
@@ -15,7 +15,7 @@ export default function EarlyAccessV2() {
           </h2>
         </div>
         
-        <p className="text-blue-100 text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-accent-light text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
           Every reward cycle during Early Access is fully backed by FinBoost. That means real cash prizes guaranteed no matter how many users join. Join early to maximize your chances while the community is still small.
         </p>
         
@@ -23,19 +23,19 @@ export default function EarlyAccessV2() {
           <div className="bg-white/10 backdrop-blur rounded-lg p-6">
             <Shield className="h-8 w-8 text-yellow-300 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Guaranteed Payouts</h3>
-            <p className="text-blue-100 text-sm">Prize pools backed by FinBoost during Early Access period</p>
+            <p className="text-accent-light text-sm">Prize pools backed by FinBoost during Early Access period</p>
           </div>
           
           <div className="bg-white/10 backdrop-blur rounded-lg p-6">
             <Clock className="h-8 w-8 text-yellow-300 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Limited Time</h3>
-            <p className="text-blue-100 text-sm">Only available to our first few hundred founding members</p>
+            <p className="text-accent-light text-sm">Only available to our first few hundred founding members</p>
           </div>
           
           <div className="bg-white/10 backdrop-blur rounded-lg p-6">
             <Star className="h-8 w-8 text-yellow-300 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Better Odds</h3>
-            <p className="text-blue-100 text-sm">Smaller community means higher win probability for early members</p>
+            <p className="text-accent-light text-sm">Smaller community means higher win probability for early members</p>
           </div>
         </div>
         

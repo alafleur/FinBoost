@@ -17,26 +17,26 @@ export default function FlywheelGraphic() {
     {
       icon: <BookOpen className="h-6 w-6" />,
       title: "Learn",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100"
+      color: "text-accent",
+      bgColor: "bg-accent-light/20"
     },
     {
       icon: <TrendingUp className="h-6 w-6" />,
       title: "Earn",
-      color: "text-green-600",
-      bgColor: "bg-green-100"
+      color: "text-accent",
+      bgColor: "bg-accent-light/20"
     },
     {
       icon: <Award className="h-6 w-6" />,
       title: "Reward",
-      color: "text-amber-600",
-      bgColor: "bg-amber-100"
+      color: "text-accent",
+      bgColor: "bg-accent-light/20"
     },
     {
       icon: <Zap className="h-6 w-6" />,
       title: "Improve",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100"
+      color: "text-accent",
+      bgColor: "bg-accent-light/20"
     }
   ];
   
@@ -52,7 +52,7 @@ export default function FlywheelGraphic() {
   return (
     <div className="relative h-64 md:h-80 w-full flex items-center justify-center">
       {/* Center hub */}
-      <div className="absolute z-10 rounded-full w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
+      <div className="absolute z-10 rounded-full w-16 h-16 card-premium flex items-center justify-center shadow-lg">
         <span className="text-white font-bold text-xs">GROWTH</span>
       </div>
       

@@ -23,11 +23,11 @@ export default function UpgradePrompt({
     <Card className="border-2 border-gradient-to-r from-yellow-400 to-orange-500 bg-gradient-to-br from-yellow-50 to-orange-50">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <Crown className="h-6 w-6 text-yellow-600" />
+          <Crown className="h-6 w-6 text-accent" />
           <CardTitle className="text-xl font-bold text-gray-800">
             Unlock Member Benefits
           </CardTitle>
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+          <Badge variant="secondary" className="bg-accent-light/20 text-accent border-accent-light">
             Limited Time
           </Badge>
         </div>

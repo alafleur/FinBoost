@@ -90,8 +90,8 @@ export default function WinnerCelebrationBanner() {
     ? getTierColors(winnerStatus?.tier || '') 
     : {
         gradient: DashboardColors.accent.primary,
-        bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
-        border: 'border-blue-200',
+        bg: 'bg-gradient-to-br from-accent-light/20 to-accent-light/30',
+        border: 'border-accent-light/50',
         text: DashboardColors.text.primary
       };
 

@@ -4,8 +4,8 @@ export default function FlywheelFeatures() {
   return (
     <div className="space-y-6">
       <div className="flex items-start">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-          <span className="text-secondary-500"><Plus className="h-5 w-5" /></span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent-light/20 flex items-center justify-center">
+          <span className="text-accent"><Plus className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">More members means a larger rewards pool</h3>
@@ -14,8 +14,8 @@ export default function FlywheelFeatures() {
       </div>
       
       <div className="flex items-start">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <span className="text-primary-500"><TrendingUp className="h-5 w-5" /></span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent-light/20 flex items-center justify-center">
+          <span className="text-accent"><TrendingUp className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Merit-based rewards system for everyone</h3>
@@ -24,8 +24,8 @@ export default function FlywheelFeatures() {
       </div>
       
       <div className="flex items-start">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-          <span className="text-accent-500"><DollarSign className="h-5 w-5" /></span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent-light/20 flex items-center justify-center">
+          <span className="text-accent"><DollarSign className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Cash rewards reinforce better habits</h3>
@@ -34,8 +34,8 @@ export default function FlywheelFeatures() {
       </div>
       
       <div className="flex items-start">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <span className="text-blue-600"><RefreshCw className="h-5 w-5" /></span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent-light/20 flex items-center justify-center">
+          <span className="text-accent"><RefreshCw className="h-5 w-5" /></span>
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Virtuous cycle of financial growth</h3>

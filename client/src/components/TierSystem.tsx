@@ -7,21 +7,21 @@ export default function TierSystem() {
       title: "Tier 1",
       description: "Top performers get the biggest share",
       icon: <Trophy className="h-6 w-6" />,
-      gradient: "from-yellow-400 to-orange-500"
+      gradient: "from-accent to-accent-light"
     },
     {
       number: 2,
       title: "Tier 2", 
       description: "Consistent earners get steady rewards",
       icon: <Target className="h-6 w-6" />,
-      gradient: "from-blue-400 to-blue-600"
+      gradient: "from-accent to-accent-light"
     },
     {
       number: 3,
       title: "Tier 3",
       description: "Everyone wins, even beginners",
       icon: <Users className="h-6 w-6" />,
-      gradient: "from-green-400 to-green-600"
+      gradient: "from-accent to-accent-light"
     }
   ];
 

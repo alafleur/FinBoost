@@ -30,12 +30,12 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            <tr className={user?.tier === 'tier1' ? 'bg-green-50 border-green-200' : 'bg-white'}>
+            <tr className={user?.tier === 'tier1' ? 'bg-accent-light/20 border-accent-light/50' : 'bg-white'}>
               <td className="px-4 py-3 text-sm font-medium text-gray-900">
                 <span className="flex items-center">
                   Tier 1
                   {user?.tier === 'tier1' && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium dashboard-accent-primary text-white">
                       Your Tier
                     </span>
                   )}
@@ -45,12 +45,12 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
                 {tierThresholds.tier1}+ points
               </td>
             </tr>
-            <tr className={user?.tier === 'tier2' ? 'bg-yellow-50 border-yellow-200' : 'bg-white'}>
+            <tr className={user?.tier === 'tier2' ? 'bg-accent-light/20 border-accent-light/50' : 'bg-white'}>
               <td className="px-4 py-3 text-sm font-medium text-gray-900">
                 <span className="flex items-center">
                   Tier 2
                   {user?.tier === 'tier2' && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium dashboard-accent-primary text-white">
                       Your Tier
                     </span>
                   )}
@@ -60,12 +60,12 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
                 {tierThresholds.tier2} - {tierThresholds.tier1 - 1} points
               </td>
             </tr>
-            <tr className={user?.tier === 'tier3' ? 'bg-orange-50 border-orange-200' : 'bg-white'}>
+            <tr className={user?.tier === 'tier3' ? 'bg-accent-light/20 border-accent-light/50' : 'bg-white'}>
               <td className="px-4 py-3 text-sm font-medium text-gray-900">
                 <span className="flex items-center">
                   Tier 3
                   {user?.tier === 'tier3' && (
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium dashboard-accent-primary text-white">
                       Your Tier
                     </span>
                   )}
@@ -80,14 +80,14 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
       </div>
       
       {/* User Position Details */}
-      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+      <div className="dashboard-card-primary rounded-lg p-4 border dashboard-border-primary">
         <div className="flex items-start space-x-3">
-          <div className="p-1 bg-blue-100 rounded">
-            <Trophy className="h-4 w-4 text-blue-600" />
+          <div className="p-1 bg-accent-light/20 rounded">
+            <Trophy className="h-4 w-4 text-accent" />
           </div>
           <div>
-            <h4 className="font-medium text-blue-900 text-sm">Your Current Position</h4>
-            <p className="text-sm text-blue-700 mt-1">
+            <h4 className="font-medium text-accent text-sm">Your Current Position</h4>
+            <p className="text-sm text-accent-light mt-1">
               You currently have <span className="font-semibold">{user.currentCyclePoints || 0} points</span> this cycle and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
             </p>
           </div>

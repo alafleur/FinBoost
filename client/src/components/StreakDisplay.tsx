@@ -26,20 +26,20 @@ export default function StreakDisplay({ currentStreak, longestStreak, className 
   };
 
   return (
-    <Card className={`bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 ${className}`}>
+    <Card className={`dashboard-card-primary border dashboard-border-primary ${className}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
-              <Flame className={`h-6 w-6 ${currentStreak > 0 ? 'text-orange-500' : 'text-gray-400'}`} />
-              <span className="text-2xl font-bold text-orange-600">{currentStreak}</span>
+              <Flame className={`h-6 w-6 ${currentStreak > 0 ? 'text-accent' : 'text-gray-400'}`} />
+              <span className="text-2xl font-bold text-accent">{currentStreak}</span>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
                 {getStreakMessage(currentStreak)}
               </p>
               {currentStreak > 0 && (
-                <p className="text-xs text-orange-600">
+                <p className="text-xs text-accent">
                   +{getStreakBonus(currentStreak)} XP bonus per lesson/quiz
                 </p>
               )}
@@ -55,8 +55,8 @@ export default function StreakDisplay({ currentStreak, longestStreak, className 
         </div>
         
         {currentStreak === 0 && (
-          <div className="mt-3 p-2 bg-orange-100 rounded-lg">
-            <p className="text-xs text-orange-700 text-center">
+          <div className="mt-3 p-2 bg-accent-light/20 rounded-lg">
+            <p className="text-xs text-accent text-center">
               Complete a lesson or quiz to start your streak and earn bonus XP!
             </p>
           </div>

@@ -116,7 +116,7 @@ export default function RewardsSummary() {
                 </p>
                 <Button 
                   onClick={handleProfileClick}
-                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  className="btn-primary"
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
                   {user?.paypalEmail ? 'View Profile' : 'Setup Payment Info'}
@@ -133,7 +133,7 @@ export default function RewardsSummary() {
                 </p>
                 <Button 
                   onClick={handleUpgradeClick}
-                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  className="btn-primary"
                 >
                   <Crown className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Upgrade to Premium - $20/month</span>

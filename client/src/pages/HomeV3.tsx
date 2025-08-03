@@ -103,14 +103,14 @@ export default function HomeV3() {
       {/* Hero Section - Enhanced with Animated Gradient */}
       <section id="hero" className="relative min-h-screen flex items-center pt-20 sm:pt-16 pb-12 px-6 overflow-hidden">
         {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-blue-100/30">
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-50/20 to-blue-100/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-accent-light/10 to-accent-light/20">
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-accent-light/10 to-accent-light/15 animate-pulse" style={{ animationDuration: '4s' }}></div>
         </div>
         
         {/* Enhanced floating background elements */}
         <div className="absolute inset-0">
           <motion.div 
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-100/40 to-cyan-100/30 rounded-full blur-3xl"
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-accent-light/20 to-accent-light/15 rounded-full blur-3xl"
             animate={{ 
               scale: [1, 1.1, 1],
               opacity: [0.3, 0.5, 0.3]
@@ -122,7 +122,7 @@ export default function HomeV3() {
             }}
           ></motion.div>
           <motion.div 
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-100/40 to-cyan-100/30 rounded-full blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-accent-light/20 to-accent-light/15 rounded-full blur-3xl"
             animate={{ 
               scale: [1, 1.2, 1],
               opacity: [0.2, 0.4, 0.2]
@@ -135,7 +135,7 @@ export default function HomeV3() {
             }}
           ></motion.div>
           <motion.div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-green-100/20 to-blue-100/20 rounded-full blur-2xl"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-accent-light/15 to-accent-light/20 rounded-full blur-2xl"
             animate={{ 
               rotate: [0, 180, 360],
               scale: [1, 1.1, 1]
@@ -282,7 +282,7 @@ export default function HomeV3() {
                 description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn points per module and quiz.",
                 screenshot: "lesson-module.png",
                 caption: "Complete short lessons like this to earn 20 points.",
-                gradient: "from-blue-500 to-cyan-500"
+                gradient: "from-accent to-accent-light"
               },
               {
                 icon: <Target className="w-8 h-8" />,
@@ -290,7 +290,7 @@ export default function HomeV3() {
                 description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus points based on impact.",
                 screenshot: "debt-submission.png",
                 caption: "Verified debt payments earn big bonus points.",
-                gradient: "from-green-500 to-emerald-500"
+                gradient: "from-accent to-accent-light"
               },
               {
                 icon: <Trophy className="w-8 h-8" />,
@@ -298,7 +298,7 @@ export default function HomeV3() {
                 description: "Points determine your reward odds — the more you learn and take action, the better your chances. Winners are selected using a point-weighted system.",
                 screenshot: "leaderboard.png",
                 caption: "Your point total determines your odds — the top contributors win real cash.",
-                gradient: "from-orange-500 to-red-500"
+                gradient: "from-accent to-accent-light"
               }
             ].map((step, index) => (
               <motion.div
@@ -428,7 +428,7 @@ export default function HomeV3() {
                 icon: <PiggyBank className="w-6 h-6 text-slate-800" />,
                 title: "Debt Progress Pays",
                 description: "Student loans, credit cards — every payment forward earns you money back.",
-                borderColor: "border-l-green-400"
+                borderColor: "border-l-accent"
               },
               {
                 icon: <BarChart3 className="w-6 h-6 text-slate-800" />,
@@ -440,7 +440,7 @@ export default function HomeV3() {
                 icon: <Clock className="w-6 h-6 text-slate-800" />,
                 title: "Worrying About Retirement, Not Just Next Month",
                 description: "FinBoost isn't just about surviving the month — it's about building momentum toward long-term goals like retirement, homeownership, and freedom from paycheck-to-paycheck stress.",
-                borderColor: "border-l-orange-400"
+                borderColor: "border-l-accent"
               },
               {
                 icon: <TrendingUp className="w-6 h-6 text-slate-800" />,
@@ -548,7 +548,7 @@ export default function HomeV3() {
       </section>
 
       {/* Reward Pool Mechanics - Show Real Impact */}
-      <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+      <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-accent-light/10 to-accent-light/20">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -824,7 +824,7 @@ export default function HomeV3() {
             >
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-800 hover:to-blue-950 text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                className="card-premium-button text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
                 onClick={handleJoinEarlyAccess}
               >
                 <Trophy className="mr-2 h-5 w-5" />
@@ -837,12 +837,12 @@ export default function HomeV3() {
       </section>
 
       {/* Learning Module Section - Enhanced Design */}
-      <section id="learn" className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-blue-50/30 relative overflow-hidden">
+      <section id="learn" className="py-20 px-4 bg-gradient-to-br from-slate-50 via-accent-light/10 to-accent-light/15 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/20 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-200/20 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-100/10 to-blue-200/10 rounded-full blur-2xl"></div>
+          <div className="absolute top-20 left-10 w-32 h-32 bg-accent-light/15 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-accent-light/15 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-accent-light/10 to-accent-light/15 rounded-full blur-2xl"></div>
         </div>
         
         <div className="max-w-6xl mx-auto relative z-10">
@@ -917,22 +917,22 @@ export default function HomeV3() {
                     icon: <CreditCard className="h-6 w-6" />,
                     title: "Improve Your Credit Score with Smart Strategies",
                     description: "Learn the tactics that have helped thousands boost their scores",
-                    gradient: "from-blue-500 to-cyan-500",
-                    bgGradient: "from-blue-50 to-cyan-50"
+                    gradient: "from-accent to-accent-light",
+                    bgGradient: "from-accent-light/20 to-accent-light/30"
                   },
                   {
                     icon: <Calculator className="h-6 w-6" />,
                     title: "Create a Budget That Actually Fits Your Life", 
                     description: "Practical approaches that work even on tight budgets",
-                    gradient: "from-green-500 to-emerald-500",
-                    bgGradient: "from-green-50 to-emerald-50"
+                    gradient: "from-accent to-accent-light",
+                    bgGradient: "from-accent-light/20 to-accent-light/30"
                   },
                   {
                     icon: <DollarSign className="h-6 w-6" />,
                     title: "Accelerate Your Debt Payoff with Smart Planning",
                     description: "Strategic methods to save on interest and get debt-free sooner",
-                    gradient: "from-orange-500 to-red-500",
-                    bgGradient: "from-orange-50 to-red-50"
+                    gradient: "from-accent to-accent-light",
+                    bgGradient: "from-accent-light/20 to-accent-light/30"
                   },
                   {
                     icon: <TrendingUp className="h-6 w-6" />,
@@ -978,7 +978,7 @@ export default function HomeV3() {
                 </h4>
                 <div className="grid sm:grid-cols-3 gap-4">
                   {[
-                    { icon: "⏱️", text: "3-5 minute lessons", color: "bg-green-100 text-green-700" },
+                    { icon: "⏱️", text: "3-5 minute lessons", color: "bg-accent-light/30 text-accent" },
                     { icon: "🧩", text: "Interactive quizzes", color: "bg-accent-light/30 text-accent" },
                     { icon: "🎯", text: "Real-world applications", color: "bg-accent-light/30 text-accent" }
                   ].map((feature, index) => (

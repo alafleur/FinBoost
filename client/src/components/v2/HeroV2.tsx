@@ -18,7 +18,7 @@ export default function HeroV2({ onSubscribeSuccess }: HeroV2Props) {
   };
 
   return (
-    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-b from-white via-blue-50/30 to-blue-100/50">
+    <section className="pt-32 pb-20 px-4 md:pt-40 md:pb-24 bg-gradient-to-b from-white via-accent-light/10 to-accent-light/20">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -32,22 +32,22 @@ export default function HeroV2({ onSubscribeSuccess }: HeroV2Props) {
               <Button 
                 onClick={handleStartLearning}
                 size="lg"
-                className="w-full h-[56px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 border border-blue-700 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
+                className="w-full h-[56px] card-premium-button text-white font-semibold px-6 rounded-lg shadow-xl transition duration-300 text-lg flex items-center justify-center hover:shadow-2xl transform hover:-translate-y-0.5"
               >
                 Claim Early Access & Start Earning
               </Button>
               
               <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center">
-                  <Award className="h-4 w-4 mr-1 text-blue-600" />
+                  <Award className="h-4 w-4 mr-1 text-accent" />
                   Prize pools guaranteed
                 </div>
                 <div className="flex items-center">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                  <TrendingUp className="h-4 w-4 mr-1 text-accent" />
                   Over 50% win rate
                 </div>
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-1 text-blue-600" />
+                  <Users className="h-4 w-4 mr-1 text-accent" />
                   Limited Early Access
                 </div>
               </div>
