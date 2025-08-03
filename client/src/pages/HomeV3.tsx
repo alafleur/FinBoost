@@ -1342,7 +1342,7 @@ export default function HomeV3() {
           </motion.div>
 
           {/* Two-column layout: Tier explanation left, Screenshot right */}
-          <div className="flex flex-col lg:flex-row gap-6 mb-12 items-center lg:items-start">
+          <div className="flex flex-col lg:flex-row gap-3 mb-12 items-center lg:items-start">
             {/* Left Column - Tier Cards */}
             <div className="flex-1 lg:pr-8">
               <div className="flex flex-col gap-4 max-w-lg mx-auto">
