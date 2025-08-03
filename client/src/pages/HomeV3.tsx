@@ -1496,33 +1496,47 @@ export default function HomeV3() {
 
           {/* Two-column layout: Screenshot left, Content right */}
           <div className="flex flex-col lg:flex-row gap-8 mb-16 items-start">
-            {/* Left Column - Screenshot */}
+            {/* Left Column - Phone Frame */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="lg:w-80 w-full lg:flex-shrink-0"
+              className="lg:w-80 w-full lg:flex-shrink-0 flex justify-center lg:justify-start"
             >
-              <div className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl p-4 shadow-lg">
-                <div className="h-[400px] w-full max-w-[250px] mx-auto bg-white/10 rounded-lg flex items-center justify-center text-gray-500 text-sm font-medium shadow-sm overflow-hidden">
-                  <img 
-                    src="/api/placeholder/lesson-quiz.png" 
-                    alt="FinBoost lesson module with interactive quiz in progress"
-                    className="w-full h-full object-cover rounded-lg"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = '<span class="text-gray-500 text-sm font-medium">lesson-quiz.png</span>';
-                      }
-                    }}
-                  />
+              <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
+                <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
+                  {/* Status bar */}
+                  <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
+                    <span>9:41</span>
+                    <div className="flex space-x-1">
+                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
+                      <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
+                    </div>
+                  </div>
+                  
+                  {/* App content */}
+                  <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
+                    <div className="text-center h-full flex flex-col justify-center">
+                      <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
+                        <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
+                          Current Lesson:<br/>
+                          Credit Score Basics<br/>
+                          Progress: 75% Complete
+                        </p>
+                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
+                          <span className="text-xs font-medium text-blue-700">Learning Module</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-center text-sm text-gray-600 mt-4 font-medium leading-relaxed">
-                  Complete bite-sized lessons and quizzes like this to earn points and level up.
-                </p>
+                <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
               </div>
             </motion.div>
 
@@ -1540,56 +1554,52 @@ export default function HomeV3() {
                 </h3>
               </motion.div>
               
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="space-y-4">
                 {[
                   {
-                    icon: <CreditCard className="h-6 w-6" />,
+                    icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
                     title: "Improve Your Credit Score with Smart Strategies",
-                    description: "Learn the tactics that have helped thousands boost their scores",
-                    gradient: "from-accent to-accent-light",
-                    bgGradient: "from-accent-light/20 to-accent-light/30"
+                    description: "Learn the tactics that have helped thousands boost their scores"
                   },
                   {
-                    icon: <Calculator className="h-6 w-6" />,
+                    icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
                     title: "Create a Budget That Actually Fits Your Life", 
-                    description: "Practical approaches that work even on tight budgets",
-                    gradient: "from-accent to-accent-light",
-                    bgGradient: "from-accent-light/20 to-accent-light/30"
+                    description: "Practical approaches that work even on tight budgets"
                   },
                   {
-                    icon: <DollarSign className="h-6 w-6" />,
+                    icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
                     title: "Accelerate Your Debt Payoff with Smart Planning",
-                    description: "Strategic methods to save on interest and get debt-free sooner",
-                    gradient: "from-accent to-accent-light",
-                    bgGradient: "from-accent-light/20 to-accent-light/30"
+                    description: "Strategic methods to save on interest and get debt-free sooner"
                   },
                   {
-                    icon: <TrendingUp className="h-6 w-6" />,
+                    icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
                     title: "Start Investing Even with Small Amounts",
-                    description: "Simple, low-risk ways to begin building wealth",
-                    gradient: "from-accent to-accent-light", 
-                    bgGradient: "from-accent-light/20 to-accent-light/30"
+                    description: "Simple, low-risk ways to begin building wealth"
                   }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    className={`bg-gradient-to-br ${item.bgGradient} border border-white/60 rounded-2xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-sm`}
+                    className="group p-5 lg:p-6 rounded-xl bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300"
                   >
-                    <div className={`bg-gradient-to-r ${item.gradient} rounded-xl w-12 h-12 flex items-center justify-center mb-4 shadow-lg`}>
-                      <div className="text-white">
-                        {item.icon}
+                    <div className="flex items-start space-x-3 lg:space-x-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors">
+                        <div className="text-white">
+                          {item.icon}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-bold text-slate-900 mb-2 leading-tight">
+                          {item.title}
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                          {item.description}
+                        </p>
                       </div>
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3 leading-tight">
-                      {item.title}
-                    </h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {item.description}
-                    </p>
                   </motion.div>
                 ))}
               </div>
