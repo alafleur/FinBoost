@@ -638,16 +638,16 @@ export default function HomeV3() {
             </motion.div>
 
             {/* Stats Cards Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
+                className="dashboard-card-primary rounded-xl p-4 text-center relative z-10 min-w-[200px] max-w-[240px]"
               >
-                <div className="text-sm font-medium text-slate-600 mb-2">Rewards Allocation</div>
-                <div className="text-3xl font-bold text-accent mb-2">
+                <div className="text-sm font-medium text-slate-600 mb-1">Rewards Allocation</div>
+                <div className="text-2xl font-bold text-accent mb-1">
                   {rewardsPercentage}%
                 </div>
                 <div className="text-xs text-slate-500">of membership fees</div>
@@ -658,10 +658,10 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="dashboard-card-primary rounded-xl p-6 text-center relative z-10"
+                className="dashboard-card-primary rounded-xl p-4 text-center relative z-10 min-w-[200px] max-w-[240px]"
               >
-                <div className="text-sm font-medium text-slate-600 mb-2">Monthly Pool Size</div>
-                <div className="text-3xl font-bold text-accent mb-2">
+                <div className="text-sm font-medium text-slate-600 mb-1">Monthly Pool Size</div>
+                <div className="text-2xl font-bold text-accent mb-1">
                   {formatCurrency(calculateRewardsPool(communitySize))}
                 </div>
                 <div className="text-xs text-slate-500">available for rewards</div>
@@ -670,7 +670,7 @@ export default function HomeV3() {
           </div>
 
           {/* Bottom Row: Visual Results */}
-          <div className="grid md:grid-cols-2 gap-8 items-start">
+          <div className="flex flex-wrap justify-center gap-8 items-start">
             {/* Dynamic Donut Chart */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -679,7 +679,7 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="flex flex-col items-center"
             >
-              <div className="relative w-64 h-64 mb-6">
+              <div className="relative w-52 h-52 mb-4">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   {/* Background circle */}
                   <circle
@@ -732,13 +732,13 @@ export default function HomeV3() {
               </div>
 
               {/* Legend */}
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1 text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-accent rounded"></div>
+                  <div className="w-3 h-3 bg-accent rounded"></div>
                   <span className="text-slate-700">{rewardsPercentage}% → Collective Rewards Pool</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-slate-500 rounded"></div>
+                  <div className="w-3 h-3 bg-slate-500 rounded"></div>
                   <span className="text-slate-700">{100 - rewardsPercentage}% → Education & Platform Operations</span>
                 </div>
               </div>
@@ -752,13 +752,13 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="flex justify-center"
             >
-              <div className="dashboard-card-primary rounded-xl p-6 w-full max-w-sm relative z-10">
+              <div className="dashboard-card-primary rounded-xl p-4 w-full max-w-[240px] relative z-10">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <Trophy className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-slate-800 mb-2">Top Reward</h4>
-                  <div className="text-2xl font-bold text-accent mb-2">
+                  <h4 className="text-base font-semibold text-slate-800 mb-1">Top Reward</h4>
+                  <div className="text-xl font-bold text-accent mb-1">
                     {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
                   <p className="text-xs text-slate-600">
