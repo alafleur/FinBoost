@@ -42,7 +42,24 @@ export default function DashboardStats({
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* 1. Rewards Pool Size */}
+      {/* 1. Current Tier - MOVED FIRST due to distinctive badge */}
+      <Card className={getCardClasses(StatCardColors.currentTier)}>
+        <div className={`absolute top-0 left-0 w-full h-1.5 ${getAccentClasses(StatCardColors.currentTier)}`}></div>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between mb-3">
+            <div className={getIconContainerClasses(StatCardColors.currentTier)}>
+              <Target className={`h-6 w-6 ${getIconColorClasses(StatCardColors.currentTier)}`} />
+            </div>
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 text-xs font-medium px-3 py-1.5 shadow-lg">
+              {getTierDisplayName(user?.tier || 'tier1')}
+            </Badge>
+          </div>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Current Tier</h3>
+          <p className={`text-xs ${DashboardColors.text.muted}`}>Cycle standing</p>
+        </CardContent>
+      </Card>
+
+      {/* 2. Rewards Pool Size */}
       <Card className={getCardClasses(StatCardColors.poolSize)}>
         <div className={`absolute top-0 left-0 w-full h-1.5 ${getAccentClasses(StatCardColors.poolSize)}`}></div>
         <CardContent className="p-5">
@@ -51,7 +68,7 @@ export default function DashboardStats({
               <Trophy className={`h-6 w-6 ${getIconColorClasses(StatCardColors.poolSize)}`} />
             </div>
             <div className="text-right">
-              <div className={`text-2xl ${getTextClasses(StatCardColors.poolSize)}`}>{formatCurrency(poolData.totalPool || 0)}</div>
+              <div className={`text-2xl ${DashboardColors.text.primary}`}>{formatCurrency(poolData.totalPool || 0)}</div>
             </div>
           </div>
           <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Pool Size</h3>
@@ -59,7 +76,7 @@ export default function DashboardStats({
         </CardContent>
       </Card>
 
-      {/* 2. Current Tier */}
+      {/* 3. Current Tier - MOVED TO SECOND POSITION */}
       <Card className={getCardClasses(StatCardColors.currentTier)}>
         <div className={`absolute top-0 left-0 w-full h-1.5 ${getAccentClasses(StatCardColors.currentTier)}`}></div>
         <CardContent className="p-5">
