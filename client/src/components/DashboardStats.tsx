@@ -67,7 +67,7 @@ export default function DashboardStats({
             <div className={getIconContainerClasses(StatCardColors.currentTier)}>
               <Target className={`h-6 w-6 ${getIconColorClasses(StatCardColors.currentTier)}`} />
             </div>
-            <Badge className={`${DashboardColors.badge.primary} text-xs font-medium px-3 py-1.5 shadow-sm`}>
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 text-xs font-medium px-3 py-1.5 shadow-lg">
               {getTierDisplayName(user?.tier || 'tier1')}
             </Badge>
           </div>
