@@ -612,14 +612,19 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="mb-8"
             >
-              <div className="flex items-center justify-between mb-4">
-                <label className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                  <Users className="h-5 w-5 text-accent" />
+              <div className="flex items-center justify-between mb-6">
+                <label className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent/80 rounded-full flex items-center justify-center shadow-sm">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
                   Community Size
                 </label>
-                <span className="text-2xl font-bold text-accent">
-                  {formatMembers(communitySize)} members
-                </span>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-accent">
+                    {formatMembers(communitySize)}
+                  </div>
+                  <div className="text-sm font-medium text-slate-600">members</div>
+                </div>
               </div>
               <div className="relative">
                 <input
@@ -629,12 +634,12 @@ export default function HomeV3() {
                   max={10000}
                   min={250}
                   step={250}
-                  className="w-full h-3 bg-gradient-to-r from-slate-300 via-accent-light/60 to-accent rounded-lg appearance-none cursor-pointer slider-enhanced"
+                  className="w-full h-3 rounded-lg appearance-none cursor-pointer slider-enhanced"
                 />
-                <div className="flex justify-between text-sm font-medium text-slate-600 mt-3">
-                  <span>250 members</span>
-                  <span className="text-accent">5K members</span>
-                  <span>10K+ members</span>
+                <div className="flex justify-between text-sm font-semibold text-slate-700 mt-4 px-1">
+                  <span className="text-slate-600">250 members</span>
+                  <span className="text-accent font-bold">5K members</span>
+                  <span className="text-slate-800">10K+ members</span>
                 </div>
               </div>
             </motion.div>
