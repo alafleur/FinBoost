@@ -282,13 +282,13 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => 
             transition={{ duration: 0.3 }}
             className="p-6 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg"
           >
-            <div className="flex items-center justify-center flex-col text-center space-y-4">
-              <div className="w-16 h-16 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="flex items-center justify-center space-x-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0">
                 <div className="text-white">
                   {topics[currentIndex].icon}
                 </div>
               </div>
-              <h4 className="text-xl font-bold text-slate-900 leading-tight">
+              <h4 className="text-lg font-semibold text-slate-900 leading-tight text-center">
                 {topics[currentIndex].title}
               </h4>
             </div>
@@ -325,31 +325,41 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => 
         </div>
       </div>
 
-      {/* Desktop: Grid Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-6">
-        {topics.map((topic, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            viewport={{ once: true }}
-            className="group p-6 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300"
-          >
-            <div className="flex items-start space-x-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors">
-                <div className="text-white">
-                  {topic.icon}
+      {/* Desktop: Horizontal Scroll Layout */}
+      <div className="hidden md:block">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex space-x-4 pb-4" style={{ width: 'max-content' }}>
+            {topics.map((topic, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                viewport={{ once: true }}
+                className="group p-5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300 flex-shrink-0"
+                style={{ width: '280px' }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors flex-shrink-0">
+                    <div className="text-white">
+                      {topic.icon}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base font-semibold text-slate-900 leading-tight">
+                      {topic.title}
+                    </h4>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-lg font-bold text-slate-900 leading-tight">
-                  {topic.title}
-                </h4>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Scroll Indicator */}
+        <div className="flex justify-center mt-4">
+          <p className="text-xs text-slate-500">← Scroll to see more →</p>
+        </div>
       </div>
     </div>
   );
@@ -1809,11 +1819,11 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h3 className="text-3xl font-bold text-gray-900 mb-6">
-                What You'll Master:
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Some Examples of What You'll Master:
               </h3>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                Real financial education based on actual scenarios and proven strategies from our curriculum
+              <p className="text-base text-slate-600 max-w-2xl mx-auto">
+                Real financial education based on proven strategies for common real-life scenarios
               </p>
             </motion.div>
             
