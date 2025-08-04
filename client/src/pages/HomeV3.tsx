@@ -1810,7 +1810,7 @@ export default function HomeV3() {
               Some Examples of Your FinBoost Lessons
             </h2>
             <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
-              Real financial education based on proven strategies for common real-life scenarios
+              Real financial education via 3-5 minute lessons and interactive quizzes based on proven strategies for common real-life scenarios
             </p>
           </motion.div>
 
@@ -1870,33 +1870,7 @@ export default function HomeV3() {
                   title: "Decode APR vs APY Differences"
                 }
               ]} />
-            
-            {/* Learning Features */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg mt-12 max-w-4xl mx-auto"
-            >
-              <h4 className="text-lg font-bold text-gray-900 mb-6 text-center">
-                Learning Experience
-              </h4>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {[
-                  { icon: "⏱️", text: "3-5 minute lessons", color: "bg-accent-light/30 text-accent" },
-                  { icon: "🧩", text: "Interactive quizzes", color: "bg-accent-light/30 text-accent" },
-                  { icon: "🎯", text: "Real-world applications", color: "bg-accent-light/30 text-accent" }
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>
-                      {feature.icon}
-                    </div>
-                    <span className="text-gray-700 font-medium text-sm">{feature.text}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+
           </div>
         </div>
       </section>
