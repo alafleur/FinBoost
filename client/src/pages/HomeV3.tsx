@@ -1094,23 +1094,50 @@ export default function HomeV3() {
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
             {/* Phone Preview - Mobile Centered, Desktop Right */}
             <div className="order-1 lg:order-2 flex flex-col items-center lg:items-start">
-              {/* Mobile navigation dots - positioned above phone */}
-              <div className="lg:hidden flex justify-center space-x-2 mb-4">
-                {screenshots.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      console.log('Dot clicked:', index, 'Previous state:', activeScreenshot);
-                      setActiveScreenshot(index);
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      activeScreenshot === index 
-                        ? 'bg-blue-600 w-8' 
-                        : 'bg-slate-300 hover:bg-slate-400'
-                    }`}
-                    aria-label={`View ${screenshots[index].title}`}
-                  />
-                ))}
+              {/* Mobile navigation with arrows and dots - positioned above phone */}
+              <div className="lg:hidden flex items-center justify-center space-x-4 mb-4">
+                {/* Left Arrow */}
+                <button
+                  onClick={() => {
+                    const prevIndex = activeScreenshot === 0 ? screenshots.length - 1 : activeScreenshot - 1;
+                    setActiveScreenshot(prevIndex);
+                  }}
+                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                  aria-label="Previous screenshot"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                </button>
+
+                {/* Dots */}
+                <div className="flex space-x-2">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        console.log('Dot clicked:', index, 'Previous state:', activeScreenshot);
+                        setActiveScreenshot(index);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        activeScreenshot === index 
+                          ? 'bg-blue-600 w-8' 
+                          : 'bg-slate-300 hover:bg-slate-400'
+                      }`}
+                      aria-label={`View ${screenshots[index].title}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Right Arrow */}
+                <button
+                  onClick={() => {
+                    const nextIndex = activeScreenshot === screenshots.length - 1 ? 0 : activeScreenshot + 1;
+                    setActiveScreenshot(nextIndex);
+                  }}
+                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                  aria-label="Next screenshot"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-600" />
+                </button>
               </div>
               
               <motion.div
