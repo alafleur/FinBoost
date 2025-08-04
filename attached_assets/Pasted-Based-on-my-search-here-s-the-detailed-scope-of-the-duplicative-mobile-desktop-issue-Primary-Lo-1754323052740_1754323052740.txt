@@ -1,0 +1,41 @@
+Based on my search, here's the detailed scope of the duplicative mobile/desktop issue:
+
+Primary Location: client/src/pages/HomeV3.tsx
+1. "What You'll Master" Section (Lines 283-375)
+
+Mobile: Single card carousel with navigation arrows and dots (md:hidden)
+Desktop: Horizontal scrolling layout with all cards visible (hidden md:block)
+Duplication: Completely separate components with different interaction patterns
+2. App Preview Section (Lines 1098-1400+)
+
+Mobile Navigation (Lines 1098-1141): Arrows and dots positioned above phone (lg:hidden)
+Mobile Cards (Lines 1187-1260): Single flipping card with tap interaction (lg:hidden)
+Desktop Cards (Lines 1262+): Static grid of 4 cards with hover states (hidden lg:block)
+Duplication: Two entirely different card systems and navigation approaches
+3. MasterTopicsSection Component (Embedded in HomeV3.tsx)
+
+Mobile: Single card with navigation arrows and dots
+Desktop: Horizontal scroll with all topics visible
+Same pattern: Complete UI separation with md:hidden and hidden md:block
+Secondary Location: client/src/components/Leaderboard.tsx
+Lines 365, 378: Mobile/desktop display differences using md:hidden
+Scope: Likely table vs card layouts for leaderboard data
+Scope Assessment:
+High Impact Areas (Major Duplication):
+
+HomeV3.tsx App Preview: ~300+ lines of duplicate mobile/desktop code
+HomeV3.tsx Master Topics: ~100+ lines of separate mobile/desktop implementations
+MasterTopicsSection: Complete component duplication
+Medium Impact Areas:
+
+Leaderboard component: Table/card layout differences
+Navigation patterns: Various mobile/desktop nav implementations
+Code Bloat: Approximately 500-600 lines of duplicative code that could be consolidated into responsive single components.
+
+Maintenance Overhead:
+
+Any design changes require updating 2+ separate implementations
+Bug fixes need to be applied to multiple code paths
+Inconsistent user experience across breakpoints
+Harder to maintain design system consistency
+Root Cause: Heavy use of lg:hidden/hidden lg:block pattern instead of responsive design with CSS Grid/Flexbox and Tailwind breakpoint classes.
