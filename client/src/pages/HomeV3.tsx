@@ -1840,10 +1840,7 @@ export default function HomeV3() {
                   icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Strategic Student Loan Repayment Plans"
                 },
-                {
-                  icon: <Award className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Student Loan Forgiveness: What Still Qualifies"
-                },
+
                 {
                   icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Do Small Daily Purchases Really Add Up?"
