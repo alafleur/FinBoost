@@ -1101,7 +1101,8 @@ export default function HomeV3() {
                         key={`screenshot-${activeScreenshot}`}
                         src={screenshots[activeScreenshot].screenshotPath}
                         alt={screenshots[activeScreenshot].title}
-                        className="w-full h-full object-cover object-top"
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: '60% top' }}
                         initial={{ scale: 1.05, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.4 }}
