@@ -891,9 +891,46 @@ export default function HomeV3() {
             <h3 className="text-xl md:text-2xl font-bold gradient-text mb-4 md:mb-6">
               Early Access Guarantees
             </h3>
-            <p className="text-slate-600 text-base md:text-lg mb-8 md:mb-12 max-w-2xl mx-auto">
+            <p className="text-slate-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
               Here's what we guarantee every early access member:
             </p>
+            
+            {/* Animated Down Arrow */}
+            <motion.div
+              className="flex justify-center mb-6 md:mb-8"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 2.0 }}
+            >
+              <motion.div
+                animate={{ 
+                  y: [0, 8, 0],
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm rounded-full border border-blue-200/50 shadow-lg"
+              >
+                <motion.svg
+                  className="w-5 h-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3, delay: 2.2 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </motion.svg>
+              </motion.div>
+            </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-6">
               <motion.div 
