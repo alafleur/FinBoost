@@ -360,7 +360,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => 
         <div className="flex justify-center mt-6">
           <div className="flex items-center space-x-2 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-full px-4 py-2">
             <ChevronLeft className="w-4 h-4 text-blue-600 animate-pulse" />
-            <p className="text-sm font-medium text-blue-700">Scroll to explore all lessons</p>
+            <p className="text-sm font-medium text-blue-700">Scroll to explore more example lessons</p>
             <ChevronRight className="w-4 h-4 text-blue-600 animate-pulse" />
           </div>
         </div>
