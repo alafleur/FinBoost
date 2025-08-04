@@ -297,13 +297,13 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => 
           {/* Navigation Arrows */}
           <button
             onClick={prevTopic}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+            className="absolute -left-6 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5 text-slate-600" />
           </button>
           <button
             onClick={nextTopic}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+            className="absolute -right-6 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
           >
             <ChevronRight className="w-5 h-5 text-slate-600" />
           </button>
@@ -1803,10 +1803,10 @@ export default function HomeV3() {
               <span className="text-blue-700 font-semibold text-sm">FINANCIAL EDUCATION</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Build Better Money Habits That Actually Stick
+              Some Examples of Your FinBoost Lessons
             </h2>
             <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
-              Learn practical financial skills through bite-sized lessons designed to fit into your daily routine.
+              Real financial education based on proven strategies for common real-life scenarios
             </p>
           </motion.div>
 
@@ -1819,12 +1819,7 @@ export default function HomeV3() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Some Examples of What You'll Master:
-              </h3>
-              <p className="text-base text-slate-600 max-w-2xl mx-auto">
-                Real financial education based on proven strategies for common real-life scenarios
-              </p>
+
             </motion.div>
             
             {/* Mobile Single Card with Navigation + Desktop Grid */}
@@ -1860,6 +1855,18 @@ export default function HomeV3() {
                 {
                   icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Harness Compound Growth Power"
+                },
+                {
+                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Strategic Student Loan Repayment Plans"
+                },
+                {
+                  icon: <Award className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Student Loan Forgiveness: What Still Qualifies"
+                },
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Do Small Daily Purchases Really Add Up?"
                 }
               ]} />
             
