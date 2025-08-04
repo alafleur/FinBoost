@@ -244,6 +244,117 @@ function useCarouselState(totalSteps: number, autoAdvanceInterval: number = 5000
   };
 }
 
+// Master Topics Component with responsive design
+interface Topic {
+  icon: React.ReactNode;
+  title: string;
+}
+
+interface MasterTopicsSectionProps {
+  topics: Topic[];
+}
+
+const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextTopic = () => {
+    setCurrentIndex((prev) => (prev + 1) % topics.length);
+  };
+
+  const prevTopic = () => {
+    setCurrentIndex((prev) => (prev - 1 + topics.length) % topics.length);
+  };
+
+  const goToTopic = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      {/* Mobile: Single Card with Navigation */}
+      <div className="md:hidden">
+        <div className="relative">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="p-6 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg"
+          >
+            <div className="flex items-center justify-center flex-col text-center space-y-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                <div className="text-white">
+                  {topics[currentIndex].icon}
+                </div>
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 leading-tight">
+                {topics[currentIndex].title}
+              </h4>
+            </div>
+          </motion.div>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevTopic}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+          >
+            <ChevronLeft className="w-5 h-5 text-slate-600" />
+          </button>
+          <button
+            onClick={nextTopic}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+          >
+            <ChevronRight className="w-5 h-5 text-slate-600" />
+          </button>
+        </div>
+
+        {/* Navigation Dots */}
+        <div className="flex justify-center mt-6 space-x-2">
+          {topics.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToTopic(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                index === currentIndex
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 scale-110'
+                  : 'bg-slate-300 hover:bg-slate-400'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: Grid Layout */}
+      <div className="hidden md:grid grid-cols-2 gap-6">
+        {topics.map((topic, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            viewport={{ once: true }}
+            className="group p-6 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300"
+          >
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors">
+                <div className="text-white">
+                  {topic.icon}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-lg font-bold text-slate-900 leading-tight">
+                  {topic.title}
+                </h4>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function HomeV3() {
   const [location, navigate] = useLocation();
   const [communitySize, setCommunitySize] = useState(5000);
@@ -1706,103 +1817,68 @@ export default function HomeV3() {
               </p>
             </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-              {[
+            {/* Mobile Single Card with Navigation + Desktop Grid */}
+            <MasterTopicsSection topics={[
                 {
                   icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Credit Utilization and Borrowing Power",
-                  description: "Learn how credit utilization impacts your score and your borrowing capacity for major purchases"
+                  title: "Master Credit Utilization and Borrowing Power"
                 },
                 {
                   icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Buy Now, Pay Later Risks", 
-                  description: "Understand the real risks of BNPL services and their hidden impact on your financial health"
+                  title: "Navigate Buy Now, Pay Later Risks"
                 },
                 {
                   icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Decode APR vs APY Differences",
-                  description: "Master the subtle but costly difference between APR and APY in your financial decisions"
+                  title: "Decode APR vs APY Differences"
                 },
                 {
                   icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Build Smart Emergency Fund Strategy",
-                  description: "Learn to think about liquidity risk when building your emergency fund safety net"
+                  title: "Build Smart Emergency Fund Strategy"
                 },
                 {
                   icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Rethink the 30% Rent Rule",
-                  description: "Discover why the 30% rent-to-income ratio isn't universal and find your optimal housing budget"
+                  title: "Rethink the 30% Rent Rule"
                 },
                 {
                   icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Debt Payoff Strategies",
-                  description: "Compare debt snowball vs avalanche methods and choose the right strategy for your situation"
+                  title: "Master Debt Payoff Strategies"
                 },
                 {
                   icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Auto Loans and Refinancing",
-                  description: "Understand the real cost of car financing and learn when refinancing makes financial sense"
+                  title: "Navigate Auto Loans and Refinancing"
                 },
                 {
                   icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Harness Compound Growth Power",
-                  description: "Learn the mechanics of compound growth to build long-term wealth effectively"
+                  title: "Harness Compound Growth Power"
                 }
-              ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="group p-5 lg:p-6 rounded-xl bg-white/90 lg:bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300"
-                  >
-                    <div className="flex items-start space-x-3 lg:space-x-4">
-                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors">
-                        <div className="text-white">
-                          {item.icon}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-bold text-slate-900 mb-2 leading-tight">
-                          {item.title}
-                        </h4>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
+              ]} />
+            
+            {/* Learning Features */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg mt-12 max-w-4xl mx-auto"
+            >
+              <h4 className="text-lg font-bold text-gray-900 mb-6 text-center">
+                Learning Experience
+              </h4>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  { icon: "⏱️", text: "3-5 minute lessons", color: "bg-accent-light/30 text-accent" },
+                  { icon: "🧩", text: "Interactive quizzes", color: "bg-accent-light/30 text-accent" },
+                  { icon: "🎯", text: "Real-world applications", color: "bg-accent-light/30 text-accent" }
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>
+                      {feature.icon}
                     </div>
-                  </motion.div>
+                    <span className="text-gray-700 font-medium text-sm">{feature.text}</span>
+                  </div>
                 ))}
               </div>
-              
-              {/* Learning Features moved inside right column */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="bg-white/60 backdrop-blur-sm border border-white/80 rounded-2xl p-6 shadow-lg mt-8"
-              >
-                <h4 className="text-lg font-bold text-gray-900 mb-6 text-center lg:text-left">
-                  Learning Experience
-                </h4>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  {[
-                    { icon: "⏱️", text: "3-5 minute lessons", color: "bg-accent-light/30 text-accent" },
-                    { icon: "🧩", text: "Interactive quizzes", color: "bg-accent-light/30 text-accent" },
-                    { icon: "🎯", text: "Real-world applications", color: "bg-accent-light/30 text-accent" }
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center text-lg font-medium flex-shrink-0`}>
-                        {feature.icon}
-                      </div>
-                      <span className="text-gray-700 font-medium text-sm">{feature.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
