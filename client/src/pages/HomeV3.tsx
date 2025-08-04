@@ -1527,7 +1527,7 @@ export default function HomeV3() {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                     <DollarSign className="w-6 h-6 text-white" />
                   </div>
-                  <div className="text-sm font-semibold text-slate-600 mb-2">Monthly Pool Size</div>
+                  <div className="text-sm font-semibold text-slate-600 mb-2">Illustrative Monthly Pool Size</div>
                   <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(calculateRewardsPool(communitySize))}
                   </div>
@@ -1537,7 +1537,7 @@ export default function HomeV3() {
             </div>
 
             {/* RIGHT SIDE: Donut Chart + Top Reward */}
-            <div className="flex flex-col items-center space-y-8">
+            <div className="space-y-6">
               {/* Dynamic Donut Chart */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
@@ -1546,7 +1546,7 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
               >
-                <div className="relative w-64 h-64 mb-6">
+                <div className="relative w-64 h-64 mb-6 mx-auto">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                     {/* Background circle */}
                     <circle
@@ -1626,14 +1626,13 @@ export default function HomeV3() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="w-full max-w-sm"
               >
                 <div className="bg-gradient-to-br from-white via-blue-50/50 to-purple-50/50 backdrop-blur-sm border border-blue-200/50 rounded-xl p-6 text-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Trophy className="w-8 h-8 text-white" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <Trophy className="w-7 h-7 text-white" />
                   </div>
-                  <h4 className="text-lg font-bold text-slate-800 mb-2">Top Reward</h4>
-                  <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+                  <h4 className="text-lg font-bold text-slate-800 mb-2">Illustrative Top Reward</h4>
+                  <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
                     {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
                   <p className="text-sm text-slate-600 font-medium">
