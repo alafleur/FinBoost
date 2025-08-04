@@ -15,7 +15,7 @@ async function importNewModules() {
 
   try {
     // Read the JSON data from the file
-    const jsonData = JSON.parse(fs.readFileSync('attached_assets/Pasted--fb201-id-fb201-title-How-Interest-Accrues-Daily-and-Why-It-Matters--1754264711398_1754264711399.txt', 'utf8'));
+    const jsonData = JSON.parse(fs.readFileSync('attached_assets/Pasted--fb206-id-fb206-title-How-Your-Credit-Utilization-Impacts-Your-Score--1754265629389_1754265629392.txt', 'utf8'));
     
     // Get current max order to continue sequence
     const maxOrderResult = await pool.query('SELECT COALESCE(MAX("order"), 0) as max_order FROM learning_modules');

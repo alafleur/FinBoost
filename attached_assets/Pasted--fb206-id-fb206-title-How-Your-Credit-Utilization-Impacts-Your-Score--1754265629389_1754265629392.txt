@@ -1,0 +1,171 @@
+{
+  "fb206": {
+    "id": "fb206",
+    "title": "How Your Credit Utilization Impacts Your Score — And Your Borrowing Power",
+    "category": "Credit",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>How Your Credit Utilization Impacts Your Score — And Your Borrowing Power</h2><p>Credit utilization — the ratio of your credit card balances to your total available credit — is one of the most influential factors in your credit score. But it also affects how lenders perceive your risk level. A 30% utilization is often cited as a target, but the optimal range is typically much lower if you’re preparing to apply for credit.</p><h3>Why It Matters</h3><ul><li>FICO models heavily weight revolving credit usage — high utilization signals elevated risk.</li><li>Lenders also view it behaviorally: maxed-out cards may suggest cash flow issues, even if you pay in full.</li><li>Credit utilization is calculated per card and in aggregate — both matter.</li><li>If you’re near a major credit event (e.g., mortgage), aim for <10% for optimal impact.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does a high credit utilization ratio indicate to lenders?",
+        "options": ["Strong credit history", "Low financial risk", "Potential repayment risk or overextension"],
+        "correctAnswer": 2,
+        "explanation": "High utilization can imply you're reliant on credit and may be overextended."
+      },
+      {
+        "id": "q2",
+        "question": "Why might paying off your card in full still not improve your score immediately?",
+        "options": ["Credit cards report balances at statement close, not after payment", "FICO ignores full payments", "Utilization only applies to installment loans"],
+        "correctAnswer": 0,
+        "explanation": "Card issuers often report your balance as of your statement date, even if you pay in full later."
+      },
+      {
+        "id": "q3",
+        "question": "If you’re planning to apply for a mortgage in 2 months, what’s a strong utilization target?",
+        "options": ["Below 50%", "Below 30%", "Below 10%"],
+        "correctAnswer": 2,
+        "explanation": "For optimal credit scoring outcomes, <10% utilization is recommended before major applications."
+      }
+    ]
+  },
+
+  "fb207": {
+    "id": "fb207",
+    "title": "Emergency Funds: How to Think About Liquidity Risk",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Emergency Funds: How to Think About Liquidity Risk</h2><p>An emergency fund isn’t just about savings — it’s about liquidity. Cash on hand protects against forced borrowing or premature asset liquidation. While the '3–6 months of expenses' rule is common, the right amount depends on your job stability, fixed costs, and portfolio structure.</p><h3>Frameworks for Liquidity Reserves</h3><ul><li><strong>Fixed vs. variable expenses</strong>: The more fixed costs you carry (e.g., rent, car loans), the more buffer you may need.</li><li><strong>Job volatility</strong>: Freelancers or commission-based earners may need 6–9+ months saved.</li><li><strong>Asset lock-in</strong>: If your net worth is in retirement or illiquid investments, emergency cash becomes more essential.</li><li>Emergency funds are not about return — they’re about access, certainty, and optionality.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s the primary purpose of an emergency fund?",
+        "options": ["Earn interest", "Protect against liquidity risk", "Maximize investment returns"],
+        "correctAnswer": 1,
+        "explanation": "Emergency funds exist to give you access to cash without needing to sell assets or go into debt."
+      },
+      {
+        "id": "q2",
+        "question": "Why might someone need more than 6 months of savings?",
+        "options": ["They have high income", "They own a home", "They have volatile or commission-based income"],
+        "correctAnswer": 2,
+        "explanation": "Unpredictable income streams require longer runways to cover variability."
+      },
+      {
+        "id": "q3",
+        "question": "What’s a key drawback of keeping emergency funds in investment accounts?",
+        "options": ["They’re too easy to access", "Returns are too high", "Market volatility could force withdrawals during downturns"],
+        "correctAnswer": 2,
+        "explanation": "Emergency funds should not be subject to market risk—they're for stability, not growth."
+      }
+    ]
+  },
+
+  "fb208": {
+    "id": "fb208",
+    "title": "The Mechanics of Compound Growth",
+    "category": "Investing",
+    "difficulty": "Beginner",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>The Mechanics of Compound Growth</h2><p>Compound growth is often cited as a financial superpower, but it’s more than just 'interest on interest.' It's a function of time, return, consistency, and reinvestment. The real power lies in maintaining uninterrupted growth over long horizons — which means minimizing disruptions and avoiding reactive decisions.</p><h3>What to Know</h3><ul><li><strong>Growth = Principal × (1 + Rate)^Time</strong></li><li>Missing early years — or interrupting the process — can significantly reduce long-term outcomes.</li><li>Even a 1–2% difference in annual return, compounded over decades, creates major divergence in total value.</li><li>Losses are harder to recover: a 50% drop requires a 100% gain to break even.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s a key driver of compound growth success?",
+        "options": ["Timing the market", "Short-term trades", "Staying invested consistently over time"],
+        "correctAnswer": 2,
+        "explanation": "Consistency and time are the real accelerators of compounding, not perfect timing."
+      },
+      {
+        "id": "q2",
+        "question": "If your portfolio drops 50%, what return is needed to recover to the prior value?",
+        "options": ["50%", "75%", "100%"],
+        "correctAnswer": 2,
+        "explanation": "After a 50% drop, you need a 100% gain to fully recover."
+      },
+      {
+        "id": "q3",
+        "question": "Which of the following has the biggest long-term impact?",
+        "options": ["Chasing highest returns", "Avoiding down years completely", "Minimizing interruptions to compounding"],
+        "correctAnswer": 2,
+        "explanation": "Avoiding disruptions and staying invested consistently beats chasing big wins."
+      }
+    ]
+  },
+
+  "fb209": {
+    "id": "fb209",
+    "title": "Understanding Effective Tax Rates vs. Marginal Rates",
+    "category": "Taxes",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Understanding Effective Tax Rates vs. Marginal Rates</h2><p>People often confuse marginal and effective tax rates. Your marginal rate is the rate applied to your next dollar of income; your effective rate is the average tax you actually pay across all your income. Understanding the difference can help with tax planning, especially around deductions, bonuses, and tax-deferred investments.</p><h3>Breakdown</h3><ul><li><strong>Marginal rate</strong>: Based on tax brackets — only applies to income in that bracket.</li><li><strong>Effective rate</strong>: Total taxes paid ÷ total income — always lower than the marginal rate if progressive.</li><li>Strategic contributions (401k, HSA, etc.) lower taxable income and reduce marginal exposure.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is your marginal tax rate?",
+        "options": ["Your total tax divided by income", "The tax rate on your last dollar earned", "The rate applied to all of your income"],
+        "correctAnswer": 1,
+        "explanation": "The marginal rate applies only to your top income bracket — not your entire income."
+      },
+      {
+        "id": "q2",
+        "question": "Why is your effective tax rate usually lower than your marginal rate?",
+        "options": ["Because you don’t pay any taxes on lower income", "Because only bonuses are taxed", "Because lower portions of your income are taxed at lower rates"],
+        "correctAnswer": 2,
+        "explanation": "U.S. taxes are progressive — only the portion in each bracket is taxed at that level."
+      },
+      {
+        "id": "q3",
+        "question": "Which action can reduce both your marginal and effective tax rates?",
+        "options": ["Roth IRA contribution", "401(k) contribution", "Receiving a raise"],
+        "correctAnswer": 1,
+        "explanation": "Traditional 401(k) contributions reduce your taxable income, possibly lowering both rates."
+      }
+    ]
+  },
+
+  "fb210": {
+    "id": "fb210",
+    "title": "Evaluating High-Yield Savings Accounts in a High-Rate Environment",
+    "category": "Saving",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Evaluating High-Yield Savings Accounts in a High-Rate Environment</h2><p>When interest rates rise, high-yield savings accounts (HYSAs) become more attractive. But not all are created equal. Understanding how banks set rates — and how they move relative to the Fed — can help you make better short-term capital parking decisions.</p><h3>What to Look For</h3><ul><li><strong>Rate responsiveness</strong>: Some institutions lag behind in updating rates, especially large banks.</li><li><strong>Access vs. return</strong>: Ensure liquidity and FDIC insurance aren’t compromised for a small rate gain.</li><li><strong>Use case</strong>: HYSAs are best for short-term goals or emergency funds — not long-term investing.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "Why do some banks offer lower HYSA rates than others?",
+        "options": ["They’re illegal to compete", "They have more operating costs and slower rate adjustments", "They don’t pay interest at all"],
+        "correctAnswer": 1,
+        "explanation": "Larger institutions often lag in raising rates due to size, inertia, or funding cost differences."
+      },
+      {
+        "id": "q2",
+        "question": "What’s a key advantage of a HYSA over a CD?",
+        "options": ["Higher returns", "Tax exemption", "Daily liquidity without penalty"],
+        "correctAnswer": 2,
+        "explanation": "HYSAs allow withdrawals at any time, unlike CDs which lock funds."
+      },
+      {
+        "id": "q3",
+        "question": "When are HYSAs most appropriate?",
+        "options": ["Long-term stock investing", "Emergency savings or short-term financial goals", "Daily trading"],
+        "correctAnswer": 1,
+        "explanation": "Their combination of yield and liquidity makes them ideal for short-term cash goals."
+      }
+    ]
+  }
+}
