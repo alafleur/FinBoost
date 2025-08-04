@@ -1753,23 +1753,23 @@ export default function HomeV3() {
                 {[
                   {
                     icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Improve Your Credit Score with Smart Strategies",
-                    description: "Learn the tactics that have helped thousands boost their scores"
+                    title: "Master Credit Utilization and APR Differences",
+                    description: "Learn how credit utilization impacts your score and understand the costly difference between APR vs APY"
                   },
                   {
-                    icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Create a Budget That Actually Fits Your Life", 
-                    description: "Practical approaches that work even on tight budgets"
+                    icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
+                    title: "Build Emergency Funds and Smart Budgets", 
+                    description: "Understand liquidity risk management and why the 30% rent rule isn't always right"
                   },
                   {
                     icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Accelerate Your Debt Payoff with Smart Planning",
-                    description: "Strategic methods to save on interest and get debt-free sooner"
+                    title: "Navigate Auto Loans and Refinancing Decisions",
+                    description: "Understand the real cost of car financing and when refinancing makes sense"
                   },
                   {
                     icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Start Investing Even with Small Amounts",
-                    description: "Simple, low-risk ways to begin building wealth"
+                    title: "Harness Compound Growth and Avoid Housing Traps",
+                    description: "Learn the mechanics of compound growth and avoid becoming house poor"
                   }
                 ].map((item, index) => (
                   <motion.div
