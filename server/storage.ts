@@ -7462,7 +7462,7 @@ export class MemStorage implements IStorage {
           isWinner: true,
           cycleId: winnerRecord.cycleId,
           cycleName: winnerRecord.cycleName || `Cycle ${winnerRecord.cycleId}`,
-          rewardAmount: winnerRecord.rewardAmount,
+          rewardAmount: finalPayoutAmount, // Use finalPayoutAmount which prioritizes payout override
           payoutOverride: winnerRecord.payoutOverride,
           payoutFinal: winnerRecord.payoutFinal,
           finalPayoutAmount: finalPayoutAmount, // Always the correct override amount
