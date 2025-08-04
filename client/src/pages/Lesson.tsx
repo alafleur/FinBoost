@@ -415,49 +415,56 @@ export default function Lesson() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => setLocation('/education')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-blue-50 transition-colors text-gray-600 hover:text-blue-700"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Education
             </Button>
-            <div className="flex-1">
+            <div className="flex-1 space-y-3">
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="flex items-center gap-1">
+                <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 px-3 py-1 flex items-center gap-1.5 shadow-sm">
                   <Star className="h-3 w-3" />
                   {lesson.points} points
                 </Badge>
               </div>
-              <h1 className="text-2xl font-bold mt-2">{lesson.title}</h1>
-              <p className="text-gray-600">{lesson.category}</p>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{lesson.title}</h1>
+                <p className="text-blue-600 font-medium mt-1">{lesson.category}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Module Navigation Progress */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant={currentStep === 'content' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setCurrentStep('content')}
-                className="flex items-center gap-2"
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  currentStep === 'content' 
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:from-blue-600 hover:to-purple-700' 
+                    : 'hover:bg-blue-50 text-gray-600 hover:text-blue-700'
+                }`}
               >
                 <BookOpen className="h-4 w-4" />
-                Lesson Content
+                <span className="hidden sm:inline">Lesson Content</span>
+                <span className="sm:hidden">Content</span>
               </Button>
-              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="w-6 sm:w-8 h-px bg-gradient-to-r from-blue-300 to-purple-300"></div>
               <Button
                 variant={currentStep === 'quiz' ? 'default' : 'ghost'}
                 size="sm"
@@ -465,15 +472,20 @@ export default function Lesson() {
                   setCurrentStep('quiz');
                   if (currentQuestionIndex === -1) setCurrentQuestionIndex(0);
                 }}
-                className="flex items-center gap-2"
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  currentStep === 'quiz' 
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md hover:from-blue-600 hover:to-purple-700' 
+                    : 'hover:bg-blue-50 text-gray-600 hover:text-blue-700'
+                }`}
                 disabled={!quizStarted}
               >
                 <Target className="h-4 w-4" />
-                Quiz ({lesson.quiz.length} questions)
+                <span className="hidden sm:inline">Quiz ({lesson.quiz.length} questions)</span>
+                <span className="sm:hidden">Quiz ({lesson.quiz.length})</span>
               </Button>
             </div>
             {currentStep === 'quiz' && !showResults && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border">
                 Question {currentQuestionIndex + 1} of {lesson.quiz.length}
               </div>
             )}
@@ -481,20 +493,22 @@ export default function Lesson() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {currentStep === 'content' ? (
           /* Lesson Content */
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary-600" />
-                  <CardTitle>Lesson Content</CardTitle>
+          <div className="space-y-8">
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                    <BookOpen className="h-5 w-5 text-white" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-gray-900">Lesson Content</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-8">
                 <div 
-                  className="prose max-w-none"
+                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900 prose-ul:space-y-2 prose-li:leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: lesson.content }}
                 />
               </CardContent>
@@ -503,7 +517,7 @@ export default function Lesson() {
             <div className="flex justify-center">
               <Button 
                 onClick={startQuiz}
-                className="flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 text-lg font-semibold flex items-center gap-3"
                 size="lg"
               >
                 <Target className="h-5 w-5" />
@@ -517,54 +531,60 @@ export default function Lesson() {
             {!showResults ? (
               <>
                 {/* Quiz Progress */}
-                <Card>
-                  <CardContent className="pt-6">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-semibold text-gray-800">
                         Question {currentQuestionIndex + 1} of {lesson.quiz.length}
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
                         {Math.round(((currentQuestionIndex + 1) / lesson.quiz.length) * 100)}% Complete
                       </span>
                     </div>
-                    <Progress 
-                      value={((currentQuestionIndex + 1) / lesson.quiz.length) * 100} 
-                      className="h-2"
-                    />
+                    <div className="relative">
+                      <Progress 
+                        value={((currentQuestionIndex + 1) / lesson.quiz.length) * 100} 
+                        className="h-3 bg-gray-200"
+                      />
+                      <div 
+                        className="absolute top-0 left-0 h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${((currentQuestionIndex + 1) / lesson.quiz.length) * 100}%` }}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Current Question */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{currentQuestion.question}</CardTitle>
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg border-b border-gray-100">
+                    <CardTitle className="text-xl font-bold text-gray-900 leading-relaxed">{currentQuestion.question}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
                       {currentQuestion.options.map((option, index) => (
                         <button
                           key={index}
                           onClick={() => handleAnswerSelect(index)}
-                          className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                          className={`w-full p-5 text-left rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
                             selectedAnswers[currentQuestionIndex] === index
-                              ? 'border-blue-500 bg-blue-50 shadow-md'
+                              ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg transform scale-[1.02]'
                               : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                          <div className="flex items-center gap-4">
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
                               selectedAnswers[currentQuestionIndex] === index
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-gray-300'
+                                ? 'border-blue-500 bg-gradient-to-r from-blue-500 to-purple-600 shadow-sm'
+                                : 'border-gray-300 hover:border-blue-400'
                             }`}>
                               {selectedAnswers[currentQuestionIndex] === index && (
-                                <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                                <div className="w-3 h-3 bg-white rounded-full" />
                               )}
                             </div>
-                            <span className={`${
+                            <span className={`text-base leading-relaxed ${
                               selectedAnswers[currentQuestionIndex] === index
-                                ? 'text-blue-900 font-medium'
-                                : 'text-gray-700'
+                                ? 'text-blue-900 font-semibold'
+                                : 'text-gray-700 font-medium'
                             }`}>{option}</span>
                           </div>
                         </button>
@@ -574,20 +594,22 @@ export default function Lesson() {
                 </Card>
 
                 {/* Quiz Navigation */}
-                <div className="flex justify-between">
-                  <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="flex gap-3">
                     <Button
                       variant="outline"
                       onClick={goBackToLesson}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
                     >
                       <BookOpen className="h-4 w-4" />
-                      Back to Lesson
+                      <span className="hidden sm:inline">Back to Lesson</span>
+                      <span className="sm:hidden">Lesson</span>
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handlePreviousQuestion}
                       disabled={currentQuestionIndex === 0}
+                      className="border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </Button>
@@ -595,9 +617,13 @@ export default function Lesson() {
                   <Button
                     onClick={handleNextQuestion}
                     disabled={!isAnswerSelected}
-                    className="flex items-center gap-2"
+                    className={`flex items-center gap-2 px-6 py-2 font-semibold transition-all duration-200 ${
+                      currentQuestionIndex === lesson.quiz.length - 1
+                        ? 'bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl'
+                    } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg`}
                   >
-                    {currentQuestionIndex === lesson.quiz.length - 1 ? 'Finish Quiz' : 'Next'}
+                    {currentQuestionIndex === lesson.quiz.length - 1 ? 'Finish Quiz' : 'Next Question'}
                   </Button>
                 </div>
               </>
