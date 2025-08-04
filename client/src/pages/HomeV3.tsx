@@ -749,76 +749,76 @@ export default function HomeV3() {
           
           {/* Early Access Guarantees */}
           <motion.div
-            className="text-center mb-12 md:mb-16 max-w-4xl mx-auto"
+            className="text-center mt-16 md:mt-20 mb-16 md:mb-20 max-w-5xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-6 md:mb-8">
+            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-8 md:mb-12">
               Early Access Guarantees
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 px-4 md:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-6">
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/80 backdrop-blur-sm rounded-xl px-4 md:px-6 py-4 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 2.0, ease: "easeOut" }}
               >
-                <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-slate-700 font-semibold text-sm md:text-base">
+                <span className="text-slate-700 font-semibold text-base md:text-lg">
                   $5,000+ minimum pool size
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/80 backdrop-blur-sm rounded-xl px-4 md:px-6 py-4 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 2.1, ease: "easeOut" }}
               >
-                <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-slate-700 font-semibold text-sm md:text-base">
+                <span className="text-slate-700 font-semibold text-base md:text-lg">
                   50% membership fees back to rewards
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/80 backdrop-blur-sm rounded-xl px-4 md:px-6 py-4 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 2.2, ease: "easeOut" }}
               >
-                <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-slate-700 font-semibold text-sm md:text-base">
+                <span className="text-slate-700 font-semibold text-base md:text-lg">
                   40%+ minimum member win rate
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/80 backdrop-blur-sm rounded-xl px-4 md:px-6 py-4 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 2.3, ease: "easeOut" }}
               >
-                <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-slate-700 font-semibold text-sm md:text-base">
+                <span className="text-slate-700 font-semibold text-base md:text-lg">
                   $250+ minimum top reward
                 </span>
               </motion.div>
