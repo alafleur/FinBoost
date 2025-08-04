@@ -1,0 +1,171 @@
+{
+  "fb216": {
+    "id": "fb216",
+    "title": "House Poor: When Buying Too Much Home Becomes a Financial Trap",
+    "category": "Real Estate",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>House Poor: When Buying Too Much Home Becomes a Financial Trap</h2><p>Being 'house poor' means too much of your income is tied up in housing costs—leaving little flexibility for savings, investing, or unexpected expenses. It’s not just about the mortgage. Taxes, insurance, maintenance, and utilities add up—and many buyers underestimate their real monthly burden.</p><h3>Key Risks</h3><ul><li><strong>Illiquidity</strong>: Home equity isn’t easily accessed without refinancing or selling.</li><li><strong>Underfunded goals</strong>: Retirement, emergency funds, and debt payoff often get deprioritized.</li><li><strong>Maintenance shock</strong>: Unexpected repairs or assessments can disrupt your financial plan.</li><li>Rule of thumb: Keep total housing costs below 28% of gross income—but adjust based on debt, location, and goals.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does being 'house poor' typically mean?",
+        "options": ["Owning a depreciating home", "Spending a disproportionate share of income on housing", "Having no home insurance"],
+        "correctAnswer": 1,
+        "explanation": "It refers to having a home you can technically afford but at the cost of other financial priorities."
+      },
+      {
+        "id": "q2",
+        "question": "Why is home equity not a reliable emergency resource?",
+        "options": ["It’s not real value", "It can’t be taxed", "It’s illiquid—you can’t access it easily without loans or a sale"],
+        "correctAnswer": 2,
+        "explanation": "Tapping equity often requires a refinance or home equity loan, which takes time and costs money."
+      },
+      {
+        "id": "q3",
+        "question": "What’s a key risk of underestimating total housing costs?",
+        "options": ["Lower credit scores", "Asset correlation", "Underfunding other goals like savings or retirement"],
+        "correctAnswer": 2,
+        "explanation": "Housing costs crowd out other critical areas when they consume too much of your budget."
+      }
+    ]
+  },
+
+  "fb217": {
+    "id": "fb217",
+    "title": "Auto Loans: Understanding the Real Cost of Car Financing",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Auto Loans: Understanding the Real Cost of Car Financing</h2><p>Auto loans are one of the most common forms of consumer debt—but often misunderstood. A longer term may lower your monthly payment but increases total interest. High-interest loans on rapidly depreciating assets can damage long-term financial stability if not managed intentionally.</p><h3>What to Know</h3><ul><li><strong>Depreciation mismatch</strong>: Most cars lose 20–30% of value in the first year, yet are financed over 5–7 years.</li><li><strong>Negative equity risk</strong>: Owing more than the car is worth is common—especially with small down payments or rolled-over loans.</li><li><strong>Interest rates vary widely</strong>: A 3% vs. 9% rate on a 5-year loan can mean thousands in additional cost.</li><li><strong>Ideal scenario</strong>: Keep loans under 48 months, aim for <10% of take-home pay monthly, and prioritize low rates.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is negative equity in the context of auto loans?",
+        "options": ["Having no co-signer", "Owning the car outright", "Owing more on the loan than the car is worth"],
+        "correctAnswer": 2,
+        "explanation": "Negative equity means you’re underwater—your loan exceeds the car’s value."
+      },
+      {
+        "id": "q2",
+        "question": "Why do longer loan terms cost more in total?",
+        "options": ["They come with prepayment penalties", "They always include add-ons", "They accrue more interest over time even at the same rate"],
+        "correctAnswer": 2,
+        "explanation": "Spreading out payments over more months increases the total interest paid."
+      },
+      {
+        "id": "q3",
+        "question": "What’s a common budgeting guideline for car payments?",
+        "options": ["They should never exceed 25% of income", "They should be below 10% of take-home pay", "They should be equal to your rent"],
+        "correctAnswer": 1,
+        "explanation": "Keeping payments under 10% of net income helps maintain overall budget health."
+      }
+    ]
+  },
+
+  "fb218": {
+    "id": "fb218",
+    "title": "How to Evaluate a 401(k) Match",
+    "category": "Retirement",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>How to Evaluate a 401(k) Match</h2><p>Employer 401(k) matches are one of the few 'free money' offers in personal finance. But how much it's worth depends on your contribution strategy and vesting schedule. Understanding how matches are structured helps you prioritize retirement savings smartly.</p><h3>What to Evaluate</h3><ul><li><strong>Common structures</strong>: e.g., 100% of first 3% of salary, or 50% of first 6%</li><li><strong>Vesting schedule</strong>: Some matches require you to stay with the company 1–5 years to keep full value</li><li><strong>Contribution threshold</strong>: You only get the full match if you contribute enough to qualify</li><li>Failing to claim a match is effectively leaving part of your compensation unused</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s a typical 401(k) employer match formula?",
+        "options": ["25% of any contribution", "50% of first 6% of salary", "10% bonus each year"],
+        "correctAnswer": 1,
+        "explanation": "Many employers offer to match 50 cents on the dollar up to a certain percent of your salary."
+      },
+      {
+        "id": "q2",
+        "question": "Why does a vesting schedule matter?",
+        "options": ["It limits tax deductions", "It affects whether you keep the employer’s contribution when you leave", "It changes your contribution amount"],
+        "correctAnswer": 1,
+        "explanation": "Vesting determines when employer contributions become yours to keep if you leave."
+      },
+      {
+        "id": "q3",
+        "question": "What happens if you contribute less than the match threshold?",
+        "options": ["The employer gives you the full match anyway", "You may forfeit part of the available match", "Your account is closed"],
+        "correctAnswer": 1,
+        "explanation": "If you don’t contribute enough, you may leave employer matching dollars on the table."
+      }
+    ]
+  },
+
+  "fb219": {
+    "id": "fb219",
+    "title": "Intro to Roth vs Traditional Accounts",
+    "category": "Retirement",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Intro to Roth vs Traditional Accounts</h2><p>Both Roth and Traditional retirement accounts offer tax advantages—but the benefits come at different times. Traditional accounts lower taxable income today, while Roth accounts provide tax-free withdrawals in retirement. The right choice depends on your current vs. expected future tax bracket and need for flexibility.</p><h3>Core Differences</h3><ul><li><strong>Traditional IRA/401(k)</strong>: Tax-deductible now; taxed on withdrawal.</li><li><strong>Roth IRA/401(k)</strong>: No deduction now; growth and withdrawals are tax-free.</li><li><strong>Required Minimum Distributions (RMDs)</strong> apply to Traditional but not Roth IRAs (Roth 401(k)s require RMDs unless rolled over).</li><li><strong>Early withdrawal rules</strong>: Roth contributions can often be accessed tax-free, adding flexibility.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "Which account type offers tax-free withdrawals in retirement?",
+        "options": ["Traditional IRA", "Brokerage account", "Roth IRA"],
+        "correctAnswer": 2,
+        "explanation": "Roth accounts grow tax-free and withdrawals are not taxed if rules are followed."
+      },
+      {
+        "id": "q2",
+        "question": "What’s a reason to prefer a Traditional IRA over a Roth?",
+        "options": ["If your income is tax-free", "If you expect to be in a lower tax bracket in retirement", "If you want higher fees"],
+        "correctAnswer": 1,
+        "explanation": "Traditional IRAs provide immediate tax savings if you expect lower taxes in the future."
+      },
+      {
+        "id": "q3",
+        "question": "Which account is subject to RMDs at age 73?",
+        "options": ["Roth IRA", "Traditional 401(k)", "HSA"],
+        "correctAnswer": 1,
+        "explanation": "Traditional 401(k)s require minimum withdrawals starting at age 73."
+      }
+    ]
+  },
+
+  "fb220": {
+    "id": "fb220",
+    "title": "When Refinancing Makes Sense (and When It Doesn’t)",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>When Refinancing Makes Sense (and When It Doesn’t)</h2><p>Refinancing a loan—whether a mortgage, auto loan, or student loan—can lower your interest rate or change your repayment terms. But it’s not always a win. Timing, fees, and your goals matter. Understand the tradeoffs before locking in new terms.</p><h3>Key Factors</h3><ul><li><strong>Rate reduction</strong>: Refinancing only makes sense if the new rate meaningfully reduces interest costs.</li><li><strong>Loan term</strong>: Extending the loan can lower your payment but increase lifetime interest paid.</li><li><strong>Break-even analysis</strong>: Weigh upfront fees vs. monthly savings to see if the refi pays off in time.</li><li><strong>Student loan caution</strong>: Federal loans refinanced into private lose protections like deferment, forgiveness, and IDR plans.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does refinancing mean?",
+        "options": ["Selling your loan to someone else", "Paying your loan off early", "Replacing an old loan with a new one, often at better terms"],
+        "correctAnswer": 2,
+        "explanation": "It’s taking out a new loan to pay off an existing one—ideally to save money or improve terms."
+      },
+      {
+        "id": "q2",
+        "question": "What is a key risk of refinancing federal student loans into private ones?",
+        "options": ["Higher credit score requirement", "Loss of federal benefits like forgiveness or income-based repayment", "It doubles your payment"],
+        "correctAnswer": 1,
+        "explanation": "You give up federal protections like deferment, forbearance, and forgiveness programs."
+      },
+      {
+        "id": "q3",
+        "question": "Why might a lower monthly payment not actually save you money?",
+        "options": ["It triggers a tax penalty", "It usually comes with higher interest rates", "It can extend your loan term, increasing total interest paid"],
+        "correctAnswer": 2,
+        "explanation": "Extending repayment spreads out interest over more time—even if the rate is lower."
+      }
+    ]
+  }
+}
