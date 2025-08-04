@@ -1,0 +1,35 @@
+{
+  "fb227": {
+    "id": "fb227",
+    "title": "Student Loan Forgiveness: What’s Changed and Who Qualifies",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Student Loan Forgiveness: What’s Changed and Who Qualifies</h2><p>The landscape of student loan forgiveness has shifted significantly in 2024–2025. Several programs introduced in recent years have been rolled back or restructured under new policy guidance. Understanding what remains, what’s been eliminated, and what may still qualify for forgiveness is essential to financial planning.</p><h3>Recent Policy Changes</h3><ul><li><strong>End of broad forgiveness</strong>: Large-scale loan cancellation programs have ended, and collections on paused accounts have resumed.</li><li><strong>Interest resumes under SAVE</strong>: Borrowers in income-driven repayment plans like SAVE began accruing interest again starting August 1, 2025.</li><li><strong>New repayment structure (RAP)</strong>: A new Repayment Assistance Plan will phase out current IDR options and extend forgiveness timelines to 30 years for most borrowers, effective mid-2026.</li><li><strong>PSLF tightening</strong>: Eligibility requirements for public service forgiveness have been narrowed to a more limited set of qualifying employers. Annual employer certification is still required to track PSLF progress.</li><li><strong>IDR account adjustment</strong>: A temporary benefit still available in 2025 may retroactively credit some borrowers for time spent in repayment or forbearance, accelerating forgiveness eligibility. This window is closing soon.</li></ul><p>Borrowers should review their current plan enrollment, assess implications of longer forgiveness windows, and document all qualified employment or payment activity via StudentAid.gov to remain eligible under transitional rules.</p>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is the IDR account adjustment benefit?",
+        "options": ["A new type of loan", "A refund for interest", "Retroactive credit toward forgiveness for past time in repayment or forbearance"],
+        "correctAnswer": 2,
+        "explanation": "This adjustment may count years that previously didn’t qualify toward IDR or PSLF forgiveness."
+      },
+      {
+        "id": "q2",
+        "question": "What’s the new repayment system being implemented?",
+        "options": ["Extended SAVE", "PAYE rollover", "Repayment Assistance Plan (RAP)"],
+        "correctAnswer": 2,
+        "explanation": "RAP will replace current IDR plans and extend forgiveness timelines to 30 years."
+      },
+      {
+        "id": "q3",
+        "question": "How has Public Service Loan Forgiveness (PSLF) eligibility changed?",
+        "options": ["It’s available to everyone", "It no longer requires certification", "The definition of qualifying employment has narrowed"],
+        "correctAnswer": 2,
+        "explanation": "Recent changes restrict the types of public service employment that qualify for PSLF."
+      }
+    ]
+  }
+}
