@@ -43,7 +43,7 @@ interface PointsActionsProps {
 
 export default function PointsActions({ onPointsEarned, quickWinActions }: PointsActionsProps) {
   const [actions, setActions] = useState<PointAction[]>([]);
-  const [selectedAction, setSelectedAction] = useState<number | null>(null);
+
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -78,10 +78,10 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
   };
 
   const submitProof = async () => {
-    if (!selectedAction || !proofFile || !description.trim()) {
+    if (!proofFile || !description.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please select an action, upload proof, and add a description.",
+        description: "Please upload proof and add a description.",
         variant: "destructive"
       });
       return;
@@ -102,7 +102,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          actionId: selectedAction.toString(),
+          actionId: '7', // Default debt paydown action ID
           proofUrl,
           description,
           metadata: {
@@ -120,7 +120,6 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
         });
 
         // Reset form
-        setSelectedAction(null);
         setProofFile(null);
         setDescription('');
       } else {
@@ -213,129 +212,78 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
   return (
     <div className="space-y-6">
-      {/* Inspirational Message */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-6 shadow-sm">
-        <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-              <Upload className="h-6 w-6 text-white" />
+      {/* Integrated Action Card */}
+      <Card className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-300 shadow-xl">
+        <CardHeader className="border-b border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <Upload className="h-6 w-6 text-white" />
+              </div>
             </div>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Rewarded for Your Financial Progress!</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Get rewarded with more points by uploading proof of debt paydown!
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {actions.map((action) => (
-          <Card 
-            key={action.id} 
-            className={`cursor-pointer transition-all duration-300 hover:shadow-xl group border ${
-              selectedAction === action.id 
-                ? 'ring-2 ring-blue-500 shadow-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-300' 
-                : 'border-gray-200 hover:border-blue-300 hover:shadow-lg bg-white'
-            }`}
-            onClick={() => setSelectedAction(action.id)}
-          >
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start gap-3">
-                <CardTitle className="text-lg font-semibold text-gray-900 leading-tight group-hover:text-blue-900 transition-colors">
-                  {action.name}
-                </CardTitle>
-                <Badge className={`${getCategoryColor(action.category)} px-3 py-1 text-xs uppercase tracking-wide`}>
-                  {getCategoryDisplayText(action.category)}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {action.description && action.description.toLowerCase() !== action.name.toLowerCase() && (
-                <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {selectedAction && (
-        <Card className="bg-gradient-to-br from-blue-50 via-white to-purple-50 border-2 border-blue-300 shadow-xl">
-          <CardHeader className="border-b border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <CardTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                <Upload className="h-5 w-5 text-white" />
-              </div>
-              Submit Proof of {actions.find(a => a.id === selectedAction)?.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <div className="space-y-3">
-              <Label htmlFor="proof-file" className="text-sm font-semibold text-gray-900">
-                Upload Proof Document/Image
-              </Label>
-              <FileUpload 
-                onFileUploaded={(fileUrl, fileName, fileSize) => {
-                  // Create a File-like object for backward compatibility
-                  const file = new File([], fileName, { type: 'application/octet-stream' });
-                  setProofFile(file);
-                }}
-              />
-              <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                Accepted formats: Images, PDF, Word documents (max 10MB)
+            <div className="flex-1">
+              <CardTitle className="text-xl font-semibold text-gray-900 mb-2">Get Rewarded for Your Financial Progress!</CardTitle>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Get rewarded with more points by uploading proof of debt paydown!
               </p>
             </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6 p-6">
+          <div className="space-y-3">
+            <Label htmlFor="proof-file" className="text-sm font-semibold text-gray-900">
+              Upload Proof Document/Image
+            </Label>
+            <FileUpload 
+              onFileUploaded={(fileUrl, fileName, fileSize) => {
+                // Create a File-like object for backward compatibility
+                const file = new File([], fileName, { type: 'application/octet-stream' });
+                setProofFile(file);
+              }}
+            />
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              Accepted formats: Images, PDF, Word documents (max 10MB)
+            </p>
+          </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="description" className="text-sm font-semibold text-gray-900">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                placeholder="Provide details about your financial action (e.g., 'Paid $500 toward credit card debt', 'Completed debt consolidation')"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 min-h-[100px] bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                rows={4}
-              />
-            </div>
+          <div className="space-y-3">
+            <Label htmlFor="description" className="text-sm font-semibold text-gray-900">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Provide details about your financial action (e.g., 'Paid $500 toward credit card debt', 'Completed debt consolidation')"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 min-h-[100px] bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              rows={4}
+            />
+          </div>
 
-            <div className="flex gap-3 pt-2">
-              <Button 
-                onClick={submitProof}
-                disabled={submitting || !proofFile || !description.trim()}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3 px-6"
-                size="lg"
-              >
-                {submitting ? (
-                  <>
-                    <Clock className="h-5 w-5 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Submit for Review
-                  </>
-                )}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSelectedAction(null);
-                  setProofFile(null);
-                  setDescription('');
-                }}
-                className="border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-4"
-                size="lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          <div className="flex gap-3 pt-2">
+            <Button 
+              onClick={submitProof}
+              disabled={submitting || !proofFile || !description.trim()}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3 px-6"
+              size="lg"
+            >
+              {submitting ? (
+                <>
+                  <Clock className="h-5 w-5 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Submit for Review
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+
 
        
     </div>
