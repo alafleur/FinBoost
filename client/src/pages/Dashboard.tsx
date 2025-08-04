@@ -492,11 +492,11 @@ export default function Dashboard() {
         /* Mobile Layout with Complete Feature Parity */
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Mobile Tab Navigation - Modern Bottom Tab Style */}
-          <div className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-16 z-40 shadow-sm py-2">
-            <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-2 rounded-none">
+          <div className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-16 z-40 shadow-sm py-1">
+            <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Dashboard overview tab"
               >
                 <Activity className="h-4 w-4" aria-hidden="true" />
@@ -504,7 +504,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="learn" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Learning modules tab"
               >
                 <BookOpen className="h-4 w-4" aria-hidden="true" />
@@ -512,7 +512,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="actions" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Financial actions tab"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
@@ -520,7 +520,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Leaderboard tab"
               >
                 <Trophy className="h-4 w-4" aria-hidden="true" />
@@ -528,7 +528,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Rewards history tab"
               >
                 <Award className="h-4 w-4" aria-hidden="true" />
@@ -536,7 +536,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="predictions" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Bonus predictions tab"
               >
                 <Target className="h-4 w-4" aria-hidden="true" />
@@ -544,7 +544,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="referrals" 
-                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Referral system tab"
               >
                 <Users className="h-4 w-4" aria-hidden="true" />
@@ -1087,12 +1087,12 @@ export default function Dashboard() {
         /* Desktop Layout - New Tab Structure */
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full" role="tablist" aria-label="Dashboard navigation">
           {/* Desktop Tab Navigation */}
-          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm py-2">
+          <div className="bg-white border-b border-gray-100 sticky top-16 z-40 shadow-sm py-1">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-2 rounded-none">
+              <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Dashboard overview tab"
                 >
                   <Activity className="h-4 w-4" aria-hidden="true" />
@@ -1100,7 +1100,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="learn" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Learning modules tab"
                 >
                   <BookOpen className="h-4 w-4" aria-hidden="true" />
@@ -1108,7 +1108,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="actions" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Financial actions tab"
                 >
                   <Upload className="h-4 w-4" aria-hidden="true" />
@@ -1116,7 +1116,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="leaderboard" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Leaderboard tab"
                 >
                   <Trophy className="h-4 w-4" aria-hidden="true" />
@@ -1124,7 +1124,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="rewards" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Rewards history tab"
                 >
                   <Award className="h-4 w-4" aria-hidden="true" />
@@ -1132,7 +1132,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="predictions" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Bonus predictions tab"
                 >
                   <Target className="h-4 w-4" aria-hidden="true" />
@@ -1140,7 +1140,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="referrals" 
-                  className="flex items-center gap-2 text-sm px-4 py-3 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Referral system tab"
                 >
                   <Users className="h-4 w-4" aria-hidden="true" />
