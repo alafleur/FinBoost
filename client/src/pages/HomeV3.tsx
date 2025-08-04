@@ -754,71 +754,137 @@ export default function HomeV3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-8 md:mb-12">
+            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-4 md:mb-6">
               Early Access Guarantees
             </h3>
+            <p className="text-slate-600 text-base md:text-lg mb-8 md:mb-12 max-w-2xl mx-auto">
+              Here's what we guarantee every early access member:
+            </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-6">
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 2.0, ease: "easeOut" }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-blue-500 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.0, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-700 font-semibold text-base md:text-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(59, 130, 246, 0.3)", "0 6px 12px rgba(124, 58, 237, 0.4)", "0 4px 8px rgba(59, 130, 246, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.3, ease: "backOut" }}
+                  >
+                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.414-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-800 font-bold text-base md:text-lg group-hover:text-slate-900 transition-colors duration-300">
                   $5,000+ minimum pool size
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 2.1, ease: "easeOut" }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-purple-500 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.15, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-700 font-semibold text-base md:text-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(124, 58, 237, 0.3)", "0 6px 12px rgba(59, 130, 246, 0.4)", "0 4px 8px rgba(124, 58, 237, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.45, ease: "backOut" }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-800 font-bold text-base md:text-lg group-hover:text-slate-900 transition-colors duration-300">
                   50% membership fees back to rewards
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 2.2, ease: "easeOut" }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-blue-600 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.3, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-700 font-semibold text-base md:text-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(59, 130, 246, 0.3)", "0 6px 12px rgba(124, 58, 237, 0.4)", "0 4px 8px rgba(59, 130, 246, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.6, ease: "backOut" }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-800 font-bold text-base md:text-lg group-hover:text-slate-900 transition-colors duration-300">
                   40%+ minimum member win rate
                 </span>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center md:justify-start bg-white/90 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 2.3, ease: "easeOut" }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-purple-600 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.45, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-700 font-semibold text-base md:text-lg">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(124, 58, 237, 0.3)", "0 6px 12px rgba(59, 130, 246, 0.4)", "0 4px 8px rgba(124, 58, 237, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.75, ease: "backOut" }}
+                  >
+                    <path fillRule="evenodd" d="M10 2L13.09 8.26L20 9L15 13.74L16.18 20.02L10 16.77L3.82 20.02L5 13.74L0 9L6.91 8.26L10 2Z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-800 font-bold text-base md:text-lg group-hover:text-slate-900 transition-colors duration-300">
                   $250+ minimum top reward
                 </span>
               </motion.div>
