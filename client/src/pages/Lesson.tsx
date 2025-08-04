@@ -498,17 +498,9 @@ export default function Lesson() {
           /* Lesson Content */
           <div className="space-y-8">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
-                    <BookOpen className="h-5 w-5 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-bold text-gray-900">Lesson Content</CardTitle>
-                </div>
-              </CardHeader>
               <CardContent className="p-8">
                 <div 
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900 prose-ul:space-y-2 prose-li:leading-relaxed"
+                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900 prose-ul:space-y-2 prose-li:leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: lesson.content }}
                 />
               </CardContent>
