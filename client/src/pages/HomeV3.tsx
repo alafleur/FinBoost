@@ -1402,41 +1402,7 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Bridge Section - Connect Trust to Action */}
-      <section className="py-12 px-4 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-2xl font-semibold text-slate-900 mb-4">
-              See the Collective Power in Action
-            </h3>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              The rewards pool described above isn't just theory. Move the slider below to see how community growth translates to real reward potential for every member.
-            </p>
-            
-            {/* Subtle Arrow */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="flex justify-center"
-            >
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/30 flex items-center justify-center shadow-sm"
-              >
-                <ChevronDown className="w-4 h-4 text-accent" />
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* Reward Pool Mechanics - Show Real Impact */}
       <section id="pool-mechanics" className="py-20 px-4 bg-gradient-to-br from-blue-50/40 via-white to-purple-50/40">
@@ -1454,6 +1420,9 @@ export default function HomeV3() {
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
               Toggle the Dial to See the Power of the Collective
             </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              The rewards pool described above isn't just theory. Move the slider below to see how community growth translates to real reward potential for every member.
+            </p>
           </motion.div>
 
           {/* Main Layout: Left Controls + Right Visual */}
@@ -1499,19 +1468,19 @@ export default function HomeV3() {
               </motion.div>
 
               {/* Stats Cards */}
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-3 gap-3">
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-6 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <ShieldCheck className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <ShieldCheck className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-sm font-semibold text-slate-600 mb-2">Illustrative Member Rewards %</div>
-                  <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Member Rewards %</div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {rewardsPercentage}% Guarantee
                   </div>
                   <div className="text-xs text-slate-500 font-medium">back to members</div>
@@ -1522,27 +1491,44 @@ export default function HomeV3() {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   viewport={{ once: true }}
-                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-6 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <DollarSign className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <DollarSign className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-sm font-semibold text-slate-600 mb-2">Illustrative Monthly Pool Size</div>
-                  <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Monthly Pool Size</div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(calculateRewardsPool(communitySize))}
                   </div>
                   <div className="text-xs text-slate-500 font-medium">available for rewards</div>
                 </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Top Reward</div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">monthly winner</div>
+                </motion.div>
               </div>
             </div>
 
-            {/* RIGHT SIDE: Donut Chart + Top Reward */}
-            <div className="space-y-6">
+            {/* RIGHT SIDE: Donut Chart Only */}
+            <div className="flex justify-center lg:justify-start">
               {/* Dynamic Donut Chart */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
                 className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
               >
@@ -1617,27 +1603,6 @@ export default function HomeV3() {
                     <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
                     <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Education & Platform Operations</span>
                   </div>
-                </div>
-              </motion.div>
-
-              {/* Top Reward Callout */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
-              >
-                <div className="bg-gradient-to-br from-white via-blue-50/50 to-purple-50/50 backdrop-blur-sm border border-blue-200/50 rounded-xl p-6 text-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <Trophy className="w-7 h-7 text-white" />
-                  </div>
-                  <h4 className="text-lg font-bold text-slate-800 mb-2">Illustrative Top Reward</h4>
-                  <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
-                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
-                  </div>
-                  <p className="text-sm text-slate-600 font-medium">
-                    5% of rewards pool goes to top performer
-                  </p>
                 </div>
               </motion.div>
             </div>
