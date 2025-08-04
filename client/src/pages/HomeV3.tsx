@@ -1479,9 +1479,12 @@ export default function HomeV3() {
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
                     <ShieldCheck className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Member Rewards %</div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Member<br />Rewards %</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    {rewardsPercentage}% Guarantee
+                    {rewardsPercentage}%
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Guarantee
                   </div>
                   <div className="text-xs text-slate-500 font-medium">back to members</div>
                 </motion.div>
@@ -1496,14 +1499,14 @@ export default function HomeV3() {
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
                     <DollarSign className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Monthly Pool Size</div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Monthly Pool<br />Size</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(calculateRewardsPool(communitySize))}
                   </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     Total Rewards
                   </div>
-                  <div className="text-xs text-slate-500 font-medium">available for rewards</div>
+                  <div className="text-xs text-slate-500 font-medium">to be distributed</div>
                 </motion.div>
 
                 <motion.div
@@ -1516,14 +1519,14 @@ export default function HomeV3() {
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
                     <Trophy className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Top Reward</div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Top<br />Reward</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     Top Reward
                   </div>
-                  <div className="text-xs text-slate-500 font-medium">monthly winner</div>
+                  <div className="text-xs text-slate-500 font-medium">cycle winner</div>
                 </motion.div>
               </div>
             </div>
