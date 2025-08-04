@@ -1,0 +1,171 @@
+{
+  "fb211": {
+    "id": "fb211",
+    "title": "The Hidden Cost of Investment Fees",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>The Hidden Cost of Investment Fees</h2><p>Fees might seem small—just 1% annually—but over decades, they compound against you. Whether it’s fund expense ratios or advisor fees, even modest percentages can erode your total return. It’s not just about minimizing fees blindly, but understanding what you’re paying for—and what value you’re getting in return.</p><h3>Fee Types and Impacts</h3><ul><li><strong>Expense ratios</strong>: Charged by mutual funds and ETFs; they reduce your net return directly.</li><li><strong>Advisory fees</strong>: Often 1% of AUM annually; may be justified if tied to comprehensive planning.</li><li><strong>Compounding effect</strong>: A 1% annual fee on a $100k portfolio over 30 years can cost ~$76k in lost growth.</li><li>Low-cost index funds often have expense ratios below 0.10%.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s the main long-term risk of seemingly small investment fees?",
+        "options": ["Regulatory scrutiny", "They compound and significantly reduce total returns", "They cause immediate portfolio losses"],
+        "correctAnswer": 1,
+        "explanation": "Fees reduce compounding over time, which can meaningfully drag down your portfolio."
+      },
+      {
+        "id": "q2",
+        "question": "Which of the following typically has the lowest expense ratio?",
+        "options": ["Actively managed mutual fund", "Target-date fund", "Broad-market index ETF"],
+        "correctAnswer": 2,
+        "explanation": "Index ETFs often have very low costs due to passive management."
+      },
+      {
+        "id": "q3",
+        "question": "When might paying a 1% advisor fee be reasonable?",
+        "options": ["Never", "Only if returns are guaranteed", "If it includes personalized planning and long-term value"],
+        "correctAnswer": 2,
+        "explanation": "Fees may be justified if paired with meaningful value, such as tax or estate planning."
+      }
+    ]
+  },
+
+  "fb212": {
+    "id": "fb212",
+    "title": "Understanding Opportunity Cost in Financial Decisions",
+    "category": "Planning",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Understanding Opportunity Cost in Financial Decisions</h2><p>Every choice has a cost—even if it’s not visible. Opportunity cost is what you give up by choosing one option over another. In finance, this applies to saving vs. investing, paying down debt vs. building reserves, or renting vs. buying. Calculating it forces you to think beyond surface-level comparisons.</p><h3>Applications</h3><ul><li>Leaving cash idle means forgoing potential investment returns.</li><li>Paying down low-interest debt aggressively might reduce flexibility for other goals.</li><li>Every dollar spent today is a dollar that could have grown over time elsewhere.</li><li>It’s not just about returns—risk, liquidity, and personal context matter too.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What does opportunity cost represent?",
+        "options": ["The tax owed on gains", "The price of delaying a purchase", "The value of the next best alternative foregone"],
+        "correctAnswer": 2,
+        "explanation": "It’s what you give up when choosing one option over another."
+      },
+      {
+        "id": "q2",
+        "question": "If you leave $10,000 in cash earning 0% instead of investing at 5%, what's the one-year opportunity cost?",
+        "options": ["$500", "$50", "$5"],
+        "correctAnswer": 0,
+        "explanation": "The missed return is 5% of $10,000 = $500."
+      },
+      {
+        "id": "q3",
+        "question": "Which of the following may justify accepting a lower-return option?",
+        "options": ["Liquidity needs", "Social pressure", "Low credit score"],
+        "correctAnswer": 0,
+        "explanation": "If you need quick access to funds, lower-return, liquid options may be appropriate."
+      }
+    ]
+  },
+
+  "fb213": {
+    "id": "fb213",
+    "title": "Why Diversification Works (and When It Doesn’t)",
+    "category": "Investing",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Why Diversification Works (and When It Doesn’t)</h2><p>Diversification reduces portfolio risk by spreading investments across assets that behave differently. The idea is simple: don’t put all your eggs in one basket. But diversification isn’t magic—it only works when asset classes aren't highly correlated.</p><h3>Key Concepts</h3><ul><li><strong>Correlation</strong>: If assets move together, diversification provides less benefit.</li><li><strong>Diversification failure</strong>: In crises, correlations often converge (e.g., 2008 or 2020).</li><li><strong>Asset class mix</strong>: True diversification involves more than holding many stocks—it includes bonds, international exposure, commodities, etc.</li><li><strong>Overdiversification</strong>: Spreading across too many similar assets adds complexity without additional protection.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s a key requirement for diversification to reduce risk?",
+        "options": ["Owning more than 20 stocks", "Assets that move independently", "Investing only in U.S. tech companies"],
+        "correctAnswer": 1,
+        "explanation": "Diversification is effective when asset returns aren’t tightly correlated."
+      },
+      {
+        "id": "q2",
+        "question": "Why can diversification be less effective during a market crisis?",
+        "options": ["Markets stop trading", "All assets tend to move in the same direction", "Cash becomes worthless"],
+        "correctAnswer": 1,
+        "explanation": "Correlations spike during crises, reducing diversification benefits."
+      },
+      {
+        "id": "q3",
+        "question": "Which of the following adds more meaningful diversification?",
+        "options": ["Owning 50 large-cap U.S. stocks", "Adding global bonds or commodities", "Holding all your money in one fund"],
+        "correctAnswer": 1,
+        "explanation": "Different asset classes behave differently—true diversification spans them."
+      }
+    ]
+  },
+
+  "fb214": {
+    "id": "fb214",
+    "title": "The Tax Impact of Selling Investments",
+    "category": "Taxes",
+    "difficulty": "Advanced",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>The Tax Impact of Selling Investments</h2><p>When you sell an investment for more than you paid, you trigger a capital gain. If held over a year, it's taxed at long-term rates (0%–20%). Sell earlier, and it’s taxed as ordinary income. Timing sales and understanding tax lots (FIFO, specific ID) can meaningfully impact what you keep vs. what you owe.</p><h3>Tax Considerations</h3><ul><li><strong>Short-term vs. long-term</strong>: Holding period affects tax treatment significantly.</li><li><strong>Harvesting losses</strong>: Selling losers can offset gains (up to $3,000 of ordinary income annually).</li><li><strong>Wash sale rule</strong>: Rebuying a similar asset within 30 days nullifies the loss deduction.</li><li><strong>Cost basis method</strong>: Specific identification lets you control which shares are sold.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What’s the tax advantage of holding an investment for over one year?",
+        "options": ["You avoid capital gains taxes", "It qualifies for lower long-term capital gains rates", "Dividends become tax-free"],
+        "correctAnswer": 1,
+        "explanation": "Long-term gains are taxed at lower preferential rates than short-term gains."
+      },
+      {
+        "id": "q2",
+        "question": "What is the 'wash sale rule' designed to prevent?",
+        "options": ["Buying too many ETFs", "Claiming a tax loss while retaining economic exposure", "Avoiding taxes through donations"],
+        "correctAnswer": 1,
+        "explanation": "The rule disallows loss deductions if you buy the same or similar security within 30 days."
+      },
+      {
+        "id": "q3",
+        "question": "What does 'specific identification' allow you to do?",
+        "options": ["Avoid all capital gains", "Pick which tax lot to sell for gain/loss optimization", "Defer capital gains indefinitely"],
+        "correctAnswer": 1,
+        "explanation": "It lets you choose which shares (by purchase date/price) to sell for optimal tax impact."
+      }
+    ]
+  },
+
+  "fb215": {
+    "id": "fb215",
+    "title": "Understanding Sinking Costs and When to Walk Away",
+    "category": "Planning",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Understanding Sinking Costs and When to Walk Away</h2><p>The sunk cost fallacy is when you continue investing time or money into something just because you already have. But sunk costs are unrecoverable—what matters is future value. This applies to investments, careers, purchases, or even relationships. Rational decisions focus on marginal benefit moving forward.</p><h3>Common Traps</h3><ul><li>Holding a stock that’s down 60% because you “already lost too much.”</li><li>Keeping a car with constant repairs because “you already spent $2,000.”</li><li>Sticking with a poor service provider to “get your money’s worth.”</li><li>In each case: ask, “Would I buy this again today?”</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What defines a sunk cost?",
+        "options": ["Any money spent this year", "Money or time already spent and unrecoverable", "Future expenses that will be due soon"],
+        "correctAnswer": 1,
+        "explanation": "Sunk costs are past investments that can’t be recovered and shouldn’t affect future choices."
+      },
+      {
+        "id": "q2",
+        "question": "What question can help you avoid sunk cost bias?",
+        "options": ["What’s the breakeven point?", "Would I choose this again today?", "How much have I spent already?"],
+        "correctAnswer": 1,
+        "explanation": "Future-focused decision making helps you avoid being anchored to past costs."
+      },
+      {
+        "id": "q3",
+        "question": "Why is the sunk cost fallacy financially harmful?",
+        "options": ["It forces immediate action", "It prevents rebalancing", "It keeps people in suboptimal decisions due to past investments"],
+        "correctAnswer": 2,
+        "explanation": "It leads to poor decisions by irrationally valuing past spending over future benefit."
+      }
+    ]
+  }
+}
