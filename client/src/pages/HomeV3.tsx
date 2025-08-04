@@ -1689,89 +1689,66 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          {/* Two-column layout: Screenshot left, Content right */}
-          <div className="flex flex-col lg:flex-row gap-8 mb-16 items-start lg:items-center">
-            {/* Left Column - Phone Frame */}
+          {/* Single Column Layout - What You'll Master */}
+          <div className="mb-16">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="lg:w-80 w-full lg:flex-shrink-0 flex justify-center lg:justify-start"
+              className="text-center mb-12"
             >
-              <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
-                <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
-                  {/* Status bar */}
-                  <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
-                    <span>9:41</span>
-                    <div className="flex space-x-1">
-                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                      <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                      <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
-                    </div>
-                  </div>
-                  
-                  {/* App content */}
-                  <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
-                    <div className="text-center h-full flex flex-col justify-center">
-                      <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
-                        <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                          Current Lesson:<br/>
-                          Credit Score Basics<br/>
-                          Progress: 75% Complete
-                        </p>
-                        <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                          <span className="text-xs font-medium text-blue-700">Learning Module</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
-              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-6">
+                What You'll Master:
+              </h3>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Real financial education based on actual scenarios and proven strategies from our curriculum
+              </p>
             </motion.div>
-
-            {/* Right Column - What You'll Master */}
-            <div className="flex-1">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                viewport={{ once: true }}
-                className="mb-8"
-              >
-                <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center lg:text-left">
-                  What You'll Master:
-                </h3>
-              </motion.div>
-              
-              <div className="space-y-4">
-                {[
-                  {
-                    icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Master Credit Utilization and APR Differences",
-                    description: "Learn how credit utilization impacts your score and understand the costly difference between APR vs APY"
-                  },
-                  {
-                    icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Build Emergency Funds and Smart Budgets", 
-                    description: "Understand liquidity risk management and why the 30% rent rule isn't always right"
-                  },
-                  {
-                    icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Navigate Auto Loans and Refinancing Decisions",
-                    description: "Understand the real cost of car financing and when refinancing makes sense"
-                  },
-                  {
-                    icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                    title: "Harness Compound Growth and Avoid Housing Traps",
-                    description: "Learn the mechanics of compound growth and avoid becoming house poor"
-                  }
-                ].map((item, index) => (
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+              {[
+                {
+                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Credit Utilization and Borrowing Power",
+                  description: "Learn how credit utilization impacts your score and your borrowing capacity for major purchases"
+                },
+                {
+                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Navigate Buy Now, Pay Later Risks", 
+                  description: "Understand the real risks of BNPL services and their hidden impact on your financial health"
+                },
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Decode APR vs APY Differences",
+                  description: "Master the subtle but costly difference between APR and APY in your financial decisions"
+                },
+                {
+                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Build Smart Emergency Fund Strategy",
+                  description: "Learn to think about liquidity risk when building your emergency fund safety net"
+                },
+                {
+                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Rethink the 30% Rent Rule",
+                  description: "Discover why the 30% rent-to-income ratio isn't universal and find your optimal housing budget"
+                },
+                {
+                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Debt Payoff Strategies",
+                  description: "Compare debt snowball vs avalanche methods and choose the right strategy for your situation"
+                },
+                {
+                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Navigate Auto Loans and Refinancing",
+                  description: "Understand the real cost of car financing and learn when refinancing makes financial sense"
+                },
+                {
+                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Harness Compound Growth Power",
+                  description: "Learn the mechanics of compound growth to build long-term wealth effectively"
+                }
+              ].map((item, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
