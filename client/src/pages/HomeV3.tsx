@@ -1510,7 +1510,7 @@ export default function HomeV3() {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                     <ShieldCheck className="w-6 h-6 text-white" />
                   </div>
-                  <div className="text-sm font-semibold text-slate-600 mb-2">Member Rewards</div>
+                  <div className="text-sm font-semibold text-slate-600 mb-2">Illustrative Member Rewards %</div>
                   <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {rewardsPercentage}% Guarantee
                   </div>
