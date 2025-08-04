@@ -498,7 +498,7 @@ export default function Lesson() {
           /* Lesson Content */
           <div className="space-y-8">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
+              <CardContent className="px-8 pt-6 pb-8">
                 <div 
                   className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-h2:text-xl prose-h3:text-lg prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900 prose-ul:space-y-2 prose-li:leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: lesson.content }}
