@@ -1,0 +1,103 @@
+{
+  "fb226": {
+    "id": "fb226",
+    "title": "How to Strategically Manage Student Loan Repayment",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>How to Strategically Manage Student Loan Repayment</h2><p>Student loan repayment isn’t one-size-fits-all. Choosing the right plan depends on your income stability, interest rate, loan type, and life goals. Whether you aim to pay off aggressively or optimize forgiveness, the key is to understand your options and build around them.</p><h3>Strategic Approaches</h3><ul><li><strong>Standard Repayment</strong>: 10-year fixed, lower interest cost but higher monthly payments.</li><li><strong>Income-Driven Repayment (IDR)</strong>: Aligns payments with income, can enable forgiveness after 20–25 years.</li><li><strong>Aggressive payoff</strong>: Useful for high-income earners with manageable balances—reduces lifetime interest.</li><li><strong>Snowball vs Avalanche</strong>: Snowball pays smallest balances first (psychological wins); Avalanche pays highest interest first (financial efficiency).</li></ul><p>Make sure to revisit your plan annually—especially after life changes.</p>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is the advantage of using an income-driven repayment plan?",
+        "options": ["It increases your credit score", "It aligns payments with your income and offers forgiveness potential", "It defers interest accumulation"],
+        "correctAnswer": 1,
+        "explanation": "IDR plans base payments on income and may lead to forgiveness after 20–25 years."
+      },
+      {
+        "id": "q2",
+        "question": "Which repayment strategy minimizes total interest paid?",
+        "options": ["Income-based", "Deferment", "Aggressive payoff using the avalanche method"],
+        "correctAnswer": 2,
+        "explanation": "The avalanche method targets high-interest loans first, reducing overall cost."
+      },
+      {
+        "id": "q3",
+        "question": "Which scenario might benefit from the snowball method?",
+        "options": ["Low interest debt only", "If motivation is a struggle and small wins help build momentum", "If your income is variable"],
+        "correctAnswer": 1,
+        "explanation": "The snowball method builds psychological momentum by eliminating smaller debts first."
+      }
+    ]
+  },
+
+  "fb227": {
+    "id": "fb227",
+    "title": "Student Loan Forgiveness: What’s Changed and Who Qualifies",
+    "category": "Debt",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Student Loan Forgiveness: What’s Changed and Who Qualifies</h2><p>Since 2023, the student loan forgiveness landscape has evolved significantly. Several programs have been expanded, new pathways created, and errors corrected under IDR reform and the SAVE plan. Knowing what qualifies and how to track eligibility is essential if you’re pursuing forgiveness.</p><h3>Recent Changes</h3><ul><li><strong>SAVE Plan</strong>: Replaces REPAYE; lowers monthly payments and forgives remaining debt after 10–25 years based on balance.</li><li><strong>IDR Adjustment (2024)</strong>: Retroactive credit toward forgiveness for time in forbearance or repayment—even partial or late.</li><li><strong>PSLF expansion</strong>: Waivers now include broader employment types and more flexible certification windows.</li><li><strong>Fresh Start initiative</strong>: Restores good standing to defaulted loans, enabling forgiveness eligibility.</li></ul><p>Track your progress using StudentAid.gov and confirm employment certifications annually for PSLF.</p>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What major 2024 change helps borrowers earn retroactive forgiveness credit?",
+        "options": ["Grace period waiver", "IDR account adjustment", "Loan consolidation reset"],
+        "correctAnswer": 1,
+        "explanation": "The IDR adjustment grants retroactive credit for past repayment periods."
+      },
+      {
+        "id": "q2",
+        "question": "What’s a key benefit of the new SAVE plan?",
+        "options": ["Eliminates all interest", "Offers forgiveness after 5 years", "Reduces payments and accelerates forgiveness for smaller balances"],
+        "correctAnswer": 2,
+        "explanation": "The SAVE plan lowers payments and forgives balances faster, especially under $12,000."
+      },
+      {
+        "id": "q3",
+        "question": "Why is employer certification important under PSLF?",
+        "options": ["It boosts your credit score", "It determines eligibility and tracks your progress toward forgiveness", "It replaces loan payments"],
+        "correctAnswer": 1,
+        "explanation": "Without annual employer certification, PSLF progress can’t be verified."
+      }
+    ]
+  },
+
+  "fb228": {
+    "id": "fb228",
+    "title": "Do Small Daily Purchases Really Hurt You Long-Term?",
+    "category": "Budgeting",
+    "difficulty": "Intermediate",
+    "points": 20,
+    "estimatedTime": 5,
+    "completed": false,
+    "content": "<h2>Do Small Daily Purchases Really Hurt You Long-Term?</h2><p>The 'latte effect' claims that minor daily expenses (like $5 coffee or takeout) add up and prevent wealth building. But the real story is more nuanced. While small leaks matter over time, financial health is more often shaped by income, big-ticket decisions, and long-term habits.</p><h3>What to Consider</h3><ul><li><strong>Opportunity cost</strong>: $5/day invested instead of spent can exceed $50,000 over 20 years at modest returns.</li><li><strong>Spending alignment</strong>: If the habit reflects your values and fits your budget, it’s not inherently wasteful.</li><li><strong>Focus on scale</strong>: Housing, transportation, and debt have far larger budget impact than coffee.</li><li>Balance is key—be intentional with all spending, but don’t over-focus on the smallest line items.</li></ul>",
+    "quiz": [
+      {
+        "id": "q1",
+        "question": "What is the main critique of the 'latte effect' argument?",
+        "options": ["It assumes coffee is too expensive", "It ignores larger structural spending decisions", "It encourages buying more coffee"],
+        "correctAnswer": 1,
+        "explanation": "Critics argue it distracts from high-impact areas like housing, debt, and income."
+      },
+      {
+        "id": "q2",
+        "question": "When can small purchases become a real issue?",
+        "options": ["Only if made daily", "When they’re unconscious and misaligned with financial goals", "If you use a debit card"],
+        "correctAnswer": 1,
+        "explanation": "Unexamined, habitual spending can add up—especially if it prevents saving or investing."
+      },
+      {
+        "id": "q3",
+        "question": "What’s a healthier approach than cutting all small indulgences?",
+        "options": ["Budgeting by guilt", "Spending with intention and balance", "Using only cash"],
+        "correctAnswer": 1,
+        "explanation": "The goal is alignment—spend where it matters, cut where it doesn’t."
+      }
+    ]
+  }
+}

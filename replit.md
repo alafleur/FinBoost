@@ -23,10 +23,10 @@ Preferred communication style: Simple, everyday language.
 - Update landing page phone images with actual application screenshots for marketing purposes
 
 **Recent Content Updates (January 2025):**
-- Added student loan forgiveness module covering 2024-2025 policy changes
+- Added 3 new modules: student loan forgiveness (policy changes), strategic loan repayment, and daily spending analysis ("latte effect") 
 - Updated "What You'll Master" section with horizontal scrolling design and refined mobile layout
-- Expanded curriculum to 12 published modules across 7 categories
-- Current distribution: Debt (4), Credit (3), Budgeting (1), Investing (1), Real Estate (1), Saving (1), Career (1)
+- Expanded curriculum to 14 published modules across 7 categories
+- Current distribution: Debt (5), Credit (3), Budgeting (2), Investing (1), Real Estate (1), Saving (1), Career (1)
 
 ## System Architecture
 
