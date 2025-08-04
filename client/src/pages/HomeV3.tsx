@@ -44,6 +44,7 @@ import step1Screenshot from '@assets/Step 1 Learn & Complete Lessons_v1_17542873
 import step2Screenshot from '@assets/Step 2 Take Financial Actions_v1_1754287375585.png';
 import step3Screenshot from '@assets/Step 3 Climb the Leaderboard_v1_1754287383280.png';
 import step4Screenshot from '@assets/Step 4 Win Real Cash Rewards_v1_1754287391648.png';
+import rewardsSystemScreenshot from '@assets/Rewards System (Tiers)_v1_1754288320243.png';
 
 /**
  * Carousel state management interface
@@ -1718,24 +1719,14 @@ export default function HomeV3() {
                       </div>
                     </div>
                     
-                    {/* App content */}
-                    <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
-                      <div className="text-center h-full flex flex-col justify-center">
-                        <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg">
-                          <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                            Current Tier: Tier 2<br/>
-                            Points: 847<br/>
-                            Rank: #23 of 156
-                          </p>
-                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                            <span className="text-xs font-medium text-blue-700">Tier Dashboard</span>
-                          </div>
-                        </div>
-                      </div>
+                    {/* App screenshot content */}
+                    <div className="h-full bg-white overflow-hidden flex items-start justify-center">
+                      <img
+                        src={rewardsSystemScreenshot}
+                        alt="Tier Thresholds & Rewards Interface"
+                        className="max-w-full max-h-full object-contain"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                   <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
