@@ -603,97 +603,141 @@ export default function Lesson() {
               </>
             ) : (
               /* Quiz Results */
-              <Card>
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4">
+              <Card className="shadow-lg border-0 bg-white">
+                <CardHeader className="text-center pb-4">
+                  <div className="mx-auto mb-6 relative">
                     {score >= 70 ? (
-                      <Trophy className="h-16 w-16 text-yellow-500" />
+                      <div className="relative">
+                        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                          <Trophy className="h-10 w-10 text-white" />
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      </div>
                     ) : (
-                      <Target className="h-16 w-16 text-gray-400" />
+                      <div className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Target className="h-10 w-10 text-white" />
+                      </div>
                     )}
                   </div>
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     {score >= 70 ? 'Congratulations!' : 'Keep Learning!'}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-lg text-gray-600 mt-2">
                     You scored {score}% ({selectedAnswers.filter((answer, index) => 
                       answer === lesson.quiz[index].correctAnswer
                     ).length} out of {lesson.quiz.length} correct)
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                <p className="text-green-600 mb-4">🎉 Great job! You scored {score}%</p>
-                      {score >= 70 ? (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <p className="text-green-800 font-medium">Congratulations! You passed the quiz.</p>
-                          <p className="text-green-600 text-sm mt-1">You've successfully completed this lesson.</p>
-                          <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-                            <p className="text-blue-800 font-medium">🎁 Points Earned!</p>
-                            <p className="text-blue-600 text-sm">
-                              {completionData ? (
-                                <>
-                                  Total: +{completionData.pointsEarned} points
-                                  {completionData.streakBonus > 0 && (
-                                    <> | Streak bonus: +{completionData.streakBonus} points</>
-                                  )}
-                                </>
-                              ) : (
-                                `Total: +${lesson.points} points`
+                <CardContent className="space-y-6">
+                  {score >= 70 ? (
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white text-sm font-bold">✓</span>
+                          </div>
+                          <p className="text-gray-800 font-semibold text-lg">Great job! You scored {score}%</p>
+                        </div>
+                        <p className="text-blue-700 font-medium mb-2">Congratulations! You passed the quiz.</p>
+                        <p className="text-gray-600 text-sm">You've successfully completed this lesson.</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <Trophy className="h-4 w-4 text-white" />
+                          </div>
+                          <p className="text-purple-800 font-semibold text-lg">Points Earned!</p>
+                        </div>
+                        <p className="text-purple-700 font-medium">
+                          {completionData ? (
+                            <>
+                              Total: +{completionData.pointsEarned} points
+                              {completionData.streakBonus > 0 && (
+                                <span className="block text-sm text-purple-600 mt-1">
+                                  Streak bonus: +{completionData.streakBonus} points
+                                </span>
                               )}
+                            </>
+                          ) : (
+                            `Total: +${lesson.points} points`
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                          <Target className="h-4 w-4 text-white" />
+                        </div>
+                        <p className="text-orange-800 font-semibold text-lg">Keep practicing!</p>
+                      </div>
+                      <p className="text-orange-700 text-sm">You need 70% or higher to pass. Review the lesson and try again.</p>
+                    </div>
+                  )}
+
+                  {/* Show correct answers */}
+                  <div className="space-y-4 mt-6">
+                    <h4 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="h-3 w-3 text-white" />
+                      </div>
+                      Review Answers:
+                    </h4>
+                    {lesson.quiz.map((question, index) => (
+                      <div key={question.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 mt-1">
+                            {selectedAnswers[index] === question.correctAnswer ? (
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm">
+                                <CheckCircle className="h-4 w-4 text-white" />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center shadow-sm">
+                                <XCircle className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-3">
+                            <p className="font-semibold text-gray-800 leading-relaxed">{question.question}</p>
+                            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-3 border border-gray-200">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-medium text-gray-800">Correct answer:</span> {question.options[question.correctAnswer]}
+                              </p>
+                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed bg-purple-50 rounded-lg p-3 border border-purple-100">
+                              {question.explanation}
                             </p>
                           </div>
                         </div>
-                      ) : (
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                          <p className="text-orange-800 font-medium">Keep practicing!</p>
-                          <p className="text-orange-600 text-sm mt-1">You need 70% or higher to pass. Review the lesson and try again.</p>
-                        </div>
-                      )}
-
-                    {/* Show correct answers */}
-                    <div className="space-y-3">
-                      <h4 className="font-medium">Review Answers:</h4>
-                      {lesson.quiz.map((question, index) => (
-                        <div key={question.id} className="border rounded-lg p-4">
-                          <div className="flex items-start gap-3">
-                            {selectedAnswers[index] === question.correctAnswer ? (
-                              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                            ) : (
-                              <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                            )}
-                            <div className="flex-1">
-                              <p className="font-medium mb-2">{question.question}</p>
-                              <p className="text-sm text-gray-600 mb-2">
-                                <strong>Correct answer:</strong> {question.options[question.correctAnswer]}
-                              </p>
-                              <p className="text-sm text-gray-700">{question.explanation}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                      </div>
+                    ))}
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                  <div className="flex gap-4 pt-6">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setLocation('/education')}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                    >
+                      Back to Education
+                    </Button>
+                    {score < 70 && (
                       <Button 
-                        variant="outline" 
-                        onClick={() => setLocation('/education')}
-                        className="flex-1"
+                        onClick={() => {
+                          setCurrentStep('content');
+                          setShowResults(false);
+                          setSelectedAnswers([]);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                       >
-                        Back to Education
+                        Review & Retry
                       </Button>
-                      {score < 70 && (
-                        <Button 
-                          onClick={() => {
-                            setCurrentStep('content');
-                            setShowResults(false);
-                            setSelectedAnswers([]);
-                          }}
-                          className="flex-1"
-                        >
-                          Review & Retry
-                        </Button>
-                      )}
-                    </div>
+                    )}
+                  </div>
                   </CardContent>
               </Card>
             )}
