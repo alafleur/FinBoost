@@ -39,6 +39,12 @@ import {
   Upload
 } from "lucide-react";
 
+// Import app screenshots
+import step1Screenshot from '@assets/Step 1 Learn & Complete Lessons_v1_1754287351239.png';
+import step2Screenshot from '@assets/Step 2 Take Financial Actions_v1_1754287375585.png';
+import step3Screenshot from '@assets/Step 3 Climb the Leaderboard_v1_1754287383280.png';
+import step4Screenshot from '@assets/Step 4 Win Real Cash Rewards_v1_1754287391648.png';
+
 /**
  * Carousel state management interface
  */
@@ -376,30 +382,30 @@ export default function HomeV3() {
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   
-  // How It Works step-by-step process data for the phone mockup
+  // How It Works step-by-step process data with actual app screenshots
   const screenshots = useMemo(() => [
     {
       title: "Step 1: Learn & Complete Lessons",
       description: "Complete easily digestible lessons and quizzes to earn points and build your knowledge",
-      mockContent: "Current Lesson:<br/>Credit Score Basics<br/>Progress: 75% Complete",
+      screenshotPath: step1Screenshot,
       icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 2: Take Financial Actions",
-      description: "Get rewarded for making sound financial decision. Upload proof of debt payments to earn more points",
-      mockContent: "Action Completed!<br/>Debt Payment Uploaded<br/>+50 bonus points earned",
+      description: "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more points",
+      screenshotPath: step2Screenshot,
       icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 3: Climb the Leaderboard",
       description: "Your points determine your tier placement. Higher tiers get larger shares of the reward pool",
-      mockContent: "Current Tier: Tier 2<br/>Points: 847<br/>Rank: #23 of 156",
+      screenshotPath: step3Screenshot,
       icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 4: Win Real Cash Rewards",
       description: "At cycle end, winners are drawn on a point-weighted basis. The more points, the better your odds",
-      mockContent: "Cycle 18 Complete!<br/>You placed Tier 1<br/>Reward: $127 won!",
+      screenshotPath: step4Screenshot,
       icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     }
   ], []);
@@ -1089,38 +1095,18 @@ export default function HomeV3() {
                       </div>
                     </div>
                     
-                    {/* App content */}
-                    <div className="p-4 lg:p-6 bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 min-h-[calc(100%-2rem)] lg:min-h-[calc(100%-3rem)]">
-                      <div className="text-center h-full flex flex-col justify-center">
-                        <motion.div
-                          key={`icon-${activeScreenshot}`}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg"
-                        >
-                          {screenshots[activeScreenshot].icon}
-                        </motion.div>
-                        
-                        <motion.div
-                          key={`text-${activeScreenshot}-${screenshots[activeScreenshot].title}`}
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1, duration: 0.3 }}
-                        >
-                          <div className="text-xs lg:text-sm font-semibold text-slate-800 leading-relaxed mb-3 lg:mb-4">
-                            {screenshots[activeScreenshot].mockContent.split('<br/>').map((line, i, arr) => (
-                              <span key={i}>
-                                {line}
-                                {i < arr.length - 1 && <br />}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="inline-block bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 lg:px-4 lg:py-2 border border-blue-200/50">
-                            <span className="text-xs font-medium text-blue-700">{screenshots[activeScreenshot].title.replace('Step ', 'Step ')}</span>
-                          </div>
-                        </motion.div>
-                      </div>
+                    {/* App screenshot content */}
+                    <div className="h-full bg-white overflow-hidden">
+                      <motion.img
+                        key={`screenshot-${activeScreenshot}`}
+                        src={screenshots[activeScreenshot].screenshotPath}
+                        alt={screenshots[activeScreenshot].title}
+                        className="w-full h-full object-cover object-top"
+                        initial={{ scale: 1.05, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.4 }}
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                   <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
