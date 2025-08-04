@@ -356,9 +356,13 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({ topics }) => 
           </div>
         </div>
         
-        {/* Scroll Indicator */}
-        <div className="flex justify-center mt-4">
-          <p className="text-xs text-slate-500">← Scroll to see more →</p>
+        {/* Enhanced Scroll Indicator */}
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center space-x-2 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-full px-4 py-2">
+            <ChevronLeft className="w-4 h-4 text-blue-600 animate-pulse" />
+            <p className="text-sm font-medium text-blue-700">Scroll to explore all lessons</p>
+            <ChevronRight className="w-4 h-4 text-blue-600 animate-pulse" />
+          </div>
         </div>
       </div>
     </div>
@@ -1825,30 +1829,6 @@ export default function HomeV3() {
             {/* Mobile Single Card with Navigation + Desktop Grid */}
             <MasterTopicsSection topics={[
                 {
-                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Credit Utilization and Borrowing Power"
-                },
-                {
-                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Buy Now, Pay Later Risks"
-                },
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Decode APR vs APY Differences"
-                },
-                {
-                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Build Smart Emergency Fund Strategy"
-                },
-                {
-                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Rethink the 30% Rent Rule"
-                },
-                {
-                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Debt Payoff Strategies"
-                },
-                {
                   icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Navigate Auto Loans and Refinancing"
                 },
@@ -1867,6 +1847,30 @@ export default function HomeV3() {
                 {
                   icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Do Small Daily Purchases Really Add Up?"
+                },
+                {
+                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Credit Utilization and Borrowing Power"
+                },
+                {
+                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Navigate Buy Now, Pay Later Risks"
+                },
+                {
+                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Build Smart Emergency Fund Strategy"
+                },
+                {
+                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Rethink the 30% Rent Rule"
+                },
+                {
+                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Debt Payoff Strategies"
+                },
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Decode APR vs APY Differences"
                 }
               ]} />
             
