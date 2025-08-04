@@ -34,7 +34,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
-  Pause
+  Pause,
+  Upload
 } from "lucide-react";
 
 /**
@@ -253,25 +254,25 @@ export default function HomeV3() {
   const screenshots = useMemo(() => [
     {
       title: "Step 1: Learn & Complete Lessons",
-      description: "Complete bite-sized financial lessons and quizzes to earn points and build your knowledge",
+      description: "Complete easily digestible lessons and quizzes to earn points and build your knowledge",
       mockContent: "Current Lesson:<br/>Credit Score Basics<br/>Progress: 75% Complete",
       icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
-      title: "Step 2: Earn Points & Build Streaks",
-      description: "Every lesson, quiz, and action earns you points. Daily streaks multiply your rewards",
-      mockContent: "Quiz Complete!<br/>+15 points earned<br/>Streak bonus: +5 points",
-      icon: <CheckCircle className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
+      title: "Step 2: Take Financial Actions",
+      description: "Get rewarded for making sound financial decision. Upload proof of debt payments to earn more points",
+      mockContent: "Action Completed!<br/>Debt Payment Uploaded<br/>+50 bonus points earned",
+      icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
-      title: "Step 3: Climb Tiers & Compete",
+      title: "Step 3: Climb the Leaderboard",
       description: "Your points determine your tier placement. Higher tiers get larger shares of the reward pool",
       mockContent: "Current Tier: Tier 2<br/>Points: 847<br/>Rank: #23 of 156",
       icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 4: Win Real Cash Rewards",
-      description: "At cycle end, winners are selected based on points. The more points, the better your odds",
+      description: "At cycle end, winners are drawn on a point-weighted basis. The more points, the better your odds",
       mockContent: "Cycle 18 Complete!<br/>You placed Tier 1<br/>Reward: $127 won!",
       icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     }
