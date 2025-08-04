@@ -231,9 +231,6 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
         </CardHeader>
         <CardContent className="space-y-6 p-6">
           <div className="space-y-3">
-            <Label htmlFor="proof-file" className="text-sm font-semibold text-gray-900">
-              Upload Proof Document/Image
-            </Label>
             <FileUpload 
               onFileUploaded={(fileUrl, fileName, fileSize) => {
                 // Create a File-like object for backward compatibility
@@ -241,9 +238,6 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
                 setProofFile(file);
               }}
             />
-            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-              Accepted formats: Images, PDF, Word documents (max 10MB)
-            </p>
           </div>
 
           <div className="space-y-3">
