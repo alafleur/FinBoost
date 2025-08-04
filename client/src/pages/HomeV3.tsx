@@ -1500,6 +1500,9 @@ export default function HomeV3() {
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(calculateRewardsPool(communitySize))}
                   </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Total Rewards
+                  </div>
                   <div className="text-xs text-slate-500 font-medium">available for rewards</div>
                 </motion.div>
 
@@ -1516,6 +1519,9 @@ export default function HomeV3() {
                   <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Top Reward</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Top Reward
                   </div>
                   <div className="text-xs text-slate-500 font-medium">monthly winner</div>
                 </motion.div>
