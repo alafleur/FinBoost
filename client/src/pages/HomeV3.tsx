@@ -888,9 +888,9 @@ export default function HomeV3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-4 md:mb-6">
-              Early Access Guarantees
-            </h3>
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-blue-700 font-semibold text-sm">EARLY ACCESS GUARANTEES</span>
+            </div>
             <p className="text-slate-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
               Here's what we guarantee every early access member:
             </p>
@@ -933,7 +933,7 @@ export default function HomeV3() {
             </motion.div>
             
             {/* Clean Blue Card Format - Responsive 2x2 Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto items-stretch">
               {[
                 {
                   title: "$5,000+ Minimum Pool Size"
@@ -956,9 +956,9 @@ export default function HomeV3() {
                   viewport={{ once: true }}
                 >
                   <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                    <CardContent className="p-6 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
+                    <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
                       <div className="relative z-10">
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-lg font-semibold text-white">
                           {guarantee.title}
                         </h3>
                       </div>
