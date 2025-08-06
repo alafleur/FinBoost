@@ -958,7 +958,7 @@ export default function HomeV3() {
                   <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
                     <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
                       <div className="relative z-10">
-                        <h3 className="text-lg font-semibold text-white">
+                        <h3 className="text-base font-semibold text-white">
                           {guarantee.title}
                         </h3>
                       </div>
