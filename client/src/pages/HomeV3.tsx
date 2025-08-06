@@ -387,25 +387,25 @@ export default function HomeV3() {
   const screenshots = useMemo(() => [
     {
       title: "Step 1: Learn & Complete Lessons",
-      description: "Complete easily digestible lessons and quizzes to earn points and build your knowledge",
+      description: "Complete easily digestible lessons and quizzes to earn tickets and build your knowledge",
       screenshotPath: step1Screenshot,
       icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 2: Take Financial Actions",
-      description: "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more points",
+      description: "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more tickets",
       screenshotPath: step2Screenshot,
       icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 3: Climb the Leaderboard",
-      description: "Your points determine your tier placement. Higher tiers get larger shares of the reward pool",
+      description: "Your tickets determine your tier placement. Higher tiers get larger shares of the reward pool",
       screenshotPath: step3Screenshot,
       icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 4: Win Real Cash Rewards",
-      description: "At cycle end, winners are drawn on a point-weighted basis. The more points, the better your odds",
+      description: "At cycle end, winners are drawn on a ticket-weighted basis. More tickets means better odds",
       screenshotPath: step4Screenshot,
       icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     }
@@ -416,25 +416,25 @@ export default function HomeV3() {
     {
       icon: <BookOpen className="w-8 h-8" />,
       title: "Learn Financial Skills",
-      description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn points per module and quiz.",
+      description: "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn tickets per module and quiz.",
       screenshot: "lesson-module.png",
-      caption: "Complete short lessons like this to earn 20 points.",
+      caption: "Complete short lessons like this to earn 20 tickets.",
       gradient: "from-accent to-accent-light"
     },
     {
       icon: <Target className="w-8 h-8" />,
       title: "Take Real Financial Actions", 
-      description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus points based on impact.",
+      description: "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus tickets based on impact.",
       screenshot: "debt-submission.png",
-      caption: "Verified debt payments earn big bonus points.",
+      caption: "Verified debt payments earn big bonus tickets.",
       gradient: "from-accent to-accent-light"
     },
     {
       icon: <BarChart3 className="w-8 h-8" />,
       title: "Track Your Leaderboard Position",
-      description: "Your points determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
+      description: "Your tickets determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
       screenshot: "leaderboard-screenshot.png",
-      caption: "Your point total determines your leaderboard position and reward odds.",
+      caption: "Your ticket total determines your leaderboard position and reward odds.",
       gradient: "from-accent to-accent-light"
     },
     {
@@ -837,7 +837,7 @@ export default function HomeV3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
           >
-            Join bi-weekly cycles where you complete short financial lessons and actions to earn points. Compete with other members to win your share of the prize pool — the more points you earn, the better your odds.
+            Join bi-weekly cycles where you complete short financial lessons and actions to earn tickets. Compete with other members to win your share of the prize pool — the more tickets you earn, the better your odds.
           </motion.p>
           
 
@@ -1700,7 +1700,7 @@ export default function HomeV3() {
               Half of Members Earn Rewards Each Cycle
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Users are placed in tiers based on points. The more you learn, the more you earn. Points aren't just for progress — they increase your chances at real cash rewards. At the end of each cycle, members with more points are eligible for larger potential payouts. Winners are selected based on point-weighted random draws.
+              Users are placed in tiers based on tickets. The more you learn, the more you earn. Tickets aren't just for progress — they increase your chances at real cash rewards. At the end of each cycle, members with more tickets are eligible for larger potential payouts. Winners are selected based on ticket-weighted random draws.
             </p>
           </motion.div>
 
