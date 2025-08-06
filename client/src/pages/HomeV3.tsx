@@ -1001,8 +1001,48 @@ export default function HomeV3() {
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
             {/* Phone Preview - Mobile Bottom, Desktop Right */}
             <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
-              {/* Mobile navigation with arrows and dots - positioned above phone */}
-              <div className="lg:hidden flex items-center justify-center space-x-4 mb-4">
+
+              
+              <motion.div
+                key={activeScreenshot}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="relative"
+              >
+                {/* Responsive Phone mockup */}
+                <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
+                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm"></div>
+                      </div>
+                    </div>
+                    
+                    {/* App screenshot content */}
+                    <div className="h-full bg-white overflow-hidden flex items-start justify-center">
+                      <motion.img
+                        key={`screenshot-${activeScreenshot}`}
+                        src={screenshots[activeScreenshot].screenshotPath}
+                        alt={screenshots[activeScreenshot].title}
+                        className="max-w-full max-h-full object-contain"
+                        initial={{ scale: 1.05, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.4 }}
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                </div>
+              </motion.div>
+              
+              {/* Mobile navigation with arrows and dots - positioned below phone */}
+              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
                 {/* Left Arrow */}
                 <button
                   onClick={() => {
@@ -1046,44 +1086,6 @@ export default function HomeV3() {
                   <ChevronRight className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
-              
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="relative"
-              >
-                {/* Responsive Phone mockup */}
-                <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
-                    {/* Status bar */}
-                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
-                      <span>9:41</span>
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm"></div>
-                      </div>
-                    </div>
-                    
-                    {/* App screenshot content */}
-                    <div className="h-full bg-white overflow-hidden flex items-start justify-center">
-                      <motion.img
-                        key={`screenshot-${activeScreenshot}`}
-                        src={screenshots[activeScreenshot].screenshotPath}
-                        alt={screenshots[activeScreenshot].title}
-                        className="max-w-full max-h-full object-contain"
-                        initial={{ scale: 1.05, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.4 }}
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
-                </div>
-              </motion.div>
             </div>
 
             {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
