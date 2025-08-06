@@ -1657,11 +1657,11 @@ export default function HomeV3() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{rewardsPercentage}% → Member Funded Cash Rewards Pool</span>
+                    <span className="text-slate-700 font-medium">Majority → Member Funded Cash Rewards Pool</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Financial Education + Platform Access</span>
+                    <span className="text-slate-700 font-medium">Portion → Financial Education + Platform Access</span>
                   </div>
                 </div>
               </motion.div>
