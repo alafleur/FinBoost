@@ -939,7 +939,7 @@ export default function HomeV3() {
                   title: "$5,000+ Minimum Pool Size"
                 },
                 {
-                  title: "50% Membership Fees Back To Rewards"
+                  title: "50% Member Fees To Rewards Pool"
                 },
                 {
                   title: "40%+ Minimum Member Win Rate"
