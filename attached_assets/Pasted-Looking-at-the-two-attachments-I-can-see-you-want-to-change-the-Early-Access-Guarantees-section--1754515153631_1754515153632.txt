@@ -1,0 +1,47 @@
+Looking at the two attachments, I can see you want to change the "Early Access Guarantees" section (first attachment) to match the format of the "Why FinBoost Isn't Just Another Finance App" section (second attachment).
+
+Step-by-Step Implementation Plan for Agent:
+1. Identify Current Location
+Find the "Early Access Guarantees" section in client/src/pages/HomeV3.tsx
+This appears to be in the early access/hero area of the landing page
+2. Format Changes Required
+From: Current card-based layout with icons and borders
+To: Bold blue rectangular cards with white text (matching the "Why FinBoost" section)
+
+3. Visual Structure Updates
+Remove: Individual card containers with borders and shadows
+Remove: Circular icon backgrounds
+Replace with: Solid blue gradient rectangular cards
+Update: Text color to white for contrast
+Maintain: 2x2 grid layout for desktop, stacked for mobile
+4. Content Mapping
+Transform each guarantee into a blue card format:
+
+"$5,000+ Minimum Pool Size" → Blue card with bold white title
+"40%+ Minimum Member Win Rate" → Blue card with bold white title
+"50% Membership Fees Back To Rewards" → Blue card with bold white title
+"$250+ Minimum Top Reward" → Blue card with bold white title
+5. CSS Classes to Apply
+Use same classes as "Why FinBoost" cards: bg-gradient-to-r from-blue-600 to-blue-700
+White text: text-white
+Bold titles: font-bold text-lg
+Proper padding and rounded corners: p-6 rounded-xl
+6. Responsive Considerations
+Mobile: Single column stack with full width cards
+Desktop: 2x2 grid layout maintaining visual balance
+Maintain: Same responsive breakpoints as existing "Why FinBoost" section
+7. Best Practices to Maintain
+Keep single component structure (no separate mobile/desktop components)
+Use existing Tailwind utility classes
+Maintain accessibility with proper heading hierarchy
+Preserve semantic HTML structure
+Keep consistent spacing with rest of page
+8. Implementation Steps
+Locate the guarantees section in HomeV3.tsx
+Replace the current card structure with blue gradient cards
+Update text colors to white
+Remove icon containers and borders
+Apply responsive grid classes
+Test mobile and desktop layouts
+Ensure text contrast meets accessibility standards
+The key is transforming from the bordered card-with-icon format to the solid blue rectangular card format while maintaining the same responsive grid behavior and content hierarchy.
