@@ -387,7 +387,7 @@ export default function HomeV3() {
   const screenshots = useMemo(() => [
     {
       title: "Step 1: Learn & Complete Lessons",
-      description: "Complete easily digestible lessons and quizzes to earn tickets and build your knowledge",
+      description: "Complete easily digestible lessons and quizzes to earn pool tickets and build your knowledge",
       screenshotPath: step1Screenshot,
       icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
@@ -399,13 +399,13 @@ export default function HomeV3() {
     },
     {
       title: "Step 3: Climb the Leaderboard",
-      description: "Your tickets determine your tier placement. Higher tiers get larger shares of the reward pool",
+      description: "Your number of tickets determines your tier placement. Higher tiers get larger shares of the total rewards pool",
       screenshotPath: step3Screenshot,
       icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     },
     {
       title: "Step 4: Win Real Cash Rewards",
-      description: "At cycle end, winners are drawn on a ticket-weighted basis. More tickets means better odds",
+      description: "At cycle end, winners are drawn on a ticket-weighted basis. The more tickets you have, the better your odds",
       screenshotPath: step4Screenshot,
       icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
     }
@@ -1413,7 +1413,7 @@ export default function HomeV3() {
               How Your Membership Fuels the Movement
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Your membership isn't just a transaction — it's a contribution to a collective effort that drives real financial outcomes.
+              Your membership isn’t just a transaction — it’s your access to financial growth and real cash rewards funded by the community.
             </p>
           </motion.div>
 
@@ -1430,7 +1430,7 @@ export default function HomeV3() {
               </div>
               <h4 className="text-xl font-bold text-white mb-4">Financial Modules</h4>
               <p className="text-white/90 leading-relaxed">
-                You unlock full access to our growing library of financial lessons, quizzes, and real-world action incentives that build genuine financial skills.
+                A portion of your membership supports full access to our growing library of financial lessons, quizzes, and real-world action incentives — all designed to build genuine financial skills.
               </p>
             </motion.div>
 
@@ -1446,7 +1446,7 @@ export default function HomeV3() {
               </div>
               <h4 className="text-xl font-bold text-white mb-4">Rewards Pool</h4>
               <p className="text-white/90 leading-relaxed">
-                Part of every membership funds the rewards pool — meaning your progress helps build rewards for everyone. The bigger the community, the bigger the rewards.
+                The majority of every membership funds the rewards pool — where you can win real cash by completing lessons and building your financial habits. The bigger the community, the bigger the rewards.
               </p>
             </motion.div>
           </div>
@@ -1532,10 +1532,10 @@ export default function HomeV3() {
                   </div>
                   <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Member<br />Rewards %</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    {rewardsPercentage}%
+                    50-90%
                   </div>
                   <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    Guarantee
+                    Guaranteed
                   </div>
                   <div className="text-xs text-slate-500 font-medium">back to members</div>
                 </motion.div>
@@ -1572,12 +1572,12 @@ export default function HomeV3() {
                   </div>
                   <div className="text-xs font-semibold text-slate-600 mb-1">Illustrative Top<br />Reward</div>
                   <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
+                    Up to {formatCurrency(Math.round(calculateRewardsPool(communitySize) * 0.05))}
                   </div>
                   <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
                     Top Reward
                   </div>
-                  <div className="text-xs text-slate-500 font-medium">cycle winner</div>
+                  <div className="text-xs text-slate-500 font-medium">to cycle winner</div>
                 </motion.div>
               </div>
             </div>
@@ -1657,11 +1657,11 @@ export default function HomeV3() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{rewardsPercentage}% → Collective Rewards Pool</span>
+                    <span className="text-slate-700 font-medium">{rewardsPercentage}% → Member Funded Cash Rewards Pool</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Education & Platform Operations</span>
+                    <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Financial Education + Platform Access</span>
                   </div>
                 </div>
               </motion.div>
