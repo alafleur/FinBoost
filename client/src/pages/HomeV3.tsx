@@ -36,8 +36,7 @@ import {
   ChevronRight,
   Play,
   Pause,
-  Upload,
-  Percent
+  Upload
 } from "lucide-react";
 
 // Import app screenshots
@@ -884,78 +883,184 @@ export default function HomeV3() {
           
           {/* Early Access Guarantees */}
           <motion.div
-            className="text-center mt-16 md:mt-20 mb-16 md:mb-20 max-w-6xl mx-auto px-4"
+            className="text-center mt-16 md:mt-20 mb-16 md:mb-20 max-w-5xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
           >
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">
+            <h3 className="text-xl md:text-2xl font-bold gradient-text mb-4 md:mb-6">
               Early Access Guarantees
             </h3>
-            <p className="text-gray-600 text-base md:text-lg mb-12 max-w-2xl mx-auto">
+            <p className="text-slate-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
               Here's what we guarantee every early access member:
             </p>
             
-            {/* Clean box grid layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <motion.div 
-                className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 md:p-8 text-left hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 2.0 }}
+            {/* Animated Down Arrow */}
+            <motion.div
+              className="flex justify-center mb-6 md:mb-8"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 2.0 }}
+            >
+              <motion.div
+                animate={{ 
+                  y: [0, 8, 0],
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm rounded-full border border-blue-200/50 shadow-lg"
               >
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                  <h4 className="text-xl md:text-2xl font-bold">$5,000+ Minimum Pool Size</h4>
-                </div>
+                <motion.svg
+                  className="w-5 h-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3, delay: 2.2 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </motion.svg>
+              </motion.div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-6">
+              <motion.div 
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-blue-500 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.0, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(59, 130, 246, 0.3)", "0 6px 12px rgba(124, 58, 237, 0.4)", "0 4px 8px rgba(59, 130, 246, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.3, ease: "backOut" }}
+                  >
+                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.414-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-900 font-black text-base md:text-lg tracking-wide group-hover:text-slate-950 transition-colors duration-300">
+                  $5,000+ Minimum Pool Size
+                </span>
               </motion.div>
 
               <motion.div 
-                className="bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl p-6 md:p-8 text-left hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 2.1 }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-purple-500 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.15, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                    <Percent className="w-6 h-6 text-white" />
-                  </div>
-                  <h4 className="text-xl md:text-2xl font-bold">50%+ Membership Fees Guaranteed Back To Rewards Pool</h4>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(124, 58, 237, 0.3)", "0 6px 12px rgba(59, 130, 246, 0.4)", "0 4px 8px rgba(124, 58, 237, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.45, ease: "backOut" }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-900 font-black text-base md:text-lg tracking-wide group-hover:text-slate-950 transition-colors duration-300">
+                  50% Membership Fees Back To Rewards
+                </span>
               </motion.div>
 
               <motion.div 
-                className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 md:p-8 text-left hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 2.2 }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-blue-600 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.3, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                    <BarChart3 className="w-6 h-6 text-white" />
-                  </div>
-                  <h4 className="text-xl md:text-2xl font-bold">40%+ Minimum Member Win Rate</h4>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(59, 130, 246, 0.3)", "0 6px 12px rgba(124, 58, 237, 0.4)", "0 4px 8px rgba(59, 130, 246, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.6, ease: "backOut" }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-900 font-black text-base md:text-lg tracking-wide group-hover:text-slate-950 transition-colors duration-300">
+                  40%+ Minimum Member Win Rate
+                </span>
               </motion.div>
 
               <motion.div 
-                className="bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl p-6 md:p-8 text-left hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 2.3 }}
+                className="group flex items-center justify-center md:justify-start bg-white/95 backdrop-blur-sm rounded-xl px-5 md:px-7 py-5 md:py-6 border-l-4 border-l-gradient-to-b border-l-purple-600 border border-slate-200 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out relative overflow-hidden"
+                initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.45, ease: "easeOut", type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
               >
-                <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                    <Star className="w-6 h-6 text-white" />
-                  </div>
-                  <h4 className="text-xl md:text-2xl font-bold">$250+ Minimum Top Reward</h4>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className="relative flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mr-4 md:mr-5 shadow-md"
+                  animate={{ 
+                    boxShadow: ["0 4px 8px rgba(124, 58, 237, 0.3)", "0 6px 12px rgba(59, 130, 246, 0.4)", "0 4px 8px rgba(124, 58, 237, 0.3)"] 
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                >
+                  <motion.svg 
+                    className="w-4 h-4 text-white" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 2.75, ease: "backOut" }}
+                  >
+                    <path fillRule="evenodd" d="M10 2L13.09 8.26L20 9L15 13.74L16.18 20.02L10 16.77L3.82 20.02L5 13.74L0 9L6.91 8.26L10 2Z" />
+                  </motion.svg>
+                </motion.div>
+                <span className="relative text-slate-900 font-black text-base md:text-lg tracking-wide group-hover:text-slate-950 transition-colors duration-300">
+                  $250+ Minimum Top Reward
+                </span>
               </motion.div>
             </div>
           </motion.div>
-
           
 
         </div>
@@ -1552,11 +1657,11 @@ export default function HomeV3() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{rewardsPercentage}% → Member Funded Cash Rewards Pool</span>
+                    <span className="text-slate-700 font-medium">Majority → Member Funded Cash Rewards Pool</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">{100 - rewardsPercentage}% → Financial Education + Platform Access</span>
+                    <span className="text-slate-700 font-medium">Portion → Financial Education + Platform Access</span>
                   </div>
                 </div>
               </motion.div>
