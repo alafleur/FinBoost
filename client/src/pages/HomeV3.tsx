@@ -999,8 +999,8 @@ export default function HomeV3() {
 
           {/* Unified Responsive Layout */}
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-            {/* Phone Preview - Mobile Centered, Desktop Right */}
-            <div className="order-1 lg:order-2 flex flex-col items-center lg:items-start">
+            {/* Phone Preview - Mobile Bottom, Desktop Right */}
+            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
               {/* Mobile navigation with arrows and dots - positioned above phone */}
               <div className="lg:hidden flex items-center justify-center space-x-4 mb-4">
                 {/* Left Arrow */}
@@ -1087,7 +1087,7 @@ export default function HomeV3() {
             </div>
 
             {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
-            <div className="order-2 lg:order-1">
+            <div className="order-1 lg:order-1">
 
 
               {/* Mobile: Single Flipping Card */}
