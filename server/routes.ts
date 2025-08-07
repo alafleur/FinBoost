@@ -11,6 +11,7 @@ import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, wi
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 import * as XLSX from "xlsx";
+import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
 
 // Initialize Stripe only if secret key is available
@@ -1013,6 +1014,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "File upload failed due to server error" 
+      });
+    }
+  });
+
+  // Secure file serving endpoint for uploaded proof documents
+  app.get("/api/uploads/:filename", async (req, res) => {
+    try {
+      // Authentication validation
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required to access files" 
+        });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid authentication token" 
+        });
+      }
+
+      // Validate and sanitize filename to prevent directory traversal
+      const filename = req.params.filename;
+      if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid filename" 
+        });
+      }
+
+      // Construct file path
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      const filePath = path.join(uploadsDir, filename);
+      
+      // Verify file exists and is within uploads directory
+      const fs = await import('fs/promises');
+      try {
+        const stats = await fs.stat(filePath);
+        
+        // Additional security check - ensure resolved path is within uploads directory
+        const resolvedPath = path.resolve(filePath);
+        const resolvedUploadsDir = path.resolve(uploadsDir);
+        
+        if (!resolvedPath.startsWith(resolvedUploadsDir)) {
+          console.warn(`[Security] Attempted path traversal by user ${user.id}: ${filename}`);
+          return res.status(403).json({ 
+            success: false, 
+            message: "Access denied" 
+          });
+        }
+
+        // Determine content type based on file extension
+        const ext = path.extname(filename).toLowerCase();
+        let contentType = 'application/octet-stream'; // Default
+
+        const mimeTypes: { [key: string]: string } = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.gif': 'image/gif',
+          '.pdf': 'application/pdf',
+          '.doc': 'application/msword',
+          '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+
+        if (mimeTypes[ext]) {
+          contentType = mimeTypes[ext];
+        }
+
+        // Set security headers
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `inline; filename="${path.basename(filename)}"`);
+        res.setHeader('Content-Length', stats.size);
+        
+        // Security headers to prevent caching sensitive files
+        res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        
+        // Log file access for security auditing
+        console.log(`[File Access] User ${user.id} (${user.email}) accessed file: ${filename}`);
+
+        // Stream file to response
+        const fileStream = (await import('fs')).createReadStream(filePath);
+        fileStream.pipe(res);
+        
+        fileStream.on('error', (error) => {
+          console.error('[File Serving Error]', error);
+          if (!res.headersSent) {
+            res.status(500).json({ 
+              success: false, 
+              message: "Error reading file" 
+            });
+          }
+        });
+
+      } catch (fileError: any) {
+        if (fileError.code === 'ENOENT') {
+          return res.status(404).json({ 
+            success: false, 
+            message: "File not found" 
+          });
+        }
+        
+        console.error('[File Access Error]', fileError);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Error accessing file" 
+        });
+      }
+
+    } catch (error: any) {
+      console.error('[File Serving Error]', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "File serving failed due to server error" 
       });
     }
   });
