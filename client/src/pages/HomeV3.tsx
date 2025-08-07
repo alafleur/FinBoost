@@ -308,43 +308,47 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="p-6 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg"
+            className="p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
           >
-            <div className="flex items-center justify-center space-x-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0">
-                <div className="text-white">{topics[currentIndex].icon}</div>
+            {/* Subtle background gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl"></div>
+            <div className="relative z-10 flex items-center justify-center space-x-4">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-lg relative">
+                {/* Icon glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-30"></div>
+                <div className="text-white relative z-10">{topics[currentIndex].icon}</div>
               </div>
-              <h4 className="text-lg font-semibold text-slate-900 leading-tight text-center">
+              <h4 className="text-lg font-semibold text-slate-900 leading-tight text-center flex-1">
                 {topics[currentIndex].title}
               </h4>
             </div>
           </motion.div>
 
-          {/* Navigation Arrows */}
+          {/* Enhanced Navigation Arrows */}
           <button
             onClick={prevTopic}
-            className="absolute -left-6 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+            className="absolute -left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-white to-blue-50/50 backdrop-blur-sm border border-slate-200/60 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-50 hover:to-white hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md"
           >
             <ChevronLeft className="w-5 h-5 text-slate-600" />
           </button>
           <button
             onClick={nextTopic}
-            className="absolute -right-6 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-md transition-all duration-200"
+            className="absolute -right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-blue-50/50 to-white backdrop-blur-sm border border-slate-200/60 flex items-center justify-center hover:bg-gradient-to-r hover:from-white hover:to-blue-50 hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md"
           >
             <ChevronRight className="w-5 h-5 text-slate-600" />
           </button>
         </div>
 
-        {/* Navigation Dots */}
-        <div className="flex justify-center mt-6 space-x-2">
+        {/* Enhanced Navigation Dots */}
+        <div className="flex justify-center mt-8 space-x-3">
           {topics.map((_, index) => (
             <button
               key={index}
               onClick={() => goToTopic(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              className={`rounded-full transition-all duration-300 hover:scale-125 ${
                 index === currentIndex
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 scale-110"
-                  : "bg-slate-300 hover:bg-slate-400"
+                  ? "w-8 h-3 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg scale-110"
+                  : "w-3 h-3 bg-slate-300 hover:bg-gradient-to-r hover:from-slate-400 hover:to-slate-500 shadow-sm"
               }`}
             />
           ))}
@@ -362,33 +366,58 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
-                className="group p-5 rounded-xl bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300 transition-all duration-300 flex-shrink-0"
-                style={{ width: "280px" }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="group p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-xl border border-slate-200/60 hover:border-blue-200/60 transition-all duration-300 flex-shrink-0 relative overflow-hidden cursor-pointer"
+                style={{ width: "300px" }}
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-colors flex-shrink-0">
-                    <div className="text-white">{topic.icon}</div>
+                {/* Subtle background gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div className="relative z-10 flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-lg relative group-hover:shadow-xl group-hover:scale-110">
+                    {/* Icon glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
+                    <div className="text-white relative z-10 transition-transform duration-300 group-hover:scale-110">{topic.icon}</div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-base font-semibold text-slate-900 leading-tight">
+                    <h4 className="text-base font-semibold text-slate-900 leading-tight group-hover:text-slate-800 transition-colors duration-300">
                       {topic.title}
                     </h4>
                   </div>
                 </div>
+                
+                {/* Subtle shine effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000 ease-out"></div>
               </motion.div>
             ))}
           </div>
         </div>
 
         {/* Enhanced Scroll Indicator */}
-        <div className="flex justify-center mt-6">
-          <div className="flex items-center space-x-2 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-full px-4 py-2">
-            <ChevronLeft className="w-4 h-4 text-blue-600 animate-pulse" />
-            <p className="text-sm font-medium text-blue-700">
+        <div className="flex justify-center mt-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="flex items-center space-x-3 bg-gradient-to-r from-blue-50/90 to-purple-50/90 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <motion.div
+              animate={{ x: [-2, 2, -2] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronLeft className="w-4 h-4 text-blue-600" />
+            </motion.div>
+            <p className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
               Scroll to explore more example lessons
             </p>
-            <ChevronRight className="w-4 h-4 text-blue-600 animate-pulse" />
-          </div>
+            <motion.div
+              animate={{ x: [-2, 2, -2] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronRight className="w-4 h-4 text-purple-600" />
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -1894,13 +1923,15 @@ export default function HomeV3() {
       {/* Learning Module Section - Enhanced Design */}
       <section
         id="learn"
-        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-accent-light/10 to-accent-light/15 relative overflow-hidden"
+        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 relative overflow-hidden"
       >
-        {/* Background decorative elements */}
+        {/* Enhanced Background decorative elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-accent-light/15 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-accent-light/15 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-accent-light/10 to-accent-light/15 rounded-full blur-2xl"></div>
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-200/5 to-purple-200/5 rounded-full blur-3xl"></div>
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
@@ -1917,10 +1948,11 @@ export default function HomeV3() {
                 FINANCIAL EDUCATION
               </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Some Examples of Your FinBoost Lessons
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
+              Some Examples of Your 
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">FinBoost Lessons</span>
             </h2>
-            <p className="text-lg leading-relaxed text-gray-700 max-w-3xl mx-auto">
+            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
               Real financial education via 3-5 minute lessons and interactive
               quizzes based on proven strategies for common real-life scenarios
             </p>
