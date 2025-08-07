@@ -68,7 +68,7 @@ export default function PointsValidation({ actionId, userId }: PointsValidationP
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
-            You're eligible to earn points for this action!
+            You're eligible to earn tickets for this action!
           </AlertDescription>
         </Alert>
       ) : (

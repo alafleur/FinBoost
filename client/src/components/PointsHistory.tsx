@@ -156,7 +156,7 @@ export default function PointsHistory() {
       <CardContent>
         <Tabs defaultValue="points" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="points">Points Activity</TabsTrigger>
+            <TabsTrigger value="points">Tickets Activity</TabsTrigger>
             <TabsTrigger value="rewards">Cycle Rewards</TabsTrigger>
           </TabsList>
 

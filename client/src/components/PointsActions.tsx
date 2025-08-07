@@ -181,7 +181,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
 
       if (response.ok) {
         toast({
-          title: "Points Earned!",
+          title: "Tickets Earned!",
           description: data.message,
         });
 
@@ -194,7 +194,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
       } else {
         toast({
           title: "Error",
-          description: data.message || "Failed to award points",
+          description: data.message || "Failed to award tickets",
           variant: "destructive"
         });
       }
@@ -202,7 +202,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
       console.error('Error awarding points:', error);
       toast({
         title: "Error",
-        description: "Failed to award points",
+        description: "Failed to award tickets",
         variant: "destructive"
       });
     } finally {
@@ -224,7 +224,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
             <div className="flex-1">
               <CardTitle className="text-xl font-semibold text-gray-900 mb-2">Get Rewarded for Your Financial Progress!</CardTitle>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Get rewarded with more points by uploading proof of debt paydown!
+                Get rewarded with more tickets by uploading proof of debt paydown!
               </p>
             </div>
           </div>

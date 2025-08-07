@@ -21,7 +21,7 @@ interface ReferralStats {
   totalReferrals: number;
   completedReferrals: number;
   pendingReferrals: number;
-  totalPointsEarned: number;
+  totalTicketsEarned: number;
 }
 
 interface Referral {
@@ -32,7 +32,7 @@ interface Referral {
     joinedAt: string;
   };
   status: string;
-  pointsAwarded: number;
+  ticketsAwarded: number;
   completedAt?: string;
   createdAt: string;
 }
@@ -43,7 +43,7 @@ export default function ReferralSystem() {
     totalReferrals: 0,
     completedReferrals: 0,
     pendingReferrals: 0,
-    totalPointsEarned: 0
+    totalTicketsEarned: 0
   });
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,7 +196,7 @@ export default function ReferralSystem() {
             <p className="font-medium text-blue-800 mb-1">How it works:</p>
             <p>• Share your referral code with friends</p>
             <p>• They sign up using your code</p>
-            <p>• You earn {referralPoints} points when they join</p>
+            <p>• You earn {referralPoints} tickets when they join</p>
             <p>• Both of you benefit from building better financial habits!</p>
           </div>
         </CardContent>
@@ -245,11 +245,11 @@ export default function ReferralSystem() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Points Earned</CardTitle>
+            <CardTitle className="text-sm font-medium">Tickets Earned</CardTitle>
             <TrendingUp className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPointsEarned}</div>
+            <div className="text-2xl font-bold">{stats.totalTicketsEarned}</div>
             <p className="text-xs text-muted-foreground">
               From referrals
             </p>
@@ -276,7 +276,7 @@ export default function ReferralSystem() {
                   <TableHead>Friend</TableHead>
                   <TableHead>Joined Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Points Earned</TableHead>
+                  <TableHead>Tickets Earned</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -295,7 +295,7 @@ export default function ReferralSystem() {
                       {getStatusBadge(referral.status)}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {referral.pointsAwarded > 0 ? `+${referral.pointsAwarded}` : '-'}
+                      {referral.ticketsAwarded > 0 ? `+${referral.ticketsAwarded}` : '-'}
                     </TableCell>
                   </TableRow>
                 ))}

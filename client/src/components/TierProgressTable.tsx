@@ -88,7 +88,7 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
           <div>
             <h4 className="font-medium text-accent text-sm">Your Current Position</h4>
             <p className="text-sm text-accent-light mt-1">
-              You currently have <span className="font-semibold">{user.currentCyclePoints || 0} points</span> this cycle and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
+              You currently have <span className="font-semibold">{user.currentCyclePoints || 0} tickets</span> this cycle and are in <span className="font-semibold">{getTierDisplayName(user.tier)}</span>.
             </p>
           </div>
         </div>

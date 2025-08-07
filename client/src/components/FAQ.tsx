@@ -14,7 +14,7 @@ export default function FAQ() {
     {
       id: "1",
       question: "How much does membership cost?",
-      answer: "$20/month. This gives you access to all learning tools, the ability to earn points, and eligibility for monthly cash rewards. Over half of all membership fees go directly back to members through the rewards pool."
+      answer: "$20/month. This gives you access to all learning tools, the ability to earn tickets, and eligibility for monthly cash rewards. Over half of all membership fees go directly back to members through the rewards pool."
     },
     {
       id: "2",
@@ -24,12 +24,12 @@ export default function FAQ() {
     {
       id: "3",
       question: "Is this a lottery?",
-      answer: "No — rewards are based on a combination of effort (points) and fairness (random draws within each tier). The system is designed to reward both consistency and improvement, with members in all tiers having opportunities to receive rewards."
+      answer: "No — rewards are based on a combination of effort (tickets) and fairness (random draws within each tier). The system is designed to reward both consistency and improvement, with members in all tiers having opportunities to receive rewards."
     },
     {
       id: "4",
-      question: "What are points?",
-      answer: "Points you earn by learning, referring others, and demonstrating responsible financial steps like paying off debt. These points determine which of the three tiers you're placed in each month."
+      question: "What are tickets?",
+      answer: "Tickets you earn by learning, referring others, and demonstrating responsible financial steps like paying off debt. These tickets determine which of the three tiers you're placed in each month."
     },
     {
       id: "5",
@@ -39,7 +39,7 @@ export default function FAQ() {
     {
       id: "6",
       question: "What if I don't get rewarded?",
-      answer: "Your points roll over — increasing your tier and chances next month. Consistent participation will help you climb to higher tiers where both your odds and potential reward amounts are greater."
+      answer: "Your tickets roll over — increasing your tier and chances next month. Consistent participation will help you climb to higher tiers where both your odds and potential reward amounts are greater."
     },
     {
       id: "7",
@@ -48,8 +48,8 @@ export default function FAQ() {
     },
     {
       id: "8",
-      question: "How do I earn points?",
-      answer: "Points are earned through four main activities: completing financial lessons, taking knowledge quizzes, referring new members, and uploading proof of positive financial actions (like paying down debt, increasing savings, or investing). Each activity earns different point values."
+      question: "How do I earn tickets?",
+      answer: "Tickets are earned through four main activities: completing financial lessons, taking knowledge quizzes, referring new members, and uploading proof of positive financial actions (like paying down debt, increasing savings, or investing). Each activity earns different ticket values."
     },
     {
       id: "9",
@@ -64,7 +64,7 @@ export default function FAQ() {
     {
       id: "11",
       question: "What is FinBoost?",
-      answer: "FinBoost is a learn-to-earn platform where members complete financial education lessons to earn points and qualify for monthly cash rewards. The more you learn, the better your odds of winning from our community-funded reward pool."
+      answer: "FinBoost is a learn-to-earn platform where members complete financial education lessons to earn tickets and qualify for monthly cash rewards. The more you learn, the better your odds of winning from our community-funded reward pool."
     },
     {
       id: "12",

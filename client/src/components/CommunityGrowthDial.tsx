@@ -115,7 +115,7 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
           await navigator.clipboard.writeText(referralLink);
           toast({
             title: "Referral link copied!",
-            description: "Share it with friends to earn bonus points",
+            description: "Share it with friends to earn bonus tickets",
           });
         }
       }

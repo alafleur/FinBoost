@@ -667,20 +667,20 @@ export default function Lesson() {
                           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
                             <Trophy className="h-4 w-4 text-white" />
                           </div>
-                          <p className="text-purple-800 font-semibold text-lg">Points Earned!</p>
+                          <p className="text-purple-800 font-semibold text-lg">Tickets Earned!</p>
                         </div>
                         <p className="text-purple-700 font-medium">
                           {completionData ? (
                             <>
-                              Total: +{completionData.pointsEarned} points
+                              Total: +{completionData.pointsEarned} tickets
                               {completionData.streakBonus > 0 && (
                                 <span className="block text-sm text-purple-600 mt-1">
-                                  Streak bonus: +{completionData.streakBonus} points
+                                  Streak bonus: +{completionData.streakBonus} tickets
                                 </span>
                               )}
                             </>
                           ) : (
-                            `Total: +${lesson.points} points`
+                            `Total: +${lesson.points} tickets`
                           )}
                         </p>
                       </div>

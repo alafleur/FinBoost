@@ -106,7 +106,7 @@ export default function PointsManagement() {
       console.error('Error fetching points data:', error);
       toast({
         title: "Error",
-        description: "Failed to load points data",
+        description: "Failed to load tickets data",
         variant: "destructive"
       });
     } finally {
@@ -350,7 +350,7 @@ export default function PointsManagement() {
                 <Label htmlFor="action">Select Action Type</Label>
                 <Select value={selectedAction} onValueChange={setSelectedAction}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose an action to earn points" />
+                    <SelectValue placeholder="Choose an action to earn tickets" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(groupedActions).map(([category, actions]) => (
@@ -416,7 +416,6 @@ export default function PointsManagement() {
                         <Label>Upload Proof</Label>
                         <FileUpload
                           onFileUploaded={(url) => setUploadedFile(url)}
-                          onFileRemoved={() => setUploadedFile('')}
                           accept="image/*,.pdf"
                           maxSize={5 * 1024 * 1024} // 5MB
                         />
@@ -429,7 +428,7 @@ export default function PointsManagement() {
                     disabled={submitting || (selectedActionData.requiresProof && (!uploadedFile || !proofDescription))}
                     className="w-full"
                   >
-                    {submitting ? 'Submitting...' : selectedActionData.requiresProof ? 'Submit for Review' : 'Claim Points'}
+                    {submitting ? 'Submitting...' : selectedActionData.requiresProof ? 'Submit for Review' : 'Claim Tickets'}
                   </Button>
                 </div>
               )}

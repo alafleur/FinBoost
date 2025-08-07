@@ -145,7 +145,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
                 <Star className="h-4 w-4 text-gray-600" />
               </div>
               <span className="text-sm font-medium">
-                {user.subscriptionStatus === 'active' ? 'Total Points' : 'Theoretical Points'}
+                {user.subscriptionStatus === 'active' ? 'Total Tickets' : 'Theoretical Tickets'}
               </span>
             </div>
             <div className="text-2xl font-bold">
@@ -156,7 +156,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             </div>
             {user.subscriptionStatus !== 'active' && (
               <p className={`text-xs ${DashboardColors.text.muted} mt-1`}>
-                Upgrade to claim as real points
+                Upgrade to claim as real tickets
               </p>
             )}
           </CardContent>
@@ -173,7 +173,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
             <div className="text-2xl font-bold">{user.currentCyclePoints}</div>
             {user.subscriptionStatus !== 'active' && (
               <p className={`text-xs ${DashboardColors.text.muted} mt-1`}>
-                Theoretical points only
+                Theoretical tickets only
               </p>
             )}
           </CardContent>
@@ -225,7 +225,7 @@ export default function PointsSummary({ user, onNavigateToPoints }: PointsSummar
 
             {/* Current Status */}
             <div className="text-center text-xs text-gray-500">
-              {user.currentCyclePoints} points this cycle
+              {user.currentCyclePoints} tickets this cycle
               {nextTierInfo.isMaxTier ? ' • Maximum tier reached!' : pointsNeeded > 0 && ` • ${pointsNeeded} to ${nextTierInfo.name}`}
             </div>
           </div>

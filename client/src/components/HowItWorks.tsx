@@ -24,7 +24,7 @@ export default function HowItWorks() {
     {
       id: 3,
       title: "3. Earn Rewards",
-      description: "Get points for every lesson completed and action taken. Join our monthly reward pools and earn real cash for your financial progress.",
+      description: "Get tickets for every lesson completed and action taken. Join our monthly reward pools and earn real cash for your financial progress.",
       icon: <Trophy className="h-6 w-6" />,
     },
   ];
