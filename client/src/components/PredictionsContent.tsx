@@ -209,7 +209,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
     
     return (
       <Badge variant={badgeVariant}>
-        Earned: {pointsEarned} pts
+        Earned: {pointsEarned} tickets
       </Badge>
     );
   };
@@ -235,7 +235,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
             <Star className="w-12 h-12 mx-auto text-yellow-500 mb-4" />
             <h3 className="text-lg font-semibold mb-2">Premium Feature</h3>
             <p className="text-gray-600 mb-6">
-              Upgrade to premium to access prediction questions and earn bonus points
+              Upgrade to premium to access prediction questions and earn bonus tickets
             </p>
             <Button onClick={onUpgradeClick}>
               Upgrade to Premium
@@ -357,7 +357,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                             </p>
                             {userPrediction.pointsAwarded && (
                               <p className="text-sm text-green-600 mt-2">
-                                +{userPrediction.pointsAwarded} points awarded
+                                +{userPrediction.pointsAwarded} tickets awarded
                               </p>
                             )}
                           </div>
@@ -491,7 +491,7 @@ export default function PredictionsContent({ user, onUpgradeClick }: Predictions
                     {selectedQuestion.options?.[selectedOptionIndex] || 'Unknown option'}
                   </p>
                   <p className="text-sm text-blue-700 mt-1">
-                    Potential reward: +{selectedQuestion.pointAwards?.[selectedOptionIndex] || 0} points
+                    Potential reward: +{selectedQuestion.pointAwards?.[selectedOptionIndex] || 0} tickets
                   </p>
                 </div>
               </div>

@@ -261,7 +261,7 @@ export default function Leaderboard() {
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm text-gray-600 mb-1">Cycle Points</p>
+                <p className="text-xs md:text-sm text-gray-600 mb-1">Cycle Tickets</p>
                 <p className="text-xl md:text-2xl font-semibold text-gray-900">{data.currentUser.points.toLocaleString()}</p>
               </div>
               <div className="bg-gray-100 rounded-lg p-2 md:p-3">
@@ -328,10 +328,10 @@ export default function Leaderboard() {
               className="h-2"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>{userTierStats.currentPoints} points</span>
+              <span>{userTierStats.currentPoints} tickets</span>
               <span>
                 {userTierStats.pointsToNext > 0 
-                  ? `${userTierStats.pointsToNext} points to go`
+                  ? `${userTierStats.pointsToNext} tickets to go`
                   : 'Elite Tier Achieved!'
                 }
               </span>
@@ -409,7 +409,7 @@ export default function Leaderboard() {
                       {entry.isCurrentUser && <span className="ml-2 text-accent-light font-medium text-xs">(You)</span>}
                     </p>
                     <p className="text-xs md:text-sm text-gray-600 font-medium">
-                      {entry.points.toLocaleString()} points
+                      {entry.points.toLocaleString()} tickets
                     </p>
                   </div>
                 </div>

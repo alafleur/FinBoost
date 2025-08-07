@@ -19,7 +19,7 @@ export default function FlywheelFeatures() {
         </div>
         <div className="ml-4">
           <h3 className="font-heading font-medium text-lg">Merit-based rewards system for everyone</h3>
-          <p className="text-gray-600 mt-1">The top 50% of members by points are guaranteed cash rewards each cycle.</p>
+          <p className="text-gray-600 mt-1">The top 50% of members by tickets are guaranteed cash rewards each cycle.</p>
         </div>
       </div>
       

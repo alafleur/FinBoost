@@ -34,7 +34,7 @@ import finboostLogo from "@/assets/finboost-logo-v10.png";
 import { DashboardColors } from "@/lib/colors";
 import PointsSummary from "@/components/PointsSummary";
 import PointsHistory from "@/components/PointsHistory";
-import PointsActions from "@/components/PointsActions";
+import TicketsActions from "@/components/PointsActions";
 import RewardsHistory from "@/components/RewardsHistory";
 import RewardsSummary from "@/components/RewardsSummary";
 import Leaderboard from "@/components/Leaderboard";
@@ -784,7 +784,7 @@ export default function Dashboard() {
                   title="Financial Actions"
                 />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <PointsActions />
+                  <TicketsActions />
                 </div>
               </div>
             </TabsContent>
@@ -1403,7 +1403,7 @@ export default function Dashboard() {
                   titleSize="2xl"
                 />
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <PointsActions />
+                  <TicketsActions />
                 </div>
               </div>
             </TabsContent>

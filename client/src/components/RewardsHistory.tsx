@@ -179,7 +179,7 @@ export default function RewardsHistory() {
             Your Rewards Journey Starts Here!
           </CardTitle>
           <CardDescription className="text-gray-600">
-            Keep learning and earning points to become eligible for monthly cash rewards
+            Keep learning and earning tickets to become eligible for monthly cash rewards
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -189,7 +189,7 @@ export default function RewardsHistory() {
             </div>
             <h3 className="font-semibold text-lg mb-2">Ready to Earn Cash Rewards?</h3>
             <p className="text-gray-600 mb-4">
-              Complete financial modules, earn points, and join our monthly winner selection for cash prizes!
+              Complete financial modules, earn tickets, and join our monthly winner selection for cash prizes!
             </p>
             <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-6">
               <div className="text-center">

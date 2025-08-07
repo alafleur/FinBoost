@@ -150,7 +150,7 @@ export default function PointsHistory() {
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <CalendarDays className="h-5 w-5" />
-          <span>Points & Rewards History</span>
+          <span>Tickets & Rewards History</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -163,7 +163,7 @@ export default function PointsHistory() {
           <TabsContent value="points" className="space-y-4">
             {pointsHistory.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No points activity yet. Start earning points by completing lessons!
+                No tickets activity yet. Start earning tickets by completing lessons!
               </div>
             ) : (
               <div className="space-y-3">
@@ -191,7 +191,7 @@ export default function PointsHistory() {
           <TabsContent value="rewards" className="space-y-4">
             {rewardsHistory.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No cycle rewards history yet. Keep earning points to participate in rewards!
+                No cycle rewards history yet. Keep earning tickets to participate in rewards!
               </div>
             ) : (
               <div className="space-y-3">
@@ -210,7 +210,7 @@ export default function PointsHistory() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <div className="text-gray-500">Points at Distribution</div>
+                        <div className="text-gray-500">Tickets at Distribution</div>
                         <div className="font-medium">{entry.pointsAtDistribution}</div>
                       </div>
                       <div>
@@ -227,13 +227,13 @@ export default function PointsHistory() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Points Deducted</div>
+                        <div className="text-gray-500">Tickets Deducted</div>
                         <div className="font-medium text-red-600">
                           {entry.pointsDeducted > 0 ? `-${entry.pointsDeducted}` : '0'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Points Rolled Over</div>
+                        <div className="text-gray-500">Tickets Rolled Over</div>
                         <div className="font-medium text-blue-600">{entry.pointsRolledOver}</div>
                       </div>
                     </div>

@@ -26,7 +26,7 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Point Range</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket Range</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">

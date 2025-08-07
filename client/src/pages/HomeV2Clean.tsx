@@ -45,7 +45,7 @@ export default function HomeV2Clean() {
                   Your Financial Comeback Starts Here <span className="gradient-text">– And We'll Reward You For It</span>
                 </h1>
                 <p className="text-gray-600 text-lg md:text-xl mb-8 max-w-lg">
-                  Learn powerful money skills. Take real financial actions. Earn points and win real cash rewards every two weeks. Join our limited Early Access where every prize pool is guaranteed.
+                  Learn powerful money skills. Take real financial actions. Earn tickets and win real cash rewards every two weeks. Join our limited Early Access where every prize pool is guaranteed.
                 </p>
                 <div className="max-w-lg space-y-4">
                   <Button 
@@ -133,15 +133,15 @@ export default function HomeV2Clean() {
                   <Target className="h-8 w-8 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">2. Take Action</h3>
-                <p className="text-gray-600 text-sm">Apply what you learned with real financial actions and upload proof to earn points</p>
+                <p className="text-gray-600 text-sm">Apply what you learned with real financial actions and upload proof to earn tickets</p>
               </div>
               
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <DollarSign className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-gray-800">3. Earn Points</h3>
-                <p className="text-gray-600 text-sm">Build your tier status with points from lessons, quizzes, and verified financial actions</p>
+                <h3 className="font-semibold text-lg mb-2 text-gray-800">3. Earn Tickets</h3>
+                <p className="text-gray-600 text-sm">Build your tier status with tickets from lessons, quizzes, and verified financial actions</p>
               </div>
               
               <div className="text-center">

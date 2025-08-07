@@ -142,7 +142,7 @@ export default function TierStats({ tierThresholds, tierRewards, user }: TierSta
                   {tier.name}
                 </h3>
                 <p className={`text-xs ${DashboardColors.text.secondary}`}>
-                  {tier.range} points
+                  {tier.range} tickets
                 </p>
               </div>
 

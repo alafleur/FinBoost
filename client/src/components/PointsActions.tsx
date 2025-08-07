@@ -21,11 +21,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import FileUpload from './FileUpload';
 
-interface PointAction {
+interface TicketAction {
   id: number;
   actionId: string;
   name: string;
-  basePoints: number;
+  baseTickets: number;
   requiresProof: boolean;
   category: string;
   description: string;
@@ -33,16 +33,16 @@ interface PointAction {
   maxMonthly?: number;
   maxTotal?: number;
   isActive: boolean;
-  points?: number;
+  tickets?: number;
 }
 
-interface PointsActionsProps {
-  onPointsEarned?: (points: number) => void;
-  quickWinActions: PointAction[];
+interface TicketsActionsProps {
+  onTicketsEarned?: (tickets: number) => void;
+  quickWinActions?: TicketAction[];
 }
 
-export default function PointsActions({ onPointsEarned, quickWinActions }: PointsActionsProps) {
-  const [actions, setActions] = useState<PointAction[]>([]);
+export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }: TicketsActionsProps) {
+  const [actions, setActions] = useState<TicketAction[]>([]);
 
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
@@ -66,7 +66,7 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
       if (response.ok) {
         const data = await response.json();
         // Filter out Investment Contribution actions
-        const filteredActions = (data.actions || []).filter((action: PointAction) => 
+        const filteredActions = (data.actions || []).filter((action: TicketAction) => 
           !action.name.toLowerCase().includes('investment contribution') &&
           !action.actionId.toLowerCase().includes('investment')
         );
@@ -185,8 +185,8 @@ export default function PointsActions({ onPointsEarned, quickWinActions }: Point
           description: data.message,
         });
 
-        if (onPointsEarned) {
-          onPointsEarned(data.points);
+        if (onTicketsEarned) {
+          onTicketsEarned(data.points);
         }
 
         // Refresh actions to update limits
