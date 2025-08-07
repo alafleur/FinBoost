@@ -290,7 +290,9 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
 }) => {
   // Set initial scroll position to show 2.5 rows on desktop
   useEffect(() => {
-    const container = document.getElementById('desktop-lesson-scroll-container');
+    const container = document.getElementById(
+      "desktop-lesson-scroll-container",
+    );
     if (container) {
       // Scroll to show half of the third row (2.5 rows)
       // Each row is ~140px (120px card + 16px gap + 4px padding)
@@ -307,11 +309,11 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
           <p className="text-sm text-slate-600 text-center mb-4 px-4">
             Scroll up/down to navigate example lessons
           </p>
-          
+
           {/* Container with enhanced glass morphism */}
           <div className="bg-white/70 backdrop-blur-xl border border-slate-200/80 hover:border-blue-200/60 rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-500">
             {/* Lesson cards container */}
-            <div 
+            <div
               id="lesson-scroll-container"
               className="overflow-y-auto scrollbar-hide relative mx-2"
               style={{ height: "320px" }}
@@ -322,10 +324,10 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                     key={index}
                     initial={{ opacity: 0, y: 30, scale: 0.95 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ 
-                      duration: 0.6, 
+                    transition={{
+                      duration: 0.6,
                       delay: index * 0.06,
-                      ease: [0.25, 0.25, 0.25, 1] 
+                      ease: [0.25, 0.25, 0.25, 1],
                     }}
                     viewport={{ once: true, margin: "-50px" }}
                     className="p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-lg border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-500 relative overflow-hidden"
@@ -334,14 +336,14 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                     {/* Subtle background gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-xl"></div>
                     <div className="relative z-10 flex items-center space-x-3">
-                      <motion.div 
+                      <motion.div
                         className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 flex-shrink-0 shadow-lg relative group"
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                       >
                         {/* Enhanced icon glow effect */}
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-purple-500 rounded-lg blur-md opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-                        <motion.div 
+                        <motion.div
                           className="text-white relative z-10 text-sm"
                           whileHover={{ rotate: 5 }}
                           transition={{ duration: 0.3 }}
@@ -359,18 +361,20 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                 ))}
               </div>
             </div>
-            
+
             {/* Top and Bottom fade gradients */}
             <div className="absolute top-4 left-6 right-6 h-6 bg-gradient-to-b from-white/80 to-transparent pointer-events-none rounded-t-xl"></div>
             <div className="absolute bottom-4 left-6 right-6 h-6 bg-gradient-to-t from-white/80 to-transparent pointer-events-none rounded-b-xl"></div>
-            
+
             {/* Dedicated navigation controls */}
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
               <motion.button
                 onClick={() => {
-                  const container = document.getElementById('lesson-scroll-container');
+                  const container = document.getElementById(
+                    "lesson-scroll-container",
+                  );
                   if (container) {
-                    container.scrollBy({ top: -120, behavior: 'smooth' });
+                    container.scrollBy({ top: -120, behavior: "smooth" });
                   }
                 }}
                 className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
@@ -382,9 +386,11 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
               </motion.button>
               <motion.button
                 onClick={() => {
-                  const container = document.getElementById('lesson-scroll-container');
+                  const container = document.getElementById(
+                    "lesson-scroll-container",
+                  );
                   if (container) {
-                    container.scrollBy({ top: 120, behavior: 'smooth' });
+                    container.scrollBy({ top: 120, behavior: "smooth" });
                   }
                 }}
                 className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
@@ -405,7 +411,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
           {/* Container with enhanced glass morphism */}
           <div className="bg-white/70 backdrop-blur-xl border border-slate-200/80 hover:border-blue-200/60 rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-500">
             {/* Scroll container showing 2.5 rows (height calculated for 2.5 card rows + gaps) */}
-            <div 
+            <div
               id="desktop-lesson-scroll-container"
               className="overflow-y-auto scrollbar-hide relative mx-2"
               style={{ height: "380px" }}
@@ -416,10 +422,10 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                     key={index}
                     initial={{ opacity: 0, y: 30, scale: 0.95 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ 
-                      duration: 0.6, 
+                    transition={{
+                      duration: 0.6,
                       delay: index * 0.04,
-                      ease: [0.25, 0.25, 0.25, 1] 
+                      ease: [0.25, 0.25, 0.25, 1],
                     }}
                     viewport={{ once: true, margin: "-50px" }}
                     whileHover={{ y: -6, scale: 1.03 }}
@@ -428,16 +434,16 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                   >
                     {/* Subtle background gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
+
                     <div className="relative z-10 flex items-center space-x-3">
-                      <motion.div 
+                      <motion.div
                         className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-lg relative group"
                         whileHover={{ scale: 1.15 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                       >
                         {/* Enhanced icon glow effect */}
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-purple-500 rounded-lg blur-md opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
-                        <motion.div 
+                        <motion.div
                           className="text-white relative z-10 text-sm"
                           whileHover={{ rotate: 8, scale: 1.1 }}
                           transition={{ duration: 0.3, ease: "easeOut" }}
@@ -451,25 +457,27 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                         </h4>
                       </div>
                     </div>
-                    
+
                     {/* Subtle shine effect on hover */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000 ease-out"></div>
                   </motion.div>
                 ))}
               </div>
             </div>
-            
+
             {/* Top and Bottom fade gradients */}
             <div className="absolute top-4 left-6 right-6 h-6 bg-gradient-to-b from-white/80 to-transparent pointer-events-none rounded-t-xl"></div>
             <div className="absolute bottom-4 left-6 right-6 h-6 bg-gradient-to-t from-white/80 to-transparent pointer-events-none rounded-b-xl"></div>
-            
+
             {/* Dedicated navigation controls */}
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
               <motion.button
                 onClick={() => {
-                  const container = document.getElementById('desktop-lesson-scroll-container');
+                  const container = document.getElementById(
+                    "desktop-lesson-scroll-container",
+                  );
                   if (container) {
-                    container.scrollBy({ top: -140, behavior: 'smooth' });
+                    container.scrollBy({ top: -140, behavior: "smooth" });
                   }
                 }}
                 className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
@@ -481,9 +489,11 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
               </motion.button>
               <motion.button
                 onClick={() => {
-                  const container = document.getElementById('desktop-lesson-scroll-container');
+                  const container = document.getElementById(
+                    "desktop-lesson-scroll-container",
+                  );
                   if (container) {
-                    container.scrollBy({ top: 140, behavior: 'smooth' });
+                    container.scrollBy({ top: 140, behavior: "smooth" });
                   }
                 }}
                 className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
@@ -495,7 +505,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
               </motion.button>
             </div>
           </div>
-          
+
           {/* Instruction text for desktop */}
           <p className="text-sm text-slate-600 text-center mt-4 px-4">
             Scroll up/down to navigate example lessons
@@ -1456,8 +1466,10 @@ export default function HomeV3() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              Some Examples of Your 
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">FinBoost Lessons</span>
+              Some Examples of Your
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                FinBoost Lessons
+              </span>
             </h2>
             <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
               Real financial education via 3-5 minute lessons and interactive
@@ -1537,11 +1549,13 @@ export default function HomeV3() {
                 },
                 {
                   icon: <BadgeDollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
+                  title:
+                    "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
                 },
                 {
                   icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Side Hustle Income: Tax Implications You Need to Know",
+                  title:
+                    "Side Hustle Income: Tax Implications You Need to Know",
                 },
                 {
                   icon: <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6" />,
@@ -1549,7 +1563,8 @@ export default function HomeV3() {
                 },
                 {
                   icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Insurance That Actually Matters vs. Overpriced Coverage",
+                  title:
+                    "Insurance That Actually Matters vs. Overpriced Coverage",
                 },
                 {
                   icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
@@ -1557,7 +1572,8 @@ export default function HomeV3() {
                 },
                 {
                   icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Setting Realistic Financial Goals That Actually Stick",
+                  title:
+                    "Setting Realistic Financial Goals That Actually Stick",
                 },
                 {
                   icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
@@ -2031,7 +2047,7 @@ export default function HomeV3() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Half of Members Earn Rewards Each Cycle
+              Not Winner Take All — Members at All Stages Win
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Users are placed in tiers based on tickets. The more you learn,
@@ -2155,8 +2171,6 @@ export default function HomeV3() {
           </div>
         </div>
       </section>
-
-
 
       {/* Final CTA - Blue to Purple Gradient Background */}
       <section

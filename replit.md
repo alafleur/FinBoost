@@ -22,6 +22,12 @@ Preferred communication style: Simple, everyday language.
 - Eliminate duplicate mobile/desktop components in favor of single responsive components
 - Update landing page phone images with actual application screenshots for marketing purposes
 
+**Recent Landing Page Optimizations (January 2025):**
+- Enhanced lesson cards section with desktop scroll showing 2.5 rows for better conversion flow
+- Implemented unified scroll interaction pattern across mobile and desktop
+- Added professional polish with staggered animations, enhanced depth effects, and icon micro-interactions
+- Updated key messaging from "Half of Members Earn Rewards Each Cycle" to "Not Winner Take All — Members at All Stages Win" for better positioning against lottery-style models
+
 **Recent Content Updates (January 2025):**
 - Added 3 new modules: student loan forgiveness (policy changes), strategic loan repayment, and daily spending analysis ("latte effect") 
 - Updated "What You'll Master" section with horizontal scrolling design and refined mobile layout
