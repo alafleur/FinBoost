@@ -37,6 +37,10 @@ import {
   Play,
   Pause,
   Upload,
+  Home,
+  Zap,
+  Eye,
+  Smartphone,
 } from "lucide-react";
 
 // Import app screenshots
@@ -2011,6 +2015,22 @@ export default function HomeV3() {
                 {
                   icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Decode APR vs APY Differences",
+                },
+                {
+                  icon: <Home className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "When Renting Actually Beats Buying",
+                },
+                {
+                  icon: <Zap className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Stop Lifestyle Inflation Before It Starts",
+                },
+                {
+                  icon: <Eye className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Hidden Fees That Drain Your Bank Account",
+                },
+                {
+                  icon: <Smartphone className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Why Your Phone Bill Is Probably Too High",
                 },
               ]}
             />
