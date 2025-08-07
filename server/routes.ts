@@ -1155,7 +1155,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the action configuration to determine points
       const actions = await storage.getPointActions();
-      const action = actions.find(a => a.id === actionId);
+      // Handle both string and number actionId for flexibility
+      const actionIdNumber = typeof actionId === 'string' ? parseInt(actionId, 10) : actionId;
+      const action = actions.find(a => a.id === actionIdNumber);
 
       if (!action) {
         return res.status(400).json({ success: false, message: "Invalid action" });

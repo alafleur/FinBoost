@@ -88,6 +88,23 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
       return;
     }
 
+    // Find the first available proof-requiring action, preferably debt-related
+    const availableAction = actions.find(action => 
+      action.requiresProof && action.isActive && (
+        action.actionId.toLowerCase().includes('debt') || 
+        action.name.toLowerCase().includes('debt')
+      )
+    ) || actions.find(action => action.requiresProof && action.isActive);
+
+    if (!availableAction) {
+      toast({
+        title: "No Available Actions",
+        description: "No proof-requiring actions are currently available.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -99,7 +116,7 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          actionId: '7', // Default debt paydown action ID
+          actionId: availableAction.id,
           proofUrl: uploadedFileData.fileUrl,
           description,
           metadata: {
@@ -113,7 +130,7 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
         const data = await response.json();
         toast({
           title: "Proof Submitted Successfully!",
-          description: data.message,
+          description: `Your proof for "${availableAction.name}" has been submitted for review.`,
         });
 
         // Reset form
