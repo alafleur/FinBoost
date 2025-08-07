@@ -11,6 +11,7 @@ import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, wi
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 import * as XLSX from "xlsx";
+import { upload, getFileUrl } from "./fileUpload";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -921,6 +922,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Proof rejected" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  // File upload endpoint for proof documents
+  app.post("/api/upload/proof", upload.single('proofFile'), async (req, res) => {
+    try {
+      // Authentication validation
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required for file upload" 
+        });
+      }
+
+      const user = await getUserFromToken(token);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid authentication token" 
+        });
+      }
+
+      // File validation
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No file provided for upload" 
+        });
+      }
+
+      // Additional file size validation (backend verification)
+      const maxSizeBytes = 10 * 1024 * 1024; // 10MB limit
+      if (req.file.size > maxSizeBytes) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "File size exceeds 10MB limit" 
+        });
+      }
+
+      // Validate file type
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+        'application/pdf', 'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid file type. Only images, PDF, and Word documents are allowed" 
+        });
+      }
+
+      // Generate file URL
+      const fileUrl = getFileUrl(req.file.filename);
+      
+      // Log successful upload for security auditing
+      console.log(`[Upload] User ${user.id} (${user.email}) uploaded file: ${req.file.filename} (${req.file.size} bytes)`);
+
+      // Return upload success response
+      res.json({ 
+        success: true, 
+        message: "File uploaded successfully",
+        fileUrl: fileUrl,
+        fileName: req.file.originalname,
+        fileSize: req.file.size
+      });
+
+    } catch (error: any) {
+      console.error('[Upload Error]', error);
+      
+      // Handle multer-specific errors
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "File size exceeds the 10MB limit" 
+        });
+      }
+      
+      if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Unexpected file field. Please use 'proofFile' field name" 
+        });
+      }
+
+      // Generic error response
+      res.status(500).json({ 
+        success: false, 
+        message: "File upload failed due to server error" 
+      });
     }
   });
 
