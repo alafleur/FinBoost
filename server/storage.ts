@@ -478,9 +478,11 @@ export class MemStorage implements IStorage {
 
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     const lastActivityDate = user.lastActivityDate;
+    const lastStreakBonusDate = user.lastStreakBonusDate;
 
     let newStreak = 1;
     let bonusPoints = 0;
+    let shouldAwardBonus = false;
 
     if (lastActivityDate) {
       const lastDate = new Date(lastActivityDate);
@@ -490,29 +492,44 @@ export class MemStorage implements IStorage {
       if (diffDays === 1) {
         // Consecutive day - increment streak
         newStreak = user.currentStreak + 1;
+        shouldAwardBonus = true;
       } else if (diffDays === 0) {
-        // Same day - don't update streak but still give bonus for existing streak
+        // Same day - don't update streak, check if bonus already awarded today
         newStreak = user.currentStreak;
+        shouldAwardBonus = lastStreakBonusDate !== today;
       } else {
         // Missed days - reset streak
         newStreak = 1;
+        shouldAwardBonus = true;
       }
+    } else {
+      // First activity ever
+      shouldAwardBonus = true;
     }
 
-    // Calculate bonus points
-    bonusPoints = this.calculateStreakBonus(newStreak);
+    // Calculate bonus points only if we should award them and haven't already today
+    if (shouldAwardBonus && lastStreakBonusDate !== today) {
+      bonusPoints = this.calculateStreakBonus(newStreak);
+    }
 
     // Update user record
     const longestStreak = Math.max(user.longestStreak, newStreak);
+    
+    const updateData: any = {
+      currentStreak: newStreak,
+      longestStreak,
+      lastActivityDate: today,
+    };
+
+    // Only update lastStreakBonusDate and add bonus points if we actually awarded them
+    if (bonusPoints > 0) {
+      updateData.lastStreakBonusDate = today;
+      updateData.totalPoints = user.totalPoints + bonusPoints;
+      updateData.currentMonthPoints = user.currentMonthPoints + bonusPoints;
+    }
 
     await db.update(users)
-      .set({
-        currentStreak: newStreak,
-        longestStreak,
-        lastActivityDate: today,
-        totalPoints: user.totalPoints + bonusPoints,
-        currentMonthPoints: user.currentMonthPoints + bonusPoints,
-      })
+      .set(updateData)
       .where(eq(users.id, userId));
 
     return { newStreak, bonusPoints };
@@ -1934,11 +1951,12 @@ export class MemStorage implements IStorage {
       })
       .where(eq(users.id, userId));
 
-    // Also update cycle points for current active cycle
+    // Also update cycle points for current active cycle (include both base points and streak bonus)
+    const totalPointsForCycle = pointsEarned + bonusPoints;
     try {
       await db.update(userCyclePoints)
         .set({
-          currentCyclePoints: sql`${userCyclePoints.currentCyclePoints} + ${pointsEarned}`,
+          currentCyclePoints: sql`${userCyclePoints.currentCyclePoints} + ${totalPointsForCycle}`,
           lastActivityDate: new Date()
         })
         .where(and(
