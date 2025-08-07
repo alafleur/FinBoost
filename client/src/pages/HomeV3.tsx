@@ -287,141 +287,85 @@ interface MasterTopicsSectionProps {
 const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
   topics,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextTopic = () => {
-    setCurrentIndex((prev) => (prev + 1) % topics.length);
-  };
-
-  const prevTopic = () => {
-    setCurrentIndex((prev) => (prev - 1 + topics.length) % topics.length);
-  };
-
-  const goToTopic = (index: number) => {
-    setCurrentIndex(index);
-  };
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Mobile: Single Card with Navigation */}
+      {/* Mobile: Vertical Scroll with 2.5 cards visible */}
       <div className="md:hidden">
         <div className="relative">
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+          {/* Container showing 2.5 cards */}
+          <div 
+            className="overflow-y-auto scrollbar-hide relative"
+            style={{ height: "350px" }}
           >
-            {/* Subtle background gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl"></div>
-            <div className="relative z-10 flex items-center justify-center space-x-4">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-lg relative">
-                {/* Icon glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-30"></div>
-                <div className="text-white relative z-10">{topics[currentIndex].icon}</div>
-              </div>
-              <h4 className="text-lg font-semibold text-slate-900 leading-tight text-center flex-1">
-                {topics[currentIndex].title}
-              </h4>
+            <div className="space-y-4 pb-4">
+              {topics.map((topic, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.02 }}
+                  viewport={{ once: true }}
+                  className="p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                  style={{ minHeight: "120px" }}
+                >
+                  {/* Subtle background gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-2xl"></div>
+                  <div className="relative z-10 flex items-center space-x-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-lg relative">
+                      {/* Icon glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-30"></div>
+                      <div className="text-white relative z-10">{topic.icon}</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base font-semibold text-slate-900 leading-tight">
+                        {topic.title}
+                      </h4>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
-
-          {/* Enhanced Navigation Arrows */}
-          <button
-            onClick={prevTopic}
-            className="absolute -left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-white to-blue-50/50 backdrop-blur-sm border border-slate-200/60 flex items-center justify-center hover:bg-gradient-to-r hover:from-blue-50 hover:to-white hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md"
-          >
-            <ChevronLeft className="w-5 h-5 text-slate-600" />
-          </button>
-          <button
-            onClick={nextTopic}
-            className="absolute -right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-blue-50/50 to-white backdrop-blur-sm border border-slate-200/60 flex items-center justify-center hover:bg-gradient-to-r hover:from-white hover:to-blue-50 hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md"
-          >
-            <ChevronRight className="w-5 h-5 text-slate-600" />
-          </button>
-        </div>
-
-        {/* Enhanced Navigation Dots */}
-        <div className="flex justify-center mt-8 space-x-3">
-          {topics.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToTopic(index)}
-              className={`rounded-full transition-all duration-300 hover:scale-125 ${
-                index === currentIndex
-                  ? "w-8 h-3 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg scale-110"
-                  : "w-3 h-3 bg-slate-300 hover:bg-gradient-to-r hover:from-slate-400 hover:to-slate-500 shadow-sm"
-              }`}
-            />
-          ))}
+          </div>
+          
+          {/* Bottom fade gradient to indicate more content */}
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent pointer-events-none rounded-b-xl"></div>
         </div>
       </div>
 
-      {/* Desktop: Horizontal Scroll Layout */}
+      {/* Desktop: 4-Column Grid Layout */}
       <div className="hidden md:block">
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex space-x-4 pb-4" style={{ width: "max-content" }}>
-            {topics.map((topic, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="group p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-xl border border-slate-200/60 hover:border-blue-200/60 transition-all duration-300 flex-shrink-0 relative overflow-hidden cursor-pointer"
-                style={{ width: "300px" }}
-              >
-                {/* Subtle background gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
-                <div className="relative z-10 flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-lg relative group-hover:shadow-xl group-hover:scale-110">
-                    {/* Icon glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
-                    <div className="text-white relative z-10 transition-transform duration-300 group-hover:scale-110">{topic.icon}</div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-base font-semibold text-slate-900 leading-tight group-hover:text-slate-800 transition-colors duration-300">
-                      {topic.title}
-                    </h4>
-                  </div>
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {topics.map((topic, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className="group p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-xl border border-slate-200/60 hover:border-blue-200/60 transition-all duration-300 relative overflow-hidden cursor-pointer"
+            >
+              {/* Subtle background gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="relative z-10 flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-lg relative group-hover:shadow-xl group-hover:scale-110">
+                  {/* Icon glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
+                  <div className="text-white relative z-10 transition-transform duration-300 group-hover:scale-110">{topic.icon}</div>
                 </div>
-                
-                {/* Subtle shine effect on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000 ease-out"></div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Enhanced Scroll Indicator */}
-        <div className="flex justify-center mt-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="flex items-center space-x-3 bg-gradient-to-r from-blue-50/90 to-purple-50/90 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <motion.div
-              animate={{ x: [-2, 2, -2] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <ChevronLeft className="w-4 h-4 text-blue-600" />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-base font-semibold text-slate-900 leading-tight group-hover:text-slate-800 transition-colors duration-300">
+                    {topic.title}
+                  </h4>
+                </div>
+              </div>
+              
+              {/* Subtle shine effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000 ease-out"></div>
             </motion.div>
-            <p className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Scroll to explore more example lessons
-            </p>
-            <motion.div
-              animate={{ x: [-2, 2, -2] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <ChevronRight className="w-4 h-4 text-purple-600" />
-            </motion.div>
-          </motion.div>
+          ))}
         </div>
       </div>
     </div>
