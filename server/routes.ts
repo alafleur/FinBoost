@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         return res.json({ 
           success: true, 
-          message: `Earned ${pointsEarned} points for quiz completion!`,
+          message: `Earned ${pointsEarned} tickets for quiz completion!`,
           points: pointsEarned
         });
       } else {
@@ -906,7 +906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const proofId = parseInt(req.params.id);
       // For admin approval, we'll use a placeholder admin ID (1)
       await storage.approveProofUpload(proofId, 1);
-      res.json({ success: true, message: "Proof approved and points awarded" });
+      res.json({ success: true, message: "Proof approved and tickets awarded" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -1091,7 +1091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { userId, points, reason } = req.body;
       await storage.awardPoints(userId, points, 'admin-award', reason);
-      res.json({ success: true, message: "Points awarded successfully" });
+      res.json({ success: true, message: "Tickets awarded successfully" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -1111,7 +1111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { userId, points, reason } = req.body;
       await storage.deductPoints(userId, points, 'admin-deduction', reason);
-      res.json({ success: true, message: "Points deducted successfully" });
+      res.json({ success: true, message: "Tickets deducted successfully" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -2927,7 +2927,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        message: "Cycle completed successfully. All user points have been reset for the new cycle." 
+        message: "Cycle completed successfully. All user tickets have been reset for the new cycle." 
       });
     } catch (error) {
       console.error("Error completing cycle:", error);

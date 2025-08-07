@@ -207,11 +207,11 @@ export default function CommunityGrowthDial({ poolData, user, distributionInfo, 
                 <div className="text-center mb-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Grow the Community</h4>
                   <p className="text-sm text-gray-600 mb-4">
-                    Invite friends and earn bonus points for each successful referral
+                    Invite friends and earn bonus tickets for each successful referral
                   </p>
                   <div className="bg-white border border-gray-200 rounded p-3 mb-4">
                     <p className="text-sm font-medium text-gray-900">
-                      Earn <span className="font-bold">+{referralPoints} points</span> per referral
+                      Earn <span className="font-bold">+{referralPoints} tickets</span> per referral
                     </p>
                     <p className="text-xs text-gray-600 mt-1">
                       Help friends build wealth while boosting your rewards

@@ -145,7 +145,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
         const data = await response.json();
         toast({
           title: "Cycle Completed",
-          description: data.message || "Cycle completed successfully. All user points have been reset."
+          description: data.message || "Cycle completed successfully. All user tickets have been reset."
         });
         onRefresh();
       } else {

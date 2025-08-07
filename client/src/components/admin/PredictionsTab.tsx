@@ -311,14 +311,14 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
         const data = await response.json();
         toast({
           title: "Success",
-          description: `Points distributed successfully! ${data.distributionResult.usersAwarded} users received ${data.distributionResult.totalPointsAwarded} total points.`
+          description: `Tickets distributed successfully! ${data.distributionResult.usersAwarded} users received ${data.distributionResult.totalPointsAwarded} total tickets.`
         });
         fetchQuestions();
       } else {
         const error = await response.json();
         toast({
           title: "Error",
-          description: error.error || "Failed to distribute points",
+          description: error.error || "Failed to distribute tickets",
           variant: "destructive"
         });
       }
