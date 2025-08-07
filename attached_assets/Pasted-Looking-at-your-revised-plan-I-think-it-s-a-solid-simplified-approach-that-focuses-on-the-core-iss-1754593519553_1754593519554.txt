@@ -1,0 +1,31 @@
+Looking at your revised plan, I think it's a solid, simplified approach that focuses on the core issue. Here's my assessment:
+
+Strong Points of Option A
+1. Clean Separation of Concerns
+
+Removing debt paydown from the Actions tab makes sense since it requires manual review anyway
+Keeps the Actions tab for truly automated actions (streaks, etc.)
+Centralizes all proof-based decisions in the admin review interface
+2. Simple Implementation
+
+Single input field for custom points during approval
+Pre-populated with sensible default (10 points)
+Clear range guidance (5-200+) gives admins flexibility
+3. Focus on Points Accounting Integrity
+
+Your emphasis on ensuring custom points flow through the entire system is crucial
+Testing that cycle points, leaderboards, and tiers all use the custom amounts is exactly right
+Minor Refinements I'd Suggest
+Phase 2 Enhancement:
+In the backend changes, I'd also ensure the approval stores the actual awarded points in the history record, so there's a clear audit trail of what was actually given vs. what was requested.
+
+Phase 3 User Experience:
+Consider adding a small note like "Reward based on effort and documentation quality" near the input field to guide admin decision-making.
+
+Phase 5 Testing Priority:
+Your testing focus is spot-on. I'd add one more check: verify that the success toast message to the user shows the actual awarded amount, not just "points awarded."
+
+Overall Assessment
+This is much cleaner than complex validation rules or multi-tier approval workflows. The admin gets full discretion at the moment of review, which is when they have all the context about the submission quality. The 5-200+ range gives good guidance without being restrictive.
+
+The key insight is right: this is really about points accounting integrity. As long as the custom amount flows correctly through all systems (dashboard, cycle points, tiers, leaderboards), this will work beautifully and give you the flexibility to properly reward quality submissions.
