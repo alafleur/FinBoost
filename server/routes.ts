@@ -906,8 +906,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/approve-proof/:id", async (req, res) => {
     try {
       const proofId = parseInt(req.params.id);
+      const { customPoints } = req.body;
+      
+      // Validate customPoints if provided
+      if (customPoints !== undefined) {
+        const pointsNum = parseInt(customPoints);
+        if (isNaN(pointsNum) || pointsNum <= 0) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "Custom points must be a positive integer" 
+          });
+        }
+      }
+      
       // For admin approval, we'll use a placeholder admin ID (1)
-      await storage.approveProofUpload(proofId, 1);
+      await storage.approveProofUpload(proofId, 1, customPoints);
       res.json({ success: true, message: "Proof approved and tickets awarded" });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });

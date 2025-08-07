@@ -62,7 +62,7 @@ export interface IStorage {
     checkDailyActionLimit(userId: number, actionId: string): Promise<boolean>;
     checkTotalActionLimit(userId: number, actionId: string): Promise<boolean>;
     getPendingProofUploads(): Promise<UserPointsHistory[]>;
-    approveProofUpload(historyId: number, reviewerId: number): Promise<void>;
+    approveProofUpload(historyId: number, reviewerId: number, customPoints?: number): Promise<void>;
     rejectProofUpload(historyId: number, reviewerId: number, reason: string): Promise<void>;
     calculateUserTier(currentMonthPoints: number): Promise<string>;
 
@@ -897,7 +897,7 @@ export class MemStorage implements IStorage {
     })) as any;
   }
 
-  async approveProofUpload(historyId: number, reviewerId: number): Promise<void> {
+  async approveProofUpload(historyId: number, reviewerId: number, customPoints?: number): Promise<void> {
     const historyEntry = await db.select()
       .from(userPointsHistory)
       .where(eq(userPointsHistory.id, historyId))
@@ -909,20 +909,29 @@ export class MemStorage implements IStorage {
 
     const entry = historyEntry[0];
 
-    // Update history entry
+    // Use custom points if provided, otherwise use the original entry points
+    const pointsToAward = customPoints !== undefined ? customPoints : entry.points;
+    
+    // Validate custom points
+    if (customPoints !== undefined && (customPoints <= 0 || !Number.isInteger(customPoints))) {
+      throw new Error('Custom points must be a positive integer');
+    }
+
+    // Update history entry with approved status and actual points awarded
     await db.update(userPointsHistory)
       .set({
         status: 'approved',
         reviewedBy: reviewerId,
         reviewedAt: new Date(),
+        points: pointsToAward, // Store the actual awarded points for audit trail
       })
       .where(eq(userPointsHistory.id, historyId));
 
     // Award points to user
     const user = await this.getUserById(entry.userId);
     if (user) {
-      const newTotalPoints = (user.totalPoints || 0) + entry.points;
-      const newCurrentMonthPoints = (user.currentMonthPoints || 0) + entry.points;
+      const newTotalPoints = (user.totalPoints || 0) + pointsToAward;
+      const newCurrentMonthPoints = (user.currentMonthPoints || 0) + pointsToAward;
       const newTier = await this.calculateUserTier(newCurrentMonthPoints);
 
       await db.update(users)
@@ -932,6 +941,24 @@ export class MemStorage implements IStorage {
           tier: newTier
         })
         .where(eq(users.id, entry.userId));
+
+      // Also update cycle points for current active cycle - critical for tier calculations and rewards
+      try {
+        await db.update(userCyclePoints)
+          .set({
+            currentCyclePoints: sql`${userCyclePoints.currentCyclePoints} + ${pointsToAward}`,
+            lastActivityDate: new Date()
+          })
+          .where(and(
+            eq(userCyclePoints.userId, entry.userId),
+            eq(userCyclePoints.isActive, true)
+          ));
+        
+        console.log(`Updated cycle points for user ${entry.userId}: +${pointsToAward} points (custom approval)`);
+      } catch (error) {
+        console.error(`Failed to update cycle points for user ${entry.userId}:`, error);
+        // Continue without failing the approval - user still gets base points
+      }
 
       // Invalidate tier threshold cache to force recalculation on next request
       this.tierThresholdCache = null;
