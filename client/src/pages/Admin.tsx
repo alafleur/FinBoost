@@ -4582,7 +4582,7 @@ function AdminComponent() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {pointActions.map((action) => (
+                      {pointActions.filter(action => action.actionId !== 'debt-paydown').map((action) => (
                         <div key={action.id} className="p-4 border rounded-lg relative">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
