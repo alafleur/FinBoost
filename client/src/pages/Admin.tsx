@@ -480,6 +480,11 @@ function AdminComponent() {
 
   // Pending proof state
   const [pendingProofs, setPendingProofs] = useState<PendingProof[]>([]);
+  
+  // Custom proof approval state
+  const [showCustomApprovalDialog, setShowCustomApprovalDialog] = useState(false);
+  const [selectedProofForApproval, setSelectedProofForApproval] = useState<any>(null);
+  const [customTicketAmount, setCustomTicketAmount] = useState<string>('');
 
   // Winner selection state
   const [selectedWinners, setSelectedWinners] = useState({
@@ -1152,29 +1157,94 @@ function AdminComponent() {
     }
   };
 
+  // Open custom approval dialog
+  const handleOpenCustomApproval = (proof: any) => {
+    setSelectedProofForApproval(proof);
+    setCustomTicketAmount(proof.points.toString()); // Default to original points
+    setShowCustomApprovalDialog(true);
+  };
+
+  // Handle standard approval (original function, now using custom approval with default points)
   const handleApproveProof = async (proofId: number) => {
+    const proof = pendingProofs.find(p => p.id === proofId);
+    if (proof) {
+      await handleApproveProofWithCustomPoints(proofId, proof.points);
+    }
+  };
+
+  // Enhanced approval function with custom points support
+  const handleApproveProofWithCustomPoints = async (proofId: number, customPoints?: number) => {
     try {
+      const token = localStorage.getItem('token');
+      const requestBody: any = {};
+      
+      if (customPoints !== undefined) {
+        requestBody.customPoints = customPoints;
+      }
+
       const response = await fetch(`/api/admin/approve-proof/${proofId}`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
       });
 
       if (response.ok) {
+        const customMessage = customPoints !== undefined && customPoints !== 0
+          ? `${customPoints} tickets awarded to the user`
+          : "Tickets have been awarded to the user";
+
         toast({
           title: "Proof Approved",
-          description: "Points have been awarded to the user."
+          description: customMessage
         });
+        
         fetchPendingProofs();
         fetchData();
+        
+        // Close dialog if open
+        setShowCustomApprovalDialog(false);
+        setSelectedProofForApproval(null);
+        setCustomTicketAmount('');
       } else {
-        throw new Error('Failed to approve proof');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to approve proof');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to approve proof",
+        title: "Error", 
+        description: error instanceof Error ? error.message : "Failed to approve proof",
         variant: "destructive"
       });
     }
+  };
+
+  // Handle custom approval from dialog
+  const handleConfirmCustomApproval = () => {
+    if (!selectedProofForApproval) return;
+
+    const ticketAmount = parseInt(customTicketAmount);
+    if (isNaN(ticketAmount) || ticketAmount <= 0) {
+      toast({
+        title: "Invalid Input",
+        description: "Please enter a valid positive number of tickets",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (ticketAmount < 5) {
+      toast({
+        title: "Minimum Requirement",
+        description: "Custom tickets must be at least 5",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    handleApproveProofWithCustomPoints(selectedProofForApproval.id, ticketAmount);
   };
 
   const handleRejectProof = async (proofId: number, reason: string) => {
@@ -4711,11 +4781,19 @@ function AdminComponent() {
                               <div className="flex flex-col gap-2">
                                 <Button 
                                   size="sm" 
+                                  onClick={() => handleOpenCustomApproval(proof)}
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  <Calculator className="h-4 w-4 mr-1" />
+                                  Set Tickets
+                                </Button>
+                                <Button 
+                                  size="sm" 
                                   onClick={() => handleApproveProof(proof.id)}
                                   className="bg-green-600 hover:bg-green-700"
                                 >
                                   <CheckCircle className="h-4 w-4 mr-1" />
-                                  Approve
+                                  Quick Approve
                                 </Button>
                                 <Button 
                                   size="sm" 
@@ -8134,6 +8212,117 @@ function AdminComponent() {
               {isImporting ? 'Importing...' : 'Import Winners'}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Ticket Approval Dialog */}
+      <Dialog open={showCustomApprovalDialog} onOpenChange={setShowCustomApprovalDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-blue-600" />
+              Set Custom Tickets
+            </DialogTitle>
+            <DialogDescription>
+              Adjust the number of tickets for this proof submission
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProofForApproval && (
+            <div className="space-y-4">
+              {/* Proof Summary */}
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-gray-700">User:</span>
+                  <span className="text-sm text-gray-900">{selectedProofForApproval.user?.username}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-gray-700">Action:</span>
+                  <span className="text-sm text-gray-900">{selectedProofForApproval.action}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-gray-700">Default Tickets:</span>
+                  <span className="text-sm text-gray-900">{selectedProofForApproval.points}</span>
+                </div>
+              </div>
+
+              {/* Custom Ticket Input */}
+              <div className="space-y-2">
+                <Label htmlFor="custom-tickets" className="text-sm font-medium">
+                  Custom Tickets (5-200+)
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="custom-tickets"
+                    type="number"
+                    min="5"
+                    max="999"
+                    value={customTicketAmount}
+                    onChange={(e) => setCustomTicketAmount(e.target.value)}
+                    className="text-center text-lg font-semibold pr-16"
+                    placeholder="Enter tickets"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    tickets
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Minimum: 5 tickets</span>
+                  <span>Recommended: 5-200</span>
+                </div>
+              </div>
+
+              {/* Quick Selection Buttons */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Quick Select:</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[5, 10, 25, 50].map((amount) => (
+                    <Button
+                      key={amount}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCustomTicketAmount(amount.toString())}
+                      className="text-xs"
+                    >
+                      {amount}
+                    </Button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {[100, 150, 200, 250].map((amount) => (
+                    <Button
+                      key={amount}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCustomTicketAmount(amount.toString())}
+                      className="text-xs"
+                    >
+                      {amount}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCustomApprovalDialog(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmCustomApproval}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={!customTicketAmount || parseInt(customTicketAmount) < 5}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Approve with {customTicketAmount || '0'} Tickets
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
