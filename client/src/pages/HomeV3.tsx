@@ -308,8 +308,8 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
             Scroll up/down to navigate example lessons
           </p>
           
-          {/* Container with visual separation */}
-          <div className="bg-white/60 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-4 shadow-lg">
+          {/* Container with enhanced glass morphism */}
+          <div className="bg-white/70 backdrop-blur-xl border border-slate-200/80 hover:border-blue-200/60 rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-500">
             {/* Lesson cards container */}
             <div 
               id="lesson-scroll-container"
@@ -320,23 +320,37 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                 {topics.map((topic, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.02 }}
-                    viewport={{ once: true }}
-                    className="p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: index * 0.06,
+                      ease: [0.25, 0.25, 0.25, 1] 
+                    }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    className="p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-lg border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-500 relative overflow-hidden"
                     style={{ minHeight: "100px" }}
                   >
                     {/* Subtle background gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-xl"></div>
                     <div className="relative z-10 flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-md relative">
-                        {/* Icon glow effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg blur-sm opacity-30"></div>
-                        <div className="text-white relative z-10 text-sm">{topic.icon}</div>
-                      </div>
+                      <motion.div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 flex-shrink-0 shadow-lg relative group"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      >
+                        {/* Enhanced icon glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-purple-500 rounded-lg blur-md opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
+                        <motion.div 
+                          className="text-white relative z-10 text-sm"
+                          whileHover={{ rotate: 5 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {topic.icon}
+                        </motion.div>
+                      </motion.div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-slate-900 leading-tight">
+                        <h4 className="text-base font-semibold text-slate-900 leading-tight">
                           {topic.title}
                         </h4>
                       </div>
@@ -352,30 +366,34 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
             
             {/* Dedicated navigation controls */}
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
-              <button
+              <motion.button
                 onClick={() => {
                   const container = document.getElementById('lesson-scroll-container');
                   if (container) {
                     container.scrollBy({ top: -120, behavior: 'smooth' });
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Scroll up through lessons"
               >
                 <ChevronUp className="w-4 h-4" />
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => {
                   const container = document.getElementById('lesson-scroll-container');
                   if (container) {
                     container.scrollBy({ top: 120, behavior: 'smooth' });
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Scroll down through lessons"
               >
                 <ChevronDown className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -384,8 +402,8 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
       {/* Desktop: Scroll Container with 2.5 rows visible */}
       <div className="hidden md:block">
         <div className="relative">
-          {/* Container with visual separation */}
-          <div className="bg-white/60 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-4 shadow-lg">
+          {/* Container with enhanced glass morphism */}
+          <div className="bg-white/70 backdrop-blur-xl border border-slate-200/80 hover:border-blue-200/60 rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-500">
             {/* Scroll container showing 2.5 rows (height calculated for 2.5 card rows + gaps) */}
             <div 
               id="desktop-lesson-scroll-container"
@@ -396,25 +414,39 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
                 {topics.map((topic, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.02 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    className="group p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm hover:bg-gradient-to-br hover:from-white hover:to-blue-50/30 hover:shadow-lg border border-slate-200/60 hover:border-blue-200/60 transition-all duration-300 relative overflow-hidden cursor-pointer"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: index * 0.04,
+                      ease: [0.25, 0.25, 0.25, 1] 
+                    }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    whileHover={{ y: -6, scale: 1.03 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-lg hover:bg-gradient-to-br hover:from-white hover:to-blue-50/40 hover:shadow-2xl border border-slate-200/60 hover:border-blue-300/80 transition-all duration-500 relative overflow-hidden cursor-pointer"
                     style={{ minHeight: "120px" }}
                   >
                     {/* Subtle background gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
                     <div className="relative z-10 flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-md relative group-hover:shadow-lg group-hover:scale-110">
-                        {/* Icon glow effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg blur-sm opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
-                        <div className="text-white relative z-10 text-sm transition-transform duration-300 group-hover:scale-110">{topic.icon}</div>
-                      </div>
+                      <motion.div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 transition-all duration-300 flex-shrink-0 shadow-lg relative group"
+                        whileHover={{ scale: 1.15 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      >
+                        {/* Enhanced icon glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-purple-500 rounded-lg blur-md opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
+                        <motion.div 
+                          className="text-white relative z-10 text-sm"
+                          whileHover={{ rotate: 8, scale: 1.1 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                        >
+                          {topic.icon}
+                        </motion.div>
+                      </motion.div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-slate-800 transition-colors duration-300">
+                        <h4 className="text-base font-semibold text-slate-900 leading-tight group-hover:text-slate-800 transition-colors duration-300">
                           {topic.title}
                         </h4>
                       </div>
@@ -433,30 +465,34 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
             
             {/* Dedicated navigation controls */}
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
-              <button
+              <motion.button
                 onClick={() => {
                   const container = document.getElementById('desktop-lesson-scroll-container');
                   if (container) {
                     container.scrollBy({ top: -140, behavior: 'smooth' });
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Scroll up through lessons"
               >
                 <ChevronUp className="w-4 h-4" />
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => {
                   const container = document.getElementById('desktop-lesson-scroll-container');
                   if (container) {
                     container.scrollBy({ top: 140, behavior: 'smooth' });
                   }
                 }}
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-300"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
                 aria-label="Scroll down through lessons"
               >
                 <ChevronDown className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
           </div>
           
