@@ -294,6 +294,11 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
       {/* Mobile: Vertical Scroll with dedicated navigation */}
       <div className="md:hidden">
         <div className="relative">
+          {/* Instruction text */}
+          <p className="text-sm text-slate-600 text-center mb-4 px-4">
+            Scroll up/down to navigate example lessons
+          </p>
+          
           {/* Container with visual separation */}
           <div className="bg-white/60 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-4 shadow-lg">
             {/* Lesson cards container */}
@@ -2009,6 +2014,14 @@ export default function HomeV3() {
                 {
                   icon: <Smartphone className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Why Your Phone Bill Is Probably Too High",
+                },
+                {
+                  icon: <BadgeDollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
+                },
+                {
+                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Side Hustle Income: Tax Implications You Need to Know",
                 },
               ]}
             />
