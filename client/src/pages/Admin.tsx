@@ -1235,10 +1235,10 @@ function AdminComponent() {
       return;
     }
 
-    if (ticketAmount < 5) {
+    if (ticketAmount < 1) {
       toast({
-        title: "Minimum Requirement",
-        description: "Custom tickets must be at least 5",
+        title: "Invalid Amount",
+        description: "Custom tickets must be at least 1",
         variant: "destructive"
       });
       return;
@@ -8249,13 +8249,13 @@ function AdminComponent() {
               {/* Custom Ticket Input */}
               <div className="space-y-2">
                 <Label htmlFor="custom-tickets" className="text-sm font-medium">
-                  Custom Tickets (5-200+)
+                  Custom Tickets (1-999)
                 </Label>
                 <div className="relative">
                   <Input
                     id="custom-tickets"
                     type="number"
-                    min="5"
+                    min="1"
                     max="999"
                     value={customTicketAmount}
                     onChange={(e) => setCustomTicketAmount(e.target.value)}
@@ -8267,8 +8267,8 @@ function AdminComponent() {
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>Minimum: 5 tickets</span>
-                  <span>Recommended: 5-200</span>
+                  <span>Minimum: 1 ticket</span>
+                  <span>Range: 1-999 tickets</span>
                 </div>
               </div>
 
@@ -8276,7 +8276,7 @@ function AdminComponent() {
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Quick Select:</Label>
                 <div className="grid grid-cols-4 gap-2">
-                  {[5, 10, 25, 50].map((amount) => (
+                  {[1, 5, 10, 25].map((amount) => (
                     <Button
                       key={amount}
                       variant="outline"
@@ -8289,7 +8289,7 @@ function AdminComponent() {
                   ))}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  {[100, 150, 200, 250].map((amount) => (
+                  {[50, 100, 200, 500].map((amount) => (
                     <Button
                       key={amount}
                       variant="outline"
@@ -8315,7 +8315,7 @@ function AdminComponent() {
                 <Button
                   onClick={handleConfirmCustomApproval}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
-                  disabled={!customTicketAmount || parseInt(customTicketAmount) < 5}
+                  disabled={!customTicketAmount || parseInt(customTicketAmount) < 1}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve with {customTicketAmount || '0'} Tickets
