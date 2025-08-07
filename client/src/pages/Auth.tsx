@@ -53,7 +53,7 @@ export default function Auth() {
       setReferralCode(refCode);
       toast({
         title: "Referral Code Detected!",
-        description: `You'll get bonus points when you sign up with code: ${refCode}`,
+        description: `You'll get bonus tickets when you sign up with code: ${refCode}`,
       });
     }
 
@@ -432,7 +432,7 @@ export default function Auth() {
                       {...registerForm.register("referralCode")}
                     />
                     {referralCode && (
-                      <p className="text-sm text-green-600">🎉 You'll earn bonus points with this referral!</p>
+                      <p className="text-sm text-green-600">🎉 You'll earn bonus tickets with this referral!</p>
                     )}
                   </div>
 

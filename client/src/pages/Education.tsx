@@ -256,8 +256,8 @@ export default function Education() {
               <CardTitle>Your Progress</CardTitle>
               <CardDescription>
                 {localStorage.getItem('token') 
-                  ? "Complete lessons to earn points and build your financial knowledge"
-                  : "Log in to track your progress and earn points for completing lessons"
+                  ? "Complete lessons to earn tickets and build your financial knowledge"
+                  : "Log in to track your progress and earn tickets for completing lessons"
                 }
               </CardDescription>
             </CardHeader>

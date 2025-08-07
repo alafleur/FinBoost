@@ -279,7 +279,7 @@ export default function Lesson() {
 
           toast({
             title: "🎉 Lesson Completed!",
-            description: `You earned ${completionResult.pointsEarned} points! ${completionResult.streakBonus > 0 ? `Plus ${completionResult.streakBonus} streak bonus!` : ''}`,
+            description: `You earned ${completionResult.pointsEarned} tickets! ${completionResult.streakBonus > 0 ? `Plus ${completionResult.streakBonus} streak bonus!` : ''}`,
           });
 
           // Show streak notification if there's a bonus

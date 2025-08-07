@@ -351,7 +351,7 @@ export default function Predictions() {
                   <Star className="w-12 h-12 mx-auto text-yellow-500 mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Premium Feature</h3>
                   <p className="text-gray-600 mb-6">
-                    Upgrade to premium to access prediction questions and earn bonus points
+                    Upgrade to premium to access prediction questions and earn bonus tickets
                   </p>
                   <Button onClick={() => setLocation('/subscribe')}>
                     Upgrade to Premium

@@ -1983,15 +1983,15 @@ function AdminComponent() {
         await fetchData(); // Refresh data
         toast({
           title: "Success",
-          description: "Points awarded successfully"
+          description: "Tickets awarded successfully"
         });
       } else {
-        throw new Error('Failed to award points');
+        throw new Error('Failed to award tickets');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to award points",
+        description: "Failed to award tickets",
         variant: "destructive"
       });
     }
@@ -2015,15 +2015,15 @@ function AdminComponent() {
         await fetchData(); // Refresh data
         toast({
           title: "Success",
-          description: "Points deducted successfully"
+          description: "Tickets deducted successfully"
         });
       } else {
-        throw new Error('Failed to deduct points');
+        throw new Error('Failed to deduct tickets');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to deduct points",
+        description: "Failed to deduct tickets",
         variant: "destructive"
       });
     }
@@ -4414,7 +4414,7 @@ function AdminComponent() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Award Points</CardTitle>
-                    <CardDescription>Grant bonus points to users</CardDescription>
+                    <CardDescription>Grant bonus tickets to users</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -6741,13 +6741,13 @@ function AdminComponent() {
                           });
                           setPointsToAdd("");
                           toast({
-                            title: "Points Added",
-                            description: `${pointsToAdd} points have been awarded to ${selectedUser.username}`
+                            title: "Tickets Added",
+                            description: `${pointsToAdd} tickets have been awarded to ${selectedUser.username}`
                           });
                         } catch (error) {
                           toast({
                             title: "Error",
-                            description: "Failed to add points",
+                            description: "Failed to add tickets",
                             variant: "destructive"
                           });
                         }
@@ -6778,13 +6778,13 @@ function AdminComponent() {
                           });
                           setPointsToDeduct("");
                           toast({
-                            title: "Points Deducted",
-                            description: `${pointsToDeduct} points have been deducted from ${selectedUser.username}`
+                            title: "Tickets Deducted",
+                            description: `${pointsToDeduct} tickets have been deducted from ${selectedUser.username}`
                           });
                         } catch (error) {
                           toast({
                             title: "Error",
-                            description: "Failed to deduct points",
+                            description: "Failed to deduct tickets",
                             variant: "destructive"
                           });
                         }

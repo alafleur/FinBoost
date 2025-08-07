@@ -80,7 +80,7 @@ export default function HomeV3() {
     },
     {
       title: "Quiz Completion & Points",
-      description: "Earn immediate points for completing quizzes and demonstrating knowledge",
+      description: "Earn immediate tickets for completing quizzes and demonstrating knowledge",
       mockContent: "Quiz complete screen: +15 points earned, streak bonus +5, total: 20 points"
     },
     {
@@ -826,21 +826,21 @@ export default function HomeV3() {
               {
                 icon: <BookOpen className="w-8 h-8" />,
                 title: "Lesson Modules",
-                description: "3–5 minutes, earn points",
+                description: "3–5 minutes, earn tickets",
                 details: "Complete bite-sized financial lessons on budgeting, debt, investing, and more",
                 gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: <Target className="w-8 h-8" />,
                 title: "Take Financial Action", 
-                description: "Upload proof, earn points",
-                details: "Submit proof of debt payments, savings, or other financial actions for bonus points",
+                description: "Upload proof, earn tickets",
+                details: "Submit proof of debt payments, savings, or other financial actions for bonus tickets",
                 gradient: "from-green-500 to-emerald-500"
               },
               {
                 icon: <TrendingUp className="w-8 h-8" />,
                 title: "Real World Bonus Questions",
-                description: "Bonus points for accuracy",
+                description: "Bonus tickets for accuracy",
                 details: "Mid-cycle prediction questions test your financial knowledge for extra points",
                 gradient: "from-purple-500 to-violet-500"
               },

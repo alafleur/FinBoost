@@ -297,7 +297,7 @@ export default function CycleManagementTab({ cycleSettings, onRefresh }: CycleMa
                             size="sm" 
                             variant="destructive"
                             onClick={() => handleCompleteCycle(cycle.id, cycle.cycleName)}
-                            title="Complete this cycle and reset all user points"
+                            title="Complete this cycle and reset all user tickets"
                           >
                             Complete Cycle
                           </Button>

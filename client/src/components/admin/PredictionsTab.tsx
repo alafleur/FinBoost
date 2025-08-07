@@ -276,7 +276,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
       if (response.ok) {
         toast({
           title: "Success",
-          description: "Result determined and points awarded"
+          description: "Result determined and tickets awarded"
         });
         setShowResultDialog(false);
         fetchQuestions();
@@ -325,7 +325,7 @@ export default function PredictionsTab({ cycleSettings, onRefresh }: Predictions
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to distribute points",
+        description: "Failed to distribute tickets",
         variant: "destructive"
       });
     }

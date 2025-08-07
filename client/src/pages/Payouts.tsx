@@ -272,7 +272,7 @@ export default function Payouts() {
                 <h4 className="font-semibold mb-2">Monthly Distributions</h4>
                 <p className="text-sm text-gray-600">
                   Rewards are calculated and distributed at the end of each month based 
-                  on your tier and points earned.
+                  on your tier and tickets earned.
                 </p>
               </div>
               

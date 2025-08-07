@@ -261,11 +261,11 @@ export default function FinancialQuiz() {
                     <>
                       <li className="flex items-start">
                         <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
-                        <span>Complete 2-3 short lessons per week to steadily accumulate points</span>
+                        <span>Complete 2-3 short lessons per week to steadily accumulate tickets</span>
                       </li>
                       <li className="flex items-start">
                         <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
-                        <span>Focus on completing lesson series for bonus points</span>
+                        <span>Focus on completing lesson series for bonus tickets</span>
                       </li>
                       <li className="flex items-start">
                         <span className="bg-blue-100 p-1 rounded-full mr-2 text-blue-600 flex-shrink-0 mt-0.5">✓</span>
