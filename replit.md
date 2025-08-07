@@ -28,6 +28,7 @@ Preferred communication style: Simple, everyday language.
 - Added secure file serving endpoint (/api/uploads/:filename) with multi-layer security protection
 - Updated PointsActions component to dynamically select appropriate proof-requiring actions instead of hardcoding actionId
 - Integrated FileUpload component properly with backend endpoints for complete end-to-end workflow
+- Fixed admin portal "View Proof File" authentication issue with secure blob-based file viewing system
 
 **Recent Landing Page Optimizations (January 2025):**
 - Enhanced lesson cards section with desktop scroll showing 2.5 rows for better conversion flow

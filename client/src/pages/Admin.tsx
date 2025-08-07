@@ -1091,6 +1091,67 @@ function AdminComponent() {
     }
   };
 
+  const handleViewProofFile = async (proofUrl: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "Admin authentication required to view files",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create a secure blob URL for the file
+      const response = await fetch(proofUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication required to access files");
+        } else if (response.status === 403) {
+          throw new Error("Access denied to file");
+        } else if (response.status === 404) {
+          throw new Error("File not found");
+        } else {
+          throw new Error(`Failed to load file (${response.status})`);
+        }
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Open in new tab
+      const newWindow = window.open(blobUrl, '_blank');
+      if (!newWindow) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups to view the file",
+          variant: "destructive"
+        });
+        URL.revokeObjectURL(blobUrl);
+        return;
+      }
+
+      // Clean up blob URL after some time
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 30000); // 30 seconds
+
+    } catch (error) {
+      console.error('Error viewing proof file:', error);
+      toast({
+        title: "File Access Error",
+        description: error instanceof Error ? error.message : "Failed to view file",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleApproveProof = async (proofId: number) => {
     try {
       const response = await fetch(`/api/admin/approve-proof/${proofId}`, {
@@ -4633,7 +4694,7 @@ function AdminComponent() {
                                     <Button 
                                       size="sm" 
                                       variant="outline"
-                                      onClick={() => window.open(proof.proofUrl, '_blank')}
+                                      onClick={() => handleViewProofFile(proof.proofUrl)}
                                       className="w-full"
                                     >
                                       <Eye className="h-4 w-4 mr-1" />
