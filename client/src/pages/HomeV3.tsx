@@ -32,6 +32,7 @@ import {
   PiggyBank,
   CheckCircle,
   ChevronDown,
+  ChevronUp,
   ChevronLeft,
   ChevronRight,
   Play,
@@ -290,46 +291,79 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Mobile: Vertical Scroll with 2.5 cards visible */}
+      {/* Mobile: Vertical Scroll with dedicated navigation */}
       <div className="md:hidden">
         <div className="relative">
-          {/* Container showing 2.5 cards */}
-          <div 
-            className="overflow-y-auto scrollbar-hide relative"
-            style={{ height: "350px" }}
-          >
-            <div className="space-y-4 pb-4">
-              {topics.map((topic, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.02 }}
-                  viewport={{ once: true }}
-                  className="p-6 rounded-2xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-                  style={{ minHeight: "120px" }}
-                >
-                  {/* Subtle background gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-2xl"></div>
-                  <div className="relative z-10 flex items-center space-x-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-lg relative">
-                      {/* Icon glow effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl blur-md opacity-30"></div>
-                      <div className="text-white relative z-10">{topic.icon}</div>
+          {/* Container with visual separation */}
+          <div className="bg-white/60 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-4 shadow-lg">
+            {/* Lesson cards container */}
+            <div 
+              id="lesson-scroll-container"
+              className="overflow-y-auto scrollbar-hide relative mx-2"
+              style={{ height: "320px" }}
+            >
+              <div className="space-y-3 pb-4">
+                {topics.map((topic, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.02 }}
+                    viewport={{ once: true }}
+                    className="p-4 rounded-xl bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-sm border border-slate-200/60 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+                    style={{ minHeight: "100px" }}
+                  >
+                    {/* Subtle background gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/3 rounded-xl"></div>
+                    <div className="relative z-10 flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 shadow-md relative">
+                        {/* Icon glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg blur-sm opacity-30"></div>
+                        <div className="text-white relative z-10 text-sm">{topic.icon}</div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-slate-900 leading-tight">
+                          {topic.title}
+                        </h4>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-semibold text-slate-900 leading-tight">
-                        {topic.title}
-                      </h4>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Top and Bottom fade gradients */}
+            <div className="absolute top-4 left-6 right-6 h-6 bg-gradient-to-b from-white/80 to-transparent pointer-events-none rounded-t-xl"></div>
+            <div className="absolute bottom-4 left-6 right-6 h-6 bg-gradient-to-t from-white/80 to-transparent pointer-events-none rounded-b-xl"></div>
+            
+            {/* Dedicated navigation controls */}
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
+              <button
+                onClick={() => {
+                  const container = document.getElementById('lesson-scroll-container');
+                  if (container) {
+                    container.scrollBy({ top: -120, behavior: 'smooth' });
+                  }
+                }}
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                aria-label="Scroll up through lessons"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  const container = document.getElementById('lesson-scroll-container');
+                  if (container) {
+                    container.scrollBy({ top: 120, behavior: 'smooth' });
+                  }
+                }}
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                aria-label="Scroll down through lessons"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
             </div>
           </div>
-          
-          {/* Bottom fade gradient to indicate more content */}
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent pointer-events-none rounded-b-xl"></div>
         </div>
       </div>
 
