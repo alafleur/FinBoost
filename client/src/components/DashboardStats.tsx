@@ -88,7 +88,7 @@ export default function DashboardStats({
               <div className={`text-2xl ${DashboardColors.text.primary}`}>{user?.currentCyclePoints || 0}</div>
             </div>
           </div>
-          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Cycle Points</h3>
+          <h3 className={`text-sm ${DashboardColors.text.secondary} mb-1`}>Cycle Tickets</h3>
           <p className={`text-xs ${DashboardColors.text.muted}`}>Current progress</p>
         </CardContent>
       </Card>

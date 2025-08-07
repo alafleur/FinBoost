@@ -42,7 +42,7 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
                 </span>
               </td>
               <td className="px-4 py-3 text-sm text-gray-600">
-                {tierThresholds.tier1}+ points
+                {tierThresholds.tier1}+ tickets
               </td>
             </tr>
             <tr className={user?.tier === 'tier2' ? 'bg-accent-light/20 border-accent-light/50' : 'bg-white'}>
@@ -57,7 +57,7 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
                 </span>
               </td>
               <td className="px-4 py-3 text-sm text-gray-600">
-                {tierThresholds.tier2} - {tierThresholds.tier1 - 1} points
+                {tierThresholds.tier2} - {tierThresholds.tier1 - 1} tickets
               </td>
             </tr>
             <tr className={user?.tier === 'tier3' ? 'bg-accent-light/20 border-accent-light/50' : 'bg-white'}>
@@ -72,7 +72,7 @@ export default function TierProgressTable({ tierThresholds, user, getTierDisplay
                 </span>
               </td>
               <td className="px-4 py-3 text-sm text-gray-600">
-                0 - {tierThresholds.tier2 - 1} points
+                0 - {tierThresholds.tier2 - 1} tickets
               </td>
             </tr>
           </tbody>
