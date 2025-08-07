@@ -45,6 +45,7 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
   const [actions, setActions] = useState<TicketAction[]>([]);
 
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [uploadedFileData, setUploadedFileData] = useState<{fileUrl: string, fileName: string, fileSize: number} | null>(null);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -78,7 +79,7 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
   };
 
   const submitProof = async () => {
-    if (!proofFile || !description.trim()) {
+    if (!uploadedFileData || !description.trim()) {
       toast({
         title: "Missing Information",
         description: "Please upload proof and add a description.",
@@ -90,10 +91,6 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
     setSubmitting(true);
 
     try {
-      // In a real app, you'd upload the file to cloud storage first
-      // For now, we'll simulate with a placeholder URL
-      const proofUrl = `uploaded/${proofFile.name}`;
-
       const token = localStorage.getItem('token');
       const response = await fetch('/api/points/submit-proof', {
         method: 'POST',
@@ -103,11 +100,11 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
         },
         body: JSON.stringify({
           actionId: '7', // Default debt paydown action ID
-          proofUrl,
+          proofUrl: uploadedFileData.fileUrl,
           description,
           metadata: {
-            fileName: proofFile.name,
-            fileSize: proofFile.size
+            fileName: uploadedFileData.fileName,
+            fileSize: uploadedFileData.fileSize
           }
         })
       });
@@ -115,12 +112,13 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
       if (response.ok) {
         const data = await response.json();
         toast({
-          title: "Proof Submitted! 📋",
+          title: "Proof Submitted Successfully!",
           description: data.message,
         });
 
         // Reset form
         setProofFile(null);
+        setUploadedFileData(null);
         setDescription('');
       } else {
         const error = await response.json();
@@ -233,7 +231,9 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
           <div className="space-y-3">
             <FileUpload 
               onFileUploaded={(fileUrl, fileName, fileSize) => {
-                // Create a File-like object for backward compatibility
+                // Store uploaded file data for proof submission
+                setUploadedFileData({ fileUrl, fileName, fileSize });
+                // Keep the file state for UI consistency
                 const file = new File([], fileName, { type: 'application/octet-stream' });
                 setProofFile(file);
               }}
@@ -257,7 +257,7 @@ export default function TicketsActions({ onTicketsEarned, quickWinActions = [] }
           <div className="flex gap-3 pt-2">
             <Button 
               onClick={submitProof}
-              disabled={submitting || !proofFile || !description.trim()}
+              disabled={submitting || !uploadedFileData || !description.trim()}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-3 px-6"
               size="lg"
             >
