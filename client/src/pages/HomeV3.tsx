@@ -288,6 +288,10 @@ interface MasterTopicsSectionProps {
 const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
   topics,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Show first 10 cards initially on desktop (2.5 rows), all on mobile
+  const visibleTopics = isExpanded ? topics : topics.slice(0, 10);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -375,7 +379,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
       {/* Desktop: 4-Column Grid Layout */}
       <div className="hidden md:block">
         <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {topics.map((topic, index) => (
+          {visibleTopics.map((topic, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -406,6 +410,30 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
             </motion.div>
           ))}
         </div>
+        
+        {/* Expansion button - only show on desktop when there are more topics */}
+        {topics.length > 10 && (
+          <div className="mt-8 text-center">
+            <motion.button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Expand to see more example lessons ({topics.length - 10} more)
+                </>
+              )}
+            </motion.button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1447,6 +1475,38 @@ export default function HomeV3() {
                 {
                   icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
                   title: "Side Hustle Income: Tax Implications You Need to Know",
+                },
+                {
+                  icon: <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Building Credit from Zero: Your First Steps",
+                },
+                {
+                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Insurance That Actually Matters vs. Overpriced Coverage",
+                },
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "401(k) vs. Roth IRA: Which Should You Choose First?",
+                },
+                {
+                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Setting Realistic Financial Goals That Actually Stick",
+                },
+                {
+                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "High-Yield Savings: Where to Park Your Money",
+                },
+                {
+                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Red Flags in Investment Offers and Financial Scams",
+                },
+                {
+                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Personal Finance Books Worth Your Time (and Money)",
+                },
+                {
+                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Negotiating Your Salary: Scripts That Actually Work",
                 },
               ]}
             />
