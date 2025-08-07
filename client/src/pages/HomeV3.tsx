@@ -1738,7 +1738,7 @@ export default function HomeV3() {
                       $20
                     </div>
                     <div className="text-sm text-slate-500 font-medium">
-                      monthly membership
+                      Monthly Membership
                     </div>
                   </div>
                 </div>
