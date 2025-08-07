@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   currentStreak: integer("current_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   lastActivityDate: text("last_activity_date"), // ISO date string
+  lastStreakBonusDate: text("last_streak_bonus_date"), // ISO date string (YYYY-MM-DD) for tracking daily streak bonus
 
   // Stripe Payment Fields
   stripeCustomerId: text("stripe_customer_id"),
