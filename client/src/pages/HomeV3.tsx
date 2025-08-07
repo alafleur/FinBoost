@@ -290,8 +290,8 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Show first 10 cards initially on desktop (2.5 rows), all on mobile
-  const visibleTopics = isExpanded ? topics : topics.slice(0, 10);
+  // Show first 8 cards initially on desktop (2 full rows), all on mobile
+  const visibleTopics = isExpanded ? topics : topics.slice(0, 8);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -412,7 +412,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
         </div>
         
         {/* Expansion button - only show on desktop when there are more topics */}
-        {topics.length > 10 && (
+        {topics.length > 8 && (
           <div className="mt-8 text-center">
             <motion.button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -428,7 +428,7 @@ const MasterTopicsSection: React.FC<MasterTopicsSectionProps> = ({
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4" />
-                  Expand to see more example lessons ({topics.length - 10} more)
+                  Expand to see more example lessons ({topics.length - 8} more)
                 </>
               )}
             </motion.button>
