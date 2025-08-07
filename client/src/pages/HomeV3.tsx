@@ -1332,6 +1332,128 @@ export default function HomeV3() {
         </div>
       </section>
 
+      {/* Learning Module Section - Enhanced Design */}
+      <section
+        id="learn"
+        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 relative overflow-hidden"
+      >
+        {/* Enhanced Background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-200/5 to-purple-200/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-blue-700 font-semibold text-sm">
+                FINANCIAL EDUCATION
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
+              Some Examples of Your 
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">FinBoost Lessons</span>
+            </h2>
+            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
+              Real financial education via 3-5 minute lessons and interactive
+              quizzes based on proven strategies for common real-life scenarios
+            </p>
+          </motion.div>
+
+          {/* Single Column Layout - What You'll Master */}
+          <div className="mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            ></motion.div>
+
+            {/* Mobile Single Card with Navigation + Desktop Grid */}
+            <MasterTopicsSection
+              topics={[
+                {
+                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Navigate Auto Loans and Refinancing",
+                },
+                {
+                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Harness Compound Growth Power",
+                },
+                {
+                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Strategic Student Loan Repayment Plans",
+                },
+
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Do Small Daily Purchases Really Add Up?",
+                },
+                {
+                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Credit Utilization and Borrowing Power",
+                },
+                {
+                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Navigate Buy Now, Pay Later Risks",
+                },
+                {
+                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Build Smart Emergency Fund Strategy",
+                },
+                {
+                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Rethink the 30% Rent Rule",
+                },
+                {
+                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Master Debt Payoff Strategies",
+                },
+                {
+                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Decode APR vs APY Differences",
+                },
+                {
+                  icon: <Home className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "When Renting Actually Beats Buying",
+                },
+                {
+                  icon: <Zap className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Stop Lifestyle Inflation Before It Starts",
+                },
+                {
+                  icon: <Eye className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Hidden Fees That Drain Your Bank Account",
+                },
+                {
+                  icon: <Smartphone className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Why Your Phone Bill Is Probably Too High",
+                },
+                {
+                  icon: <BadgeDollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
+                },
+                {
+                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
+                  title: "Side Hustle Income: Tax Implications You Need to Know",
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Why FinBoost Isn't Just Another Finance App - Refined Platform Overview Format */}
       <section
         id="trust"
@@ -1907,127 +2029,7 @@ export default function HomeV3() {
         </div>
       </section>
 
-      {/* Learning Module Section - Enhanced Design */}
-      <section
-        id="learn"
-        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 relative overflow-hidden"
-      >
-        {/* Enhanced Background decorative elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
-          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-200/5 to-purple-200/5 rounded-full blur-3xl"></div>
-        </div>
 
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Header Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                FINANCIAL EDUCATION
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              Some Examples of Your 
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">FinBoost Lessons</span>
-            </h2>
-            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
-              Real financial education via 3-5 minute lessons and interactive
-              quizzes based on proven strategies for common real-life scenarios
-            </p>
-          </motion.div>
-
-          {/* Single Column Layout - What You'll Master */}
-          <div className="mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            ></motion.div>
-
-            {/* Mobile Single Card with Navigation + Desktop Grid */}
-            <MasterTopicsSection
-              topics={[
-                {
-                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Auto Loans and Refinancing",
-                },
-                {
-                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Harness Compound Growth Power",
-                },
-                {
-                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Strategic Student Loan Repayment Plans",
-                },
-
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Do Small Daily Purchases Really Add Up?",
-                },
-                {
-                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Credit Utilization and Borrowing Power",
-                },
-                {
-                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Buy Now, Pay Later Risks",
-                },
-                {
-                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Build Smart Emergency Fund Strategy",
-                },
-                {
-                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Rethink the 30% Rent Rule",
-                },
-                {
-                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Debt Payoff Strategies",
-                },
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Decode APR vs APY Differences",
-                },
-                {
-                  icon: <Home className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "When Renting Actually Beats Buying",
-                },
-                {
-                  icon: <Zap className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Stop Lifestyle Inflation Before It Starts",
-                },
-                {
-                  icon: <Eye className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Hidden Fees That Drain Your Bank Account",
-                },
-                {
-                  icon: <Smartphone className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Why Your Phone Bill Is Probably Too High",
-                },
-                {
-                  icon: <BadgeDollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
-                },
-                {
-                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Side Hustle Income: Tax Implications You Need to Know",
-                },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Final CTA - Blue to Purple Gradient Background */}
       <section
