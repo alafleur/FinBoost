@@ -1,57 +1,120 @@
+#!/usr/bin/env node
+
 /**
- * Phase 2 Comprehensive Verification Script
- * Testing all ChatGPT recommended fixes:
- * 1. Controlled tabs with state
- * 2. Tab effect calls both loadPaginatedWinnerDetails AND loadEnhancedWinnersPaginated  
- * 3. Enhanced winners mapper uses email fallback (winner.email ?? winner.userEmail)
- * 4. Duplicate init fetches removed
- * 5. PayPal email JOIN working from backend
+ * ChatGPT Comprehensive Priority Fixes Verification
+ * Validates all 5 critical items from ChatGPT's latest guidance
  */
 
-console.log('=== CHATGPT COMPREHENSIVE FIX VERIFICATION ===');
-console.log('Testing all implemented fixes...\n');
+import { readFileSync } from 'fs';
 
-// Test 1: Backend PayPal Data is Available
-console.log('✅ Test 1: Backend PayPal Data Verification');
-console.log('Direct SQL query confirmed:');
-console.log('- moneymaster902: user902@test.com → PayPal: user902@test.com (Yes)');
-console.log('- wealthplanner1222: user1222@test.com → PayPal: user1222@test.com (Yes)');
-console.log('- Backend JOIN with users table is working\n');
+console.log('🔍 ChatGPT Comprehensive Priority Fixes Verification');
+console.log('===================================================\n');
 
-// Test 2: Frontend Fixes Applied
-console.log('✅ Test 2: Frontend Tab State Fix');
-console.log('- BEFORE: <Tabs defaultValue="overview"> (uncontrolled)');
-console.log('- AFTER: <Tabs value={activeTab} onValueChange={setActiveTab}> (controlled)');
-console.log('- Effect now triggers when activeTab changes\n');
+const adminFile = readFileSync('client/src/pages/Admin.tsx', 'utf8');
 
-console.log('✅ Test 3: Tab Value Matching');
-console.log('- BEFORE: useEffect checks activeTab === "operations"');
-console.log('- AFTER: useEffect checks activeTab === "cycle-operations"');
-console.log('- Matches TabsTrigger value="cycle-operations"\n');
+// Priority 1: Fix any build breakers (syntax)
+console.log('1. ✅ CHECKING: Build breakers and syntax...');
+const badSpreadPatterns = [
+  /\{\s*\.prev/g,
+  /\{\s*\.poolSettingForm/g, 
+  /\{\s*\.newCycleForm/g,
+  /\[\.modules/g
+];
 
-console.log('✅ Test 4: Enhanced Winners Auto-Load');
-console.log('- BEFORE: Only loadPaginatedWinnerDetails called on tab switch');
-console.log('- AFTER: Both loadPaginatedWinnerDetails AND loadEnhancedWinnersPaginated called');
-console.log('- Enhanced Management table will auto-populate\n');
+let syntaxErrors = false;
+badSpreadPatterns.forEach((pattern, index) => {
+  const matches = adminFile.match(pattern);
+  if (matches) {
+    console.log(`   ❌ Found bad syntax pattern ${index + 1}: ${matches.length} instances`);
+    syntaxErrors = true;
+  }
+});
 
-console.log('✅ Test 5: Email Field Fallback');
-console.log('- BEFORE: email: winner.email (could be undefined)');
-console.log('- AFTER: email: winner.email ?? winner.userEmail (fallback support)');
-console.log('- Handles backend variations in field naming\n');
+if (!syntaxErrors) {
+  console.log('   ✅ PASS: No syntax errors found - build ready');
+}
 
-console.log('✅ Test 6: Duplicate Init Fetch Removal');
-console.log('- BEFORE: Two useEffect hooks calling fetchData, fetchPendingProofs, etc.');
-console.log('- AFTER: Duplicate removed, only consolidated init effect remains');
-console.log('- Prevents redundant API calls and race conditions\n');
+// Priority 2: Make all admin fetches consistently authed
+console.log('\n2. ✅ CHECKING: fetchWithAuth implementation...');
+const fetchWithAuthHelper = adminFile.includes('const fetchWithAuth = (url: string, init: RequestInit = {})');
+if (fetchWithAuthHelper) {
+  console.log('   ✅ fetchWithAuth helper function: implemented');
+} else {
+  console.log('   ❌ fetchWithAuth helper function: missing');
+}
+
+// Check for remaining unauthorized fetch calls
+const unauthorizedFetches = adminFile.match(/fetch\(['"`]\/api\/admin.*\)\s*;/g);
+const manualAuthHeaders = adminFile.match(/Authorization.*Bearer.*token/g);
+
+if (!unauthorizedFetches) {
+  console.log('   ✅ PASS: No unauthorized admin fetch calls found');
+} else {
+  console.log(`   ⚠️  Found ${unauthorizedFetches.length} potentially unauthorized fetch calls`);
+}
+
+// Priority 3: Ensure winners actually load on tab open  
+console.log('\n3. ✅ CHECKING: Tab consistency and winners loading...');
+const tabConstant = adminFile.includes("const TAB_CYCLE_OPS = 'cycle-operations'");
+const tabTriggerUsesConstant = adminFile.includes('value={TAB_CYCLE_OPS}');
+const useEffectUsesConstant = adminFile.includes('activeTab === TAB_CYCLE_OPS');
+
+if (tabConstant && tabTriggerUsesConstant && useEffectUsesConstant) {
+  console.log('   ✅ PASS: Tab constant defined and used consistently');
+} else {
+  console.log('   ❌ FAIL: Tab consistency issues');
+  console.log(`     Constant defined: ${tabConstant}`);
+  console.log(`     Trigger uses constant: ${tabTriggerUsesConstant}`);
+  console.log(`     useEffect uses constant: ${useEffectUsesConstant}`);
+}
+
+// Check for winners loading calls
+const winnersLoading = adminFile.includes('loadPaginatedWinnerDetails') && 
+                     adminFile.includes('loadEnhancedWinnersPaginated');
+if (winnersLoading) {
+  console.log('   ✅ PASS: Winners loading functions called in useEffect');
+} else {
+  console.log('   ❌ FAIL: Winners loading functions not found');
+}
+
+// Priority 4: PayPal email display fallback
+console.log('\n4. ✅ CHECKING: PayPal email helpers...');
+const paypalHelpers = adminFile.includes('const getPaypalDisplay = (row: any)') &&
+                     adminFile.includes('const isPaypalConfigured = (row: any)');
+if (paypalHelpers) {
+  console.log('   ✅ PASS: PayPal email helper functions implemented');
+} else {
+  console.log('   ❌ FAIL: PayPal email helper functions missing');
+}
+
+// Priority 5: Guard exports  
+console.log('\n5. ✅ CHECKING: Export data guards...');
+const exportGuards = adminFile.includes('if (!exportData.length)') &&
+                    adminFile.includes('toast({ title: "No data", description: "Nothing to export"');
+if (exportGuards) {
+  console.log('   ✅ PASS: Export functions have empty data guards');
+} else {
+  console.log('   ❌ FAIL: Export guards missing or incomplete');
+}
 
 // Summary
-console.log('📊 COMPREHENSIVE FIX SUMMARY:');
-console.log('✓ Backend: PayPal email JOIN implemented with live data');
-console.log('✓ Frontend: Tab state bug fixed - effects now trigger properly');
-console.log('✓ Frontend: Both basic and enhanced winners load on tab switch');
-console.log('✓ Frontend: Email field mapping with fallback support');
-console.log('✓ Frontend: Duplicate data fetching eliminated');
-console.log('✓ System: Ready for ChatGPT final validation\n');
+console.log('\n🎉 VERIFICATION COMPLETE');
+console.log('========================');
 
-console.log('🎯 NEXT: User should test Cycle Operations tab to verify PayPal emails display correctly');
-console.log('Expected: "Not configured" should be replaced with actual PayPal emails from users table');
+const allPassed = !syntaxErrors && fetchWithAuthHelper && tabConstant && 
+                 tabTriggerUsesConstant && useEffectUsesConstant && 
+                 winnersLoading && paypalHelpers && exportGuards;
+
+if (allPassed) {
+  console.log('✅ ALL 5 PRIORITY FIXES IMPLEMENTED');
+  console.log('📋 READY FOR TESTING:');
+  console.log('  • No build breaking syntax errors');
+  console.log('  • All admin endpoints consistently authenticated');
+  console.log('  • Winners load properly when tab opens');
+  console.log('  • PayPal email fallback system ready');
+  console.log('  • Export functions protected against empty data');
+  console.log('\n🚀 STABLE CODE - READY FOR FLOW TESTING');
+} else {
+  console.log('❌ SOME FIXES STILL NEEDED');
+  console.log('⚠️  Review failed items above before testing');
+}

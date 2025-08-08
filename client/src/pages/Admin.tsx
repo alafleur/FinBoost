@@ -59,6 +59,25 @@ import {
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+// Constants for tab consistency
+const TAB_CYCLE_OPS = 'cycle-operations';
+
+// Auth helper to prevent 401s
+const fetchWithAuth = (url: string, init: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  return fetch(url, { 
+    ...init, 
+    headers: { 
+      ...(init.headers || {}), 
+      Authorization: `Bearer ${token || ''}` 
+    }
+  });
+};
+
+// PayPal email helpers
+const getPaypalDisplay = (row: any) => row.paypalEmail ?? row.snapshotPaypalEmail ?? null;
+const isPaypalConfigured = (row: any) => Boolean(getPaypalDisplay(row));
+
 // Error Boundary Component
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -698,9 +717,7 @@ function AdminComponent() {
       }
 
       console.log('🌐 Making API call to /api/admin/winner-cycles');
-      const response = await fetch('/api/admin/winner-cycles', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/winner-cycles');
       console.log('📡 Response status:', response.status, response.statusText);
 
       // Handle expired/invalid auth
@@ -819,7 +836,7 @@ function AdminComponent() {
 
   // Load both basic and enhanced winners when Cycle Operations tab is opened
   useEffect(() => {
-    if (activeTab === 'cycle-operations') {
+    if (activeTab === TAB_CYCLE_OPS) {
       const activeCycle = cycleSettings.find(c => c.isActive);
       if (activeCycle?.id) {
         console.log('Loading both basic and enhanced winners for cycle-operations tab');
@@ -847,10 +864,10 @@ function AdminComponent() {
 
       // Fetch all data concurrently
       const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
-        fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('/api/admin/modules', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('/api/cycles/pool'),
-        fetch('/api/tiers/thresholds')
+        fetchWithAuth('/api/admin/users'),
+        fetchWithAuth('/api/admin/modules'),
+        fetchWithAuth('/api/cycles/pool'),
+        fetchWithAuth('/api/tiers/thresholds')
       ]);
 
       if (usersRes.ok) {
@@ -890,10 +907,7 @@ function AdminComponent() {
 
   const fetchPendingProofs = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/pending-proofs', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/pending-proofs');
       if (response.ok) {
         const data = await response.json();
         setPendingProofs(data.proofs || []);
@@ -905,10 +919,7 @@ function AdminComponent() {
 
   const fetchPointActions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/points/actions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/points/actions');
       if (response.ok) {
         const data = await response.json();
         setPointActions(data.actions || []);
@@ -920,10 +931,7 @@ function AdminComponent() {
 
   const fetchSupportTickets = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/support', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/support');
       if (response.ok) {
         const data = await response.json();
         setSupportTickets(data.tickets || []);
@@ -935,10 +943,7 @@ function AdminComponent() {
 
   const fetchCyclePoolSettings = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-settings', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/cycle-settings');
       if (response.ok) {
         const data = await response.json();
         setCyclePoolSettings(data);
@@ -950,10 +955,7 @@ function AdminComponent() {
 
   const fetchCurrentPoolSettings = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-settings', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/cycle-settings');
       if (response.ok) {
         const data = await response.json();
         const activeCycle = data.find(cycle => cycle.isActive);
@@ -983,10 +985,7 @@ function AdminComponent() {
 
   const fetchCycleSettings = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-settings', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/cycle-settings');
       if (response.ok) {
         const data = await response.json();
         setCycleSettings(data || []);
@@ -998,10 +997,7 @@ function AdminComponent() {
 
   const fetchUserCyclePoints = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/user-cycle-points', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/user-cycle-points');
       if (response.ok) {
         const data = await response.json();
         setUserCyclePoints(data.userCyclePoints || []);
@@ -1013,10 +1009,7 @@ function AdminComponent() {
 
   const fetchCycleWinnerSelections = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/cycle-winner-selections', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetchWithAuth('/api/admin/cycle-winner-selections');
       if (response.ok) {
         const data = await response.json();
         setCycleWinnerSelections(data.selections || []);
@@ -1035,11 +1028,10 @@ function AdminComponent() {
       
       const method = editingCycle ? 'PUT' : 'POST';
       
-      const response = await fetch(url, {
+      const response = await fetchWithAuth(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(cycleForm)
       });
@@ -1083,9 +1075,8 @@ function AdminComponent() {
   const handleDeleteCycle = async (cycleId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/cycle-settings/${cycleId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetchWithAuth(`/api/admin/cycle-settings/${cycleId}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -1118,11 +1109,10 @@ function AdminComponent() {
       
       console.log('Saving pool setting:', { url, method, form: poolSettingForm, editingPoolSetting });
       
-      const response = await fetch(url, {
+      const response = await fetchWithAuth(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(poolSettingForm)
       });
@@ -1392,11 +1382,10 @@ function AdminComponent() {
         quiz: JSON.stringify(quizQuestions)
       };
 
-      const response = await fetch('/api/admin/modules', {
+      const response = await fetchWithAuth('/api/admin/modules', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(moduleData)
       });
@@ -1445,11 +1434,10 @@ function AdminComponent() {
         return;
       }
 
-      const response = await fetch(`/api/admin/modules/${moduleId}`, {
+      const response = await fetchWithAuth(`/api/admin/modules/${moduleId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updateData)
       });
@@ -1485,11 +1473,8 @@ function AdminComponent() {
         return;
       }
 
-      const response = await fetch(`/api/admin/modules/${moduleId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetchWithAuth(`/api/admin/modules/${moduleId}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -1522,11 +1507,10 @@ function AdminComponent() {
         return;
       }
 
-      const response = await fetch(`/api/admin/modules/${moduleId}/publish`, {
+      const response = await fetchWithAuth(`/api/admin/modules/${moduleId}/publish`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ isPublished })
       });
@@ -1564,11 +1548,10 @@ function AdminComponent() {
     try {
       const token = localStorage.getItem('token');
       const newStatus = currentStatus === 'premium' ? 'free' : 'premium';
-      const response = await fetch(`/api/admin/users/${userId}/subscription`, {
+      const response = await fetchWithAuth(`/api/admin/users/${userId}/subscription`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ subscriptionStatus: newStatus })
       });
@@ -1600,11 +1583,10 @@ function AdminComponent() {
   const handleCreateUser = async (userData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users', {
+      const response = await fetchWithAuth('/api/admin/users', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
       });
@@ -1631,11 +1613,10 @@ function AdminComponent() {
   const handleUpdateUser = async (userId: number, updateData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetchWithAuth(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updateData)
       });
@@ -1662,11 +1643,8 @@ function AdminComponent() {
   const handleDeleteUser = async (userId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetchWithAuth(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -2519,7 +2497,7 @@ function AdminComponent() {
             <TabsTrigger value="content" className="flex-shrink-0">Content</TabsTrigger>
             <TabsTrigger value="quiz" className="flex-shrink-0">Quiz</TabsTrigger>
             <TabsTrigger value="cycle-management" className="flex-shrink-0">Cycle Management</TabsTrigger>
-            <TabsTrigger value="cycle-operations" className="flex-shrink-0">Cycle Operations</TabsTrigger>
+            <TabsTrigger value={TAB_CYCLE_OPS} className="flex-shrink-0">Cycle Operations</TabsTrigger>
             <TabsTrigger value="predictions" className="flex-shrink-0">Predictions</TabsTrigger>
             <TabsTrigger value="points" className="flex-shrink-0">Points</TabsTrigger>
             <TabsTrigger value="actions" className="flex-shrink-0">Actions</TabsTrigger>
