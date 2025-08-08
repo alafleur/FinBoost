@@ -1572,15 +1572,47 @@ function AdminComponent() {
   const loadCycles = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        // No token — force login
+        window.location.href = '/auth';
+        return;
+      }
+
       const response = await fetch('/api/admin/winner-cycles', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      // Handle expired/invalid auth
+      if (response.status === 401 || response.status === 403) {
+        // Optional: toast to explain what happened
+        try {
+          // if you have useToast in scope
+          toast?.({
+            title: "Session expired",
+            description: "Please sign in again to view winner cycles.",
+            variant: "destructive"
+          });
+        } catch { /* no-op if toast isn't available here */ }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth';
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to load cycles: ${response.status}`);
+      }
+
       const data = await response.json();
-      if (data.success) {
+      if (data?.success) {
         setWinnerCycles(data.cycles);
+      } else {
+        setWinnerCycles([]);
       }
     } catch (error) {
       console.error('Failed to load cycles:', error);
+      setWinnerCycles([]); // fail safe so UI can show empty state or error
     }
   };
 

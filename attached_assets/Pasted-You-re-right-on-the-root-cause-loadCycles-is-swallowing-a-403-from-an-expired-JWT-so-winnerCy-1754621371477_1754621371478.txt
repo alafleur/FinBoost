@@ -1,0 +1,70 @@
+You're right on the root cause: `loadCycles()` is swallowing a 403 from an expired JWT, so `winnerCycles` stays empty and the whole “Winner Selection Cycles” block (and therefore the PayPal button) never mounts.
+
+Here’s a tight fix that (a) detects 401/403, (b) clears the bad token, and (c) forces a re-auth redirect (consistent with your existing logout path `/auth`).
+
+# 1) Patch `loadCycles()` to handle 401/403
+
+Replace your current `loadCycles` with this:
+
+```ts
+// Winner cycle management functions
+const loadCycles = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // No token — force login
+      window.location.href = '/auth';
+      return;
+    }
+
+    const response = await fetch('/api/admin/winner-cycles', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    // Handle expired/invalid auth
+    if (response.status === 401 || response.status === 403) {
+      // Optional: toast to explain what happened
+      try {
+        // if you have useToast in scope
+        toast?.({
+          title: "Session expired",
+          description: "Please sign in again to view winner cycles.",
+          variant: "destructive"
+        });
+      } catch { /* no-op if toast isn't available here */ }
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/auth';
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to load cycles: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data?.success) {
+      setWinnerCycles(data.cycles);
+    } else {
+      setWinnerCycles([]);
+    }
+  } catch (error) {
+    console.error('Failed to load cycles:', error);
+    setWinnerCycles([]); // fail safe so UI can show empty state or error
+  }
+};
+```
+
+Why `/auth`? That’s already how your Logout button clears tokens and routes users back to sign-in, so we’re mirroring existing behavior for consistency.&#x20;
+This replaces the current, silent version of `loadCycles` that doesn’t check `response.status`.&#x20;
+
+# 2) Keep using your existing initialization call
+
+You already call `loadCycles()` during the initial data load; with the patch above, an expired token will now trigger a re-auth instead of leaving `winnerCycles` empty.&#x20;
+
+# Expected outcome
+
+After re-auth (or with a fresh token), `loadCycles()` will populate `winnerCycles`, so the “Winner Selection Cycles” section renders and you’ll see your **“July 2/2 Test Cycle”** with the green **Selection Complete** badge and the blue **Process PayPal Disbursements** button as intended.
+
+If you want this pattern everywhere, we can also factor a tiny `fetchWithAuth` helper that centralizes the 401/403 handling—but the targeted patch above is enough to unblock the PayPal button right now.
