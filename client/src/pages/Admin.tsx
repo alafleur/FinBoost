@@ -808,10 +808,10 @@ function AdminComponent() {
 
   // Load paginated winners when Cycle Operations tab is opened or when cycle selection is completed
   useEffect(() => {
-    if (activeTab === 'operations') {
+    if (activeTab === 'cycle-operations') {
       const activeCycle = cycleSettings.find(c => c.isActive);
       if (activeCycle?.id) {
-        console.log('Loading paginated winners for operations tab');
+        console.log('Loading paginated winners for cycle-operations tab');
         loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
         // Also check if selection was already completed (persistence fix)
         if ((activeCycle as any).selectionCompleted) {
@@ -2488,7 +2488,7 @@ function AdminComponent() {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-1 h-auto p-1">
             <TabsTrigger value="overview" className="flex-shrink-0">Overview</TabsTrigger>
             <TabsTrigger value="users" className="flex-shrink-0">Users</TabsTrigger>

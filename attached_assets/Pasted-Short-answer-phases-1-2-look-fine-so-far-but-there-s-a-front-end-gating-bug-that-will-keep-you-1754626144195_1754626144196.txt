@@ -1,0 +1,49 @@
+Short answer: phases 1–2 look fine so far, but there’s a **front-end gating bug** that will keep your “Enhanced Winners” loader from firing even after the backfill.
+
+Here’s what I’m seeing in **Admin (3).tsx**:
+
+* Your “load paginated winners when the operations tab opens” effect checks **`activeTab === 'operations'`**.
+* But your Tabs are **uncontrolled** (they use `defaultValue="overview"` and never update `activeTab`), so `activeTab` never changes from `"overview"`.
+* Net effect: that useEffect never runs, so `loadPaginatedWinnerDetails(...)` won’t auto-fire on tab switch—even if the UI looks right.
+
+What to change (2 tiny fixes):
+
+1. **Control the Tabs with state**
+
+```tsx
+<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+```
+
+(Replace the current `defaultValue="overview"` Tabs usage that isn’t wired to state.)
+
+2. **Match the tab value string**
+   If your tab trigger uses `"cycle-operations"` (common in this codebase), update the effect’s guard to that:
+
+```ts
+useEffect(() => {
+  if (activeTab === 'cycle-operations') {
+    const activeCycle = cycleSettings.find(c => c.isActive);
+    if (activeCycle?.id) {
+      loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
+      if ((activeCycle as any).selectionCompleted) {
+        setSelectionResults({
+          winnersSelected: (activeCycle as any).totalWinners || 0,
+          totalRewardPool: ((activeCycle as any).totalRewardPool || 0) / 100,
+          selectionMode: 'loaded_from_database'
+        });
+      }
+    }
+  }
+}, [activeTab, cycleSettings]);
+```
+
+Right now it’s checking `'operations'`, which likely doesn’t match the trigger value.
+
+Good news on your init harness:
+
+* The named `Promise.allSettled` batch + belt-and-suspenders `loadCycles()` retry is in place and looks solid.
+* `loadCycles()` itself is logging and handling 401/403 properly.
+
+So: backend investigation/backfill ✅, but wire up the tab state and fix the tab value check so your winners list and PayPal-related UI react when you switch to the operations tab.
+
+If you paste the server query/route for the paginated winners endpoint next, I’ll sanity-check the JOIN for `paypalEmail` too.
