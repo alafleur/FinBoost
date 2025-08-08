@@ -1,0 +1,50 @@
+Nice progress — this version is close. I do see a couple blockers and one likely permission miss:
+
+# Must-fix bugs
+
+* **Bad array spread still present (crashes on create):**
+  `setModules([.modules, data.module]);` → should be `setModules([...modules, data.module]);`. It appears twice in this file. &#x20;
+
+# Likely auth miss
+
+* **`/api/admin/pending-proofs` call has no token:**
+  You’re fetching pending proofs without `Authorization`, while the rest of the admin endpoints use it. Add the header to be consistent with your other admin reads.&#x20;
+
+  **Patch:**
+
+  ```ts
+  const token = localStorage.getItem('token');
+  const response = await fetch('/api/admin/pending-proofs', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  ```
+
+# Good stuff (don’t change)
+
+* **Reject proof now sends the token** (was missing before). Looks correct.&#x20;
+* **Tabs-driven load** for both basic + enhanced winners fires on `'cycle-operations'` and sets persisted selection results. ✔️ &#x20;
+* **Init harness** with named tasks + fallback `loadCycles()` is in and solid. &#x20;
+* **Auth on other admin endpoints** (users, modules, cycle settings, winner details, etc.) looks consistent. &#x20;
+
+# Quick diff you can paste
+
+```diff
+- setModules([.modules, data.module]);
++ setModules([...modules, data.module]);
+```
+
+(Apply in both `handleCreateModule` occurrences shown above.)
+
+```diff
+- const response = await fetch('/api/admin/pending-proofs');
++ const token = localStorage.getItem('token');
++ const response = await fetch('/api/admin/pending-proofs', {
++   headers: { 'Authorization': `Bearer ${token}` }
++ });
+```
+
+# One sanity check
+
+* Make sure your **TabsTrigger** value actually is `"cycle-operations"` for the operations tab (your effect keys off that string). If the trigger still uses a different value like `"operations"`, the effect won’t run. The effect itself is correct; just confirm the tab value matches.&#x20;
+
+Fix those two items and you should be in a good place. If you want me to skim **CycleOperationsTab** next, I can double-check the PayPal “ready” gating logic for the disbursement button.

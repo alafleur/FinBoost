@@ -890,7 +890,10 @@ function AdminComponent() {
 
   const fetchPendingProofs = async () => {
     try {
-      const response = await fetch('/api/admin/pending-proofs');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/pending-proofs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setPendingProofs(data.proofs || []);
