@@ -30,7 +30,9 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
+  Globe,
+  CheckSquare
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -1291,26 +1293,47 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                       ) : null}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
-                    {/* PHASE 4 STEP 4: Enhanced Force Refresh with Comprehensive State Management */}
-                    <Button
-                      onClick={() => refreshAllCycleData({ forceFresh: true, showToast: true })}
-                      disabled={loadingEnhanced}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {loadingEnhanced ? (
-                        <>
-                          <Timer className="w-4 h-4 mr-2 animate-spin" />
-                          Refreshing...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Force Refresh
-                        </>
-                      )}
-                    </Button>
+                  <div className="flex flex-col gap-4">
+                    {/* ChatGPT Step 3: Enhanced Status Panel for Mode Visibility */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${selectedForDisbursement.size === 0 ? 'bg-blue-500' : 'bg-green-500'}`} />
+                        <span className="font-medium text-sm">
+                          {selectedForDisbursement.size === 0 ? 'Bulk Mode Active' : 'Selective Mode Active'}
+                        </span>
+                        <span className="text-xs text-gray-600">
+                          {selectedForDisbursement.size === 0 
+                            ? `Will process ${eligibleCount !== null ? eligibleCount : '...'} eligible winners` 
+                            : `Will process ${selectedForDisbursement.size} selected winners`
+                          }
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Globe className="w-3 h-3" />
+                        <span>Real-time counts</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      {/* PHASE 4 STEP 4: Enhanced Force Refresh with Comprehensive State Management */}
+                      <Button
+                        onClick={() => refreshAllCycleData({ forceFresh: true, showToast: true })}
+                        disabled={loadingEnhanced}
+                        variant="outline"
+                        size="sm"
+                      >
+                        {loadingEnhanced ? (
+                          <>
+                            <Timer className="w-4 h-4 mr-2 animate-spin" />
+                            Refreshing...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Force Refresh
+                          </>
+                        )}
+                      </Button>
                     <Button
                       onClick={handleExportWinners}
                       disabled={isExporting}
@@ -1329,34 +1352,84 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                         </>
                       )}
                     </Button>
-                    {/* Process PayPal Disbursements Button with selection count and proper disabling */}
+                    {/* ChatGPT Step 3: Enhanced Process PayPal Disbursements Button with Visual Polish */}
                     {(() => {
                       const selectedCount = selectedForDisbursement.size;
+                      const isBulkMode = selectedCount === 0;
+                      const isSelectiveMode = selectedCount > 0;
                       
                       return (
-                        <Button
-                          onClick={handleProcessPayouts}
-                          disabled={isProcessingPayouts || !isSelectionSealed}
-                          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                          size="sm"
-                        >
-                          {isProcessingPayouts ? (
-                            <>
-                              <Timer className="w-4 h-4 mr-2 animate-spin" />
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <DollarSign className="w-4 h-4 mr-2" />
-                              {selectedCount === 0 
-                                ? `Process PayPal Disbursements (${eligibleCount !== null ? `${eligibleCount} Eligible` : 'All Eligible'})` 
-                                : `Process PayPal Disbursements (${selectedCount} Selected)`
+                        <div className="relative">
+                          {/* Mode indicator badge */}
+                          <div className="absolute -top-2 -right-1 z-10">
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs px-1.5 py-0.5 ${
+                                isBulkMode 
+                                  ? 'bg-blue-100 text-blue-700 border-blue-200' 
+                                  : 'bg-green-100 text-green-700 border-green-200'
+                              }`}
+                            >
+                              {isBulkMode ? 'BULK' : 'SELECT'}
+                            </Badge>
+                          </div>
+                          
+                          <Button
+                            onClick={handleProcessPayouts}
+                            disabled={isProcessingPayouts || !isSelectionSealed}
+                            className={`
+                              disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200
+                              ${isBulkMode 
+                                ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 border-blue-500' 
+                                : 'bg-green-600 hover:bg-green-700 shadow-green-200 border-green-500'
                               }
-                            </>
-                          )}
-                        </Button>
+                              ${isLoadingEligibleCount && isBulkMode ? 'animate-pulse' : ''}
+                              hover:shadow-lg hover:scale-105 border-2
+                              relative overflow-hidden group
+                            `}
+                            size="sm"
+                            title={
+                              isBulkMode 
+                                ? `Bulk mode: Process all eligible winners (${eligibleCount || 'loading...'})` 
+                                : `Selective mode: Process ${selectedCount} selected winners`
+                            }
+                          >
+                            {/* Background animation for processing state */}
+                            {isProcessingPayouts && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                            )}
+                            
+                            {isProcessingPayouts ? (
+                              <>
+                                <Timer className="w-4 h-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                {isBulkMode ? (
+                                  <>
+                                    <Globe className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+                                    {isLoadingEligibleCount ? (
+                                      <span className="flex items-center">
+                                        Loading Count... <Timer className="w-3 h-3 ml-1 animate-spin" />
+                                      </span>
+                                    ) : (
+                                      <span>Process All Eligible ({eligibleCount !== null ? eligibleCount : '...'})</span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckSquare className="w-4 h-4 mr-2 group-hover:animate-pulse" />
+                                    <span>Process Selected ({selectedCount})</span>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       );
                     })()}
+                    </div>
                     <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
                       <DialogTrigger asChild>
                         <Button size="sm">
