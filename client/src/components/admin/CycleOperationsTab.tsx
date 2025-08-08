@@ -1254,25 +1254,15 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                         </>
                       )}
                     </Button>
-                    {/* Process PayPal Disbursements Button with selection-based logic */}
+                    {/* Process PayPal Disbursements Button with selection count and proper disabling */}
                     {(() => {
                       const selectedCount = selectedForDisbursement.size;
                       
                       return (
                         <Button
-                          onClick={async () => {
-                            if (selectedCount === 0) {
-                              toast({ 
-                                title: 'Error', 
-                                description: 'Please select winners to process payouts for', 
-                                variant: 'destructive' 
-                              });
-                              return;
-                            }
-                            await handleProcessPayouts();
-                          }}
+                          onClick={handleProcessPayouts}
                           disabled={selectedCount === 0 || isProcessingPayouts}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                           size="sm"
                         >
                           {isProcessingPayouts ? (
@@ -1420,6 +1410,28 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-16">
+                          {(() => {
+                            const pageRows = enhancedWinners || [];
+                            const pageEligible = helpers.getEligibleIds(pageRows);
+                            const allOnPageSelected = pageEligible.length > 0 && pageEligible.every(id => selectedForDisbursement.has(id));
+                            
+                            return (
+                              <input
+                                type="checkbox"
+                                checked={allOnPageSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
+                                  } else {
+                                    setSelectedForDisbursement(prev => helpers.removeIds(prev, pageEligible));
+                                  }
+                                }}
+                                className="w-4 h-4"
+                              />
+                            );
+                          })()}
+                        </TableHead>
                         <TableHead className="w-20">Overall Rank #</TableHead>
                         <TableHead className="w-20">Tier Rank #</TableHead>
                         <TableHead className="w-32">Username</TableHead>
@@ -1439,6 +1451,28 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                     <TableBody>
                       {enhancedWinners.map((winner, index) => (
                         <TableRow key={`${winner.email}-${index}`}>
+                          <TableCell className="text-center">
+                            {(() => {
+                              const isEligible = helpers.isPaypalConfigured(winner);
+                              const isSelected = selectedForDisbursement.has(winner.id);
+                              
+                              return (
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  disabled={!isEligible}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedForDisbursement(prev => helpers.addIds(prev, [winner.id]));
+                                    } else {
+                                      setSelectedForDisbursement(prev => helpers.removeIds(prev, [winner.id]));
+                                    }
+                                  }}
+                                  className={`w-4 h-4 ${!isEligible ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                />
+                              );
+                            })()}
+                          </TableCell>
                           <TableCell className="font-medium text-center">
                             {winner.overallRank}
                           </TableCell>
