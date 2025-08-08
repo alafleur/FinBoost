@@ -361,6 +361,7 @@ function AdminComponent() {
   
   // Current pool settings - will be populated from API
   const [currentPoolSettings, setCurrentPoolSettings] = useState({
+    id: 0,
     rewardPoolPercentage: 0,
     membershipFee: 0
   });
@@ -944,6 +945,7 @@ function AdminComponent() {
         const activeCycle = data.find(cycle => cycle.isActive);
         if (activeCycle) {
           setCurrentPoolSettings({
+            id: activeCycle.id,
             rewardPoolPercentage: activeCycle.rewardPoolPercentage,
             membershipFee: activeCycle.membershipFee
           });

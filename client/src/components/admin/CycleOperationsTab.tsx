@@ -1246,6 +1246,33 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         </>
                       )}
                     </Button>
+                    {/* Process PayPal Disbursements Button with proper disabled logic */}
+                    {(() => {
+                      const paypalReadyCount = enhancedWinners.filter(w => 
+                        (w.paypalEmail && w.paypalEmail.includes('@')) || w.paypalConfigured
+                      ).length;
+                      
+                      return (
+                        <Button
+                          onClick={handleProcessPayouts}
+                          disabled={paypalReadyCount === 0 || isProcessingPayouts}
+                          className="bg-green-600 hover:bg-green-700"
+                          size="sm"
+                        >
+                          {isProcessingPayouts ? (
+                            <>
+                              <Timer className="w-4 h-4 mr-2 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Process PayPal Disbursements ({paypalReadyCount})
+                            </>
+                          )}
+                        </Button>
+                      );
+                    })()}
                     <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
                       <DialogTrigger asChild>
                         <Button size="sm">

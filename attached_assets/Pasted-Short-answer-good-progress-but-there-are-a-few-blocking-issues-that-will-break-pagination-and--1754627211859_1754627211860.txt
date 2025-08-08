@@ -1,0 +1,71 @@
+Short answer: good progress, but there are a few **blocking** issues that will break pagination and even compilation, plus one UX toggle you’ll want.
+
+Here’s what I’m seeing:
+
+1. **Winner table pagination is using the wrong id**
+
+* The “Next/Previous” handlers call `loadPaginatedWinnerDetails(currentPoolSettings.id, ...)`, but `currentPoolSettings` never stores an `id`—you only set `rewardPoolPercentage` and `membershipFee`. So those if-guards are always false and pagination won’t fetch new pages. Use the active cycle id instead (`activeCycle.id` or `selectedCycle?.id`). You can see the current call site here: `if (currentPoolSettings?.id) { loadPaginatedWinnerDetails(currentPoolSettings.id, newPage, winnersPerPage) }`, and you can see where `currentPoolSettings` is defined without an id here: `setCurrentPoolSettings({ rewardPoolPercentage, membershipFee })`.
+
+  **Fix idea:** store the active cycle id when you set `currentPoolSettings`, e.g.
+
+  ```ts
+  setCurrentPoolSettings({
+    id: activeCycle.id,
+    rewardPoolPercentage: activeCycle.rewardPoolPercentage,
+    membershipFee: activeCycle.membershipFee
+  });
+  ```
+
+  then pagination will work as written; or just swap to `activeCycle.id` where you call the loaders.
+
+2. **Typos that will crash the build (`.prev`, `.editingUser`)**
+
+* There are still spread typos like `({ .prev, ... })` and `setEditingUser({.editingUser, ...})`. These won’t compile. Example occurrences:
+
+  * In payout override updater: `return { .prev, [winner.id]: ... }`.
+  * In pool settings mapping: `setCycleForm(prev => ({ .prev, ... }))` and `setPoolSettingForm(prev => ({ .prev, ... }))`.
+
+  **Fix:** change to `({ ...prev, ... })` and `setEditingUser(prev => ({ ...prev, ... }))`.
+
+3. **“Process PayPal Disbursements” button ignores config state**
+
+* Right now the button always renders once `selectionResults` exists. Given your business rule, it should be **disabled/hidden** unless there’s at least one winner with a PayPal email (or `paypalConfigured` true) to prevent misleading clicks.
+
+  **Fix idea:** compute:
+
+  ```ts
+  const paypalReadyCount = paginatedWinners.winners.filter(w => 
+    (w.paypalEmail && w.paypalEmail.includes('@')) || w.paypalConfigured
+  ).length;
+  ```
+
+  and render:
+
+  ```tsx
+  <Button disabled={paypalReadyCount === 0} className="bg-green-600 hover:bg-green-700">
+    Process PayPal Disbursements
+  </Button>
+  ```
+
+  (Or hide it entirely when `paypalReadyCount === 0`.)
+
+4. **Minor: Email mapping consistency**
+
+* Enhanced winners map uses `winner.email ?? winner.userEmail` and `winner.paypalEmail || winner.snapshotPaypalEmail`【loadEnhancedWinnersPaginated: you referenced this mapping in your latest code】. That’s fine as a fallback, just make sure the backend now **always** returns a single canonical field (e.g., `userEmail`, `paypalEmail`) so the UI logic can simplify later.
+
+---
+
+### Quick, surgical patch list
+
+* Replace bad spreads:
+
+  * `({ .prev, ... })` → `({ ...prev, ... })` everywhere. Examples: pool settings setters and payout override updater.
+* Fix pagination id source:
+
+  * Either store `id` in `currentPoolSettings` when setting it, **or** replace `currentPoolSettings?.id` guards with `activeCycle?.id` (you already resolve `activeCycle` elsewhere).
+  * Update both **Previous** and **Next** handlers (see both blocks).
+* Gate the disbursement button by PayPal readiness:
+
+  * Button currently always renders; add a `disabled` condition tied to `paypalReadyCount`.
+
+If you patch those three areas, you’ll get: 1) a compiling build, 2) working winner pagination, and 3) a button that only lights up when at least one PayPal-ready recipient exists—matching how the rest of your flow now behaves.
