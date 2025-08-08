@@ -1782,6 +1782,7 @@ function AdminComponent() {
         
         // Transform the paginated data to enhanced format with proper field mapping
         const enhancedData = data.winners.map((winner: any) => ({
+          id: winner.id, // Add id field for selection functionality
           overallRank: winner.overallRank,
           tierRank: winner.tierRank,
           username: winner.username,

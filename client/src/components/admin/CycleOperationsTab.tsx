@@ -67,6 +67,7 @@ interface WinnerSelection {
 
 // Enhanced interface for the new 13-column Selected Winners table (Phase 3: Added cyclePoints, Phase 2A: Added audit fields)
 interface EnhancedWinnerData {
+  id: number; // Add id field for selection functionality
   overallRank: number;
   tierRank: number;
   username: string;
@@ -1246,16 +1247,24 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                         </>
                       )}
                     </Button>
-                    {/* Process PayPal Disbursements Button with proper disabled logic */}
+                    {/* Process PayPal Disbursements Button with selection-based logic */}
                     {(() => {
-                      const paypalReadyCount = enhancedWinners.filter(w => 
-                        (w.paypalEmail && w.paypalEmail.includes('@')) || w.paypalConfigured
-                      ).length;
+                      const selectedCount = selectedForDisbursement.size;
                       
                       return (
                         <Button
-                          onClick={handleProcessPayouts}
-                          disabled={paypalReadyCount === 0 || isProcessingPayouts}
+                          onClick={async () => {
+                            if (selectedCount === 0) {
+                              toast({ 
+                                title: 'Error', 
+                                description: 'Please select winners to process payouts for', 
+                                variant: 'destructive' 
+                              });
+                              return;
+                            }
+                            await handleProcessPayouts();
+                          }}
+                          disabled={selectedCount === 0 || isProcessingPayouts}
                           className="bg-green-600 hover:bg-green-700"
                           size="sm"
                         >
@@ -1267,7 +1276,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                           ) : (
                             <>
                               <DollarSign className="w-4 h-4 mr-2" />
-                              Process PayPal Disbursements ({paypalReadyCount})
+                              Process PayPal Disbursements ({selectedCount})
                             </>
                           )}
                         </Button>
@@ -1358,6 +1367,50 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Select All Eligible Winners Checkbox */}
+                {(() => {
+                  const isPaypalConfigured = (w: EnhancedWinnerData) =>
+                    typeof w.paypalEmail === 'string' && w.paypalEmail.includes('@');
+
+                  const eligibleIds = enhancedWinners
+                    .filter(isPaypalConfigured)
+                    .map((w: EnhancedWinnerData) => w.id)
+                    .filter(Boolean);
+
+                  const allEligibleSelected =
+                    eligibleIds.length > 0 &&
+                    eligibleIds.every(id => selectedForDisbursement.has(id));
+
+                  return (
+                    <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                      <input
+                        type="checkbox"
+                        checked={allEligibleSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Select ALL eligible
+                            const next = new Set(selectedForDisbursement);
+                            eligibleIds.forEach(id => next.add(id));
+                            setSelectedForDisbursement(next);
+                          } else {
+                            // Deselect ALL eligible (leave any manual selections that aren't eligible)
+                            const next = new Set(
+                              Array.from(selectedForDisbursement).filter(id => !eligibleIds.includes(id))
+                            );
+                            setSelectedForDisbursement(next);
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">
+                        Select all eligible winners ({eligibleIds.length})
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        (Winners with valid PayPal emails)
+                      </span>
+                    </div>
+                  );
+                })()}
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
