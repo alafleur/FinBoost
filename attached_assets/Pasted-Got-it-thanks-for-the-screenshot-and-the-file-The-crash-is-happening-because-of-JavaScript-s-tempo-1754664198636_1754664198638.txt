@@ -1,0 +1,71 @@
+Got it—thanks for the screenshot and the file. The crash is happening because of JavaScript’s *temporal dead zone*:
+
+### What’s breaking
+
+In `Admin (24).tsx`, you compute this **before** you declare the state it depends on:
+
+```ts
+const isSelectionSealed = useMemo(() => {
+  const activeCycle = cycleSettings.find(c => c.isActive);
+  return Boolean(
+    activeCycle?.selectionCompleted ||
+    selectionResults?.isSealed ||
+    selectionResults?.selectionMode === 'loaded_from_database'
+  );
+}, [cycleSettings, selectionResults]);
+```
+
+…but `cycleSettings` (and `selectionResults`) are declared *later* in the component with `useState(...)`. Because `const`/`let` aren’t hoisted for use, referencing them earlier throws:
+
+> **Cannot access 'cycleSettings' before initialization**
+
+That exactly matches the error in your screenshot.
+
+### Quick fix (2 options)
+
+**Option A — Move the state up (fastest)**
+Place these **above** the `isSelectionSealed` `useMemo`:
+
+```ts
+const [cycleSettings, setCycleSettings] = useState<CycleSetting[]>([]);
+const [selectionResults, setSelectionResults] = useState<any>(null);
+```
+
+**Option B — Move the memo down**
+Leave the state where it is and move the whole `isSelectionSealed` block to **after** both state declarations.
+
+Either way, the variables must be declared before they’re referenced.
+
+### Safer version to paste (still requires correct ordering)
+
+```ts
+const isSelectionSealed = useMemo(() => {
+  // Extra guard (not strictly necessary once ordering is fixed)
+  if (!Array.isArray(cycleSettings)) return false;
+
+  const activeCycle = cycleSettings.find(c => c.isActive);
+  return Boolean(
+    activeCycle?.selectionCompleted ||
+    selectionResults?.isSealed ||
+    selectionResults?.selectionMode === 'loaded_from_database'
+  );
+}, [cycleSettings, selectionResults]);
+```
+
+### Why this popped up now
+
+A recent refactor likely added that `useMemo` earlier in the component body (above the states), which is easy to do in long files. With `const`, you can’t use a variable before its declaration during render.
+
+### Plan to prevent this again
+
+1. **Grouping rule:** Keep all `useState` declarations at the very top of the component, then all `useMemo`/`useCallback`, then effects, then handlers, then JSX.
+2. **ESLint rule:** Enable `no-use-before-define` with `{ "functions": false, "classes": true, "variables": true }` for TS/React.
+3. **Smoke test:** Add a quick render test that mounts the component without network calls (mock `fetchWithAuth`) to catch TDZ errors immediately.
+
+### What to do now
+
+* Reorder as above.
+* Save & redeploy.
+* Hard refresh `/admin` (or clear cache) and it should load instead of the red error card.
+
+If you want, paste the first \~100 lines of the component and I’ll mark the exact “move this above/below that” spots for you.

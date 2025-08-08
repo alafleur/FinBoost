@@ -418,6 +418,9 @@ function AdminComponent() {
   const [isRunningSelection, setIsRunningSelection] = useState(false);
   const [selectionResults, setSelectionResults] = useState<any>(null);
 
+  // Move cycleSettings state above useMemo to fix temporal dead zone
+  const [cycleSettings, setCycleSettings] = useState<CycleSetting[]>([]);
+
   // ChatGPT Step 2: Define isSelectionSealed in parent component
   const isSelectionSealed = useMemo(() => {
     const activeCycle = cycleSettings.find(c => c.isActive);
@@ -500,8 +503,7 @@ function AdminComponent() {
     isActive: true
   });
 
-  // New Cycle Management and Operations state
-  const [cycleSettings, setCycleSettings] = useState<CycleSetting[]>([]);
+  // New Cycle Management and Operations state (cycleSettings moved above to fix TDZ)
   const [userCyclePoints, setUserCyclePoints] = useState<UserCyclePoints[]>([]);
   const [cycleWinnerSelections, setCycleWinnerSelections] = useState<CycleWinnerSelection[]>([]);
   const [showCycleDialog, setShowCycleDialog] = useState(false);
