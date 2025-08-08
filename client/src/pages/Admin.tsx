@@ -691,7 +691,8 @@ function AdminComponent() {
           fetchSupportTickets().catch(e => console.error('fetchSupportTickets failed:', e)),
           fetchCyclePoolSettings().catch(e => console.error('fetchCyclePoolSettings failed:', e)),
           fetchCurrentPoolSettings().catch(e => console.error('fetchCurrentPoolSettings failed:', e)),
-          fetchCycleWinnerSelections().catch(e => console.error('fetchCycleWinnerSelections failed:', e))
+          fetchCycleWinnerSelections().catch(e => console.error('fetchCycleWinnerSelections failed:', e)),
+          loadCycles().catch(e => console.error('loadCycles failed:', e)) // Winner cycles data for PayPal disbursements
         ]);
         
         // Log which calls failed
