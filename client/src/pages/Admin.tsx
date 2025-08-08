@@ -843,11 +843,12 @@ function AdminComponent() {
 
   const fetchData = async () => {
     try {
+      const token = localStorage.getItem('token');
 
       // Fetch all data concurrently
       const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
-        fetch('/api/admin/users'),
-        fetch('/api/admin/modules'),
+        fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('/api/admin/modules', { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch('/api/cycles/pool'),
         fetch('/api/tiers/thresholds')
       ]);

@@ -1,0 +1,60 @@
+Alright, I went through the latest **Admin (9).tsx** you attached. Here’s the straight dope — what’s clearly broken vs. what looks fine, with receipts.
+
+# 🚨 Must-fix bugs
+
+1. **Syntax bug that will crash module creation UI**
+
+* You’ve still got the bad spread in `handleCreateModule`:
+
+  * `setModules([.modules, data.module]);` ← the leading dot means this will throw every time.
+  * Should be: `setModules([...modules, data.module]);`
+    Proof: it’s right here in the file.&#x20;
+
+2. **Enhanced winners auto-load likely never runs (tab key mismatch)**
+
+* Your effect only runs when `activeTab === 'cycle-operations'`. If your Tabs use `"operations"` (like older versions did), this effect won’t fire, so the enhanced/paginated tables won’t load on tab switch.
+  See the guard `activeTab === 'cycle-operations'` here.&#x20;
+  (In previous code, the check was `'operations'` — if the tab value didn’t change to match, this is a silent no-op.)
+
+# ⚠️ Risky / brittle spots (fix soon)
+
+3. **Some admin fetches are unauthenticated**
+
+* In `fetchData`, calls to `/api/admin/users` and `/api/admin/modules` are made **without** an `Authorization` header. If your backend enforces auth there (it should), you’ll see intermittent 401s and empty lists.
+  Calls are here.&#x20;
+  (Elsewhere you *do* send the token for admin endpoints — be consistent.)
+
+# ✅ Looks good / Nice improvements
+
+* `loadCycles()` is now robust and logs clearly; it handles 401/403 by nuking local storage and redirecting.&#x20;
+* The “import winners” flow does full cache reset and page-1 reload for both lists. That’s exactly what you want after an edit/import.&#x20;
+* Reject-proof now sends the token (that was missing before).&#x20;
+* Export winners uses token and downloads correctly.&#x20;
+
+# Quick fixes to apply
+
+* Replace the spread typo:
+
+  ```ts
+  // before
+  setModules([.modules, data.module]);
+  // after
+  setModules([...modules, data.module]);
+  ```
+* Make the tab key consistent. Either:
+
+  * Change the effect guard to `if (activeTab === 'operations') { ... }`, **or**
+  * Rename the actual tab value to `"cycle-operations"` in your Tabs so they match this effect.
+* Add auth headers to the admin reads in `fetchData()`:
+
+  ```ts
+  const token = localStorage.getItem('token');
+  const [usersRes, modulesRes, poolRes, tierRes] = await Promise.all([
+    fetch('/api/admin/users',   { headers: { 'Authorization': `Bearer ${token}` }}),
+    fetch('/api/admin/modules', { headers: { 'Authorization': `Bearer ${token}` }}),
+    fetch('/api/cycles/pool'),
+    fetch('/api/tiers/thresholds'),
+  ]);
+  ```
+
+If you want, I can point out exactly where the Tabs are defined so we can make sure the `activeTab` values line up — but from what I can see, fixing those three items will get you over the hump.
