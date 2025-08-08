@@ -1,0 +1,82 @@
+1) Backend: accept bulk mode
+Endpoint: POST /api/admin/winner-cycles/:cycleId/process-disbursements
+
+Accept either payload:
+
+{ processAll: true } ➜ compute eligible winner IDs server-side
+
+{ selectedWinnerIds: number[] } ➜ selective path (current behavior)
+
+Eligibility SQL (server-side):
+
+pgsql
+Copy
+Edit
+WHERE cycleSettingId = :cycleId
+  AND payoutStatus IN ('pending','ready')
+  AND (paypalEmail IS NOT NULL OR snapshotPaypalEmail IS NOT NULL)
+  AND processedAt IS NULL
+  AND COALESCE(removed, false) = false
+Validation: if selectedWinnerIds provided, verify each id belongs to :cycleId; 400 with helpful message if not.
+
+Idempotency: before calling PayPal, persist payout_final (snapshot), set payout_batch_id, and ensure updates are idempotent (no double pays on retries). Wrap in a DB transaction.
+
+Response (always this shape):
+
+json
+Copy
+Edit
+{
+  "success": true,
+  "processedCount": 0,
+  "failed": [],
+  "batchId": "…",
+  "totalEligible": 0
+}
+2) Backend (optional but preferred): support endpoints
+GET /api/admin/cycle-winner-details/:cycleId/eligible-count ➜ returns integer
+
+GET /api/admin/cycle-winner-details/:cycleId/eligible-ids ➜ returns number[] of winner row ids (only if we want client-driven bulk fallback)
+
+3) Frontend: split handlers + shared poster
+In CycleOperationsTab.tsx:
+
+Keep the current selective handler (uses selectedWinnerIds from selectedForDisbursement).
+
+Add a bulk handler that sends { processAll: true }.
+
+Create a shared postDisbursements(payload) that:
+
+Sends JSON with Authorization + Content-Type: application/json
+
+Parses JSON safely (handle non-JSON errors)
+
+Shows partial failures if present
+
+Refreshes winners + clears selection on success
+
+Button logic:
+
+If selectedForDisbursement.size > 0 ➜ call selective
+
+Else ➜ call bulk ({ processAll: true })
+
+Disable only when no selection AND eligibleCount === 0, or while posting
+
+Show count using server eligible-count endpoint (fallback to current page if endpoint not ready)
+
+4) Safety rails & logging
+Server logs: cycleId, mode (processAll / selected), countIn, processedCount, failed.length, batchId.
+
+Validate auth (admin) on new/updated routes.
+
+5) Testing checklist
+Selective: select 2–3 rows ➜ post { selectedWinnerIds } ➜ success, table refreshes, selection clears.
+
+Bulk: with zero selection ➜ post { processAll: true } ➜ processes all eligible across pages (not just current page).
+
+Counts: button badge uses server eligible-count and matches processed totals.
+
+Bad ids: send a non-cycle id in selectedWinnerIds ➜ 400 with clear message.
+
+Idempotency: retry the same payload ➜ no duplicate payouts; processedCount stable.
