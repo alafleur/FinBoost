@@ -681,29 +681,57 @@ function AdminComponent() {
       
       try {
         console.log('Loading admin data...');
-        // Group API calls by priority and dependencies with individual error handling
-        const results = await Promise.allSettled([
-          fetchData().catch(e => console.error('fetchData failed:', e)), // Core data first
-          fetchCycleSettings().catch(e => console.error('fetchCycleSettings failed:', e)), // Essential cycle data
-          fetchUserCyclePoints().catch(e => console.error('fetchUserCyclePoints failed:', e)),
-          fetchPendingProofs().catch(e => console.error('fetchPendingProofs failed:', e)),
-          fetchPointActions().catch(e => console.error('fetchPointActions failed:', e)),
-          fetchSupportTickets().catch(e => console.error('fetchSupportTickets failed:', e)),
-          fetchCyclePoolSettings().catch(e => console.error('fetchCyclePoolSettings failed:', e)),
-          fetchCurrentPoolSettings().catch(e => console.error('fetchCurrentPoolSettings failed:', e)),
-          fetchCycleWinnerSelections().catch(e => console.error('fetchCycleWinnerSelections failed:', e)),
-          loadCycles().catch(e => console.error('loadCycles failed:', e)) // Winner cycles data for PayPal disbursements
-        ]);
-        
-        // Log which calls failed
-        results.forEach((result, index) => {
-          if (result.status === 'rejected') {
-            console.error(`API call ${index} failed:`, result.reason);
+        // Named tasks for better debugging
+        const tasks: Record<string, () => Promise<any>> = {
+          fetchData,
+          fetchCycleSettings,
+          fetchUserCyclePoints,
+          fetchPendingProofs,
+          fetchPointActions,
+          fetchSupportTickets,
+          fetchCyclePoolSettings,
+          fetchCurrentPoolSettings,
+          fetchCycleWinnerSelections,
+          loadCycles, // <- the one we care about
+        };
+
+        const results = await Promise.allSettled(
+          Object.entries(tasks).map(async ([name, fn]) => {
+            console.log(`[init] starting ${name}`);
+            try {
+              const out = await fn();
+              console.log(`[init] ${name} ✓`);
+              return { name, status: 'fulfilled' as const, out };
+            } catch (e) {
+              console.error(`[init] ${name} ✗`, e);
+              return { name, status: 'rejected' as const, reason: e };
+            }
+          })
+        );
+
+        // Pretty-print outcomes
+        results.forEach((r) => {
+          if ((r as any).value) {
+            const { name, status } = (r as any).value;
+            console.log(`[init] result ${name}: ${status}`);
+          } else {
+            const { name } = (r as any).reason ?? { name: 'unknown' };
+            console.log(`[init] result ${name}: rejected`);
           }
         });
         
         const loadTime = performance.now() - startTime;
         console.log(`Admin data loaded in ${Math.round(loadTime)}ms`);
+        
+        // Belt-and-suspenders fallback for loadCycles
+        if (winnerCycles.length === 0) {
+          console.log('[init] winnerCycles empty after batch; forcing direct loadCycles()');
+          try { 
+            await loadCycles(); 
+          } catch (e) { 
+            console.error('direct loadCycles failed', e); 
+          }
+        }
       } catch (error) {
         console.error('Error loading initial admin data:', error);
       } finally {
@@ -1570,6 +1598,7 @@ function AdminComponent() {
 
   // Winner cycle management functions
   const loadCycles = async () => {
+    console.log('🔄 loadCycles() ENTER');
     console.log('🔄 loadCycles() called - attempting to fetch winner cycles');
     try {
       const token = localStorage.getItem('token');
