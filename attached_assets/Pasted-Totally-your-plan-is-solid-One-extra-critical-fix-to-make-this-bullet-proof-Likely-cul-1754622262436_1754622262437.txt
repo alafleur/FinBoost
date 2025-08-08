@@ -1,0 +1,61 @@
+Totally—your plan is solid. One **extra-critical fix** to make this bullet-proof:
+
+# 🔧 Likely culprit you’re still hitting: hoisting/order
+
+If `loadCycles` is declared as `const loadCycles = async () => {…}` **below** the init `useEffect`, then just **referencing** it while building the `Promise.allSettled([...])` array can throw *“Cannot access 'loadCycles' before initialization”* synchronously. That error happens **before** your first log line and **before** any fetch—so you’d see:
+
+* no console from `loadCycles()`
+* no `/api/admin/winner-cycles` call
+* empty `winnerCycles`
+* and nothing obvious unless you’re watching the exact stack
+
+## Fix (Step 0): make `loadCycles` hoisted or defined earlier
+
+Either **move the function above** the init effect, **or** switch it to a hoisted function declaration.
+
+```ts
+// ✅ Hoisted declaration
+async function loadCycles() {
+  console.log('🔄 loadCycles() ENTER');
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/auth'; return; }
+
+  const res = await fetch('/api/admin/winner-cycles', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/auth';
+    return;
+  }
+
+  if (!res.ok) throw new Error(`Failed to load cycles: ${res.status}`);
+  const data = await res.json();
+  setWinnerCycles(data?.cycles ?? []);
+}
+```
+
+*(If you prefer to keep the arrow function, just move it **above** the init `useEffect` so it’s initialized before use.)*
+
+# ✅ Then keep your minimal, surgical changes
+
+1. **Named task harness** around `Promise.allSettled` (so we *see* if `loadCycles` starts/finishes).
+2. **Can’t-miss log** at the top of `loadCycles()`.
+3. **Post-batch fallback** call:
+
+```ts
+if (winnerCycles.length === 0) {
+  console.log('[init] winnerCycles empty after batch; forcing direct loadCycles()');
+  try { await loadCycles(); } catch (e) { console.error('direct loadCycles failed', e); }
+}
+```
+
+# Expected after this
+
+* Console shows: `[init] starting loadCycles` ➜ `🔄 loadCycles() ENTER`
+* Network shows `GET /api/admin/winner-cycles`
+* UI mounts **Winner Selection Cycles** with **July 2/2 Test Cycle** and the blue **Process PayPal Disbursements** button.
+
+If it still doesn’t fire, paste me the exact init `Promise.allSettled([...])` block and where `loadCycles` is defined—we’ll diff it line-by-line.
