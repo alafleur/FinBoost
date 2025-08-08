@@ -3015,18 +3015,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all winner cycles
-  app.get("/api/admin/winner-cycles", async (req, res) => {
+  app.get("/api/admin/winner-cycles", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
-      if (!token) {
-        return res.status(401).json({ error: "Access token required" });
-      }
-
-      const user = await storage.getUserByToken(token);
-      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
-        return res.status(403).json({ error: "Admin access required" });
-      }
-
       const cycles = await db
         .select()
         .from(winnerSelectionCycles)
