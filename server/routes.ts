@@ -2793,6 +2793,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Process PayPal disbursements for selected cycle winners
+  app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      const { selectedWinnerIds } = req.body;
+
+      if (!selectedWinnerIds || selectedWinnerIds.length === 0) {
+        return res.status(400).json({ error: "No winners selected for disbursement" });
+      }
+
+      // Get the cycle setting to verify it exists
+      const cycle = await storage.getCycleSetting(cycleId);
+      if (!cycle) {
+        return res.status(404).json({ error: "Cycle not found" });
+      }
+
+      // Get selected winners with their details
+      const winners = await db
+        .select({
+          id: cycleWinnerSelections.id,
+          userId: cycleWinnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          paypalEmail: users.paypalEmail,
+          snapshotPaypalEmail: cycleWinnerSelections.snapshotPaypalEmail,
+          tier: cycleWinnerSelections.tier,
+          tierRank: cycleWinnerSelections.tierRank,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          payoutStatus: cycleWinnerSelections.payoutStatus
+        })
+        .from(cycleWinnerSelections)
+        .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(and(
+          eq(cycleWinnerSelections.cycleSettingId, cycleId),
+          inArray(cycleWinnerSelections.id, selectedWinnerIds)
+        ));
+
+      if (winners.length === 0) {
+        return res.status(404).json({ error: "No valid winners found for selected IDs" });
+      }
+
+      // Filter to only winners with PayPal emails
+      const eligibleWinners = winners.filter(w => w.paypalEmail || w.snapshotPaypalEmail);
+      
+      if (eligibleWinners.length === 0) {
+        return res.status(400).json({ error: "No winners with valid PayPal emails selected" });
+      }
+
+      // Prepare PayPal payout recipients
+      const recipients = eligibleWinners.map(winner => ({
+        email: winner.paypalEmail || winner.snapshotPaypalEmail,
+        amount: winner.payoutFinal, // Amount in cents
+        currency: "USD",
+        note: `FinBoost ${winner.tier} tier reward for ${cycle.cycleName}`,
+        recipientId: `cycle_${cycleId}_winner_${winner.id}_${Date.now()}`
+      }));
+
+      // Create PayPal batch payout
+      const { createPaypalPayout } = await import('./paypal');
+      const payoutResult = await createPaypalPayout(recipients);
+
+      // Update winner payout status
+      await db.update(cycleWinnerSelections)
+        .set({
+          payoutStatus: 'processed',
+          payoutProcessedAt: new Date()
+        })
+        .where(inArray(cycleWinnerSelections.id, selectedWinnerIds));
+
+      res.json({
+        success: true,
+        message: `Successfully initiated payouts to ${eligibleWinners.length} winners`,
+        batchId: payoutResult.batch_header?.payout_batch_id,
+        totalAmount: eligibleWinners.reduce((sum, w) => sum + (w.payoutFinal || 0), 0),
+        totalRecipients: eligibleWinners.length,
+        skippedCount: winners.length - eligibleWinners.length
+      });
+    } catch (error) {
+      console.error("Error processing cycle disbursements:", error);
+      res.status(500).json({ error: "Failed to process disbursements" });
+    }
+  });
+
   // Get cycle winners with current allocations
   app.get("/api/admin/winner-cycles/:cycleId/winners", async (req, res) => {
     try {
