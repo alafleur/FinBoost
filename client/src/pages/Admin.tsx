@@ -576,6 +576,11 @@ function AdminComponent() {
         'Last Login': user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'
       }));
 
+    if (!exportData.length) {
+      toast({ title: "No data", description: "Nothing to export", variant: "destructive" });
+      return;
+    }
+
     if (format === 'csv') {
       const csvContent = [
         Object.keys(exportData[0]).join(','),
@@ -622,6 +627,11 @@ function AdminComponent() {
         ).join('; ')
       };
     });
+
+    if (!exportData.length) {
+      toast({ title: "No data", description: "Nothing to export", variant: "destructive" });
+      return;
+    }
 
     if (format === 'csv') {
       const csvContent = [
@@ -1370,6 +1380,7 @@ function AdminComponent() {
   // CRUD Handlers for Modules
   const handleCreateModule = async () => {
     try {
+      const token = localStorage.getItem('token');
       const moduleData = {
         ...moduleForm,
         quiz: JSON.stringify(quizQuestions)
@@ -1378,7 +1389,8 @@ function AdminComponent() {
       const response = await fetch('/api/admin/modules', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(moduleData)
       });
@@ -1544,11 +1556,13 @@ function AdminComponent() {
   // Handler for toggling user subscription status
   const handleToggleSubscription = async (userId: number, currentStatus: string) => {
     try {
+      const token = localStorage.getItem('token');
       const newStatus = currentStatus === 'premium' ? 'free' : 'premium';
       const response = await fetch(`/api/admin/users/${userId}/subscription`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ subscriptionStatus: newStatus })
       });
@@ -1579,10 +1593,12 @@ function AdminComponent() {
   // CRUD Handlers for Users
   const handleCreateUser = async (userData: any) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(userData)
       });
@@ -1608,10 +1624,12 @@ function AdminComponent() {
 
   const handleUpdateUser = async (userId: number, updateData: any) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(updateData)
       });
@@ -1637,8 +1655,12 @@ function AdminComponent() {
 
   const handleDeleteUser = async (userId: number) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {

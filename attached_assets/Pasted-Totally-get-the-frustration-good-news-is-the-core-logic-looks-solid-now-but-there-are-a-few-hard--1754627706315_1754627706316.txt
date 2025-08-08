@@ -1,0 +1,60 @@
+Totally get the frustration—good news is the core logic looks solid now, but there are a few **hard blockers** and a couple QoL tweaks I’d fix next.
+
+# High-impact issues to fix
+
+1. **CSV export typo → crashes the build**
+
+* In both export helpers you’ve got `, .exportData.map(...)` instead of the spread `, ...exportData.map(...)`. That leading dot is a syntax error and will nuke the bundle.
+
+  * Example shown in your current file set: `Object.keys(exportData[0]).join(',')` followed by a line that starts with `.exportData.map(...)` instead of `...exportData.map(...)`. Fix to the spread version everywhere this occurs.
+
+2. **Missing auth headers on several Admin user endpoints**
+
+* These calls are hitting admin routes without `Authorization: Bearer <token>`:
+
+  * `PATCH /api/admin/users/:userId/subscription` (no token)
+  * `POST /api/admin/users` (no token)
+  * `PUT /api/admin/users/:userId` (no token)
+  * `DELETE /api/admin/users/:userId` (no token)
+
+  These will 401/403 in any real environment. Mirror how you handled `/modules/:id/publish` by pulling the token and adding the header. Example with context:
+
+3. **One broken string literal in a PayPal placeholder (compile-time break)**
+
+* There’s a `placeholder="paypal@example.` (missing closing quote and domain) that will break TSX parsing. Make it `"paypal@example.com"`. Evidence of the truncated placeholder appears in the current variant set; fix any occurrence you find.&#x20;
+
+# Medium / nice-to-haves
+
+4. **Export when dataset is empty**
+
+* `Object.keys(exportData[0])` throws if there are no rows. Guard with:
+
+  ```ts
+  if (!exportData.length) { toast({ title: "No data", description: "Nothing to export" }); return; }
+  ```
+
+  (Same spot as the spread fix.)
+
+5. **Consistency: add auth on all admin fetches**
+
+* You already use the token on a bunch of endpoints (e.g., winner selection execute). For consistency/safety, bring the user CRUD calls in line with that pattern. See how you did it here for reference: `Authorization: Bearer ${token}`.
+
+# What’s good (don’t change)
+
+* The **named task harness** in the init `useEffect` is great—gives you traceable starts/finishes and isolates failures.
+* `loadCycles()` was moved above the effect so the reference exists—nice. The fallback re-invocation if `winnerCycles` is empty is also smart.
+* Enhanced winners pagination + the import “cache reset → reload from page 1” flow is clean.
+
+# TL;DR fix list you can apply right now
+
+* Replace every `, .exportData.map(` with `, ...exportData.map(` in both export helpers.
+* Add token headers to:
+
+  * `PATCH /users/:id/subscription`
+  * `POST /users`
+  * `PUT /users/:id`
+  * `DELETE /users/:id`
+* Fix the PayPal placeholder string so it’s a valid TSX string.&#x20;
+* Add an empty-data guard to both export helpers.
+
+Knock those out and your PayPal/email sync work won’t be drowned out by silly compile/auth gotchas. Want me to patch the exact lines for you?
