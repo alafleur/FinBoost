@@ -1,0 +1,72 @@
+Short version: the green **“Process PayPal Disbursements”** button is posting to your API **without a JSON body**, while your “selected disbursements” path *does* send a body. If your backend expects either `selectedWinnerIds` or a flag like `processAll`, the “big button” call will 400/500 and you’ll fall into the generic “Failed to process disbursements” toast (exactly what you’re seeing).
+
+## What I saw in your code
+
+* The *selective* handler sends JSON with the selected ids:
+
+  * `POST /api/admin/winner-cycles/:id/process-disbursements` with `{ selectedWinnerIds }` and `Content-Type: application/json`.&#x20;
+* The **main** “Process PayPal Disbursements” button posts **with no body** (and no `Content-Type`), then immediately calls `response.json()` and falls into the catch on error → your red snackbar. &#x20;
+
+So the two buttons hit the **same endpoint**, but only one supplies what the backend likely needs.
+
+## Why the UI shows “750 eligible” but still fails
+
+That “750 eligible” comes from your client-side count of rows with valid PayPal emails. But the big button doesn’t pass those ids; it’s relying on the server to figure it out. If your server now requires explicit ids (or a `processAll` flag), the call returns an error and you show the generic toast.
+
+## Fix (front-end)
+
+Make the big button use the same payload shape as your selective flow. For “all eligible,” just pass the ids of all eligible winners (or a `processAll: true` if your API supports it).
+
+**Patch (conceptual):** wire the big button to your existing helper and send JSON:
+
+```ts
+// 1) Reuse your selective helper:
+onClick={handleProcessSelectedDisbursements}
+
+// 2) Or, if you want a dedicated "process all" call, send a body:
+const handleProcessAllDisbursements = async () => {
+  try {
+    setIsProcessingDisbursements(true);
+    const token = localStorage.getItem('token');
+
+    // Compute all eligible winner ids from your current table state
+    const allEligibleIds = enhancedWinnersData.winners
+      .filter(w => (w.paypalEmail && w.paypalEmail !== 'Not set'))
+      .map(w => w.id);
+
+    const res = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ selectedWinnerIds: allEligibleIds, processAll: true })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed');
+
+    // success toast + refresh
+  } catch (e) {
+    // error toast
+  } finally { setIsProcessingDisbursements(false); }
+};
+```
+
+Where this matters in your file:
+
+* The current no-body post is here—switch it to the helper or add a JSON payload.&#x20;
+* Your selective version already does the right thing—JSON + ids. You can reuse it for “all” by pre-populating the selection set.&#x20;
+
+## Also double-check
+
+1. **Which id your API expects.** You call `/api/admin/winner-cycles/${selectedCycle.id}/...`. Make sure `selectedCycle.id` is the **winner-cycle id** the backend route expects (not a cycle-setting id). A mismatch will 404/500 and hit your generic toast.
+2. **Non-JSON error responses.** If the API returns HTML on 500, `response.json()` throws and you land in the catch with the same generic error. You could guard it:
+
+```ts
+let data: any = {};
+try { data = await response.json(); } catch {}
+if (!response.ok || !data.success) { /* show data.error or status text */ }
+```
+
+If you want, paste the backend route signature for `POST /winner-cycles/:id/process-disbursements` and I’ll align the exact payload/headers so both buttons behave consistently.
