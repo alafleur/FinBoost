@@ -1784,9 +1784,9 @@ function AdminComponent() {
           payoutCalc: winner.payoutCalculated || 0,
           payoutOverride: winner.payoutOverride || 0,
           payoutFinal: winner.payoutFinal || 0,
-          paypalEmail: winner.paypalEmail || 'Not set',
+          paypalEmail: winner.paypalEmail || winner.snapshotPaypalEmail || 'Not set',
           status: winner.payoutStatus || 'pending',
-          lastModified: winner.lastModified || new Date().toISOString()
+          lastModified: winner.lastModified || null
         }));
 
         setEnhancedWinnersData({

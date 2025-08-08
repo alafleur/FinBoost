@@ -1,0 +1,38 @@
+Alright, honest take:
+
+# What’s solid
+
+* The init harness is clean and defensive: named tasks + `Promise.allSettled` + a fallback `loadCycles()` if nothing came back. That’ll make this class of heisenbugs much rarer.  &#x20;
+* You now load **both** winner tables when the **Cycle Operations** tab opens (basic + enhanced). This was the right call so the “Enhanced Management” view isn’t blank.&#x20;
+* Tabs are properly **controlled** (`value` / `onValueChange`) and include a trigger for `cycle-operations`. That unblocked the effect.&#x20;
+* `loadCycles()` has proper 401/403 handling with a redirect, so you don’t sit in a broken state.&#x20;
+
+# Things to fix (these matter)
+
+1. **JSX spread typos in Edit User dialog (will crash UI)**
+
+   You’ve got several `setEditingUser({.editingUser, ...})` calls. That’s invalid JS—should be a **spread**:
+
+   ```ts
+   setEditingUser({ ...editingUser, firstName: e.target.value })
+   ```
+
+   Same issue for `lastName`, `totalPoints`, `tier`, `paypalEmail`, etc. Fix all instances. (Example problematic lines shown below.)
+   &#x20;  &#x20;
+
+2. **Enhanced winners: field fallback**
+
+   In your enhanced mapping you (correctly) fall back `email: winner.email ?? winner.userEmail`. Keep that approach across the app and do the same for PayPal: show `winner.paypalEmail` (live join) if present, else `snapshotPaypalEmail` (if you still store it). The tab effect now loads the enhanced list, but the column will look empty if the API returns `userEmail` and your UI only reads `email`. (Your current mapper appears to handle both for email—do the same for PayPal in one helper.)
+
+3. **Button gating — use a boolean from the API**
+
+   Don’t re-implement string checks in the UI. Key off a backend-provided `paypalConfigured` (or compute `Boolean(paypalEmail || snapshotPaypalEmail)` in one place). That keeps the “Process PayPal Disbursements” button logic consistent with the data contract you’re building in the API.
+
+# Nice-to-haves (low risk, good hygiene)
+
+* The fallback `if (winnerCycles.length === 0) await loadCycles()` in init can double-call `loadCycles()` (since it’s also in the task list). It’s fine functionally—just be aware you’ll see two `/winner-cycles` requests on cold load. If that nags you, stash the settled results and only call the fallback when the **task outcome** for `loadCycles` was rejected.&#x20;
+* When transforming enhanced winners, you set `lastModified` to “now” if missing. That can make rows look like they change every fetch. Consider leaving it `null`/`undefined` if you don’t have a real timestamp.
+
+# Bottom line
+
+You’re 90% there. The **only blocking bug** I see in the current file is the spread typo that will blow up the Edit User dialog. Fix those `setEditingUser` calls, keep the unified PayPal fallback (live join → snapshot), and gate the disbursement button off a boolean. After that, the UI should reflect the backfilled emails and the button should finally show up when expected.
