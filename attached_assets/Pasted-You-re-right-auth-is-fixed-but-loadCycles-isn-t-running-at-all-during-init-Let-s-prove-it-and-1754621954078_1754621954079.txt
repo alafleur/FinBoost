@@ -1,0 +1,104 @@
+You’re right: auth is fixed, but `loadCycles()` isn’t running at all during init. Let’s prove it and make it bullet-proof.
+
+# What’s happening (and where)
+
+* `loadCycles()` is *intended* to run inside the initial `useEffect` via `Promise.allSettled([... , loadCycles().catch(...) ])`. You can see it in the init bundle here.&#x20;
+* The `loadCycles` function exists further down and sets `winnerCycles` when the API returns.&#x20;
+* The Admin component does mount (wrapped in an `ErrorBoundary`).&#x20;
+
+Given your logs (no `console.log` from the function, no `/api/admin/winner-cycles` traffic), the most likely culprit is the *invocation site*—`Promise.allSettled`—where a sync error in any element expression can short-circuit or a rejected promise is swallowed by the per-call `.catch`, masking the failure before your function body’s first log line.
+
+# Minimal, surgical fixes
+
+## 1) Add a “named” results map so we can see exactly what ran
+
+Replace the `Promise.allSettled` block with this safer harness that (a) logs each task by name, (b) *never* swallows a sync error silently, and (c) guarantees `loadCycles` actually executes.
+
+```ts
+const tasks: Record<string, () => Promise<any>> = {
+  fetchData,
+  fetchCycleSettings,
+  fetchUserCyclePoints,
+  fetchPendingProofs,
+  fetchPointActions,
+  fetchSupportTickets,
+  fetchCyclePoolSettings,
+  fetchCurrentPoolSettings,
+  fetchCycleWinnerSelections,
+  loadCycles, // <- the one we care about
+};
+
+const results = await Promise.allSettled(
+  Object.entries(tasks).map(async ([name, fn]) => {
+    console.log(`[init] starting ${name}`);
+    try {
+      const out = await fn();
+      console.log(`[init] ${name} ✓`);
+      return { name, status: 'fulfilled' as const, out };
+    } catch (e) {
+      console.error(`[init] ${name} ✗`, e);
+      return { name, status: 'rejected' as const, reason: e };
+    }
+  })
+);
+
+// Pretty-print outcomes
+results.forEach((r) => {
+  // r is PromiseSettledResult<{name, status, ...}>
+  if ((r as any).value) {
+    const { name, status } = (r as any).value;
+    console.log(`[init] result ${name}: ${status}`);
+  } else {
+    const { name } = (r as any).reason ?? { name: 'unknown' };
+    console.log(`[init] result ${name}: rejected`);
+  }
+});
+```
+
+(You can drop this after debugging, but it will instantly tell you if `loadCycles` actually ran.)
+
+## 2) Add a can’t-miss log at the very top of `loadCycles()`
+
+You already added rich logs in the `(1)` file. Keep the very first line as:
+
+```ts
+console.log('🔄 loadCycles() ENTER');
+```
+
+The function definition we’re touching is this one.&#x20;
+
+## 3) Call `loadCycles()` once more *after* the batch as a belt-and-suspenders fallback
+
+Right after the `Promise.allSettled` block, add:
+
+```ts
+if (winnerCycles.length === 0) {
+  console.log('[init] winnerCycles empty after batch; forcing direct loadCycles()');
+  try { await loadCycles(); } catch (e) { console.error('direct loadCycles failed', e); }
+}
+```
+
+This ensures a single missed execution doesn’t hide the section.
+
+## 4) Quick dependency sanity checks
+
+* `toast` exists in this scope (it does: `useToast()` at top of component), so it won’t throw.
+* `setWinnerCycles` is defined before `loadCycles` uses it (it is).
+* The init effect is there and runs once on mount.&#x20;
+
+# Why this works
+
+* If `loadCycles()` was being rejected or never invoked within the `Promise.allSettled` array, the named harness will print a line for it (“starting loadCycles”), and either a ✓ or the precise error. No more silent failure.
+* Even in the worst case, the post-batch direct call guarantees we populate `winnerCycles`, which mounts the whole **Winner Selection Cycles** section (and your **Process PayPal Disbursements** button).
+
+# Acceptance criteria (what you should see)
+
+* Console:
+
+  * `[init] starting loadCycles`
+  * `🔄 loadCycles() ENTER`
+  * `🌐 Making API call to /api/admin/winner-cycles` (from your function logs)
+* Network: a GET to `/api/admin/winner-cycles`
+* UI: “Winner Selection Cycles” shows your **July 2/2 Test Cycle** with the green **Selection Complete** badge and the blue **Process PayPal Disbursements** button.
+
+If you want, I can also factor a tiny `run(name, fn)` helper so every future init call gets the same robust logging/handling.
