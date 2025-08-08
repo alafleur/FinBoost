@@ -1,0 +1,93 @@
+Got it. Since you want **stable code** and to **actually test flows now**, here’s the tight, minimal priority list that’ll get you unblocked without churning UI.
+
+# Top priorities (do these first)
+
+1. **Fix any build breakers (syntax)**
+
+* Replace every bad spread: `({ .prev, ... })` → `({ ...prev, ... })`; `[.modules, x]` → `[...modules, x]`.
+* These are zero-risk, pure bug fixes. Without them, you can’t reliably test anything.
+
+2. **Make all admin fetches consistently authed**
+
+* Add a tiny helper and swap calls (mechanical change, low risk):
+
+  ```ts
+  const fetchWithAuth = (url: string, init: RequestInit = {}) => {
+    const token = localStorage.getItem('token');
+    return fetch(url, { ...init, headers: { ...(init.headers||{}), Authorization: `Bearer ${token||''}` }});
+  };
+  ```
+* Use it for **every `/api/admin/*`** GET/POST/PATCH/DELETE (users, modules, pending-proofs, winner endpoints, etc.). This prevents random 401s that look like “data missing.”
+
+3. **Ensure winners actually load on tab open**
+
+* Lock the tab key in a constant (avoids “operations” vs “cycle-operations” mismatches):
+
+  ```ts
+  const TAB_CYCLE_OPS = 'cycle-operations';
+  ```
+* Your `useEffect` should check `activeTab === TAB_CYCLE_OPS` and call
+
+  * `loadPaginatedWinnerDetails(activeCycle.id, 1, pageSize)`
+  * `loadEnhancedWinnersPaginated(activeCycle.id, 1, pageSize)`
+* This guarantees the tables populate when you click into Cycle Ops.
+
+4. **PayPal email display fallback (so the button can appear)**
+
+* Add two tiny helpers and use them in the table + button logic:
+
+  ```ts
+  const getPaypalDisplay = (row:any) => row.paypalEmail ?? row.snapshotPaypalEmail ?? null;
+  const isPaypalConfigured = (row:any) => Boolean(getPaypalDisplay(row));
+  ```
+* This works **today** with your backfill and will work **later** when the backend JOIN is live.
+
+5. **(Optional but smart) Guard exports**
+
+* Before building CSV/XLSX, bail gracefully if dataset is empty. Saves time debugging “export does nothing.”
+
+# Nice-to-haves (only if you’ve got 10 extra minutes)
+
+* **Pagination id source:** Ensure you’re using the **active cycle id** for next/prev page loaders (not `currentPoolSettings.id` unless you explicitly set it). This fixes “pagination does nothing” bugs.
+* **Disburse button gating:** For testing, it’s fine to always show it; once you see emails in the table, gate it with:
+
+  ```ts
+  const paypalReady = winners.some(isPaypalConfigured);
+  // <Button disabled={!paypalReady}>Process PayPal Disbursements</Button>
+  ```
+
+# 5-minute test script (what to click to prove it works)
+
+1. **Auth sanity**
+
+   * Hard refresh → confirm no console errors; if token expired, you’re redirected to `/auth`.
+
+2. **Cycle Operations loads**
+
+   * Click **Cycle Operations** tab.
+   * In Network, you should see calls to:
+
+     * `/api/admin/cycle-winner-details/:id/paginated`
+     * `/api/admin/cycle-winner-details/:id/enhanced/paginated` (or your enhanced route)
+   * The tables render (no spinners forever).
+
+3. **PayPal emails appear**
+
+   * Row for `user180@test.com` shows `lafleur.andrew@gmail.com` in “PayPal Email”.
+   * (This is using backfilled `snapshotPaypalEmail` or live join if backend is done.)
+
+4. **Disburse button shows/enables**
+
+   * If at least one winner shows an email, the **Process PayPal Disbursements** button is visible (and enabled if you wired the boolean).
+
+5. **Admin actions work**
+
+   * Create a module → list updates without crash (array spread fix).
+   * Approve & reject a proof → both succeed (headers via `fetchWithAuth`).
+
+# Why this set is low-risk
+
+* It’s **mostly mechanical**: fix typos, centralize auth, ensure the tab loads data, and add a pure read-only fallback for PayPal display.
+* You’re **not changing** selection logic, payouts, or any sensitive flows—just making data show up so you can test the PayPal path you’ve been chasing.
+
+If you want, I can generate a **single diff** limited to those five priority items so Replit can apply them in one shot and you can start clicking through immediately.
