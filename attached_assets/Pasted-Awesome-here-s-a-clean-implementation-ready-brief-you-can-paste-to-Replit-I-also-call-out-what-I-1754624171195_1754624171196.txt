@@ -1,0 +1,194 @@
+Awesome — here’s a clean, implementation-ready brief you can paste to Replit. I also call out what I changed from the previous plan at the end.
+
+# FinBoost – PayPal Email Sync Fix (Backend + Frontend)
+
+**Goal:** Ensure winners in **Cycle Operations → Selected Winners – Enhanced Management** show the **live PayPal email** from `users` so the **Process PayPal Disbursements** button appears whenever at least one winner is configured.
+
+**Root Cause:** Winner rows are served from selection details without a reliable join to `users` on read (or they’re stale/cached). Users tab shows updated email; winners table shows “Not configured”.
+
+---
+
+# Phase 1 — Trace & Confirm (5–10 min)
+
+1. Identify the exact handlers used by:
+
+   * `GET /api/admin/cycle-winner-details/:cycleId/paginated`
+   * `GET /api/admin/winners/data/:cycleId` (or whichever the table uses)
+2. Trace handler → service → DB query. Confirm whether:
+
+   * We **join to `users`** on read, and
+   * The response includes a **canonical `paypalEmail`** field (live, not snapshot).
+3. Temporarily log per request: `{ cycleId, winnersReturned, paypalConfiguredCount }`.
+
+---
+
+# Phase 2 — Immediate Backfill for Today’s Cycle (10 min)
+
+> Purpose: get the UI unblocked tonight, then ship the permanent fix.
+
+**MySQL variant**
+
+```sql
+UPDATE winner_selection_details wsd
+JOIN users u ON u.id = wsd.user_id
+SET wsd.paypal_email = u.paypal_email
+WHERE wsd.cycle_id = :cycleId
+  AND wsd.paypal_email IS NULL
+  AND u.paypal_email IS NOT NULL;
+```
+
+**Postgres variant**
+
+```sql
+UPDATE winner_selection_details wsd
+SET paypal_email = u.paypal_email
+FROM users u
+WHERE u.id = wsd.user_id
+  AND wsd.cycle_id = $1
+  AND wsd.paypal_email IS NULL
+  AND u.paypal_email IS NOT NULL;
+```
+
+* Run for **cycle 18 (July 2/2)** first. Spot-check 3–5 rows (including `user180@test.com`).
+* After verifying, **repeat for all open (not yet disbursed) cycles**.
+
+---
+
+# Phase 3 — Permanent API Fix (15–20 min)
+
+## 3.1 Read-time join (single source of truth)
+
+Update the **base query** used by both endpoints (paginated + non-paginated) to **always join `users`** and **select a canonical `paypalEmail`**:
+
+```sql
+SELECT
+  wsd.id,
+  wsd.cycle_id,
+  wsd.user_id,
+  wsd.overall_rank,
+  wsd.tier_rank,
+  wsd.payout_percent,
+  wsd.payout_amount,
+  u.email          AS userEmail,
+  u.paypal_email   AS paypalEmail  -- <- live email from users
+FROM winner_selection_details wsd
+JOIN users u ON u.id = wsd.user_id
+WHERE wsd.cycle_id = :cycleId
+ORDER BY wsd.overall_rank
+LIMIT :limit OFFSET :offset;
+```
+
+> If we still keep `wsd.paypal_email` as a snapshot, that’s fine — but **prefer `u.paypal_email`** on read.
+
+## 3.2 API response contract
+
+* Add `paypalConfigured: boolean = !!paypalEmail && paypalEmail.includes('@')`.
+* (Optional but nice) Also return `snapshotPaypalEmail` if we still store it.
+
+**Example JSON row**
+
+```json
+{
+  "userId": 180,
+  "username": "earnachiever180",
+  "userEmail": "user180@test.com",
+  "paypalEmail": "lafleur.andrew@gmail.com",
+  "paypalConfigured": true,
+  "overallRank": 1,
+  "tierRank": 1,
+  "payoutPercent": 0.01,
+  "payoutAmount": 21.16
+}
+```
+
+## 3.3 Caching & pagination
+
+* Ensure **both endpoints** use the **same service/query** so pagination and the main table can’t diverge.
+* Invalidate any cache on:
+
+  * user PayPal update,
+  * selection sealed/unsealed,
+  * backfill run.
+
+## 3.4 Policy: “sealed” meaning
+
+* **Sealed** locks the **selection & payout math**, **not** payment contact metadata. Keep PayPal email **live** until `disbursementCompleted = true`. (If you disagree, we can snapshot on seal, but then we must keep a resync job.)
+
+---
+
+# Phase 4 — Frontend Enhancements (10–15 min)
+
+## 4.1 Single resolver for display
+
+Create a small util so the table and the button use the same rule:
+
+```ts
+export const getPaypalForRow = (row: any) =>
+  row.paypalEmail ?? row.snapshotPaypalEmail ?? null;
+```
+
+Use it in the column renderer:
+
+```ts
+const email = getPaypalForRow(row);
+return email ? email : 'Not configured';
+```
+
+## 4.2 Button enablement
+
+Enable **Process PayPal Disbursements** when:
+
+* `selection.sealed === true`
+* `winners.some(w => w.paypalConfigured)` is **true**
+
+No more string checks in the UI — rely on the API’s `paypalConfigured`.
+
+## 4.3 “Sync” control (optional but useful)
+
+Add an admin-only **“Sync PayPal Emails”** button that calls a backend route to re-run the Phase-2 backfill for the active cycle (handy for support).
+
+---
+
+# Phase 5 — Tests & Validation (10–15 min)
+
+## 5.1 API spot checks
+
+* For **cycle 18**, `GET /…/paginated` returns `paypalEmail: "lafleur.andrew@gmail.com"` for `user180@test.com`.
+* Response also includes `paypalConfigured: true`.
+
+## 5.2 E2E happy path
+
+* Update a user’s PayPal email on **Users** tab → refresh **Cycle Operations** → the email appears in table → **Process PayPal Disbursements** button is enabled.
+
+## 5.3 E2E edge cases
+
+* If **no winners** have configured PayPal, button remains hidden/disabled.
+* After **backfill**, result shows `paypalConfigured` count > 0 (log proves it).
+* Removing PayPal email removes the button when no configured winners remain.
+
+## 5.4 Audit
+
+* When disbursing, persist the exact `disbursementEmail` used per row (even if user later changes it).
+
+---
+
+# Implementation Notes / Guardrails
+
+* Ensure indexes on `winner_selection_details.user_id` (and `cycle_id`) for the join.
+* Normalize emails lower-case when saving; trim whitespace.
+* If you memoize/paginate in the client, refetch after PayPal update or expose an admin “Force refresh”.
+
+---
+
+# What Changed vs. the Previous Plan
+
+* **Two-track fix made explicit:** We will **backfill now** (to unblock UI tonight) **and** implement a **read-time join** so the problem doesn’t recur.
+* **Unified query path:** Both **paginated and non-paginated** endpoints must share the same service/query so they can’t drift.
+* **API contract strengthened:** Added `paypalConfigured` boolean and (optionally) `snapshotPaypalEmail` to reduce UI logic mistakes.
+* **Sealed policy clarified:** Sealing doesn’t freeze contact metadata — emails stay live until disbursement completes.
+* **Diagnostics & logs:** We’ll log the count of configured winners per response; plus a manual **Sync** action to fix future one-offs quickly.
+* **Frontend simplification:** Centralized the fallback logic and button gating so it’s deterministic and matches the backend contract.
+
+---
+
+If you want, I can also draft the exact Prisma/TypeORM code for the JOIN and the backfill script once you confirm your ORM/database.
