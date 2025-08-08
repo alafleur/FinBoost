@@ -417,6 +417,18 @@ function AdminComponent() {
   const [showCreateCycleDialog, setShowCreateCycleDialog] = useState(false);
   const [isRunningSelection, setIsRunningSelection] = useState(false);
   const [selectionResults, setSelectionResults] = useState<any>(null);
+
+  // ChatGPT Step 2: Define isSelectionSealed in parent component
+  const isSelectionSealed = useMemo(() => {
+    const activeCycle = cycleSettings.find(c => c.isActive);
+
+    // treat any of these as "sealed"
+    return Boolean(
+      activeCycle?.selectionCompleted ||                     // server says selection done
+      selectionResults?.isSealed ||                          // result flag from execute endpoint (if present)
+      selectionResults?.selectionMode === 'loaded_from_database' // when we loaded existing winners
+    );
+  }, [cycleSettings, selectionResults]);
   const [isProcessingDisbursements, setIsProcessingDisbursements] = useState(false);
   const [winnerSelectionMode, setWinnerSelectionMode] = useState('weighted_random');
   const [tierSettings, setTierSettings] = useState({
@@ -3430,6 +3442,7 @@ function AdminComponent() {
             <CycleOperationsTab 
               cycleSettings={cycleSettings} 
               onRefresh={fetchData}
+              isSelectionSealed={isSelectionSealed}
               helpers={{
                 getPaypalDisplay,
                 isPaypalConfigured,
