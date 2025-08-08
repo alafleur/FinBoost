@@ -1,0 +1,24 @@
+Quick read: they did a pretty solid job. A few nits to tighten.
+
+# What’s good
+
+* **Tabs are now controlled** (`value={activeTab}` / `onValueChange={setActiveTab}`), and there’s a **trigger for `cycle-operations`**. That unblocks tab-driven loads.&#x20;
+* The **effect checks the correct tab value** (`'cycle-operations'`) and kicks `loadPaginatedWinnerDetails` + restores selection results.&#x20;
+* The **init harness** runs named tasks (including `loadCycles`) and has a **belt-and-suspenders re-call** if `winnerCycles` is still empty. Nice. &#x20;
+* Enhanced winners mapper is in place and **reads `winner.paypalEmail`** for the column—ready to show live PayPal emails once the backend join lands.&#x20;
+
+# Watch-outs / suggested tweaks
+
+1. **Duplicate init fetches.**
+   You’ve got the big **named-tasks init** effect, *and* a second effect later that calls `fetchData`, `fetchPendingProofs`, etc. again. That’s redundant work and can cause flicker/race. Kill the second one. &#x20;
+
+2. **Enhanced vs. basic winners.**
+   The tab effect only calls `loadPaginatedWinnerDetails` (the “basic” list). If you want the **Enhanced Management** table to auto-populate on tab open, also call `loadEnhancedWinnersPaginated` there (same params). Right now it’s not called on tab entry.&#x20;
+
+3. **Field names: `email` vs `userEmail`.**
+   Your enhanced mapper reads `winner.email`. If the backend returns `userEmail` (common when joining), that column will look empty. Either align the API to output `email` or map both: `email: winner.email ?? winner.userEmail`.&#x20;
+
+4. **Button gating (double-check).**
+   I don’t see the disbursement-button enable logic here (likely in `CycleOperationsTab`). Make sure it keys off an API boolean (e.g., `paypalConfigured`) or `Boolean(w.paypalEmail || w.snapshotPaypalEmail)`—not string matching in the UI.
+
+If you want, paste the winner-details endpoint response shape and I’ll tell you exactly which field names to standardize so the Enhanced table and the button both light up on first try.

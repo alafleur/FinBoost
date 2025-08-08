@@ -806,13 +806,17 @@ function AdminComponent() {
     }
   }, [selectedCycle]);
 
-  // Load paginated winners when Cycle Operations tab is opened or when cycle selection is completed
+  // Load both basic and enhanced winners when Cycle Operations tab is opened
   useEffect(() => {
     if (activeTab === 'cycle-operations') {
       const activeCycle = cycleSettings.find(c => c.isActive);
       if (activeCycle?.id) {
-        console.log('Loading paginated winners for cycle-operations tab');
+        console.log('Loading both basic and enhanced winners for cycle-operations tab');
+        // Load basic winners list
         loadPaginatedWinnerDetails(activeCycle.id, 1, winnersPerPage);
+        // Load enhanced winners table 
+        loadEnhancedWinnersPaginated(activeCycle.id, 1, winnersPerPage);
+        
         // Also check if selection was already completed (persistence fix)
         if ((activeCycle as any).selectionCompleted) {
           console.log('Cycle selection already completed, loading existing winners');
@@ -1773,7 +1777,7 @@ function AdminComponent() {
           overallRank: winner.overallRank,
           tierRank: winner.tierRank,
           username: winner.username,
-          email: winner.email,
+          email: winner.email ?? winner.userEmail,
           cyclePoints: winner.pointsAtSelection || 0,
           tierSize: winner.tierSizeAmount || 0,
           payoutPercentage: winner.payoutPercentage || 100,
@@ -2429,17 +2433,7 @@ function AdminComponent() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    fetchPendingProofs();
-    fetchPointActions();
-    fetchSupportTickets();
-    fetchCyclePoolSettings();
-    fetchCurrentPoolSettings();
-
-    // Removed automatic polling to improve performance
-    // Data will refresh when user manually interacts with the interface
-  }, []);
+  // Note: Removed duplicate data fetching - all initial data loading is handled in the consolidated useEffect above
 
   useEffect(() => {
     calculateProportionalRatios();
