@@ -78,6 +78,29 @@ const fetchWithAuth = (url: string, init: RequestInit = {}) => {
 const getPaypalDisplay = (row: any) => row.paypalEmail ?? row.snapshotPaypalEmail ?? null;
 const isPaypalConfigured = (row: any) => Boolean(getPaypalDisplay(row));
 
+// Centralized Selection Helper Functions (ChatGPT Implementation)
+type SelectScope = 'page' | 'tier' | 'all';
+
+// Utility: returns ids for rows that are selectable for payout
+const getEligibleIds = (rows: any[]) =>
+  rows.filter(isPaypalConfigured)
+      .map((w: any) => w.id)
+      .filter(Boolean);
+
+// Toggle a batch of ids ON in our Set
+const addIds = (current: Set<number>, ids: number[]) => {
+  const next = new Set(current);
+  ids.forEach(id => next.add(id));
+  return next;
+};
+
+// Remove a batch of ids from our Set
+const removeIds = (current: Set<number>, ids: number[]) => {
+  const next = new Set(current);
+  ids.forEach(id => next.delete(id));
+  return next;
+};
+
 // Error Boundary Component
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -3407,6 +3430,13 @@ function AdminComponent() {
             <CycleOperationsTab 
               cycleSettings={cycleSettings} 
               onRefresh={fetchData}
+              helpers={{
+                getPaypalDisplay,
+                isPaypalConfigured,
+                getEligibleIds,
+                addIds,
+                removeIds
+              }}
             />
           </TabsContent>
 

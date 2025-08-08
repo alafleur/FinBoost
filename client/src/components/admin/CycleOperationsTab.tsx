@@ -92,9 +92,16 @@ interface EnhancedWinnerData {
 interface CycleOperationsTabProps {
   cycleSettings: CycleSetting[];
   onRefresh: () => void;
+  helpers: {
+    getPaypalDisplay: (row: any) => string | null;
+    isPaypalConfigured: (row: any) => boolean;
+    getEligibleIds: (rows: any[]) => number[];
+    addIds: (current: Set<number>, ids: number[]) => Set<number>;
+    removeIds: (current: Set<number>, ids: number[]) => Set<number>;
+  };
 }
 
-export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOperationsTabProps) {
+export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }: CycleOperationsTabProps) {
   const { toast } = useToast();
   const [selectedCycle, setSelectedCycle] = useState<CycleSetting | null>(null);
   const [cycleAnalytics, setCycleAnalytics] = useState<any>(null);
@@ -1367,47 +1374,45 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh }: CycleOp
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Select All Eligible Winners Checkbox */}
+                {/* Enhanced Select All Eligible Winners Controls (ChatGPT Implementation) */}
                 {(() => {
-                  const isPaypalConfigured = (w: EnhancedWinnerData) =>
-                    typeof w.paypalEmail === 'string' && w.paypalEmail.includes('@');
+                  // Data sources
+                  const pageRows = enhancedWinners || [];
+                  const pageEligible = helpers.getEligibleIds(pageRows);
 
-                  const eligibleIds = enhancedWinners
-                    .filter(isPaypalConfigured)
-                    .map((w: EnhancedWinnerData) => w.id)
-                    .filter(Boolean);
-
-                  const allEligibleSelected =
-                    eligibleIds.length > 0 &&
-                    eligibleIds.every(id => selectedForDisbursement.has(id));
+                  const allOnPageSelected =
+                    pageEligible.length > 0 &&
+                    pageEligible.every(id => selectedForDisbursement.has(id));
 
                   return (
-                    <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
                       <input
                         type="checkbox"
-                        checked={allEligibleSelected}
+                        checked={allOnPageSelected}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            // Select ALL eligible
-                            const next = new Set(selectedForDisbursement);
-                            eligibleIds.forEach(id => next.add(id));
-                            setSelectedForDisbursement(next);
+                            setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
                           } else {
-                            // Deselect ALL eligible (leave any manual selections that aren't eligible)
-                            const next = new Set(
-                              Array.from(selectedForDisbursement).filter(id => !eligibleIds.includes(id))
-                            );
-                            setSelectedForDisbursement(next);
+                            setSelectedForDisbursement(prev => helpers.removeIds(prev, pageEligible));
                           }
                         }}
                         className="w-4 h-4"
                       />
                       <span className="text-sm text-gray-700 font-medium">
-                        Select all eligible winners ({eligibleIds.length})
+                        Select all eligible on this page ({pageEligible.length})
                       </span>
                       <span className="text-xs text-gray-500">
                         (Winners with valid PayPal emails)
                       </span>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedForDisbursement(new Set())}
+                        className="ml-auto"
+                      >
+                        Clear selection
+                      </Button>
                     </div>
                   );
                 })()}
