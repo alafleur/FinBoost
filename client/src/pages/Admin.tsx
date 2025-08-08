@@ -1351,10 +1351,12 @@ function AdminComponent() {
 
   const handleRejectProof = async (proofId: number, reason: string) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/reject-proof/${proofId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ reason })
       });
