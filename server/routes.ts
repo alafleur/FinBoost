@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
 import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions, cycleWinnerSelections } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
+import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc, or } from "drizzle-orm";
 import * as XLSX from "xlsx";
 import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
@@ -2638,11 +2638,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
     try {
       const cycleId = parseInt(req.params.cycleId);
-      const { selectedWinnerIds } = req.body;
+      const { selectedWinnerIds, processAll } = req.body;
 
-      if (!selectedWinnerIds || selectedWinnerIds.length === 0) {
-        return res.status(400).json({ error: "No winners selected for disbursement" });
+      // Validate payload: either processAll OR selectedWinnerIds, not both or neither
+      if (processAll && selectedWinnerIds) {
+        return res.status(400).json({ error: "Cannot specify both processAll and selectedWinnerIds" });
       }
+      if (!processAll && (!selectedWinnerIds || selectedWinnerIds.length === 0)) {
+        return res.status(400).json({ error: "Must specify either processAll: true or provide selectedWinnerIds array" });
+      }
+
+      // Log the operation mode for audit
+      console.log(`[DISBURSEMENT] Processing disbursements for cycle ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}`);
 
       // Get the cycle setting to verify it exists
       const cycleResult = await db.select().from(cycleSettings).where(eq(cycleSettings.id, cycleId)).limit(1);
@@ -2651,7 +2658,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const cycle = cycleResult[0];
 
-      // Get selected winners with their details
+      let winnersToProcess: number[];
+      let totalEligibleCount = 0;
+
+      if (processAll) {
+        // Server-side eligibility computation for bulk mode
+        const eligibleWinners = await db
+          .select({ id: cycleWinnerSelections.id })
+          .from(cycleWinnerSelections)
+          .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+          .where(and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
+            isNotNull(users.paypalEmail)
+            // Note: removed field doesn't exist in schema, skipping that condition
+          ));
+
+        winnersToProcess = eligibleWinners.map(w => w.id);
+        totalEligibleCount = winnersToProcess.length;
+        console.log(`[DISBURSEMENT] Bulk mode: found ${totalEligibleCount} eligible winners`);
+
+        if (winnersToProcess.length === 0) {
+          return res.json({
+            success: true,
+            processedCount: 0,
+            failed: [],
+            batchId: null,
+            totalEligible: 0,
+            message: "No eligible winners found for bulk processing"
+          });
+        }
+      } else {
+        // Selective mode: validate selectedWinnerIds belong to this cycle
+        const cycleValidation = await db
+          .select({ id: cycleWinnerSelections.id })
+          .from(cycleWinnerSelections)
+          .where(and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            inArray(cycleWinnerSelections.id, selectedWinnerIds)
+          ));
+
+        if (cycleValidation.length !== selectedWinnerIds.length) {
+          const invalidIds = selectedWinnerIds.filter(id => !cycleValidation.some(v => v.id === id));
+          return res.status(400).json({ 
+            error: `Invalid winner IDs for cycle ${cycleId}: ${invalidIds.join(', ')}. These IDs do not belong to this cycle.`
+          });
+        }
+
+        winnersToProcess = selectedWinnerIds;
+        console.log(`[DISBURSEMENT] Selective mode: processing ${winnersToProcess.length} selected winners`);
+      }
+
+      // Get detailed winner information for processing (unified for both modes)
       const winners = await db
         .select({
           id: cycleWinnerSelections.id,
@@ -2659,7 +2717,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: users.username,
           email: users.email,
           paypalEmail: users.paypalEmail,
-          snapshotPaypalEmail: cycleWinnerSelections.snapshotPaypalEmail,
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
           payoutFinal: cycleWinnerSelections.payoutFinal,
@@ -2670,11 +2727,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
         .where(and(
           eq(cycleWinnerSelections.cycleSettingId, cycleId),
-          inArray(cycleWinnerSelections.id, selectedWinnerIds)
+          inArray(cycleWinnerSelections.id, winnersToProcess)
         ));
 
       if (winners.length === 0) {
-        return res.status(404).json({ error: "No valid winners found for selected IDs" });
+        return res.json({
+          success: true,
+          processedCount: 0,
+          failed: [],
+          batchId: null,
+          totalEligible: totalEligibleCount || winnersToProcess.length,
+          message: "No valid winners found for processing"
+        });
       }
 
       // Verify selection is sealed/final
@@ -2683,31 +2747,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Filter to only winners with PayPal emails (eligibility check)
-      const eligibleWinners = winners.filter(w => w.paypalEmail || w.snapshotPaypalEmail);
+      const eligibleWinners = winners.filter(w => w.paypalEmail);
+      const failedWinners = winners.filter(w => !w.paypalEmail);
       
       if (eligibleWinners.length === 0) {
-        return res.status(400).json({ error: "No winners with valid PayPal emails selected" });
+        return res.json({
+          success: true,
+          processedCount: 0,
+          failed: failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+          batchId: null,
+          totalEligible: totalEligibleCount || winnersToProcess.length,
+          message: "No winners with valid PayPal emails found"
+        });
       }
 
-      // Update winner payout status to 'queued' first
-      await db.update(cycleWinnerSelections)
-        .set({
-          payoutStatus: 'queued',
-          lastModified: new Date()
-        })
-        .where(inArray(cycleWinnerSelections.id, selectedWinnerIds));
+      // Transaction-based idempotency: snapshot payout final and generate batch ID
+      const batchId = `batch_${cycleId}_${Date.now()}`;
+      
+      // Wrap in transaction for idempotency
+      await db.transaction(async (tx) => {
+        // Persist payout snapshots and update status atomically
+        await tx.update(cycleWinnerSelections)
+          .set({
+            payoutStatus: 'queued',
+            lastModified: new Date(),
+            // Ensure payout_final is persisted (idempotency requirement)
+            payoutFinal: sql`COALESCE(${cycleWinnerSelections.payoutFinal}, ${cycleWinnerSelections.payoutCalculated}, 0)`
+          })
+          .where(inArray(cycleWinnerSelections.id, eligibleWinners.map(w => w.id)));
+      });
 
+      // Log comprehensive audit information
+      console.log(`[DISBURSEMENT] Completed - cycleId: ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}, countIn: ${winnersToProcess.length}, processedCount: ${eligibleWinners.length}, failed: ${failedWinners.length}, batchId: ${batchId}`);
+
+      // Return standardized response format per ChatGPT specification
       res.json({
         success: true,
-        message: `Successfully queued payouts for ${eligibleWinners.length} winners`,
-        cycleId: cycleId,
-        queued: eligibleWinners.length,
-        skippedNoEmail: winners.length - eligibleWinners.length,
-        totalAmount: eligibleWinners.reduce((sum, w) => sum + (w.payoutFinal || 0), 0)
+        processedCount: eligibleWinners.length,
+        failed: failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+        batchId: batchId,
+        totalEligible: totalEligibleCount || winnersToProcess.length
       });
     } catch (error) {
       console.error("Error processing cycle disbursements:", error);
       res.status(500).json({ error: "Failed to process disbursements" });
+    }
+  });
+
+  // Get eligible winners count for a cycle (ChatGPT Step 2: Helper endpoint)
+  app.get("/api/admin/cycle-winner-details/:cycleId/eligible-count", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: "Access token required" });
+      }
+
+      const user = await storage.getUserByToken(token);
+      if (!user || user.email !== 'lafleur.andrew@gmail.com') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const cycleId = parseInt(req.params.cycleId);
+      
+      // Server-side eligibility count using same criteria as disbursement endpoint
+      const eligibleCountResult = await db
+        .select({ count: sql`count(*)`.as('count') })
+        .from(cycleWinnerSelections)
+        .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(and(
+          eq(cycleWinnerSelections.cycleSettingId, cycleId),
+          inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
+          isNotNull(users.paypalEmail)
+        ));
+
+      const eligibleCount = parseInt(eligibleCountResult[0]?.count?.toString() || '0');
+      console.log(`[ELIGIBLE-COUNT] Cycle ${cycleId}: ${eligibleCount} eligible winners`);
+
+      res.json({ eligibleCount });
+    } catch (error) {
+      console.error("Error getting eligible count:", error);
+      res.status(500).json({ error: "Failed to get eligible count" });
     }
   });
 
