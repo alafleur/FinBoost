@@ -1,0 +1,68 @@
+Got it—this is a plain old **ReferenceError**. Somewhere in the Cycle Operations view you’re reading `isSelectionSealed` but that variable is never defined in scope, so React’s error boundary catches it and shows “isSelectionSealed is not defined.”
+
+### Why it happens
+
+You recently added/changed logic around sealing a selection (“selection completed / sealed”), and the UI is checking `isSelectionSealed` (likely to disable buttons, hide controls, etc.). But there’s no `const isSelectionSealed = ...` anywhere, and it’s not being passed down as a prop either—so the first render of the Cycle Operations tab explodes.
+
+### Quick fix (parent component)
+
+Add a derived boolean in your **Admin** component and pass it into `CycleOperationsTab`:
+
+```ts
+// near other useMemos/derived state
+const isSelectionSealed = useMemo(() => {
+  const activeCycle = cycleSettings.find(c => c.isActive);
+
+  // treat any of these as "sealed"
+  return Boolean(
+    activeCycle?.selectionCompleted ||                     // server says selection done
+    selectionResults?.isSealed ||                          // result flag from execute endpoint (if present)
+    selectionResults?.selectionMode === 'loaded_from_database' // when we loaded existing winners
+  );
+}, [cycleSettings, selectionResults]);
+```
+
+Then when you render the tab:
+
+```tsx
+<CycleOperationsTab
+  // ...existing props
+  isSelectionSealed={isSelectionSealed}
+/>
+```
+
+### Quick fix (child component)
+
+In `CycleOperationsTab`, accept the prop and default it to `false` so this can’t crash again if someone forgets to pass it:
+
+```ts
+type Props = {
+  // ...others
+  isSelectionSealed?: boolean;
+};
+
+function CycleOperationsTab({
+  // ...others
+  isSelectionSealed = false,
+}: Props) {
+  // use isSelectionSealed safely in JSX / logic
+}
+```
+
+### If you don’t want to plumb a prop
+
+Define the variable right where it’s used. For example, if the tab code itself wants to compute it:
+
+```ts
+const isSelectionSealed =
+  Boolean(activeCycle?.selectionCompleted) ||
+  Boolean(selectionResults?.isSealed) ||
+  selectionResults?.selectionMode === 'loaded_from_database';
+```
+
+### Bonus sanity checks
+
+* Make sure your winners payload includes an `id` for each row (you already mapped `id` in your enhanced winners transform—good).
+* Anywhere you reference `isSelectionSealed` in JSX, prefer a safe default (`const sealed = isSelectionSealed ?? false`) to avoid this category of crash again.
+
+Do that, redeploy, and the Cycle Operations tab should load instead of face-planting. If it still barks, paste the top of `CycleOperationsTab` (prop types + first 50 lines) and I’ll wire it up for you.
