@@ -1,0 +1,40 @@
+Detailed Issue Analysis for Assistant:
+
+Core Problem: Missing PayPal Disbursement Interface
+The user is correctly navigating to Admin Portal → Cycle Management tab but the PayPal disbursement functionality is completely missing from the interface.
+
+What Should Be Displayed vs. What's Actually Showing:
+Expected Interface Structure:
+"Cycle Configuration" section ✅ (Currently visible)
+"Winner Selection Cycles" section ❌ (Missing entirely)
+Should display July 2/2 cycle as clickable card
+Shows selection/disbursement status badges
+"Selected Cycle Actions" section ❌ (Missing - appears after cycle click)
+Contains the blue "Process PayPal Disbursements" button
+Also has "Run Random Selection", "View Winners", "Export CSV" buttons
+Current Reality:
+Only "Cycle Configuration" section is rendering
+No "Winner Selection Cycles" section visible
+User sees cycle parameter editing interface with "Complete Cycle" button instead
+Root Cause Analysis:
+The missing interface is controlled by the winnerCycles state variable in Admin.tsx (lines 5242-5296). This section only renders when winnerCycles.length > 0.
+
+Likely Issues:
+
+API Endpoint Problem: /api/admin/winner-cycles is not returning data or failing
+Data Structure Mismatch: The API returns data but in wrong format for the UI
+State Loading Issue: winnerCycles state is not being populated from API response
+Authentication/Permission: Winner cycles API requires different auth than cycle settings
+Evidence from Logs:
+GET /api/admin/cycle-settings 304 - ✅ Working (shows "July 2/2" in cycle config)
+No corresponding /api/admin/winner-cycles requests visible in logs
+750 winners exist for cycle 18 (July 2/2) based on backend logs
+Technical Root Cause:
+The disbursement functionality exists in two separate data structures:
+
+cycleSettings - Powers cycle configuration interface (working)
+winnerCycles - Powers winner selection/disbursement interface (broken/missing)
+The PayPal button is in the winnerCycles interface, not the cycleSettings interface the user is currently viewing.
+
+Required Fix:
+Assistant needs to investigate why winnerCycles data is not loading and ensure the "Winner Selection Cycles" section renders properly with the July 2/2 cycle available for selection and disbursement processing.
