@@ -120,6 +120,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
   const [showUnsealConfirmation, setShowUnsealConfirmation] = useState(false);
   const [pendingWinners, setPendingWinners] = useState<any[]>([]);
   
+  // ChatGPT Step 2: Helper endpoint state for real-time eligible count
+  const [eligibleCount, setEligibleCount] = useState<number | null>(null);
+  const [isLoadingEligibleCount, setIsLoadingEligibleCount] = useState(false);
+  
   // PHASE 2C: Seal Workflow Refinement - Additional state for confirmation workflow
   const [showSealConfirmation, setShowSealConfirmation] = useState(false);
   const [sealConfirmationStep, setSealConfirmationStep] = useState(1);
@@ -632,7 +636,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
       const refreshPromises = [
         loadCycleAnalytics(forceFresh),
         loadWinners(forceFresh),
-        loadEnhancedWinners(forceFresh)
+        loadEnhancedWinners(forceFresh),
+        loadEligibleCount(forceFresh) // ChatGPT Step 2: Include eligible count refresh
       ];
 
       // Wait for all refresh operations to complete
@@ -656,6 +661,35 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
           variant: "destructive"
         });
       }
+    }
+  };
+
+  // ChatGPT Step 2: Helper endpoint integration for real-time eligible count
+  const loadEligibleCount = async (forceFresh = false) => {
+    if (!selectedCycle) return;
+
+    setIsLoadingEligibleCount(true);
+    try {
+      const token = localStorage.getItem('token');
+      const url = `/api/admin/cycle-winner-details/${selectedCycle.id}/eligible-count${forceFresh ? '?t=' + Date.now() : ''}`;
+      
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEligibleCount(data.eligibleCount);
+        console.log(`[FRONTEND] Loaded eligible count: ${data.eligibleCount}`);
+      } else {
+        console.error('[FRONTEND] Failed to load eligible count:', response.status);
+        setEligibleCount(null);
+      }
+    } catch (error) {
+      console.error('[FRONTEND] Error loading eligible count:', error);
+      setEligibleCount(null);
+    } finally {
+      setIsLoadingEligibleCount(false);
     }
   };
 
@@ -706,20 +740,37 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
     }
   };
 
+  // ChatGPT Step 2: Dual-Mode Frontend Implementation
   const handleProcessPayouts = async () => {
-    if (!selectedCycle || selectedForDisbursement.size === 0) {
+    if (!selectedCycle) {
       toast({
         title: "Error",
-        description: "Please select winners to process payouts for",
+        description: "No cycle selected",
         variant: "destructive"
       });
       return;
     }
 
     setIsProcessingPayouts(true);
+    
     try {
       const token = localStorage.getItem('token');
-      const selectedWinnerIds = Array.from(selectedForDisbursement);
+      let requestBody: any;
+      let modeDescription: string;
+
+      // ChatGPT Logic: Smart dual-mode handling based on selection state
+      if (selectedForDisbursement.size === 0) {
+        // Bulk mode: No selections means process all eligible
+        requestBody = { processAll: true };
+        modeDescription = "bulk processing of all eligible winners";
+        console.log('[FRONTEND] Disbursement mode: bulk (processAll: true)');
+      } else {
+        // Selective mode: Specific winners selected
+        const selectedWinnerIds = Array.from(selectedForDisbursement);
+        requestBody = { selectedWinnerIds };
+        modeDescription = `selective processing of ${selectedWinnerIds.length} selected winners`;
+        console.log(`[FRONTEND] Disbursement mode: selective (${selectedWinnerIds.length} winners)`);
+      }
 
       const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
         method: 'POST',
@@ -727,16 +778,35 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selectedWinnerIds })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
+      
       if (data.success) {
+        // Use standardized response format from ChatGPT specification
+        const processedCount = data.processedCount || 0;
+        const failedCount = data.failed ? data.failed.length : 0;
+        const totalEligible = data.totalEligible || 0;
+        
+        let successMessage = `Successfully processed ${processedCount} payouts`;
+        if (failedCount > 0) {
+          successMessage += ` (${failedCount} failed due to missing PayPal emails)`;
+        }
+        if (data.batchId) {
+          successMessage += ` - Batch ID: ${data.batchId}`;
+        }
+
         toast({
           title: "Payouts Processed",
-          description: `Successfully processed ${selectedWinnerIds.length} payouts`
+          description: successMessage
         });
+        
+        // Clear selections after successful processing
         setSelectedForDisbursement(new Set());
+        
+        // Log comprehensive results for audit
+        console.log(`[FRONTEND] Disbursement completed: processed=${processedCount}, failed=${failedCount}, totalEligible=${totalEligible}, batchId=${data.batchId}`);
         
         // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
         await refreshAllCycleData({ forceFresh: true, showToast: false });
@@ -748,6 +818,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
         });
       }
     } catch (error) {
+      console.error('[FRONTEND] Disbursement error:', error);
       toast({
         title: "Error", 
         description: "Failed to process payouts",
@@ -1265,7 +1336,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                       return (
                         <Button
                           onClick={handleProcessPayouts}
-                          disabled={selectedCount === 0 || isProcessingPayouts}
+                          disabled={isProcessingPayouts || !isSelectionSealed}
                           className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                           size="sm"
                         >
@@ -1277,7 +1348,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                           ) : (
                             <>
                               <DollarSign className="w-4 h-4 mr-2" />
-                              Process PayPal Disbursements ({selectedCount})
+                              {selectedCount === 0 
+                                ? `Process PayPal Disbursements (${eligibleCount !== null ? `${eligibleCount} Eligible` : 'All Eligible'})` 
+                                : `Process PayPal Disbursements (${selectedCount} Selected)`
+                              }
                             </>
                           )}
                         </Button>
