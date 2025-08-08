@@ -7783,6 +7783,8 @@ export class MemStorage implements IStorage {
           userId: cycleWinnerSelections.userId,
           username: users.username,
           email: users.email,
+          // Phase 2: Critical PayPal email data from users table
+          paypalEmail: users.paypalEmail,
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
           overallRank: cycleWinnerSelections.overallRank,
@@ -7813,7 +7815,9 @@ export class MemStorage implements IStorage {
         payoutPercentage: 100, // Default to 100% since this field doesn't exist in schema
         baseReward: (winner.rewardAmount || 0) / 100, // Convert cents to dollars for display
         finalAmount: (winner.rewardAmount || 0) / 100, // Same as base since 100%
-        reason: 'Auto-selected' // Default reason
+        reason: 'Auto-selected', // Default reason
+        // Phase 2: Critical computed field for PayPal configuration status
+        paypalConfigured: winner.paypalEmail ? 'Yes' : 'Not configured'
       }));
 
       console.log(`[DEBUG] Successfully processed ${winnersWithOverallRank.length} winners with overall ranks`);
@@ -7853,6 +7857,8 @@ export class MemStorage implements IStorage {
           userId: cycleWinnerSelections.userId,
           username: users.username,
           email: users.email,
+          // Phase 2: Critical PayPal email data from users table
+          paypalEmail: users.paypalEmail,
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
           overallRank: cycleWinnerSelections.overallRank,
@@ -7892,7 +7898,9 @@ export class MemStorage implements IStorage {
         payoutPercentage: winner.payoutPercentage || 100,
         baseReward: (winner.payoutCalculated || winner.rewardAmount || 0) / 100,
         finalAmount: (winner.payoutFinal || winner.rewardAmount || 0) / 100,
-        reason: 'Auto-selected'
+        reason: 'Auto-selected',
+        // Phase 2: Critical computed field for PayPal configuration status
+        paypalConfigured: winner.paypalEmail ? 'Yes' : 'Not configured'
       }));
 
       console.log(`[DEBUG] Successfully processed ${winnersWithOverallRank.length} paginated winners`);
