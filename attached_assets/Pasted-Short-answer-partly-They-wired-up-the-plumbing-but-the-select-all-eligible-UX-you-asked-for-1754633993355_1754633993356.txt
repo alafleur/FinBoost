@@ -1,0 +1,24 @@
+Short answer: **partly**. They wired up the plumbing, but the “select all eligible” UX you asked for isn’t actually there where you need it.
+
+What they did get right:
+
+* There’s now a `selectedForDisbursement` `Set<number>` in state, and a handler to POST the selected winner IDs to the backend when you click “Process Selected Disbursements.” ✅
+* In the **Enhanced Winners** loader, each row now includes an **`id`** field so rows can be selected. ✅
+* In the older per-tier winners cards, they added a **“Select All with PayPal”** button that bulk-adds checkbox selections for that tier. That’s nice… but it’s limited to that section. ✅/⚠️
+
+What’s missing (a.k.a. what you asked for):
+
+* No **header checkbox** or **scope control** (“this page / this tier / all pages”) in the **Enhanced Winners** table. The only bulk-select shown is the per-tier “Select All with PayPal” in the old winners cards, not the paginated table.
+* No implementation that **selects across pages** (or all winners in a tier) in the enhanced table. The current bulk select only touches whatever tier card you’re viewing, not the table’s current page, tier-wide, or all pages.
+
+How to finish it (quick path):
+
+1. **Add a header checkbox + scope dropdown** in the Enhanced Winners table.
+2. For “This page”: take the current page’s rows (`enhancedWinnersData.winners`), **filter to those with a PayPal email**, and add/remove their `id`s to/from `selectedForDisbursement`. You already have the Set and the POST — just wire the toggle up to it. You can reuse the same pattern used for the tier cards’ “Select All with PayPal.” (See state + processing here.)
+3. For “This tier”: filter the table’s data to rows where `winner.tierRank` belongs to the visible tier (or carry the tier in each row from the API) and then do the same add/remove.
+4. For “All pages”: either
+
+   * add a backend endpoint that returns **all eligible winner IDs** for the active cycle (optionally filtered by tier), then union/diff those with the Set; or
+   * iterate pages client-side (works but is clunky and slow).
+
+If you want, I can write the exact React bits for the header checkbox and scope menu, and a tiny API sketch for the “all pages” case.

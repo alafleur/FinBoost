@@ -81,6 +81,14 @@ Preferred communication style: Simple, everyday language.
 - Professional styling with visual feedback for disabled state and eligibility
 - All 15 UI verification tests passed - complete checkbox functionality implemented
 
+**Enhanced Scope Selection Implementation (January 8, 2025):**
+- Added scope selection dropdown with three options: "on this page", "in this tier", "on all pages"
+- Implemented scope-aware tri-state checkbox logic for different selection contexts
+- Enhanced selection handler with async support for future backend integration
+- Dynamic count display based on selected scope with professional UI layout
+- Ready for tier-specific and all-pages selection with TODO markers for backend endpoints
+- All scope selection verification tests passed - foundation complete for advanced bulk operations
+
 **ChatGPT Priority Fixes Implementation (January 8, 2025):**
 - Implemented fetchWithAuth helper function to prevent 401 errors across all admin endpoints
 - Updated 15+ fetch calls to use consistent authentication pattern

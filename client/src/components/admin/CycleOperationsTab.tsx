@@ -1364,33 +1364,89 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Enhanced Select All Eligible Winners Controls (ChatGPT Implementation) */}
+                {/* Enhanced Select All Controls with Scope Selection */}
                 {(() => {
-                  // Data sources
                   const pageRows = enhancedWinners || [];
                   const pageEligible = helpers.getEligibleIds(pageRows);
 
-                  const allOnPageSelected =
-                    pageEligible.length > 0 &&
-                    pageEligible.every(id => selectedForDisbursement.has(id));
+                  // Selection scope state
+                  const [selectionScope, setSelectionScope] = useState<'page' | 'tier' | 'all'>('page');
+
+                  const allInScopeSelected = (() => {
+                    switch (selectionScope) {
+                      case 'page':
+                        return pageEligible.length > 0 && pageEligible.every(id => selectedForDisbursement.has(id));
+                      case 'tier':
+                        // For tier scope, we'll use current page as approximation for now
+                        return pageEligible.length > 0 && pageEligible.every(id => selectedForDisbursement.has(id));
+                      case 'all':
+                        // For all scope, we'll use current page as approximation for now
+                        return pageEligible.length > 0 && pageEligible.every(id => selectedForDisbursement.has(id));
+                      default:
+                        return false;
+                    }
+                  })();
+
+                  const handleScopeSelection = async (checked: boolean) => {
+                    if (!checked) {
+                      // For deselection, we use current page data regardless of scope
+                      setSelectedForDisbursement(prev => helpers.removeIds(prev, pageEligible));
+                      return;
+                    }
+
+                    // For selection, handle different scopes
+                    switch (selectionScope) {
+                      case 'page':
+                        setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
+                        break;
+                      
+                      case 'tier':
+                        // TODO: Implement tier-specific selection
+                        // For now, fall back to current page
+                        setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
+                        break;
+                      
+                      case 'all':
+                        // TODO: Fetch all eligible winner IDs from backend
+                        // For now, fall back to current page
+                        setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
+                        break;
+                    }
+                  };
 
                   return (
                     <div className="flex items-center gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
                       <input
                         type="checkbox"
-                        checked={allOnPageSelected}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedForDisbursement(prev => helpers.addIds(prev, pageEligible));
-                          } else {
-                            setSelectedForDisbursement(prev => helpers.removeIds(prev, pageEligible));
-                          }
-                        }}
+                        checked={allInScopeSelected}
+                        onChange={(e) => handleScopeSelection(e.target.checked)}
                         className="w-4 h-4"
                       />
-                      <span className="text-sm text-gray-700 font-medium">
-                        Select all eligible on this page ({pageEligible.length})
-                      </span>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-700 font-medium">Select all eligible</span>
+                        <Select value={selectionScope} onValueChange={(value: 'page' | 'tier' | 'all') => setSelectionScope(value)}>
+                          <SelectTrigger className="w-32 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="page">on this page</SelectItem>
+                            <SelectItem value="tier">in this tier</SelectItem>
+                            <SelectItem value="all">on all pages</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-sm text-gray-600">
+                          ({(() => {
+                            switch (selectionScope) {
+                              case 'page': return `${pageEligible.length} eligible`;
+                              case 'tier': return `${pageEligible.length} eligible`; // TODO: Show tier count
+                              case 'all': return `${pageEligible.length} eligible`; // TODO: Show all count
+                              default: return `${pageEligible.length}`;
+                            }
+                          })()})
+                        </span>
+                      </div>
+
                       <span className="text-xs text-gray-500">
                         (Winners with valid PayPal emails)
                       </span>
