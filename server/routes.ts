@@ -2764,21 +2764,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transaction-based idempotency: snapshot payout final and generate batch ID
       const batchId = `batch_${cycleId}_${Date.now()}`;
       
+      // Prepare recipients for PayPal payout
+      const recipients = eligibleWinners.map((winner, index) => ({
+        email: winner.paypalEmail,
+        amount: Math.round((winner.payoutFinal || 0) * 100), // Convert to cents for PayPal API
+        currency: "USD",
+        note: `FinBoost Cycle ${cycleId} Reward - Tier ${winner.tier}`,
+        recipientId: `user_${winner.userId}_cycle_${cycleId}_${Date.now()}`
+      }));
+
+      // Create actual PayPal payout
+      const { createPaypalPayout } = await import('./paypal');
+      const payoutResult = await createPaypalPayout(recipients);
+      
       // Wrap in transaction for idempotency
       await db.transaction(async (tx) => {
         // Persist payout snapshots and update status atomically
         await tx.update(cycleWinnerSelections)
           .set({
-            payoutStatus: 'queued',
+            payoutStatus: 'processing',
             lastModified: new Date(),
             // Ensure payout_final is persisted (idempotency requirement)
             payoutFinal: sql`COALESCE(${cycleWinnerSelections.payoutFinal}, ${cycleWinnerSelections.payoutCalculated}, 0)`
           })
           .where(inArray(cycleWinnerSelections.id, eligibleWinners.map(w => w.id)));
+
+        // Save PayPal payout records
+        const payoutPromises = eligibleWinners.map(async (winner, index) => {
+          return tx.insert(paypalPayouts).values({
+            userId: winner.userId,
+            paypalPayoutId: payoutResult.batch_header?.payout_batch_id,
+            paypalItemId: payoutResult.items?.[index]?.payout_item_id,
+            recipientEmail: winner.paypalEmail,
+            amount: Math.round((winner.payoutFinal || 0) * 100), // Store in cents
+            currency: "usd",
+            status: "pending",
+            reason: `cycle_${cycleId}_reward`,
+            tier: winner.tier,
+            pointsUsed: 0, // Not applicable for cycle rewards
+            processedAt: new Date(),
+            paypalResponse: JSON.stringify(payoutResult)
+          });
+        });
+
+        await Promise.all(payoutPromises);
       });
 
       // Log comprehensive audit information
-      console.log(`[DISBURSEMENT] Completed - cycleId: ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}, countIn: ${winnersToProcess.length}, processedCount: ${eligibleWinners.length}, failed: ${failedWinners.length}, batchId: ${batchId}`);
+      console.log(`[DISBURSEMENT] PayPal Payouts Created - cycleId: ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}, countIn: ${winnersToProcess.length}, processedCount: ${eligibleWinners.length}, failed: ${failedWinners.length}, batchId: ${batchId}, paypalBatchId: ${payoutResult.batch_header?.payout_batch_id}`);
 
       // Return standardized response format per ChatGPT specification
       res.json({
