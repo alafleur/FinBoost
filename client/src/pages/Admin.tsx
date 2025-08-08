@@ -1570,17 +1570,22 @@ function AdminComponent() {
 
   // Winner cycle management functions
   const loadCycles = async () => {
+    console.log('🔄 loadCycles() called - attempting to fetch winner cycles');
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 Token exists:', !!token, token ? `Length: ${token.length}` : 'No token');
       if (!token) {
+        console.log('❌ No token found - redirecting to /auth');
         // No token — force login
         window.location.href = '/auth';
         return;
       }
 
+      console.log('🌐 Making API call to /api/admin/winner-cycles');
       const response = await fetch('/api/admin/winner-cycles', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      console.log('📡 Response status:', response.status, response.statusText);
 
       // Handle expired/invalid auth
       if (response.status === 401 || response.status === 403) {
@@ -1605,13 +1610,16 @@ function AdminComponent() {
       }
 
       const data = await response.json();
+      console.log('📦 Winner cycles response data:', data);
       if (data?.success) {
+        console.log('✅ Winner cycles loaded successfully:', data.cycles?.length || 0, 'cycles');
         setWinnerCycles(data.cycles);
       } else {
+        console.log('⚠️ Winner cycles response not successful, setting empty array');
         setWinnerCycles([]);
       }
     } catch (error) {
-      console.error('Failed to load cycles:', error);
+      console.error('❌ Failed to load cycles:', error);
       setWinnerCycles([]); // fail safe so UI can show empty state or error
     }
   };
