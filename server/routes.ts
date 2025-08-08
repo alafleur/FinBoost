@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions, cycleWinnerSelections } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc } from "drizzle-orm";
 import * as XLSX from "xlsx";
@@ -2804,10 +2804,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the cycle setting to verify it exists
-      const cycle = await storage.getCycleSetting(cycleId);
-      if (!cycle) {
+      const cycleResult = await db.select().from(cycleSettings).where(eq(cycleSettings.id, cycleId)).limit(1);
+      if (cycleResult.length === 0) {
         return res.status(404).json({ error: "Cycle not found" });
       }
+      const cycle = cycleResult[0];
 
       // Get selected winners with their details
       const winners = await db
@@ -2821,7 +2822,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tier: cycleWinnerSelections.tier,
           tierRank: cycleWinnerSelections.tierRank,
           payoutFinal: cycleWinnerSelections.payoutFinal,
-          payoutStatus: cycleWinnerSelections.payoutStatus
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          isSealed: cycleWinnerSelections.isSealed
         })
         .from(cycleWinnerSelections)
         .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
@@ -2834,41 +2836,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "No valid winners found for selected IDs" });
       }
 
-      // Filter to only winners with PayPal emails
+      // Verify selection is sealed/final
+      if (!winners.some(w => w.isSealed)) {
+        return res.status(400).json({ error: "Winner selection must be sealed before processing disbursements" });
+      }
+
+      // Filter to only winners with PayPal emails (eligibility check)
       const eligibleWinners = winners.filter(w => w.paypalEmail || w.snapshotPaypalEmail);
       
       if (eligibleWinners.length === 0) {
         return res.status(400).json({ error: "No winners with valid PayPal emails selected" });
       }
 
-      // Prepare PayPal payout recipients
-      const recipients = eligibleWinners.map(winner => ({
-        email: winner.paypalEmail || winner.snapshotPaypalEmail,
-        amount: winner.payoutFinal, // Amount in cents
-        currency: "USD",
-        note: `FinBoost ${winner.tier} tier reward for ${cycle.cycleName}`,
-        recipientId: `cycle_${cycleId}_winner_${winner.id}_${Date.now()}`
-      }));
-
-      // Create PayPal batch payout
-      const { createPaypalPayout } = await import('./paypal');
-      const payoutResult = await createPaypalPayout(recipients);
-
-      // Update winner payout status
+      // Update winner payout status to 'queued' first
       await db.update(cycleWinnerSelections)
         .set({
-          payoutStatus: 'processed',
-          payoutProcessedAt: new Date()
+          payoutStatus: 'queued',
+          lastModified: new Date()
         })
         .where(inArray(cycleWinnerSelections.id, selectedWinnerIds));
 
       res.json({
         success: true,
-        message: `Successfully initiated payouts to ${eligibleWinners.length} winners`,
-        batchId: payoutResult.batch_header?.payout_batch_id,
-        totalAmount: eligibleWinners.reduce((sum, w) => sum + (w.payoutFinal || 0), 0),
-        totalRecipients: eligibleWinners.length,
-        skippedCount: winners.length - eligibleWinners.length
+        message: `Successfully queued payouts for ${eligibleWinners.length} winners`,
+        cycleId: cycleId,
+        queued: eligibleWinners.length,
+        skippedNoEmail: winners.length - eligibleWinners.length,
+        totalAmount: eligibleWinners.reduce((sum, w) => sum + (w.payoutFinal || 0), 0)
       });
     } catch (error) {
       console.error("Error processing cycle disbursements:", error);

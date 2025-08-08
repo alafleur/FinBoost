@@ -1,0 +1,132 @@
+You’re on the right track—the error is exactly what it says: the frontend calls
+
+```
+POST /api/admin/winner-cycles/:cycleId/process-disbursements
+```
+
+…and that route doesn’t exist, so you get a 404 → “Cycle not found.”
+
+Two clean ways to fix this (pick one, don’t do both):
+
+# Option A — **Add the missing backend endpoint** (recommended)
+
+Implement this route so it matches what the UI already calls.
+
+## Backend (server/routes.ts)
+
+Add:
+
+```ts
+// POST /api/admin/winner-cycles/:cycleId/process-disbursements
+router.post(
+  '/api/admin/winner-cycles/:cycleId/process-disbursements',
+  requireAdminAuth,
+  async (req, res) => {
+    try {
+      const cycleId = Number(req.params.cycleId);
+      if (!Number.isFinite(cycleId)) return res.status(400).json({ error: 'Invalid cycleId' });
+
+      // 1) Verify cycle exists & selection is sealed/final
+      const selection = await db.cycleWinnerSelections.findFirst({
+        where: { cycleSettingId: cycleId, isSealed: true } // adjust field name if different
+      });
+      if (!selection) return res.status(404).json({ error: 'Cycle selection not found or not sealed' });
+
+      // 2) Determine winners to process
+      const requestedIds: number[] = req.body?.winnerIds ?? [];
+      const winners = await db.cycleWinnerDetails.findMany({
+        where: {
+          cycleSettingId: cycleId,
+          id: requestedIds.length ? { in: requestedIds } : undefined,
+          payoutStatus: { in: ['pending', 'approved'] }
+        },
+        include: { user: { select: { paypalEmail: true, email: true } } }
+      });
+
+      if (!winners.length) return res.status(400).json({ error: 'No eligible winners found' });
+
+      const payable = winners.filter(w => (w.paypalEmail || w.snapshotPaypalEmail || w.user?.paypalEmail));
+      const missingEmail = winners.length - payable.length;
+
+      // 3) Build PayPal items (don’t actually call PayPal here if you don’t have it wired)
+      // Persist a payout batch and mark rows as queued
+      const batch = await db.payoutBatch.create({
+        data: {
+          cycleSettingId: cycleId,
+          provider: 'paypal',
+          status: 'queued',
+          itemCount: payable.length,
+        }
+      });
+
+      await Promise.all(payable.map(w =>
+        db.cycleWinnerDetails.update({
+          where: { id: w.id },
+          data: { payoutStatus: 'queued', payoutBatchId: batch.id, payoutFinal: w.payoutFinal }
+        })
+      ));
+
+      return res.json({
+        success: true,
+        cycleId,
+        queued: payable.length,
+        skippedNoEmail: missingEmail,
+        batchId: batch.id
+      });
+    } catch (e) {
+      console.error('process-disbursements error', e);
+      return res.status(500).json({ error: 'Failed to queue disbursements' });
+    }
+  }
+);
+```
+
+Adjust model/field names (`isSealed`, `cycleWinnerDetails`, `payoutStatus`, etc.) to your schema.
+
+## Frontend sanity checks
+
+* In the handler you already have, send the selected IDs:
+
+```ts
+const cycleId = cycleSettings.find(c => c.isActive)?.id ?? selectedCycle?.id;
+if (!cycleId) return toast({ title: 'Error', description: 'Active cycle not found', variant: 'destructive' });
+
+const winnerIds = Array.from(selectedForDisbursement);
+if (winnerIds.length === 0) return toast({ title: 'Error', description: 'Please select winners', variant: 'destructive' });
+
+await fetchWithAuth(`/api/admin/winner-cycles/${cycleId}/process-disbursements`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ winnerIds })
+});
+```
+
+* Disable the button while the request is in-flight; after success, refresh the enhanced table so statuses change to `queued`.
+
+# Option B — **Point the UI at an existing route**
+
+If you already have a working disbursement route (search for “disburse”, “paypal”, “payout” in `routes.ts`), just change the frontend to call that route and payload shape. But be consistent everywhere (the Import/Export and Enhanced table should all use the same cycle id source and the same status fields).
+
+---
+
+# Quick gotchas to check now
+
+1. **Cycle ID source**
+   Make sure the button derives `cycleId` from the active cycle:
+
+   ```ts
+   const cycleId = cycleSettings.find(c => c.isActive)?.id ?? selectedCycle?.id;
+   ```
+
+   Don’t rely on stale `selectedCycle` if you never set it.
+
+2. **Selected IDs present**
+   You now have “Select all eligible” working; make sure you’re actually sending those IDs. If you want a true “process all eligible on server”, support `winnerIds: null` meaning “server determines all eligible”.
+
+3. **Sealed selection**
+   Backend should reject processing if the selection isn’t sealed/final (your UI shows “Final & Locked”, so enforce that server-side).
+
+4. **Partial success**
+   Return counts `{ queued, skippedNoEmail }` so the UI can toast a helpful summary.
+
+Do that, and the red “Cycle not found” goes away—either because the route exists (Option A) or because you pointed to one that already does (Option B).
