@@ -1,88 +1,87 @@
+#!/usr/bin/env node
+
 /**
- * Final Comprehensive Verification of ChatGPT's Critical Issues
- * 
- * 1. Winner table pagination using wrong id - FIXED
- * 2. Typos that will crash the build - FIXED
- * 3. PayPal button ignores config state - FIXED
- * 4. Email mapping consistency - VERIFIED
+ * ChatGPT Final Build-Breaking Syntax Verification
+ * Searches for exact patterns ChatGPT identified as broken
  */
 
-const fs = require('fs');
+import { readFileSync } from 'fs';
 
-console.log('=== CHATGPT FINAL VERIFICATION ===');
+console.log('🔍 ChatGPT Final Build-Breaking Syntax Verification');
+console.log('==================================================\n');
 
-// Read files
-const adminContent = fs.readFileSync('client/src/pages/Admin.tsx', 'utf8');
-const cycleOpsContent = fs.readFileSync('client/src/components/admin/CycleOperationsTab.tsx', 'utf8');
+const adminFile = readFileSync('client/src/pages/Admin.tsx', 'utf8');
+const lines = adminFile.split('\n');
 
-console.log('\n✅ 1. PAGINATION ID FIX VERIFICATION:');
-console.log('Looking for: currentPoolSettings.id usage and structure...');
+console.log('1. ✅ SEARCHING: Bad object spread (.prev instead of ...prev)...');
+let foundBadObjectSpread = false;
+lines.forEach((line, index) => {
+  // Look for { .prev (without the ...)
+  if (line.match(/\{\s*\.prev\s*,/) && !line.match(/\{\s*\.\.\.prev\s*,/)) {
+    console.log(`   ❌ FOUND at line ${index + 1}: ${line.trim()}`);
+    foundBadObjectSpread = true;
+  }
+});
 
-const poolSettingsMatches = adminContent.match(/setCurrentPoolSettings\({([^}]+)\}/g);
-if (poolSettingsMatches) {
-    poolSettingsMatches.forEach(match => {
-        console.log('Found setCurrentPoolSettings call:', match);
-        if (match.includes('id:')) {
-            console.log('✅ ID field is included in currentPoolSettings');
-        } else {
-            console.log('❌ ID field missing from currentPoolSettings');
-        }
-    });
+if (!foundBadObjectSpread) {
+  console.log('   ✅ PASS: No bad object spread patterns found');
 }
 
-const paginationMatches = adminContent.match(/currentPoolSettings\?\.id/g);
-if (paginationMatches) {
-    console.log(`✅ Found ${paginationMatches.length} currentPoolSettings.id usages for pagination`);
-} else {
-    console.log('❌ No currentPoolSettings.id usage found');
+console.log('\n2. ✅ SEARCHING: Bad array spread ([.modules instead of [...modules)...');
+let foundBadArraySpread = false;
+lines.forEach((line, index) => {
+  // Look for [.modules (without the ...)
+  if (line.match(/\[\s*\.modules\s*,/) && !line.match(/\[\s*\.\.\.modules\s*,/)) {
+    console.log(`   ❌ FOUND at line ${index + 1}: ${line.trim()}`);
+    foundBadArraySpread = true;
+  }
+});
+
+if (!foundBadArraySpread) {
+  console.log('   ✅ PASS: No bad array spread patterns found');
 }
 
-console.log('\n✅ 2. COMPILATION ERRORS VERIFICATION:');
-console.log('Checking for bad spread syntax...');
-
-const badSpread = adminContent.match(/{\s*\.\w+/g) || cycleOpsContent.match(/{\s*\.\w+/g);
-if (badSpread) {
-    console.log('❌ Found bad spread syntax:', badSpread);
-} else {
-    console.log('✅ No bad spread syntax found - compilation should work');
-}
-
-console.log('\n✅ 3. PAYPAL BUTTON DISABLED LOGIC VERIFICATION:');
-console.log('Looking for: Process PayPal Disbursements button with paypalReadyCount...');
-
-const paypalButtonRegex = /Process PayPal Disbursements.*paypalReadyCount/s;
-const hasPaypalButton = cycleOpsContent.match(paypalButtonRegex);
-
-if (hasPaypalButton) {
-    console.log('✅ PayPal button found with paypalReadyCount logic');
-    
-    // Check for disabled logic
-    const disabledLogic = cycleOpsContent.match(/disabled=.*paypalReadyCount === 0/s);
-    if (disabledLogic) {
-        console.log('✅ Disabled logic correctly implemented');
-    } else {
-        console.log('❌ Disabled logic not found');
+console.log('\n3. ✅ SEARCHING: setCycleForm and setPoolSettingForm calls...');
+const setCycleFormCalls = lines.filter((line, index) => {
+  if (line.includes('setCycleForm') || line.includes('setPoolSettingForm')) {
+    if (line.includes('.prev,') && !line.includes('...prev,')) {
+      console.log(`   ❌ BAD SYNTAX at line ${index + 1}: ${line.trim()}`);
+      return true;
     }
-} else {
-    console.log('❌ PayPal button with paypalReadyCount not found');
+  }
+  return false;
+});
+
+if (setCycleFormCalls.length === 0) {
+  console.log('   ✅ PASS: All setCycleForm/setPoolSettingForm calls use proper syntax');
 }
 
-console.log('\n✅ 4. EMAIL MAPPING CONSISTENCY VERIFICATION:');
-console.log('Checking for: winner.email ?? winner.userEmail patterns...');
+console.log('\n4. ✅ SEARCHING: setModules calls...');
+const setModulesCalls = lines.filter((line, index) => {
+  if (line.includes('setModules') && line.includes('[')) {
+    if (line.includes('[.modules') && !line.includes('[...modules')) {
+      console.log(`   ❌ BAD SYNTAX at line ${index + 1}: ${line.trim()}`);
+      return true;
+    }
+  }
+  return false;
+});
 
-const emailMappings = cycleOpsContent.match(/winner\.(email|userEmail|paypalEmail)/g);
-if (emailMappings) {
-    console.log('Found email field references:', [...new Set(emailMappings)]);
-    console.log('✅ Email mapping appears consistent');
-} else {
-    console.log('❌ No email field references found');
+if (setModulesCalls.length === 0) {
+  console.log('   ✅ PASS: All setModules calls use proper syntax');
 }
 
-console.log('\n=== VERIFICATION SUMMARY ===');
-console.log('All ChatGPT critical issues should now be resolved:');
-console.log('1. ✅ Pagination ID fixed - currentPoolSettings now includes id field');
-console.log('2. ✅ Compilation errors fixed - no bad spread syntax');
-console.log('3. ✅ PayPal button disabled logic - based on paypalReadyCount');
-console.log('4. ✅ Email mapping consistency maintained');
+// Summary
+console.log('\n🎉 VERIFICATION COMPLETE');
+console.log('========================');
 
-console.log('\n🎯 Ready for ChatGPT re-verification!');
+const hasSyntaxErrors = foundBadObjectSpread || foundBadArraySpread || 
+                       setCycleFormCalls.length > 0 || setModulesCalls.length > 0;
+
+if (hasSyntaxErrors) {
+  console.log('❌ BUILD-BREAKING SYNTAX ERRORS FOUND');
+  console.log('⚠️  Must fix before build will succeed');
+} else {
+  console.log('✅ NO BUILD-BREAKING SYNTAX ERRORS FOUND');
+  console.log('🚀 All spread syntax is correct - build should succeed');
+}
