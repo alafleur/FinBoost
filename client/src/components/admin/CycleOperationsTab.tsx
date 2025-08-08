@@ -94,6 +94,7 @@ interface EnhancedWinnerData {
 interface CycleOperationsTabProps {
   cycleSettings: CycleSetting[];
   onRefresh: () => void;
+  isSelectionSealed?: boolean;
   helpers: {
     getPaypalDisplay: (row: any) => string | null;
     isPaypalConfigured: (row: any) => boolean;
@@ -103,7 +104,7 @@ interface CycleOperationsTabProps {
   };
 }
 
-export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }: CycleOperationsTabProps) {
+export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelectionSealed = false, helpers }: CycleOperationsTabProps) {
   const { toast } = useToast();
   
   // Selection scope state (moved to top level to avoid hooks rule violation)
