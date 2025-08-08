@@ -103,6 +103,10 @@ interface CycleOperationsTabProps {
 
 export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }: CycleOperationsTabProps) {
   const { toast } = useToast();
+  
+  // Selection scope state (moved to top level to avoid hooks rule violation)
+  const [selectionScope, setSelectionScope] = useState<'page' | 'tier' | 'all'>('page');
+  
   const [selectedCycle, setSelectedCycle] = useState<CycleSetting | null>(null);
   const [cycleAnalytics, setCycleAnalytics] = useState<any>(null);
   const [winners, setWinners] = useState<WinnerSelection[]>([]);
@@ -1364,13 +1368,10 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Enhanced Select All Controls with Scope Selection */}
+                {/* Enhanced Select All Controls with Scope Selection - Hook-free version */}
                 {(() => {
                   const pageRows = enhancedWinners || [];
                   const pageEligible = helpers.getEligibleIds(pageRows);
-
-                  // Selection scope state
-                  const [selectionScope, setSelectionScope] = useState<'page' | 'tier' | 'all'>('page');
 
                   const allInScopeSelected = (() => {
                     switch (selectionScope) {
@@ -1387,7 +1388,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, helpers }
                     }
                   })();
 
-                  const handleScopeSelection = async (checked: boolean) => {
+                  const handleScopeSelection = (checked: boolean) => {
                     if (!checked) {
                       // For deselection, we use current page data regardless of scope
                       setSelectedForDisbursement(prev => helpers.removeIds(prev, pageEligible));

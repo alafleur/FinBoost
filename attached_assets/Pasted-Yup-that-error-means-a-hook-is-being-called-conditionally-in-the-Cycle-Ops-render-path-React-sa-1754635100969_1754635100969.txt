@@ -1,0 +1,74 @@
+Yup—that error means **a hook is being called conditionally** in the Cycle Ops render path. React saw a different number/order of hooks when you switched to that tab and bailed.
+
+Here’s a precise fix plan you can hand to Replit (it’s short and surgical):
+
+# What to look for (and remove)
+
+* Any `useState / useEffect / useMemo / useRef / useCallback` **inside**:
+
+  * `if (activeTab === TAB_CYCLE_OPS) { … }`
+  * JSX blocks only rendered on the Cycle Ops tab (e.g. the Enhanced Winners section)
+  * functions that are **only** called from those conditional blocks (e.g. `renderEnhancedWinners()`)
+  * loops / `.map()` for table rows
+* Any “inline component” declared inside render for that tab that itself uses hooks.
+
+# Put these at top-level (always run)
+
+Add these right under other top-level hooks in `Admin (19).tsx`—**not** inside any conditional:
+
+```ts
+// Derived ids for this page (no conditional hooks)
+const eligibleIdsOnPage = useMemo(
+  () => getEligibleIds(enhancedWinnersData.winners), 
+  [enhancedWinnersData.winners]
+);
+
+const allEligibleSelected =
+  eligibleIdsOnPage.length > 0 &&
+  eligibleIdsOnPage.every(id => selectedForDisbursement.has(id));
+
+const someEligibleSelected =
+  eligibleIdsOnPage.some(id => selectedForDisbursement.has(id)) && !allEligibleSelected;
+
+// Header checkbox handler (top-level)
+const toggleSelectAllOnPage = (checked: boolean) => {
+  setSelectedForDisbursement(prev =>
+    checked ? addIds(prev, eligibleIdsOnPage) : removeIds(prev, eligibleIdsOnPage)
+  );
+};
+```
+
+# Use a hook-free header checkbox
+
+In the Enhanced Winners table header, replace any stateful/conditional-hook logic with a plain input. This must be inside the JSX, but it uses **no hooks**:
+
+```tsx
+<th className="w-10">
+  <input
+    type="checkbox"
+    checked={allEligibleSelected}
+    onChange={e => toggleSelectAllOnPage(e.target.checked)}
+    // show mixed state without hooks
+    ref={el => { if (el) el.indeterminate = someEligibleSelected; }}
+    title="Select all eligible winners on this page"
+  />
+</th>
+```
+
+# If you added any of these, hoist or delete
+
+* A `const [headerChecked, setHeaderChecked] = useState(...)` created **inside** the tab’s block → remove it; the header should be purely derived (as above).
+* An inline component (e.g. `const EnhancedWinnersHeader = () => { const x = useState(...); … }`) declared inside render → move it out of the component file scope or make it hook-free.
+* Any `useEffect` inside `if (activeTab === TAB_CYCLE_OPS)` → move the effect to top-level (with `[activeTab, …]` deps). Effects are fine; they just must not be **conditionally declared**.
+
+# Quick grep to catch offenders
+
+Search for hooks in conditional areas:
+
+```
+useState\(|useEffect\(|useMemo\(|useRef\(|useCallback\(
+```
+
+and make sure none appear **below** the first place you branch on `activeTab === TAB_CYCLE_OPS` or inside render helpers called only from there.
+
+Once those are hoisted/removed, the “Rendered more hooks” crash will disappear, and the Select-All checkbox will work without introducing any new state or hooks-in-branches.
