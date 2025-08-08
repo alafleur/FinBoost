@@ -1377,7 +1377,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                           
                           <Button
                             onClick={handleProcessPayouts}
-                            disabled={isProcessingPayouts || !isSelectionSealed}
+                            disabled={isProcessingPayouts || (isSelectiveMode && selectedCount === 0)}
                             className={`
                               disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200
                               ${isBulkMode 

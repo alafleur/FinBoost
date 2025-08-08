@@ -2280,12 +2280,12 @@ function AdminComponent() {
     }
   };
 
-  // Handle selective disbursement processing
+  // Handle selective disbursement processing - ChatGPT Fix: Added dual-mode logic
   const handleProcessSelectedDisbursements = async () => {
-    if (!selectedCycle || selectedForDisbursement.size === 0) {
+    if (!selectedCycle) {
       toast({
         title: "Error",
-        description: "Please select winners to process disbursements for",
+        description: "No cycle selected",
         variant: "destructive"
       });
       return;
@@ -2294,7 +2294,14 @@ function AdminComponent() {
     try {
       setIsProcessingDisbursements(true);
       const token = localStorage.getItem('token');
-      const selectedWinnerIds = Array.from(selectedForDisbursement);
+      
+      // ChatGPT Fix: Determine if we're in selective mode or bulk mode
+      const selectiveModeActive = selectedForDisbursement.size > 0;
+      
+      // ChatGPT Fix: Send appropriate payload based on mode
+      const payload = selectiveModeActive
+        ? { selectedWinnerIds: Array.from(selectedForDisbursement) }
+        : { processAll: true };
       
       const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
         method: 'POST',
@@ -2302,14 +2309,16 @@ function AdminComponent() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ selectedWinnerIds })
+        body: JSON.stringify(payload)
       });
       
       const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || response.statusText);
+      
       if (data.success) {
         toast({
           title: "Disbursements Processed",
-          description: `Successfully processed ${selectedWinnerIds.length} disbursements`
+          description: `Successfully processed ${data.processedCount || payload.selectedWinnerIds?.length || 'all eligible'} disbursements`
         });
         // Clear selection and reload winners
         setSelectedForDisbursement(new Set());
@@ -2324,7 +2333,7 @@ function AdminComponent() {
     } catch (error) {
       toast({
         title: "Error", 
-        description: "Failed to process disbursements",
+        description: error.message || "Failed to process disbursements",
         variant: "destructive"
       });
     } finally {

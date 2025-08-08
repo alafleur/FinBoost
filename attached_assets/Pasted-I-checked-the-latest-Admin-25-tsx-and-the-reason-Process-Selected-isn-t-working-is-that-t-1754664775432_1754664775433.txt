@@ -1,0 +1,67 @@
+I checked the latest `Admin (25).tsx`, and the reason **"Process Selected"** isn’t working is that the new layout’s button handler is still wired for the old selective-only disbursement logic.
+
+Right now, the button:
+
+* Reads `selectedForDisbursement`
+* Sends `{ selectedWinnerIds }` to the backend
+* Is disabled if `selectedForDisbursement.size === 0`
+
+In your screenshot, even though it shows “750 selected” from “Select all eligible,” this is only a **UI state**, not the backend-ready state — the array it sends is still empty when the handler runs because bulk selection logic hasn’t been implemented.
+
+**Why it’s failing:**
+
+* The "Process Selected" button has no branch for `{ processAll: true }`
+* The bulk selection ("Select all eligible") doesn't populate `selectedForDisbursement` across all pages
+* Backend expects either `{ processAll: true }` or a real `selectedWinnerIds` array with all IDs
+
+---
+
+**Plan to fix in this file (Step 1 only — backend bulk mode):**
+
+1. **Add a `processAll` branch in the handler**
+
+   ```ts
+   const handleProcessDisbursements = async () => {
+     try {
+       setIsProcessingDisbursements(true);
+       const token = localStorage.getItem('token');
+
+       const payload = selectiveModeActive
+         ? { selectedWinnerIds: Array.from(selectedForDisbursement) }
+         : { processAll: true };
+
+       const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
+         method: 'POST',
+         headers: {
+           'Authorization': `Bearer ${token}`,
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(payload),
+       });
+
+       const data = await response.json();
+       if (!response.ok) throw new Error(data?.error || response.statusText);
+
+       toast({ title: 'Success', description: `Processed ${data.processedCount} payouts` });
+       await loadEnhancedWinnersPaginated(selectedCycle.id, currentPage, winnersPerPage);
+
+     } catch (error) {
+       toast({ title: 'Error', description: error.message, variant: 'destructive' });
+     } finally {
+       setIsProcessingDisbursements(false);
+     }
+   };
+   ```
+
+2. **Update button disable logic** so it’s only disabled when:
+
+   * Selective mode is on **and** no winners selected
+   * Or a process is already running
+
+3. **Ensure backend** is already updated to handle `{ processAll: true }` (you said Step 1 backend is done).
+
+---
+
+If you want, I can rewrite your `Admin (25).tsx` with this change so you can click **Process Selected** and have it process all 750 winners without having to individually select them.
+
+Do you want me to apply that change now?
