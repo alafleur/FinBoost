@@ -1,0 +1,114 @@
+Got your **Admin (20).tsx**. I see you added the centralized helpers (`getEligibleIds`, `addIds`, `removeIds`) and also injected `id` into the enhanced winners mapping—good call. Want me to wire that into the UI so “Select: page / tier / all” and the per-row checkboxes actually work? Here’s a tight drop-in you can use.
+
+# 1) Row checkbox (per winner)
+
+Add this where you render each row’s checkbox:
+
+```tsx
+const isChecked = selectedForDisbursement.has(row.id);
+const isDisabled = !isPaypalConfigured(row);
+
+<input
+  type="checkbox"
+  checked={isChecked}
+  disabled={isDisabled}
+  onChange={(e) => {
+    setSelectedForDisbursement(prev => {
+      const next = new Set(prev);
+      if (e.target.checked) next.add(row.id);
+      else next.delete(row.id);
+      return next;
+    });
+  }}
+/>
+```
+
+# 2) “Select …” controls
+
+Create a single handler that uses your helpers:
+
+```tsx
+const toggleScope = (
+  scope: SelectScope,            // 'page' | 'tier' | 'all'
+  action: 'select' | 'clear',
+  tierName?: 'tier1' | 'tier2' | 'tier3'
+) => {
+  let ids: number[] = [];
+
+  if (scope === 'page') {
+    ids = getEligibleIds(enhancedWinnersData.winners); // current page only
+  } else if (scope === 'tier') {
+    // If your page is already filtered by tier, this is same as 'page'.
+    // If not, fetch the ids from *all* pages for that tier. If you only
+    // have the current page in memory, call your backend for the tier list
+    // or keep a cache. For now we’ll filter current page:
+    ids = getEligibleIds(
+      enhancedWinnersData.winners.filter(w =>
+        (w.tierRank ?? 0) >= 1 && // winner belongs to some tier
+        (tierName ? String(w.tierRankTier || w.tier).toLowerCase() === tierName : true)
+      )
+    );
+  } else if (scope === 'all') {
+    // Same caveat: if you don’t have all pages loaded, this should call an API
+    // to fetch all eligible ids. As a stopgap, we’ll use current page:
+    ids = getEligibleIds(enhancedWinnersData.winners);
+  }
+
+  setSelectedForDisbursement(prev =>
+    action === 'select' ? addIds(prev, ids) : removeIds(prev, ids)
+  );
+};
+```
+
+Hook these up to your UI buttons/dropdowns:
+
+```tsx
+<Button onClick={() => toggleScope('page', 'select')}>Select page</Button>
+<Button variant="secondary" onClick={() => toggleScope('page', 'clear')}>Clear page</Button>
+
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline">Tier actions</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onClick={() => toggleScope('tier', 'select', 'tier1')}>Select Tier 1</DropdownMenuItem>
+    <DropdownMenuItem onClick={() => toggleScope('tier', 'clear', 'tier1')}>Clear Tier 1</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem onClick={() => toggleScope('all', 'select')}>Select ALL (see note)</DropdownMenuItem>
+    <DropdownMenuItem onClick={() => toggleScope('all', 'clear')}>Clear ALL (see note)</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+> ⚠️ **Note on “ALL” / full tier:** if you paginate, “all” should come from the backend (e.g., `GET /api/admin/cycle-winner-details/{cycleId}/eligible-ids?scope=all` or `?tier=tier1`). Right now the snippet only touches whatever is loaded in `enhancedWinnersData.winners` (current page).
+
+# 3) “Select all on page” checkbox state
+
+If you have a header checkbox, keep it in sync like this:
+
+```tsx
+const pageEligibleIds = useMemo(
+  () => getEligibleIds(enhancedWinnersData.winners),
+  [enhancedWinnersData.winners]
+);
+
+const allOnPageSelected = pageEligibleIds.length > 0 &&
+  pageEligibleIds.every(id => selectedForDisbursement.has(id));
+
+<input
+  type="checkbox"
+  checked={allOnPageSelected}
+  indeterminate={!allOnPageSelected && pageEligibleIds.some(id => selectedForDisbursement.has(id))}
+  onChange={(e) => toggleScope('page', e.target.checked ? 'select' : 'clear')}
+/>
+```
+
+(If your checkbox component doesn’t support `indeterminate`, you can set it via `ref.current.indeterminate = true`.)
+
+# 4) Quick sanity checks
+
+* You already added `id` to `enhancedWinnersData` mapping — perfect. Keep it!
+* Only selectable if `paypalEmail` or `snapshotPaypalEmail` exists — using your `isPaypalConfigured`.
+* `selectedForDisbursement` stays a `Set<number>` for O(1) toggles.
+
+If you want, I can also draft a tiny API for “select ALL across pages” so the front end can just receive an id list and dump it into the `Set`.
