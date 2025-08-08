@@ -338,7 +338,7 @@ export default function Dashboard() {
 
     setSavingPayment(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/user/payment-info', {
         method: 'PATCH',
         headers: {
