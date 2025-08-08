@@ -1,0 +1,163 @@
+Got it — here’s the **full deliverable** for Replit so they can both **backfill today’s data** and **deploy the permanent join** in one go.
+
+---
+
+## **1. Immediate Backfill Script**
+
+### **Postgres Syntax**
+
+```sql
+-- Backfill all open (undisbursed) cycles so PayPal emails are current
+UPDATE cycleWinnerSelections cws
+SET paypalEmail = u.paypalEmail
+FROM users u
+WHERE u.id = cws.userId
+  AND cws.paypalEmail IS NULL
+  AND u.paypalEmail IS NOT NULL
+  AND (cws.disbursementCompleted = false OR cws.disbursementCompleted IS NULL);
+```
+
+### **MySQL Syntax**
+
+```sql
+UPDATE cycleWinnerSelections cws
+JOIN users u ON u.id = cws.userId
+SET cws.paypalEmail = u.paypalEmail
+WHERE cws.paypalEmail IS NULL
+  AND u.paypalEmail IS NOT NULL
+  AND (cws.disbursementCompleted = 0 OR cws.disbursementCompleted IS NULL);
+```
+
+**Sanity check after run:**
+
+```sql
+SELECT userId, paypalEmail
+FROM cycleWinnerSelections
+WHERE cycleSettingId = 18
+ORDER BY userId
+LIMIT 10;
+```
+
+→ You should see `lafleur.andrew@gmail.com` for `user180@test.com`.
+
+---
+
+## **2. Permanent Join in API Queries**
+
+### **Postgres Raw SQL**
+
+```sql
+SELECT
+  cws.id,
+  cws.cycleSettingId,
+  cws.userId,
+  cws.overallRank,
+  cws.tierRank,
+  cws.payoutPercent,
+  cws.payoutAmount,
+  u.email              AS userEmail,
+  u.paypalEmail        AS paypalEmail,           -- live from users
+  cws.paypalEmail      AS snapshotPaypalEmail,   -- stored at selection time
+  (CASE
+     WHEN u.paypalEmail IS NOT NULL AND POSITION('@' IN u.paypalEmail) > 1 THEN TRUE
+     WHEN cws.paypalEmail IS NOT NULL AND POSITION('@' IN cws.paypalEmail) > 1 THEN TRUE
+     ELSE FALSE
+   END)                AS paypalConfigured
+FROM cycleWinnerSelections cws
+JOIN users u ON u.id = cws.userId
+WHERE cws.cycleSettingId = :cycleId
+ORDER BY cws.overallRank
+LIMIT :limit OFFSET :offset;
+```
+
+---
+
+### **TypeORM QueryBuilder**
+
+```ts
+const winners = await this.cycleWinnerSelectionsRepository
+  .createQueryBuilder('cws')
+  .innerJoinAndSelect('users', 'u', 'u.id = cws.userId')
+  .addSelect('u.email', 'userEmail')
+  .addSelect('u.paypalEmail', 'paypalEmail')
+  .addSelect('cws.paypalEmail', 'snapshotPaypalEmail')
+  .addSelect(`
+    CASE
+      WHEN u.paypalEmail IS NOT NULL AND POSITION('@' IN u.paypalEmail) > 1 THEN true
+      WHEN cws.paypalEmail IS NOT NULL AND POSITION('@' IN cws.paypalEmail) > 1 THEN true
+      ELSE false
+    END
+  `, 'paypalConfigured')
+  .where('cws.cycleSettingId = :cycleId', { cycleId })
+  .orderBy('cws.overallRank', 'ASC')
+  .limit(limit)
+  .offset(offset)
+  .getRawMany();
+```
+
+---
+
+### **Prisma**
+
+```ts
+const winners = await prisma.cycleWinnerSelections.findMany({
+  where: { cycleSettingId: cycleId },
+  orderBy: { overallRank: 'asc' },
+  take: limit,
+  skip: offset,
+  include: {
+    user: {
+      select: {
+        email: true,
+        paypalEmail: true,
+      },
+    },
+  },
+});
+
+return winners.map(w => ({
+  ...w,
+  userEmail: w.user.email,
+  paypalEmail: w.user.paypalEmail,
+  snapshotPaypalEmail: w.paypalEmail,
+  paypalConfigured: Boolean(
+    (w.user.paypalEmail && w.user.paypalEmail.includes('@')) ||
+    (w.paypalEmail && w.paypalEmail.includes('@'))
+  ),
+}));
+```
+
+---
+
+## **3. Frontend Consumption**
+
+* Column display:
+
+```ts
+const getPaypalDisplay = (row) =>
+  row.paypalEmail ?? row.snapshotPaypalEmail ?? null;
+```
+
+* Button enablement:
+
+```ts
+const disbursementEnabled = winners.some(w => w.paypalConfigured);
+```
+
+---
+
+## **4. Testing**
+
+1. Run **backfill**.
+2. Reload Cycle Operations → Confirm `user180@test.com` now shows `lafleur.andrew@gmail.com`.
+3. Confirm **Process PayPal Disbursements** button appears (because `paypalConfigured=true`).
+4. E2E: Change PayPal email in Users → refresh → table shows updated email, button stays enabled.
+5. Edge case: remove PayPal email → refresh → email shows "Not configured" and button hides if no configured winners remain.
+
+---
+
+If Replit runs the **backfill first** and then deploys the **join**, you’ll have the button live immediately for Cycle 18, and you’ll never see the “Users tab says X / Winners tab says Not configured” mismatch again.
+
+---
+
+Do you want me to also write the **one-off admin route** so you (or Replit) can trigger this backfill from the Admin UI without touching the DB directly? That would let you fix future cases in seconds.

@@ -1,0 +1,104 @@
+Yes — between your DB column hints (`cycleWinnerSelections`, `userId`, `cycleSettingId`, `paypalEmail`) and the API behavior you’ve described, I can give you a join that will work in both **raw SQL** and an ORM like Prisma/TypeORM.
+
+The one thing I can’t 100% confirm is whether `cycleWinnerSelections` is the actual table name in the database or just the model name — but I’ll note that so Replit can swap it if needed.
+
+---
+
+## **Raw SQL (Postgres syntax)**
+
+```sql
+SELECT
+  cws.id,
+  cws.cycleSettingId,
+  cws.userId,
+  cws.overallRank,
+  cws.tierRank,
+  cws.payoutPercent,
+  cws.payoutAmount,
+  u.email              AS userEmail,
+  u.paypalEmail        AS paypalEmail,           -- live email from users
+  cws.paypalEmail      AS snapshotPaypalEmail,   -- stored at selection time
+  (CASE
+     WHEN u.paypalEmail IS NOT NULL AND POSITION('@' IN u.paypalEmail) > 1 THEN TRUE
+     WHEN cws.paypalEmail IS NOT NULL AND POSITION('@' IN cws.paypalEmail) > 1 THEN TRUE
+     ELSE FALSE
+   END)                AS paypalConfigured
+FROM cycleWinnerSelections cws
+JOIN users u
+  ON u.id = cws.userId
+WHERE cws.cycleSettingId = :cycleId
+ORDER BY cws.overallRank
+LIMIT :limit OFFSET :offset;
+```
+
+---
+
+## **TypeORM Example**
+
+```ts
+const winners = await this.cycleWinnerSelectionsRepository
+  .createQueryBuilder('cws')
+  .innerJoinAndSelect('users', 'u', 'u.id = cws.userId')
+  .addSelect('u.email', 'userEmail')
+  .addSelect('u.paypalEmail', 'paypalEmail')
+  .addSelect('cws.paypalEmail', 'snapshotPaypalEmail')
+  .addSelect(`
+    CASE
+      WHEN u.paypalEmail IS NOT NULL AND POSITION('@' IN u.paypalEmail) > 1 THEN true
+      WHEN cws.paypalEmail IS NOT NULL AND POSITION('@' IN cws.paypalEmail) > 1 THEN true
+      ELSE false
+    END
+  `, 'paypalConfigured')
+  .where('cws.cycleSettingId = :cycleId', { cycleId })
+  .orderBy('cws.overallRank', 'ASC')
+  .limit(limit)
+  .offset(offset)
+  .getRawMany();
+```
+
+---
+
+## **Prisma Example**
+
+```ts
+const winners = await prisma.cycleWinnerSelections.findMany({
+  where: { cycleSettingId: cycleId },
+  orderBy: { overallRank: 'asc' },
+  take: limit,
+  skip: offset,
+  include: {
+    user: {
+      select: {
+        email: true,
+        paypalEmail: true,
+      },
+    },
+  },
+});
+
+return winners.map(w => ({
+  ...w,
+  userEmail: w.user.email,
+  paypalEmail: w.user.paypalEmail,
+  snapshotPaypalEmail: w.paypalEmail,
+  paypalConfigured: Boolean(
+    (w.user.paypalEmail && w.user.paypalEmail.includes('@')) ||
+    (w.paypalEmail && w.paypalEmail.includes('@'))
+  ),
+}));
+```
+
+---
+
+### **Why this works**
+
+* **Live join** to `users` gives the most current PayPal email.
+* Still returns the **snapshot** email stored at selection time in `cws.paypalEmail`.
+* Adds a boolean `paypalConfigured` so the frontend doesn’t duplicate null/empty checks.
+* Works for both paginated and full endpoints — just wrap in the service layer they already use.
+
+---
+
+If you want, I can also include a **one-line SQL backfill** in the same file so Replit can fix Cycle 18 and all open cycles in one shot before deploying the permanent join. That way they’ll see the PayPal button immediately after deployment.
+
+Do you want me to include that in the same deliverable?
