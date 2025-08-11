@@ -201,6 +201,9 @@ export async function createPaypalPayout(recipients: Array<{
   try {
     const accessToken = await getAccessToken();
     
+    // Force USD for all payouts to avoid currency balance issues
+    const PAYOUT_CCY = process.env.PAYOUT_CURRENCY || "USD";
+    
     const payoutData = {
       sender_batch_header: {
         sender_batch_id: `payout_${Date.now()}`,
@@ -211,13 +214,16 @@ export async function createPaypalPayout(recipients: Array<{
         recipient_type: "EMAIL",
         amount: {
           value: (recipient.amount / 100).toFixed(2), // Convert cents to dollars
-          currency: recipient.currency.toUpperCase(),
+          currency: "USD", // Hardcoded to USD to avoid sandbox currency balance issues
         },
         receiver: recipient.email,
         note: recipient.note || "FinBoost monthly reward",
         sender_item_id: recipient.recipientId || `item_${index}_${Date.now()}`,
       })),
     };
+
+    // Debug logging for first 3 recipients
+    console.log("PAYOUT PREVIEW", recipients.slice(0, 3));
 
     const response = await fetch(
       process.env.NODE_ENV === "production"
