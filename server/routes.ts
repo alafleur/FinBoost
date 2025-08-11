@@ -2764,6 +2764,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transaction-based idempotency: snapshot payout final and generate batch ID
       const batchId = `batch_${cycleId}_${Date.now()}`;
       
+      // Debug logging to trace the inflation issue
+      console.log('DEBUG PAYOUT VALUES:', eligibleWinners.slice(0, 3).map(w => ({
+        userId: w.userId,
+        tier: w.tier,
+        payoutFinal: w.payoutFinal,
+        type: typeof w.payoutFinal
+      })));
+
       // Prepare recipients for PayPal payout
       const recipients = eligibleWinners.map((winner, index) => ({
         email: winner.paypalEmail,
