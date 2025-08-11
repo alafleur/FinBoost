@@ -2767,7 +2767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Prepare recipients for PayPal payout
       const recipients = eligibleWinners.map((winner, index) => ({
         email: winner.paypalEmail,
-        amount: Math.round((winner.payoutFinal || 0) * 100), // Convert to cents for PayPal API
+        amount: Math.round(winner.payoutFinal || 0), // Database already stores in cents
         currency: "USD",
         note: `FinBoost Cycle ${cycleId} Reward - Tier ${winner.tier}`,
         recipientId: `user_${winner.userId}_cycle_${cycleId}_${Date.now()}`
@@ -2796,7 +2796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paypalPayoutId: payoutResult.batch_header?.payout_batch_id,
             paypalItemId: payoutResult.items?.[index]?.payout_item_id,
             recipientEmail: winner.paypalEmail,
-            amount: Math.round((winner.payoutFinal || 0) * 100), // Store in cents
+            amount: Math.round(winner.payoutFinal || 0), // Database already stores in cents
             currency: "usd",
             status: "pending",
             reason: `cycle_${cycleId}_reward`,
