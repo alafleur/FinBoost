@@ -514,6 +514,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="actions" 
+                id="nav-actions"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Financial actions tab"
               >
@@ -522,6 +523,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard" 
+                id="nav-leaderboard"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Leaderboard tab"
               >
@@ -539,6 +541,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="predictions" 
+                id="nav-predictions"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Bonus predictions tab"
               >
@@ -547,6 +550,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="referrals" 
+                id="nav-referrals"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Referral system tab"
               >
@@ -1113,6 +1117,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="actions" 
+                  id="nav-actions-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Financial actions tab"
                 >
@@ -1121,6 +1126,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="leaderboard" 
+                  id="nav-leaderboard-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Leaderboard tab"
                 >
@@ -1138,6 +1144,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="predictions" 
+                  id="nav-predictions-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Bonus predictions tab"
                 >
@@ -1146,6 +1153,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="referrals" 
+                  id="nav-referrals-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Referral system tab"
                 >
