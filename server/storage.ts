@@ -427,6 +427,8 @@ export interface IStorage {
     getPayoutBatch(batchId: number): Promise<PayoutBatch | null>;
     getPayoutBatchBySenderBatchId(senderBatchId: string): Promise<PayoutBatch | null>;
     getPayoutBatchItems(batchId: number): Promise<PayoutBatchItem[]>;
+    // Step 8: Concurrency protection - get batches by cycle
+    getPayoutBatchesByCycle(cycleId: number): Promise<PayoutBatch[]>;
     
     // Idempotency and Validation
     generateIdempotencyKey(cycleId: number, winnerData: Array<{id: number, amount: number, email: string}>): string;
@@ -7907,6 +7909,21 @@ export class MemStorage implements IStorage {
       return items;
     } catch (error) {
       console.error('Error getting payout batch items:', error);
+      throw error;
+    }
+  }
+
+  // Step 8: Concurrency protection - get batches by cycle
+  async getPayoutBatchesByCycle(cycleId: number): Promise<PayoutBatch[]> {
+    try {
+      const batches = await db
+        .select()
+        .from(payoutBatches)
+        .where(eq(payoutBatches.cycleId, cycleId))
+        .orderBy(payoutBatches.createdAt);
+      return batches;
+    } catch (error) {
+      console.error('Error getting payout batches by cycle:', error);
       throw error;
     }
   }

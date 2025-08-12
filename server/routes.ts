@@ -3184,29 +3184,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Process PayPal disbursements for selected cycle winners
-  app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
-    try {
-      const cycleId = parseInt(req.params.cycleId);
-      const { selectedWinnerIds, processAll } = req.body;
+  // Step 8: Structured logging utility for batch operations
+  function createBatchLogger(batchId: string, cycleId: number, adminId: number) {
+    const prefix = `[STEP 8 BATCH-${batchId}]`;
+    return {
+      start: (mode: string, eligibleCount: number) => {
+        console.log(`${prefix} BATCH START - CycleId: ${cycleId}, AdminId: ${adminId}, Mode: ${mode}, EligibleCount: ${eligibleCount}, Timestamp: ${new Date().toISOString()}`);
+      },
+      end: (processedCount: number, failedCount: number, paypalBatchId?: string) => {
+        console.log(`${prefix} BATCH END - ProcessedCount: ${processedCount}, FailedCount: ${failedCount}, PayPalBatchId: ${paypalBatchId || 'N/A'}, Timestamp: ${new Date().toISOString()}`);
+      },
+      item: (userId: number, amount: number, status: 'success' | 'failed', reason?: string) => {
+        console.log(`${prefix} ITEM RESULT - UserId: ${userId}, Amount: ${amount}, Status: ${status}, Reason: ${reason || 'N/A'}, Timestamp: ${new Date().toISOString()}`);
+      },
+      validation: (type: string, message: string) => {
+        console.log(`${prefix} VALIDATION - Type: ${type}, Message: ${message}, Timestamp: ${new Date().toISOString()}`);
+      },
+      concurrency: (message: string) => {
+        console.log(`${prefix} CONCURRENCY - ${message}, Timestamp: ${new Date().toISOString()}`);
+      },
+      audit: (action: string, details: any) => {
+        console.log(`${prefix} AUDIT - Action: ${action}, Details: ${JSON.stringify(details)}, Timestamp: ${new Date().toISOString()}`);
+      }
+    };
+  }
 
-      // Validate payload: either processAll OR selectedWinnerIds, not both or neither
+  // Step 8: Currency and amount validation utilities
+  function validateCurrencyAmount(amount: any, currency: any): { valid: boolean; error?: string; normalizedAmount?: number } {
+    // Currency validation
+    if (!currency || typeof currency !== 'string') {
+      return { valid: false, error: 'Currency must be a non-empty string' };
+    }
+    
+    if (currency.toUpperCase() !== 'USD') {
+      return { valid: false, error: 'Only USD currency is supported' };
+    }
+
+    // Amount validation
+    if (amount === null || amount === undefined) {
+      return { valid: false, error: 'Amount is required' };
+    }
+
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount);
+    
+    if (isNaN(numAmount)) {
+      return { valid: false, error: 'Amount must be a valid number' };
+    }
+
+    if (numAmount < 0) {
+      return { valid: false, error: 'Amount must be non-negative' };
+    }
+
+    if (numAmount === 0) {
+      return { valid: false, error: 'Amount must be greater than zero' };
+    }
+
+    // Check for more than 2 decimal places (cents precision)
+    const rounded = Math.round(numAmount * 100) / 100;
+    if (Math.abs(numAmount - rounded) > 0.001) {
+      return { valid: false, error: 'Amount must have at most 2 decimal places' };
+    }
+
+    // Convert to cents for internal storage (as integers)
+    const normalizedAmount = Math.round(numAmount * 100);
+
+    return { valid: true, normalizedAmount };
+  }
+
+  // Step 8: Concurrency protection - check for existing open batches
+  async function checkConcurrentBatches(cycleId: number, currentBatchId: string): Promise<{ hasConflict: boolean; conflictDetails?: any }> {
+    try {
+      // Check for existing open payout batches for this cycle
+      const openBatches = await storage.getPayoutBatchesByCycle(cycleId);
+      const activeBatches = openBatches.filter(batch => 
+        batch.status === 'processing' && 
+        batch.id !== currentBatchId &&
+        batch.createdAt && 
+        (new Date().getTime() - new Date(batch.createdAt).getTime()) < 3600000 // Within last hour
+      );
+
+      if (activeBatches.length > 0) {
+        return {
+          hasConflict: true,
+          conflictDetails: {
+            count: activeBatches.length,
+            batchIds: activeBatches.map(b => b.id),
+            oldestBatch: activeBatches[0]?.createdAt
+          }
+        };
+      }
+
+      return { hasConflict: false };
+    } catch (error) {
+      console.error('[STEP 8 CONCURRENCY] Error checking concurrent batches:', error);
+      // On error, assume potential conflict to be safe
+      return { hasConflict: true, conflictDetails: { error: 'Unable to verify concurrent batches' } };
+    }
+  }
+
+  // Process PayPal disbursements for selected cycle winners (Enhanced with Step 8 Guardrails)
+  app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    const cycleId = parseInt(req.params.cycleId);
+    const { selectedWinnerIds, processAll } = req.body;
+    const adminId = req.user?.id || 1;
+    const batchId = `batch_${cycleId}_${Date.now()}`;
+    
+    // Initialize structured logger
+    const logger = createBatchLogger(batchId, cycleId, adminId);
+
+    try {
+      // Step 8: Audit trail - log operation initiation
+      logger.audit('DISBURSEMENT_INITIATED', {
+        cycleId,
+        processAll: !!processAll,
+        selectedWinnerIds: selectedWinnerIds?.length || 0,
+        adminId,
+        requestTimestamp: new Date().toISOString()
+      });
+
+      // Step 8: Input validation with structured logging
       if (processAll && selectedWinnerIds) {
+        logger.validation('PAYLOAD_VALIDATION', 'Cannot specify both processAll and selectedWinnerIds');
         return res.status(400).json({ error: "Cannot specify both processAll and selectedWinnerIds" });
       }
       if (!processAll && (!selectedWinnerIds || selectedWinnerIds.length === 0)) {
+        logger.validation('PAYLOAD_VALIDATION', 'Must specify either processAll: true or provide selectedWinnerIds array');
         return res.status(400).json({ error: "Must specify either processAll: true or provide selectedWinnerIds array" });
       }
 
-      // Log the operation mode for audit
-      console.log(`[DISBURSEMENT] Processing disbursements for cycle ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}`);
+      // Step 8: Concurrency protection check
+      const concurrencyCheck = await checkConcurrentBatches(cycleId, batchId);
+      if (concurrencyCheck.hasConflict) {
+        logger.concurrency(`Concurrent batch detected: ${JSON.stringify(concurrencyCheck.conflictDetails)}`);
+        return res.status(409).json({
+          error: "Concurrent disbursement in progress",
+          details: "Another disbursement batch is currently being processed for this cycle. Please wait for it to complete.",
+          conflictInfo: concurrencyCheck.conflictDetails
+        });
+      }
+      logger.concurrency('No concurrent batches detected - proceeding');
 
       // Get the cycle setting to verify it exists
       const cycleResult = await db.select().from(cycleSettings).where(eq(cycleSettings.id, cycleId)).limit(1);
       if (cycleResult.length === 0) {
+        logger.validation('CYCLE_VALIDATION', `Cycle ${cycleId} not found`);
         return res.status(404).json({ error: "Cycle not found" });
       }
       const cycle = cycleResult[0];
+      logger.audit('CYCLE_VERIFIED', { cycleId, cycleName: cycle.cycleName });
 
       let winnersToProcess: number[];
       let totalEligibleCount = 0;
@@ -3226,9 +3351,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         winnersToProcess = eligibleWinners.map(w => w.id);
         totalEligibleCount = winnersToProcess.length;
-        console.log(`[DISBURSEMENT] Bulk mode: found ${totalEligibleCount} eligible winners`);
+        logger.audit('ELIGIBILITY_CHECK_BULK', {
+          mode: 'processAll',
+          totalEligible: totalEligibleCount,
+          winnersToProcess: winnersToProcess.slice(0, 10) // Log first 10 for audit
+        });
 
         if (winnersToProcess.length === 0) {
+          logger.end(0, 0);
           return res.json({
             success: true,
             processedCount: 0,
@@ -3249,14 +3379,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ));
 
         if (cycleValidation.length !== selectedWinnerIds.length) {
-          const invalidIds = selectedWinnerIds.filter(id => !cycleValidation.some(v => v.id === id));
+          const invalidIds = selectedWinnerIds.filter((id: any) => !cycleValidation.some(v => v.id === id));
+          logger.validation('WINNER_ID_VALIDATION', `Invalid winner IDs: ${invalidIds.join(', ')}`);
           return res.status(400).json({ 
             error: `Invalid winner IDs for cycle ${cycleId}: ${invalidIds.join(', ')}. These IDs do not belong to this cycle.`
           });
         }
 
         winnersToProcess = selectedWinnerIds;
-        console.log(`[DISBURSEMENT] Selective mode: processing ${winnersToProcess.length} selected winners`);
+        logger.audit('ELIGIBILITY_CHECK_SELECTIVE', {
+          mode: 'selective',
+          selectedWinnerIds,
+          validatedCount: cycleValidation.length
+        });
       }
 
       // Get detailed winner information for processing (unified for both modes)
@@ -3291,16 +3426,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify selection is sealed/final
+      // Step 8: Verify selection is sealed with audit logging
       if (!winners.some(w => w.isSealed)) {
+        logger.validation('SEAL_STATUS_VALIDATION', 'Winner selection must be sealed before processing disbursements');
         return res.status(400).json({ error: "Winner selection must be sealed before processing disbursements" });
       }
 
-      // Filter to only winners with PayPal emails (eligibility check)
+      // Step 8: Log batch initiation with structured logging
+      logger.start(processAll ? 'processAll' : 'selective', winners.length);
+
+      // Step 8: Enhanced eligibility check with structured logging
       const eligibleWinners = winners.filter(w => w.paypalEmail);
       const failedWinners = winners.filter(w => !w.paypalEmail);
       
+      // Log each failed winner with detailed reason
+      failedWinners.forEach(winner => {
+        logger.item(winner.userId, 0, 'failed', 'No PayPal email');
+      });
+      
       if (eligibleWinners.length === 0) {
+        logger.audit('NO_ELIGIBLE_WINNERS', {
+          totalWinners: winners.length,
+          failedReasons: ['No PayPal email']
+        });
+        logger.end(0, failedWinners.length);
         return res.json({
           success: true,
           processedCount: 0,
@@ -3311,33 +3460,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Transaction-based idempotency: snapshot payout final and generate batch ID
-      const batchId = `batch_${cycleId}_${Date.now()}`;
-      
-      // Debug logging to trace the inflation issue
-      console.log('DEBUG PAYOUT VALUES:', eligibleWinners.slice(0, 3).map(w => ({
-        userId: w.userId,
-        tier: w.tier,
-        payoutFinal: w.payoutFinal,
-        type: typeof w.payoutFinal
-      })));
+      // Step 8: Currency and amount validation for each winner
+      const validationResults = eligibleWinners.map(winner => {
+        const validation = validateCurrencyAmount(winner.payoutFinal, 'USD');
+        return {
+          winner,
+          validation,
+          validatedAmount: validation.normalizedAmount
+        };
+      });
 
-      // Prepare recipients for PayPal payout
-      const recipients = eligibleWinners.map((winner, index) => ({
-        email: winner.paypalEmail,
-        amount: Math.round(winner.payoutFinal || 0), // Database already stores in cents
+      const validRecipients = validationResults.filter(r => r.validation.valid);
+      const invalidRecipients = validationResults.filter(r => !r.validation.valid);
+
+      // Log validation failures
+      invalidRecipients.forEach(({ winner, validation }) => {
+        logger.item(winner.userId, winner.payoutFinal || 0, 'failed', `Amount validation: ${validation.error}`);
+      });
+
+      if (validRecipients.length === 0) {
+        logger.audit('ALL_AMOUNTS_INVALID', {
+          totalWinners: eligibleWinners.length,
+          validationErrors: invalidRecipients.map(r => r.validation.error)
+        });
+        logger.end(0, eligibleWinners.length + failedWinners.length);
+        return res.json({
+          success: true,
+          processedCount: 0,
+          failed: [...failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+                  ...invalidRecipients.map(r => ({ id: r.winner.id, email: r.winner.email, reason: `Amount validation: ${r.validation.error}` }))],
+          batchId: null,
+          totalEligible: totalEligibleCount || winnersToProcess.length,
+          message: "No winners with valid amounts found"
+        });
+      }
+
+      // Step 8: Prepare recipients with validated amounts
+      const recipients = validRecipients.map((result, index) => ({
+        email: result.winner.paypalEmail,
+        amount: result.validatedAmount, // Use validated/normalized amount in cents
         currency: "USD",
-        note: `FinBoost Cycle ${cycleId} Reward - Tier ${winner.tier}`,
-        recipientId: `user_${winner.userId}_cycle_${cycleId}_${Date.now()}`
+        note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`,
+        recipientId: `user_${result.winner.userId}_cycle_${cycleId}_${Date.now()}`
       }));
 
-      // Create actual PayPal payout
+      // Step 8: Audit trail before PayPal API call
+      logger.audit('PAYPAL_PAYOUT_INITIATION', {
+        recipientCount: recipients.length,
+        totalAmount: recipients.reduce((sum, r) => sum + r.amount, 0),
+        recipients: recipients.map(r => ({ email: r.email, amount: r.amount })).slice(0, 5) // Log first 5
+      });
+
+      // Create PayPal payout with enhanced error handling
       const { createPaypalPayout } = await import('./paypal');
       const payoutResult = await createPaypalPayout(recipients);
+
+      // Step 8: Log PayPal API success
+      logger.audit('PAYPAL_PAYOUT_SUCCESS', {
+        paypalBatchId: payoutResult.batch_header?.payout_batch_id,
+        itemCount: payoutResult.items?.length || 0,
+        batchHeader: payoutResult.batch_header
+      });
       
-      // Wrap in transaction for idempotency
+      // Step 8: Enhanced database transaction with audit trail
       await db.transaction(async (tx) => {
-        // Persist payout snapshots and update status atomically
+        // Update only the winners that passed validation
         await tx.update(cycleWinnerSelections)
           .set({
             payoutStatus: 'processing',
@@ -3345,16 +3532,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Ensure payout_final is persisted (idempotency requirement)
             payoutFinal: sql`COALESCE(${cycleWinnerSelections.payoutFinal}, ${cycleWinnerSelections.payoutCalculated}, 0)`
           })
-          .where(inArray(cycleWinnerSelections.id, eligibleWinners.map(w => w.id)));
+          .where(inArray(cycleWinnerSelections.id, validRecipients.map(r => r.winner.id)));
 
-        // Save PayPal payout records
-        const payoutPromises = eligibleWinners.map(async (winner, index) => {
+        // Save PayPal payout records for valid recipients only
+        const payoutPromises = validRecipients.map(async (result, index) => {
+          const { winner } = result;
           return tx.insert(paypalPayouts).values({
             userId: winner.userId,
             paypalPayoutId: payoutResult.batch_header?.payout_batch_id,
             paypalItemId: payoutResult.items?.[index]?.payout_item_id,
             recipientEmail: winner.paypalEmail,
-            amount: Math.round(winner.payoutFinal || 0), // Database already stores in cents
+            amount: result.validatedAmount, // Use validated amount
             currency: "usd",
             status: "pending",
             reason: `cycle_${cycleId}_reward`,
@@ -3368,20 +3556,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await Promise.all(payoutPromises);
       });
 
-      // Log comprehensive audit information
-      console.log(`[DISBURSEMENT] PayPal Payouts Created - cycleId: ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}, countIn: ${winnersToProcess.length}, processedCount: ${eligibleWinners.length}, failed: ${failedWinners.length}, batchId: ${batchId}, paypalBatchId: ${payoutResult.batch_header?.payout_batch_id}`);
+      // Step 8: Log successful database transaction
+      logger.audit('DATABASE_TRANSACTION_SUCCESS', {
+        winnersUpdated: validRecipients.length,
+        payoutRecordsCreated: validRecipients.length
+      });
 
-      // Return standardized response format per ChatGPT specification
+      // Step 8: Log individual successful items
+      validRecipients.forEach(result => {
+        logger.item(result.winner.userId, result.validatedAmount, 'success');
+      });
+
+      // Step 8: Comprehensive batch completion logging
+      const allFailures = [
+        ...failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+        ...invalidRecipients.map(r => ({ id: r.winner.id, email: r.winner.email, reason: `Amount validation: ${r.validation.error}` }))
+      ];
+
+      logger.end(validRecipients.length, allFailures.length, payoutResult.batch_header?.payout_batch_id);
+
+      // Step 8: Final audit trail
+      logger.audit('DISBURSEMENT_COMPLETED', {
+        processedCount: validRecipients.length,
+        failedCount: allFailures.length,
+        paypalBatchId: payoutResult.batch_header?.payout_batch_id,
+        totalAmount: recipients.reduce((sum, r) => sum + r.amount, 0),
+        completedAt: new Date().toISOString()
+      });
+
+      // Return enhanced response format
       res.json({
         success: true,
-        processedCount: eligibleWinners.length,
-        failed: failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+        processedCount: validRecipients.length,
+        failed: allFailures,
         batchId: batchId,
-        totalEligible: totalEligibleCount || winnersToProcess.length
+        totalEligible: totalEligibleCount || winnersToProcess.length,
+        paypalBatchId: payoutResult.batch_header?.payout_batch_id
       });
     } catch (error) {
-      console.error("Error processing cycle disbursements:", error);
-      res.status(500).json({ error: "Failed to process disbursements" });
+      // Step 8: Enhanced error handling with structured logging
+      logger.audit('DISBURSEMENT_ERROR', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      });
+      
+      logger.end(0, winnersToProcess?.length || 0);
+      
+      console.error("[STEP 8 ERROR] Error processing cycle disbursements:", error);
+      res.status(500).json({ 
+        error: "Failed to process disbursements",
+        details: error instanceof Error ? error.message : String(error),
+        batchId: batchId
+      });
     }
   });
 
