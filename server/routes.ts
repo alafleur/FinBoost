@@ -2359,6 +2359,215 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /* ========================================
+   * ENHANCED PAYOUT SYSTEM (Step 3 Routes)
+   * ========================================*/
+
+  // Enhanced cycle disbursement using Step 1 & 2 infrastructure
+  app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      const { useMockData = false } = req.body;
+      
+      console.log(`[ENHANCED DISBURSEMENT] Processing disbursements for cycle ${cycleId}, mock: ${useMockData}`);
+      
+      // Use enhanced payout processing with Step 1 & 2 integration
+      const { processPayoutWithEnhancedTracking } = await import('./paypal');
+      const result = await processPayoutWithEnhancedTracking(cycleId, req.user!.id, useMockData);
+      
+      if (result.duplicate) {
+        return res.json({
+          success: true,
+          message: `Disbursement already processed for cycle ${cycleId}`,
+          batchId: result.batchId,
+          duplicate: true
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: `Successfully initiated enhanced disbursements for cycle ${cycleId}`,
+        batchId: result.batchId,
+        paypalBatchId: result.paypalBatchId,
+        senderBatchId: result.senderBatchId,
+        recipientCount: result.recipientCount,
+        totalAmount: result.totalAmount
+      });
+    } catch (error) {
+      console.error("Enhanced disbursement error:", error);
+      res.status(500).json({ 
+        error: "Failed to process enhanced disbursements",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Check and update payout batch status
+  app.post("/api/admin/payout-batches/:batchId/check-status", requireAdmin, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+      
+      console.log(`[PAYOUT STATUS CHECK] Checking status for batch ${batchId}`);
+      
+      // Get batch record
+      const batch = await storage.getPayoutBatchById(batchId);
+      if (!batch) {
+        return res.status(404).json({ error: "Payout batch not found" });
+      }
+      
+      if (!batch.paypalBatchId) {
+        return res.status(400).json({ error: "Batch has no PayPal batch ID" });
+      }
+      
+      // Get enhanced status from PayPal
+      const { getEnhancedPayoutStatus } = await import('./paypal');
+      const paypalStatus = await getEnhancedPayoutStatus(batch.paypalBatchId);
+      
+      // Update batch status
+      await storage.updatePayoutBatchStatus(batchId, paypalStatus.batchStatus, {
+        paypalResponse: paypalStatus,
+        processedAt: paypalStatus.processedAt,
+        fees: paypalStatus.fees
+      });
+      
+      // Update individual batch items with PayPal results
+      for (const result of paypalStatus.individualResults) {
+        await storage.updatePayoutBatchItemStatus(
+          batchId, 
+          result.cycleWinnerSelectionId, 
+          result.status,
+          {
+            paypalItemId: result.paypalItemId,
+            errorCode: result.errorCode,
+            errorMessage: result.errorMessage,
+            processedAt: result.processedAt,
+            fees: result.fees
+          }
+        );
+        
+        // If successful, mark winner as processed and create user reward record
+        if (result.status === 'success') {
+          await storage.updateWinnerProcessingStatus(result.cycleWinnerSelectionId, true, new Date());
+          
+          // Create user reward record for dashboard display
+          await storage.createUserRewardRecord({
+            userId: result.userId,
+            cycleSettingId: batch.cycleSettingId,
+            amount: result.amount * 100, // Convert back to cents
+            status: 'completed',
+            paypalBatchId: batch.paypalBatchId,
+            paypalItemId: result.paypalItemId,
+            processedAt: result.processedAt
+          });
+        }
+      }
+      
+      // Check if cycle is complete (all winners processed successfully)
+      const cycleComplete = await storage.checkCycleCompletionStatus(batch.cycleSettingId);
+      if (cycleComplete) {
+        await storage.updateCycleStatus(batch.cycleSettingId, 'completed');
+        console.log(`[CYCLE COMPLETION] Cycle ${batch.cycleSettingId} marked as completed`);
+      }
+      
+      res.json({
+        success: true,
+        batchStatus: paypalStatus.batchStatus,
+        itemCount: paypalStatus.itemCount,
+        individualResults: paypalStatus.individualResults,
+        cycleComplete
+      });
+    } catch (error) {
+      console.error("Payout status check error:", error);
+      res.status(500).json({ 
+        error: "Failed to check payout status",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get detailed payout history for admin dashboard
+  app.get("/api/admin/payout-batches", requireAdmin, async (req, res) => {
+    try {
+      const { cycleId, status, limit = 50 } = req.query;
+      
+      const batches = await storage.getPayoutBatches({
+        cycleId: cycleId ? parseInt(cycleId as string) : undefined,
+        status: status as string,
+        limit: parseInt(limit as string)
+      });
+      
+      // Get detailed items for each batch
+      const batchesWithDetails = await Promise.all(
+        batches.map(async (batch) => {
+          const items = await storage.getPayoutBatchItems(batch.id);
+          return {
+            ...batch,
+            items,
+            successCount: items.filter(item => item.status === 'success').length,
+            failureCount: items.filter(item => item.status === 'failed').length,
+            pendingCount: items.filter(item => ['pending', 'unclaimed'].includes(item.status)).length
+          };
+        })
+      );
+      
+      res.json({
+        success: true,
+        batches: batchesWithDetails
+      });
+    } catch (error) {
+      console.error("Error fetching payout batches:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch payout batches",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Enhanced user rewards history with detailed status
+  app.get("/api/cycles/rewards/history/enhanced", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Get user reward records with detailed status
+      const rewards = await storage.getUserRewardHistory(userId);
+      
+      // Calculate summary statistics
+      const totalEarned = rewards
+        .filter(r => r.status === 'completed')
+        .reduce((sum, r) => sum + r.amount, 0);
+      
+      const statusCounts = rewards.reduce((acc, r) => {
+        acc[r.status] = (acc[r.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      res.json({
+        success: true,
+        disbursements: rewards.map(reward => ({
+          id: reward.id,
+          amount: reward.amount,
+          currency: 'USD',
+          status: reward.status,
+          tier: reward.tier || 'Unknown',
+          processedAt: reward.processedAt,
+          reason: 'Monthly reward',
+          cycleName: reward.cycleName || `Cycle ${reward.cycleSettingId}`,
+          paypalItemId: reward.paypalItemId,
+          errorMessage: reward.errorMessage
+        })),
+        totalEarned,
+        totalCount: rewards.length,
+        statusCounts
+      });
+    } catch (error) {
+      console.error("Error fetching enhanced rewards history:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch enhanced rewards history",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   app.get("/api/admin/disbursements/history", requireAdmin, async (req, res) => {
     try {
 
