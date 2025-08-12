@@ -1281,15 +1281,6 @@ export default function Dashboard() {
                 getTierDisplayName={getTierDisplayName}
               />
 
-              {/* Getting Started Card - Only show for new users with onboarding enabled */}
-              {isFeatureEnabled('ONBOARDING_V1') && user && 
-               (!onboardingProgress.firstLesson || !onboardingProgress.viewedRewards || !onboardingProgress.referralAdded) && (
-                <GettingStartedCard 
-                  progress={onboardingProgress}
-                  onTaskComplete={handleTaskComplete}
-                />
-              )}
-
               {/* Tier Thresholds */}
               {user && (
                 <div className="space-y-4">
