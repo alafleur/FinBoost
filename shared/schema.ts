@@ -432,6 +432,10 @@ export const payoutBatches = pgTable("payout_batches", {
   failedCount: integer("failed_count").default(0).notNull(), // Number of failed payouts
   pendingCount: integer("pending_count").default(0).notNull(), // Number of pending/unclaimed payouts
   errorDetails: text("error_details"), // JSON string for batch-level errors
+  // STEP 6: Retry tracking fields
+  retryCount: integer("retry_count").default(0).notNull(), // Number of retry attempts made
+  lastRetryAt: timestamp("last_retry_at"), // Timestamp of last retry attempt
+  lastRetryError: text("last_retry_error"), // Details of last retry error
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -538,10 +542,9 @@ export const insertPayoutBatchSchema = createInsertSchema(payoutBatches).pick({
   cycleSettingId: true,
   senderBatchId: true,
   requestChecksum: true,
-  totalWinners: true,
   totalAmount: true,
-  eligibleWinners: true,
-  adminUserId: true,
+  totalRecipients: true,
+  adminId: true,
 });
 
 export const insertPayoutBatchItemSchema = createInsertSchema(payoutBatchItems).pick({
@@ -570,7 +573,6 @@ export const insertLearningModuleSchema = createInsertSchema(learningModules).pi
 export type RewardDistributionSetting = typeof rewardDistributionSettings.$inferSelect;
 export type InsertRewardDistributionSetting = z.infer<typeof insertRewardDistributionSettingSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
-export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
 export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
 
 export const insertUserSchema = createInsertSchema(users).pick({

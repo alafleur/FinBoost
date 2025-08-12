@@ -2884,6 +2884,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // STEP 6: MANUAL RETRY AND ADMIN OVERRIDE ENDPOINTS
+  // ============================================================================
+
+  /**
+   * Manual retry endpoint for failed disbursement batches
+   */
+  app.post('/api/admin/disbursements/:batchId/retry', requireAdmin, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+      const { retryPolicy } = req.body;
+      const adminId = (req as any).user?.id || 1;
+
+      console.log(`[STEP 6 RETRY] Manual retry requested for batch ${batchId} by admin ${adminId}`);
+
+      // Load orchestrator
+      const { PaypalTransactionOrchestrator } = await import('./paypal-transaction-orchestrator.js');
+      const orchestrator = new PaypalTransactionOrchestrator();
+
+      // Execute retry
+      const result = await orchestrator.retryTransaction(batchId, retryPolicy);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          message: `Batch ${batchId} retry completed successfully`,
+          batchId: result.phase1.batchId,
+          paypalBatchId: result.phase2?.paypalBatchId,
+          processedCount: result.phase2?.processedCount || 0,
+          successfulCount: result.phase2?.successfulCount || 0,
+          failedCount: result.phase2?.failedCount || 0,
+          pendingCount: result.phase2?.pendingCount || 0
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          error: 'Retry failed',
+          details: result.errors,
+          rollbackPerformed: result.rollbackPerformed
+        });
+      }
+
+    } catch (error) {
+      console.error('[STEP 6 RETRY] Manual retry error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Manual retry failed',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  /**
+   * Get batch status and retry information
+   */
+  app.get('/api/admin/disbursements/:batchId/status', requireAdmin, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+
+      const batch = await storage.getPayoutBatch(batchId);
+      if (!batch) {
+        return res.status(404).json({
+          success: false,
+          error: 'Batch not found'
+        });
+      }
+
+      const batchItems = await storage.getPayoutBatchItems(batchId);
+
+      res.json({
+        success: true,
+        batch: {
+          id: batch.id,
+          status: batch.status,
+          senderBatchId: batch.senderBatchId,
+          paypalBatchId: batch.paypalBatchId,
+          totalAmount: batch.totalAmount,
+          totalRecipients: batch.totalRecipients,
+          successfulCount: batch.successfulCount,
+          failedCount: batch.failedCount,
+          pendingCount: batch.pendingCount,
+          retryCount: batch.retryCount || 0,
+          lastRetryAt: batch.lastRetryAt,
+          lastRetryError: batch.lastRetryError,
+          errorDetails: batch.errorDetails,
+          createdAt: batch.createdAt,
+          updatedAt: batch.updatedAt
+        },
+        items: batchItems.map(item => ({
+          id: item.id,
+          userId: item.userId,
+          recipientEmail: item.recipientEmail,
+          amount: item.amount,
+          status: item.status,
+          paypalItemId: item.paypalItemId,
+          errorDetails: item.errorDetails
+        }))
+      });
+
+    } catch (error) {
+      console.error('[STEP 6 STATUS] Batch status error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get batch status',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  /**
+   * Override batch status (for manual intervention)
+   */
+  app.post('/api/admin/disbursements/:batchId/override-status', requireAdmin, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+      const { newStatus, reason } = req.body;
+      const adminId = (req as any).user?.id || 1;
+
+      console.log(`[STEP 6 OVERRIDE] Status override for batch ${batchId} to ${newStatus} by admin ${adminId}`);
+
+      // Validate new status
+      const validStatuses = ['intent', 'processing', 'completed', 'failed', 'cancelled'];
+      if (!validStatuses.includes(newStatus)) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+        });
+      }
+
+      // Update batch status
+      await storage.updatePayoutBatch(batchId, {
+        status: newStatus,
+        errorDetails: reason ? `Manual override by admin ${adminId}: ${reason}` : undefined,
+        updatedAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        message: `Batch ${batchId} status updated to ${newStatus}`,
+        newStatus,
+        reason,
+        updatedBy: adminId
+      });
+
+    } catch (error) {
+      console.error('[STEP 6 OVERRIDE] Status override error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to override batch status',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Process PayPal disbursements for selected cycle winners
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
     try {

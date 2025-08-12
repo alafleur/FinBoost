@@ -38,6 +38,41 @@ export interface PayoutRecipient {
   note?: string;
 }
 
+// ============================================================================
+// STEP 6: RE-RUN PREVENTION & RETRY LOGIC TYPES
+// ============================================================================
+
+export interface RetryPolicy {
+  maxRetries: number;
+  baseDelayMs: number;
+  maxDelayMs: number;
+  backoffMultiplier: number;
+  retryableErrors: string[];
+}
+
+export interface RetryState {
+  attemptNumber: number;
+  lastAttemptAt: Date;
+  nextRetryAt: Date;
+  totalAttempts: number;
+  errorHistory: Array<{
+    attemptNumber: number;
+    timestamp: Date;
+    errorType: string;
+    errorMessage: string;
+    recoverable: boolean;
+  }>;
+}
+
+export interface TransactionStatus {
+  batchId: number;
+  status: 'intent' | 'processing' | 'retrying' | 'completed' | 'failed' | 'cancelled';
+  lastActivity: Date;
+  retryState?: RetryState;
+  preventRerun: boolean;
+  lockExpiry?: Date;
+}
+
 export interface TransactionContext {
   cycleSettingId: number;
   adminId: number;
@@ -89,6 +124,31 @@ export class PaypalTransactionOrchestrator {
   private static readonly MAX_RECIPIENTS_PER_BATCH = 15000; // PayPal limit
   private static readonly MIN_AMOUNT_CENTS = 1; // $0.01 minimum
   private static readonly MAX_AMOUNT_CENTS = 6000000; // $60,000 maximum per item
+
+  // ========================================================================
+  // STEP 6: RETRY POLICY CONFIGURATION
+  // ========================================================================
+  
+  private static readonly DEFAULT_RETRY_POLICY: RetryPolicy = {
+    maxRetries: 3,
+    baseDelayMs: 5000, // 5 seconds
+    maxDelayMs: 300000, // 5 minutes
+    backoffMultiplier: 2,
+    retryableErrors: [
+      'ECONNRESET',
+      'ETIMEDOUT', 
+      'ENOTFOUND',
+      'ECONNREFUSED',
+      'SOCKET_TIMEOUT',
+      'NETWORK_ERROR',
+      'TEMPORARY_UNAVAILABLE',
+      'RATE_LIMITED',
+      'INTERNAL_ERROR'
+    ]
+  };
+
+  private static readonly PROCESSING_LOCK_DURATION_MS = 600000; // 10 minutes
+  private static readonly RERUN_COOLDOWN_MS = 60000; // 1 minute
 
   /**
    * Main entry point for two-phase PayPal disbursement transactions
@@ -173,6 +233,516 @@ export class PaypalTransactionOrchestrator {
       }
       
       return result;
+    }
+  }
+
+  // ============================================================================
+  // STEP 6: RE-RUN PREVENTION & RETRY LOGIC METHODS
+  // ============================================================================
+
+  /**
+   * Enhanced transaction execution with automatic retry for existing batches
+   */
+  async retryTransaction(batchId: number, overridePolicy?: RetryPolicy): Promise<TransactionResult> {
+    console.log(`[STEP 6 ORCHESTRATOR] Retrying transaction for batch ${batchId}`);
+    
+    try {
+      // Get existing batch and validate retry eligibility  
+      const batch = await storage.getPayoutBatch(batchId);
+      if (!batch) {
+        throw new Error(`Batch ${batchId} not found`);
+      }
+
+      // Check retry eligibility
+      const retryCheck = await this.checkRetryEligibility(batch);
+      if (!retryCheck.eligible) {
+        throw new Error(`Retry not eligible: ${retryCheck.reason}`);
+      }
+
+      // Reconstruct transaction context from batch data
+      const context = await this.reconstructTransactionContext(batch);
+      
+      // Execute with retry logic
+      return await this.executeTransactionWithRetry(context, overridePolicy);
+
+    } catch (error) {
+      console.error('[STEP 6 ORCHESTRATOR] Retry transaction error:', error);
+      return {
+        success: false,
+        phase1: {
+          success: false,
+          senderBatchId: '',
+          requestChecksum: '',
+          paypalPayload: null,
+          itemIds: [],
+          errors: [error instanceof Error ? error.message : String(error)],
+          warnings: []
+        },
+        rollbackPerformed: false,
+        errors: [error instanceof Error ? error.message : String(error)],
+        warnings: []
+      };
+    }
+  }
+
+  /**
+   * Enhanced executeTransaction with comprehensive retry logic
+   */
+  async executeTransactionWithRetry(context: TransactionContext, retryPolicy?: RetryPolicy): Promise<TransactionResult> {
+    const policy = retryPolicy || PaypalTransactionOrchestrator.DEFAULT_RETRY_POLICY;
+    console.log(`[STEP 6 ORCHESTRATOR] Starting transaction with retry policy - max retries: ${policy.maxRetries}`);
+    
+    const result: TransactionResult = {
+      success: false,
+      phase1: {
+        success: false,
+        senderBatchId: '',
+        requestChecksum: '',
+        paypalPayload: null,
+        itemIds: [],
+        errors: [],
+        warnings: []
+      },
+      rollbackPerformed: false,
+      errors: [],
+      warnings: []
+    };
+
+    try {
+      // Check re-run prevention
+      const preventionCheck = await this.checkRerunPrevention(context);
+      if (preventionCheck.prevented) {
+        result.errors.push(`Re-run prevented: ${preventionCheck.reason}`);
+        return result;
+      }
+
+      // Acquire processing lock
+      const lockAcquired = await this.acquireProcessingLock(context);
+      if (!lockAcquired) {
+        result.errors.push('Could not acquire processing lock - another transaction may be in progress');
+        return result;
+      }
+
+      try {
+        // Execute Phase 1
+        result.phase1 = await this.executePhase1(context);
+        
+        if (!result.phase1.success) {
+          result.errors.push('Phase 1 preparation failed');
+          result.errors.push(...result.phase1.errors);
+          return result;
+        }
+
+        // Execute Phase 2 with retry logic
+        result.phase2 = await this.executePhase2WithRetry(result.phase1, policy);
+        
+        if (!result.phase2.success) {
+          await this.performRollback(result.phase1);
+          result.rollbackPerformed = true;
+          result.errors.push('Phase 2 execution failed after all retry attempts');
+          result.errors.push(...result.phase2.errors);
+          return result;
+        }
+
+        result.success = true;
+        return result;
+
+      } finally {
+        await this.releaseProcessingLock(context);
+      }
+
+    } catch (error) {
+      console.error('[STEP 6 ORCHESTRATOR] Critical transaction error:', error);
+      result.errors.push(`Critical transaction error: ${error instanceof Error ? error.message : String(error)}`);
+      
+      if (result.phase1.success) {
+        try {
+          await this.performRollback(result.phase1);
+          result.rollbackPerformed = true;
+        } catch (rollbackError) {
+          console.error('[STEP 6 ORCHESTRATOR] Rollback failed:', rollbackError);
+        }
+      }
+      
+      return result;
+    }
+  }
+
+  /**
+   * Enhanced Phase 2 execution with intelligent retry logic
+   */
+  private async executePhase2WithRetry(phase1Result: Phase1Result, policy: RetryPolicy): Promise<Phase2Result> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= policy.maxRetries + 1; attempt++) {
+      console.log(`[STEP 6 PHASE 2] Attempt ${attempt}/${policy.maxRetries + 1}`);
+      
+      try {
+        // Record retry attempt if not first attempt
+        if (attempt > 1) {
+          await this.recordRetryAttempt(phase1Result.batchId!, attempt, lastError);
+        }
+
+        // Execute Phase 2
+        const result = await this.executePhase2(phase1Result);
+        
+        if (result.success) {
+          console.log(`[STEP 6 PHASE 2] Attempt ${attempt} succeeded`);
+          return result;
+        }
+
+        // Check if error is retryable
+        const errorAnalysis = this.analyzeError(result.errors, policy);
+        if (!errorAnalysis.retryable || attempt > policy.maxRetries) {
+          console.log(`[STEP 6 PHASE 2] Error not retryable or max attempts reached`);
+          return result;
+        }
+
+        // Calculate delay for next attempt
+        const delay = this.calculateRetryDelay(attempt - 1, policy);
+        console.log(`[STEP 6 PHASE 2] Waiting ${delay}ms before retry attempt ${attempt + 1}`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        lastError = new Error(result.errors.join('; '));
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        const errorAnalysis = this.analyzeError([lastError.message], policy);
+        if (!errorAnalysis.retryable || attempt > policy.maxRetries) {
+          console.log(`[STEP 6 PHASE 2] Critical error not retryable or max attempts reached`);
+          return {
+            success: false,
+            batchId: phase1Result.batchId!,
+            processedCount: 0,
+            successfulCount: 0,
+            failedCount: 0,
+            pendingCount: 0,
+            userRewardsCreated: 0,
+            cycleCompleted: false,
+            errors: [`Attempt ${attempt} failed: ${lastError.message}`]
+          };
+        }
+
+        const delay = this.calculateRetryDelay(attempt - 1, policy);
+        console.log(`[STEP 6 PHASE 2] Waiting ${delay}ms before retry attempt ${attempt + 1} due to error: ${lastError.message}`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    // All attempts failed
+    return {
+      success: false,
+      batchId: phase1Result.batchId!,
+      processedCount: 0,
+      successfulCount: 0,
+      failedCount: 0,
+      pendingCount: 0,
+      userRewardsCreated: 0,
+      cycleCompleted: false,
+      errors: [`All ${policy.maxRetries + 1} attempts failed. Last error: ${lastError?.message || 'Unknown error'}`]
+    };
+  }
+
+  /**
+   * Check for re-run prevention conditions
+   */
+  private async checkRerunPrevention(context: TransactionContext): Promise<{
+    prevented: boolean;
+    reason?: string;
+  }> {
+    try {
+      // Check for recent duplicate transaction
+      const duplicateCheck = await this.checkForDuplicateTransaction(context.requestId);
+      if (duplicateCheck.isDuplicate) {
+        return {
+          prevented: true,
+          reason: `Duplicate transaction detected - existing batch: ${duplicateCheck.existingBatchId}`
+        };
+      }
+
+      // Check for recent processing activity (cooldown period)
+      const recentActivity = await this.checkRecentProcessingActivity(context.cycleSettingId);
+      if (recentActivity.withinCooldown) {
+        return {
+          prevented: true,
+          reason: `Processing cooldown active - last activity: ${recentActivity.lastActivity}`
+        };
+      }
+
+      // Check for concurrent processing locks
+      const lockStatus = await this.checkExistingLocks(context.cycleSettingId);
+      if (lockStatus.hasActiveLock) {
+        return {
+          prevented: true,
+          reason: `Processing lock active - expires: ${lockStatus.lockExpiry}`
+        };
+      }
+
+      return { prevented: false };
+
+    } catch (error) {
+      console.error('[STEP 6 PREVENTION] Re-run prevention check failed:', error);
+      // On error, allow processing but log warning
+      return { prevented: false };
+    }
+  }
+
+  /**
+   * Acquire processing lock to prevent concurrent execution
+   */
+  private async acquireProcessingLock(context: TransactionContext): Promise<boolean> {
+    try {
+      const lockKey = `cycle_${context.cycleSettingId}_processing`;
+      const lockExpiry = new Date(Date.now() + PaypalTransactionOrchestrator.PROCESSING_LOCK_DURATION_MS);
+      
+      return await storage.acquireProcessingLock(lockKey, lockExpiry);
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Failed to acquire processing lock:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Release processing lock
+   */
+  private async releaseProcessingLock(context: TransactionContext): Promise<void> {
+    try {
+      const lockKey = `cycle_${context.cycleSettingId}_processing`;
+      await storage.releaseProcessingLock(lockKey);
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Failed to release processing lock:', error);
+      // Don't throw - this is cleanup
+    }
+  }
+
+  // ============================================================================
+  // STEP 6: HELPER METHODS FOR RETRY LOGIC AND PREVENTION
+  // ============================================================================
+
+  /**
+   * Check if a batch is eligible for retry
+   */
+  private async checkRetryEligibility(batch: any): Promise<{
+    eligible: boolean;
+    reason?: string;
+  }> {
+    try {
+      // Check batch status
+      if (batch.status === 'completed') {
+        return { eligible: false, reason: 'Batch already completed successfully' };
+      }
+
+      if (batch.status === 'processing') {
+        return { eligible: false, reason: 'Batch currently processing' };
+      }
+
+      if (batch.status === 'cancelled') {
+        return { eligible: false, reason: 'Batch was cancelled' };
+      }
+
+      // Check retry count (if stored)
+      if (batch.retryCount && batch.retryCount >= PaypalTransactionOrchestrator.DEFAULT_RETRY_POLICY.maxRetries) {
+        return { eligible: false, reason: 'Maximum retry attempts exceeded' };
+      }
+
+      // Check if batch was created too long ago (e.g., 24 hours)
+      const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+      if (Date.now() - batch.createdAt.getTime() > MAX_AGE_MS) {
+        return { eligible: false, reason: 'Batch too old for retry' };
+      }
+
+      return { eligible: true };
+
+    } catch (error) {
+      console.error('[STEP 6 ELIGIBILITY] Retry eligibility check failed:', error);
+      return { eligible: false, reason: 'Eligibility check failed' };
+    }
+  }
+
+  /**
+   * Reconstruct transaction context from batch data
+   */
+  private async reconstructTransactionContext(batch: any): Promise<TransactionContext> {
+    try {
+      // Get batch items to reconstruct recipients
+      const batchItems = await storage.getPayoutBatchItems(batch.id);
+      
+      const recipients: PayoutRecipient[] = batchItems.map(item => ({
+        cycleWinnerSelectionId: item.cycleWinnerSelectionId,
+        userId: item.userId,
+        paypalEmail: item.recipientEmail,
+        amount: item.amount,
+        currency: item.currency || 'USD',
+        note: item.note || 'FinBoost monthly reward'
+      }));
+
+      return {
+        cycleSettingId: batch.cycleSettingId || 1, // Fallback if not stored
+        adminId: batch.adminId || 1, // Fallback if not stored  
+        recipients,
+        totalAmount: recipients.reduce((sum, r) => sum + r.amount, 0),
+        requestId: batch.requestChecksum || batch.senderBatchId
+      };
+
+    } catch (error) {
+      console.error('[STEP 6 RECONSTRUCTION] Failed to reconstruct transaction context:', error);
+      throw new Error(`Failed to reconstruct transaction context: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Record retry attempt for auditing and tracking
+   */
+  private async recordRetryAttempt(batchId: number, attemptNumber: number, error: Error | null): Promise<void> {
+    try {
+      await storage.recordRetryAttempt(batchId, {
+        attemptNumber,
+        timestamp: new Date(),
+        errorType: error?.name || 'Unknown',
+        errorMessage: error?.message || 'No error details',
+        recoverable: error ? this.isRecoverableError(error.message) : false
+      });
+    } catch (recordError) {
+      console.error('[STEP 6 AUDIT] Failed to record retry attempt:', recordError);
+      // Don't throw - this is auditing
+    }
+  }
+
+  /**
+   * Analyze error to determine if it's retryable
+   */
+  private analyzeError(errors: string[], policy: RetryPolicy): {
+    retryable: boolean;
+    errorType: string;
+  } {
+    const combinedError = errors.join(' ').toLowerCase();
+
+    // Check if any error matches retryable patterns
+    for (const retryablePattern of policy.retryableErrors) {
+      if (combinedError.includes(retryablePattern.toLowerCase())) {
+        return {
+          retryable: true,
+          errorType: retryablePattern
+        };
+      }
+    }
+
+    // Check for additional retryable patterns
+    const retryablePatterns = [
+      'timeout',
+      'connection',
+      'network',
+      'temporary',
+      'rate limit',
+      'service unavailable',
+      'internal server error',
+      '5xx'
+    ];
+
+    for (const pattern of retryablePatterns) {
+      if (combinedError.includes(pattern)) {
+        return {
+          retryable: true,
+          errorType: pattern
+        };
+      }
+    }
+
+    return {
+      retryable: false,
+      errorType: 'non-retryable'
+    };
+  }
+
+  /**
+   * Calculate retry delay with exponential backoff
+   */
+  private calculateRetryDelay(attemptNumber: number, policy: RetryPolicy): number {
+    const baseDelay = policy.baseDelayMs;
+    const multiplier = policy.backoffMultiplier;
+    const maxDelay = policy.maxDelayMs;
+
+    // Calculate exponential backoff: baseDelay * (multiplier ^ attemptNumber)
+    const calculatedDelay = baseDelay * Math.pow(multiplier, attemptNumber);
+    
+    // Add random jitter (±25%) to avoid thundering herd
+    const jitter = calculatedDelay * 0.25 * (Math.random() - 0.5);
+    const delayWithJitter = calculatedDelay + jitter;
+
+    // Cap at maximum delay
+    return Math.min(Math.max(delayWithJitter, baseDelay), maxDelay);
+  }
+
+  /**
+   * Check if an error is recoverable
+   */
+  private isRecoverableError(errorMessage: string): boolean {
+    const recoverablePatterns = [
+      'timeout',
+      'connection',
+      'network',
+      'temporary',
+      'rate limit',
+      'service unavailable'
+    ];
+
+    const lowerError = errorMessage.toLowerCase();
+    return recoverablePatterns.some(pattern => lowerError.includes(pattern));
+  }
+
+  /**
+   * Check for recent processing activity within cooldown period
+   */
+  private async checkRecentProcessingActivity(cycleSettingId: number): Promise<{
+    withinCooldown: boolean;
+    lastActivity?: Date;
+  }> {
+    try {
+      const recentBatches = await storage.getRecentPayoutBatches(
+        cycleSettingId, 
+        PaypalTransactionOrchestrator.RERUN_COOLDOWN_MS
+      );
+
+      if (recentBatches.length > 0) {
+        const lastActivity = recentBatches[0].updatedAt || recentBatches[0].createdAt;
+        return {
+          withinCooldown: true,
+          lastActivity
+        };
+      }
+
+      return { withinCooldown: false };
+
+    } catch (error) {
+      console.error('[STEP 6 COOLDOWN] Recent activity check failed:', error);
+      return { withinCooldown: false };
+    }
+  }
+
+  /**
+   * Check for existing processing locks
+   */
+  private async checkExistingLocks(cycleSettingId: number): Promise<{
+    hasActiveLock: boolean;
+    lockExpiry?: Date;
+  }> {
+    try {
+      const lockKey = `cycle_${cycleSettingId}_processing`;
+      const lockInfo = await storage.getProcessingLockInfo(lockKey);
+
+      if (lockInfo && lockInfo.expiry > new Date()) {
+        return {
+          hasActiveLock: true,
+          lockExpiry: lockInfo.expiry
+        };
+      }
+
+      return { hasActiveLock: false };
+
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Lock check failed:', error);
+      return { hasActiveLock: false };
     }
   }
 

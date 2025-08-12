@@ -7937,6 +7937,155 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // ============================================================================
+  // STEP 6: RE-RUN PREVENTION & RETRY LOGIC STORAGE METHODS
+  // ============================================================================
+
+  /**
+   * Acquire a processing lock to prevent concurrent executions
+   */
+  async acquireProcessingLock(lockKey: string, expiry: Date): Promise<boolean> {
+    try {
+      // Simple implementation using cache - in production could use Redis or dedicated lock table
+      const existingLock = this.cache.get(lockKey);
+      
+      if (existingLock && existingLock.expiry > new Date()) {
+        console.log(`[STEP 6 LOCK] Lock ${lockKey} already exists, expires at ${existingLock.expiry}`);
+        return false;
+      }
+
+      // Acquire lock
+      this.cache.set(lockKey, { expiry, acquired: new Date() });
+      console.log(`[STEP 6 LOCK] Acquired lock ${lockKey}, expires at ${expiry}`);
+      return true;
+
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Error acquiring processing lock:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Release a processing lock
+   */
+  async releaseProcessingLock(lockKey: string): Promise<void> {
+    try {
+      this.cache.delete(lockKey);
+      console.log(`[STEP 6 LOCK] Released lock ${lockKey}`);
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Error releasing processing lock:', error);
+      // Don't throw - this is cleanup
+    }
+  }
+
+  /**
+   * Get information about a processing lock
+   */
+  async getProcessingLockInfo(lockKey: string): Promise<{
+    expiry: Date;
+    acquired: Date;
+  } | null> {
+    try {
+      const lockInfo = this.cache.get(lockKey);
+      return lockInfo || null;
+    } catch (error) {
+      console.error('[STEP 6 LOCK] Error getting lock info:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Record a retry attempt for auditing
+   */
+  async recordRetryAttempt(batchId: number, retryInfo: {
+    attemptNumber: number;
+    timestamp: Date;
+    errorType: string;
+    errorMessage: string;
+    recoverable: boolean;
+  }): Promise<void> {
+    try {
+      // Update batch with retry information
+      await db
+        .update(payoutBatches)
+        .set({
+          retryCount: retryInfo.attemptNumber,
+          lastRetryAt: retryInfo.timestamp,
+          lastRetryError: `${retryInfo.errorType}: ${retryInfo.errorMessage}`,
+          updatedAt: new Date()
+        })
+        .where(eq(payoutBatches.id, batchId));
+
+      console.log(`[STEP 6 RETRY] Recorded retry attempt ${retryInfo.attemptNumber} for batch ${batchId}`);
+    } catch (error) {
+      console.error('[STEP 6 RETRY] Error recording retry attempt:', error);
+      // Don't throw - this is auditing
+    }
+  }
+
+  /**
+   * Get recent payout batches within a time window
+   */
+  async getRecentPayoutBatches(cycleSettingId: number, timeWindowMs: number): Promise<any[]> {
+    try {
+      const cutoffTime = new Date(Date.now() - timeWindowMs);
+      
+      const recentBatches = await db
+        .select()
+        .from(payoutBatches)
+        .where(
+          and(
+            eq(payoutBatches.cycleSettingId, cycleSettingId),
+            sql`${payoutBatches.updatedAt} > ${cutoffTime}`
+          )
+        )
+        .orderBy(sql`${payoutBatches.updatedAt} DESC`)
+        .limit(10);
+
+      return recentBatches;
+    } catch (error) {
+      console.error('[STEP 6 RECENT] Error getting recent payout batches:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Enhanced duplicate transaction check with improved context matching
+   */
+  async checkForDuplicateTransaction(requestId: string): Promise<{
+    isDuplicate: boolean;
+    existingBatchId?: string;
+    batchStatus?: string;
+  }> {
+    try {
+      // Check by request checksum or sender batch ID pattern
+      const existingBatch = await db
+        .select()
+        .from(payoutBatches)
+        .where(
+          or(
+            eq(payoutBatches.requestChecksum, requestId),
+            sql`${payoutBatches.senderBatchId} LIKE ${`%${requestId}%`}`
+          )
+        )
+        .limit(1);
+
+      if (existingBatch.length > 0) {
+        const batch = existingBatch[0];
+        return {
+          isDuplicate: true,
+          existingBatchId: batch.senderBatchId,
+          batchStatus: batch.status
+        };
+      }
+
+      return { isDuplicate: false };
+    } catch (error) {
+      console.warn('[STEP 6 DUPLICATE] Duplicate check failed, proceeding:', error);
+      return { isDuplicate: false };
+    }
+  }
+
   // Idempotency and Validation
   generateIdempotencyKey(cycleId: number, winnerData: Array<{id: number, amount: number, email: string}>): string {
     // Create deterministic hash from cycle + sorted winner data
