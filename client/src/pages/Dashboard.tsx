@@ -31,7 +31,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import TierStats from "@/components/TierStats";
-import { WelcomeModal, Tour, GettingStartedCard, dashboardTourSteps, desktopTourSteps } from "@/components/onboarding";
+import { WelcomeModal, Tour, dashboardTourSteps, desktopTourSteps } from "@/components/onboarding";
 import { onboardingStorage } from "@/lib/onboardingStorage";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 import finboostLogo from "@/assets/finboost-logo-v10.png";
