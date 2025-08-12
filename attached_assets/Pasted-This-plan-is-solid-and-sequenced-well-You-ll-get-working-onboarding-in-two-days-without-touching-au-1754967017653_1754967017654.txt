@@ -1,0 +1,60 @@
+This plan is solid and sequenced well. You’ll get working onboarding in two days without touching auth—nice. A few tweaks to make it bulletproof:
+
+**What to keep**
+
+* Phase order is right (foundations → components → wire-up → nudges → tracking → QA).
+* Joyride for speed, `localStorage` for MVP persistence, and the Day 2 polish items (first-lesson highlight + tier tooltip).
+
+**Small upgrades (low effort, high payoff)**
+
+1. **Feature flag from the start**
+
+   * Add `ONBOARDING_V1` env/remote flag in Phase 1 so you can ship safely and disable if anything breaks.
+
+2. **Deep link to a specific lesson**
+
+   * In Phase 2 (Tour): make the end CTA route to `/learn/:lessonId` (pick a recommended “First Steps” lesson).
+   * Add a fallback to `/learn` if the lesson ID isn’t available.
+
+3. **Checklist truth source**
+
+   * Keep UI responsive with `localStorage`, but also flip checklist items based on **server events** if available (e.g., lesson started/completed). If server isn’t ready, leave as-is for MVP.
+
+4. **Mobile & layering**
+
+   * In Phase 6, explicitly test: small screens, safe-area insets, fixed headers. Watch **z-index** conflicts with sticky nav, ensure Joyride uses a **portal**.
+
+5. **Accessibility pass (quick)**
+
+   * Modal: focus trap, `aria-labelledby`, `aria-describedby`, Esc to close.
+   * Tooltips: ensure keyboard progression works.
+
+6. **Analytics schema (Phase 5)**
+
+   * Standardize payloads: `{ userId, step, source: 'onboarding_v1', cycleId?, ts }`.
+   * Events: `onboarding_welcome_shown`, `onboarding_tour_started/completed`, `onboarding_skipped`, `onboarding_checklist_viewed`, `first_lesson_started`, `rewards_viewed`, `referral_added`.
+
+7. **Edge-case handling**
+
+   * If `localStorage` is blocked/cleared, don’t hard-crash—show modal once per session.
+   * If Joyride fails to mount, skip to Checklist; log to Sentry/console.
+
+8. **Copy hooks (Phase 2/6)**
+
+   * Welcome: “Boost Tickets = prize draw entries.”
+   * Rewards tooltip: “More Tickets → better odds in your tier.”
+
+**QA checklist to add (Phase 6)**
+
+* Fresh user: modal → tour → CTA deep links to lesson.
+* Returning user: no modal/tour; checklist reflects progress.
+* Mobile Safari & Android Chrome.
+* RTL/long-text tolerance (future i18n).
+* Clear `localStorage` mid-session → graceful behavior.
+* Tour step positioning at all breakpoints.
+
+**Timeline sanity check**
+
+* Day 1/2 breakdown is realistic. The only item that can slip is “first-lesson highlight” if you need backend changes; mitigate by hardcoding one recommended lesson ID for now.
+
+**Bottom line:** Ship it with the feature flag, deep link the tour’s final CTA to a recommended lesson, and do a tight mobile/z-index QA pass. That’ll de-risk the rollout and maximize activation without stretching the 2-day window.
