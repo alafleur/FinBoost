@@ -1,0 +1,216 @@
+Perfect—here’s a tight, hand-off-ready plan your devs can ship in 1–2 days without touching auth or routing.
+
+# MVP Onboarding Implementation Plan (Dashboard-Scoped)
+
+## Goals (MVP)
+
+* Orient first-time users in <60 seconds.
+* Drive the *first lesson start* and a *Rewards tab view*.
+* Do not modify `Home_v3.tsx` or `Auth.tsx`. Everything overlays or lives inside `Dashboard.tsx`.
+
+## Scope Overview
+
+1. **Welcome Modal (single screen)**
+2. **Guided Walkthrough (3–4 tooltip steps)**
+3. **“Getting Started” Checklist (Overview tab card)**
+4. **First-time Contextual Nudges** (tiny one-time tooltips on Learn/Rewards)
+5. **Analytics hooks** for each step
+
+---
+
+## Components & Files
+
+### 1) `components/onboarding/WelcomeModal.tsx`
+
+* Props: `onStartTour: () => void`, `onSkip: () => void`.
+* Content:
+
+  * Title: “Welcome to FinBoost, {username}!”
+  * Copy: “Earn **Boost Tickets** by learning. Tickets = prize draw entries.”
+  * 3 bullets with icons: **Start a lesson → Earn Tickets → Check Rewards**
+  * Buttons: **Take the tour**, **Skip**
+* State flag: set `localStorage.setItem('fb_onboarding_seen', '1')` on either action.
+
+### 2) `components/onboarding/Tour.tsx`
+
+* Use **react-joyride** (or lightweight custom) anchored to:
+
+  * `#nav-overview`
+  * `#nav-learn`
+  * `#nav-rewards`
+  * Optional: `#overview-checklist`
+* Steps (copy):
+
+  1. **Overview:** “Your progress & Tickets live here.”
+  2. **Learn:** “Start lessons to earn Boost Tickets fast.”
+  3. **Rewards:** “See the prize pool and upcoming draws.”
+  4. **CTA end step:** Button → “Start your first lesson”
+* Completion: set `localStorage.setItem('fb_tour_done', '1')`.
+
+### 3) `components/onboarding/GettingStartedCard.tsx`
+
+* Render **only on Overview tab**.
+* Items (with micro-rewards shown in UI; actual rewards use existing server logic):
+
+  * [ ] **Complete your first lesson** (+50 Tickets)
+  * [ ] **Visit Rewards** (+10 Tickets)
+  * [ ] **Add a referral** (+500 Tickets when friend joins)
+* Props:
+
+  * `progress: { firstLesson: boolean; viewedRewards: boolean; referralAdded: boolean }`
+* Completion rules (front-end):
+
+  * `firstLesson` flips true on `lesson_started` event.
+  * `viewedRewards` true on `route == /rewards` open (once).
+  * `referralAdded` true on successful referral submit.
+* Persist lightweight client state in `localStorage` (`fb_gs_*`) and rely on backend truth for Ticket awards.
+
+### 4) Tiny Nudges (one-time tooltips)
+
+* **Learn Tab first open:** “Pick any lesson to earn Boost Tickets.”
+* **Rewards Tab first open:** “Draws close soon—your Tickets count here.”
+* Flags: `fb_hint_learn`, `fb_hint_rewards` in `localStorage`.
+
+---
+
+## Dashboard Integration
+
+In `Dashboard.tsx`:
+
+```tsx
+useEffect(() => {
+  const firstLogin = !localStorage.getItem('fb_onboarding_seen');
+  if (firstLogin) setWelcomeOpen(true);
+}, []);
+
+const handleStartTour = () => {
+  localStorage.setItem('fb_onboarding_seen', '1');
+  setWelcomeOpen(false);
+  setTourOpen(true);
+};
+
+const handleSkipWelcome = () => {
+  localStorage.setItem('fb_onboarding_seen', '1');
+  setWelcomeOpen(false);
+};
+
+const handleTourComplete = () => {
+  localStorage.setItem('fb_tour_done', '1');
+  setTourOpen(false);
+};
+```
+
+Add stable IDs to nav items for tour anchors:
+
+```tsx
+<li id="nav-overview">Overview</li>
+<li id="nav-learn">Learn</li>
+<li id="nav-rewards">Rewards</li>
+```
+
+Render checklist card in Overview:
+
+```tsx
+{isOverview && <GettingStartedCard progress={progress} />}
+```
+
+Update progress on events:
+
+```tsx
+track('lesson_started', {...});
+localStorage.setItem('fb_gs_firstLesson', '1');
+
+if (route === '/rewards' && !localStorage.getItem('fb_gs_viewedRewards')) {
+  track('viewed_rewards', {...});
+  localStorage.setItem('fb_gs_viewedRewards', '1');
+}
+```
+
+---
+
+## Analytics / Events (name → when)
+
+* `onboarding_welcome_shown`
+* `onboarding_tour_started` / `onboarding_tour_completed`
+* `onboarding_skipped`
+* `getting_started_viewed`
+* `lesson_started_first_time`
+* `rewards_viewed_first_time`
+* `referral_added_first_time`
+
+Include `userId`, `timestamp`, `cycleId` (if available).
+
+---
+
+## Copy (final text)
+
+**Welcome Modal**
+
+* Header: “Welcome to FinBoost, {firstName}!”
+* Body bullets:
+
+  * “Start a short lesson”
+  * “Earn **Boost Tickets** (prize entries)”
+  * “Check the Rewards pool”
+* Buttons: **Take the tour** (primary), **Skip for now** (ghost)
+
+**Tour Steps**
+
+1. Overview: “Track your Tickets and progress here.”
+2. Learn: “Complete lessons to earn more Boost Tickets.”
+3. Rewards: “See prize pools and when draws close.”
+4. End: “Let’s start your first lesson.”
+
+**Checklist Title**
+
+* “Getting Started (earn quick Tickets)”
+
+---
+
+## Acceptance Criteria (MVP)
+
+1. First-time login shows **Welcome Modal** before any interaction.
+2. Selecting **Take the tour** launches a 3–4 step overlay and ends with a CTA to Learn.
+3. **Checklist card** appears on Overview until all 3 tasks are complete.
+4. One-time tooltips show on first open of Learn and Rewards.
+5. All analytics events fire with correct payloads.
+6. Refreshing the page does **not** re-show modal/tour if flags are set.
+7. No changes to auth/signup flow; no blocking regressions in dashboard.
+
+---
+
+## QA Checklist
+
+* Fresh account → modal shows, tour runs, checklist present.
+* Returning account → no modal/tour; checklist reflects completed items.
+* Start first lesson → checklist updates immediately.
+* Visit Rewards → checklist updates.
+* Add referral → checklist updates.
+* Mobile & desktop: overlays do not block nav; anchors align correctly.
+* LocalStorage cleared → flow reappears (expected).
+* Accessibility: modal/tour trap focus; ESC closes; buttons are keyboard navigable; ARIA labels present.
+
+---
+
+## Rollout & Fallback
+
+* Feature flag `ONBOARDING_V1` (env or remote config).
+* If tour lib fails, continue showing Checklist card; modal still works.
+* Log errors to console + Sentry (if enabled).
+
+---
+
+## Effort & Order of Work (est.)
+
+1. **WelcomeModal** (2–3h)
+2. **Tour** with 3 anchors (3–4h)
+3. **Checklist card** + event wiring (4–6h)
+4. **Nudges** (1–2h)
+5. **Analytics** (1–2h)
+6. **QA pass** (2–3h)
+
+*Total*: \~1 day dev + 0.5 day QA.
+
+---
+
+If you want, I can convert this into a **ticket bundle** (Jira/Linear) with task breakdown and exact acceptance criteria per ticket for your devs.
