@@ -2636,6 +2636,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // ============================================================================
+  // STEP 5: DRY-RUN PREVIEW ENDPOINT FOR PAYPAL DISBURSEMENTS
+  // ============================================================================
+  
+  // Import Step 4 transaction orchestrator
+  const { PaypalTransactionOrchestrator } = await import('./paypal-transaction-orchestrator.js');
+
+  // Preview PayPal disbursements for selected cycle winners (dry-run)
+  app.post("/api/admin/winner-cycles/:cycleId/preview-disbursements", requireAdmin, async (req, res) => {
+    try {
+      const cycleId = parseInt(req.params.cycleId);
+      const { selectedWinnerIds, processAll } = req.body;
+
+      // Validate payload: either processAll OR selectedWinnerIds, not both or neither
+      if (processAll && selectedWinnerIds) {
+        return res.status(400).json({ error: "Cannot specify both processAll and selectedWinnerIds" });
+      }
+      if (!processAll && (!selectedWinnerIds || selectedWinnerIds.length === 0)) {
+        return res.status(400).json({ error: "Must specify either processAll: true or provide selectedWinnerIds array" });
+      }
+
+      console.log(`[STEP 5 PREVIEW] Generating disbursement preview for cycle ${cycleId}, mode: ${processAll ? 'processAll' : 'selective'}`);
+
+      // Get the cycle setting to verify it exists
+      const cycleResult = await db.select().from(cycleSettings).where(eq(cycleSettings.id, cycleId)).limit(1);
+      if (cycleResult.length === 0) {
+        return res.status(404).json({ error: "Cycle not found" });
+      }
+      const cycle = cycleResult[0];
+
+      let winnersToProcess: number[];
+      let totalEligibleCount = 0;
+
+      if (processAll) {
+        // Server-side eligibility computation for bulk mode
+        const eligibleWinners = await db
+          .select({ id: cycleWinnerSelections.id })
+          .from(cycleWinnerSelections)
+          .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+          .where(and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
+            isNotNull(users.paypalEmail)
+          ));
+
+        winnersToProcess = eligibleWinners.map(w => w.id);
+        totalEligibleCount = winnersToProcess.length;
+        console.log(`[STEP 5 PREVIEW] Bulk mode: found ${totalEligibleCount} eligible winners`);
+
+        if (winnersToProcess.length === 0) {
+          return res.json({
+            success: true,
+            preview: {
+              previewMode: true,
+              eligibleRecipients: 0,
+              totalAmount: 0,
+              validationResults: {
+                errors: [],
+                warnings: ["No eligible winners found for bulk processing"]
+              },
+              recipients: [],
+              paypalPayloadPreview: null
+            }
+          });
+        }
+      } else {
+        // Selective mode: validate selectedWinnerIds belong to this cycle
+        const cycleValidation = await db
+          .select({ id: cycleWinnerSelections.id })
+          .from(cycleWinnerSelections)
+          .where(and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            inArray(cycleWinnerSelections.id, selectedWinnerIds)
+          ));
+
+        if (cycleValidation.length !== selectedWinnerIds.length) {
+          const invalidIds = selectedWinnerIds.filter(id => !cycleValidation.some(v => v.id === id));
+          return res.status(400).json({ 
+            error: `Invalid winner IDs for cycle ${cycleId}: ${invalidIds.join(', ')}. These IDs do not belong to this cycle.`
+          });
+        }
+
+        winnersToProcess = selectedWinnerIds;
+        console.log(`[STEP 5 PREVIEW] Selective mode: processing ${winnersToProcess.length} selected winners`);
+      }
+
+      // Get detailed winner information for preview (unified for both modes)
+      const winners = await db
+        .select({
+          id: cycleWinnerSelections.id,
+          userId: cycleWinnerSelections.userId,
+          username: users.username,
+          email: users.email,
+          paypalEmail: users.paypalEmail,
+          tier: cycleWinnerSelections.tier,
+          tierRank: cycleWinnerSelections.tierRank,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          isSealed: cycleWinnerSelections.isSealed
+        })
+        .from(cycleWinnerSelections)
+        .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(and(
+          eq(cycleWinnerSelections.cycleSettingId, cycleId),
+          inArray(cycleWinnerSelections.id, winnersToProcess)
+        ));
+
+      if (winners.length === 0) {
+        return res.json({
+          success: true,
+          preview: {
+            previewMode: true,
+            eligibleRecipients: 0,
+            totalAmount: 0,
+            validationResults: {
+              errors: [],
+              warnings: ["No valid winners found for processing"]
+            },
+            recipients: [],
+            paypalPayloadPreview: null
+          }
+        });
+      }
+
+      // Verify selection is sealed/final
+      if (!winners.some(w => w.isSealed)) {
+        return res.status(400).json({ error: "Winner selection must be sealed before previewing disbursements" });
+      }
+
+      // Filter to eligible winners and generate recipient data
+      const eligibleWinners = winners.filter(w => w.paypalEmail);
+      const ineligibleWinners = winners.filter(w => !w.paypalEmail);
+      
+      if (eligibleWinners.length === 0) {
+        return res.json({
+          success: true,
+          preview: {
+            previewMode: true,
+            eligibleRecipients: 0,
+            totalAmount: 0,
+            validationResults: {
+              errors: [],
+              warnings: ["No winners with valid PayPal emails found"]
+            },
+            recipients: [],
+            paypalPayloadPreview: null,
+            ineligibleRecipients: ineligibleWinners.map(w => ({
+              id: w.id,
+              username: w.username,
+              email: w.email,
+              reason: "No PayPal email"
+            }))
+          }
+        });
+      }
+
+      // Create transaction context for Step 4 orchestrator
+      const recipients = eligibleWinners.map(winner => ({
+        cycleWinnerSelectionId: winner.id,
+        userId: winner.userId,
+        paypalEmail: winner.paypalEmail!,
+        amount: Math.round(parseFloat(winner.payoutFinal) * 100), // Convert to cents
+        currency: "USD",
+        note: `FinBoost Cycle ${cycle.cycleName} Reward`
+      }));
+
+      const totalAmount = recipients.reduce((sum, r) => sum + r.amount, 0);
+
+      const transactionContext = {
+        cycleSettingId: cycleId,
+        adminId: req.user.id,
+        recipients,
+        totalAmount,
+        requestId: `preview_${cycleId}_${Date.now()}`
+      };
+
+      // Execute ONLY Phase 1 from Step 4 orchestrator for dry-run preview
+      console.log('[STEP 5 PREVIEW] Executing Phase 1 validation and preparation');
+      const orchestrator = new PaypalTransactionOrchestrator();
+      const phase1Result = await (orchestrator as any).executePhase1(transactionContext);
+
+      // Clean up any intent records created during preview (they're not real transactions)
+      if (phase1Result.batchId) {
+        try {
+          console.log(`[STEP 5 PREVIEW] Cleaning up preview intent batch: ${phase1Result.batchId}`);
+          await storage.deletePayoutBatch(phase1Result.batchId);
+        } catch (cleanupError) {
+          console.warn('[STEP 5 PREVIEW] Preview cleanup warning:', cleanupError);
+          // Don't fail the preview for cleanup issues
+        }
+      }
+
+      // Generate comprehensive preview response
+      const previewResponse = {
+        success: true,
+        preview: {
+          previewMode: true,
+          cycleId,
+          cycleName: cycle.cycleName,
+          processMode: processAll ? 'processAll' : 'selective',
+          eligibleRecipients: eligibleWinners.length,
+          totalRecipients: winners.length,
+          totalAmount: totalAmount, // In cents
+          totalAmountUSD: (totalAmount / 100).toFixed(2),
+          validationResults: {
+            success: phase1Result.success,
+            errors: phase1Result.errors,
+            warnings: phase1Result.warnings
+          },
+          recipients: eligibleWinners.map((winner, index) => ({
+            cycleWinnerSelectionId: winner.id,
+            userId: winner.userId,
+            username: winner.username,
+            email: winner.email,
+            paypalEmail: winner.paypalEmail,
+            tier: winner.tier,
+            tierRank: winner.tierRank,
+            amount: recipients[index].amount, // In cents
+            amountUSD: (recipients[index].amount / 100).toFixed(2),
+            payoutStatus: winner.payoutStatus
+          })),
+          ineligibleRecipients: ineligibleWinners.map(w => ({
+            id: w.id,
+            username: w.username,
+            email: w.email,
+            reason: "No PayPal email"
+          })),
+          paypalPayloadPreview: phase1Result.success ? {
+            senderBatchId: phase1Result.senderBatchId,
+            itemCount: phase1Result.paypalPayload?.items?.length || 0,
+            sampleItems: phase1Result.paypalPayload?.items?.slice(0, 3) || []
+          } : null,
+          idempotencyData: phase1Result.success ? {
+            senderBatchId: phase1Result.senderBatchId,
+            requestChecksum: phase1Result.requestChecksum
+          } : null
+        }
+      };
+
+      console.log(`[STEP 5 PREVIEW] Preview generated successfully: ${eligibleWinners.length} recipients, $${(totalAmount / 100).toFixed(2)} total`);
+      res.json(previewResponse);
+
+    } catch (error) {
+      console.error("[STEP 5 PREVIEW] Error generating disbursement preview:", error);
+      res.status(500).json({ error: "Failed to generate disbursement preview" });
+    }
+  });
+
   // Process PayPal disbursements for selected cycle winners
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
     try {

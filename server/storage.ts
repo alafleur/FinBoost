@@ -7911,6 +7911,32 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // Step 5: Cleanup methods for preview mode
+  async deletePayoutBatch(batchId: number): Promise<void> {
+    try {
+      // First delete associated items due to foreign key constraint
+      await db.delete(payoutBatchItems).where(eq(payoutBatchItems.batchId, batchId));
+      
+      // Then delete the batch
+      await db.delete(payoutBatches).where(eq(payoutBatches.id, batchId));
+      
+      console.log(`[PAYOUT BATCH] Deleted batch ${batchId} and associated items`);
+    } catch (error) {
+      console.error('Error deleting payout batch:', error);
+      throw error;
+    }
+  }
+
+  async deletePayoutBatchItems(batchId: number): Promise<void> {
+    try {
+      await db.delete(payoutBatchItems).where(eq(payoutBatchItems.batchId, batchId));
+      console.log(`[PAYOUT BATCH] Deleted items for batch ${batchId}`);
+    } catch (error) {
+      console.error('Error deleting payout batch items:', error);
+      throw error;
+    }
+  }
+
   // Idempotency and Validation
   generateIdempotencyKey(cycleId: number, winnerData: Array<{id: number, amount: number, email: string}>): string {
     // Create deterministic hash from cycle + sorted winner data
