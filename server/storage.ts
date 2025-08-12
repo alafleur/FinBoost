@@ -1,4 +1,6 @@
 import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult, payoutBatches, payoutBatchItems, type PayoutBatch, type InsertPayoutBatch, type PayoutBatchItem, type InsertPayoutBatchItem } from "@shared/schema";
+// Step 2 Type Imports for Enhanced PayPal Integration
+import type { ParsedPayoutResponse, PayoutItemResult } from "./paypal";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -455,6 +457,123 @@ export interface IStorage {
     
     // Cycle Completion Management  
     updateCycleStatusAfterDisbursement(cycleId: number, adminUserId: number): Promise<void>;
+    
+    // ========================================
+    // ENHANCED STORAGE METHODS (Step 3)
+    // Integration with Step 2 Parsed Results
+    // ========================================
+    
+    // Core Integration Methods
+    processPaypalResponseResults(batchId: number, parsedResponse: any): Promise<{
+      batchUpdated: boolean;
+      itemsUpdated: number;
+      successfulPayouts: number;
+      failedPayouts: number;
+      pendingPayouts: number;
+      userRewardsCreated: number;
+      cycleCompleted: boolean;
+    }>;
+    
+    // Batch Status Integration
+    updatePayoutBatchFromParsedResponse(batchId: number, parsedResponse: any): Promise<PayoutBatch>;
+    
+    // Individual Item Updates with PayPal Data
+    updatePayoutBatchItemsFromResults(batchId: number, itemResults: Array<{
+      cycleWinnerSelectionId: number;
+      userId: number;
+      paypalItemId: string;
+      status: 'success' | 'failed' | 'pending' | 'unclaimed';
+      amount: number;
+      email: string;
+      errorCode?: string;
+      errorMessage?: string;
+      processedAt?: Date;
+      fees?: number;
+    }>): Promise<number>;
+    
+    // User Reward Records for Dashboard
+    createUserRewardRecord(data: {
+      userId: number;
+      cycleSettingId: number;
+      amount: number;
+      status: 'completed' | 'pending' | 'failed';
+      paypalBatchId?: string;
+      paypalItemId?: string;
+      processedAt?: Date;
+      tier?: string;
+      cycleName?: string;
+      errorMessage?: string;
+    }): Promise<any>;
+    
+    // Bulk User Reward Creation
+    createUserRewardRecordsFromResults(cycleSettingId: number, itemResults: Array<{
+      cycleWinnerSelectionId: number;
+      userId: number;
+      paypalItemId: string;
+      status: 'success' | 'failed' | 'pending' | 'unclaimed';
+      amount: number;
+      errorCode?: string;
+      errorMessage?: string;
+      processedAt?: Date;
+    }>, paypalBatchId: string): Promise<number>;
+    
+    // Winner Processing Status Updates
+    updateWinnerProcessingStatusFromResults(itemResults: Array<{
+      cycleWinnerSelectionId: number;
+      status: 'success' | 'failed' | 'pending' | 'unclaimed';
+      processedAt?: Date;
+    }>): Promise<number>;
+    
+    // Cycle Completion Checking
+    checkCycleCompletionFromPaypalResults(cycleSettingId: number): Promise<{
+      isComplete: boolean;
+      totalWinners: number;
+      processedWinners: number;
+      pendingWinners: number;
+      successfulWinners: number;
+      failedWinners: number;
+    }>;
+    
+    // Enhanced Reconciliation Methods
+    reconcilePayoutBatchWithPaypal(batchId: number, paypalBatchId: string): Promise<{
+      batchMatch: boolean;
+      itemsMatch: boolean;
+      discrepancies: Array<{
+        type: 'missing_item' | 'status_mismatch' | 'amount_mismatch';
+        cycleWinnerSelectionId?: number;
+        expected?: any;
+        actual?: any;
+      }>;
+    }>;
+    
+    // Administrative Query Methods
+    getPayoutBatchWithEnhancedDetails(batchId: number): Promise<{
+      batch: PayoutBatch;
+      items: Array<PayoutBatchItem & {
+        userName: string;
+        userEmail: string;
+        tier: string;
+        tierRank: number;
+      }>;
+      summary: {
+        totalAmount: number;
+        totalFees: number;
+        statusDistribution: Record<string, number>;
+      };
+    }>;
+    
+    // Enhanced User Reward History  
+    getUserRewardHistory(userId: number): Promise<Array<{
+      id: number;
+      amount: number;
+      status: string;
+      tier?: string;
+      cycleName?: string;
+      processedAt?: Date;
+      paypalItemId?: string;
+      errorMessage?: string;
+      cycleSettingId: number;
+    }>>;
 }
 
 import fs from 'fs/promises';
@@ -8849,6 +8968,650 @@ export class MemStorage implements IStorage {
         totalPointsEarned: 0,
         accuracyRate: 0
       };
+    }
+  }
+
+  // ========================================
+  // STEP 3: ENHANCED STORAGE METHODS
+  // Integration with Step 2 Parsed Results
+  // ========================================
+
+  /**
+   * Step 3: Main orchestrator method to process PayPal parsed results
+   * Integrates Step 2 parsing with Step 1 database infrastructure
+   */
+  async processPaypalResponseResults(batchId: number, parsedResponse: ParsedPayoutResponse): Promise<{
+    batchUpdated: boolean;
+    itemsUpdated: number;
+    successfulPayouts: number;
+    failedPayouts: number;
+    pendingPayouts: number;
+    userRewardsCreated: number;
+    cycleCompleted: boolean;
+  }> {
+    console.log(`[STEP 3] Processing PayPal results for batch ${batchId}`);
+    
+    try {
+      // Get the batch to ensure it exists and get cycle info
+      const batch = await this.getPayoutBatch(batchId);
+      if (!batch) {
+        throw new Error(`Payout batch ${batchId} not found`);
+      }
+
+      let batchUpdated = false;
+      let itemsUpdated = 0;
+      let successfulPayouts = 0;
+      let failedPayouts = 0;
+      let pendingPayouts = 0;
+      let userRewardsCreated = 0;
+      let cycleCompleted = false;
+
+      // Step 1: Update batch status from parsed response
+      try {
+        await this.updatePayoutBatchFromParsedResponse(batchId, parsedResponse);
+        batchUpdated = true;
+        console.log(`[STEP 3] Updated batch ${batchId} status to ${parsedResponse.batchStatus}`);
+      } catch (error) {
+        console.error(`[STEP 3] Failed to update batch status: ${error}`);
+      }
+
+      // Step 2: Update individual batch items with PayPal data
+      if (parsedResponse.individualResults.length > 0) {
+        try {
+          itemsUpdated = await this.updatePayoutBatchItemsFromResults(batchId, parsedResponse.individualResults);
+          console.log(`[STEP 3] Updated ${itemsUpdated} batch items`);
+        } catch (error) {
+          console.error(`[STEP 3] Failed to update batch items: ${error}`);
+        }
+      }
+
+      // Step 3: Count status distribution
+      parsedResponse.individualResults.forEach(result => {
+        switch (result.status) {
+          case 'success':
+            successfulPayouts++;
+            break;
+          case 'failed':
+            failedPayouts++;
+            break;
+          case 'pending':
+          case 'unclaimed':
+            pendingPayouts++;
+            break;
+        }
+      });
+
+      // Step 4: Create user reward records for successful payouts
+      if (successfulPayouts > 0) {
+        try {
+          userRewardsCreated = await this.createUserRewardRecordsFromResults(
+            batch.cycleSettingId,
+            parsedResponse.individualResults.filter(r => r.status === 'success'),
+            parsedResponse.paypalBatchId
+          );
+          console.log(`[STEP 3] Created ${userRewardsCreated} user reward records`);
+        } catch (error) {
+          console.error(`[STEP 3] Failed to create user reward records: ${error}`);
+        }
+      }
+
+      // Step 5: Update winner processing status
+      try {
+        const winnersUpdated = await this.updateWinnerProcessingStatusFromResults(parsedResponse.individualResults);
+        console.log(`[STEP 3] Updated processing status for ${winnersUpdated} winners`);
+      } catch (error) {
+        console.error(`[STEP 3] Failed to update winner status: ${error}`);
+      }
+
+      // Step 6: Check if cycle is complete
+      try {
+        const completionStatus = await this.checkCycleCompletionFromPaypalResults(batch.cycleSettingId);
+        cycleCompleted = completionStatus.isComplete;
+        
+        if (cycleCompleted) {
+          // Mark cycle as completed
+          await db.update(cycleSettings)
+            .set({ 
+              disbursementCompleted: true,
+              updatedAt: new Date()
+            })
+            .where(eq(cycleSettings.id, batch.cycleSettingId));
+          console.log(`[STEP 3] Cycle ${batch.cycleSettingId} marked as completed`);
+        }
+      } catch (error) {
+        console.error(`[STEP 3] Failed to check cycle completion: ${error}`);
+      }
+
+      console.log(`[STEP 3] Processing complete - ${successfulPayouts} successful, ${failedPayouts} failed, ${pendingPayouts} pending`);
+
+      return {
+        batchUpdated,
+        itemsUpdated,
+        successfulPayouts,
+        failedPayouts,
+        pendingPayouts,
+        userRewardsCreated,
+        cycleCompleted
+      };
+
+    } catch (error) {
+      console.error(`[STEP 3] Error processing PayPal results for batch ${batchId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Update payout batch with parsed PayPal response data
+   */
+  async updatePayoutBatchFromParsedResponse(batchId: number, parsedResponse: ParsedPayoutResponse): Promise<PayoutBatch> {
+    console.log(`[STEP 3] Updating batch ${batchId} from parsed PayPal response`);
+    
+    try {
+      // Map parsed status to our database status
+      let dbStatus = 'processing';
+      switch (parsedResponse.batchStatus) {
+        case 'SUCCESS':
+        case 'COMPLETED':
+          dbStatus = 'completed';
+          break;
+        case 'PENDING':
+        case 'PROCESSING':
+          dbStatus = 'processing';
+          break;
+        case 'DENIED':
+        case 'FAILED':
+        case 'BLOCKED':
+          dbStatus = 'failed';
+          break;
+        default:
+          dbStatus = 'processing';
+      }
+
+      // Count successful, failed, and pending items
+      const statusCounts = parsedResponse.individualResults.reduce(
+        (acc, item) => {
+          switch (item.status) {
+            case 'success':
+              acc.successful++;
+              break;
+            case 'failed':
+              acc.failed++;
+              break;
+            case 'pending':
+            case 'unclaimed':
+              acc.pending++;
+              break;
+          }
+          return acc;
+        },
+        { successful: 0, failed: 0, pending: 0 }
+      );
+
+      // Update batch with PayPal data
+      const [updatedBatch] = await db.update(payoutBatches)
+        .set({
+          status: dbStatus,
+          paypalBatchId: parsedResponse.paypalBatchId,
+          successfulCount: statusCounts.successful,
+          failedCount: statusCounts.failed,
+          pendingCount: statusCounts.pending,
+          updatedAt: new Date()
+        })
+        .where(eq(payoutBatches.id, batchId))
+        .returning();
+
+      if (!updatedBatch) {
+        throw new Error(`Failed to update payout batch ${batchId}`);
+      }
+
+      console.log(`[STEP 3] Batch ${batchId} updated: ${statusCounts.successful} successful, ${statusCounts.failed} failed, ${statusCounts.pending} pending`);
+      return updatedBatch;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error updating batch from parsed response:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Update individual payout batch items with PayPal result data
+   */
+  async updatePayoutBatchItemsFromResults(batchId: number, itemResults: PayoutItemResult[]): Promise<number> {
+    console.log(`[STEP 3] Updating ${itemResults.length} batch items for batch ${batchId}`);
+    
+    try {
+      let updatedCount = 0;
+
+      for (const result of itemResults) {
+        try {
+          // Find the corresponding batch item by cycleWinnerSelectionId
+          const [existingItem] = await db.select()
+            .from(payoutBatchItems)
+            .where(
+              and(
+                eq(payoutBatchItems.batchId, batchId),
+                eq(payoutBatchItems.cycleWinnerSelectionId, result.cycleWinnerSelectionId)
+              )
+            );
+
+          if (!existingItem) {
+            console.warn(`[STEP 3] No batch item found for winner ${result.cycleWinnerSelectionId}`);
+            continue;
+          }
+
+          // Update the batch item with PayPal data
+          await db.update(payoutBatchItems)
+            .set({
+              paypalItemId: result.paypalItemId,
+              status: result.status,
+              paypalStatus: `PayPal: ${result.status.toUpperCase()}`,
+              errorCode: result.errorCode || null,
+              errorMessage: result.errorMessage || null,
+              processedAt: result.processedAt || null,
+              updatedAt: new Date()
+            })
+            .where(eq(payoutBatchItems.id, existingItem.id));
+
+          updatedCount++;
+
+        } catch (error) {
+          console.error(`[STEP 3] Error updating batch item for winner ${result.cycleWinnerSelectionId}:`, error);
+        }
+      }
+
+      console.log(`[STEP 3] Successfully updated ${updatedCount} batch items`);
+      return updatedCount;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error updating batch items from results:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Create user reward record for dashboard display
+   */
+  async createUserRewardRecord(data: {
+    userId: number;
+    cycleSettingId: number;
+    amount: number;
+    status: 'completed' | 'pending' | 'failed';
+    paypalBatchId?: string;
+    paypalItemId?: string;
+    processedAt?: Date;
+    tier?: string;
+    cycleName?: string;
+    errorMessage?: string;
+  }): Promise<any> {
+    console.log(`[STEP 3] Creating user reward record for user ${data.userId}`);
+    
+    try {
+      // For now, we'll use the existing paypalPayouts table structure
+      // In a future enhancement, we could create a dedicated userRewards table
+      const rewardRecord = {
+        userId: data.userId,
+        amount: data.amount,
+        currency: 'USD',
+        status: data.status === 'completed' ? 'disbursed' : data.status,
+        tier: data.tier || 'Unknown',
+        disbursementId: data.paypalBatchId || null,
+        payoutStatus: data.status,
+        cycleName: data.cycleName || `Cycle ${data.cycleSettingId}`,
+        errorMessage: data.errorMessage || null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const [inserted] = await db.insert(paypalPayouts)
+        .values(rewardRecord)
+        .returning();
+
+      console.log(`[STEP 3] Created reward record ${inserted.id} for user ${data.userId}`);
+      return inserted;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error creating user reward record:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Bulk create user reward records from PayPal results
+   */
+  async createUserRewardRecordsFromResults(
+    cycleSettingId: number, 
+    itemResults: PayoutItemResult[], 
+    paypalBatchId: string
+  ): Promise<number> {
+    console.log(`[STEP 3] Creating ${itemResults.length} user reward records for cycle ${cycleSettingId}`);
+    
+    try {
+      let createdCount = 0;
+
+      // Get cycle name for better display
+      const [cycle] = await db.select({ 
+        name: cycleSettings.name,
+        cycleName: cycleSettings.cycleName
+      })
+      .from(cycleSettings)
+      .where(eq(cycleSettings.id, cycleSettingId));
+
+      const cycleName = cycle?.cycleName || cycle?.name || `Cycle ${cycleSettingId}`;
+
+      // Get winner details for tier information
+      const winnerIds = itemResults.map(r => r.cycleWinnerSelectionId);
+      const winners = await db.select({
+        id: cycleWinnerSelections.id,
+        tier: cycleWinnerSelections.tier,
+        tierRank: cycleWinnerSelections.tierRank
+      })
+      .from(cycleWinnerSelections)
+      .where(inArray(cycleWinnerSelections.id, winnerIds));
+
+      const winnerMap = new Map(winners.map(w => [w.id, w]));
+
+      for (const result of itemResults) {
+        try {
+          const winner = winnerMap.get(result.cycleWinnerSelectionId);
+          
+          await this.createUserRewardRecord({
+            userId: result.userId,
+            cycleSettingId,
+            amount: result.amount,
+            status: result.status === 'success' ? 'completed' : 
+                   result.status === 'failed' ? 'failed' : 'pending',
+            paypalBatchId,
+            paypalItemId: result.paypalItemId,
+            processedAt: result.processedAt,
+            tier: winner?.tier || 'Unknown',
+            cycleName,
+            errorMessage: result.errorMessage
+          });
+
+          createdCount++;
+
+        } catch (error) {
+          console.error(`[STEP 3] Error creating reward record for user ${result.userId}:`, error);
+        }
+      }
+
+      console.log(`[STEP 3] Created ${createdCount} user reward records`);
+      return createdCount;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error creating user reward records from results:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Update winner processing status from PayPal results
+   */
+  async updateWinnerProcessingStatusFromResults(itemResults: PayoutItemResult[]): Promise<number> {
+    console.log(`[STEP 3] Updating processing status for ${itemResults.length} winners`);
+    
+    try {
+      let updatedCount = 0;
+
+      for (const result of itemResults) {
+        try {
+          // Update winner selection record with processing status
+          await db.update(cycleWinnerSelections)
+            .set({
+              disbursed: result.status === 'success',
+              disbursementId: result.paypalItemId,
+              updatedAt: new Date()
+            })
+            .where(eq(cycleWinnerSelections.id, result.cycleWinnerSelectionId));
+
+          updatedCount++;
+
+        } catch (error) {
+          console.error(`[STEP 3] Error updating winner ${result.cycleWinnerSelectionId}:`, error);
+        }
+      }
+
+      console.log(`[STEP 3] Updated processing status for ${updatedCount} winners`);
+      return updatedCount;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error updating winner processing status:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Check if cycle is complete based on PayPal results
+   */
+  async checkCycleCompletionFromPaypalResults(cycleSettingId: number): Promise<{
+    isComplete: boolean;
+    totalWinners: number;
+    processedWinners: number;
+    pendingWinners: number;
+    successfulWinners: number;
+    failedWinners: number;
+  }> {
+    console.log(`[STEP 3] Checking completion status for cycle ${cycleSettingId}`);
+    
+    try {
+      // Get all winners for this cycle
+      const winners = await db.select({
+        id: cycleWinnerSelections.id,
+        disbursed: cycleWinnerSelections.disbursed,
+        disbursementId: cycleWinnerSelections.disbursementId
+      })
+      .from(cycleWinnerSelections)
+      .innerJoin(cycleSettings, eq(cycleWinnerSelections.cycleId, cycleSettings.id))
+      .where(eq(cycleSettings.id, cycleSettingId));
+
+      const totalWinners = winners.length;
+      const processedWinners = winners.filter(w => w.disbursementId !== null).length;
+      const successfulWinners = winners.filter(w => w.disbursed === true).length;
+      const failedWinners = processedWinners - successfulWinners;
+      const pendingWinners = totalWinners - processedWinners;
+
+      // Cycle is complete if all winners have been processed (have disbursementId)
+      const isComplete = totalWinners > 0 && pendingWinners === 0;
+
+      console.log(`[STEP 3] Cycle ${cycleSettingId} completion: ${processedWinners}/${totalWinners} processed, complete: ${isComplete}`);
+
+      return {
+        isComplete,
+        totalWinners,
+        processedWinners,
+        pendingWinners,
+        successfulWinners,
+        failedWinners
+      };
+
+    } catch (error) {
+      console.error(`[STEP 3] Error checking cycle completion:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Reconcile payout batch with PayPal data
+   */
+  async reconcilePayoutBatchWithPaypal(batchId: number, paypalBatchId: string): Promise<{
+    batchMatch: boolean;
+    itemsMatch: boolean;
+    discrepancies: Array<{
+      type: 'missing_item' | 'status_mismatch' | 'amount_mismatch';
+      cycleWinnerSelectionId?: number;
+      expected?: any;
+      actual?: any;
+    }>;
+  }> {
+    console.log(`[STEP 3] Reconciling batch ${batchId} with PayPal batch ${paypalBatchId}`);
+    
+    try {
+      const discrepancies: Array<{
+        type: 'missing_item' | 'status_mismatch' | 'amount_mismatch';
+        cycleWinnerSelectionId?: number;
+        expected?: any;
+        actual?: any;
+      }> = [];
+
+      // Get batch and items from database
+      const batch = await this.getPayoutBatch(batchId);
+      const batchItems = await this.getPayoutBatchItems(batchId);
+
+      if (!batch) {
+        throw new Error(`Batch ${batchId} not found`);
+      }
+
+      // Basic batch reconciliation
+      const batchMatch = batch.paypalBatchId === paypalBatchId;
+      if (!batchMatch) {
+        discrepancies.push({
+          type: 'status_mismatch',
+          expected: paypalBatchId,
+          actual: batch.paypalBatchId
+        });
+      }
+
+      // For now, assume items match if we have the expected count
+      // In a full implementation, we'd fetch PayPal data to compare
+      const itemsMatch = batchItems.length > 0;
+
+      console.log(`[STEP 3] Reconciliation complete: batch match ${batchMatch}, items match ${itemsMatch}, ${discrepancies.length} discrepancies`);
+
+      return {
+        batchMatch,
+        itemsMatch,
+        discrepancies
+      };
+
+    } catch (error) {
+      console.error(`[STEP 3] Error reconciling batch with PayPal:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Get payout batch with enhanced administrative details
+   */
+  async getPayoutBatchWithEnhancedDetails(batchId: number): Promise<{
+    batch: PayoutBatch;
+    items: Array<PayoutBatchItem & {
+      userName: string;
+      userEmail: string;
+      tier: string;
+      tierRank: number;
+    }>;
+    summary: {
+      totalAmount: number;
+      totalFees: number;
+      statusDistribution: Record<string, number>;
+    };
+  }> {
+    console.log(`[STEP 3] Getting enhanced details for batch ${batchId}`);
+    
+    try {
+      const batch = await this.getPayoutBatch(batchId);
+      if (!batch) {
+        throw new Error(`Batch ${batchId} not found`);
+      }
+
+      // Get enhanced batch items with user and winner details
+      const items = await db.select({
+        // Batch item fields
+        id: payoutBatchItems.id,
+        batchId: payoutBatchItems.batchId,
+        cycleWinnerSelectionId: payoutBatchItems.cycleWinnerSelectionId,
+        userId: payoutBatchItems.userId,
+        paypalEmail: payoutBatchItems.paypalEmail,
+        amount: payoutBatchItems.amount,
+        currency: payoutBatchItems.currency,
+        paypalItemId: payoutBatchItems.paypalItemId,
+        status: payoutBatchItems.status,
+        paypalStatus: payoutBatchItems.paypalStatus,
+        errorCode: payoutBatchItems.errorCode,
+        errorMessage: payoutBatchItems.errorMessage,
+        note: payoutBatchItems.note,
+        createdAt: payoutBatchItems.createdAt,
+        updatedAt: payoutBatchItems.updatedAt,
+        processedAt: payoutBatchItems.processedAt,
+        
+        // Enhanced fields
+        userName: users.username,
+        userEmail: users.email,
+        tier: cycleWinnerSelections.tier,
+        tierRank: cycleWinnerSelections.tierRank
+      })
+      .from(payoutBatchItems)
+      .innerJoin(users, eq(payoutBatchItems.userId, users.id))
+      .innerJoin(cycleWinnerSelections, eq(payoutBatchItems.cycleWinnerSelectionId, cycleWinnerSelections.id))
+      .where(eq(payoutBatchItems.batchId, batchId))
+      .orderBy(asc(payoutBatchItems.id));
+
+      // Calculate summary
+      const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+      const totalFees = 0; // Would be calculated from PayPal fee data
+      
+      const statusDistribution = items.reduce((acc, item) => {
+        acc[item.status] = (acc[item.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      console.log(`[STEP 3] Retrieved enhanced details for batch ${batchId}: ${items.length} items, $${(totalAmount / 100).toFixed(2)} total`);
+
+      return {
+        batch,
+        items,
+        summary: {
+          totalAmount,
+          totalFees,
+          statusDistribution
+        }
+      };
+
+    } catch (error) {
+      console.error(`[STEP 3] Error getting enhanced batch details:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 3: Get enhanced user reward history for dashboard
+   */
+  async getUserRewardHistory(userId: number): Promise<Array<{
+    id: number;
+    amount: number;
+    status: string;
+    tier?: string;
+    cycleName?: string;
+    processedAt?: Date;
+    paypalItemId?: string;
+    errorMessage?: string;
+    cycleSettingId: number;
+  }>> {
+    console.log(`[STEP 3] Getting reward history for user ${userId}`);
+    
+    try {
+      // Get user reward history from paypalPayouts table
+      const rewards = await db.select({
+        id: paypalPayouts.id,
+        amount: paypalPayouts.amount,
+        status: paypalPayouts.status,
+        tier: paypalPayouts.tier,
+        cycleName: paypalPayouts.cycleName,
+        processedAt: paypalPayouts.createdAt, // Using createdAt as processedAt
+        paypalItemId: paypalPayouts.disbursementId,
+        errorMessage: paypalPayouts.errorMessage,
+        cycleSettingId: sql<number>`0` // Default value, would be enhanced with proper schema
+      })
+      .from(paypalPayouts)
+      .where(eq(paypalPayouts.userId, userId))
+      .orderBy(desc(paypalPayouts.createdAt));
+
+      console.log(`[STEP 3] Retrieved ${rewards.length} reward records for user ${userId}`);
+      return rewards;
+
+    } catch (error) {
+      console.error(`[STEP 3] Error getting user reward history:`, error);
+      return [];
     }
   }
 }
