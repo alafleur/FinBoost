@@ -417,13 +417,43 @@ export const cyclePointsActions = pgTable("cycle_points_actions", {
   updatedBy: integer("updated_by").references(() => users.id),
 });
 
-export const insertAdminSettingSchema = createInsertSchema(adminSettings).pick({
-  settingKey: true,
-  settingValue: true,
-  settingType: true,
-  displayName: true,
-  description: true,
-  category: true,
+// Payout Batches - Idempotent batch intent records for PayPal disbursements
+export const payoutBatches = pgTable("payout_batches", {
+  id: serial("id").primaryKey(),
+  cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
+  senderBatchId: text("sender_batch_id").notNull().unique(), // Deterministic: cycle-{cycleId}-{checksum}
+  requestChecksum: text("request_checksum").notNull(), // Hash of sorted winnerIds + amounts + emails for idempotency
+  status: text("status").default("intent").notNull(), // intent, processing, completed, failed, partially_completed
+  adminId: integer("admin_id").references(() => users.id).notNull(), // Admin who initiated the payout
+  paypalBatchId: text("paypal_batch_id"), // Returned from PayPal API after successful batch creation
+  totalAmount: integer("total_amount").notNull(), // Total amount being paid out in cents
+  totalRecipients: integer("total_recipients").notNull(), // Number of recipients in this batch
+  successfulCount: integer("successful_count").default(0).notNull(), // Number of successful payouts
+  failedCount: integer("failed_count").default(0).notNull(), // Number of failed payouts
+  pendingCount: integer("pending_count").default(0).notNull(), // Number of pending/unclaimed payouts
+  errorDetails: text("error_details"), // JSON string for batch-level errors
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Payout Batch Items - Individual payout records within a batch for reconciliation
+export const payoutBatchItems = pgTable("payout_batch_items", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
+  cycleWinnerSelectionId: integer("cycle_winner_selection_id").references(() => cycleWinnerSelections.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  paypalEmail: text("paypal_email").notNull(), // PayPal email used for this payout
+  amount: integer("amount").notNull(), // Payout amount in cents
+  currency: text("currency").default("USD").notNull(), // Currency code
+  paypalItemId: text("paypal_item_id"), // PayPal payout_item_id for tracking
+  status: text("status").default("pending").notNull(), // pending, processing, success, failed, unclaimed
+  paypalStatus: text("paypal_status"), // Raw PayPal status (SUCCESS, FAILED, PENDING, UNCLAIMED, etc.)
+  errorCode: text("error_code"), // PayPal error code if failed
+  errorMessage: text("error_message"), // Human-readable error description
+  note: text("note"), // Message sent with payout
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  processedAt: timestamp("processed_at"), // When PayPal processed this item
 });
 
 // Winner Selection Cycles
@@ -503,6 +533,27 @@ export const insertWinnerAllocationTemplateSchema = createInsertSchema(winnerAll
   isDefault: true,
 });
 
+// Payout Batch insert schemas
+export const insertPayoutBatchSchema = createInsertSchema(payoutBatches).pick({
+  cycleSettingId: true,
+  senderBatchId: true,
+  requestChecksum: true,
+  totalWinners: true,
+  totalAmount: true,
+  eligibleWinners: true,
+  adminUserId: true,
+});
+
+export const insertPayoutBatchItemSchema = createInsertSchema(payoutBatchItems).pick({
+  batchId: true,
+  cycleWinnerSelectionId: true,
+  userId: true,
+  paypalEmail: true,
+  amount: true,
+  currency: true,
+  note: true,
+});
+
 export const insertLearningModuleSchema = createInsertSchema(learningModules).pick({
   title: true,
   description: true,
@@ -579,6 +630,10 @@ export type StripePayout = typeof stripePayouts.$inferSelect;
 export type PaypalPayout = typeof paypalPayouts.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type AdminPointsAction = typeof adminPointsActions.$inferSelect;
+export type PayoutBatch = typeof payoutBatches.$inferSelect;
+export type InsertPayoutBatch = z.infer<typeof insertPayoutBatchSchema>;
+export type PayoutBatchItem = typeof payoutBatchItems.$inferSelect;
+export type InsertPayoutBatchItem = z.infer<typeof insertPayoutBatchItemSchema>;
 
 // Insert schemas for new cycle-based tables
 export const insertCycleSettingSchema = createInsertSchema(cycleSettings).pick({

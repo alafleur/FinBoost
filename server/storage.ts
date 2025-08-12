@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult, payoutBatches, payoutBatchItems, type PayoutBatch, type InsertPayoutBatch, type PayoutBatchItem, type InsertPayoutBatchItem } from "@shared/schema";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -414,6 +414,47 @@ export interface IStorage {
       isSealed?: boolean;
     } | null>;
     markWinnerNotificationDisplayed(userId: number, cycleSettingId: number): Promise<{ success: boolean; message: string }>;
+    
+    // ========================================
+    // PAYOUT BATCH SYSTEM METHODS (Step 1)
+    // ========================================
+    
+    // Batch Creation and Management
+    createPayoutBatch(data: InsertPayoutBatch): Promise<PayoutBatch>;
+    createPayoutBatchItem(data: InsertPayoutBatchItem): Promise<PayoutBatchItem>;
+    getPayoutBatch(batchId: number): Promise<PayoutBatch | null>;
+    getPayoutBatchBySenderBatchId(senderBatchId: string): Promise<PayoutBatch | null>;
+    getPayoutBatchItems(batchId: number): Promise<PayoutBatchItem[]>;
+    
+    // Idempotency and Validation
+    generateIdempotencyKey(cycleId: number, winnerData: Array<{id: number, amount: number, email: string}>): string;
+    checkExistingBatch(requestChecksum: string): Promise<PayoutBatch | null>;
+    
+    // Eligible Winners Management
+    findEligibleWinners(cycleId: number): Promise<Array<{
+      id: number;
+      userId: number;
+      paypalEmail: string;
+      payoutFinal: number;
+      tier: string;
+      tierRank: number;
+      payoutStatus: string;
+    }>>;
+    
+    // Status Updates (Two-Phase Transaction Pattern)
+    markWinnersProcessing(winnerIds: number[], batchId: number): Promise<void>;
+    updatePayoutBatchStatus(batchId: number, status: string, updates?: Partial<PayoutBatch>): Promise<PayoutBatch>;
+    updatePayoutBatchItemStatus(itemId: number, status: string, updates?: Partial<PayoutBatchItem>): Promise<PayoutBatchItem>;
+    finalizePayoutResults(batchId: number, results: Array<{
+      cycleWinnerSelectionId: number;
+      status: 'success' | 'failed' | 'pending';
+      paypalItemId?: string;
+      errorCode?: string;
+      errorMessage?: string;
+    }>): Promise<void>;
+    
+    // Cycle Completion Management  
+    updateCycleStatusAfterDisbursement(cycleId: number, adminUserId: number): Promise<void>;
 }
 
 import fs from 'fs/promises';
@@ -7677,6 +7718,306 @@ export class MemStorage implements IStorage {
         success: false,
         message: `Failed to dismiss notification: ${error.message}`
       };
+    }
+  }
+
+  // ========================================
+  // PAYOUT BATCH SYSTEM IMPLEMENTATIONS (Step 1)
+  // ========================================
+
+  // Batch Creation and Management
+  async createPayoutBatch(data: InsertPayoutBatch): Promise<PayoutBatch> {
+    try {
+      const [batch] = await db.insert(payoutBatches).values(data).returning();
+      console.log(`[PAYOUT BATCH] Created batch ${batch.id} for cycle ${data.cycleSettingId}`);
+      return batch;
+    } catch (error) {
+      console.error('Error creating payout batch:', error);
+      throw error;
+    }
+  }
+
+  async createPayoutBatchItem(data: InsertPayoutBatchItem): Promise<PayoutBatchItem> {
+    try {
+      const [item] = await db.insert(payoutBatchItems).values(data).returning();
+      return item;
+    } catch (error) {
+      console.error('Error creating payout batch item:', error);
+      throw error;
+    }
+  }
+
+  async getPayoutBatch(batchId: number): Promise<PayoutBatch | null> {
+    try {
+      const [batch] = await db
+        .select()
+        .from(payoutBatches)
+        .where(eq(payoutBatches.id, batchId));
+      return batch || null;
+    } catch (error) {
+      console.error('Error getting payout batch:', error);
+      throw error;
+    }
+  }
+
+  async getPayoutBatchBySenderBatchId(senderBatchId: string): Promise<PayoutBatch | null> {
+    try {
+      const [batch] = await db
+        .select()
+        .from(payoutBatches)
+        .where(eq(payoutBatches.senderBatchId, senderBatchId));
+      return batch || null;
+    } catch (error) {
+      console.error('Error getting payout batch by sender batch ID:', error);
+      throw error;
+    }
+  }
+
+  async getPayoutBatchItems(batchId: number): Promise<PayoutBatchItem[]> {
+    try {
+      const items = await db
+        .select()
+        .from(payoutBatchItems)
+        .where(eq(payoutBatchItems.batchId, batchId))
+        .orderBy(payoutBatchItems.createdAt);
+      return items;
+    } catch (error) {
+      console.error('Error getting payout batch items:', error);
+      throw error;
+    }
+  }
+
+  // Idempotency and Validation
+  generateIdempotencyKey(cycleId: number, winnerData: Array<{id: number, amount: number, email: string}>): string {
+    // Create deterministic hash from cycle + sorted winner data
+    const sortedData = winnerData
+      .sort((a, b) => a.id - b.id)
+      .map(w => `${w.id}:${w.amount}:${w.email}`)
+      .join('|');
+    
+    const input = `cycle-${cycleId}|${sortedData}`;
+    return crypto.createHash('sha256').update(input).digest('hex').substring(0, 16);
+  }
+
+  async checkExistingBatch(requestChecksum: string): Promise<PayoutBatch | null> {
+    try {
+      const [batch] = await db
+        .select()
+        .from(payoutBatches)
+        .where(eq(payoutBatches.requestChecksum, requestChecksum))
+        .orderBy(desc(payoutBatches.createdAt));
+      return batch || null;
+    } catch (error) {
+      console.error('Error checking existing batch:', error);
+      throw error;
+    }
+  }
+
+  // Eligible Winners Management
+  async findEligibleWinners(cycleId: number): Promise<Array<{
+    id: number;
+    userId: number;
+    paypalEmail: string;
+    payoutFinal: number;
+    tier: string;
+    tierRank: number;
+    payoutStatus: string;
+  }>> {
+    try {
+      const winners = await db
+        .select({
+          id: cycleWinnerSelections.id,
+          userId: cycleWinnerSelections.userId,
+          paypalEmail: users.paypalEmail,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          tier: cycleWinnerSelections.tier,
+          tierRank: cycleWinnerSelections.tierRank,
+          payoutStatus: cycleWinnerSelections.payoutStatus
+        })
+        .from(cycleWinnerSelections)
+        .innerJoin(users, eq(cycleWinnerSelections.userId, users.id))
+        .where(
+          and(
+            eq(cycleWinnerSelections.cycleSettingId, cycleId),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'failed']),
+            isNotNull(users.paypalEmail),
+            gt(cycleWinnerSelections.payoutFinal, 0)
+          )
+        )
+        .orderBy(cycleWinnerSelections.tierRank);
+
+      return winners.filter(w => w.paypalEmail && w.paypalEmail.trim() !== '');
+    } catch (error) {
+      console.error('Error finding eligible winners:', error);
+      throw error;
+    }
+  }
+
+  // Status Updates (Two-Phase Transaction Pattern)
+  async markWinnersProcessing(winnerIds: number[], batchId: number): Promise<void> {
+    try {
+      await db
+        .update(cycleWinnerSelections)
+        .set({
+          payoutStatus: 'processing',
+          lastModified: new Date()
+        })
+        .where(inArray(cycleWinnerSelections.id, winnerIds));
+      
+      console.log(`[PAYOUT BATCH] Marked ${winnerIds.length} winners as processing for batch ${batchId}`);
+    } catch (error) {
+      console.error('Error marking winners as processing:', error);
+      throw error;
+    }
+  }
+
+  async updatePayoutBatchStatus(batchId: number, status: string, updates?: Partial<PayoutBatch>): Promise<PayoutBatch> {
+    try {
+      const updateData = {
+        status,
+        updatedAt: new Date(),
+        ...updates
+      };
+
+      const [batch] = await db
+        .update(payoutBatches)
+        .set(updateData)
+        .where(eq(payoutBatches.id, batchId))
+        .returning();
+
+      console.log(`[PAYOUT BATCH] Updated batch ${batchId} status to ${status}`);
+      return batch;
+    } catch (error) {
+      console.error('Error updating payout batch status:', error);
+      throw error;
+    }
+  }
+
+  async updatePayoutBatchItemStatus(itemId: number, status: string, updates?: Partial<PayoutBatchItem>): Promise<PayoutBatchItem> {
+    try {
+      const updateData = {
+        status,
+        updatedAt: new Date(),
+        ...updates
+      };
+
+      const [item] = await db
+        .update(payoutBatchItems)
+        .set(updateData)
+        .where(eq(payoutBatchItems.id, itemId))
+        .returning();
+
+      return item;
+    } catch (error) {
+      console.error('Error updating payout batch item status:', error);
+      throw error;
+    }
+  }
+
+  async finalizePayoutResults(batchId: number, results: Array<{
+    cycleWinnerSelectionId: number;
+    status: 'success' | 'failed' | 'pending';
+    paypalItemId?: string;
+    errorCode?: string;
+    errorMessage?: string;
+  }>): Promise<void> {
+    try {
+      // Update cycle winner selections with final results
+      for (const result of results) {
+        const payoutStatus = result.status === 'success' ? 'completed' : 
+                           result.status === 'pending' ? 'pending' : 'failed';
+        
+        const updateData: any = {
+          payoutStatus,
+          lastModified: new Date()
+        };
+
+        // Set notification flag for successful payouts
+        if (result.status === 'success') {
+          updateData.notificationDisplayed = false; // Allow winner celebration banner to show
+        }
+
+        await db
+          .update(cycleWinnerSelections)
+          .set(updateData)
+          .where(eq(cycleWinnerSelections.id, result.cycleWinnerSelectionId));
+
+        // Update corresponding batch item if PayPal item ID provided
+        if (result.paypalItemId) {
+          await db
+            .update(payoutBatchItems)
+            .set({
+              paypalItemId: result.paypalItemId,
+              status: result.status,
+              errorCode: result.errorCode,
+              errorMessage: result.errorMessage,
+              updatedAt: new Date(),
+              processedAt: new Date()
+            })
+            .where(eq(payoutBatchItems.cycleWinnerSelectionId, result.cycleWinnerSelectionId));
+        }
+      }
+
+      console.log(`[PAYOUT BATCH] Finalized ${results.length} payout results for batch ${batchId}`);
+    } catch (error) {
+      console.error('Error finalizing payout results:', error);
+      throw error;
+    }
+  }
+
+  // Cycle Completion Management
+  async updateCycleStatusAfterDisbursement(cycleId: number, adminUserId: number): Promise<void> {
+    try {
+      // Check all winner statuses to determine cycle completion
+      const statusCounts = await db
+        .select({
+          payoutStatus: cycleWinnerSelections.payoutStatus,
+          count: sql<number>`count(*)`
+        })
+        .from(cycleWinnerSelections)
+        .where(eq(cycleWinnerSelections.cycleSettingId, cycleId))
+        .groupBy(cycleWinnerSelections.payoutStatus);
+
+      const counts = statusCounts.reduce((acc, row) => {
+        acc[row.payoutStatus] = Number(row.count);
+        return acc;
+      }, {} as Record<string, number>);
+
+      const completedCount = counts['completed'] || 0;
+      const failedCount = counts['failed'] || 0;
+      const pendingCount = counts['pending'] || 0;
+      const totalWinners = completedCount + failedCount + pendingCount;
+
+      let cycleStatus: string;
+      let completedAt: Date | null = null;
+      let completedBy: number | null = null;
+
+      if (completedCount === totalWinners && totalWinners > 0) {
+        // All payouts successful
+        cycleStatus = 'completed';
+        completedAt = new Date();
+        completedBy = adminUserId;
+      } else if (completedCount > 0 && (failedCount > 0 || pendingCount > 0)) {
+        // Mixed results
+        cycleStatus = 'partially_completed';
+      } else {
+        // All failed or still pending
+        cycleStatus = 'active';
+      }
+
+      await db
+        .update(cycleSettings)
+        .set({
+          status: cycleStatus,
+          completedAt,
+          completedBy
+        })
+        .where(eq(cycleSettings.id, cycleId));
+
+      console.log(`[CYCLE STATUS] Updated cycle ${cycleId} to ${cycleStatus} (${completedCount}/${totalWinners} completed)`);
+    } catch (error) {
+      console.error('Error updating cycle status after disbursement:', error);
+      throw error;
     }
   }
 
