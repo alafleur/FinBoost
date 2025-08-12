@@ -38,6 +38,12 @@ export const dashboardTourSteps: TourStep[] = [
     placement: 'bottom',
   },
   {
+    target: '#nav-predictions',
+    title: 'Bonus Predictions 🎯',
+    content: 'Answer prediction questions about markets and trends to earn extra points beyond lessons and actions.',
+    placement: 'bottom',
+  },
+  {
     target: '#nav-referrals',
     title: 'Earn Together 🤝',
     content: 'Invite friends and family. You both earn bonus points when they join and start learning.',
