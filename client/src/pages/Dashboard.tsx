@@ -30,6 +30,9 @@ import {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import TierStats from "@/components/TierStats";
+import { WelcomeModal, Tour, GettingStartedCard, dashboardTourSteps, desktopTourSteps } from "@/components/onboarding";
+import { onboardingStorage } from "@/lib/onboardingStorage";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import finboostLogo from "@/assets/finboost-logo-v10.png";
 import { DashboardColors } from "@/lib/colors";
 import PointsSummary from "@/components/PointsSummary";
@@ -121,6 +124,15 @@ export default function Dashboard() {
   const [payoutMethod, setPayoutMethod] = useState('paypal');
   const [savingPayment, setSavingPayment] = useState(false);
 
+  // Onboarding state management
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [onboardingProgress, setOnboardingProgress] = useState({
+    firstLesson: false,
+    viewedRewards: false,
+    referralAdded: false
+  });
+
   const LeaderboardSidebar = () => {
     if (!leaderboardData) return null;
     
@@ -162,7 +174,64 @@ export default function Dashboard() {
     );
   };
 
+  // Onboarding orchestration logic
+  const initializeOnboarding = () => {
+    if (!isFeatureEnabled('ONBOARDING_V1') || !user) return;
+    
+    const hasSeenWelcome = onboardingStorage.hasSeenWelcome();
+    const hasTourCompleted = onboardingStorage.hasTourCompleted();
+    
+    // Show welcome modal for first-time users
+    if (!hasSeenWelcome) {
+      setShowWelcomeModal(true);
+    }
+    
+    // Update progress tracking from storage
+    setOnboardingProgress({
+      firstLesson: onboardingStorage.hasStartedFirstLesson(),
+      viewedRewards: onboardingStorage.hasViewedRewards(),
+      referralAdded: onboardingStorage.hasAddedReferral()
+    });
+  };
 
+  const handleWelcomeStart = () => {
+    setShowWelcomeModal(false);
+    onboardingStorage.setWelcomeSeen();
+    setShowTour(true);
+  };
+
+  const handleWelcomeSkip = () => {
+    setShowWelcomeModal(false);
+    onboardingStorage.setWelcomeSeen();
+  };
+
+  const handleTourComplete = () => {
+    setShowTour(false);
+    onboardingStorage.setTourCompleted();
+  };
+
+  const handleTourSkip = () => {
+    setShowTour(false);
+    onboardingStorage.setTourCompleted();
+  };
+
+  const handleTaskComplete = (task: keyof typeof onboardingProgress) => {
+    if (task === 'firstLesson') {
+      onboardingStorage.setFirstLessonStarted();
+      setActiveTab('learn');
+    } else if (task === 'viewedRewards') {
+      onboardingStorage.setRewardsViewed();
+      setActiveTab('rewards');
+    } else if (task === 'referralAdded') {
+      onboardingStorage.setReferralAdded();
+      setActiveTab('referrals');
+    }
+    
+    setOnboardingProgress(prev => ({
+      ...prev,
+      [task]: true
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -292,6 +361,13 @@ export default function Dashboard() {
 
     fetchData();
   }, [setLocation, toast]);
+
+  // Initialize onboarding when user data is loaded
+  useEffect(() => {
+    if (user) {
+      initializeOnboarding();
+    }
+  }, [user]);
 
   const getTierColor = (tier: string) => {
     // Use consistent neutral colors for all tier badges
@@ -1219,6 +1295,15 @@ export default function Dashboard() {
                 getTierDisplayName={getTierDisplayName}
               />
 
+              {/* Getting Started Card - Only show for new users with onboarding enabled */}
+              {isFeatureEnabled('ONBOARDING_V1') && user && 
+               (!onboardingProgress.firstLesson || !onboardingProgress.viewedRewards || !onboardingProgress.referralAdded) && (
+                <GettingStartedCard 
+                  progress={onboardingProgress}
+                  onTaskComplete={handleTaskComplete}
+                />
+              )}
+
               {/* Tier Thresholds */}
               {user && (
                 <div className="space-y-4">
@@ -1626,6 +1711,25 @@ export default function Dashboard() {
 
           </div>
         </Tabs>
+      )}
+
+      {/* Onboarding Components */}
+      {isFeatureEnabled('ONBOARDING_V1') && user && (
+        <>
+          <WelcomeModal
+            isOpen={showWelcomeModal}
+            onStartTour={handleWelcomeStart}
+            onSkip={handleWelcomeSkip}
+            username={user.firstName || user.username || 'there'}
+          />
+          
+          <Tour
+            isOpen={showTour}
+            steps={isMobile ? dashboardTourSteps : desktopTourSteps}
+            onComplete={handleTourComplete}
+            onSkip={handleTourSkip}
+          />
+        </>
       )}
     </div>
   );
