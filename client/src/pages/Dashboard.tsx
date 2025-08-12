@@ -496,6 +496,7 @@ export default function Dashboard() {
             <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
               <TabsTrigger 
                 value="overview" 
+                id="nav-overview"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Dashboard overview tab"
               >
@@ -504,6 +505,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="learn" 
+                id="nav-learn"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Learning modules tab"
               >
@@ -528,6 +530,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="rewards" 
+                id="nav-rewards"
                 className="flex flex-col items-center gap-0.5 text-xs px-0.5 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 aria-label="Rewards history tab"
               >
@@ -1092,6 +1095,7 @@ export default function Dashboard() {
               <TabsList className="grid w-full grid-cols-7 h-auto bg-transparent border-0 p-1 rounded-none">
                 <TabsTrigger 
                   value="overview" 
+                  id="nav-overview-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Dashboard overview tab"
                 >
@@ -1100,6 +1104,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="learn" 
+                  id="nav-learn-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Learning modules tab"
                 >
@@ -1124,6 +1129,7 @@ export default function Dashboard() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="rewards" 
+                  id="nav-rewards-desktop"
                   className="flex items-center gap-2 text-sm px-4 py-1.5 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:shadow-lg rounded-md transition-all duration-200 hover:text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Rewards history tab"
                 >
