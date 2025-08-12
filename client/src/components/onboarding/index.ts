@@ -2,10 +2,10 @@
  * Onboarding components exports
  */
 
-// Components will be exported here as they are created
-// export { default as WelcomeModal } from './WelcomeModal';
-// export { default as Tour } from './Tour';
-// export { default as GettingStartedCard } from './GettingStartedCard';
+// Core onboarding components
+export { default as WelcomeModal } from './WelcomeModal';
+export { default as Tour } from './Tour';
+export { default as GettingStartedCard } from './GettingStartedCard';
 
 // Export types
 export type { 
@@ -15,4 +15,4 @@ export type {
   WelcomeModalProps, 
   TourProps, 
   GettingStartedCardProps 
-} from './types.js';
+} from './types';
