@@ -1,0 +1,117 @@
+Copy–paste this **exact issue** to Replit. It’s tight, actionable, and scoped for the first merge. No back-and-forth needed.
+
+---
+
+## \[BUG] PayPal Disbursement: Missing DB Updates, Duplicate-Run Risk, No Frontend Sync
+
+**Priority:** Critical
+**Endpoint:** `server/routes.ts` → `/api/admin/winner-cycles/:cycleId/process-disbursements`
+**Files to touch:** `server/routes.ts`, `server/storage.ts`, `server/paypal.ts`
+**Scope:** Backend fix + minimal frontend verification (no UI redesign)
+
+### Summary
+
+The endpoint successfully creates PayPal payouts but **does not update app state**. Result: rewards never appear in dashboards, winner banners never show, cycles remain `active`, and admins can re-run payouts (duplicate risk).
+
+### Deliverable (Phase 1 – ship this first)
+
+Implement **state sync + idempotency** for disbursements with granular success/failure handling.
+
+### Implementation (required)
+
+1. **Pre-filter winners**
+
+* Only process `cycle_winner_selections` with `payout_status IN ('pending','failed')` and valid PayPal email.
+
+2. **PayPal response parsing** (`server/paypal.ts`)
+
+* Return per-item results: `{ winnerId, status: 'completed'|'failed', payoutItemId, error? }`.
+
+3. **Single transaction updates** (`server/routes.ts` + `server/storage.ts`)
+
+* On success:
+
+  ```sql
+  UPDATE cycle_winner_selections
+  SET payout_status='completed',
+      notification_displayed=false,
+      last_modified=NOW()
+  WHERE id IN (:successfulWinnerIds);
+  ```
+* On failure:
+
+  ```sql
+  UPDATE cycle_winner_selections
+  SET payout_status='failed',
+      payout_error=:error,
+      last_modified=NOW()
+  WHERE id IN (:failedWinnerIds);
+  ```
+* Cycle status:
+
+  * all success → `cycle_settings.status='completed', completed_at=NOW(), completed_by=:adminId`
+  * mixed → `cycle_settings.status='partially_completed'`
+  * none → leave `active`
+
+4. **Re-run prevention**
+
+* Before calling PayPal, **exclude** winners already `payout_status='completed'`.
+* If `cycle_settings.status IN ('completed','partially_completed')`, block with 409 and return a summary.
+
+5. **Return summary payload**
+
+```json
+{
+  "cycleId":"...",
+  "totals":{"eligible":10,"success":7,"failed":3,"skippedNoEmail":2},
+  "successfulWinnerIds":[...],
+  "failedWinnerIds":[...],
+  "cycleStatus":"partially_completed"
+}
+```
+
+### Minimal code sketch (for clarity)
+
+```ts
+// server/routes.ts (within the route handler)
+const eligible = await storage.findEligibleWinners(cycleId); // pending/failed + hasEmail
+if (!eligible.length) return res.status(400).json({message:'No eligible winners'});
+
+const pp = await paypal.createPayout(buildBatch(eligible)); // returns per-item statuses
+
+const successful = pp.items.filter(i => i.status==='completed').map(i => i.winnerId);
+const failed     = pp.items.filter(i => i.status==='failed');
+
+await storage.markWinnersCompleted(successful); // sets notification_displayed=false
+await storage.markWinnersFailed(failed);        // sets payout_error
+await storage.updateCycleStatus(cycleId, computeCycleStatus(successful.length, failed.length), adminId);
+
+return res.json(summarize(eligible, successful, failed));
+```
+
+### Acceptance Criteria (must pass)
+
+* [ ] After a payout run, `cycle_settings.status` becomes `completed` or `partially_completed` (with `completed_at`, `completed_by` when completed).
+* [ ] `cycle_winner_selections.payout_status` updates to `completed` or `failed` per PayPal item.
+* [ ] Winners with `completed` have `notification_displayed=false` so banners can show.
+* [ ] `/api/cycles/rewards/history` returns rewards for those winners immediately.
+* [ ] Re-running the endpoint does **not** re-pay already `completed` winners.
+* [ ] If some items fail, those winners are **retryable** without affecting successful ones.
+
+### Test Plan (run on staging with PayPal sandbox)
+
+1. Seed a cycle: 5 valid PayPal emails + 3 invalid.
+2. Run disbursement. Expect summary: `success=5`, `failed=3`.
+3. Check DB: winners updated as above; cycle `partially_completed`.
+4. Winner account(s): Rewards History populated; Celebration banner appears.
+5. Re-run disbursement: no duplicate payments; summary unchanged.
+6. Retry only failed (manually re-run after fixing emails): expect success → cycle moves to `completed`.
+
+### Notes
+
+* Frontend is already calling the correct API. No UI change required.
+* Keep this fix **backend-only** for Phase 1. We’ll iterate later if we need batch/audit tables.
+
+---
+
+Send this as a single GitHub issue.
