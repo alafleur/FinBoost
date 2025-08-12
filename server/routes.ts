@@ -2891,11 +2891,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /**
    * Manual retry endpoint for failed disbursement batches
    */
-  app.post('/api/admin/disbursements/:batchId/retry', requireAdmin, async (req, res) => {
+  app.post('/api/admin/disbursements/:batchId/retry', requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const batchId = parseInt(req.params.batchId);
       const { retryPolicy } = req.body;
-      const adminId = (req as any).user?.id || 1;
+      const adminId = req.user?.id || 1;
 
       console.log(`[STEP 6 RETRY] Manual retry requested for batch ${batchId} by admin ${adminId}`);
 
@@ -2975,11 +2975,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: batchItems.map(item => ({
           id: item.id,
           userId: item.userId,
-          recipientEmail: item.recipientEmail,
+          recipientEmail: item.paypalEmail,
           amount: item.amount,
           status: item.status,
           paypalItemId: item.paypalItemId,
-          errorDetails: item.errorDetails
+          errorDetails: item.errorMessage
         }))
       });
 
@@ -2996,11 +2996,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /**
    * Override batch status (for manual intervention)
    */
-  app.post('/api/admin/disbursements/:batchId/override-status', requireAdmin, async (req, res) => {
+  app.post('/api/admin/disbursements/:batchId/override-status', requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const batchId = parseInt(req.params.batchId);
       const { newStatus, reason } = req.body;
-      const adminId = (req as any).user?.id || 1;
+      const adminId = req.user?.id || 1;
 
       console.log(`[STEP 6 OVERRIDE] Status override for batch ${batchId} to ${newStatus} by admin ${adminId}`);
 
