@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TierStats from "@/components/TierStats";
 import { WelcomeModal, Tour, GettingStartedCard, dashboardTourSteps, desktopTourSteps } from "@/components/onboarding";
 import { onboardingStorage } from "@/lib/onboardingStorage";
@@ -52,22 +53,7 @@ import WinnerCelebrationBanner from "@/components/WinnerCelebrationBanner";
 import KeepGoingMessage from "@/components/KeepGoingMessage";
 import { educationContent } from "@/data/educationContent";
 
-// Custom hook to determine if the screen is mobile
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return isMobile;
-}
 
 interface User {
   id: number;
