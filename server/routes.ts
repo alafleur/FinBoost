@@ -3038,6 +3038,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // STEP 7: RECONCILIATION ENDPOINT
+  // ============================================================================
+
+  /**
+   * Reconcile payout batch with PayPal - fetch latest status for PENDING/UNCLAIMED items
+   */
+  app.post('/api/admin/payout-batches/:batchId/reconcile', requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+      const adminId = req.user?.id || 1;
+
+      console.log(`[STEP 7 RECONCILE] Reconciliation requested for batch ${batchId} by admin ${adminId}`);
+
+      // Step 1: Get batch from database to verify it exists and get PayPal batch ID
+      const batch = await storage.getPayoutBatch(batchId);
+      if (!batch) {
+        return res.status(404).json({
+          success: false,
+          error: 'Batch not found'
+        });
+      }
+
+      if (!batch.paypalBatchId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Batch has no PayPal batch ID - cannot reconcile unprocessed batch'
+        });
+      }
+
+      console.log(`[STEP 7 RECONCILE] Found batch ${batchId} with PayPal ID ${batch.paypalBatchId}, current status: ${batch.status}`);
+
+      // Step 2: Get current database status for comparison
+      const priorItems = await storage.getPayoutBatchItems(batchId);
+      const priorCounts = priorItems.reduce((acc, item) => {
+        switch (item.status) {
+          case 'success': acc.successful++; break;
+          case 'failed': acc.failed++; break;
+          case 'pending': 
+          case 'unclaimed': acc.pending++; break;
+        }
+        return acc;
+      }, { successful: 0, failed: 0, pending: 0 });
+
+      console.log(`[STEP 7 RECONCILE] Prior status - Successful: ${priorCounts.successful}, Failed: ${priorCounts.failed}, Pending: ${priorCounts.pending}`);
+
+      // Step 3: Fetch latest status from PayPal API
+      const { getEnhancedPayoutStatus } = await import('./paypal.js');
+      const latestPaypalResponse = await getEnhancedPayoutStatus(batch.paypalBatchId);
+
+      console.log(`[STEP 7 RECONCILE] PayPal API response - Batch status: ${latestPaypalResponse.batchStatus}, Items: ${latestPaypalResponse.individualResults.length}`);
+
+      // Step 4: Process PayPal response to update database
+      const updateResults = await storage.processPaypalResponseResults(batchId, latestPaypalResponse);
+
+      console.log(`[STEP 7 RECONCILE] Database update results:`, {
+        batchUpdated: updateResults.batchUpdated,
+        itemsUpdated: updateResults.itemsUpdated,
+        successfulPayouts: updateResults.successfulPayouts,
+        failedPayouts: updateResults.failedPayouts,
+        pendingPayouts: updateResults.pendingPayouts,
+        cycleCompleted: updateResults.cycleCompleted
+      });
+
+      // Step 5: Get updated status for comparison
+      const updatedItems = await storage.getPayoutBatchItems(batchId);
+      const updatedCounts = updatedItems.reduce((acc, item) => {
+        switch (item.status) {
+          case 'success': acc.successful++; break;
+          case 'failed': acc.failed++; break;
+          case 'pending': 
+          case 'unclaimed': acc.pending++; break;
+        }
+        return acc;
+      }, { successful: 0, failed: 0, pending: 0 });
+
+      // Step 6: Calculate what changed during reconciliation
+      const statusChanges = {
+        successfulDelta: updatedCounts.successful - priorCounts.successful,
+        failedDelta: updatedCounts.failed - priorCounts.failed,
+        pendingDelta: updatedCounts.pending - priorCounts.pending
+      };
+
+      console.log(`[STEP 7 RECONCILE] Status changes - Successful: +${statusChanges.successfulDelta}, Failed: +${statusChanges.failedDelta}, Pending: ${statusChanges.pendingDelta}`);
+
+      // Step 7: Return comprehensive reconciliation results
+      res.json({
+        success: true,
+        message: `Batch ${batchId} reconciled successfully with PayPal`,
+        reconciliationResults: {
+          batchId: batchId,
+          paypalBatchId: batch.paypalBatchId,
+          batchStatus: latestPaypalResponse.batchStatus,
+          itemsProcessed: updateResults.itemsUpdated,
+          cycleCompleted: updateResults.cycleCompleted,
+          priorStatus: {
+            successful: priorCounts.successful,
+            failed: priorCounts.failed,
+            pending: priorCounts.pending
+          },
+          updatedStatus: {
+            successful: updatedCounts.successful,
+            failed: updatedCounts.failed,
+            pending: updatedCounts.pending
+          },
+          statusChanges: {
+            newSuccessful: statusChanges.successfulDelta,
+            newFailed: statusChanges.failedDelta,
+            resolvedPending: Math.abs(statusChanges.pendingDelta)
+          },
+          paypalSyncTimestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('[STEP 7 RECONCILE] Reconciliation error:', error);
+      
+      // Enhanced error handling for common scenarios
+      if (error instanceof Error) {
+        if (error.message.includes('PayPal Payout Status API error')) {
+          return res.status(502).json({
+            success: false,
+            error: 'PayPal API error during reconciliation',
+            details: 'Unable to fetch latest status from PayPal. Please try again later.',
+            technical: error.message
+          });
+        }
+        
+        if (error.message.includes('Failed to parse PayPal response')) {
+          return res.status(502).json({
+            success: false,
+            error: 'PayPal response parsing error',
+            details: 'Received invalid data from PayPal API',
+            technical: error.message
+          });
+        }
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Reconciliation failed',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Process PayPal disbursements for selected cycle winners
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req, res) => {
     try {
