@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -175,7 +175,7 @@ export default function Dashboard() {
   };
 
   // Onboarding orchestration logic
-  const initializeOnboarding = () => {
+  const initializeOnboarding = useCallback(() => {
     if (!isFeatureEnabled('ONBOARDING_V1') || !user) return;
     
     const hasSeenWelcome = onboardingStorage.hasSeenWelcome();
@@ -192,7 +192,7 @@ export default function Dashboard() {
       viewedRewards: onboardingStorage.hasViewedRewards(),
       referralAdded: onboardingStorage.hasAddedReferral()
     });
-  };
+  }, [user]);
 
   const handleWelcomeStart = () => {
     setShowWelcomeModal(false);
@@ -367,7 +367,7 @@ export default function Dashboard() {
     if (user) {
       initializeOnboarding();
     }
-  }, [user]);
+  }, [user, initializeOnboarding]);
 
   const getTierColor = (tier: string) => {
     // Use consistent neutral colors for all tier badges
