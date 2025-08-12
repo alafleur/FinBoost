@@ -286,6 +286,136 @@ export async function getPayoutStatus(payoutBatchId: string) {
  * ENHANCED PAYOUT BATCH PROCESSING (Step 2)
  * ========================================*/
 
+// ============================================
+// STEP 2: ENHANCED PAYPAL RESPONSE PARSING
+// ============================================
+
+/**
+ * Step 2 Type Definitions for Enhanced PayPal Parsing
+ */
+export interface PayoutItemResult {
+  cycleWinnerSelectionId: number;
+  userId: number;
+  paypalItemId: string;
+  status: 'success' | 'failed' | 'pending' | 'unclaimed';
+  amount: number; // In cents
+  email: string;
+  errorCode?: string;
+  errorMessage?: string;
+  processedAt?: Date;
+  fees?: number; // In cents
+}
+
+export interface ParsedPayoutResponse {
+  batchStatus: string;
+  paypalBatchId: string;
+  senderBatchId: string;
+  totalAmount: number; // In cents
+  totalFees: number; // In cents
+  itemCount: number;
+  processedAt?: Date;
+  individualResults: PayoutItemResult[];
+}
+
+/**
+ * Maps PayPal item status to our standardized status
+ */
+function mapPaypalItemStatus(paypalStatus: string): 'success' | 'failed' | 'pending' | 'unclaimed' {
+  switch (paypalStatus?.toUpperCase()) {
+    case 'SUCCESS':
+    case 'COMPLETED':
+      return 'success';
+    case 'PENDING':
+    case 'ONHOLD':
+    case 'RETURNED': // Temporary hold, may resolve
+      return 'pending';
+    case 'UNCLAIMED':
+      return 'unclaimed'; // Distinct from failed - user needs to claim
+    case 'FAILED':
+    case 'DENIED':
+    case 'BLOCKED':
+    case 'REFUNDED':
+      return 'failed';
+    default:
+      console.warn(`[PAYPAL PARSING] Unknown PayPal item status: ${paypalStatus}`);
+      return 'failed'; // Safe default
+  }
+}
+
+/**
+ * Extracts winner IDs from sender_item_id format: "winner-{cycleWinnerSelectionId}-{userId}"
+ */
+function extractWinnerIds(senderItemId: string): { cycleWinnerSelectionId: number; userId: number } | null {
+  const winnerIdMatch = senderItemId.match(/^winner-(\d+)-(\d+)$/);
+  if (!winnerIdMatch) {
+    console.error(`[PAYPAL PARSING] Invalid sender_item_id format: ${senderItemId}`);
+    return null;
+  }
+  return {
+    cycleWinnerSelectionId: parseInt(winnerIdMatch[1]),
+    userId: parseInt(winnerIdMatch[2])
+  };
+}
+
+/**
+ * Step 2 Core Function: Parse Enhanced PayPal Payout Response
+ * Returns typed results without database operations
+ */
+export function parseEnhancedPayoutResponse(paypalResponse: any): ParsedPayoutResponse {
+  try {
+    const batchHeader = paypalResponse.batch_header;
+    const items = paypalResponse.items || [];
+
+    // Parse batch-level information
+    const parsedResponse: ParsedPayoutResponse = {
+      batchStatus: batchHeader.batch_status,
+      paypalBatchId: batchHeader.payout_batch_id,
+      senderBatchId: batchHeader.sender_batch_header?.sender_batch_id || '',
+      totalAmount: Math.round(parseFloat(batchHeader.amount?.value || '0') * 100), // Convert to cents
+      totalFees: Math.round(parseFloat(batchHeader.fees?.value || '0') * 100), // Convert to cents
+      itemCount: items.length,
+      processedAt: batchHeader.time_completed ? new Date(batchHeader.time_completed) : undefined,
+      individualResults: []
+    };
+
+    // Parse individual item results
+    for (const item of items) {
+      const winnerIds = extractWinnerIds(item.payout_item?.sender_item_id);
+      if (!winnerIds) {
+        continue; // Skip items with invalid format
+      }
+
+      const itemResult: PayoutItemResult = {
+        cycleWinnerSelectionId: winnerIds.cycleWinnerSelectionId,
+        userId: winnerIds.userId,
+        paypalItemId: item.payout_item_id,
+        status: mapPaypalItemStatus(item.transaction_status),
+        amount: Math.round(parseFloat(item.payout_item?.amount?.value || '0') * 100), // Convert to cents
+        email: item.payout_item?.receiver || '',
+        processedAt: item.time_processed ? new Date(item.time_processed) : undefined,
+        fees: item.payout_item_fee ? Math.round(parseFloat(item.payout_item_fee.value) * 100) : undefined
+      };
+
+      // Add error information if present
+      if (item.failure_reason) {
+        itemResult.errorCode = item.failure_reason;
+      }
+      if (item.errors?.message) {
+        itemResult.errorMessage = item.errors.message;
+      }
+
+      parsedResponse.individualResults.push(itemResult);
+    }
+
+    console.log(`[PAYPAL PARSING] Parsed ${parsedResponse.individualResults.length} items from batch ${parsedResponse.paypalBatchId}`);
+    return parsedResponse;
+
+  } catch (error) {
+    console.error('[PAYPAL PARSING] Error parsing PayPal response:', error);
+    throw new Error(`Failed to parse PayPal response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 // Enhanced payout creation with batch infrastructure integration
 export async function createEnhancedPaypalPayout(
   cycleId: number,
@@ -364,7 +494,10 @@ export async function createEnhancedPaypalPayout(
 }
 
 // Enhanced status checking with granular per-winner results
-export async function getEnhancedPayoutStatus(payoutBatchId: string) {
+/**
+ * Get enhanced payout status from PayPal and parse to typed results
+ */
+export async function getEnhancedPayoutStatus(payoutBatchId: string): Promise<ParsedPayoutResponse> {
   try {
     const accessToken = await getAccessToken();
     
@@ -389,104 +522,12 @@ export async function getEnhancedPayoutStatus(payoutBatchId: string) {
 
     return parseEnhancedPayoutResponse(result);
   } catch (error) {
-    console.error("Enhanced PayPal payout status error:", error);
+    console.error("[PAYPAL STATUS] Enhanced PayPal payout status error:", error);
     throw error;
   }
 }
 
-// Parse PayPal response with granular per-winner status mapping
-export function parseEnhancedPayoutResponse(paypalResponse: any) {
-  const batch = paypalResponse?.batch_header || paypalResponse?.payout_batch_header;
-  const items = paypalResponse?.items || [];
 
-  const batchStatus = mapPaypalBatchStatus(batch?.batch_status);
-  const individualResults = items.map((item: any) => {
-    // Extract winner ID from sender_item_id format: "winner-{cycleWinnerSelectionId}-{userId}"
-    const senderItemId = item.payout_item?.sender_item_id || '';
-    const winnerIdMatch = senderItemId.match(/^winner-(\d+)-(\d+)$/);
-    
-    if (!winnerIdMatch) {
-      console.error(`[PAYOUT PARSING] Invalid sender_item_id format: ${senderItemId}`);
-      return null;
-    }
-
-    const cycleWinnerSelectionId = parseInt(winnerIdMatch[1]);
-    const userId = parseInt(winnerIdMatch[2]);
-    
-    return {
-      cycleWinnerSelectionId,
-      userId,
-      paypalItemId: item.payout_item?.payout_item_id,
-      status: mapPaypalItemStatus(item.transaction_status),
-      amount: parseFloat(item.payout_item?.amount?.value || '0'),
-      currency: item.payout_item?.amount?.currency || 'USD',
-      errorCode: item.errors?.[0]?.name,
-      errorMessage: item.errors?.[0]?.message,
-      recipientEmail: item.payout_item?.receiver,
-      processedAt: item.time_processed ? new Date(item.time_processed) : null,
-      fees: parseFloat(item.payout_item_fee?.value || '0')
-    };
-  }).filter(Boolean); // Remove null entries from invalid formats
-
-  return {
-    batchId: batch?.payout_batch_id,
-    senderBatchId: batch?.sender_batch_header?.sender_batch_id,
-    batchStatus,
-    totalAmount: parseFloat(batch?.amount?.value || '0'),
-    currency: batch?.amount?.currency || 'USD',
-    fees: parseFloat(batch?.fees?.value || '0'),
-    processedAt: batch?.time_completed ? new Date(batch.time_completed) : null,
-    createdAt: batch?.time_created ? new Date(batch.time_created) : null,
-    itemCount: items.length,
-    individualResults
-  };
-}
-
-// Map PayPal batch statuses to our internal statuses
-function mapPaypalBatchStatus(paypalStatus: string): string {
-  switch (paypalStatus?.toUpperCase()) {
-    case 'SUCCESS':
-    case 'COMPLETED':
-      return 'completed';
-    case 'PENDING':
-    case 'PROCESSING':
-      return 'processing';
-    case 'DENIED':
-    case 'FAILED':
-    case 'BLOCKED':
-      return 'failed';
-    case 'CANCELED':
-    case 'CANCELLED':
-      return 'cancelled';
-    default:
-      console.warn(`[PAYOUT PARSING] Unknown PayPal batch status: ${paypalStatus}`);
-      return 'unknown';
-  }
-}
-
-// Map PayPal item statuses with distinct handling for pending/unclaimed
-function mapPaypalItemStatus(paypalStatus: string): 'success' | 'failed' | 'pending' | 'unclaimed' {
-  switch (paypalStatus?.toUpperCase()) {
-    case 'SUCCESS':
-    case 'COMPLETED':
-      return 'success';
-    case 'PENDING':
-      return 'pending';
-    case 'UNCLAIMED':
-      return 'unclaimed'; // Distinct from failed - user needs to claim
-    case 'RETURNED':
-    case 'ONHOLD':
-      return 'pending'; // Temporary hold, may resolve
-    case 'FAILED':
-    case 'DENIED':
-    case 'BLOCKED':
-    case 'REFUNDED':
-      return 'failed';
-    default:
-      console.warn(`[PAYOUT PARSING] Unknown PayPal item status: ${paypalStatus}`);
-      return 'failed'; // Safe default
-  }
-}
 
 // Mock PayPal responses for testing without hitting sandbox
 export function getMockPayoutResponse(type: 'success' | 'mixed' | 'failed' = 'success') {
