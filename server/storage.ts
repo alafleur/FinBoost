@@ -574,6 +574,11 @@ export interface IStorage {
       errorMessage?: string;
       cycleSettingId: number;
     }>>;
+
+    // Step 4: Two-Phase Transaction Pattern Support Methods
+    updatePayoutBatch(batchId: number, updates: Partial<PayoutBatch>): Promise<void>;
+    updatePayoutBatchItem(itemId: number, updates: Partial<PayoutBatchItem>): Promise<void>;
+    getPayoutBatchByChecksum(requestChecksum: string): Promise<PayoutBatch | null>;
 }
 
 import fs from 'fs/promises';
@@ -9612,6 +9617,101 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error(`[STEP 3] Error getting user reward history:`, error);
       return [];
+    }
+  }
+
+  // ============================================================================
+  // Step 4: Two-Phase Transaction Pattern Support Methods
+  // ============================================================================
+
+  /**
+   * Step 4: Update payout batch with new status and data
+   */
+  async updatePayoutBatch(batchId: number, updates: Partial<PayoutBatch>): Promise<void> {
+    console.log(`[STEP 4] Updating payout batch ${batchId} with updates:`, updates);
+    
+    try {
+      const updateData: any = {};
+      
+      // Map updates to database columns, filtering out undefined values
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.paypalBatchId !== undefined) updateData.paypalBatchId = updates.paypalBatchId;
+      if (updates.errorDetails !== undefined) updateData.errorDetails = updates.errorDetails;
+      if (updates.updatedAt !== undefined) updateData.updatedAt = updates.updatedAt;
+      if (updates.completedAt !== undefined) updateData.completedAt = updates.completedAt;
+      if (updates.totalFees !== undefined) updateData.totalFees = updates.totalFees;
+
+      const result = await db
+        .update(payoutBatches)
+        .set(updateData)
+        .where(eq(payoutBatches.id, batchId));
+
+      console.log(`[STEP 4] Successfully updated payout batch ${batchId}`);
+      
+    } catch (error) {
+      console.error(`[STEP 4] Error updating payout batch ${batchId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 4: Update payout batch item with PayPal response data
+   */
+  async updatePayoutBatchItem(itemId: number, updates: Partial<PayoutBatchItem>): Promise<void> {
+    console.log(`[STEP 4] Updating payout batch item ${itemId} with updates:`, updates);
+    
+    try {
+      const updateData: any = {};
+      
+      // Map updates to database columns, filtering out undefined values
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.paypalItemId !== undefined) updateData.paypalItemId = updates.paypalItemId;
+      if (updates.paypalStatus !== undefined) updateData.paypalStatus = updates.paypalStatus;
+      if (updates.errorCode !== undefined) updateData.errorCode = updates.errorCode;
+      if (updates.errorMessage !== undefined) updateData.errorMessage = updates.errorMessage;
+      if (updates.updatedAt !== undefined) updateData.updatedAt = updates.updatedAt;
+      if (updates.processedAt !== undefined) updateData.processedAt = updates.processedAt;
+      if (updates.fees !== undefined) updateData.fees = updates.fees;
+
+      const result = await db
+        .update(payoutBatchItems)
+        .set(updateData)
+        .where(eq(payoutBatchItems.id, itemId));
+
+      console.log(`[STEP 4] Successfully updated payout batch item ${itemId}`);
+      
+    } catch (error) {
+      console.error(`[STEP 4] Error updating payout batch item ${itemId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Step 4: Get payout batch by request checksum for idempotency checking
+   */
+  async getPayoutBatchByChecksum(requestChecksum: string): Promise<PayoutBatch | null> {
+    console.log(`[STEP 4] Looking up payout batch by checksum: ${requestChecksum.substring(0, 8)}...`);
+    
+    try {
+      const batches = await db
+        .select()
+        .from(payoutBatches)
+        .where(eq(payoutBatches.requestChecksum, requestChecksum))
+        .limit(1);
+
+      const batch = batches[0] || null;
+      
+      if (batch) {
+        console.log(`[STEP 4] Found existing batch with checksum: batch ID ${batch.id}, status ${batch.status}`);
+      } else {
+        console.log(`[STEP 4] No existing batch found with checksum`);
+      }
+      
+      return batch;
+      
+    } catch (error) {
+      console.error(`[STEP 4] Error looking up batch by checksum:`, error);
+      throw error;
     }
   }
 }
