@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { 
@@ -32,7 +33,11 @@ import {
   ChevronRight,
   RefreshCw,
   Globe,
-  CheckSquare
+  CheckSquare,
+  Shield,
+  Clock,
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 
 interface CycleSetting {
@@ -743,7 +748,17 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
     }
   };
 
-  // ChatGPT Step 2: Dual-Mode Frontend Implementation
+  // PHASE 3 STEP 9: Enhanced Disbursement Processing with Bulletproof Backend Integration
+  const [processingProgress, setProcessingProgress] = useState({
+    phase: '',
+    progress: 0,
+    message: '',
+    batchId: null as string | null,
+    chunkCount: 0,
+    currentChunk: 0
+  });
+  const [showProcessingDialog, setShowProcessingDialog] = useState(false);
+  
   const handleProcessPayouts = async () => {
     if (!selectedCycle) {
       toast({
@@ -754,26 +769,58 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       return;
     }
 
+    // STEP 9.1: Pre-processing validation and setup
     setIsProcessingPayouts(true);
+    setShowProcessingDialog(true);
+    setProcessingProgress({
+      phase: 'Initializing',
+      progress: 0,
+      message: 'Preparing disbursement request...',
+      batchId: null,
+      chunkCount: 0,
+      currentChunk: 0
+    });
     
     try {
       const token = localStorage.getItem('token');
       let requestBody: any;
       let modeDescription: string;
 
-      // ChatGPT Logic: Smart dual-mode handling based on selection state
+      // STEP 9.2: Smart dual-mode handling with enhanced validation
       if (selectedForDisbursement.size === 0) {
         // Bulk mode: No selections means process all eligible
         requestBody = { processAll: true };
         modeDescription = "bulk processing of all eligible winners";
-        console.log('[FRONTEND] Disbursement mode: bulk (processAll: true)');
+        console.log('[STEP 9 FRONTEND] Disbursement mode: bulk (processAll: true)');
+        
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Validation',
+          progress: 10,
+          message: `Validating all eligible winners for ${modeDescription}...`
+        }));
       } else {
         // Selective mode: Specific winners selected
         const selectedWinnerIds = Array.from(selectedForDisbursement);
         requestBody = { selectedWinnerIds };
         modeDescription = `selective processing of ${selectedWinnerIds.length} selected winners`;
-        console.log(`[FRONTEND] Disbursement mode: selective (${selectedWinnerIds.length} winners)`);
+        console.log(`[STEP 9 FRONTEND] Disbursement mode: selective (${selectedWinnerIds.length} winners)`);
+        
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Validation',
+          progress: 10,
+          message: `Validating ${selectedWinnerIds.length} selected winners...`
+        }));
       }
+
+      // STEP 9.3: Enhanced API call with defensive architecture integration
+      setProcessingProgress(prev => ({
+        ...prev,
+        phase: 'Processing',
+        progress: 25,
+        message: 'Sending request to bulletproof PayPal system...'
+      }));
 
       const response = await fetch(`/api/admin/winner-cycles/${selectedCycle.id}/process-disbursements`, {
         method: 'POST',
@@ -786,102 +833,189 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
       const data = await response.json();
       
-      // FRONTEND FIX: Handle all response types with structured error display
-      console.log(`[FRONTEND] API Response:`, { status: response.status, data });
+      // STEP 9.4: Comprehensive response handling with bulletproof error integration
+      console.log(`[STEP 9 FRONTEND] API Response:`, { status: response.status, data });
       
       if (response.ok && data.success) {
-        // SUCCESS CASE: Use standardized response format from ChatGPT specification
+        // SUCCESS CASE: Enhanced success handling with batch tracking
         const processedCount = data.processedCount || 0;
         const failedCount = data.failed ? data.failed.length : 0;
         const totalEligible = data.totalEligible || 0;
+        const batchId = data.batchId;
+        const chunkInfo = data.batchMetadata?.chunkInfo || {};
+        
+        // STEP 9.5: Update progress for batch processing feedback
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Completed',
+          progress: 100,
+          message: `Successfully processed ${processedCount} disbursements`,
+          batchId: batchId,
+          chunkCount: chunkInfo.totalChunks || 0,
+          currentChunk: chunkInfo.totalChunks || 0
+        }));
         
         let successMessage = `Successfully processed ${processedCount} payouts`;
         if (failedCount > 0) {
-          successMessage += ` (${failedCount} failed due to missing PayPal emails)`;
+          successMessage += ` (${failedCount} failed due to email validation errors)`;
         }
-        if (data.batchId) {
-          successMessage += ` - Batch ID: ${data.batchId}`;
+        if (batchId) {
+          successMessage += ` - Batch ID: ${batchId}`;
+        }
+        if (chunkInfo.totalChunks > 1) {
+          successMessage += ` - Processed in ${chunkInfo.totalChunks} optimized chunks`;
         }
 
+        // Enhanced success toast with batch information
         toast({
-          title: "Payouts Processed",
+          title: "✅ Disbursement Successful",
           description: successMessage
         });
+        
+        // Show batch tracking information if available
+        if (batchId) {
+          setTimeout(() => {
+            toast({
+              title: "📊 Batch Tracking",
+              description: `Track your disbursement progress with Batch ID: ${batchId}`,
+              variant: "default"
+            });
+          }, 1500);
+        }
         
         // Clear selections after successful processing
         setSelectedForDisbursement(new Set());
         
-        // Log comprehensive results for audit
-        console.log(`[FRONTEND] Disbursement completed: processed=${processedCount}, failed=${failedCount}, totalEligible=${totalEligible}, batchId=${data.batchId}`);
+        // Enhanced audit logging
+        console.log(`[STEP 9 FRONTEND] Disbursement completed successfully:`, {
+          processed: processedCount,
+          failed: failedCount,
+          totalEligible: totalEligible,
+          batchId: batchId,
+          chunks: chunkInfo.totalChunks || 1,
+          timestamp: new Date().toISOString()
+        });
         
-        // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
+        // Close processing dialog after brief delay
+        setTimeout(() => setShowProcessingDialog(false), 3000);
+        
+        // Comprehensive state refresh
         await refreshAllCycleData({ forceFresh: true, showToast: false });
         
       } else {
-        // ERROR CASES: Handle structured backend error responses
-        let errorTitle = "Processing Failed";
+        // STEP 9.6: Enhanced error handling with defensive architecture responses
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Error',
+          progress: 0,
+          message: 'Processing failed - see details below'
+        }));
+        
+        let errorTitle = "⚠️ Processing Failed";
         let errorDescription = data.error || data.userMessage || "Failed to process payouts";
         
-        // Enhanced error messages based on HTTP status codes
+        // Enhanced error categorization based on bulletproof backend responses
         if (response.status === 400) {
-          errorTitle = "Invalid Request";
+          errorTitle = "❌ Invalid Request";
+        } else if (response.status === 409) {
+          errorTitle = "🔒 Concurrency Conflict";
+          errorDescription = data.error || "Another disbursement is in progress. Please wait and retry.";
         } else if (response.status === 422) {
-          errorTitle = "Validation Error";
+          errorTitle = "📧 Validation Error";
+          // Enhanced validation error display
+          if (data.validationErrors) {
+            errorDescription = `Email validation failed: ${data.validationErrors.invalidEmails?.length || 0} invalid, ${data.validationErrors.disposableEmails?.length || 0} disposable`;
+          }
         } else if (response.status === 429) {
-          errorTitle = "Rate Limited";
+          errorTitle = "⏱️ Rate Limited";
+          errorDescription = data.error || "System is rate-limited. Please wait before retrying.";
+        } else if (response.status === 503) {
+          errorTitle = "🔧 Service Unavailable";
+          errorDescription = data.error || "PayPal service temporarily unavailable. Retry in a few minutes.";
         } else if (response.status >= 500) {
-          errorTitle = "System Error";
+          errorTitle = "🚨 System Error";
         }
         
-        // Add details if available
+        // Add technical details for comprehensive error feedback
         if (data.details && data.details !== data.error) {
-          errorDescription += ` - ${data.details}`;
+          errorDescription += ` | Details: ${data.details}`;
         }
         
-        // Display main error to user
+        // Main error display
         toast({
           title: errorTitle,
           description: errorDescription,
           variant: "destructive"
         });
         
-        // Show additional helpful information
-        if (data.actionRequired || data.nextSteps) {
+        // STEP 9.7: Advanced error guidance and recovery options
+        if (data.actionRequired || data.nextSteps || data.retryAfter) {
           setTimeout(() => {
-            const guidance = data.actionRequired || (data.nextSteps && data.nextSteps[0]);
+            let guidance = "Please try again";
+            
+            if (data.retryAfter) {
+              guidance = `Retry available after ${data.retryAfter} seconds`;
+            } else if (data.actionRequired) {
+              guidance = data.actionRequired;
+            } else if (data.nextSteps && data.nextSteps[0]) {
+              guidance = data.nextSteps[0];
+            }
+            
             toast({
-              title: "Next Steps",
+              title: "🛠️ Recovery Options",
               description: guidance,
               variant: "default"
             });
-          }, 1000);
+          }, 1200);
         }
         
-        // LOG FOR CHATGPT REVIEW: Complete JSON response payload
-        console.error('=== DISBURSEMENT ERROR RESPONSE FOR CHATGPT REVIEW ===');
+        // Show email validation details if available
+        if (data.validationErrors && (data.validationErrors.invalidEmails?.length > 0 || data.validationErrors.disposableEmails?.length > 0)) {
+          setTimeout(() => {
+            const invalidCount = data.validationErrors.invalidEmails?.length || 0;
+            const disposableCount = data.validationErrors.disposableEmails?.length || 0;
+            toast({
+              title: "📧 Email Validation Details",
+              description: `${invalidCount} invalid emails, ${disposableCount} disposable emails detected`,
+              variant: "destructive"
+            });
+          }, 2000);
+        }
+        
+        // Enhanced audit logging for troubleshooting
+        console.error('=== STEP 9 DISBURSEMENT ERROR - COMPREHENSIVE LOG ===');
+        console.error('Timestamp:', new Date().toISOString());
         console.error('HTTP Status:', response.status);
         console.error('Request Mode:', requestBody.processAll ? 'bulk' : 'selective');
         console.error('Selected Count:', requestBody.selectedWinnerIds?.length || 0);
         console.error('Cycle ID:', selectedCycle.id);
-        console.error('Complete Response Payload:', data);
-        console.error('============================================');
+        console.error('Error Response:', data);
+        if (data.validationErrors) {
+          console.error('Validation Errors:', data.validationErrors);
+        }
+        console.error('=================================================');
         
-        // Alert user to check console
-        setTimeout(() => {
-          toast({
-            title: "Debug Information Available",
-            description: "Technical details logged to browser console for troubleshooting",
-            variant: "default"
-          });
-        }, 2000);
+        // Close processing dialog on error
+        setTimeout(() => setShowProcessingDialog(false), 2000);
       }
     } catch (error) {
-      console.error('[FRONTEND] Disbursement error:', error);
+      // STEP 9.8: Network error handling
+      console.error('[STEP 9 FRONTEND] Network/System error:', error);
+      
+      setProcessingProgress(prev => ({
+        ...prev,
+        phase: 'Error',
+        progress: 0,
+        message: 'Network error occurred'
+      }));
+      
       toast({
-        title: "Error", 
-        description: "Failed to process payouts",
+        title: "🌐 Network Error",
+        description: "Unable to connect to disbursement system. Check your connection and retry.",
         variant: "destructive"
       });
+      
+      setTimeout(() => setShowProcessingDialog(false), 2000);
     } finally {
       setIsProcessingPayouts(false);
     }
@@ -2142,6 +2276,87 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 </>
               )}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PHASE 3 STEP 9: Real-time Processing Dialog with Bulletproof Backend Integration */}
+      <Dialog open={showProcessingDialog} onOpenChange={setShowProcessingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-600" />
+              Processing Disbursements
+            </DialogTitle>
+            <DialogDescription>
+              Bulletproof PayPal transaction orchestrator in progress...
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Progress Indicator */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">{processingProgress.phase}</span>
+                <span className="text-gray-500">{processingProgress.progress}%</span>
+              </div>
+              <Progress value={processingProgress.progress} className="h-2" />
+              <p className="text-sm text-gray-600">{processingProgress.message}</p>
+            </div>
+
+            {/* Batch Information */}
+            {processingProgress.batchId && (
+              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Batch Processing</span>
+                </div>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <div>Batch ID: <code className="bg-white px-1 rounded">{processingProgress.batchId}</code></div>
+                  {processingProgress.chunkCount > 0 && (
+                    <div>Chunks: {processingProgress.currentChunk}/{processingProgress.chunkCount}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Success State */}
+            {processingProgress.phase === 'Completed' && (
+              <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">Disbursement Successful!</span>
+                </div>
+                <p className="text-xs text-green-700 mt-1">All defensive validations passed</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {processingProgress.phase === 'Error' && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm font-medium text-red-800">Processing Failed</span>
+                </div>
+                <p className="text-xs text-red-700 mt-1">Check error details above</p>
+              </div>
+            )}
+
+            {/* Real-time Status Indicators */}
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <Shield className="w-3 h-3 text-blue-500" />
+                <span className="text-gray-600">Defensive</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3 text-green-500" />
+                <span className="text-gray-600">Real-time</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 text-purple-500" />
+                <span className="text-gray-600">Bulletproof</span>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
