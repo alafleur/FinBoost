@@ -1855,11 +1855,13 @@ export class PaypalTransactionOrchestrator {
     // STEP 4: Generate payload with normalized data
     const payloadItems = validatedRecipients.map((recipient, index) => {
       // STEP 4: Normalize emails (trim, lowercase)
-      const normalizedEmail = recipient.paypalEmail.trim().toLowerCase();
+      console.log(`[DEBUG] Recipient ${index}: paypalEmail = "${recipient.paypalEmail}", type = ${typeof recipient.paypalEmail}`);
+      const normalizedEmail = recipient.paypalEmail ? recipient.paypalEmail.trim().toLowerCase() : '';
+      console.log(`[DEBUG] Normalized email for recipient ${index}: "${normalizedEmail}"`);
       
       const senderItemId = `winner-${recipient.cycleWinnerSelectionId}-${recipient.userId}`;
       
-      return {
+      const item = {
         recipient_type: "EMAIL",
         amount: {
           value: (recipient.amount / 100).toFixed(2), // Convert cents to dollars
@@ -1869,6 +1871,8 @@ export class PaypalTransactionOrchestrator {
         note: recipient.note || "FinBoost monthly reward",
         sender_item_id: senderItemId
       };
+      console.log(`[DEBUG] PayPal item ${index}: receiver = "${item.receiver}", amount = ${item.amount.value}`);
+      return item;
     });
 
     const payload = {

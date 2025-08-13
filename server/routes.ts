@@ -3491,8 +3491,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return { valid: false, error: 'Amount must have at most 2 decimal places' };
     }
 
-    // Convert to cents for internal storage (as integers)
-    const normalizedAmount = Math.round(numAmount * 100);
+    // Amount is already in cents from the database - DO NOT multiply by 100 again!
+    // payoutFinal is stored as cents (1666 = $16.66)
+    const normalizedAmount = Math.round(numAmount);
 
     return { valid: true, normalizedAmount };
   }
