@@ -4134,8 +4134,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         senderBatchId: deterministic_batch_id
       });
 
-      // Phase 1 & 2: Execute two-phase transaction through orchestrator
-      const orchestratorResult = await orchestrator.executeTransaction(transactionContext);
+      // Phase 1 & 2: Execute two-phase transaction through orchestrator with comprehensive error handling
+      let orchestratorResult;
+      try {
+        console.log('[PHASE 2 ERROR HANDLING] Starting orchestrator execution with defensive error handling');
+        orchestratorResult = await orchestrator.executeTransaction(transactionContext);
+        
+        // PHASE 2: Defensive validation of orchestrator result
+        if (!orchestratorResult || typeof orchestratorResult !== 'object') {
+          throw new Error('Orchestrator returned invalid result object');
+        }
+        
+        console.log('[PHASE 2 ERROR HANDLING] Orchestrator execution completed successfully');
+        
+      } catch (orchestratorError) {
+        // PHASE 2: Comprehensive orchestrator error handling - prevent blank pages
+        console.error('[PHASE 2 ERROR HANDLING] Orchestrator execution failed:', orchestratorError);
+        
+        // Always release processing lock on orchestrator failure
+        try {
+          await storage.releaseProcessingLock(cycleProcessingKey);
+          logger.concurrency(`Processing lock released after orchestrator error for cycle ${cycleId}`);
+        } catch (lockError) {
+          logger.concurrency(`Warning: Failed to release lock after orchestrator error: ${lockError instanceof Error ? lockError.message : String(lockError)}`);
+        }
+        
+        // Determine error type and appropriate response
+        const errorMessage = orchestratorError instanceof Error ? orchestratorError.message : String(orchestratorError);
+        const isValidationError = errorMessage.includes('validation') || 
+                                errorMessage.includes('invalid') ||
+                                errorMessage.includes('Input validation failed') ||
+                                errorMessage.includes('recipient') ||
+                                errorMessage.includes('email') ||
+                                errorMessage.includes('amount');
+                                
+        // Log structured error for debugging
+        logger.audit('ORCHESTRATOR_EXECUTION_FAILED', {
+          errorType: isValidationError ? 'validation_error' : 'internal_error',
+          errorMessage: errorMessage,
+          recipientCount: recipients.length,
+          totalAmount,
+          stackTrace: orchestratorError instanceof Error ? orchestratorError.stack : undefined
+        });
+        
+        logger.end(0, recipients.length, `orchestrator_error`);
+        
+        if (isValidationError) {
+          // PHASE 2: Return 422 for validation errors with structured response
+          return res.status(422).json({
+            ok: false,
+            stage: 'validation',
+            error: 'Validation failed',
+            details: errorMessage,
+            userMessage: 'The disbursement data failed validation checks. Please review the recipient information and try again.',
+            errors: [errorMessage],
+            recipientCount: recipients.length,
+            totalAmount: totalAmount,
+            actionRequired: 'review_recipient_data',
+            canRetry: true
+          });
+        } else {
+          // PHASE 2: Return 500 for internal errors with structured response
+          return res.status(500).json({
+            ok: false,
+            stage: 'internal_error',
+            error: 'Internal disbursement system error',
+            details: 'An unexpected error occurred during disbursement processing',
+            userMessage: 'A system error occurred while processing disbursements. Please try again in a few minutes or contact support if the issue persists.',
+            errorCode: 'ORCHESTRATOR_EXECUTION_FAILED',
+            recipientCount: recipients.length,
+            totalAmount: totalAmount,
+            actionRequired: 'retry_later_or_contact_support',
+            canRetry: true,
+            retryDelay: '5_minutes'
+          });
+        }
+      }
       
       // Phase 3: Always release processing lock after orchestrator execution
       try {
@@ -4517,23 +4591,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
     } catch (error) {
+      // PHASE 2: Comprehensive route-level error handling - prevent all blank pages
+      console.error('[PHASE 2 ROUTE ERROR HANDLING] Critical route-level error caught:', error);
+      
+      // Always ensure processing lock is released on any route-level error
+      try {
+        const cycleProcessingKey = `cycle_processing_${cycleId}`;
+        await storage.releaseProcessingLock(cycleProcessingKey);
+        console.log(`[PHASE 2 ROUTE ERROR HANDLING] Processing lock released after route error for cycle ${cycleId}`);
+      } catch (lockError) {
+        console.error('[PHASE 2 ROUTE ERROR HANDLING] Failed to release lock after route error:', lockError);
+        // Don't fail the error response due to lock issues
+      }
+      
       // Enhanced error handling with structured logging
       logger.audit('DISBURSEMENT_CRITICAL_ERROR', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         errorType: error instanceof Error ? error.constructor.name : typeof error,
-        phase: 'route_execution'
+        phase: 'route_execution',
+        errorPhase: 'route_level_exception'
       });
       
-      logger.end(0, 0); // Critical error before processing could determine eligible count
+      logger.end(0, 0, 'route_level_critical_error');
       
-      console.error("[PHASE 1 CRITICAL ERROR] Error executing orchestrator transaction:", error);
-      return res.status(500).json({ 
-        success: false,
-        error: "Critical error during disbursement processing",
-        details: error instanceof Error ? error.message : String(error),
-        phase: "orchestrator_execution"
+      // Determine error type for appropriate response
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isValidationError = errorMessage.includes('validation') || 
+                              errorMessage.includes('invalid') ||
+                              errorMessage.includes('required') ||
+                              errorMessage.includes('missing');
+      const isAuthError = errorMessage.includes('auth') || 
+                         errorMessage.includes('permission') ||
+                         errorMessage.includes('unauthorized');
+      const isDatabaseError = errorMessage.includes('database') ||
+                             errorMessage.includes('connection') ||
+                             errorMessage.includes('sql') ||
+                             errorMessage.includes('query');
+      
+      console.error('[PHASE 2 ROUTE ERROR HANDLING] Route execution failed:', {
+        errorType: isValidationError ? 'validation' : isAuthError ? 'authorization' : isDatabaseError ? 'database' : 'internal',
+        message: errorMessage
       });
+      
+      // PHASE 2: Return appropriate structured JSON response based on error type
+      if (isValidationError) {
+        return res.status(422).json({
+          ok: false,
+          stage: 'route_validation',
+          error: 'Route validation error',
+          details: errorMessage,
+          userMessage: 'There was a validation error with the request data. Please check your input and try again.',
+          errorCode: 'ROUTE_VALIDATION_ERROR',
+          actionRequired: 'check_input_data',
+          canRetry: true,
+          timestamp: new Date().toISOString()
+        });
+      } else if (isAuthError) {
+        return res.status(403).json({
+          ok: false,
+          stage: 'authorization',
+          error: 'Authorization error',
+          details: errorMessage,
+          userMessage: 'You do not have permission to perform this operation.',
+          errorCode: 'ROUTE_AUTHORIZATION_ERROR',
+          actionRequired: 'check_permissions',
+          canRetry: false,
+          timestamp: new Date().toISOString()
+        });
+      } else if (isDatabaseError) {
+        return res.status(503).json({
+          ok: false,
+          stage: 'database_connection',
+          error: 'Database connectivity error',
+          details: 'A database connection error occurred',
+          userMessage: 'The system is experiencing database connectivity issues. Please try again in a few minutes.',
+          errorCode: 'ROUTE_DATABASE_ERROR',
+          actionRequired: 'retry_later',
+          canRetry: true,
+          retryDelay: '5_minutes',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        // PHASE 2: Internal server error with comprehensive details
+        return res.status(500).json({
+          ok: false,
+          stage: 'internal_error',
+          error: 'Critical system error',
+          details: 'An unexpected error occurred during disbursement processing',
+          userMessage: 'A critical system error occurred. The development team has been notified. Please try again later or contact support if the issue persists.',
+          errorCode: 'ROUTE_CRITICAL_ERROR',
+          actionRequired: 'contact_support_if_persists',
+          canRetry: true,
+          retryDelay: '10_minutes',
+          timestamp: new Date().toISOString(),
+          context: {
+            phase: 'route_execution',
+            operation: 'process_disbursements',
+            cycleId: cycleId || 'unknown',
+            errorType: error instanceof Error ? error.constructor.name : typeof error
+          }
+        });
+      }
     }
   });
 
