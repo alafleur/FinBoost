@@ -3717,6 +3717,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         ];
 
+        // STEP 4: DATABASE STATE SYNCHRONIZATION
+        // The orchestrator successfully processed PayPal payouts, but we need to sync the application state
+        // by updating cycle_winner_selections and cycle_settings tables based on PayPal results
+        try {
+          logger.audit('DATABASE_STATE_SYNC_START', {
+            batchId: orchestratorResult.phase1.batchId,
+            cycleId
+          });
+
+          // Get individual payout results from the batch
+          const batchItems = await storage.getPayoutBatchItems(orchestratorResult.phase1.batchId!);
+          
+          // Separate successful and failed payouts
+          const successfulItems = batchItems.filter(item => item.status === 'success');
+          const failedItems = batchItems.filter(item => item.status === 'failed');
+          
+          logger.audit('PAYOUT_RESULTS_RETRIEVED', {
+            totalItems: batchItems.length,
+            successful: successfulItems.length,
+            failed: failedItems.length,
+            pending: batchItems.filter(item => ['pending', 'unclaimed'].includes(item.status)).length
+          });
+
+          // Update cycle_winner_selections for successful payouts
+          if (successfulItems.length > 0) {
+            const successfulWinnerIds = successfulItems.map(item => item.cycleWinnerSelectionId);
+            
+            await db.update(cycleWinnerSelections)
+              .set({
+                payoutStatus: 'completed',
+                notificationDisplayed: false,  // Enable winner celebration banners
+                lastModified: new Date()
+              })
+              .where(inArray(cycleWinnerSelections.id, successfulWinnerIds));
+            
+            logger.audit('SUCCESSFUL_WINNERS_UPDATED', {
+              count: successfulItems.length,
+              winnerIds: successfulWinnerIds.slice(0, 5) // Log first 5 for audit
+            });
+          }
+
+          // Update cycle_winner_selections for failed payouts
+          if (failedItems.length > 0) {
+            const failedWinnerIds = failedItems.map(item => item.cycleWinnerSelectionId);
+            
+            await db.update(cycleWinnerSelections)
+              .set({
+                payoutStatus: 'failed',
+                payoutError: 'PayPal disbursement failed',
+                lastModified: new Date()
+              })
+              .where(inArray(cycleWinnerSelections.id, failedWinnerIds));
+            
+            logger.audit('FAILED_WINNERS_UPDATED', {
+              count: failedItems.length,
+              winnerIds: failedWinnerIds.slice(0, 5)
+            });
+          }
+
+          // Update cycle status based on overall results
+          const totalProcessed = successfulItems.length + failedItems.length;
+          const allSuccessful = failedItems.length === 0 && successfulItems.length > 0;
+          const cycleCompleted = orchestratorResult.phase2.cycleCompleted || allSuccessful;
+          
+          if (cycleCompleted) {
+            // All winners processed successfully - mark cycle as completed
+            await db.update(cycleSettings)
+              .set({
+                status: 'completed',
+                completedAt: new Date(),
+                completedBy: adminId
+              })
+              .where(eq(cycleSettings.id, cycleId));
+            
+            logger.audit('CYCLE_COMPLETED', {
+              cycleId,
+              completedBy: adminId,
+              totalProcessed
+            });
+          } else if (successfulItems.length > 0) {
+            // Some successful, some failed - mark as partially completed
+            await db.update(cycleSettings)
+              .set({
+                status: 'partially_completed',
+                lastModified: new Date()
+              })
+              .where(eq(cycleSettings.id, cycleId));
+            
+            logger.audit('CYCLE_PARTIALLY_COMPLETED', {
+              cycleId,
+              successful: successfulItems.length,
+              failed: failedItems.length
+            });
+          }
+          
+          logger.audit('DATABASE_STATE_SYNC_COMPLETE', {
+            cycleId,
+            winnersUpdated: totalProcessed,
+            cycleStatus: cycleCompleted ? 'completed' : (successfulItems.length > 0 ? 'partially_completed' : 'active')
+          });
+
+        } catch (syncError) {
+          // Log sync error but don't fail the entire operation - PayPal processing was successful
+          logger.audit('DATABASE_STATE_SYNC_ERROR', {
+            error: syncError instanceof Error ? syncError.message : String(syncError),
+            phase: 'post_paypal_sync'
+          });
+          console.error('[STEP 4 SYNC ERROR] Failed to sync database state after successful PayPal processing:', syncError);
+        }
+
         logger.end(
           orchestratorResult.phase2.successfulCount, 
           allFailures.length,
