@@ -367,9 +367,19 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   rewardAmount: integer("reward_amount").notNull(), // In cents (legacy field, keeping for compatibility)
   pointsDeducted: integer("points_deducted").notNull(),
   pointsRolledOver: integer("points_rolled_over").notNull(),
-  payoutStatus: text("payout_status").default("pending").notNull(), // pending, processing, completed, failed
+  // PHASE 2 STEP 5: Enhanced Winner State Machine
+  payoutStatus: text("payout_status").default("draft").notNull(), // Comprehensive state tracking
   lastModified: timestamp("last_modified").defaultNow().notNull(), // When payout data was last updated
   selectionDate: timestamp("selection_date").defaultNow().notNull(),
+  
+  // STEP 5: State machine tracking fields
+  stateTransitions: text("state_transitions"), // JSON array of state changes with timestamps
+  processingAttempts: integer("processing_attempts").default(0).notNull(), // Number of disbursement attempts
+  lastProcessingAttempt: timestamp("last_processing_attempt"), // When last disbursement was attempted
+  paypalBatchId: text("paypal_batch_id"), // Associated PayPal batch ID for tracking
+  paypalItemId: text("paypal_item_id"), // Individual PayPal item ID for tracking
+  failureReason: text("failure_reason"), // Detailed failure reason if status is failed
+  adminNotes: text("admin_notes"), // Admin comments for manual intervention cases
   
   // Phase 2A: Enhanced Save/Seal Workflow Fields (Issue #2 Resolution)
   isSealed: boolean("is_sealed").default(false).notNull(), // Individual winner record seal status

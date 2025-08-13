@@ -4075,6 +4075,146 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // ============================================================================
+  // PHASE 2 STEP 5: Winner State Machine Integration
+  // ============================================================================
+
+  /**
+   * STEP 5: Create winner with initial state machine data
+   */
+  async createWinnerWithState(winnerData: any, initialState: string = 'draft'): Promise<number> {
+    const now = new Date();
+    
+    // Create initial state transition record
+    const initialTransition = {
+      fromState: null,
+      toState: initialState,
+      timestamp: now,
+      reason: 'Winner selection created'
+    };
+
+    const winnerDataWithState = {
+      ...winnerData,
+      payoutStatus: initialState,
+      stateTransitions: JSON.stringify([initialTransition]),
+      processingAttempts: 0,
+      lastProcessingAttempt: null,
+      savedAt: now,
+      lastModified: now
+    };
+
+    const [createdWinner] = await db.insert(cycleWinnerSelections)
+      .values(winnerDataWithState)
+      .returning({ id: cycleWinnerSelections.id });
+
+    console.log(`[STORAGE STATE] Created winner ${createdWinner.id} with initial state: ${initialState}`);
+    return createdWinner.id;
+  }
+
+  /**
+   * STEP 5: Update winner state through state machine
+   */
+  async updateWinnerState(winnerId: number, newState: string, metadata?: {
+    adminId?: number;
+    reason?: string;
+    paypalBatchId?: string;
+    paypalItemId?: string;
+    failureReason?: string;
+    adminNotes?: string;
+  }): Promise<{ success: boolean; error?: string }> {
+    const { WinnerStateMachine } = await import('./winner-state-machine.js');
+    
+    return await WinnerStateMachine.transitionState({
+      winnerId,
+      newState: newState as any,
+      adminId: metadata?.adminId,
+      reason: metadata?.reason,
+      metadata: metadata ? { ...metadata } : undefined,
+      paypalBatchId: metadata?.paypalBatchId,
+      paypalItemId: metadata?.paypalItemId,
+      failureReason: metadata?.failureReason,
+      adminNotes: metadata?.adminNotes
+    });
+  }
+
+  /**
+   * STEP 5: Get winners by state for batch operations
+   */
+  async getWinnersByState(cycleSettingId: number, states: string[]): Promise<any[]> {
+    const { WinnerStateMachine } = await import('./winner-state-machine.js');
+    return await WinnerStateMachine.getWinnersByState(cycleSettingId, states as any);
+  }
+
+  /**
+   * STEP 5: Bulk state transition for disbursement batches
+   */
+  async bulkUpdateWinnerStates(updates: Array<{
+    winnerId: number;
+    newState: string;
+    adminId?: number;
+    reason?: string;
+    metadata?: any;
+  }>): Promise<{
+    success: boolean;
+    successCount: number;
+    failureCount: number;
+    results: Array<{ winnerId: number; success: boolean; error?: string }>;
+  }> {
+    const { WinnerStateMachine } = await import('./winner-state-machine.js');
+    
+    const stateUpdates = updates.map(update => ({
+      winnerId: update.winnerId,
+      newState: update.newState as any,
+      adminId: update.adminId,
+      reason: update.reason,
+      metadata: update.metadata
+    }));
+
+    return await WinnerStateMachine.batchTransitionState(stateUpdates);
+  }
+
+  /**
+   * STEP 5: Get state machine statistics for admin dashboard
+   */
+  async getWinnerStateStatistics(cycleSettingId: number): Promise<Record<string, number>> {
+    const { WinnerStateMachine } = await import('./winner-state-machine.js');
+    return await WinnerStateMachine.getStateStatistics(cycleSettingId);
+  }
+
+  /**
+   * STEP 5: Reset winner state for admin intervention
+   */
+  async resetWinnerState(winnerId: number, adminId: number, reason: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    const { WinnerStateMachine } = await import('./winner-state-machine.js');
+    return await WinnerStateMachine.resetWinnerState(winnerId, adminId, reason);
+  }
+
+  /**
+   * STEP 5: Enhanced winner creation that integrates with state machine
+   */
+  async createCycleWinnerSelection(winnerData: {
+    cycleSettingId: number;
+    userId: number;
+    tier: string;
+    overallRank: number;
+    tierRank: number;
+    pointsAtSelection: number;
+    tierSizeAmount: number;
+    payoutPercentage: number;
+    payoutCalculated: number;
+    payoutOverride?: number;
+    payoutFinal: number;
+    rewardAmount: number;
+    pointsDeducted: number;
+    pointsRolledOver: number;
+    savedBy: number;
+  }): Promise<number> {
+    return await this.createWinnerWithState(winnerData, 'draft');
+  }
+
   // Enhanced Winner Selection with Flexible Admin Controls
   async executeFlexibleWinnerSelection(cycleSettingId: number, options: {
     selectionMode: 'random' | 'top_performers' | 'weighted_random' | 'manual';
@@ -4227,7 +4367,8 @@ export class MemStorage implements IStorage {
         const winner = processedWinners[i];
         const tierRank = processedWinners.filter(w => w.tier === winner.tier).indexOf(winner) + 1;
 
-        const [record] = await db.insert(cycleWinnerSelections).values([{
+        // PHASE 2 STEP 5: Create winner with state machine integration
+        const winnerId = await this.createWinnerWithState({
           cycleSettingId,
           userId: winner.userId,
           tier: winner.tier,
@@ -4238,8 +4379,17 @@ export class MemStorage implements IStorage {
           rewardAmount: winner.rewardAmount,
           pointsDeducted: winner.pointsDeducted,
           pointsRolledOver: winner.pointsRolledOver,
-          payoutStatus: 'pending'
-        }]).returning();
+          payoutCalculated: winner.rewardAmount,
+          payoutFinal: winner.rewardAmount,
+          payoutPercentage: 10000, // 100% as basis points (100 * 100)
+          savedBy: 1 // TODO: Get actual admin ID
+        }, 'draft');
+
+        // Get the created record for return
+        const [record] = await db.select()
+          .from(cycleWinnerSelections)
+          .where(eq(cycleWinnerSelections.id, winnerId))
+          .limit(1);
 
         winnerRecords.push({
           ...record,

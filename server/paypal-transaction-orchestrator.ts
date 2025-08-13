@@ -1455,6 +1455,26 @@ export class PaypalTransactionOrchestrator {
         console.log(`[IDEMPOTENCY] Retry allowed for ${duplicateCheck.existingBatch?.status} batch - creating new attempt`);
       }
 
+      // PHASE 2 STEP 5: Transition winners to pending_disbursement state
+      console.log('[STEP 5 STATE MACHINE] Transitioning winners to pending_disbursement');
+      const winnerStateUpdates = safeContext.recipients.map(recipient => ({
+        winnerId: recipient.cycleWinnerSelectionId,
+        newState: 'pending_disbursement',
+        adminId: safeContext.adminId,
+        reason: 'Disbursement batch processing started',
+        metadata: { phase: 'phase1_preparation' }
+      }));
+
+      const { default: WinnerStateMachine } = await import('./winner-state-machine.js');
+      const stateTransitionResult = await WinnerStateMachine.batchTransitionState(winnerStateUpdates);
+      
+      if (!stateTransitionResult.success || stateTransitionResult.failureCount > 0) {
+        console.warn(`[STEP 5 STATE MACHINE] State transition warnings: ${stateTransitionResult.failureCount} failures`);
+        result.warnings.push(`winner_state_transitions_partial_success=${stateTransitionResult.successCount}/${winnerStateUpdates.length}`);
+      } else {
+        console.log(`[STEP 5 STATE MACHINE] Successfully transitioned ${stateTransitionResult.successCount} winners to pending_disbursement`);
+      }
+
       // Step 1.4: Create payout batch intent with proper attempt handling (CHATGPT: Use safeContext)
       const nextAttempt = await this.findNextAttemptNumber(safeContext.cycleSettingId, result.requestChecksum);
       const attemptSenderBatchId = this.generateAttemptSenderBatchId(result.senderBatchId, nextAttempt);
@@ -1554,6 +1574,29 @@ export class PaypalTransactionOrchestrator {
         updatedAt: new Date()
       });
 
+      // PHASE 2 STEP 5: Transition winners to processing_disbursement state
+      console.log('[STEP 5 STATE MACHINE] Transitioning winners to processing_disbursement');
+      const batchItems = await storage.getPayoutBatchItems(result.batchId);
+      const processingStateUpdates = batchItems.map(item => ({
+        winnerId: item.cycleWinnerSelectionId,
+        newState: 'processing_disbursement',
+        reason: 'PayPal API processing initiated',
+        metadata: { 
+          batchId: result.batchId,
+          paypalBatchId: phase1Result.senderBatchId,
+          phase: 'phase2_paypal_execution'
+        }
+      }));
+
+      const { default: WinnerStateMachine } = await import('./winner-state-machine.js');
+      const processingTransitionResult = await WinnerStateMachine.batchTransitionState(processingStateUpdates);
+      
+      if (processingTransitionResult.failureCount > 0) {
+        console.warn(`[STEP 5 STATE MACHINE] Processing state transition warnings: ${processingTransitionResult.failureCount} failures`);
+      } else {
+        console.log(`[STEP 5 STATE MACHINE] Successfully transitioned ${processingTransitionResult.successCount} winners to processing_disbursement`);
+      }
+
       // Step 2.2: Execute PayPal API call
       console.log('[STEP 4 PHASE 2] Executing PayPal payout API call');
       const paypalResponse = await createPaypalPayout(phase1Result.paypalPayload.items);
@@ -1593,6 +1636,10 @@ export class PaypalTransactionOrchestrator {
         updatedAt: new Date()
       });
 
+      // PHASE 2 STEP 5: Update winner states based on PayPal individual results
+      console.log('[STEP 5 STATE MACHINE] Updating winner states based on PayPal results');
+      await this.updateWinnerStatesFromPayPalResults(result.batchId, parsedResponse, batchItems);
+
       result.success = true;
       console.log('[STEP 4 PHASE 2] Phase 2 execution completed successfully');
       
@@ -1601,6 +1648,28 @@ export class PaypalTransactionOrchestrator {
     } catch (error) {
       console.error('[STEP 4 PHASE 2] Phase 2 error:', error);
       result.errors.push(`Phase 2 error: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // PHASE 2 STEP 5: Transition winners to disbursement_failed on Phase 2 error
+      console.log('[STEP 5 STATE MACHINE] Transitioning winners to disbursement_failed due to Phase 2 error');
+      try {
+        const batchItems = await storage.getPayoutBatchItems(result.batchId);
+        const failureStateUpdates = batchItems.map(item => ({
+          winnerId: item.cycleWinnerSelectionId,
+          newState: 'disbursement_failed',
+          reason: `Phase 2 processing error: ${error instanceof Error ? error.message : String(error)}`,
+          metadata: { 
+            batchId: result.batchId,
+            phase: 'phase2_error',
+            errorType: error instanceof Error ? error.constructor.name : 'UnknownError'
+          },
+          failureReason: error instanceof Error ? error.message : String(error)
+        }));
+
+        const { default: WinnerStateMachine } = await import('./winner-state-machine.js');
+        await WinnerStateMachine.batchTransitionState(failureStateUpdates);
+      } catch (stateUpdateError) {
+        console.error('[STEP 5 STATE MACHINE] Failed to update winner states on Phase 2 error:', stateUpdateError);
+      }
       
       // Update batch status to "failed" on error
       try {
@@ -1944,6 +2013,33 @@ export class PaypalTransactionOrchestrator {
 
     try {
       if (phase1Result.batchId) {
+        // PHASE 2 STEP 5: Transition winners to disbursement_cancelled state
+        console.log('[STEP 5 STATE MACHINE] Transitioning winners to disbursement_cancelled due to rollback');
+        try {
+          const batchItems = await storage.getPayoutBatchItems(phase1Result.batchId);
+          const rollbackStateUpdates = batchItems.map(item => ({
+            winnerId: item.cycleWinnerSelectionId,
+            newState: 'disbursement_cancelled',
+            reason: 'Transaction rolled back due to Phase 2 failure',
+            metadata: { 
+              batchId: phase1Result.batchId,
+              phase: 'rollback',
+              rollbackReason: 'phase2_failure'
+            }
+          }));
+
+          const { default: WinnerStateMachine } = await import('./winner-state-machine.js');
+          const rollbackTransitionResult = await WinnerStateMachine.batchTransitionState(rollbackStateUpdates);
+          
+          if (rollbackTransitionResult.failureCount > 0) {
+            console.warn(`[STEP 5 STATE MACHINE] Rollback state transition warnings: ${rollbackTransitionResult.failureCount} failures`);
+          } else {
+            console.log(`[STEP 5 STATE MACHINE] Successfully transitioned ${rollbackTransitionResult.successCount} winners to disbursement_cancelled`);
+          }
+        } catch (stateUpdateError) {
+          console.error('[STEP 5 STATE MACHINE] Failed to update winner states during rollback:', stateUpdateError);
+        }
+
         // Update batch status to "cancelled"
         await storage.updatePayoutBatch(phase1Result.batchId, {
           status: 'cancelled',
@@ -1966,6 +2062,100 @@ export class PaypalTransactionOrchestrator {
     } catch (error) {
       console.error('[STEP 4 ROLLBACK] Rollback failed:', error);
       throw new Error(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * PHASE 2 STEP 5: Update winner states based on individual PayPal results
+   */
+  private async updateWinnerStatesFromPayPalResults(
+    batchId: number, 
+    parsedResponse: any, 
+    batchItems: any[]
+  ): Promise<void> {
+    console.log('[STEP 5 STATE MACHINE] Processing individual PayPal results for winner state updates');
+
+    try {
+      const { default: WinnerStateMachine } = await import('./winner-state-machine.js');
+      const stateUpdates: any[] = [];
+
+      // Process each item in the PayPal response
+      if (parsedResponse.items && Array.isArray(parsedResponse.items)) {
+        for (const paypalItem of parsedResponse.items) {
+          // Find corresponding batch item
+          const batchItem = batchItems.find(item => 
+            paypalItem.payout_item?.sender_item_id?.includes(item.cycleWinnerSelectionId.toString())
+          );
+
+          if (!batchItem) {
+            console.warn(`[STEP 5 STATE MACHINE] Could not find batch item for PayPal item: ${paypalItem.payout_item?.sender_item_id}`);
+            continue;
+          }
+
+          // Determine new state based on PayPal transaction status
+          let newState: string;
+          let reason: string;
+          let failureReason: string | undefined;
+
+          switch (paypalItem.transaction_status?.toUpperCase()) {
+            case 'SUCCESS':
+              newState = 'disbursement_completed';
+              reason = 'PayPal disbursement completed successfully';
+              break;
+            case 'FAILED':
+            case 'DENIED':
+            case 'BLOCKED':
+              newState = 'disbursement_failed';
+              reason = `PayPal disbursement failed: ${paypalItem.transaction_status}`;
+              failureReason = paypalItem.errors?.map((e: any) => e.message).join('; ') || paypalItem.transaction_status;
+              break;
+            case 'PENDING':
+            case 'UNCLAIMED':
+            case 'RETURNED':
+              // Keep in processing state, will be updated when final status is known
+              console.log(`[STEP 5 STATE MACHINE] Keeping winner ${batchItem.cycleWinnerSelectionId} in processing_disbursement (status: ${paypalItem.transaction_status})`);
+              continue;
+            default:
+              console.warn(`[STEP 5 STATE MACHINE] Unknown PayPal transaction status: ${paypalItem.transaction_status} for winner ${batchItem.cycleWinnerSelectionId}`);
+              continue;
+          }
+
+          stateUpdates.push({
+            winnerId: batchItem.cycleWinnerSelectionId,
+            newState,
+            reason,
+            metadata: {
+              batchId,
+              paypalBatchId: parsedResponse.paypalBatchId,
+              paypalItemId: paypalItem.payout_item_id,
+              paypalStatus: paypalItem.transaction_status,
+              phase: 'phase2_paypal_results'
+            },
+            paypalBatchId: parsedResponse.paypalBatchId,
+            paypalItemId: paypalItem.payout_item_id,
+            failureReason
+          });
+        }
+      }
+
+      // Execute state transitions
+      if (stateUpdates.length > 0) {
+        const transitionResult = await WinnerStateMachine.batchTransitionState(stateUpdates);
+        
+        console.log(`[STEP 5 STATE MACHINE] PayPal results processing: ${transitionResult.successCount} successful, ${transitionResult.failureCount} failed state transitions`);
+        
+        // Log successful completions and failures
+        const completedCount = stateUpdates.filter(u => u.newState === 'disbursement_completed').length;
+        const failedCount = stateUpdates.filter(u => u.newState === 'disbursement_failed').length;
+        
+        console.log(`[STEP 5 STATE MACHINE] Final disbursement results: ${completedCount} completed, ${failedCount} failed`);
+      } else {
+        console.log('[STEP 5 STATE MACHINE] No final state transitions needed from PayPal results');
+      }
+
+    } catch (error) {
+      console.error('[STEP 5 STATE MACHINE] Error updating winner states from PayPal results:', error);
+      // Don't throw - this is not critical enough to fail the entire transaction
     }
   }
 
