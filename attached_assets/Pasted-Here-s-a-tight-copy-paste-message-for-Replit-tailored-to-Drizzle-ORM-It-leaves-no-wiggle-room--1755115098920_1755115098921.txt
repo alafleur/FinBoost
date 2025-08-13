@@ -1,0 +1,168 @@
+Here’s a tight, copy-paste message for Replit tailored to **Drizzle ORM**. It leaves no wiggle room.
+
+---
+
+**Subject:** BLOCKER — Fix DB schema with Drizzle (do not change backend code)
+
+Team — the payout failure is from a **DB schema/code mismatch**. The backend you merged expects chunking + item tables/columns that don’t exist. **Do exactly the steps below. No refactors.**
+
+### 0) Backup
+
+* Take a **production DB snapshot** first.
+
+### 1) Update Drizzle schema (single file change)
+
+Edit **`shared/schema.ts`** and add the three models below (or extend `payout_batches` if it already exists). Names/columns must match exactly.
+
+```ts
+// Drizzle (Postgres)
+import {
+  pgTable, bigint, integer, text, boolean, timestamp,
+  uniqueIndex, index
+} from "drizzle-orm/pg-core";
+
+/** 1) Batches (add these columns if table already exists) */
+export const payoutBatches = pgTable("payout_batches", {
+  id: bigint("id", { mode: "number" }).primaryKey(), // keep existing PK type
+
+  // ... keep your existing columns here ...
+
+  isChunked: boolean("is_chunked").notNull().default(false),
+  totalChunks: integer("total_chunks").notNull().default(1),
+  completedChunks: integer("completed_chunks").notNull().default(0),
+  chunkSize: integer("chunk_size").notNull().default(500),
+
+  expectedItemCount: integer("expected_item_count"),
+  payloadChecksum: text("payload_checksum"),
+  attempt: integer("attempt").notNull().default(1),
+
+  parentBatchId: bigint("parent_batch_id", { mode: "number" }), // self-FK (nullable)
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  idxParent: index("idx_payout_batches_parent").on(t.parentBatchId),
+  idxChunks: index("idx_payout_batches_chunks").on(t.isChunked, t.totalChunks, t.completedChunks),
+  idxAttempt: index("idx_payout_batches_attempt").on(t.attempt),
+}));
+
+/** 2) Batch chunks (NEW) */
+export const payoutBatchChunks = pgTable("payout_batch_chunks", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+
+  batchId: bigint("batch_id", { mode: "number" }).notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+
+  status: text("status").notNull().default("created"), // created|queued|processing|completed|failed
+  itemsCount: integer("items_count").notNull(),
+  processedItems: integer("processed_items").notNull().default(0),
+
+  senderBatchId: text("sender_batch_id"),
+  paypalBatchId: text("paypal_batch_id"),
+
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uqBatchChunk: uniqueIndex("uq_payout_batch_chunks_batch_chunk").on(t.batchId, t.chunkIndex),
+  idxBatch: index("idx_payout_batch_chunks_batch").on(t.batchId),
+  idxStatus: index("idx_payout_batch_chunks_status").on(t.status),
+}));
+
+/** 3) Batch items (NEW) */
+export const payoutBatchItems = pgTable("payout_batch_items", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+
+  batchId: bigint("batch_id", { mode: "number" }).notNull(),
+  chunkId: bigint("chunk_id", { mode: "number" }),
+
+  selectionId: bigint("selection_id", { mode: "number" }).notNull(), // cycle_winner_selection id
+  userId: bigint("user_id", { mode: "number" }).notNull(),
+
+  receiverEmail: text("receiver_email"),          // normalized email sent to PayPal
+  amountCents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("USD"),
+
+  senderItemId: text("sender_item_id").notNull(), // deterministic: winner-{selectionId}-{userId}
+  paypalItemId: text("paypal_item_id"),
+
+  status: text("status").notNull().default("pending"), // pending|processing|paid|failed|unclaimed
+  paypalTransactionStatus: text("paypal_transaction_status"),
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uqSenderItem: uniqueIndex("uq_payout_batch_items_sender_item").on(t.senderItemId),
+  idxBatch: index("idx_payout_batch_items_batch").on(t.batchId),
+  idxChunk: index("idx_payout_batch_items_chunk").on(t.chunkId),
+  idxSelection: index("idx_payout_batch_items_selection").on(t.selectionId),
+  idxStatus: index("idx_payout_batch_items_status").on(t.status),
+}));
+```
+
+> **Relations/constraints:** Ensure the backend already enforces the FKs in code. If you maintain explicit FKs via raw SQL migrations, add:
+>
+> * `payout_batch_chunks.batch_id → payout_batches.id (ON DELETE CASCADE)`
+> * `payout_batch_items.batch_id → payout_batches.id (ON DELETE CASCADE)`
+> * `payout_batch_items.chunk_id → payout_batch_chunks.id (ON DELETE SET NULL)`
+> * `payout_batches.parent_batch_id → payout_batches.id (ON DELETE SET NULL)`
+
+If your Drizzle setup includes relation helpers, wire them after this push; **but do not block this push** on relation helpers—tables/columns are the blocker.
+
+### 2) Generate + push migrations
+
+Run these exactly in the project root (whatever your repo already uses for Drizzle):
+
+```bash
+# Generate migration files based on the updated schema.ts
+npx drizzle-kit generate
+
+# Apply migrations to the production DB
+npx drizzle-kit push
+```
+
+(If you have package scripts, use the project’s `npm run db:generate && npm run db:push` instead. The result must create the three objects above and add the new columns.)
+
+### 3) Verify schema exists (required)
+
+Run on the DB:
+
+```
+\d payout_batches
+\d payout_batch_chunks
+\d payout_batch_items
+```
+
+**Accept only** if:
+
+* `payout_batches` shows: `is_chunked, total_chunks, completed_chunks, chunk_size, expected_item_count, payload_checksum, attempt, parent_batch_id`
+* `payout_batch_chunks` exists with `batch_id`, `chunk_index`, `status`, `items_count`, indexes incl. `uq_payout_batch_chunks_batch_chunk`
+* `payout_batch_items` exists with `sender_item_id` (UNIQUE), `status`, and indexes
+
+### 4) Do not modify backend/UI code
+
+* No refactors. No renames. This is **schema sync only** to match the already-merged code.
+
+### 5) Acceptance criteria (must pass)
+
+* `/api/admin/disbursements/status-dashboard` responds without 5xx.
+* Starting **“Process Selected (750)”** advances the new **ProcessingDialog** (no instant “System Error”).
+* For each chunk created:
+
+  * a row is inserted into `payout_batch_chunks` with correct `batch_id`, `chunk_index`, `items_count`
+  * `payout_batch_items` has rows per recipient with **deterministic** `sender_item_id = 'winner-{selectionId}-{userId}'`
+
+### 6) After success
+
+* Re-run the **July 2/2** disbursement from the admin UI.
+* If anything fails, return the exact server error **code + stack** (no paraphrasing).
+
+— End of instructions —
+
+---
+
+If you want me to tailor the schema to a non-BIGINT PK (e.g., UUID), say the word and I’ll swap the types accordingly.
