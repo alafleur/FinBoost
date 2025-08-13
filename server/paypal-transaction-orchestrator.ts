@@ -39,6 +39,23 @@ export interface PayoutRecipient {
 }
 
 // ============================================================================
+// PHASE 1: VALIDATION RESULT TYPES (Long-term Fix)
+// ============================================================================
+
+export type ValidationOk = { 
+  valid: true; 
+  sanitized: TransactionContext; 
+};
+
+export type ValidationFail = { 
+  valid: false; 
+  errors: string[]; 
+  sanitized?: Partial<TransactionContext>; 
+};
+
+export type ValidationResult = ValidationOk | ValidationFail;
+
+// ============================================================================
 // STEP 6: RE-RUN PREVENTION & RETRY LOGIC TYPES
 // ============================================================================
 
@@ -202,116 +219,261 @@ export class PaypalTransactionOrchestrator {
   // ========================================================================
   
   /**
-   * Comprehensive input validation with fail-safe defaults
+   * PHASE 1: Comprehensive input validation with guaranteed return structure
+   * This method NEVER returns undefined - always returns ValidationResult
    */
-  private validateTransactionContext(context: TransactionContext): { valid: boolean; errors: string[]; sanitized?: TransactionContext } {
+  private validateTransactionContext(context: TransactionContext): ValidationResult {
+    try {
+      const errors: string[] = [];
+      
+      // Defensive null/undefined check for context
+      if (!context || typeof context !== 'object') {
+        return { 
+          valid: false, 
+          errors: ['context_missing_or_invalid'] 
+        };
+      }
+
+      // Initialize sanitized context with actual values and safe defaults
+      const sanitized: TransactionContext = {
+        cycleSettingId: context.cycleSettingId || 0,
+        adminId: context.adminId || 0,
+        recipients: context.recipients || [],
+        totalAmount: context.totalAmount || 0,
+        requestId: context.requestId || '',
+        senderBatchId: context.senderBatchId || ''
+      };
+
+      // Validate cycle ID
+      if (!this.isValidNumber(context.cycleSettingId)) {
+        errors.push('cycle_setting_id_invalid');
+      } else if (context.cycleSettingId < PaypalTransactionOrchestrator.MIN_CYCLE_ID) {
+        errors.push(`cycle_setting_id_too_low`);
+      }
+
+      // Validate admin ID  
+      if (!this.isValidNumber(context.adminId)) {
+        errors.push('admin_id_invalid');
+      } else if (context.adminId > PaypalTransactionOrchestrator.MAX_ADMIN_ID) {
+        errors.push('admin_id_exceeds_maximum');
+      }
+
+      // Validate request ID
+      if (!this.isValidString(context.requestId)) {
+        errors.push('request_id_missing');
+      } else {
+        sanitized.requestId = this.sanitizeString(context.requestId);
+        if (sanitized.requestId.length > PaypalTransactionOrchestrator.MAX_REQUEST_ID_LENGTH) {
+          errors.push('request_id_too_long');
+        }
+      }
+
+      // Validate sender batch ID
+      if (!this.isValidString(context.senderBatchId)) {
+        errors.push('sender_batch_id_missing');
+      } else {
+        sanitized.senderBatchId = this.sanitizeString(context.senderBatchId);
+        if (sanitized.senderBatchId.length > PaypalTransactionOrchestrator.MAX_SENDER_BATCH_ID_LENGTH) {
+          errors.push('sender_batch_id_too_long');
+        }
+      }
+
+      // Validate recipients array
+      const recipientValidation = this.validateRecipients(context.recipients);
+      if (!recipientValidation.valid) {
+        errors.push(...recipientValidation.errors);
+      } else {
+        sanitized.recipients = recipientValidation.sanitizedRecipients!;
+      }
+
+      // Validate total amount
+      if (!this.isValidNumber(context.totalAmount)) {
+        errors.push('total_amount_invalid');
+      } else if (context.totalAmount > PaypalTransactionOrchestrator.MAX_TOTAL_AMOUNT_CENTS) {
+        errors.push('total_amount_exceeds_safety_limit');
+      } else if (context.totalAmount <= 0) {
+        errors.push('total_amount_must_be_positive');
+      }
+
+      // Return validation result
+      if (errors.length > 0) {
+        return { 
+          valid: false, 
+          errors,
+          sanitized: sanitized as Partial<TransactionContext>
+        };
+      }
+
+      return { 
+        valid: true, 
+        sanitized 
+      };
+
+    } catch (error) {
+      // Defensive catch-all - should never happen but prevents undefined returns
+      console.error('[VALIDATOR EXCEPTION]', error);
+      return { 
+        valid: false, 
+        errors: ['validation_internal_error'] 
+      };
+    }
+  }
+
+  /**
+   * Helper: Validate that value is a valid positive number
+   */
+  private isValidNumber(value: any): value is number {
+    return typeof value === 'number' && !isNaN(value) && Number.isFinite(value) && value > 0;
+  }
+
+  /**
+   * Helper: Validate that value is a valid non-empty string
+   */
+  private isValidString(value: any): value is string {
+    return typeof value === 'string' && value.trim().length > 0;
+  }
+
+  /**
+   * Helper: Sanitize string input (consistent with checksum generation)
+   */
+  private sanitizeString(value: string): string {
+    return value.trim();
+  }
+
+  /**
+   * Helper: Normalize email address (consistent with existing logic)
+   */
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  /**
+   * Helper: Validate email format
+   */
+  private isValidPaypalEmail(email: string): boolean {
+    const normalizedEmail = this.normalizeEmail(email);
+    if (normalizedEmail.length === 0 || normalizedEmail.length > PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH) {
+      return false;
+    }
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  }
+
+  /**
+   * Helper: Validate recipients array with comprehensive error handling
+   */
+  private validateRecipients(recipients: any): { valid: boolean; errors: string[]; sanitizedRecipients?: PayoutRecipient[] } {
     const errors: string[] = [];
-    const sanitized: TransactionContext = { ...context };
-    
-    // Validate cycle ID
-    if (!context.cycleSettingId || typeof context.cycleSettingId !== 'number') {
-      errors.push('Invalid cycle ID: must be a positive number');
-    } else if (context.cycleSettingId < PaypalTransactionOrchestrator.MIN_CYCLE_ID) {
-      errors.push(`Cycle ID must be >= ${PaypalTransactionOrchestrator.MIN_CYCLE_ID}`);
+
+    // Check if recipients is an array
+    if (!Array.isArray(recipients)) {
+      return { valid: false, errors: ['recipients_not_array'] };
     }
-    
-    // Validate admin ID
-    if (!context.adminId || typeof context.adminId !== 'number') {
-      errors.push('Invalid admin ID: must be a positive number');
-    } else if (context.adminId > PaypalTransactionOrchestrator.MAX_ADMIN_ID) {
-      errors.push(`Admin ID exceeds maximum allowed value`);
+
+    // Check if array is empty
+    if (recipients.length === 0) {
+      return { valid: false, errors: ['recipients_empty'] };
     }
+
+    // Check if array exceeds maximum size
+    if (recipients.length > PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH) {
+      return { 
+        valid: false, 
+        errors: [`recipients_exceed_limit_${recipients.length}_max_${PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH}`] 
+      };
+    }
+
+    // Validate each recipient
+    const sanitizedRecipients: PayoutRecipient[] = [];
     
-    // Validate recipients array
-    if (!Array.isArray(context.recipients)) {
-      errors.push('Recipients must be an array');
-    } else if (context.recipients.length === 0) {
-      errors.push('Recipients array cannot be empty');
-    } else if (context.recipients.length > PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH) {
-      errors.push(`Too many recipients: ${context.recipients.length} exceeds limit of ${PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH}`);
-    } else {
-      // Validate each recipient
-      sanitized.recipients = context.recipients.map((recipient, index) => {
-        const sanitizedRecipient = { ...recipient };
-        
-        // Validate recipient structure
-        if (!recipient.cycleWinnerSelectionId || typeof recipient.cycleWinnerSelectionId !== 'number') {
-          errors.push(`Recipient ${index}: Invalid cycle winner selection ID`);
-        }
-        
-        if (!recipient.userId || typeof recipient.userId !== 'number') {
-          errors.push(`Recipient ${index}: Invalid user ID`);
-        } else if (recipient.userId > PaypalTransactionOrchestrator.MAX_USER_ID) {
-          errors.push(`Recipient ${index}: User ID exceeds maximum allowed value`);
-        }
-        
-        // Sanitize and validate email
-        if (!recipient.paypalEmail || typeof recipient.paypalEmail !== 'string') {
-          errors.push(`Recipient ${index}: Invalid PayPal email`);
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
+      const recipientErrors: string[] = [];
+
+      // Validate recipient structure
+      if (!recipient || typeof recipient !== 'object') {
+        errors.push(`recipient_${i}_invalid_structure`);
+        continue;
+      }
+
+      // Create sanitized recipient with safe defaults
+      const sanitizedRecipient: PayoutRecipient = {
+        cycleWinnerSelectionId: 0,
+        userId: 0,
+        paypalEmail: '',
+        amount: 0,
+        currency: 'USD'
+      };
+
+      // Validate cycle winner selection ID
+      if (!this.isValidNumber(recipient.cycleWinnerSelectionId)) {
+        recipientErrors.push(`recipient_${i}_winner_id_invalid`);
+      } else {
+        sanitizedRecipient.cycleWinnerSelectionId = recipient.cycleWinnerSelectionId;
+      }
+
+      // Validate user ID
+      if (!this.isValidNumber(recipient.userId)) {
+        recipientErrors.push(`recipient_${i}_user_id_invalid`);
+      } else if (recipient.userId > PaypalTransactionOrchestrator.MAX_USER_ID) {
+        recipientErrors.push(`recipient_${i}_user_id_exceeds_maximum`);
+      } else {
+        sanitizedRecipient.userId = recipient.userId;
+      }
+
+      // Validate and sanitize PayPal email
+      if (!this.isValidString(recipient.paypalEmail)) {
+        recipientErrors.push(`recipient_${i}_email_missing`);
+      } else {
+        const normalizedEmail = this.normalizeEmail(recipient.paypalEmail);
+        if (!this.isValidPaypalEmail(recipient.paypalEmail)) {
+          recipientErrors.push(`recipient_${i}_email_invalid_format`);
         } else {
-          sanitizedRecipient.paypalEmail = recipient.paypalEmail.trim().toLowerCase();
-          if (sanitizedRecipient.paypalEmail.length > PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH) {
-            errors.push(`Recipient ${index}: Email too long (${sanitizedRecipient.paypalEmail.length} > ${PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH})`);
-          }
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedRecipient.paypalEmail)) {
-            errors.push(`Recipient ${index}: Invalid email format`);
-          }
+          sanitizedRecipient.paypalEmail = normalizedEmail;
         }
-        
-        // Validate amount
-        if (typeof recipient.amount !== 'number' || isNaN(recipient.amount)) {
-          errors.push(`Recipient ${index}: Invalid amount (must be a number)`);
-        } else if (recipient.amount < PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS) {
-          errors.push(`Recipient ${index}: Amount too low (${recipient.amount} < ${PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS})`);
-        } else if (recipient.amount > PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS) {
-          errors.push(`Recipient ${index}: Amount too high (${recipient.amount} > ${PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS})`);
-        }
-        
-        // Validate currency (default to USD if missing)
-        if (!recipient.currency || typeof recipient.currency !== 'string') {
-          sanitizedRecipient.currency = 'USD';
+      }
+
+      // Validate amount
+      if (!this.isValidNumber(recipient.amount)) {
+        recipientErrors.push(`recipient_${i}_amount_invalid`);
+      } else if (recipient.amount < PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS) {
+        recipientErrors.push(`recipient_${i}_amount_too_low`);
+      } else if (recipient.amount > PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS) {
+        recipientErrors.push(`recipient_${i}_amount_too_high`);
+      } else {
+        sanitizedRecipient.amount = recipient.amount;
+      }
+
+      // Validate currency
+      if (this.isValidString(recipient.currency)) {
+        const normalizedCurrency = recipient.currency.toUpperCase();
+        if (normalizedCurrency !== 'USD') {
+          recipientErrors.push(`recipient_${i}_currency_not_supported`);
         } else {
-          sanitizedRecipient.currency = recipient.currency.toUpperCase();
-          if (sanitizedRecipient.currency !== 'USD') {
-            errors.push(`Recipient ${index}: Only USD currency is supported`);
-          }
+          sanitizedRecipient.currency = normalizedCurrency;
         }
-        
-        return sanitizedRecipient;
-      });
-    }
-    
-    // Validate total amount
-    if (!context.totalAmount || typeof context.totalAmount !== 'number') {
-      errors.push('Invalid total amount: must be a positive number');
-    } else if (context.totalAmount > PaypalTransactionOrchestrator.MAX_TOTAL_AMOUNT_CENTS) {
-      errors.push(`Total amount exceeds safety limit: ${context.totalAmount} > ${PaypalTransactionOrchestrator.MAX_TOTAL_AMOUNT_CENTS}`);
-    }
-    
-    // Validate request ID
-    if (!context.requestId || typeof context.requestId !== 'string') {
-      errors.push('Invalid request ID: must be a non-empty string');
-    } else {
-      sanitized.requestId = context.requestId.trim();
-      if (sanitized.requestId.length > PaypalTransactionOrchestrator.MAX_REQUEST_ID_LENGTH) {
-        errors.push(`Request ID too long: ${sanitized.requestId.length} > ${PaypalTransactionOrchestrator.MAX_REQUEST_ID_LENGTH}`);
+      } else {
+        // Default to USD if not provided
+        sanitizedRecipient.currency = 'USD';
+      }
+
+      // Add note if present
+      if (this.isValidString(recipient.note)) {
+        sanitizedRecipient.note = this.sanitizeString(recipient.note);
+      }
+
+      // Collect errors for this recipient
+      errors.push(...recipientErrors);
+
+      // Only add recipient if no errors
+      if (recipientErrors.length === 0) {
+        sanitizedRecipients.push(sanitizedRecipient);
       }
     }
-    
-    // Validate sender batch ID
-    if (!context.senderBatchId || typeof context.senderBatchId !== 'string') {
-      errors.push('Invalid sender batch ID: must be a non-empty string');
-    } else {
-      sanitized.senderBatchId = context.senderBatchId.trim();
-      if (sanitized.senderBatchId.length > PaypalTransactionOrchestrator.MAX_SENDER_BATCH_ID_LENGTH) {
-        errors.push(`Sender batch ID too long: ${sanitized.senderBatchId.length} > ${PaypalTransactionOrchestrator.MAX_SENDER_BATCH_ID_LENGTH}`);
-      }
-    }
-    
+
     return {
       valid: errors.length === 0,
       errors,
-      sanitized: errors.length === 0 ? sanitized : undefined
+      sanitizedRecipients: errors.length === 0 ? sanitizedRecipients : undefined
     };
   }
   
@@ -428,21 +590,48 @@ export class PaypalTransactionOrchestrator {
     
     try {
       // ========================================================================
-      // STEP 7: DEFENSIVE LAYER 1 - INPUT VALIDATION
+      // STEP 7: DEFENSIVE LAYER 1 - INPUT VALIDATION WITH UNDEFINED PROTECTION
       // ========================================================================
       console.log('[STEP 7 DEFENSIVE] Layer 1: Validating transaction context');
       
-      const validation = this.validateTransactionContext(context);
-      if (!validation.valid) {
-        console.error('[STEP 7 DEFENSIVE] Input validation failed:', validation.errors);
-        result.errors.push('Input validation failed');
-        result.errors.push(...validation.errors);
+      const validation = this.validateTransactionContext(context) as ValidationResult;
+      
+      // PHASE 1: Defensive guard against undefined validation results
+      if (!validation || typeof validation !== 'object') {
+        console.error('[STEP 7 DEFENSIVE] Validation returned invalid result:', validation);
+        result.errors.push('validation_system_error');
+        result.errors.push('validator_returned_invalid_result');
+        return result;
+      }
+      
+      // PHASE 1: Defensive guard against missing validation properties
+      if (validation.valid !== true && validation.valid !== false) {
+        console.error('[STEP 7 DEFENSIVE] Validation result missing valid property:', validation);
+        result.errors.push('validation_system_error');
+        result.errors.push('validator_missing_valid_property');
+        return result;
+      }
+      
+      // PHASE 1: Handle validation failure with proper error structure
+      if (validation.valid !== true) {
+        const validationErrors = Array.isArray(validation.errors) ? validation.errors : ['validation_errors_missing'];
+        console.error('[STEP 7 DEFENSIVE] Input validation failed with errors:', validationErrors);
+        result.errors.push('input_validation_failed');
+        result.errors.push(...validationErrors);
+        return result;
+      }
+      
+      // PHASE 1: Defensive guard against missing sanitized context
+      if (!validation.sanitized || typeof validation.sanitized !== 'object') {
+        console.error('[STEP 7 DEFENSIVE] Validation passed but missing sanitized context:', validation);
+        result.errors.push('validation_system_error');
+        result.errors.push('validator_missing_sanitized_context');
         return result;
       }
       
       // Use sanitized context for processing
-      const sanitizedContext = validation.sanitized!;
-      console.log('[STEP 7 DEFENSIVE] Input validation passed - using sanitized context');
+      const sanitizedContext = validation.sanitized;
+      console.log('[STEP 7 DEFENSIVE] Input validation passed - using sanitized context with', sanitizedContext.recipients.length, 'recipients');
       
       // ========================================================================
       // STEP 7: DEFENSIVE LAYER 2 - CIRCUIT BREAKER CHECK
