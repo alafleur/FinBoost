@@ -108,7 +108,7 @@ export interface IStorage {
     updateUserStreak(userId: number): Promise<{ newStreak: number; bonusPoints: number }>;
 
     // Lesson Completion
-    markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak }>;
+    markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }>;
 
     // === PASSWORD RESET METHODS ===
 
@@ -626,7 +626,7 @@ export class MemStorage implements IStorage {
     try {
       const data = await fs.readFile(STORAGE_FILE, 'utf-8');
       const json = JSON.parse(data);
-      this.subscribers = new Map(Object.entries(json.subscribers));
+      this.subscribers = new Map(Object.entries(json.subscribers).map(([id, subscriber]) => [parseInt(id), subscriber]));
       this.currentSubscriberId = json.currentSubscriberId;
     } catch (error) {
       // File doesn't exist yet, start fresh
@@ -748,7 +748,7 @@ export class MemStorage implements IStorage {
     const subscriber: Subscriber = { 
       ...insertSubscriber, 
       id, 
-      createdAt: now.toISOString() 
+      createdAt: now 
     };
     this.subscribers.set(id, subscriber);
     await this.saveToFile();
@@ -776,7 +776,8 @@ export class MemStorage implements IStorage {
 
   // User Authentication Methods
   async getUserByEmail(email: string): Promise<User | null> {
-    for (const user of this.users.values()) {
+    const users = Array.from(this.users.values());
+    for (const user of users) {
       if (user.email === email) {
         return user;
       }
@@ -865,8 +866,7 @@ export class MemStorage implements IStorage {
       .set({ 
         totalPoints, 
         currentMonthPoints, 
-        tier,
-        updatedAt: new Date()
+        tier
       })
       .where(eq(users.id, userId));
   }
@@ -2016,8 +2016,8 @@ export class MemStorage implements IStorage {
         ORDER BY completed_at DESC
       `);
 
-      // Handle different response formats
-      const rows = progress.rows || progress || [];
+      // Handle different response formats - direct access to query result
+      const rows = progress || [];
 
       console.log(`User ${userId} progress query returned ${rows.length} total lessons, ${rows.filter((r: any) => r.completed).length} completed`);
 
@@ -2036,7 +2036,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak }> {
+  async markLessonComplete(userId: number, lessonId: string): Promise<{ pointsEarned: number; streakBonus: number; newStreak: number }> {
     // Handle both numeric and string lesson IDs
     let moduleId: number;
 
@@ -2114,7 +2114,7 @@ export class MemStorage implements IStorage {
       LIMIT 1
     `);
 
-    const existingRows = existingProgress.rows || existingProgress || [];
+    const existingRows = existingProgress || [];
     if (existingRows.length > 0 && existingRows[0].completed) {
       throw new Error('Lesson already completed');
     }
@@ -2373,7 +2373,7 @@ export class MemStorage implements IStorage {
         WHERE user_id = ${userId} AND is_winner = true
       `);
 
-      const totalCents = result.rows?.[0]?.total_rewards || result[0]?.total_rewards || 0;
+      const totalCents = Number(result[0]?.total_rewards || 0);
       return Math.floor(totalCents / 100); // Convert cents to dollars
     } catch (error) {
       console.error('Error fetching total rewards:', error);
@@ -2560,7 +2560,7 @@ export class MemStorage implements IStorage {
   async updateUserPayPalOrderId(userId: number, orderId: string): Promise<void> {
     try {
       await db.update(users)
-        .set({ paypalOrderId: orderId })
+        .set({ paypalEmail: orderId })
         .where(eq(users.id, userId));
     } catch (error) {
       console.error('Error updating PayPal order ID:', error);
@@ -5694,7 +5694,7 @@ export class MemStorage implements IStorage {
         })
         .from(userCyclePoints)
         .innerJoin(users, eq(userCyclePoints.userId, users.id))
-        .where(eq(userCyclePoints.cycleId, currentCycle.id))
+        .where(eq(userCyclePoints.cycleSettingId, currentCycle.id))
         .groupBy(userCyclePoints.userId, users.username)
         .orderBy(desc(sql`sum(points)`));
 
@@ -5745,14 +5745,14 @@ export class MemStorage implements IStorage {
       const totalUsers = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(and(gte(users.createdAt, startDate), eq(users.isAdmin, false)));
+        .where(and(gte(users.joinedAt, startDate), eq(users.isAdmin, false)));
 
       const convertedUsers = await db
         .select({ count: sql<number>`count(*)` })
         .from(users)
         .where(
           and(
-            gte(users.createdAt, startDate),
+            gte(users.joinedAt, startDate),
             eq(users.subscriptionStatus, 'active'),
             eq(users.isAdmin, false)
           )
@@ -5777,10 +5777,10 @@ export class MemStorage implements IStorage {
     try {
       const result = await db
         .select({
-          cycleId: cycleWinnerSelections.cycleId,
+          cycleId: cycleWinnerSelections.cycleSettingId,
           userId: cycleWinnerSelections.userId,
           username: users.username,
-          payoutAmount: cycleWinnerSelections.payoutAmount,
+          payoutAmount: cycleWinnerSelections.rewardAmount,
           selectionDate: cycleWinnerSelections.selectionDate
         })
         .from(cycleWinnerSelections)
@@ -5831,10 +5831,10 @@ export class MemStorage implements IStorage {
             userId: sql<number>`1`,
             username: users.username,
             activity: sql<string>`'Completed lesson'`,
-            timestamp: users.createdAt
+            timestamp: users.joinedAt
           })
           .from(users)
-          .orderBy(desc(users.createdAt))
+          .orderBy(desc(users.joinedAt))
           .limit(limit / 2)
         );
 
@@ -5852,11 +5852,11 @@ export class MemStorage implements IStorage {
           id: users.id,
           username: users.username,
           email: users.email,
-          createdAt: users.createdAt,
+          createdAt: users.joinedAt,
           subscriptionStatus: users.subscriptionStatus
         })
         .from(users)
-        .orderBy(desc(users.createdAt))
+        .orderBy(desc(users.joinedAt))
         .limit(limit);
       return result;
     } catch (error) {
@@ -5885,7 +5885,8 @@ export class MemStorage implements IStorage {
 
       const totalCompletions = await db
         .select({ count: sql<number>`count(*)` })
-        .from(lessonProgress);
+        .from(userProgress)
+        .where(eq(userProgress.completed, true));
 
       const expectedCompletions = totalUsers * (totalModules[0]?.count || 0);
       return expectedCompletions > 0 
@@ -5969,10 +5970,10 @@ export class MemStorage implements IStorage {
       if (!currentCycle) return 0;
 
       const result = await db
-        .select({ count: sql<number>`count(DISTINCT ucp.user_id)` })
-        .from(userCyclePoints.as('ucp'))
-        .innerJoin(users, eq(users.id, sql.raw('ucp.user_id')))
-        .where(and(eq(sql.raw('ucp.cycle_setting_id'), currentCycle.id), eq(users.isAdmin, false)));
+        .select({ count: sql<number>`count(DISTINCT ${userCyclePoints.userId})` })
+        .from(userCyclePoints)
+        .innerJoin(users, eq(users.id, userCyclePoints.userId))
+        .where(and(eq(userCyclePoints.cycleSettingId, currentCycle.id), eq(users.isAdmin, false)));
       
       return result[0]?.count || 0;
     } catch (error) {
@@ -6264,7 +6265,7 @@ export class MemStorage implements IStorage {
   // Cache invalidation methods
   invalidateCacheByPattern(pattern: string): void {
     const keysToDelete: string[] = [];
-    for (const [key] of this.analyticsCache) {
+    for (const [key] of Array.from(this.analyticsCache)) {
       if (key.includes(pattern)) {
         keysToDelete.push(key);
       }

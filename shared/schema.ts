@@ -447,7 +447,7 @@ export const payoutBatches = pgTable("payout_batches", {
   retryCount: integer("retry_count").default(0).notNull(), // Number of retry attempts made
   lastRetryAt: timestamp("last_retry_at"), // Timestamp of last retry attempt
   lastRetryError: text("last_retry_error"), // Details of last retry error
-  supersededById: integer("superseded_by_id").references(() => payoutBatches.id), // CHATGPT: Links to newer attempt
+  supersededById: integer("superseded_by_id"), // PHASE 2 FIX: Remove circular reference for now
   // STEP 6: Chunking support fields
   isChunked: boolean("is_chunked").default(false).notNull(), // Whether this batch was processed in chunks
   totalChunks: integer("total_chunks").default(1).notNull(), // Total number of chunks for this batch
