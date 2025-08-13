@@ -1,0 +1,73 @@
+Thanks for the files — I read through:
+
+* `server/paypal-transaction-orchestrator (7).ts`
+* `server/paypal-transaction-orchestrator (6).ts` (older)
+* `server/paypal (6).ts` (the PayPal wrapper)
+* `server/storage (3).ts`
+* `shared/schema (5).ts` / `(4).ts`
+* `server/email-validation-service.ts`
+
+Here’s a crisp review + what I’d do next.
+
+# ✅ Looks good
+
+* **Phase 1 guards are in**: preflight filtering to `safeContext`, single DB transaction, advisory lock via `pg_try_advisory_lock`, centralized email validation (`emailValidationService`), normalization, and masking.
+* **Chunking (Step 6)** is wired: chunk records, linking, and sequential processing with rate limiting.
+* **Email validator (Step 7)** is real and used (multi-layer checks + normalization).
+
+# ⚠️ Issues / Gaps I’d fix before a live July 2/2 run
+
+1. **No pre-API count assertion**
+
+   * I don’t see an explicit check that `paypalPayload.items.length === safeContext.recipients.length` (or, for the chunk path: `payoutRequest.length === chunkRecipients.length`) before calling PayPal.
+   * Add a one-liner immediately before each `createPaypalPayout(...)` call.
+
+2. **Checksum scope doesn’t match what’s actually sent**
+
+   * In the orchestrator you compute a checksum from a **constructed PayPal items payload** (`receiver|amount.value|currency|sender_item_id`).
+   * But the **actual call** is `createPaypalPayout(recipients)`; the wrapper (`paypal.ts`) then rebuilds its own items and **forces currency to `"USD"`** and generates `sender_item_id` as `recipient.recipientId || item_${index}_${Date.now()}`.
+   * Result: your persisted `payload_checksum` (and any future replay safety) may **not** match what was truly sent.
+   * **Fix (least change):** when you build each `payoutRequest` for a chunk, also set a **deterministic** `recipientId` (e.g., `winner-${selectionId}-${userId}`) and compute the checksum off **that exact `payoutRequest`**, not an internal items array. Then pass that same `recipientId` through to the wrapper (it already honors it). Now checksum == what’s sent.
+
+3. **Currency mismatch risk**
+
+   * Orchestrator tracks `recipient.currency`, but the wrapper hardcodes `"USD"` in the PayPal body.
+   * If your checksum uses per-recipient currency while the real call forces USD, the checksum diverges (see #2).
+   * **Fix:** Normalize all recipients to a single payout currency upstream (USD), use that for checksum, and document it.
+
+4. **Advisory lock SQL is string-interpolated**
+
+   * You call `SELECT pg_try_advisory_lock(${cycleSettingId})`. It’s numeric and internal, so risk is low, but parameterize (`$1`) if your DB helper supports it.
+
+5. **Missing “prepared\_items\_count\_mismatch” guard path**
+
+   * I searched for that specific error code and didn’t find it in the (7).ts build. Add it right after payload (or `payoutRequest`) construction to fail fast if counts drift.
+
+6. **LSP errors in `paypal.ts` / `schema.ts`**
+
+   * You mentioned 10 pre-existing LSP errors. Please resolve before prod (types/imports drift). These often bite at runtime in TS->JS builds.
+
+# Tiny polish (not blockers)
+
+* Mask emails in *all* logs that print user data (you’re doing this in the validator; keep it consistent elsewhere).
+* Parameterize chunk size (500 is fine), but store it on the batch and include in logs.
+
+# What I recommend doing next (order)
+
+1. **Two quick code tweaks (15–20 min total):**
+
+   * Add the **count assertion** before each PayPal call (both non-chunk and per-chunk path).
+   * Make **checksum == reality**: compute checksum from the actual `payoutRequest` array you pass to `createPaypalPayout`, and set a deterministic `recipientId` there (`winner-${selectionId}-${userId}`), which the wrapper will use as `sender_item_id`.
+
+2. **Kick off July 2/2 live.**
+
+   * You don’t need Phase 2 to run this. Phase 1 will either allow it or block it cleanly with actionable errors.
+   * Watch for either success or a guarded stop (e.g., malformed recipients). No PayPal API call should happen on bad data.
+
+3. **Then** proceed with Phase 2 (data hygiene/admin tooling), and later the checksum columns + reconciliation job.
+
+If you want, say the word and I’ll give you the exact **insert points** (line anchors) and short diffs for:
+
+* the **count assertion**,
+* setting **`recipientId`** in the per-chunk `payoutRequest`, and
+* computing the **checksum from `payoutRequest`** so it matches the wrapper’s payload 1:1.
