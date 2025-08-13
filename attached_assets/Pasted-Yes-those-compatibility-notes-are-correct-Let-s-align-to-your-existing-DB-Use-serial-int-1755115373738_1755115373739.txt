@@ -1,0 +1,254 @@
+Yes—those compatibility notes are correct. Let’s align to your existing DB:
+
+* Use **`serial` (integer)** PKs (since `payout_batches.id` is `serial` already).
+* Keep **snake\_case** column names exactly as the backend expects.
+* **Extend** the existing `payout_batches` (don’t redefine or drop anything).
+
+Below is a **safe migration** (Postgres SQL) and a **Drizzle schema** that match those constraints. Then I give you a tight message to send Replit.
+
+---
+
+# 1) Safe Postgres migration (run in prod)
+
+```sql
+BEGIN;
+
+-- Extend payout_batches (keep all existing cols)
+ALTER TABLE payout_batches
+  ADD COLUMN IF NOT EXISTS is_chunked BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS total_chunks INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS completed_chunks INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS chunk_size INTEGER NOT NULL DEFAULT 500,
+  ADD COLUMN IF NOT EXISTS expected_item_count INTEGER,
+  ADD COLUMN IF NOT EXISTS payload_checksum TEXT,
+  ADD COLUMN IF NOT EXISTS attempt INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS parent_batch_id INTEGER;
+
+-- Parent/child link (self-FK) if not present
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'payout_batches_parent_fk'
+  ) THEN
+    ALTER TABLE payout_batches
+      ADD CONSTRAINT payout_batches_parent_fk
+      FOREIGN KEY (parent_batch_id)
+      REFERENCES payout_batches (id)
+      ON DELETE SET NULL;
+  END IF;
+END$$;
+
+-- Helpful indexes
+CREATE INDEX IF NOT EXISTS idx_payout_batches_parent
+  ON payout_batches (parent_batch_id);
+CREATE INDEX IF NOT EXISTS idx_payout_batches_attempt
+  ON payout_batches (attempt);
+CREATE INDEX IF NOT EXISTS idx_payout_batches_chunks
+  ON payout_batches (is_chunked, total_chunks, completed_chunks);
+
+-- New: payout_batch_chunks (integer/serial IDs)
+CREATE TABLE IF NOT EXISTS payout_batch_chunks (
+  id SERIAL PRIMARY KEY,
+  batch_id INTEGER NOT NULL
+    REFERENCES payout_batches(id) ON DELETE CASCADE,
+  chunk_index INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'created', -- created|queued|processing|completed|failed
+  items_count INTEGER NOT NULL,
+  processed_items INTEGER NOT NULL DEFAULT 0,
+  sender_batch_id TEXT,
+  paypal_batch_id TEXT,
+  error_code TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (batch_id, chunk_index)
+);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_chunks_batch
+  ON payout_batch_chunks (batch_id);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_chunks_status
+  ON payout_batch_chunks (status);
+
+-- New: payout_batch_items (integer/serial IDs)
+CREATE TABLE IF NOT EXISTS payout_batch_items (
+  id SERIAL PRIMARY KEY,
+  batch_id INTEGER NOT NULL
+    REFERENCES payout_batches(id) ON DELETE CASCADE,
+  chunk_id INTEGER
+    REFERENCES payout_batch_chunks(id) ON DELETE SET NULL,
+
+  selection_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+
+  receiver_email TEXT,
+  amount_cents INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+
+  sender_item_id TEXT NOT NULL, -- deterministic: winner-{selectionId}-{userId}
+  paypal_item_id TEXT,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending|processing|paid|failed|unclaimed
+  paypal_transaction_status TEXT,
+  error_code TEXT,
+  error_message TEXT,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  UNIQUE (sender_item_id)
+);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_items_batch
+  ON payout_batch_items (batch_id);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_items_chunk
+  ON payout_batch_items (chunk_id);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_items_selection
+  ON payout_batch_items (selection_id);
+CREATE INDEX IF NOT EXISTS idx_payout_batch_items_status
+  ON payout_batch_items (status);
+
+COMMIT;
+```
+
+This **adds** what’s missing, doesn’t touch existing columns, and uses `INTEGER/SERIAL` everywhere to match your `payout_batches.id`.
+
+---
+
+# 2) Drizzle schema (matches your conventions)
+
+> Note: Drizzle property names can be camelCase; **only the column name strings must be snake\_case**, which we do below. Use `serial`/`integer` to align types.
+
+```ts
+// shared/schema.ts (extract)
+
+import {
+  pgTable, serial, integer, text, boolean, timestamp,
+  uniqueIndex, index
+} from "drizzle-orm/pg-core";
+
+/** Extend existing payout_batches (keep your current columns intact; add these) */
+export const payoutBatches = pgTable("payout_batches", {
+  id: serial("id").primaryKey(),
+
+  // ... your existing columns remain here ...
+
+  is_chunked: boolean("is_chunked").notNull().default(false),
+  total_chunks: integer("total_chunks").notNull().default(1),
+  completed_chunks: integer("completed_chunks").notNull().default(0),
+  chunk_size: integer("chunk_size").notNull().default(500),
+
+  expected_item_count: integer("expected_item_count"),
+  payload_checksum: text("payload_checksum"),
+  attempt: integer("attempt").notNull().default(1),
+  parent_batch_id: integer("parent_batch_id"),
+
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  idx_parent: index("idx_payout_batches_parent").on(t.parent_batch_id),
+  idx_chunks: index("idx_payout_batches_chunks").on(t.is_chunked, t.total_chunks, t.completed_chunks),
+  idx_attempt: index("idx_payout_batches_attempt").on(t.attempt),
+}));
+
+/** New: payout_batch_chunks */
+export const payoutBatchChunks = pgTable("payout_batch_chunks", {
+  id: serial("id").primaryKey(),
+  batch_id: integer("batch_id").notNull(),        // FK to payout_batches.id (int)
+  chunk_index: integer("chunk_index").notNull(),
+  status: text("status").notNull().default("created"),
+  items_count: integer("items_count").notNull(),
+  processed_items: integer("processed_items").notNull().default(0),
+  sender_batch_id: text("sender_batch_id"),
+  paypal_batch_id: text("paypal_batch_id"),
+  error_code: text("error_code"),
+  error_message: text("error_message"),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uq_batch_chunk: uniqueIndex("uq_payout_batch_chunks_batch_chunk").on(t.batch_id, t.chunk_index),
+  idx_batch: index("idx_payout_batch_chunks_batch").on(t.batch_id),
+  idx_status: index("idx_payout_batch_chunks_status").on(t.status),
+}));
+
+/** New: payout_batch_items */
+export const payoutBatchItems = pgTable("payout_batch_items", {
+  id: serial("id").primaryKey(),
+  batch_id: integer("batch_id").notNull(),        // FK payout_batches.id (int)
+  chunk_id: integer("chunk_id"),                  // FK payout_batch_chunks.id (int)
+
+  selection_id: integer("selection_id").notNull(),
+  user_id: integer("user_id").notNull(),
+
+  receiver_email: text("receiver_email"),
+  amount_cents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("USD"),
+
+  sender_item_id: text("sender_item_id").notNull(),
+  paypal_item_id: text("paypal_item_id"),
+  status: text("status").notNull().default("pending"),
+  paypal_transaction_status: text("paypal_transaction_status"),
+  error_code: text("error_code"),
+  error_message: text("error_message"),
+
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uq_sender_item: uniqueIndex("uq_payout_batch_items_sender_item").on(t.sender_item_id),
+  idx_batch: index("idx_payout_batch_items_batch").on(t.batch_id),
+  idx_chunk: index("idx_payout_batch_items_chunk").on(t.chunk_id),
+  idx_selection: index("idx_payout_batch_items_selection").on(t.selection_id),
+  idx_status: index("idx_payout_batch_items_status").on(t.status),
+}));
+```
+
+> FK relations in Drizzle can be modeled via relation helpers or enforced at the SQL level (migration above already adds FKs). Either is fine; don’t block on relations if your current setup relies on SQL.
+
+---
+
+# 3) Message to send Replit (Drizzle-specific, no discretion)
+
+```
+Subject: BLOCKER – Fix DB schema with Drizzle (no backend changes)
+
+We must sync the DB to the code that was merged. Do the following exactly:
+
+0) Take a production DB snapshot.
+
+1) Update Drizzle schema:
+   - In shared/schema.ts, EXTEND the existing payout_batches table by adding the following snake_case columns:
+     is_chunked BOOLEAN DEFAULT FALSE NOT NULL
+     total_chunks INTEGER DEFAULT 1 NOT NULL
+     completed_chunks INTEGER DEFAULT 0 NOT NULL
+     chunk_size INTEGER DEFAULT 500 NOT NULL
+     expected_item_count INTEGER NULL
+     payload_checksum TEXT NULL
+     attempt INTEGER DEFAULT 1 NOT NULL
+     parent_batch_id INTEGER NULL
+   - CREATE two new tables with integer/serial IDs:
+     payout_batch_chunks, payout_batch_items
+   Use the exact column names/types provided below (copy from the attached code block).
+
+2) Generate & push migrations using our Drizzle workflow:
+   npx drizzle-kit generate
+   npx drizzle-kit push
+   (If our repo has npm scripts for this, use those. The result must match the SQL below.)
+
+3) Verify schema on the DB:
+   \d payout_batches
+   \d payout_batch_chunks
+   \d payout_batch_items
+   Confirm the new columns/tables exist with the exact snake_case names above.
+
+4) Do NOT modify backend or UI code. This is a schema sync only.
+
+ACCEPTANCE CRITERIA
+- /api/admin/disbursements/status-dashboard returns without 5xx
+- “Process Selected (750)” proceeds beyond 0% without the red System Error toast
+- Each created chunk inserts a row into payout_batch_chunks (batch_id, chunk_index, items_count)
+- payout_batch_items is populated per recipient with sender_item_id = 'winner-{selection_id}-{user_id}'
+
+If anything fails, return the exact server error code + stack trace, not a paraphrase.
+```
+
+(Attach the **SQL migration** from section 1 and the **Drizzle snippet** from section 2 to your message.)
+
+---
+
+If your `payout_batches.id` is actually **UUID** anywhere, tell me and I’ll swap the types accordingly.
