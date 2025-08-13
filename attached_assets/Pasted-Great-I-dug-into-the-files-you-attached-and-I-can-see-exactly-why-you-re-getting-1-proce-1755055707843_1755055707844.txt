@@ -1,0 +1,157 @@
+Great, I dug into the files you attached and I can see exactly why you’re getting:
+
+* **(1) `processAll` eligibility returns 0**, and
+* **(2) PayPal emails show up as `undefined` in the orchestrator.**
+
+Here’s the tight diagnosis + the minimal diffs to fix both.
+
+---
+
+# 🔎 Root causes
+
+## A) Email = `undefined` in orchestrator
+
+* In **`server/paypal-transaction-orchestrator.ts`**, the `PayoutRecipient` interface expects:
+
+  ```ts
+  interface PayoutRecipient {
+    cycleWinnerSelectionId: number;
+    userId: number;
+    paypalEmail: string;   // <-- expects this exact field name
+    amount: number;
+    currency: string;
+    note?: string;
+  }
+  ```
+* In **`server/routes.ts`** (your disbursement endpoint), you currently build recipients like this:
+
+  ```ts
+  const recipients: PayoutRecipient[] = validRecipients.map(result => ({
+    cycleWinnerSelectionId: result.winner.id,
+    userId: result.winner.userId,
+    email: result.winner.paypalEmail!,    // <-- WRONG KEY
+    amount: result.validatedAmount,
+    currency: "USD",
+    note: ...
+  }));
+  ```
+* Because the orchestrator reads `recipient.paypalEmail`, it receives `undefined` — hence:
+
+  > “Invalid PayPal email for recipient X: undefined”
+
+### ✅ Fix
+
+Change `email:` to `paypalEmail:` in the recipient mapper.
+
+```diff
+-    email: result.winner.paypalEmail!,
++    paypalEmail: result.winner.paypalEmail!,
+```
+
+That’s it. This will immediately stop the “undefined” errors in **selective mode** and any path that uses this mapper.
+
+---
+
+## B) `processAll` returns zero eligible rows
+
+Your **Drizzle** query for bulk mode is:
+
+```ts
+const eligibleWinners = await db
+  .select({ id: cycleWinnerSelections.id })
+  .from(cycleWinnerSelections)
+  .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
+  .where(and(
+    eq(cycleWinnerSelections.cycleSettingId, cycleId),
+    inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
+    isNotNull(users.paypalEmail),
+    isNotNull(cycleWinnerSelections.isSealed)   // <-- suspicious
+  ));
+```
+
+Two likely culprits:
+
+1. **Sealed check:** you used `isNotNull(cycleWinnerSelections.isSealed)`.
+
+   * `isSealed` is a `boolean NOT NULL DEFAULT false`, so it’s **never null**.
+   * This condition doesn’t filter to winners; it allows both false/true.
+   * In your **preview** code you use `eq(cycleWinnerSelections.isSealed, true)` (which is correct). The mismatch can lead to different counts and, depending on `payoutStatus` values, could result in **0 matches**.
+
+2. **Statuses:** your schema documents `payout_status` values as `pending | processing | completed | failed`.
+
+   * You’re filtering `['pending','ready']`, but **`ready` isn’t one of the documented values**. If your data doesn’t use `ready`, this filter will be too restrictive (and if many are `processing`, they’ll be excluded too).
+
+### ✅ Fix (align to the SQL you said returns 750)
+
+Use the same logic you used in preview (and what your raw SQL apparently used):
+
+```diff
+  .where(and(
+    eq(cycleWinnerSelections.cycleSettingId, cycleId),
+-   inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
++   inArray(cycleWinnerSelections.payoutStatus, ['pending', 'processing']), // or just ['pending'] if that’s your intended “unpaid” state
+    isNotNull(users.paypalEmail),
+-   isNotNull(cycleWinnerSelections.isSealed)
++   eq(cycleWinnerSelections.isSealed, true)
+  ));
+```
+
+> **Pick one**:
+>
+> * If “eligible to pay” is strictly **not yet paid**, use `['pending']`.
+> * If you want to include items that got stuck mid-run and can be resumed, include `'processing'` as well.
+> * Drop `'ready'` unless you actually set that in DB elsewhere.
+
+---
+
+# ✅ Sanity checks to run after the changes
+
+1. **Selective mode (email fix):**
+
+   * Run selective payout with a couple of winner IDs.
+   * Expect orchestrator **not** to log “Invalid PayPal email … undefined”.
+
+2. **Bulk mode (eligibility fix):**
+
+   * Call your `eligible-count` helper route (I saw one in the code), or log `eligibleWinners.length`.
+   * You should see your raw-SQL 750 (or whatever your true eligible count should be).
+
+3. **Preview → Process:**
+
+   * `preview` should show correct counts (eligible, skipped for missing email, total).
+   * `process` should create the `payout_batches` row, populate `payout_batch_items`, and flip `cycle_winner_selections.payout_status` to `completed/failed/pending` according to the PayPal results.
+   * Rewards history/banners should reflect the change (you already wired this in Step 9).
+
+4. **Idempotency:**
+
+   * Re-run `processAll` immediately with unchanged data → should **return existing batch summary** and **not** call PayPal again.
+
+---
+
+# 🚀 TL;DR Changes to make
+
+* In `routes.ts` (disbursement route) recipient mapping:
+
+  ```diff
+  ```
+* email: result.winner.paypalEmail!,
+
+- paypalEmail: result.winner.paypalEmail!,
+
+  ```
+  ```
+
+* In `routes.ts` (bulk eligibility query):
+
+  ```diff
+  ```
+* inArray(cycleWinnerSelections.payoutStatus, \['pending', 'ready']),
+* isNotNull(cycleWinnerSelections.isSealed)
+
+- inArray(cycleWinnerSelections.payoutStatus, \['pending', 'processing']), // or just \['pending']
+- eq(cycleWinnerSelections.isSealed, true)
+
+  ```
+  ```
+
+Do those two and your two reported blockers should clear. If anything still looks off after applying these, send me the new error log snippet and I’ll trace it further.
