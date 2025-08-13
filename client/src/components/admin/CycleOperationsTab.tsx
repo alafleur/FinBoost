@@ -786,8 +786,11 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
       const data = await response.json();
       
-      if (data.success) {
-        // Use standardized response format from ChatGPT specification
+      // FRONTEND FIX: Handle all response types with structured error display
+      console.log(`[FRONTEND] API Response:`, { status: response.status, data });
+      
+      if (response.ok && data.success) {
+        // SUCCESS CASE: Use standardized response format from ChatGPT specification
         const processedCount = data.processedCount || 0;
         const failedCount = data.failed ? data.failed.length : 0;
         const totalEligible = data.totalEligible || 0;
@@ -813,12 +816,64 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         
         // PHASE 4 STEP 4: Use comprehensive state refresh for complete UI consistency
         await refreshAllCycleData({ forceFresh: true, showToast: false });
+        
       } else {
+        // ERROR CASES: Handle structured backend error responses
+        let errorTitle = "Processing Failed";
+        let errorDescription = data.error || data.userMessage || "Failed to process payouts";
+        
+        // Enhanced error messages based on HTTP status codes
+        if (response.status === 400) {
+          errorTitle = "Invalid Request";
+        } else if (response.status === 422) {
+          errorTitle = "Validation Error";
+        } else if (response.status === 429) {
+          errorTitle = "Rate Limited";
+        } else if (response.status >= 500) {
+          errorTitle = "System Error";
+        }
+        
+        // Add details if available
+        if (data.details && data.details !== data.error) {
+          errorDescription += ` - ${data.details}`;
+        }
+        
+        // Display main error to user
         toast({
-          title: "Error",
-          description: data.error || "Failed to process payouts",
+          title: errorTitle,
+          description: errorDescription,
           variant: "destructive"
         });
+        
+        // Show additional helpful information
+        if (data.actionRequired || data.nextSteps) {
+          setTimeout(() => {
+            const guidance = data.actionRequired || (data.nextSteps && data.nextSteps[0]);
+            toast({
+              title: "Next Steps",
+              description: guidance,
+              variant: "default"
+            });
+          }, 1000);
+        }
+        
+        // LOG FOR CHATGPT REVIEW: Complete JSON response payload
+        console.error('=== DISBURSEMENT ERROR RESPONSE FOR CHATGPT REVIEW ===');
+        console.error('HTTP Status:', response.status);
+        console.error('Request Mode:', requestBody.processAll ? 'bulk' : 'selective');
+        console.error('Selected Count:', requestBody.selectedWinnerIds?.length || 0);
+        console.error('Cycle ID:', selectedCycle.id);
+        console.error('Complete Response Payload:', data);
+        console.error('============================================');
+        
+        // Alert user to check console
+        setTimeout(() => {
+          toast({
+            title: "Debug Information Available",
+            description: "Technical details logged to browser console for troubleshooting",
+            variant: "default"
+          });
+        }, 2000);
       }
     } catch (error) {
       console.error('[FRONTEND] Disbursement error:', error);
