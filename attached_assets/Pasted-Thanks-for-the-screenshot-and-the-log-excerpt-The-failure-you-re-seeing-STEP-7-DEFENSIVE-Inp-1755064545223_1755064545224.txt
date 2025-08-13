@@ -1,0 +1,185 @@
+Thanks for the screenshot and the log excerpt. The failure you’re seeing (“**\[STEP 7 DEFENSIVE] Input validation failed: undefined**” followed by **TypeError: validation.errors is not iterable**) is exactly what happens when `validateTransactionContext(...)` returns **undefined** (or anything other than the expected object). That breaks `executeTransaction(...)` when it tries to read `validation.errors`.
+
+Below is a clean, minimal **hot-fix** that will unblock disbursements **today**, plus the slightly more thorough version you should keep.
+
+---
+
+## 1) Minimal hot-fix (unblocks immediately)
+
+In `server/paypal-transaction-orchestrator.ts`:
+
+### A) Make sure `validateTransactionContext` **always** returns a shaped object
+
+```ts
+// Types you can keep at the top of the file
+type ValidationOk = { valid: true; sanitized: TransactionContext };
+type ValidationFail = { valid: false; errors: string[]; sanitized?: Partial<TransactionContext> };
+type ValidationResult = ValidationOk | ValidationFail;
+
+private validateTransactionContext(ctx: TransactionContext): ValidationResult {
+  const errors: string[] = [];
+
+  // VERY basic checks — expand later
+  if (!ctx) errors.push('context_missing');
+  if (!ctx.recipients || !Array.isArray(ctx.recipients)) errors.push('recipients_missing');
+  if (ctx && Array.isArray(ctx.recipients) && ctx.recipients.length === 0) {
+    errors.push('recipients_empty');
+  }
+  if (!ctx.senderBatchId) errors.push('sender_batch_id_missing');
+  if (!ctx.requestId) errors.push('request_checksum_missing');
+
+  if (errors.length) {
+    return { valid: false, errors };
+  }
+
+  // pass through — you can sanitize below in the full fix
+  return { valid: true, sanitized: ctx };
+}
+```
+
+### B) Defend in `executeTransaction(...)`
+
+Where you currently do something like:
+
+```ts
+const validation = this.validateTransactionContext(ctx);
+// BUG was here: if validateTransactionContext returned undefined,
+// the next line would throw trying to read validation.errors
+if (!validation.valid) {
+  logger.error('[STEP 7 DEFENSIVE] Input validation failed:', validation.errors);
+  return { ok: false, stage: 'validation', errors: validation.errors };
+}
+ctx = validation.sanitized;
+```
+
+Keep that structure, but **never** assume `validation` is defined:
+
+```ts
+const validation = this.validateTransactionContext(ctx) as ValidationResult;
+
+if (!validation || validation.valid !== true) {
+  const errs = validation?.errors ?? ['validation_returned_undefined'];
+  logger.error('[STEP 7 DEFENSIVE] Input validation failed', { errors: errs });
+  return { ok: false, stage: 'validation', errors: errs };
+}
+
+ctx = validation.sanitized;
+```
+
+This alone prevents the crash and blank page.
+
+---
+
+## 2) Proper defensive validation (the version to keep)
+
+Augment the validator so it sanitizes emails and collects real errors, but **always** returns `ValidationResult`.
+
+```ts
+private normalizeEmail(raw?: string | null) {
+  return (raw ?? '').trim().toLowerCase();
+}
+
+private isValidPaypalEmail(raw?: string | null): boolean {
+  const e = this.normalizeEmail(raw);
+  return !!e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+private validateTransactionContext(ctx: TransactionContext): ValidationResult {
+  const errors: string[] = [];
+  if (!ctx) errors.push('context_missing');
+
+  // Basic fields
+  if (!ctx?.cycleSettingId) errors.push('cycle_setting_id_missing');
+  if (!ctx?.adminId)        errors.push('admin_id_missing');
+  if (!ctx?.requestId)      errors.push('request_checksum_missing');
+  if (!ctx?.senderBatchId)  errors.push('sender_batch_id_missing');
+
+  // Recipients
+  if (!Array.isArray(ctx?.recipients)) {
+    errors.push('recipients_missing');
+    return { valid: false, errors };
+  }
+  if (ctx.recipients.length === 0) {
+    errors.push('recipients_empty');
+  }
+
+  // Sanitize recipients
+  const sanitizedRecipients = (ctx.recipients || []).map(r => ({
+    ...r,
+    paypalEmail: this.normalizeEmail(r.paypalEmail),
+  }));
+
+  // Validate each recipient
+  sanitizedRecipients.forEach((r, i) => {
+    if (!r.cycleWinnerSelectionId) errors.push(`recipient_${i}_winner_id_missing`);
+    if (!r.userId)                 errors.push(`recipient_${i}_user_id_missing`);
+    if (!this.isValidPaypalEmail(r.paypalEmail)) {
+      errors.push(`recipient_${i}_invalid_paypal_email`);
+    }
+    if (!Number.isFinite(r.amount) || r.amount <= 0) {
+      errors.push(`recipient_${i}_invalid_amount`);
+    }
+    if (!r.currency) errors.push(`recipient_${i}_currency_missing`);
+  });
+
+  if (errors.length) {
+    return { valid: false, errors };
+  }
+
+  const sanitized: TransactionContext = {
+    ...ctx,
+    recipients: sanitizedRecipients,
+  };
+
+  return { valid: true, sanitized };
+}
+```
+
+This guarantees:
+
+* No undefined returns,
+* A consistent `{valid, errors, sanitized}` structure,
+* Emails get normalized before you touch PayPal, and
+* If something is wrong, you respond with a clear validation failure instead of crashing.
+
+---
+
+## 3) Stop the **blank page** behavior
+
+Even with the fix above, make sure the **route** that calls `executeTransaction(...)` wraps the call and **returns JSON** (with a 400/422/500 status) rather than letting an exception bubble and render a blank page.
+
+```ts
+try {
+  const result = await orchestrator.executeTransaction(ctx);
+  if (!result?.ok) {
+    return res.status(422).json(result); // structured error back to UI
+  }
+  return res.json(result);
+} catch (err) {
+  logger.error('disbursement_execute_failed', { err });
+  return res.status(500).json({ ok: false, error: 'internal_error' });
+}
+```
+
+Your admin UI expects JSON; the blank screen is almost always a thrown error that never got caught.
+
+---
+
+## 4) One quick regression test
+
+* Run a **preview** → confirm counts.
+* Start a **process** with a known-good small selection.
+* Watch logs: you should see either “validation failed with \[errors...]” in structured JSON **or** proceed to Phase 1/2 without exceptions.
+* If validation fails intentionally, the admin should show a toast with the server’s JSON (no blank page).
+* Then re-run with fixed recipients → should pass and hit PayPal.
+
+---
+
+### TL;DR
+
+* Your Step-7 defensive layer is returning `undefined`.
+* Make `validateTransactionContext` **always** return `{ valid, errors, sanitized }`.
+* Guard against undefined in `executeTransaction`.
+* Ensure the route returns JSON errors instead of crashing → no more blank page.
+
+If you paste your current `validateTransactionContext(...)` and the `executeTransaction(...)` preamble, I’ll give you a drop-in replacement tailored to your exact shapes.
