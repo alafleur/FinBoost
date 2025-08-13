@@ -21,9 +21,10 @@
 
 import { createPaypalPayout, parseEnhancedPayoutResponse, getEnhancedPayoutStatus } from './paypal.js';
 import { storage } from './storage.js';
+import type { PayoutBatchChunk } from '@shared/schema';
 import { db } from './db.js'; // CHATGPT: Import db for transaction boundary
 import type { ParsedPayoutResponse, PayoutItemResult } from './paypal.js';
-import type { InsertPayoutBatch, InsertPayoutBatchItem } from '@shared/schema.js';
+import type { InsertPayoutBatch, InsertPayoutBatchItem, InsertPayoutBatchChunk, PayoutBatchChunk } from '@shared/schema.js';
 import crypto from 'crypto';
 
 // ============================================================================
@@ -144,9 +145,21 @@ export interface TransactionResult {
 
 export class PaypalTransactionOrchestrator {
   private static readonly MAX_RECIPIENTS_PER_BATCH = 15000; // PayPal limit
+  private static readonly OPTIMAL_CHUNK_SIZE = 500; // STEP 6: Optimal chunk size for reliability
+  private static readonly MAX_CHUNK_SIZE = 1000; // STEP 6: Maximum chunk size allowed
+  private static readonly MIN_CHUNK_SIZE = 1; // STEP 6: Minimum chunk size allowed
   private static readonly MIN_AMOUNT_CENTS = 1; // $0.01 minimum
   private static readonly MAX_AMOUNT_CENTS = 6000000; // $60,000 maximum per item
 
+  // ========================================================================
+  // STEP 6: CHUNKING CONFIGURATION - OPTIMAL BATCH SIZE & PROCESSING
+  // ========================================================================
+  
+  // Chunking delay configuration for sequential processing
+  private static readonly CHUNK_PROCESSING_DELAY_MS = 2000; // 2 second delay between chunks
+  private static readonly CHUNK_RETRY_DELAY_MS = 5000; // 5 second delay before retrying failed chunks
+  private static readonly MAX_CHUNK_RETRIES = 3; // Maximum retries per chunk
+  
   // ========================================================================
   // STEP 7: DEFENSIVE ORCHESTRATOR ENHANCEMENT - VALIDATION & PROTECTION
   // ========================================================================
@@ -1459,7 +1472,7 @@ export class PaypalTransactionOrchestrator {
       console.log('[STEP 5 STATE MACHINE] Transitioning winners to pending_disbursement');
       const winnerStateUpdates = safeContext.recipients.map(recipient => ({
         winnerId: recipient.cycleWinnerSelectionId,
-        newState: 'pending_disbursement',
+        newState: 'pending_disbursement' as const,
         adminId: safeContext.adminId,
         reason: 'Disbursement batch processing started',
         metadata: { phase: 'phase1_preparation' }
@@ -1489,7 +1502,10 @@ export class PaypalTransactionOrchestrator {
         totalRecipients: safeContext.recipients.length // CHATGPT: Use safeContext (filtered count)
       };
 
-      const createdBatch = await storage.createPayoutBatchWithAttempt(batchData);
+      const createdBatch = await storage.createPayoutBatchWithAttempt({
+        ...batchData,
+        attempt: nextAttempt
+      });
       result.batchId = createdBatch.id;
       result.senderBatchId = attemptSenderBatchId; // Update result with final sender_batch_id
       console.log(`[STEP 4 PHASE 1] Created payout batch intent: ${result.batchId}, attempt ${nextAttempt}`);
@@ -1579,7 +1595,7 @@ export class PaypalTransactionOrchestrator {
       const batchItems = await storage.getPayoutBatchItems(result.batchId);
       const processingStateUpdates = batchItems.map(item => ({
         winnerId: item.cycleWinnerSelectionId,
-        newState: 'processing_disbursement',
+        newState: 'processing_disbursement' as const,
         reason: 'PayPal API processing initiated',
         metadata: { 
           batchId: result.batchId,
@@ -1655,7 +1671,7 @@ export class PaypalTransactionOrchestrator {
         const batchItems = await storage.getPayoutBatchItems(result.batchId);
         const failureStateUpdates = batchItems.map(item => ({
           winnerId: item.cycleWinnerSelectionId,
-          newState: 'disbursement_failed',
+          newState: 'disbursement_failed' as const,
           reason: `Phase 2 processing error: ${error instanceof Error ? error.message : String(error)}`,
           metadata: { 
             batchId: result.batchId,
@@ -2019,7 +2035,7 @@ export class PaypalTransactionOrchestrator {
           const batchItems = await storage.getPayoutBatchItems(phase1Result.batchId);
           const rollbackStateUpdates = batchItems.map(item => ({
             winnerId: item.cycleWinnerSelectionId,
-            newState: 'disbursement_cancelled',
+            newState: 'disbursement_cancelled' as const,
             reason: 'Transaction rolled back due to Phase 2 failure',
             metadata: { 
               batchId: phase1Result.batchId,
@@ -2099,13 +2115,13 @@ export class PaypalTransactionOrchestrator {
 
           switch (paypalItem.transaction_status?.toUpperCase()) {
             case 'SUCCESS':
-              newState = 'disbursement_completed';
+              newState = 'disbursement_completed' as const;
               reason = 'PayPal disbursement completed successfully';
               break;
             case 'FAILED':
             case 'DENIED':
             case 'BLOCKED':
-              newState = 'disbursement_failed';
+              newState = 'disbursement_failed' as const;
               reason = `PayPal disbursement failed: ${paypalItem.transaction_status}`;
               failureReason = paypalItem.errors?.map((e: any) => e.message).join('; ') || paypalItem.transaction_status;
               break;
@@ -2305,6 +2321,217 @@ export class PaypalTransactionOrchestrator {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  // ========================================================================
+  // STEP 6: CHUNKING STRATEGY AND PROCESSING METHODS
+  // ========================================================================
+
+  /**
+   * Determine if a batch should use chunking based on recipient count
+   */
+  private shouldUseChunking(recipients: PayoutRecipient[]): boolean {
+    return recipients.length > PaypalTransactionOrchestrator.OPTIMAL_CHUNK_SIZE;
+  }
+
+  /**
+   * Calculate optimal chunk size for a given batch
+   */
+  private calculateOptimalChunkSize(totalRecipients: number): number {
+    if (totalRecipients <= PaypalTransactionOrchestrator.OPTIMAL_CHUNK_SIZE) {
+      return totalRecipients;
+    }
+    
+    // Use optimal chunk size, but ensure we don't have tiny remainder chunks
+    const optimalSize = PaypalTransactionOrchestrator.OPTIMAL_CHUNK_SIZE;
+    const remainder = totalRecipients % optimalSize;
+    
+    // If remainder is very small (< 25% of optimal), merge into last chunk
+    if (remainder > 0 && remainder < optimalSize * 0.25) {
+      const chunksCount = Math.floor(totalRecipients / optimalSize);
+      return Math.ceil(totalRecipients / chunksCount);
+    }
+    
+    return optimalSize;
+  }
+
+  /**
+   * Split recipients into optimal chunks for processing
+   */
+  private createRecipientChunks(recipients: PayoutRecipient[]): PayoutRecipient[][] {
+    if (!this.shouldUseChunking(recipients)) {
+      return [recipients];
+    }
+
+    const chunkSize = this.calculateOptimalChunkSize(recipients.length);
+    const chunks: PayoutRecipient[][] = [];
+
+    for (let i = 0; i < recipients.length; i += chunkSize) {
+      const chunk = recipients.slice(i, i + chunkSize);
+      chunks.push(chunk);
+    }
+
+    console.log(`[STEP 6 CHUNKING] Split ${recipients.length} recipients into ${chunks.length} chunks of ~${chunkSize} each`);
+    return chunks;
+  }
+
+  /**
+   * Create database records for chunks
+   */
+  private async createChunkRecords(
+    batchId: number, 
+    chunks: PayoutRecipient[][], 
+    senderBatchId: string
+  ): Promise<PayoutBatchChunk[]> {
+    const chunkRecords: PayoutBatchChunk[] = [];
+
+    for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+      const chunk = chunks[chunkIndex];
+      const chunkNumber = chunkIndex + 1;
+      const startIndex = chunkIndex * chunk.length;
+      const endIndex = startIndex + chunk.length - 1;
+      const totalAmount = chunk.reduce((sum, recipient) => sum + recipient.amount, 0);
+
+      const chunkData: InsertPayoutBatchChunk = {
+        batchId,
+        chunkNumber,
+        senderBatchId: `${senderBatchId}-chunk-${chunkNumber}`,
+        startIndex,
+        endIndex,
+        recipientCount: chunk.length,
+        totalAmount
+      };
+
+      const createdChunk = await storage.createPayoutBatchChunk(chunkData);
+      chunkRecords.push(createdChunk);
+      
+      console.log(`[STEP 6 CHUNKING] Created chunk ${chunkNumber}/${chunks.length}: ${chunk.length} recipients, $${(totalAmount/100).toFixed(2)}`);
+    }
+
+    return chunkRecords;
+  }
+
+  /**
+   * Process a single chunk through PayPal API
+   */
+  private async processChunk(
+    chunk: PayoutRecipient[], 
+    chunkRecord: PayoutBatchChunk,
+    context: TransactionContext
+  ): Promise<{ success: boolean; errors: string[]; paypalBatchId?: string }> {
+    try {
+      console.log(`[STEP 6 CHUNKING] Processing chunk ${chunkRecord.chunkNumber} with ${chunk.length} recipients`);
+      
+      // Update chunk status to processing
+      await storage.updatePayoutBatchChunk(chunkRecord.id, {
+        status: 'processing',
+        processingStartedAt: new Date()
+      });
+
+      // Prepare PayPal request for this chunk
+      const payoutRequest = chunk.map(recipient => ({
+        cycleWinnerSelectionId: recipient.cycleWinnerSelectionId,
+        userId: recipient.userId,
+        email: recipient.paypalEmail,
+        amount: recipient.amount,
+        currency: recipient.currency,
+        note: recipient.note || 'FinBoost monthly reward'
+      }));
+
+      // Call PayPal API for this chunk
+      const paypalResponse = await createPaypalPayout(
+        context.cycleSettingId,
+        payoutRequest
+      );
+
+      console.log(`[STEP 6 CHUNKING] Chunk ${chunkRecord.chunkNumber} PayPal response:`, paypalResponse.batch_header?.payout_batch_id);
+
+      // Update chunk with PayPal batch ID
+      await storage.updatePayoutBatchChunk(chunkRecord.id, {
+        paypalBatchId: paypalResponse.batch_header?.payout_batch_id,
+        status: 'completed',
+        processingCompletedAt: new Date()
+      });
+
+      return {
+        success: true,
+        errors: [],
+        paypalBatchId: paypalResponse.batch_header?.payout_batch_id
+      };
+
+    } catch (error) {
+      console.error(`[STEP 6 CHUNKING] Chunk ${chunkRecord.chunkNumber} processing failed:`, error);
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Update chunk status to failed
+      await storage.updatePayoutBatchChunk(chunkRecord.id, {
+        status: 'failed',
+        errorDetails: JSON.stringify({ error: errorMessage, timestamp: new Date() }),
+        processingCompletedAt: new Date()
+      });
+
+      return {
+        success: false,
+        errors: [`chunk_${chunkRecord.chunkNumber}_failed: ${errorMessage}`]
+      };
+    }
+  }
+
+  /**
+   * Process all chunks sequentially with delay and error handling
+   */
+  private async processAllChunks(
+    chunks: PayoutRecipient[][],
+    chunkRecords: PayoutBatchChunk[],
+    context: TransactionContext
+  ): Promise<{ 
+    successfulChunks: number; 
+    failedChunks: number; 
+    errors: string[];
+    paypalBatchIds: string[];
+  }> {
+    let successfulChunks = 0;
+    let failedChunks = 0;
+    const errors: string[] = [];
+    const paypalBatchIds: string[] = [];
+
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      const chunkRecord = chunkRecords[i];
+
+      // Add delay between chunks for rate limiting (except first chunk)
+      if (i > 0) {
+        console.log(`[STEP 6 CHUNKING] Waiting ${PaypalTransactionOrchestrator.CHUNK_PROCESSING_DELAY_MS}ms before processing chunk ${i + 1}`);
+        await new Promise(resolve => setTimeout(resolve, PaypalTransactionOrchestrator.CHUNK_PROCESSING_DELAY_MS));
+      }
+
+      const result = await this.processChunk(chunk, chunkRecord, context);
+      
+      if (result.success) {
+        successfulChunks++;
+        if (result.paypalBatchId) {
+          paypalBatchIds.push(result.paypalBatchId);
+        }
+      } else {
+        failedChunks++;
+        errors.push(...result.errors);
+      }
+
+      // Update overall batch progress
+      await storage.updatePayoutBatch(chunkRecord.batchId, {
+        completedChunks: successfulChunks + failedChunks
+      });
+    }
+
+    console.log(`[STEP 6 CHUNKING] Chunk processing complete: ${successfulChunks} successful, ${failedChunks} failed`);
+    
+    return {
+      successfulChunks,
+      failedChunks,
+      errors,
+      paypalBatchIds
+    };
   }
 
   /**

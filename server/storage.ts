@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult, payoutBatches, payoutBatchItems, type PayoutBatch, type InsertPayoutBatch, type PayoutBatchItem, type InsertPayoutBatchItem } from "@shared/schema";
+import { users, type User, type InsertUser, subscribers, type Subscriber, type InsertSubscriber, userPointsHistory, learningModules, userProgress, monthlyRewards, userMonthlyRewards, referrals, userReferralCodes, supportRequests, type SupportRequest, passwordResetTokens, type PasswordResetToken, adminPointsActions, paypalPayouts, type PaypalPayout, cycleSettings, userCyclePoints, cycleWinnerSelections, cyclePointHistory, cyclePointsActions, type CycleSetting, type UserCyclePoints, type CycleWinnerSelection, type CyclePointHistory, type CyclePointsAction, type InsertCycleSetting, type InsertUserCyclePoints, type InsertCycleWinnerSelection, type InsertCyclePointHistory, type InsertCyclePointsAction, predictionQuestions, userPredictions, predictionResults, type PredictionQuestion, type UserPrediction, type PredictionResult, type InsertPredictionQuestion, type InsertUserPrediction, type InsertPredictionResult, payoutBatches, payoutBatchItems, payoutBatchChunks, type PayoutBatch, type InsertPayoutBatch, type PayoutBatchItem, type InsertPayoutBatchItem, type PayoutBatchChunk, type InsertPayoutBatchChunk } from "@shared/schema";
 // Step 2 Type Imports for Enhanced PayPal Integration
 import type { ParsedPayoutResponse, PayoutItemResult } from "./paypal";
 import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, UserReferralCode } from "@shared/schema";
@@ -427,6 +427,13 @@ export interface IStorage {
     getPayoutBatch(batchId: number): Promise<PayoutBatch | null>;
     getPayoutBatchBySenderBatchId(senderBatchId: string): Promise<PayoutBatch | null>;
     getPayoutBatchItems(batchId: number): Promise<PayoutBatchItem[]>;
+    
+    // STEP 6: Chunking management methods
+    createPayoutBatchChunk(chunkData: InsertPayoutBatchChunk): Promise<PayoutBatchChunk>;
+    getPayoutBatchChunk(chunkId: number): Promise<PayoutBatchChunk | null>;
+    getPayoutBatchChunks(batchId: number): Promise<PayoutBatchChunk[]>;
+    updatePayoutBatchChunk(chunkId: number, updates: Partial<PayoutBatchChunk>): Promise<void>;
+    getChunkStatus(chunkId: number): Promise<{ status: string; processingStartedAt?: Date; processingCompletedAt?: Date; errorDetails?: string } | null>;
     // Step 8: Concurrency protection - get batches by cycle
     getPayoutBatchesByCycle(cycleId: number): Promise<PayoutBatch[]>;
     
@@ -10125,6 +10132,57 @@ export class MemStorage implements IStorage {
       console.error(`[STEP 4] Error creating payout batch:`, error);
       throw error;
     }
+  }
+
+  // ========================================
+  // STEP 6: CHUNKING STORAGE IMPLEMENTATION
+  // ========================================
+
+  async createPayoutBatchChunk(chunkData: InsertPayoutBatchChunk): Promise<PayoutBatchChunk> {
+    const [chunk] = await db.insert(payoutBatchChunks).values(chunkData).returning();
+    console.log(`[STEP 6 STORAGE] Created chunk ${chunk.chunkNumber} for batch ${chunk.batchId}`);
+    return chunk;
+  }
+
+  async getPayoutBatchChunk(chunkId: number): Promise<PayoutBatchChunk | null> {
+    const chunk = await db.select().from(payoutBatchChunks).where(eq(payoutBatchChunks.id, chunkId));
+    return chunk[0] || null;
+  }
+
+  async getPayoutBatchChunks(batchId: number): Promise<PayoutBatchChunk[]> {
+    const chunks = await db.select()
+      .from(payoutBatchChunks)
+      .where(eq(payoutBatchChunks.batchId, batchId))
+      .orderBy(asc(payoutBatchChunks.chunkNumber));
+    
+    console.log(`[STEP 6 STORAGE] Retrieved ${chunks.length} chunks for batch ${batchId}`);
+    return chunks;
+  }
+
+  async updatePayoutBatchChunk(chunkId: number, updates: Partial<PayoutBatchChunk>): Promise<void> {
+    await db.update(payoutBatchChunks)
+      .set(updates)
+      .where(eq(payoutBatchChunks.id, chunkId));
+    
+    console.log(`[STEP 6 STORAGE] Updated chunk ${chunkId} with:`, Object.keys(updates).join(', '));
+  }
+
+  async getChunkStatus(chunkId: number): Promise<{ 
+    status: string; 
+    processingStartedAt?: Date; 
+    processingCompletedAt?: Date; 
+    errorDetails?: string; 
+  } | null> {
+    const chunk = await db.select({
+      status: payoutBatchChunks.status,
+      processingStartedAt: payoutBatchChunks.processingStartedAt,
+      processingCompletedAt: payoutBatchChunks.processingCompletedAt,
+      errorDetails: payoutBatchChunks.errorDetails
+    })
+    .from(payoutBatchChunks)
+    .where(eq(payoutBatchChunks.id, chunkId));
+    
+    return chunk[0] || null;
   }
 }
 

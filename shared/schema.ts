@@ -448,6 +448,11 @@ export const payoutBatches = pgTable("payout_batches", {
   lastRetryAt: timestamp("last_retry_at"), // Timestamp of last retry attempt
   lastRetryError: text("last_retry_error"), // Details of last retry error
   supersededById: integer("superseded_by_id").references(() => payoutBatches.id), // CHATGPT: Links to newer attempt
+  // STEP 6: Chunking support fields
+  isChunked: boolean("is_chunked").default(false).notNull(), // Whether this batch was processed in chunks
+  totalChunks: integer("total_chunks").default(1).notNull(), // Total number of chunks for this batch
+  completedChunks: integer("completed_chunks").default(0).notNull(), // Number of completed chunks
+  chunkSize: integer("chunk_size").default(500).notNull(), // Number of recipients per chunk
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -455,10 +460,38 @@ export const payoutBatches = pgTable("payout_batches", {
   uniqueAttempt: unique("payout_batches_cycle_checksum_attempt_unique").on(table.cycleSettingId, table.requestChecksum, table.attempt),
 }));
 
+// STEP 6: Payout Batch Chunks - Individual chunk processing within a batch
+export const payoutBatchChunks = pgTable("payout_batch_chunks", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
+  chunkNumber: integer("chunk_number").notNull(), // 1, 2, 3, etc.
+  status: text("status").default("pending").notNull(), // pending, processing, completed, failed, cancelled
+  paypalBatchId: text("paypal_batch_id"), // Individual PayPal batch ID for this chunk
+  senderBatchId: text("sender_batch_id").notNull(), // chunk-specific sender batch ID
+  startIndex: integer("start_index").notNull(), // Starting recipient index in the full batch
+  endIndex: integer("end_index").notNull(), // Ending recipient index in the full batch
+  recipientCount: integer("recipient_count").notNull(), // Number of recipients in this chunk
+  totalAmount: integer("total_amount").notNull(), // Total amount for this chunk in cents
+  successfulCount: integer("successful_count").default(0).notNull(),
+  failedCount: integer("failed_count").default(0).notNull(),
+  pendingCount: integer("pending_count").default(0).notNull(),
+  processingStartedAt: timestamp("processing_started_at"), // When chunk processing began
+  processingCompletedAt: timestamp("processing_completed_at"), // When chunk processing finished
+  errorDetails: text("error_details"), // JSON string for chunk-specific errors
+  retryCount: integer("retry_count").default(0).notNull(), // Retry attempts for this chunk
+  lastRetryAt: timestamp("last_retry_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Unique constraint: one chunk number per batch
+  uniqueChunk: unique("payout_batch_chunks_batch_chunk_unique").on(table.batchId, table.chunkNumber),
+}));
+
 // Payout Batch Items - Individual payout records within a batch for reconciliation
 export const payoutBatchItems = pgTable("payout_batch_items", {
   id: serial("id").primaryKey(),
   batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
+  chunkId: integer("chunk_id").references(() => payoutBatchChunks.id), // STEP 6: Link to chunk
   cycleWinnerSelectionId: integer("cycle_winner_selection_id").references(() => cycleWinnerSelections.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   paypalEmail: text("paypal_email").notNull(), // PayPal email used for this payout
@@ -561,10 +594,25 @@ export const insertPayoutBatchSchema = createInsertSchema(payoutBatches).pick({
   totalAmount: true,
   totalRecipients: true,
   adminId: true,
+  isChunked: true, // STEP 6: Chunking support
+  totalChunks: true,
+  chunkSize: true,
+});
+
+// STEP 6: Chunking schema
+export const insertPayoutBatchChunkSchema = createInsertSchema(payoutBatchChunks).pick({
+  batchId: true,
+  chunkNumber: true,
+  senderBatchId: true,
+  startIndex: true,
+  endIndex: true,
+  recipientCount: true,
+  totalAmount: true,
 });
 
 export const insertPayoutBatchItemSchema = createInsertSchema(payoutBatchItems).pick({
   batchId: true,
+  chunkId: true, // STEP 6: Link to chunk
   cycleWinnerSelectionId: true,
   userId: true,
   paypalEmail: true,
@@ -590,6 +638,12 @@ export type RewardDistributionSetting = typeof rewardDistributionSettings.$infer
 export type InsertRewardDistributionSetting = z.infer<typeof insertRewardDistributionSettingSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InsertLearningModule = z.infer<typeof insertLearningModuleSchema>;
+
+// STEP 6: Chunking types
+export type PayoutBatchChunk = typeof payoutBatchChunks.$inferSelect;
+export type InsertPayoutBatchChunk = z.infer<typeof insertPayoutBatchChunkSchema>;
+export type InsertPayoutBatch = z.infer<typeof insertPayoutBatchSchema>;
+export type InsertPayoutBatchItem = z.infer<typeof insertPayoutBatchItemSchema>;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -649,9 +703,7 @@ export type PaypalPayout = typeof paypalPayouts.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type AdminPointsAction = typeof adminPointsActions.$inferSelect;
 export type PayoutBatch = typeof payoutBatches.$inferSelect;
-export type InsertPayoutBatch = z.infer<typeof insertPayoutBatchSchema>;
 export type PayoutBatchItem = typeof payoutBatchItems.$inferSelect;
-export type InsertPayoutBatchItem = z.infer<typeof insertPayoutBatchItemSchema>;
 
 // Insert schemas for new cycle-based tables
 export const insertCycleSettingSchema = createInsertSchema(cycleSettings).pick({

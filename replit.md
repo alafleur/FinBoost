@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
     - **Authentication System**: Supports email/password, Google OAuth, password reset, and role-based access control.
     - **Points and Rewards System**: Configurable actions, proof-based awards, percentile-based tier system, monthly reward pool distribution, and a referral system. It supports cycle-based rewards and a minimum pool guarantee.
     - **Learning Management**: Offers rich content modules, interactive quizzes, progress tracking, and manages free/premium content access.
-    - **Payment Processing**: Handles subscription management and reward disbursements, including a robust PayPal disbursement system with two-phase transactions, idempotency, retry logic, and comprehensive error handling.
+    - **Payment Processing**: Handles subscription management and reward disbursements, including a robust PayPal disbursement system with two-phase transactions, idempotency, retry logic, comprehensive error handling, and advanced batch chunking optimization with 500-recipient chunks for enhanced API reliability.
     - **Admin Portal**: Provides tools for content management, user/analytics management, points configuration, flexible winner selection (point-weighted random, top performers, pure random, manual), configurable tier pools, individual payout adjustments, and Excel export/import for winner data.
     - **Prediction System**: Implements skill-based prediction questions with configurable points, deadline management, results determination, and nuanced scoring.
     - **Winner Celebration Notification System**: Manages notifications for reward winners.
