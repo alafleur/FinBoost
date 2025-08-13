@@ -1,0 +1,57 @@
+Yep—I can open the files you sent and I checked specifically for **Step 9 (Frontend Integration Verification)**. Short answer: **it’s implemented correctly.** Here’s what I verified and a couple of tiny polish suggestions.
+
+# What I confirmed
+
+### 1) `/api/cycles/rewards/history` uses the updated payout fields ✅
+
+* **Route:** found in `routes (2).ts`.
+* **Behavior:** it extracts the user from the auth token and calls `storage.getUserCycleRewards(userId)`, returning the result.
+* **Storage:** in `storage (2).ts`, `getUserCycleRewards(...)` selects from `cycleWinnerSelections` and includes:
+
+  * `payoutStatus`, `payoutOverride`, `payoutFinal`, `payoutCalculated`, `isSealed`, `sealedAt`, and `notificationDisplayed`.
+    This means your rewards history is now driven by the **same payout state** your backend updates during disbursement. Good.
+
+### 2) Winner banner trigger on `notification_displayed = false` ✅
+
+* **Getter:** `routes (2).ts` has `GET /api/user/winner-status` → calls `storage.getUserWinnerStatus(userId)` and returns `{ winner: {...} }`.
+
+* **Storage logic:** `getUserWinnerStatus(...)` (in `storage (2).ts`) pulls the most recent **sealed** winner record for the user and returns:
+
+  * `notificationDisplayed`, `payoutStatus`, `tier`, `cycleId`, `cycleName`, and a **final payout amount** that prioritizes overrides (`payoutFinal || payoutOverride || rewardAmount`).
+    That’s exactly what you want for a banner.
+
+* **Setter (dismiss):** `POST /api/user/winner-notification/dismiss` → calls `storage.markWinnerNotificationDisplayed(userId, cycleId)`.
+
+* **DB update:** `markWinnerNotificationDisplayed(...)` sets `notificationDisplayed = true` for that user & cycle (when they’re a sealed winner). Nice and tight.
+
+### 3) Success path actually flips the flag for banners ✅
+
+* In `storage (2).ts` → `finalizePayoutResults(...)`:
+
+  * For each PayPal item: sets `payoutStatus` to `completed/failed/pending`.
+  * **On success** sets `notificationDisplayed = false` so the UI **will show the banner**.
+  * Also updates `payout_batch_items` with the `paypalItemId` and any errors. Correct wiring.
+
+### 4) Rewards history pulls in the right state after payouts ✅
+
+* Because `getUserCycleRewards` reads straight off `cycleWinnerSelections` (with `payoutStatus`, `isSealed`, etc.), users will see their reward entries as soon as the disbursement finalizes.
+* Route returns an empty array for unauth’d users rather than throwing—sane default.
+
+# Minor polish suggestions (optional, low lift)
+
+1. **Filter rewards history to sealed winners (optional):**
+   If you don’t want “pre-sealed” selections to appear, add `eq(cycleWinnerSelections.isSealed, true)` in `getUserCycleRewards(...)`. Not required, but it keeps history consistent with “finalized” payouts only.
+
+2. **Guard the dismiss endpoint a bit more:**
+   You already check `cycleId` and winner presence; that’s good. Consider returning the **updated winner status** in the response so the client can optimistically update UI state without re-fetching.
+
+3. **Surface `payoutFinal` in history items (UI):**
+   You’re already selecting it—make sure the frontend displays the **final amount** (not the base) if present. (The storage method prioritizes it correctly for the banner; just ensure the history UI mirrors that.)
+
+4. **Non-winner banner behavior:**
+   Your `getUserWinnerStatus` gracefully returns community stats when the user isn’t a winner (nice touch). Ensure the frontend ignores `notificationDisplayed` for those non-winner cases (sounds obvious, but worth a quick glance in UI).
+
+# Bottom line
+
+* ✅ Step 9 is **done properly**: history uses payout state; the winner banner triggers from `notificationDisplayed=false`; and the dismissal endpoint sets it to `true`.
+* If you implement the small optional tweaks above, you’ll tighten the UX a bit more, but you’re good to proceed to Step 10.
