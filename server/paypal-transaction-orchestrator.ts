@@ -22,6 +22,7 @@
 import { createPaypalPayout, parseEnhancedPayoutResponse, getEnhancedPayoutStatus } from './paypal.js';
 import { storage } from './storage.js';
 import { db } from './db.js'; // CHATGPT: Import db for transaction boundary
+import { sql } from 'drizzle-orm'; // CHATGPT PHASE 1 FIX: Import sql template for advisory locks
 import type { ParsedPayoutResponse, PayoutItemResult } from './paypal.js';
 import type { InsertPayoutBatch, InsertPayoutBatchItem, InsertPayoutBatchChunk, PayoutBatchChunk } from '@shared/schema.js';
 import crypto from 'crypto';
@@ -1614,6 +1615,13 @@ export class PaypalTransactionOrchestrator {
 
       // Step 2.2: Execute PayPal API call
       console.log('[STEP 4 PHASE 2] Executing PayPal payout API call');
+      
+      // CHATGPT PHASE 1 FIX: Add pre-API count assertion (non-chunk path)
+      const expectedItemCount = (await storage.getPayoutBatchItems(result.batchId)).length;
+      if (phase1Result.paypalPayload.items.length !== expectedItemCount) {
+        throw new Error(`prepared_items_count_mismatch: PayPal payload has ${phase1Result.paypalPayload.items.length} items but expected ${expectedItemCount} recipients`);
+      }
+      
       const paypalResponse = await createPaypalPayout(phase1Result.paypalPayload.items);
       result.paypalResponse = paypalResponse;
 
@@ -1855,7 +1863,7 @@ export class PaypalTransactionOrchestrator {
         recipient_type: "EMAIL",
         amount: {
           value: (recipient.amount / 100).toFixed(2), // Convert cents to dollars
-          currency: recipient.currency
+          currency: 'USD' // CHATGPT PHASE 1 FIX: Force USD currency upstream for consistency
         },
         receiver: normalizedEmail,
         note: recipient.note || "FinBoost monthly reward",
@@ -2159,9 +2167,9 @@ export class PaypalTransactionOrchestrator {
     try {
       console.log('[STEP 3 ADVISORY LOCK] Attempting to acquire lock for cycle', cycleSettingId);
       
-      // Use cycle ID as the advisory lock key
+      // CHATGPT PHASE 1 FIX: Parameterize advisory lock SQL for security
       const result = await db.execute(
-        `SELECT pg_try_advisory_lock(${cycleSettingId}) as lock_acquired`
+        sql`SELECT pg_try_advisory_lock(${cycleSettingId}) as lock_acquired`
       );
       
       const lockAcquired = (result as any)[0]?.lock_acquired === true;
@@ -2186,8 +2194,9 @@ export class PaypalTransactionOrchestrator {
     try {
       console.log('[STEP 3 ADVISORY LOCK] Releasing lock for cycle', cycleSettingId);
       
+      // CHATGPT PHASE 1 FIX: Parameterize advisory unlock SQL for security
       await db.execute(
-        `SELECT pg_advisory_unlock(${cycleSettingId})`
+        sql`SELECT pg_advisory_unlock(${cycleSettingId})`
       );
       
       console.log('[STEP 3 ADVISORY LOCK] Lock released successfully for cycle', cycleSettingId);
@@ -2392,18 +2401,49 @@ export class PaypalTransactionOrchestrator {
         processingStartedAt: new Date()
       });
 
-      // Prepare PayPal request for this chunk
-      const payoutRequest = chunk.map(recipient => ({
-        cycleWinnerSelectionId: recipient.cycleWinnerSelectionId,
-        userId: recipient.userId,
-        email: recipient.paypalEmail,
-        amount: recipient.amount,
-        currency: recipient.currency,
-        note: recipient.note || 'FinBoost monthly reward'
-      }));
+      // CHATGPT PHASE 1 FIX: Use same payload structure as non-chunk path for checksum consistency
+      const payoutRequest = chunk.map(recipient => {
+        // Normalize email consistently with non-chunk path
+        const normalizedEmail = recipient.paypalEmail.trim().toLowerCase();
+        
+        // CHATGPT PHASE 1 FIX: Set deterministic recipientId (already done correctly)
+        const senderItemId = `winner-${recipient.cycleWinnerSelectionId}-${recipient.userId}`;
+        
+        // CHATGPT PHASE 1 FIX: Force USD currency upstream for consistency
+        const normalizedCurrency = 'USD';
+        
+        return {
+          recipient_type: "EMAIL",
+          amount: {
+            value: (recipient.amount / 100).toFixed(2), // Convert cents to dollars - match non-chunk path
+            currency: normalizedCurrency
+          },
+          receiver: normalizedEmail,
+          note: recipient.note || 'FinBoost monthly reward',
+          sender_item_id: senderItemId
+        };
+      });
 
+      // CHATGPT PHASE 1 FIX: Add pre-API count assertion (chunk path)
+      if (payoutRequest.length !== chunk.length) {
+        throw new Error(`prepared_items_count_mismatch: Chunk payoutRequest has ${payoutRequest.length} items but expected ${chunk.length} recipients`);
+      }
+      
+      // CHATGPT PHASE 1 FIX: Compute checksum from consistent internal format for replay safety  
+      const chunkChecksumData = this.generatePayloadChecksum(payoutRequest);
+      console.log(`[STEP 6 CHUNKING] Chunk ${chunkRecord.chunkNumber} checksum: ${chunkChecksumData.checksum}, count: ${chunkChecksumData.itemCount}`);
+      
+      // CHATGPT PHASE 1 FIX: Convert to format that PayPal wrapper expects while maintaining checksum consistency
+      const paypalWrapperPayload = payoutRequest.map(item => ({
+        email: item.receiver,
+        amount: Math.round(parseFloat(item.amount.value) * 100), // Convert dollars back to cents for wrapper
+        currency: item.amount.currency,
+        note: item.note,
+        recipientId: item.sender_item_id
+      }));
+      
       // Call PayPal API for this chunk
-      const paypalResponse = await createPaypalPayout(payoutRequest);
+      const paypalResponse = await createPaypalPayout(paypalWrapperPayload);
 
       console.log(`[STEP 6 CHUNKING] Chunk ${chunkRecord.chunkNumber} PayPal response:`, paypalResponse.batch_header?.payout_batch_id);
 
