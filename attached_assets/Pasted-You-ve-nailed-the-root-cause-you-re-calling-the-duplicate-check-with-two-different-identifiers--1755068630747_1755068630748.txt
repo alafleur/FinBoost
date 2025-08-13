@@ -1,0 +1,54 @@
+You’ve nailed the root cause: you’re calling the duplicate check with **two different identifiers**—`requestId` in one place and the actual **checksum** in another—while the lookup expects the **checksum**. That’s why your status-aware logic never runs and cancelled batches still block.
+
+Here’s exactly how to fix it—no detours:
+
+# What to do (decisive, minimal)
+
+1. **Pick one canonical identifier: `requestChecksum`.**
+
+   * This is the deterministic hash of **normalized recipients** (id + amount + email).
+   * Treat `requestId` as deprecated or make it a strict alias to `requestChecksum` for now.
+
+2. **Standardize the function signatures.**
+
+   * `checkForDuplicateTransaction(cycleId: number, requestChecksum: string): Promise<PayoutBatch | null>`
+   * `getPayoutBatchByChecksum(cycleId: number, requestChecksum: string): Promise<PayoutBatch | null>`
+
+3. **Pass the SAME value everywhere.**
+
+   * In **checkRerunPrevention**: call with `context.requestChecksum`.
+   * In **executePhase1**: call with `context.requestChecksum` (NOT some `result.requestChecksum` if they can differ).
+   * If Phase 1 computes/normalizes recipients, **recompute** the checksum there and assert equality with `context.requestChecksum`. If they differ, return 422 with `errors: ['checksum_mismatch']`.
+
+4. **Wire the status-aware decision table (don’t block on cancelled).**
+   After `getPayoutBatchByChecksum(...)`:
+
+   * `completed | partially_completed | awaiting_reconcile` → **return existing summary** (no PayPal call).
+   * `processing | executing` → **409 in\_progress** (don’t start another).
+   * `failed | cancelled | intent_only` → **ALLOW RETRY**: create a **new batch attempt** with the **same checksum** but a **new** `sender_batch_id` (e.g., `...-attempt-2`).
+
+5. **Deterministic IDs (retry-safe).**
+
+   * `sender_batch_id = cycle-{cycleId}-{requestChecksum.slice(0,16)}-attempt-{n}`
+   * Keep `(cycle_id, request_checksum, attempt)` unique (not `(cycle_id, request_checksum)`).
+
+6. **Add a checksum guard once, then move on.**
+
+   * Add a tiny helper: `assertValidChecksum(ctx)` that throws (or returns 422) if `!ctx.requestChecksum` or if recomputed checksum != `ctx.requestChecksum`.
+   * Log both values when mismatched to catch future regressions.
+
+# Hotfix you can apply immediately
+
+* In both **checkRerunPrevention** and **executePhase1**, replace any `context.requestId` or `result.requestChecksum` with **`context.requestChecksum`**.
+* If `context.requestChecksum` is not set, compute it from `context.recipients` right there, set it on the context, and use that value consistently.
+
+# Tests to prove it’s fixed (fast)
+
+* **Cancelled → retry allowed:** existing batch `status='cancelled'` with same checksum → new attempt created; no duplicate error.
+* **Completed → idempotent return:** same checksum → returns old summary; no new PayPal call.
+* **Processing → 409 in\_progress:** same checksum while a batch is processing → 409.
+* **Checksum mismatch:** context checksum != recomputed → 422 `checksum_mismatch`.
+
+# Why this works
+
+Your status-aware logic is fine; it just never ran because you looked up by the wrong key in one code path. Making **`requestChecksum` the single source of truth** and passing it everywhere ensures the right branch executes (and that cancelled batches are properly retryable).
