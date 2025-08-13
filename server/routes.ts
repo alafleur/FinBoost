@@ -3185,15 +3185,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Step 8: Structured logging utility for batch operations
-  function createBatchLogger(batchId: string, cycleId: number, adminId: number) {
-    const prefix = `[STEP 8 BATCH-${batchId}]`;
+  // Phase 3: Rate Limiting Storage (In-memory for simplicity, could use Redis in production)
+  const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+  
+  function checkRateLimit(adminId: number, cycleId: number): { allowed: boolean; resetTime?: number; currentCount?: number } {
+    const key = `admin_${adminId}_cycle_${cycleId}`;
+    const now = Date.now();
+    const windowMs = 60000; // 1 minute window
+    
+    const current = rateLimitStore.get(key);
+    
+    if (!current || now >= current.resetTime) {
+      // Reset or initialize
+      rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
+      return { allowed: true };
+    }
+    
+    if (current.count >= 1) {
+      // Rate limit exceeded
+      return { 
+        allowed: false, 
+        resetTime: current.resetTime,
+        currentCount: current.count
+      };
+    }
+    
+    // Increment count
+    current.count++;
+    return { allowed: true, currentCount: current.count };
+  }
+
+  // Phase 3: Enhanced structured logging with IP tracking and comprehensive audit trails
+  function createBatchLogger(batchId: string, cycleId: number, adminId: number, adminEmail?: string, requestIP?: string) {
+    const prefix = `[PHASE 3 BATCH-${batchId}]`;
     return {
       start: (mode: string, eligibleCount: number) => {
-        console.log(`${prefix} BATCH START - CycleId: ${cycleId}, AdminId: ${adminId}, Mode: ${mode}, EligibleCount: ${eligibleCount}, Timestamp: ${new Date().toISOString()}`);
+        console.log(`${prefix} BATCH START - CycleId: ${cycleId}, AdminId: ${adminId}, AdminEmail: ${adminEmail || 'N/A'}, RequestIP: ${requestIP || 'N/A'}, Mode: ${mode}, EligibleCount: ${eligibleCount}, Timestamp: ${new Date().toISOString()}`);
       },
       end: (processedCount: number, failedCount: number, paypalBatchId?: string) => {
-        console.log(`${prefix} BATCH END - ProcessedCount: ${processedCount}, FailedCount: ${failedCount}, PayPalBatchId: ${paypalBatchId || 'N/A'}, Timestamp: ${new Date().toISOString()}`);
+        console.log(`${prefix} BATCH END - ProcessedCount: ${processedCount}, FailedCount: ${failedCount}, PayPalBatchId: ${paypalBatchId || 'N/A'}, Duration: ${Date.now()}, Timestamp: ${new Date().toISOString()}`);
       },
       item: (userId: number, amount: number, status: 'success' | 'failed', reason?: string) => {
         console.log(`${prefix} ITEM RESULT - UserId: ${userId}, Amount: ${amount}, Status: ${status}, Reason: ${reason || 'N/A'}, Timestamp: ${new Date().toISOString()}`);
@@ -3204,8 +3234,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       concurrency: (message: string) => {
         console.log(`${prefix} CONCURRENCY - ${message}, Timestamp: ${new Date().toISOString()}`);
       },
+      rateLimit: (message: string, details: any) => {
+        console.log(`${prefix} RATE_LIMIT - ${message}, Details: ${JSON.stringify(details)}, Timestamp: ${new Date().toISOString()}`);
+      },
       audit: (action: string, details: any) => {
-        console.log(`${prefix} AUDIT - Action: ${action}, Details: ${JSON.stringify(details)}, Timestamp: ${new Date().toISOString()}`);
+        console.log(`${prefix} AUDIT - Action: ${action}, Details: ${JSON.stringify(details)}, AdminId: ${adminId}, AdminEmail: ${adminEmail || 'N/A'}, RequestIP: ${requestIP || 'N/A'}, Timestamp: ${new Date().toISOString()}`);
       }
     };
   }
@@ -3283,27 +3316,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Process PayPal disbursements for selected cycle winners (Phase 1: Core Integration with Orchestrator)
+  // Process PayPal disbursements for selected cycle winners (Phases 1-3: Complete Integration)
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req: AuthenticatedRequest, res) => {
     const cycleId = parseInt(req.params.cycleId);
     const { selectedWinnerIds, processAll } = req.body;
     const adminId = req.user?.id || 1;
+    const adminEmail = req.user?.email || 'unknown@admin.com';
+    const requestIP = req.ip || req.connection.remoteAddress || 'unknown';
     
     // Generate deterministic batch ID for logging (will be replaced by orchestrator's batch ID)
     const tempBatchId = `temp_${cycleId}_${Date.now()}`;
-    const logger = createBatchLogger(tempBatchId, cycleId, adminId);
+    const logger = createBatchLogger(tempBatchId, cycleId, adminId, adminEmail, requestIP);
 
     try {
-      // Step 8: Audit trail - log operation initiation
+      // Phase 3: Rate limiting check (1 request per cycle per minute per admin)
+      const rateLimitCheck = checkRateLimit(adminId, cycleId);
+      if (!rateLimitCheck.allowed) {
+        const resetInSeconds = Math.ceil((rateLimitCheck.resetTime! - Date.now()) / 1000);
+        logger.rateLimit('RATE_LIMIT_EXCEEDED', {
+          adminId,
+          cycleId,
+          currentCount: rateLimitCheck.currentCount,
+          resetInSeconds,
+          adminEmail,
+          requestIP
+        });
+        return res.status(429).json({
+          error: "Rate limit exceeded",
+          details: `Maximum 1 disbursement request per cycle per minute. Try again in ${resetInSeconds} seconds.`,
+          userMessage: `Please wait ${resetInSeconds} seconds before trying again. This prevents accidental duplicate disbursements.`,
+          rateLimitInfo: {
+            resetInSeconds,
+            maxRequests: 1,
+            windowMinutes: 1
+          },
+          actionRequired: "wait_and_retry"
+        });
+      }
+      
+      logger.rateLimit('RATE_LIMIT_PASSED', { adminId, cycleId, requestCount: rateLimitCheck.currentCount || 1 });
+
+      // Phase 3: Enhanced audit trail - log operation initiation with comprehensive details
       logger.audit('DISBURSEMENT_INITIATED', {
         cycleId,
         processAll: !!processAll,
         selectedWinnerIds: selectedWinnerIds?.length || 0,
         adminId,
+        adminEmail,
+        requestIP,
+        userAgent: req.headers['user-agent'],
         requestTimestamp: new Date().toISOString()
       });
 
-      // Step 8: Input validation with structured logging
+      // Input validation with structured logging
       if (processAll && selectedWinnerIds) {
         logger.validation('PAYLOAD_VALIDATION', 'Cannot specify both processAll and selectedWinnerIds');
         return res.status(400).json({ error: "Cannot specify both processAll and selectedWinnerIds" });
@@ -3547,8 +3612,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Phase 1: Step 8 Concurrency protection using deterministic batch context
+      // Phase 3: Enhanced concurrency protection with advisory lock per cycle
+      const cycleProcessingKey = `cycle_processing_${cycleId}`;
       const deterministic_batch_id = `cycle-${cycleId}-${requestChecksum.slice(0, 16)}`;
+      
+      // Check for processing lock first
+      const lockInfo = await storage.getProcessingLockInfo(cycleProcessingKey);
+      if (lockInfo && lockInfo.expiry > new Date()) {
+        logger.concurrency(`Processing lock active for cycle ${cycleId}, expires at ${lockInfo.expiry}`);
+        logger.end(0, recipients.length);
+        return res.status(423).json({
+          error: "Cycle processing locked",
+          details: `Cycle ${cycleId} is currently locked for processing. This prevents concurrent disbursement operations.`,
+          userMessage: `Another disbursement is currently processing for this cycle. Please wait ${Math.ceil((lockInfo.expiry.getTime() - Date.now()) / 60000)} minutes and try again.`,
+          lockInfo: {
+            lockedSince: lockInfo.acquired,
+            expiresAt: lockInfo.expiry,
+            remainingMinutes: Math.ceil((lockInfo.expiry.getTime() - Date.now()) / 60000)
+          },
+          actionRequired: "wait_for_lock_expiry"
+        });
+      }
+      
+      // Traditional concurrent batch check 
       const concurrencyCheck = await checkConcurrentBatches(cycleId, deterministic_batch_id);
       if (concurrencyCheck.hasConflict) {
         logger.concurrency(`Concurrent batch detected: ${JSON.stringify(concurrencyCheck.conflictDetails)}`);
@@ -3556,9 +3642,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({
           error: "Concurrent disbursement in progress",
           details: "Another disbursement batch is currently being processed for this cycle. Please wait for it to complete.",
-          conflictInfo: concurrencyCheck.conflictDetails
+          userMessage: "A disbursement is already running for this cycle. Please check the status dashboard and wait for completion before trying again.",
+          conflictInfo: concurrencyCheck.conflictDetails,
+          actionRequired: "check_status_dashboard"
         });
       }
+
+      // Acquire processing lock for the duration of the operation
+      const lockExpiry = new Date(Date.now() + 900000); // 15 minutes
+      const lockAcquired = await storage.acquireProcessingLock(cycleProcessingKey, lockExpiry);
+      if (!lockAcquired) {
+        logger.concurrency(`Failed to acquire processing lock for cycle ${cycleId}`);
+        logger.end(0, recipients.length);
+        return res.status(423).json({
+          error: "Unable to acquire processing lock",
+          details: "Could not secure exclusive processing rights for this cycle. Please try again."
+        });
+      }
+
+      logger.concurrency(`Processing lock acquired for cycle ${cycleId}, expires at ${lockExpiry}`);
       
       // Phase 1: Calculate total amount for orchestrator
       const totalAmount = recipients.reduce((sum, r) => sum + r.amount, 0);
@@ -3587,6 +3689,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Phase 1 & 2: Execute two-phase transaction through orchestrator
       const orchestratorResult = await orchestrator.executeTransaction(transactionContext);
+      
+      // Phase 3: Always release processing lock after orchestrator execution
+      try {
+        await storage.releaseProcessingLock(cycleProcessingKey);
+        logger.concurrency(`Processing lock released for cycle ${cycleId}`);
+      } catch (lockError) {
+        logger.concurrency(`Warning: Failed to release processing lock for cycle ${cycleId}: ${lockError instanceof Error ? lockError.message : String(lockError)}`);
+        // Don't fail the entire operation for lock release issues
+      }
 
       // Phase 2: Process orchestrator result with Step 8 logging
       if (orchestratorResult.success && orchestratorResult.phase2) {
@@ -3657,11 +3768,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: false,
           error: "Disbursement processing failed",
           details: errorMessages.join('; '),
+          userMessage: "The disbursement failed due to a processing error. The system automatically rolled back any partial changes. Please check the error details and try again.",
           phase1Success: orchestratorResult.phase1?.success || false,
           phase2Success: orchestratorResult.phase2?.success || false,
           rollbackPerformed: orchestratorResult.rollbackPerformed,
           batchId: orchestratorResult.phase1?.senderBatchId,
-          totalEligible: totalEligibleCount
+          totalEligible: totalEligibleCount,
+          actionRequired: "review_errors_and_retry",
+          canRetry: true,
+          troubleshooting: {
+            commonCauses: [
+              "PayPal API connectivity issues",
+              "Invalid recipient email addresses", 
+              "Insufficient PayPal account balance",
+              "Temporary service outage"
+            ],
+            nextSteps: [
+              "Verify PayPal account status",
+              "Check recipient email validity",
+              "Wait 5-10 minutes and retry",
+              "Contact support if issue persists"
+            ]
+          }
         });
       }
 
@@ -3685,6 +3813,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Phase 4: Enhanced status monitoring dashboard endpoint  
+  app.get("/api/admin/disbursements/status-dashboard", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const adminId = req.user?.id || 1;
+      
+      // Get recent batches with comprehensive status info
+      const recentBatches = await db
+        .select({
+          id: payoutBatches.id,
+          cycleSettingId: payoutBatches.cycleSettingId,
+          senderBatchId: payoutBatches.senderBatchId,
+          paypalBatchId: payoutBatches.paypalBatchId,
+          status: payoutBatches.status,
+          totalAmount: payoutBatches.totalAmount,
+          totalRecipients: payoutBatches.totalRecipients,
+          successfulCount: payoutBatches.successfulCount,
+          failedCount: payoutBatches.failedCount,
+          pendingCount: payoutBatches.pendingCount,
+          retryCount: payoutBatches.retryCount,
+          lastRetryAt: payoutBatches.lastRetryAt,
+          lastRetryError: payoutBatches.lastRetryError,
+          errorDetails: payoutBatches.errorDetails,
+          createdAt: payoutBatches.createdAt,
+          updatedAt: payoutBatches.updatedAt,
+          cycleName: cycleSettings.cycleName
+        })
+        .from(payoutBatches)
+        .leftJoin(cycleSettings, eq(payoutBatches.cycleSettingId, cycleSettings.id))
+        .orderBy(desc(payoutBatches.createdAt))
+        .limit(20);
+
+      // Get current processing locks
+      const activeLocks = Array.from(rateLimitStore.keys()).map(key => {
+        const lockInfo = rateLimitStore.get(key);
+        if (lockInfo && lockInfo.resetTime > Date.now()) {
+          return {
+            key,
+            resetTime: lockInfo.resetTime,
+            remainingSeconds: Math.ceil((lockInfo.resetTime - Date.now()) / 1000)
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      // Calculate summary statistics
+      const summary = {
+        totalBatches: recentBatches.length,
+        activeBatches: recentBatches.filter(b => b.status === 'processing').length,
+        completedBatches: recentBatches.filter(b => b.status === 'completed').length,
+        failedBatches: recentBatches.filter(b => b.status === 'failed').length,
+        totalPayouts: recentBatches.reduce((sum, b) => sum + (b.totalAmount || 0), 0),
+        totalRecipients: recentBatches.reduce((sum, b) => sum + (b.totalRecipients || 0), 0),
+        retryableBatches: recentBatches.filter(b => b.status === 'failed' && (b.retryCount || 0) < 3).length
+      };
+
+      res.json({
+        success: true,
+        dashboard: {
+          summary,
+          recentBatches: recentBatches.map(batch => ({
+            ...batch,
+            statusLabel: getStatusLabel(batch.status),
+            progressPercentage: calculateProgressPercentage(batch),
+            canRetry: batch.status === 'failed' && (batch.retryCount || 0) < 3,
+            isStale: batch.status === 'processing' && 
+                     batch.createdAt && 
+                     (Date.now() - new Date(batch.createdAt).getTime()) > 900000, // 15 minutes
+            amountFormatted: `$${((batch.totalAmount || 0) / 100).toFixed(2)}`
+          })),
+          activeLocks,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('[PHASE 4 DASHBOARD] Error loading status dashboard:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to load disbursement status dashboard',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Phase 4: User-friendly status labels and progress calculation helpers
+  function getStatusLabel(status: string): string {
+    switch (status) {
+      case 'intent': return 'Preparing';
+      case 'processing': return 'Processing';
+      case 'completed': return 'Completed';
+      case 'failed': return 'Failed';
+      case 'partially_completed': return 'Partially Complete';
+      default: return 'Unknown';
+    }
+  }
+
+  function calculateProgressPercentage(batch: any): number {
+    const total = batch.totalRecipients || 0;
+    if (total === 0) return 0;
+    
+    const completed = (batch.successfulCount || 0) + (batch.failedCount || 0);
+    return Math.round((completed / total) * 100);
+  }
 
   // Get eligible winners count for a cycle (ChatGPT Step 2: Helper endpoint)
   app.get("/api/admin/cycle-winner-details/:cycleId/eligible-count", async (req, res) => {

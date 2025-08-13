@@ -343,18 +343,40 @@ function mapPaypalItemStatus(paypalStatus: string): 'success' | 'failed' | 'pend
 }
 
 /**
- * Extracts winner IDs from sender_item_id format: "winner-{cycleWinnerSelectionId}-{userId}"
+ * Phase 2: Backward Compatible Extraction of winner IDs from sender_item_id
+ * Supports both:
+ * - New format: "winner-{cycleWinnerSelectionId}-{userId}"  
+ * - Legacy format: "user_{userId}_cycle_{cycleId}_{timestamp}"
  */
-function extractWinnerIds(senderItemId: string): { cycleWinnerSelectionId: number; userId: number } | null {
-  const winnerIdMatch = senderItemId.match(/^winner-(\d+)-(\d+)$/);
-  if (!winnerIdMatch) {
-    console.error(`[PAYPAL PARSING] Invalid sender_item_id format: ${senderItemId}`);
-    return null;
+function extractWinnerIds(senderItemId: string): { 
+  cycleWinnerSelectionId: number; 
+  userId: number; 
+  isLegacyFormat?: boolean;
+  cycleId?: number;  // Available for legacy format
+} | null {
+  // Try new format first
+  const newFormatMatch = senderItemId.match(/^winner-(\d+)-(\d+)$/);
+  if (newFormatMatch) {
+    return {
+      cycleWinnerSelectionId: parseInt(newFormatMatch[1]),
+      userId: parseInt(newFormatMatch[2])
+    };
   }
-  return {
-    cycleWinnerSelectionId: parseInt(winnerIdMatch[1]),
-    userId: parseInt(winnerIdMatch[2])
-  };
+  
+  // Try legacy format: user_{userId}_cycle_{cycleId}_{timestamp}
+  const legacyFormatMatch = senderItemId.match(/^user_(\d+)_cycle_(\d+)_\d+$/);
+  if (legacyFormatMatch) {
+    console.warn(`[PAYPAL PARSING] Legacy sender_item_id format detected: ${senderItemId}`);
+    return {
+      cycleWinnerSelectionId: -1, // Mark as legacy - needs reconciliation
+      userId: parseInt(legacyFormatMatch[1]),
+      isLegacyFormat: true,
+      cycleId: parseInt(legacyFormatMatch[2])
+    };
+  }
+  
+  console.error(`[PAYPAL PARSING] Unknown sender_item_id format: ${senderItemId}`);
+  return null;
 }
 
 /**
@@ -378,11 +400,19 @@ export function parseEnhancedPayoutResponse(paypalResponse: any): ParsedPayoutRe
       individualResults: []
     };
 
-    // Parse individual item results
+    // Parse individual item results with legacy format tolerance
     for (const item of items) {
       const winnerIds = extractWinnerIds(item.payout_item?.sender_item_id);
       if (!winnerIds) {
+        console.error(`[PAYPAL PARSING] Skipping item with invalid sender_item_id: ${item.payout_item?.sender_item_id}`);
         continue; // Skip items with invalid format
+      }
+
+      // Handle legacy format gracefully
+      if (winnerIds.isLegacyFormat) {
+        console.warn(`[PAYPAL PARSING] Processing legacy format item - userId: ${winnerIds.userId}, cycleId: ${winnerIds.cycleId}`);
+        // For legacy format, we'll mark cycleWinnerSelectionId as -1 to indicate reconciliation needed
+        // The actual reconciliation can be done later via separate script/process
       }
 
       const itemResult: PayoutItemResult = {
@@ -402,6 +432,11 @@ export function parseEnhancedPayoutResponse(paypalResponse: any): ParsedPayoutRe
       }
       if (item.errors?.message) {
         itemResult.errorMessage = item.errors.message;
+      }
+
+      // Add metadata for legacy format tracking
+      if (winnerIds.isLegacyFormat) {
+        itemResult.errorMessage = (itemResult.errorMessage || '') + ` [LEGACY_FORMAT: cycle_${winnerIds.cycleId}]`;
       }
 
       parsedResponse.individualResults.push(itemResult);
