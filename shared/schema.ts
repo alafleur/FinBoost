@@ -491,35 +491,26 @@ export const payoutBatchChunks = pgTable("payout_batch_chunks", {
   uniqueChunk: unique("payout_batch_chunks_batch_chunk_unique").on(table.batchId, table.chunkNumber),
 }));
 
-// New: payout_batch_items (ChatGPT specification)
+// Payout Batch Items - Individual payout records within a batch for reconciliation
 export const payoutBatchItems = pgTable("payout_batch_items", {
   id: serial("id").primaryKey(),
-  batchId: integer("batch_id").notNull(),        // FK payout_batches.id (int)
-  chunkId: integer("chunk_id"),                  // FK payout_batch_chunks.id (int)
-  
-  selectionId: integer("selection_id").notNull(),
-  userId: integer("user_id").notNull(),
-  
-  receiverEmail: text("receiver_email"),
-  amountCents: integer("amount_cents").notNull(),
-  currency: text("currency").notNull().default("USD"),
-  
-  senderItemId: text("sender_item_id").notNull(),
-  paypalItemId: text("paypal_item_id"),
-  status: text("status").notNull().default("pending"),
-  paypalTransactionStatus: text("paypal_transaction_status"),
-  errorCode: text("error_code"),
-  errorMessage: text("error_message"),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  uqSenderItem: uniqueIndex("uq_payout_batch_items_sender_item").on(t.senderItemId),
-  idxBatch: index("idx_payout_batch_items_batch").on(t.batchId),
-  idxChunk: index("idx_payout_batch_items_chunk").on(t.chunkId),
-  idxSelection: index("idx_payout_batch_items_selection").on(t.selectionId),
-  idxStatus: index("idx_payout_batch_items_status").on(t.status),
-}));
+  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
+  chunkId: integer("chunk_id").references(() => payoutBatchChunks.id), // STEP 6: Link to chunk
+  cycleWinnerSelectionId: integer("cycle_winner_selection_id").references(() => cycleWinnerSelections.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  paypalEmail: text("paypal_email").notNull(), // PayPal email used for this payout
+  amount: integer("amount").notNull(), // Payout amount in cents
+  currency: text("currency").default("USD").notNull(), // Currency code
+  paypalItemId: text("paypal_item_id"), // PayPal payout_item_id for tracking
+  status: text("status").default("pending").notNull(), // pending, processing, success, failed, unclaimed
+  paypalStatus: text("paypal_status"), // Raw PayPal status (SUCCESS, FAILED, PENDING, UNCLAIMED, etc.)
+  errorCode: text("error_code"), // PayPal error code if failed
+  errorMessage: text("error_message"), // Human-readable error description
+  note: text("note"), // Message sent with payout
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  processedAt: timestamp("processed_at"), // When PayPal processed this item
+});
 
 // Winner Selection Cycles
 export const winnerSelectionCycles = pgTable("winner_selection_cycles", {
