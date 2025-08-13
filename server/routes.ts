@@ -3754,10 +3754,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Step 2: Enhanced Email Validation and Recipient Processing
       // Phase 1: Normalize all emails first for consistent processing
-      const normalizedWinners = winners.map(winner => ({
-        ...winner,
-        normalizedPaypalEmail: normalizeEmail(winner.paypalEmail)
-      }));
+      const normalizedWinners = winners.map(winner => {
+        console.log(`[EMAIL DEBUG] Winner ${winner.id}: paypalEmail = "${winner.paypalEmail}", type = ${typeof winner.paypalEmail}`);
+        const normalized = normalizeEmail(winner.paypalEmail);
+        console.log(`[EMAIL DEBUG] Winner ${winner.id}: normalized = "${normalized}"`);
+        return {
+          ...winner,
+          normalizedPaypalEmail: normalized
+        };
+      });
 
       // Phase 2: Split into valid and invalid email recipients  
       const validEmailWinners = normalizedWinners.filter(w => isValidPaypalEmail(w.paypalEmail));
@@ -4014,14 +4019,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Phase 7: Build PayPal recipients using normalized emails (Step 2: Deterministic idempotency)
-      const recipients: PayoutRecipient[] = validRecipients.map(result => ({
-        cycleWinnerSelectionId: result.winner.id,    // Required for orchestrator
-        userId: result.winner.userId,                 // Required for orchestrator  
-        paypalEmail: result.winner.normalizedPaypalEmail,  // Use pre-normalized email for consistency
-        amount: result.validatedAmount,               // In cents, validated
-        currency: "USD",
-        note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`
-      }));
+      const recipients: PayoutRecipient[] = validRecipients.map(result => {
+        console.log(`[CRITICAL DEBUG] Building recipient - normalizedPaypalEmail: "${result.winner.normalizedPaypalEmail}", type: ${typeof result.winner.normalizedPaypalEmail}`);
+        const recipient = {
+          cycleWinnerSelectionId: result.winner.id,    // Required for orchestrator
+          userId: result.winner.userId,                 // Required for orchestrator  
+          paypalEmail: result.winner.normalizedPaypalEmail,  // Use pre-normalized email for consistency
+          amount: result.validatedAmount,               // In cents, validated
+          currency: "USD",
+          note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`
+        };
+        console.log(`[CRITICAL DEBUG] Final recipient object - paypalEmail: "${recipient.paypalEmail}"`);
+        return recipient;
+      });
 
       // Phase 8: Generate deterministic request checksum using ONLY valid recipients (Critical for idempotency)
       const winnerData = recipients.map(r => ({
