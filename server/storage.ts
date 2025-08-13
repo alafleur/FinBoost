@@ -9895,15 +9895,21 @@ export class MemStorage implements IStorage {
 
   /**
    * Step 4: Get payout batch by request checksum for idempotency checking
+   * HOTFIX STEP 2: Updated signature to include cycleId parameter
    */
-  async getPayoutBatchByChecksum(requestChecksum: string): Promise<PayoutBatch | null> {
-    console.log(`[STEP 4] Looking up payout batch by checksum: ${requestChecksum.substring(0, 8)}...`);
+  async getPayoutBatchByChecksum(cycleId: number, requestChecksum: string): Promise<PayoutBatch | null> {
+    console.log(`[STEP 4] Looking up payout batch by checksum for cycle ${cycleId}: ${requestChecksum.substring(0, 8)}...`);
     
     try {
       const batches = await db
         .select()
         .from(payoutBatches)
-        .where(eq(payoutBatches.requestChecksum, requestChecksum))
+        .where(
+          and(
+            eq(payoutBatches.cycleSettingId, cycleId),
+            eq(payoutBatches.requestChecksum, requestChecksum)
+          )
+        )
         .limit(1);
 
       const batch = batches[0] || null;
@@ -9911,7 +9917,7 @@ export class MemStorage implements IStorage {
       if (batch) {
         console.log(`[STEP 4] Found existing batch with checksum: batch ID ${batch.id}, status ${batch.status}`);
       } else {
-        console.log(`[STEP 4] No existing batch found with checksum`);
+        console.log(`[STEP 4] No existing batch found with checksum for cycle ${cycleId}`);
       }
       
       return batch;

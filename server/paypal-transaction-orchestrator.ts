@@ -1025,18 +1025,9 @@ export class PaypalTransactionOrchestrator {
     reason?: string;
   }> {
     try {
-      // Check for recent duplicate transaction with status-aware logic
-      const duplicateCheck = await this.checkForDuplicateTransaction(context.requestId);
-      if (duplicateCheck.isDuplicate) {
-        // Only prevent for active processing or completed batches
-        if (duplicateCheck.action === 'block_in_progress' || duplicateCheck.action === 'return_existing') {
-          return {
-            prevented: true,
-            reason: `${duplicateCheck.reason || 'Duplicate transaction detected'} - existing batch: ${duplicateCheck.existingBatchId}`
-          };
-        }
-        // For 'allow_retry' action, don't prevent - let it proceed as new attempt
-      }
+      // HOTFIX STEP 3: Remove duplicate check from prevention - only check in executePhase1
+      // The duplicate check needs the computed checksum, which isn't available here.
+      // Duplicate prevention is now handled in executePhase1 with proper status-aware logic.
 
       // Check for recent processing activity (cooldown period)
       const recentActivity = await this.checkRecentProcessingActivity(context.cycleSettingId);
@@ -1357,7 +1348,8 @@ export class PaypalTransactionOrchestrator {
       result.requestChecksum = idempotencyData.requestChecksum;
 
       // Step 1.3: Check for duplicate transactions with status-aware handling
-      const duplicateCheck = await this.checkForDuplicateTransaction(result.requestChecksum);
+      // HOTFIX STEP 1: Use consistent cycleId + requestChecksum parameters
+      const duplicateCheck = await this.checkForDuplicateTransaction(context.cycleSettingId, result.requestChecksum);
       if (duplicateCheck.isDuplicate) {
         console.log(`[IDEMPOTENCY] Duplicate check result: action=${duplicateCheck.action}, reason=${duplicateCheck.reason}`);
         
@@ -1546,7 +1538,7 @@ export class PaypalTransactionOrchestrator {
     return { senderBatchId, requestChecksum };
   }
 
-  private async checkForDuplicateTransaction(requestChecksum: string): Promise<{
+  private async checkForDuplicateTransaction(cycleId: number, requestChecksum: string): Promise<{
     isDuplicate: boolean;
     existingBatchId?: string;
     action?: 'allow_retry' | 'return_existing' | 'block_in_progress';
@@ -1554,7 +1546,8 @@ export class PaypalTransactionOrchestrator {
     reason?: string;
   }> {
     try {
-      const existingBatch = await storage.getPayoutBatchByChecksum(requestChecksum);
+      // HOTFIX STEP 2: Update function signature to include cycleId
+      const existingBatch = await storage.getPayoutBatchByChecksum(cycleId, requestChecksum);
       
       if (!existingBatch) {
         return { isDuplicate: false };
