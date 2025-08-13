@@ -3571,7 +3571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recipients: PayoutRecipient[] = validRecipients.map(result => ({
         cycleWinnerSelectionId: result.winner.id,    // Required for orchestrator
         userId: result.winner.userId,                 // Required for orchestrator  
-        email: result.winner.paypalEmail!,           // PayPal API expects 'email' field
+        paypalEmail: result.winner.paypalEmail!.trim().toLowerCase(),  // Normalized email for PayPal API
         amount: result.validatedAmount,               // In cents, validated
         currency: "USD",
         note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`
@@ -3581,7 +3581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winnerData = recipients.map(r => ({
         id: r.cycleWinnerSelectionId,
         amount: r.amount,
-        email: r.email
+        email: r.paypalEmail
       }));
       const requestChecksum = storage.generateIdempotencyKey(cycleId, winnerData);
       
