@@ -3638,7 +3638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const concurrencyCheck = await checkConcurrentBatches(cycleId, deterministic_batch_id);
       if (concurrencyCheck.hasConflict) {
         logger.concurrency(`Concurrent batch detected: ${JSON.stringify(concurrencyCheck.conflictDetails)}`);
-        logger.end(0, recipients.length);
+        logger.end(0, 0);
         return res.status(409).json({
           error: "Concurrent disbursement in progress",
           details: "Another disbursement batch is currently being processed for this cycle. Please wait for it to complete.",
@@ -3653,7 +3653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const lockAcquired = await storage.acquireProcessingLock(cycleProcessingKey, lockExpiry);
       if (!lockAcquired) {
         logger.concurrency(`Failed to acquire processing lock for cycle ${cycleId}`);
-        logger.end(0, recipients.length);
+        logger.end(0, 0);
         return res.status(423).json({
           error: "Unable to acquire processing lock",
           details: "Could not secure exclusive processing rights for this cycle. Please try again."
@@ -3803,7 +3803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phase: 'route_execution'
       });
       
-      logger.end(0, (recipients?.length || 0) + (failedWinners?.length || 0) + (invalidAmountRecipients?.length || 0));
+      logger.end(0, totalEligibleCount || 0);
       
       console.error("[PHASE 1 CRITICAL ERROR] Error executing orchestrator transaction:", error);
       return res.status(500).json({ 
