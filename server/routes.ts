@@ -3540,37 +3540,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Winner selection must be sealed before processing disbursements" });
       }
 
-      // Phase 1: Filter to only winners with PayPal emails (final eligibility check)
-      const eligibleWinners = winners.filter(w => w.paypalEmail && w.paypalEmail.trim() !== '');
-      const failedWinners = winners.filter(w => !w.paypalEmail || w.paypalEmail.trim() === '');
+      // Step 2: Enhanced Email Validation and Recipient Processing
+      // Phase 1: Normalize all emails first for consistent processing
+      const normalizedWinners = winners.map(winner => ({
+        ...winner,
+        normalizedPaypalEmail: normalizeEmail(winner.paypalEmail)
+      }));
+
+      // Phase 2: Split into valid and invalid email recipients  
+      const validEmailWinners = normalizedWinners.filter(w => isValidPaypalEmail(w.paypalEmail));
+      const invalidEmailWinners = normalizedWinners.filter(w => !isValidPaypalEmail(w.paypalEmail));
       
-      // Log each failed winner with detailed reason
-      failedWinners.forEach(winner => {
-        logger.item(winner.userId, 0, 'failed', 'No PayPal email');
+      // Phase 3: Log invalid email winners with PII-safe masking
+      invalidEmailWinners.forEach(winner => {
+        const maskedEmail = winner.paypalEmail ? maskEmailForLogging(winner.paypalEmail) : '(empty)';
+        const reasonCode = !winner.paypalEmail ? EMAIL_VALIDATION_REASONS.MISSING_EMAIL 
+                         : winner.paypalEmail.trim() === '' ? EMAIL_VALIDATION_REASONS.EMPTY_EMAIL 
+                         : EMAIL_VALIDATION_REASONS.INVALID_FORMAT;
+        
+        logger.item(winner.userId, 0, 'failed', `Invalid PayPal email: ${maskedEmail}`);
+        logger.validation('EMAIL_VALIDATION_FAILED', `UserId: ${winner.userId}, Email: ${maskedEmail}, Reason: ${reasonCode}`);
       });
       
-      // Second zero-eligible guard after PayPal email filtering
-      if (eligibleWinners.length === 0) {
-        logger.audit('NO_PAYPAL_EMAILS_FOUND', {
+      // Phase 4: Empty batch protection after email validation
+      if (validEmailWinners.length === 0) {
+        const invalidEmailCount = invalidEmailWinners.length;
+        logger.audit('NO_VALID_PAYPAL_EMAILS_FOUND', {
           totalWinners: winners.length,
-          failedCount: failedWinners.length,
-          failedReasons: ['No PayPal email']
+          invalidEmailCount,
+          invalidReasons: ['missing_email', 'empty_email', 'invalid_format']
         });
-        logger.end(0, failedWinners.length);
+        logger.end(0, invalidEmailCount);
         return res.status(400).json({
-          error: "No winners with valid PayPal emails found",
-          details: "All selected winners are missing PayPal email addresses required for disbursement.",
-          failed: failedWinners.map(w => ({ 
+          error: "No valid PayPal recipients to process",
+          details: `0 valid, ${invalidEmailCount} invalid email(s). All selected winners have missing, empty, or invalid PayPal email addresses.`,
+          failed: invalidEmailWinners.map(w => ({ 
             id: w.id, 
             email: w.email, 
-            reason: "No PayPal email" 
+            reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT
           })),
+          skippedInvalidEmail: invalidEmailCount,
           totalEligible: totalEligibleCount
         });
       }
 
-      // Phase 1: Currency and amount validation for each winner
-      const validationResults = eligibleWinners.map(winner => {
+      // Phase 5: Currency and amount validation for valid email winners
+      const validationResults = validEmailWinners.map(winner => {
         const amount = winner.payoutFinal || winner.payoutCalculated || 0;
         const validation = validateCurrencyAmount(amount, 'USD');
         return {
@@ -3589,10 +3604,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         logger.item(winner.userId, winner.payoutFinal || 0, 'failed', `Amount validation: ${validation.error}`);
       });
 
-      // Third zero-eligible guard after amount validation
+      // Phase 6: Final zero-eligible guard after amount validation
       if (validRecipients.length === 0) {
         const allFailures = [
-          ...failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+          ...invalidEmailWinners.map(w => ({ id: w.id, email: w.email, reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT })),
           ...invalidAmountRecipients.map(r => ({ 
             id: r.winner.id, 
             email: r.winner.email, 
@@ -3601,33 +3616,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
         
         logger.audit('ALL_AMOUNTS_INVALID', {
-          totalWinners: eligibleWinners.length,
+          totalWinners: validEmailWinners.length,
+          invalidEmailCount: invalidEmailWinners.length,
+          invalidAmountCount: invalidAmountRecipients.length,
           validationErrors: invalidAmountRecipients.map(r => r.validation.error)
         });
         logger.end(0, allFailures.length);
         return res.status(400).json({
-          error: "No winners with valid payment amounts found",
-          details: "All selected winners have invalid payment amounts that cannot be processed.",
+          error: "No valid PayPal recipients to process",
+          details: `0 valid, ${invalidEmailWinners.length} invalid email(s), ${invalidAmountRecipients.length} invalid amount(s). No winners can be processed.`,
           failed: allFailures,
+          skippedInvalidEmail: invalidEmailWinners.length,
           totalEligible: totalEligibleCount
         });
       }
 
-      // Phase 1: Prepare PayPal recipients with proper sender_item_id format (ChatGPT fix)
+      // Phase 7: Build PayPal recipients using normalized emails (Step 2: Deterministic idempotency)
       const recipients: PayoutRecipient[] = validRecipients.map(result => ({
         cycleWinnerSelectionId: result.winner.id,    // Required for orchestrator
         userId: result.winner.userId,                 // Required for orchestrator  
-        paypalEmail: result.winner.paypalEmail!.trim().toLowerCase(),  // Normalized email for PayPal API
+        paypalEmail: result.winner.normalizedPaypalEmail,  // Use pre-normalized email for consistency
         amount: result.validatedAmount,               // In cents, validated
         currency: "USD",
         note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`
       }));
 
-      // Phase 1: Generate deterministic request checksum for idempotency (ChatGPT fix)
+      // Phase 8: Generate deterministic request checksum using ONLY valid recipients (Critical for idempotency)
       const winnerData = recipients.map(r => ({
         id: r.cycleWinnerSelectionId,
         amount: r.amount,
-        email: r.paypalEmail
+        email: r.paypalEmail  // Normalized email ensures deterministic checksum
       }));
       const requestChecksum = storage.generateIdempotencyKey(cycleId, winnerData);
       
@@ -3755,7 +3773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         const allFailures = [
-          ...failedWinners.map(w => ({ id: w.id, email: w.email, reason: "No PayPal email" })),
+          ...invalidEmailWinners.map(w => ({ id: w.id, email: w.email, reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT })),
           ...invalidAmountRecipients.map(r => ({ 
             id: r.winner.id, 
             email: r.winner.email, 
@@ -3920,7 +3938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           senderBatchId: orchestratorResult.phase1?.senderBatchId
         });
 
-        logger.end(0, recipients.length + failedWinners.length + invalidAmountRecipients.length);
+        logger.end(0, recipients.length + invalidEmailWinners.length + invalidAmountRecipients.length);
 
         return res.status(500).json({
           success: false,
