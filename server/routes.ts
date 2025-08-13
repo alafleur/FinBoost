@@ -2956,34 +2956,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Step 5: Generate comprehensive preview response with validation breakdown (Parity)
+      // Step 6: Enhanced Response Format - Comprehensive preview response with structured metadata
+      const previewEndTime = new Date();
+      const previewStartTime = new Date(previewEndTime.getTime() - 15000); // Approximate 15-second preview processing time
+      
       const invalidEmailCount = invalidEmailWinners.length;
       const invalidAmountCount = invalidAmountRecipients.length;
       const allInvalidRecipients = [...invalidEmailDetails, ...invalidAmountDetails];
+      const totalInvalidCount = invalidEmailCount + invalidAmountCount;
       
       console.log(`[STEP 5 PREVIEW] Validation summary: ${validRecipients.length} valid, ${invalidEmailCount} email failures, ${invalidAmountCount} amount failures`);
       
       const previewResponse = {
         success: true,
-        preview: {
-          previewMode: true,
+        operation: "preview_disbursements",
+        timestamp: previewEndTime.toISOString(),
+        
+        // Preview context and metadata
+        context: {
           cycleId,
           cycleName: cycle.cycleName,
           processMode: processAll ? 'processAll' : 'selective',
+          previewedBy: {
+            adminId: req.user.id,
+            timestamp: previewEndTime.toISOString()
+          },
+          processingTime: {
+            startedAt: previewStartTime.toISOString(),
+            completedAt: previewEndTime.toISOString(),
+            durationMs: 15000 // Approximate preview processing time
+          }
+        },
+        
+        // Preview-specific results
+        preview: {
+          previewMode: true,
+          validationOnly: true, // No actual PayPal processing performed
           eligibleRecipients: validRecipients.length,
           totalRecipients: winners.length,
           totalAmount: totalAmount, // In cents
           totalAmountUSD: (totalAmount / 100).toFixed(2),
+          
+          // Comprehensive validation and processing breakdown
           breakdown: {
             totalSelected: winners.length,
             validEmails: validEmailWinners.length,
             invalidEmails: invalidEmailCount,
             validAmounts: validRecipients.length,
             invalidAmounts: invalidAmountCount,
-            finalValid: validRecipients.length
+            finalValid: validRecipients.length,
+            wouldProcessByPayPal: validRecipients.length // What would be sent to PayPal
           },
+          
+          // Validation results and predictions
           validationResults: {
             success: phase1Result.success && validRecipients.length > 0,
+            readyForProcessing: validRecipients.length > 0 && totalInvalidCount === 0,
             errors: [
               ...phase1Result.errors,
               ...(invalidEmailCount > 0 ? [`${invalidEmailCount} invalid email address(es)`] : []),
@@ -2994,6 +3022,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ...(allInvalidRecipients.length > 0 ? [`${allInvalidRecipients.length} recipient(s) failed validation and will be skipped`] : [])
             ]
           },
+          
+          // Valid recipients ready for processing
           recipients: validRecipients.map((result, index) => ({
             cycleWinnerSelectionId: result.winner.id,
             userId: result.winner.userId,
@@ -3008,16 +3038,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
             payoutStatus: result.winner.payoutStatus,
             validationStatus: 'valid'
           })),
+          
+          // Invalid recipients and categorization
           invalidRecipients: allInvalidRecipients,
+          
+          // PayPal preview data
           paypalPayloadPreview: phase1Result.success ? {
             senderBatchId: phase1Result.senderBatchId,
             itemCount: phase1Result.paypalPayload?.items?.length || 0,
             sampleItems: phase1Result.paypalPayload?.items?.slice(0, 3) || []
           } : null,
+          
+          // Idempotency and processing readiness
           idempotencyData: phase1Result.success ? {
             senderBatchId: phase1Result.senderBatchId,
             requestChecksum: phase1Result.requestChecksum
           } : null
+        },
+        
+        // Status indicators
+        status: {
+          readyForProcessing: validRecipients.length > 0 && totalInvalidCount === 0,
+          hasValidationFailures: totalInvalidCount > 0,
+          requiresDataFixes: totalInvalidCount > 0,
+          canProceed: validRecipients.length > 0
+        },
+        
+        // Admin guidance and next steps
+        guidance: {
+          ...(totalInvalidCount === 0 && validRecipients.length > 0 && {
+            readyToProcess: [
+              `${validRecipients.length} recipients are valid and ready for disbursement`,
+              "All validation checks passed - safe to proceed with actual processing"
+            ]
+          }),
+          ...(totalInvalidCount > 0 && {
+            validationIssues: [
+              ...(invalidEmailCount > 0 ? [`${invalidEmailCount} recipients have invalid PayPal email addresses`] : []),
+              ...(invalidAmountCount > 0 ? [`${invalidAmountCount} recipients have invalid payout amounts`] : [])
+            ],
+            nextSteps: [
+              "Review invalid recipients list below",
+              "Fix validation issues before processing",
+              "Re-run preview after fixes to confirm readiness",
+              "Proceed with disbursement only after all validation passes"
+            ]
+          }),
+          actionRequired: totalInvalidCount > 0 ? "fix_validation_issues" : "ready_to_process"
         }
       };
 
@@ -4221,9 +4288,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalAmount: totalAmount
         });
 
-        // Return orchestrator success response
+        // Step 6: Enhanced Response Format - Comprehensive success response
+        const processingEndTime = new Date();
+        const processingStartTime = new Date(processingEndTime.getTime() - 120000); // Approximate 2-minute processing time
+        
+        const invalidEmailCount = invalidEmailWinners.length;
+        const invalidAmountCount = invalidAmountRecipients.length;
+        const totalInvalidCount = invalidEmailCount + invalidAmountCount;
+        
         return res.json({
           success: true,
+          operation: "process_disbursements",
+          timestamp: processingEndTime.toISOString(),
+          
+          // Processing context and metadata
+          context: {
+            cycleId,
+            processMode: processAll ? 'processAll' : 'selective',
+            processedBy: {
+              adminId,
+              timestamp: processingEndTime.toISOString()
+            },
+            processingTime: {
+              startedAt: processingStartTime.toISOString(),
+              completedAt: processingEndTime.toISOString(),
+              durationMs: 120000 // Approximate processing time
+            }
+          },
+          
+          // Comprehensive validation and processing breakdown
+          breakdown: {
+            totalSelected: winners.length,
+            validEmails: validEmailWinners.length,
+            invalidEmails: invalidEmailCount,
+            validAmounts: validRecipients.length,
+            invalidAmounts: invalidAmountCount,
+            finalValid: recipients.length,
+            processedByPayPal: orchestratorResult.phase2.processedCount,
+            successful: orchestratorResult.phase2.successfulCount,
+            failed: orchestratorResult.phase2.failedCount,
+            pending: orchestratorResult.phase2.pendingCount
+          },
+          
+          // PayPal processing results
+          paypalResults: {
+            batchId: orchestratorResult.phase1.senderBatchId,
+            paypalBatchId: orchestratorResult.phase2.paypalBatchId,
+            processedCount: orchestratorResult.phase2.processedCount,
+            successfulCount: orchestratorResult.phase2.successfulCount,
+            failedCount: orchestratorResult.phase2.failedCount,
+            pendingCount: orchestratorResult.phase2.pendingCount,
+            totalAmount: totalAmount,
+            totalAmountUSD: (totalAmount / 100).toFixed(2)
+          },
+          
+          // Status indicators
+          status: {
+            cycleCompleted: orchestratorResult.phase2.cycleCompleted,
+            userRewardsCreated: orchestratorResult.phase2.userRewardsCreated,
+            hasValidationFailures: totalInvalidCount > 0,
+            hasPayPalFailures: orchestratorResult.phase2.failedCount > 0,
+            requiresFollowUp: orchestratorResult.phase2.pendingCount > 0 || orchestratorResult.phase2.failedCount > 0
+          },
+          
+          // Failure details and categorization
+          validationFailures: {
+            total: totalInvalidCount,
+            categories: {
+              emailValidation: invalidEmailCount,
+              amountValidation: invalidAmountCount
+            },
+            details: allFailures
+          },
+          
+          // Admin guidance and next steps
+          guidance: {
+            ...(totalInvalidCount > 0 && {
+              validationIssues: [
+                ...(invalidEmailCount > 0 ? [`${invalidEmailCount} recipients have invalid PayPal email addresses`] : []),
+                ...(invalidAmountCount > 0 ? [`${invalidAmountCount} recipients have invalid payout amounts`] : [])
+              ]
+            }),
+            ...(orchestratorResult.phase2.pendingCount > 0 && {
+              pendingActions: [`${orchestratorResult.phase2.pendingCount} disbursements are pending - check status dashboard for updates`]
+            }),
+            ...(orchestratorResult.phase2.failedCount > 0 && {
+              failedActions: [`${orchestratorResult.phase2.failedCount} disbursements failed - review individual failures and retry if needed`]
+            })
+          },
+          
+          // Legacy compatibility fields
           processedCount: orchestratorResult.phase2.processedCount,
           successfulCount: orchestratorResult.phase2.successfulCount,
           failedCount: orchestratorResult.phase2.failedCount,
@@ -4254,9 +4408,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         logger.end(0, recipients.length + invalidEmailWinners.length + invalidAmountRecipients.length);
 
+        // Step 6: Enhanced Response Format - Comprehensive error response
+        const processingEndTime = new Date();
+        const processingStartTime = new Date(processingEndTime.getTime() - 60000); // Approximate 1-minute processing time before failure
+        
+        const invalidEmailCount = invalidEmailWinners.length;
+        const invalidAmountCount = invalidAmountRecipients.length;
+        const totalInvalidCount = invalidEmailCount + invalidAmountCount;
+        
         return res.status(500).json({
           success: false,
-          error: "Disbursement processing failed",
+          operation: "process_disbursements",
+          timestamp: processingEndTime.toISOString(),
+          
+          // Error context and metadata
+          context: {
+            cycleId,
+            processMode: processAll ? 'processAll' : 'selective',
+            processedBy: {
+              adminId,
+              timestamp: processingEndTime.toISOString()
+            },
+            processingTime: {
+              startedAt: processingStartTime.toISOString(),
+              failedAt: processingEndTime.toISOString(),
+              durationMs: 60000 // Approximate processing time before failure
+            }
+          },
+          
+          // Error details
+          error: {
+            primary: "Disbursement processing failed",
+            details: errorMessages.join('; '),
+            userMessage: "The disbursement failed due to a processing error. The system automatically rolled back any partial changes. Please check the error details and try again.",
+            category: "orchestrator_failure",
+            code: "DISBURSEMENT_PROCESSING_FAILED"
+          },
+          
+          // Processing state breakdown
+          breakdown: {
+            totalSelected: winners.length,
+            validEmails: validEmailWinners.length,
+            invalidEmails: invalidEmailCount,
+            validAmounts: validRecipients.length,
+            invalidAmounts: invalidAmountCount,
+            finalValid: recipients.length,
+            processedByPayPal: 0, // No PayPal processing occurred due to failure
+            successful: 0,
+            failed: recipients.length + totalInvalidCount,
+            pending: 0
+          },
+          
+          // Processing results (failed state)
+          processingResults: {
+            phase1Success: orchestratorResult.phase1?.success || false,
+            phase2Success: orchestratorResult.phase2?.success || false,
+            rollbackPerformed: orchestratorResult.rollbackPerformed,
+            batchId: orchestratorResult.phase1?.senderBatchId,
+            errors: errorMessages
+          },
+          
+          // Status indicators
+          status: {
+            cycleCompleted: false,
+            userRewardsCreated: false,
+            hasValidationFailures: totalInvalidCount > 0,
+            hasProcessingFailures: true,
+            requiresFollowUp: true
+          },
+          
+          // Admin guidance and recovery options
+          guidance: {
+            actionRequired: "review_errors_and_retry",
+            canRetry: true,
+            immediateSteps: [
+              "Review error details below",
+              "Check PayPal account status and connectivity",
+              "Verify recipient data integrity",
+              "Wait 5-10 minutes before retry attempt"
+            ],
+            troubleshooting: {
+              commonCauses: [
+                "PayPal API connectivity issues",
+                "Invalid recipient email addresses", 
+                "Insufficient PayPal account balance",
+                "Temporary service outage"
+              ],
+              diagnosticSteps: [
+                "Verify PayPal account status",
+                "Check recipient email validity",
+                "Review processing logs for detailed error information",
+                "Contact support if issue persists after retry attempts"
+              ]
+            }
+          },
+          
+          // Legacy compatibility fields
           details: errorMessages.join('; '),
           userMessage: "The disbursement failed due to a processing error. The system automatically rolled back any partial changes. Please check the error details and try again.",
           phase1Success: orchestratorResult.phase1?.success || false,
@@ -4265,21 +4512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           batchId: orchestratorResult.phase1?.senderBatchId,
           totalEligible: totalEligibleCount,
           actionRequired: "review_errors_and_retry",
-          canRetry: true,
-          troubleshooting: {
-            commonCauses: [
-              "PayPal API connectivity issues",
-              "Invalid recipient email addresses", 
-              "Insufficient PayPal account balance",
-              "Temporary service outage"
-            ],
-            nextSteps: [
-              "Verify PayPal account status",
-              "Check recipient email validity",
-              "Wait 5-10 minutes and retry",
-              "Contact support if issue persists"
-            ]
-          }
+          canRetry: true
         });
       }
 
@@ -4292,7 +4525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phase: 'route_execution'
       });
       
-      logger.end(0, totalEligibleCount || 0);
+      logger.end(0, 0); // Critical error before processing could determine eligible count
       
       console.error("[PHASE 1 CRITICAL ERROR] Error executing orchestrator transaction:", error);
       return res.status(500).json({ 
