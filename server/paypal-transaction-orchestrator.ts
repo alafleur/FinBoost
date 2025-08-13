@@ -127,6 +127,34 @@ export class PaypalTransactionOrchestrator {
   private static readonly MAX_AMOUNT_CENTS = 6000000; // $60,000 maximum per item
 
   // ========================================================================
+  // STEP 7: DEFENSIVE ORCHESTRATOR ENHANCEMENT - VALIDATION & PROTECTION
+  // ========================================================================
+  
+  // Input validation constraints
+  private static readonly MAX_EMAIL_LENGTH = 254; // RFC 5321 standard
+  private static readonly MIN_CYCLE_ID = 1;
+  private static readonly MAX_ADMIN_ID = 999999999;
+  private static readonly MAX_USER_ID = 999999999;
+  private static readonly MAX_TOTAL_AMOUNT_CENTS = 10000000000; // $100M safety limit
+  private static readonly MAX_REQUEST_ID_LENGTH = 500;
+  private static readonly MAX_SENDER_BATCH_ID_LENGTH = 127; // PayPal limit
+  
+  // Circuit breaker configuration
+  private static readonly CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
+  private static readonly CIRCUIT_BREAKER_TIMEOUT_MS = 300000; // 5 minutes
+  private static readonly CIRCUIT_BREAKER_HALF_OPEN_MAX_CALLS = 3;
+  
+  // Resource protection limits
+  private static readonly MAX_PROCESSING_TIME_MS = 1800000; // 30 minutes
+  private static readonly MAX_MEMORY_USAGE_MB = 512;
+  private static readonly MAX_CONCURRENT_OPERATIONS = 10;
+  
+  // Fail-safe timeouts
+  private static readonly PHASE1_TIMEOUT_MS = 300000; // 5 minutes
+  private static readonly PHASE2_TIMEOUT_MS = 600000; // 10 minutes
+  private static readonly ROLLBACK_TIMEOUT_MS = 180000; // 3 minutes
+
+  // ========================================================================
   // STEP 6: RETRY POLICY CONFIGURATION
   // ========================================================================
   
@@ -150,12 +178,234 @@ export class PaypalTransactionOrchestrator {
 
   private static readonly PROCESSING_LOCK_DURATION_MS = 600000; // 10 minutes
   private static readonly RERUN_COOLDOWN_MS = 60000; // 1 minute
+  
+  // ========================================================================
+  // STEP 7: CIRCUIT BREAKER STATE MANAGEMENT
+  // ========================================================================
+  
+  private static circuitBreakerState: {
+    state: 'closed' | 'open' | 'half-open';
+    failureCount: number;
+    lastFailureTime: Date | null;
+    successCount: number;
+  } = {
+    state: 'closed',
+    failureCount: 0,
+    lastFailureTime: null,
+    successCount: 0
+  };
+  
+  private static activeOperations = 0;
 
+  // ========================================================================
+  // STEP 7: DEFENSIVE VALIDATION METHODS
+  // ========================================================================
+  
   /**
-   * Main entry point for two-phase PayPal disbursement transactions
+   * Comprehensive input validation with fail-safe defaults
+   */
+  private validateTransactionContext(context: TransactionContext): { valid: boolean; errors: string[]; sanitized?: TransactionContext } {
+    const errors: string[] = [];
+    const sanitized: TransactionContext = { ...context };
+    
+    // Validate cycle ID
+    if (!context.cycleSettingId || typeof context.cycleSettingId !== 'number') {
+      errors.push('Invalid cycle ID: must be a positive number');
+    } else if (context.cycleSettingId < PaypalTransactionOrchestrator.MIN_CYCLE_ID) {
+      errors.push(`Cycle ID must be >= ${PaypalTransactionOrchestrator.MIN_CYCLE_ID}`);
+    }
+    
+    // Validate admin ID
+    if (!context.adminId || typeof context.adminId !== 'number') {
+      errors.push('Invalid admin ID: must be a positive number');
+    } else if (context.adminId > PaypalTransactionOrchestrator.MAX_ADMIN_ID) {
+      errors.push(`Admin ID exceeds maximum allowed value`);
+    }
+    
+    // Validate recipients array
+    if (!Array.isArray(context.recipients)) {
+      errors.push('Recipients must be an array');
+    } else if (context.recipients.length === 0) {
+      errors.push('Recipients array cannot be empty');
+    } else if (context.recipients.length > PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH) {
+      errors.push(`Too many recipients: ${context.recipients.length} exceeds limit of ${PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH}`);
+    } else {
+      // Validate each recipient
+      sanitized.recipients = context.recipients.map((recipient, index) => {
+        const sanitizedRecipient = { ...recipient };
+        
+        // Validate recipient structure
+        if (!recipient.cycleWinnerSelectionId || typeof recipient.cycleWinnerSelectionId !== 'number') {
+          errors.push(`Recipient ${index}: Invalid cycle winner selection ID`);
+        }
+        
+        if (!recipient.userId || typeof recipient.userId !== 'number') {
+          errors.push(`Recipient ${index}: Invalid user ID`);
+        } else if (recipient.userId > PaypalTransactionOrchestrator.MAX_USER_ID) {
+          errors.push(`Recipient ${index}: User ID exceeds maximum allowed value`);
+        }
+        
+        // Sanitize and validate email
+        if (!recipient.paypalEmail || typeof recipient.paypalEmail !== 'string') {
+          errors.push(`Recipient ${index}: Invalid PayPal email`);
+        } else {
+          sanitizedRecipient.paypalEmail = recipient.paypalEmail.trim().toLowerCase();
+          if (sanitizedRecipient.paypalEmail.length > PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH) {
+            errors.push(`Recipient ${index}: Email too long (${sanitizedRecipient.paypalEmail.length} > ${PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH})`);
+          }
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedRecipient.paypalEmail)) {
+            errors.push(`Recipient ${index}: Invalid email format`);
+          }
+        }
+        
+        // Validate amount
+        if (typeof recipient.amount !== 'number' || isNaN(recipient.amount)) {
+          errors.push(`Recipient ${index}: Invalid amount (must be a number)`);
+        } else if (recipient.amount < PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS) {
+          errors.push(`Recipient ${index}: Amount too low (${recipient.amount} < ${PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS})`);
+        } else if (recipient.amount > PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS) {
+          errors.push(`Recipient ${index}: Amount too high (${recipient.amount} > ${PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS})`);
+        }
+        
+        // Validate currency (default to USD if missing)
+        if (!recipient.currency || typeof recipient.currency !== 'string') {
+          sanitizedRecipient.currency = 'USD';
+        } else {
+          sanitizedRecipient.currency = recipient.currency.toUpperCase();
+          if (sanitizedRecipient.currency !== 'USD') {
+            errors.push(`Recipient ${index}: Only USD currency is supported`);
+          }
+        }
+        
+        return sanitizedRecipient;
+      });
+    }
+    
+    // Validate total amount
+    if (!context.totalAmount || typeof context.totalAmount !== 'number') {
+      errors.push('Invalid total amount: must be a positive number');
+    } else if (context.totalAmount > PaypalTransactionOrchestrator.MAX_TOTAL_AMOUNT_CENTS) {
+      errors.push(`Total amount exceeds safety limit: ${context.totalAmount} > ${PaypalTransactionOrchestrator.MAX_TOTAL_AMOUNT_CENTS}`);
+    }
+    
+    // Validate request ID
+    if (!context.requestId || typeof context.requestId !== 'string') {
+      errors.push('Invalid request ID: must be a non-empty string');
+    } else {
+      sanitized.requestId = context.requestId.trim();
+      if (sanitized.requestId.length > PaypalTransactionOrchestrator.MAX_REQUEST_ID_LENGTH) {
+        errors.push(`Request ID too long: ${sanitized.requestId.length} > ${PaypalTransactionOrchestrator.MAX_REQUEST_ID_LENGTH}`);
+      }
+    }
+    
+    // Validate sender batch ID
+    if (!context.senderBatchId || typeof context.senderBatchId !== 'string') {
+      errors.push('Invalid sender batch ID: must be a non-empty string');
+    } else {
+      sanitized.senderBatchId = context.senderBatchId.trim();
+      if (sanitized.senderBatchId.length > PaypalTransactionOrchestrator.MAX_SENDER_BATCH_ID_LENGTH) {
+        errors.push(`Sender batch ID too long: ${sanitized.senderBatchId.length} > ${PaypalTransactionOrchestrator.MAX_SENDER_BATCH_ID_LENGTH}`);
+      }
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors,
+      sanitized: errors.length === 0 ? sanitized : undefined
+    };
+  }
+  
+  /**
+   * Circuit breaker pattern implementation
+   */
+  private checkCircuitBreaker(): { allowed: boolean; reason?: string } {
+    const state = PaypalTransactionOrchestrator.circuitBreakerState;
+    const now = new Date();
+    
+    switch (state.state) {
+      case 'closed':
+        return { allowed: true };
+        
+      case 'open':
+        if (state.lastFailureTime && 
+            (now.getTime() - state.lastFailureTime.getTime()) > PaypalTransactionOrchestrator.CIRCUIT_BREAKER_TIMEOUT_MS) {
+          // Move to half-open state
+          state.state = 'half-open';
+          state.successCount = 0;
+          console.log('[STEP 7 DEFENSIVE] Circuit breaker moved to half-open state');
+          return { allowed: true };
+        }
+        return { 
+          allowed: false, 
+          reason: `Circuit breaker open due to ${state.failureCount} failures. Will retry after ${Math.ceil((PaypalTransactionOrchestrator.CIRCUIT_BREAKER_TIMEOUT_MS - (now.getTime() - (state.lastFailureTime?.getTime() || 0))) / 60000)} minutes.`
+        };
+        
+      case 'half-open':
+        if (state.successCount >= PaypalTransactionOrchestrator.CIRCUIT_BREAKER_HALF_OPEN_MAX_CALLS) {
+          // Close the circuit breaker
+          state.state = 'closed';
+          state.failureCount = 0;
+          state.lastFailureTime = null;
+          console.log('[STEP 7 DEFENSIVE] Circuit breaker closed after successful recovery');
+        }
+        return { allowed: true };
+    }
+  }
+  
+  /**
+   * Record circuit breaker operations
+   */
+  private recordCircuitBreakerResult(success: boolean): void {
+    const state = PaypalTransactionOrchestrator.circuitBreakerState;
+    
+    if (success) {
+      if (state.state === 'half-open') {
+        state.successCount++;
+      } else if (state.state === 'closed') {
+        // Reset failure count on successful operation
+        state.failureCount = Math.max(0, state.failureCount - 1);
+      }
+    } else {
+      state.failureCount++;
+      state.lastFailureTime = new Date();
+      
+      if (state.failureCount >= PaypalTransactionOrchestrator.CIRCUIT_BREAKER_FAILURE_THRESHOLD) {
+        state.state = 'open';
+        state.successCount = 0;
+        console.log(`[STEP 7 DEFENSIVE] Circuit breaker opened after ${state.failureCount} failures`);
+      }
+    }
+  }
+  
+  /**
+   * Resource protection and concurrent operation management
+   */
+  private async acquireOperationSlot(): Promise<{ acquired: boolean; reason?: string }> {
+    if (PaypalTransactionOrchestrator.activeOperations >= PaypalTransactionOrchestrator.MAX_CONCURRENT_OPERATIONS) {
+      return { 
+        acquired: false, 
+        reason: `Maximum concurrent operations reached: ${PaypalTransactionOrchestrator.activeOperations}/${PaypalTransactionOrchestrator.MAX_CONCURRENT_OPERATIONS}`
+      };
+    }
+    
+    PaypalTransactionOrchestrator.activeOperations++;
+    console.log(`[STEP 7 DEFENSIVE] Operation slot acquired (${PaypalTransactionOrchestrator.activeOperations}/${PaypalTransactionOrchestrator.MAX_CONCURRENT_OPERATIONS})`);
+    return { acquired: true };
+  }
+  
+  /**
+   * Release operation slot
+   */
+  private releaseOperationSlot(): void {
+    PaypalTransactionOrchestrator.activeOperations = Math.max(0, PaypalTransactionOrchestrator.activeOperations - 1);
+    console.log(`[STEP 7 DEFENSIVE] Operation slot released (${PaypalTransactionOrchestrator.activeOperations}/${PaypalTransactionOrchestrator.MAX_CONCURRENT_OPERATIONS})`);
+  }
+  
+  /**
+   * Enhanced main entry point with defensive mechanisms
    */
   async executeTransaction(context: TransactionContext): Promise<TransactionResult> {
-    console.log(`[STEP 4 ORCHESTRATOR] Starting two-phase transaction for ${context.recipients.length} recipients`);
+    console.log(`[STEP 7 DEFENSIVE] Starting defensive transaction validation for ${context.recipients.length} recipients`);
     
     const result: TransactionResult = {
       success: false,
@@ -173,66 +423,199 @@ export class PaypalTransactionOrchestrator {
       warnings: []
     };
 
+    let operationSlotAcquired = false;
+    const processingStartTime = new Date();
+    
     try {
       // ========================================================================
-      // PHASE 1: PREPARE - Create Intent and Validate
+      // STEP 7: DEFENSIVE LAYER 1 - INPUT VALIDATION
       // ========================================================================
-      console.log('[STEP 4 ORCHESTRATOR] PHASE 1: Starting preparation phase');
+      console.log('[STEP 7 DEFENSIVE] Layer 1: Validating transaction context');
       
-      result.phase1 = await this.executePhase1(context);
+      const validation = this.validateTransactionContext(context);
+      if (!validation.valid) {
+        console.error('[STEP 7 DEFENSIVE] Input validation failed:', validation.errors);
+        result.errors.push('Input validation failed');
+        result.errors.push(...validation.errors);
+        return result;
+      }
+      
+      // Use sanitized context for processing
+      const sanitizedContext = validation.sanitized!;
+      console.log('[STEP 7 DEFENSIVE] Input validation passed - using sanitized context');
+      
+      // ========================================================================
+      // STEP 7: DEFENSIVE LAYER 2 - CIRCUIT BREAKER CHECK
+      // ========================================================================
+      console.log('[STEP 7 DEFENSIVE] Layer 2: Checking circuit breaker state');
+      
+      const circuitCheck = this.checkCircuitBreaker();
+      if (!circuitCheck.allowed) {
+        console.error('[STEP 7 DEFENSIVE] Circuit breaker blocked operation:', circuitCheck.reason);
+        result.errors.push('Circuit breaker protection active');
+        result.errors.push(circuitCheck.reason || 'Service temporarily unavailable');
+        return result;
+      }
+      
+      console.log('[STEP 7 DEFENSIVE] Circuit breaker allows operation');
+      
+      // ========================================================================
+      // STEP 7: DEFENSIVE LAYER 3 - RESOURCE PROTECTION
+      // ========================================================================
+      console.log('[STEP 7 DEFENSIVE] Layer 3: Acquiring operation slot');
+      
+      const slotAcquisition = await this.acquireOperationSlot();
+      if (!slotAcquisition.acquired) {
+        console.error('[STEP 7 DEFENSIVE] Resource protection blocked operation:', slotAcquisition.reason);
+        result.errors.push('Resource protection active');
+        result.errors.push(slotAcquisition.reason || 'System at capacity');
+        return result;
+      }
+      
+      operationSlotAcquired = true;
+      console.log('[STEP 7 DEFENSIVE] Resource slot acquired successfully');
+      
+      // ========================================================================
+      // STEP 7: DEFENSIVE LAYER 4 - TIMEOUT WRAPPER
+      // ========================================================================
+      console.log('[STEP 7 DEFENSIVE] Layer 4: Starting transaction with timeout protection');
+      
+      const transactionPromise = this.executeDefensiveTransaction(sanitizedContext, result);
+      const timeoutPromise = new Promise<TransactionResult>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Transaction timeout after ${PaypalTransactionOrchestrator.MAX_PROCESSING_TIME_MS / 1000} seconds`));
+        }, PaypalTransactionOrchestrator.MAX_PROCESSING_TIME_MS);
+      });
+      
+      // Race between transaction completion and timeout
+      const finalResult = await Promise.race([transactionPromise, timeoutPromise]);
+      
+      // ========================================================================
+      // STEP 7: DEFENSIVE LAYER 5 - CIRCUIT BREAKER RECORDING
+      // ========================================================================
+      this.recordCircuitBreakerResult(finalResult.success);
+      
+      const processingDuration = new Date().getTime() - processingStartTime.getTime();
+      console.log(`[STEP 7 DEFENSIVE] Transaction completed in ${processingDuration}ms - Success: ${finalResult.success}`);
+      
+      return finalResult;
+
+    } catch (error) {
+      console.error('[STEP 7 DEFENSIVE] Critical defensive error:', error);
+      
+      // Record failure in circuit breaker
+      this.recordCircuitBreakerResult(false);
+      
+      result.errors.push(`Defensive orchestrator error: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Attempt emergency rollback if Phase 1 succeeded
+      if (result.phase1.success) {
+        try {
+          console.log('[STEP 7 DEFENSIVE] Attempting emergency rollback');
+          await Promise.race([
+            this.performRollback(result.phase1),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Rollback timeout')), PaypalTransactionOrchestrator.ROLLBACK_TIMEOUT_MS))
+          ]);
+          result.rollbackPerformed = true;
+          console.log('[STEP 7 DEFENSIVE] Emergency rollback completed');
+        } catch (rollbackError) {
+          console.error('[STEP 7 DEFENSIVE] Emergency rollback failed:', rollbackError);
+          result.errors.push(`Emergency rollback failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`);
+        }
+      }
+      
+      return result;
+      
+    } finally {
+      // ========================================================================
+      // STEP 7: DEFENSIVE CLEANUP - ALWAYS EXECUTED
+      // ========================================================================
+      if (operationSlotAcquired) {
+        this.releaseOperationSlot();
+      }
+      
+      const totalDuration = new Date().getTime() - processingStartTime.getTime();
+      console.log(`[STEP 7 DEFENSIVE] Defensive orchestrator cleanup completed - Total duration: ${totalDuration}ms`);
+    }
+  }
+  
+  /**
+   * Core transaction logic wrapped with defensive timeout handling
+   */
+  private async executeDefensiveTransaction(context: TransactionContext, result: TransactionResult): Promise<TransactionResult> {
+    console.log(`[STEP 7 DEFENSIVE] Starting core transaction for ${context.recipients.length} recipients`);
+    
+    try {
+      // ========================================================================
+      // PHASE 1: PREPARE - Create Intent and Validate (with timeout)
+      // ========================================================================
+      console.log('[STEP 7 DEFENSIVE] PHASE 1: Starting preparation phase with timeout protection');
+      
+      const phase1Promise = this.executePhase1(context);
+      const phase1TimeoutPromise = new Promise<Phase1Result>((_, reject) => {
+        setTimeout(() => reject(new Error('Phase 1 timeout')), PaypalTransactionOrchestrator.PHASE1_TIMEOUT_MS);
+      });
+      
+      result.phase1 = await Promise.race([phase1Promise, phase1TimeoutPromise]);
       
       if (!result.phase1.success) {
-        console.error('[STEP 4 ORCHESTRATOR] Phase 1 failed, aborting transaction');
+        console.error('[STEP 7 DEFENSIVE] Phase 1 failed, aborting transaction');
         result.errors.push('Phase 1 preparation failed');
         result.errors.push(...result.phase1.errors);
         return result;
       }
 
-      console.log(`[STEP 4 ORCHESTRATOR] Phase 1 completed successfully - Batch ID: ${result.phase1.batchId}`);
+      console.log(`[STEP 7 DEFENSIVE] Phase 1 completed successfully - Batch ID: ${result.phase1.batchId}`);
 
       // ========================================================================
-      // PHASE 2: COMMIT - Execute PayPal API and Update Database
+      // PHASE 2: COMMIT - Execute PayPal API and Update Database (with timeout)
       // ========================================================================
-      console.log('[STEP 4 ORCHESTRATOR] PHASE 2: Starting execution phase');
+      console.log('[STEP 7 DEFENSIVE] PHASE 2: Starting execution phase with timeout protection');
       
-      result.phase2 = await this.executePhase2(result.phase1);
+      const phase2Promise = this.executePhase2(result.phase1);
+      const phase2TimeoutPromise = new Promise<Phase2Result>((_, reject) => {
+        setTimeout(() => reject(new Error('Phase 2 timeout')), PaypalTransactionOrchestrator.PHASE2_TIMEOUT_MS);
+      });
+      
+      result.phase2 = await Promise.race([phase2Promise, phase2TimeoutPromise]);
       
       if (!result.phase2.success) {
-        console.error('[STEP 4 ORCHESTRATOR] Phase 2 failed, performing rollback');
-        await this.performRollback(result.phase1);
-        result.rollbackPerformed = true;
-        result.errors.push('Phase 2 execution failed, rollback performed');
+        console.error('[STEP 7 DEFENSIVE] Phase 2 failed, performing defensive rollback');
+        
+        // Defensive rollback with timeout
+        const rollbackPromise = this.performRollback(result.phase1);
+        const rollbackTimeoutPromise = new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Rollback timeout')), PaypalTransactionOrchestrator.ROLLBACK_TIMEOUT_MS);
+        });
+        
+        try {
+          await Promise.race([rollbackPromise, rollbackTimeoutPromise]);
+          result.rollbackPerformed = true;
+          console.log('[STEP 7 DEFENSIVE] Defensive rollback completed');
+        } catch (rollbackError) {
+          console.error('[STEP 7 DEFENSIVE] Defensive rollback failed:', rollbackError);
+          result.errors.push(`Defensive rollback failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`);
+        }
+        
+        result.errors.push('Phase 2 execution failed, defensive rollback performed');
         result.errors.push(...result.phase2.errors);
         return result;
       }
 
-      console.log(`[STEP 4 ORCHESTRATOR] Phase 2 completed successfully - PayPal Batch ID: ${result.phase2.paypalBatchId}`);
+      console.log(`[STEP 7 DEFENSIVE] Phase 2 completed successfully - PayPal Batch ID: ${result.phase2.paypalBatchId}`);
 
       // ========================================================================
       // TRANSACTION SUCCESS
       // ========================================================================
       result.success = true;
-      console.log(`[STEP 4 ORCHESTRATOR] Two-phase transaction completed successfully`);
-      console.log(`[STEP 4 ORCHESTRATOR] Results: ${result.phase2.successfulCount} successful, ${result.phase2.failedCount} failed, ${result.phase2.pendingCount} pending`);
+      console.log(`[STEP 7 DEFENSIVE] Defensive transaction completed successfully`);
+      console.log(`[STEP 7 DEFENSIVE] Results: ${result.phase2.successfulCount} successful, ${result.phase2.failedCount} failed, ${result.phase2.pendingCount} pending`);
 
       return result;
 
     } catch (error) {
-      console.error('[STEP 4 ORCHESTRATOR] Critical transaction error:', error);
-      result.errors.push(`Critical transaction error: ${error instanceof Error ? error.message : String(error)}`);
-      
-      // Attempt rollback if Phase 1 succeeded
-      if (result.phase1.success) {
-        try {
-          await this.performRollback(result.phase1);
-          result.rollbackPerformed = true;
-          console.log('[STEP 4 ORCHESTRATOR] Emergency rollback completed');
-        } catch (rollbackError) {
-          console.error('[STEP 4 ORCHESTRATOR] Emergency rollback failed:', rollbackError);
-          result.errors.push(`Emergency rollback failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`);
-        }
-      }
-      
+      console.error('[STEP 7 DEFENSIVE] Core transaction error:', error);
+      result.errors.push(`Core transaction error: ${error instanceof Error ? error.message : String(error)}`);
       return result;
     }
   }
@@ -572,7 +955,7 @@ export class PaypalTransactionOrchestrator {
       const recipients: PayoutRecipient[] = batchItems.map(item => ({
         cycleWinnerSelectionId: item.cycleWinnerSelectionId,
         userId: item.userId,
-        paypalEmail: item.recipientEmail,
+        paypalEmail: item.paypalEmail, // Fixed: use paypalEmail instead of recipientEmail
         amount: item.amount,
         currency: item.currency || 'USD',
         note: item.note || 'FinBoost monthly reward'
@@ -583,7 +966,8 @@ export class PaypalTransactionOrchestrator {
         adminId: batch.adminId || 1, // Fallback if not stored  
         recipients,
         totalAmount: recipients.reduce((sum, r) => sum + r.amount, 0),
-        requestId: batch.requestChecksum || batch.senderBatchId
+        requestId: batch.requestChecksum || batch.senderBatchId,
+        senderBatchId: batch.senderBatchId // Fixed: include required senderBatchId field
       };
 
     } catch (error) {
@@ -765,13 +1149,14 @@ export class PaypalTransactionOrchestrator {
     try {
       console.log('[STEP 4 PHASE 1] Starting validation and intent creation');
 
-      // Step 1.1: Validate business rules and prerequisites
-      const validationResult = await this.validateTransactionContext(context);
-      if (!validationResult.isValid) {
+      // Step 1.1: Validate business rules and prerequisites  
+      const validationResult = this.validateTransactionContext(context);
+      if (!validationResult.valid) {
         result.errors.push(...validationResult.errors);
         return result;
       }
-      result.warnings.push(...validationResult.warnings);
+      // Use sanitized context for further processing
+      const sanitizedContext = validationResult.sanitized || context;
 
       // Step 1.2: Generate idempotency safeguards
       const idempotencyData = this.generateIdempotencyData(context);
@@ -790,7 +1175,6 @@ export class PaypalTransactionOrchestrator {
         cycleSettingId: context.cycleSettingId,
         senderBatchId: result.senderBatchId,
         requestChecksum: result.requestChecksum,
-        status: 'intent', // Phase 1 status
         adminId: context.adminId,
         totalAmount: context.totalAmount,
         totalRecipients: context.recipients.length
@@ -1184,13 +1568,21 @@ export class PaypalTransactionOrchestrator {
     requestId?: string
   ): TransactionContext {
     const totalAmount = recipients.reduce((sum, r) => sum + r.amount, 0);
+    const finalRequestId = requestId || crypto.randomUUID();
+    
+    // Generate deterministic sender batch ID (from Gap 1 fix)
+    const requestChecksum = crypto.createHash('sha256')
+      .update(JSON.stringify({ cycleSettingId, recipients, totalAmount, requestId: finalRequestId }))
+      .digest('hex');
+    const senderBatchId = `cycle-${cycleSettingId}-${requestChecksum.slice(0, 16)}`;
     
     return {
       cycleSettingId,
       adminId,
       recipients,
       totalAmount,
-      requestId: requestId || crypto.randomUUID()
+      requestId: finalRequestId,
+      senderBatchId // Fixed: include required senderBatchId field
     };
   }
 }
