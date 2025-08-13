@@ -3561,6 +3561,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         logger.item(winner.userId, 0, 'failed', `Invalid PayPal email: ${maskedEmail}`);
         logger.validation('EMAIL_VALIDATION_FAILED', `UserId: ${winner.userId}, Email: ${maskedEmail}, Reason: ${reasonCode}`);
       });
+
+      // Step 3: Invalid Recipient Handling - Mark invalid emails as failed in database immediately
+      if (invalidEmailWinners.length > 0) {
+        try {
+          logger.audit('MARKING_INVALID_EMAILS_AS_FAILED', {
+            count: invalidEmailWinners.length,
+            winnerIds: invalidEmailWinners.map(w => w.id).slice(0, 10) // Log first 10 for audit
+          });
+
+          // Prepare detailed reason messages for each invalid email type
+          const invalidEmailUpdates = invalidEmailWinners.map(winner => {
+            let reasonMessage = 'Invalid PayPal email address';
+            let reasonDetails = '';
+            
+            if (!winner.paypalEmail) {
+              reasonDetails = 'No PayPal email provided';
+            } else if (winner.paypalEmail.trim() === '') {
+              reasonDetails = 'Empty PayPal email address';  
+            } else {
+              reasonDetails = 'Invalid PayPal email format';
+            }
+
+            return {
+              winnerId: winner.id,
+              reasonMessage: `${reasonMessage}: ${reasonDetails}`,
+              reasonCode: EMAIL_VALIDATION_REASONS.INVALID_FORMAT
+            };
+          });
+
+          // Update cycle_winner_selections for invalid email recipients
+          const invalidEmailWinnerIds = invalidEmailWinners.map(w => w.id);
+          await db.update(cycleWinnerSelections)
+            .set({
+              payoutStatus: 'failed',
+              payoutError: 'Invalid PayPal email address - unable to process disbursement',
+              lastModified: new Date(),
+              notificationDisplayed: false // Allow admin to see failure status
+            })
+            .where(inArray(cycleWinnerSelections.id, invalidEmailWinnerIds));
+
+          logger.audit('INVALID_EMAILS_MARKED_FAILED', {
+            updatedCount: invalidEmailWinnerIds.length,
+            reasonCode: EMAIL_VALIDATION_REASONS.INVALID_FORMAT,
+            timestamp: new Date().toISOString()
+          });
+
+          // Log each individual update for audit trail
+          invalidEmailUpdates.forEach(update => {
+            logger.validation('DATABASE_UPDATE_INVALID_EMAIL', 
+              `WinnerId: ${update.winnerId}, Reason: ${update.reasonMessage}, Code: ${update.reasonCode}`
+            );
+          });
+
+        } catch (dbError) {
+          logger.audit('DATABASE_UPDATE_FAILED_INVALID_EMAILS', {
+            error: dbError instanceof Error ? dbError.message : String(dbError),
+            affectedWinners: invalidEmailWinners.length
+          });
+          // Continue processing - don't fail entire batch due to database update issues
+          console.error('[STEP 3] Failed to mark invalid emails as failed in database:', dbError);
+        }
+      }
       
       // Phase 4: Empty batch protection after email validation
       if (validEmailWinners.length === 0) {
@@ -3603,6 +3665,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       invalidAmountRecipients.forEach(({ winner, validation }) => {
         logger.item(winner.userId, winner.payoutFinal || 0, 'failed', `Amount validation: ${validation.error}`);
       });
+
+      // Step 3: Invalid Recipient Handling - Mark invalid amounts as failed in database immediately
+      if (invalidAmountRecipients.length > 0) {
+        try {
+          logger.audit('MARKING_INVALID_AMOUNTS_AS_FAILED', {
+            count: invalidAmountRecipients.length,
+            winnerIds: invalidAmountRecipients.map(r => r.winner.id).slice(0, 10) // Log first 10 for audit
+          });
+
+          // Update cycle_winner_selections for invalid amount recipients
+          const invalidAmountWinnerIds = invalidAmountRecipients.map(r => r.winner.id);
+          await db.update(cycleWinnerSelections)
+            .set({
+              payoutStatus: 'failed',
+              payoutError: 'Invalid payout amount - unable to process disbursement',
+              lastModified: new Date(),
+              notificationDisplayed: false // Allow admin to see failure status
+            })
+            .where(inArray(cycleWinnerSelections.id, invalidAmountWinnerIds));
+
+          logger.audit('INVALID_AMOUNTS_MARKED_FAILED', {
+            updatedCount: invalidAmountWinnerIds.length,
+            reasonCode: 'invalid_payout_amount',
+            timestamp: new Date().toISOString()
+          });
+
+          // Log each individual amount validation failure for audit trail  
+          invalidAmountRecipients.forEach(({ winner, validation }) => {
+            logger.validation('DATABASE_UPDATE_INVALID_AMOUNT',
+              `WinnerId: ${winner.id}, Amount: ${winner.payoutFinal || winner.payoutCalculated || 0}, Error: ${validation.error}`
+            );
+          });
+
+        } catch (dbError) {
+          logger.audit('DATABASE_UPDATE_FAILED_INVALID_AMOUNTS', {
+            error: dbError instanceof Error ? dbError.message : String(dbError),
+            affectedWinners: invalidAmountRecipients.length
+          });
+          // Continue processing - don't fail entire batch due to database update issues
+          console.error('[STEP 3] Failed to mark invalid amounts as failed in database:', dbError);
+        }
+      }
 
       // Phase 6: Final zero-eligible guard after amount validation
       if (validRecipients.length === 0) {
