@@ -4650,7 +4650,15 @@ export class MemStorage implements IStorage {
         pointsDeducted: cycleWinnerSelections.pointsDeducted,
         pointsRolledOver: cycleWinnerSelections.pointsRolledOver,
         isWinner: sql<boolean>`true`, // All records in this table are winners
-        createdAt: cycleWinnerSelections.selectionDate
+        createdAt: cycleWinnerSelections.selectionDate,
+        // Step 9: Enhanced payout status fields for frontend integration
+        payoutStatus: cycleWinnerSelections.payoutStatus,
+        payoutOverride: cycleWinnerSelections.payoutOverride,
+        payoutFinal: cycleWinnerSelections.payoutFinal,
+        payoutCalculated: cycleWinnerSelections.payoutCalculated,
+        isSealed: cycleWinnerSelections.isSealed,
+        sealedAt: cycleWinnerSelections.sealedAt,
+        notificationDisplayed: cycleWinnerSelections.notificationDisplayed
       })
       .from(cycleWinnerSelections)
       .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
