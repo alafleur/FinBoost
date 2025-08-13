@@ -464,24 +464,31 @@ export const payoutBatches = pgTable("payout_batches", {
   uniqueAttempt: unique("payout_batches_cycle_checksum_attempt_unique").on(table.cycleSettingId, table.requestChecksum, table.attempt),
 }));
 
-// New: payout_batch_chunks (ChatGPT specification)
+// STEP 6: Payout Batch Chunks - Individual chunk processing within a batch
 export const payoutBatchChunks = pgTable("payout_batch_chunks", {
   id: serial("id").primaryKey(),
-  batchId: integer("batch_id").notNull(),        // FK to payout_batches.id (int)
-  chunkIndex: integer("chunk_index").notNull(),
-  status: text("status").notNull().default("created"),
-  itemsCount: integer("items_count").notNull(),
-  processedItems: integer("processed_items").notNull().default(0),
-  senderBatchId: text("sender_batch_id"),
-  paypalBatchId: text("paypal_batch_id"),
-  errorCode: text("error_code"),
-  errorMessage: text("error_message"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  uqBatchChunk: uniqueIndex("uq_payout_batch_chunks_batch_chunk").on(t.batchId, t.chunkIndex),
-  idxBatch: index("idx_payout_batch_chunks_batch").on(t.batchId),
-  idxStatus: index("idx_payout_batch_chunks_status").on(t.status),
+  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
+  chunkNumber: integer("chunk_number").notNull(), // 1, 2, 3, etc. - BACKEND EXPECTS THIS NAME
+  status: text("status").default("pending").notNull(), // pending, processing, completed, failed, cancelled
+  paypalBatchId: text("paypal_batch_id"), // Individual PayPal batch ID for this chunk
+  senderBatchId: text("sender_batch_id").notNull(), // chunk-specific sender batch ID
+  startIndex: integer("start_index").notNull(), // Starting recipient index in the full batch
+  endIndex: integer("end_index").notNull(), // Ending recipient index in the full batch
+  recipientCount: integer("recipient_count").notNull(), // Number of recipients in this chunk
+  totalAmount: integer("total_amount").notNull(), // Total amount for this chunk in cents
+  successfulCount: integer("successful_count").default(0).notNull(),
+  failedCount: integer("failed_count").default(0).notNull(),
+  pendingCount: integer("pending_count").default(0).notNull(),
+  processingStartedAt: timestamp("processing_started_at"), // When chunk processing began
+  processingCompletedAt: timestamp("processing_completed_at"), // When chunk processing finished
+  errorDetails: text("error_details"), // JSON string for chunk-specific errors
+  retryCount: integer("retry_count").default(0).notNull(), // Retry attempts for this chunk
+  lastRetryAt: timestamp("last_retry_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Unique constraint: one chunk number per batch
+  uniqueChunk: unique("payout_batch_chunks_batch_chunk_unique").on(table.batchId, table.chunkNumber),
 }));
 
 // New: payout_batch_items (ChatGPT specification)
