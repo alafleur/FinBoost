@@ -21,11 +21,12 @@
 
 import { createPaypalPayout, parseEnhancedPayoutResponse, getEnhancedPayoutStatus } from './paypal.js';
 import { storage } from './storage.js';
-import type { PayoutBatchChunk } from '@shared/schema';
 import { db } from './db.js'; // CHATGPT: Import db for transaction boundary
 import type { ParsedPayoutResponse, PayoutItemResult } from './paypal.js';
 import type { InsertPayoutBatch, InsertPayoutBatchItem, InsertPayoutBatchChunk, PayoutBatchChunk } from '@shared/schema.js';
 import crypto from 'crypto';
+// STEP 7: Import centralized email validation service
+import { emailValidationService, type EmailValidationResult } from './email-validation-service.js';
 
 // ============================================================================
 // Types and Interfaces for Two-Phase Transaction Pattern
@@ -358,21 +359,19 @@ export class PaypalTransactionOrchestrator {
   }
 
   /**
-   * Helper: Normalize email address (consistent with existing logic)
+   * STEP 7: Email normalization using centralized service
    */
   private normalizeEmail(email: string): string {
-    return email.trim().toLowerCase();
+    return emailValidationService.normalizeEmail(email);
   }
 
   /**
-   * Helper: Validate email format
+   * STEP 7: Centralized email validation using EmailValidationService
+   * Replaces legacy email validation methods with comprehensive validation
    */
   private isValidPaypalEmail(email: string): boolean {
-    const normalizedEmail = this.normalizeEmail(email);
-    if (normalizedEmail.length === 0 || normalizedEmail.length > PaypalTransactionOrchestrator.MAX_EMAIL_LENGTH) {
-      return false;
-    }
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+    const result = emailValidationService.validateEmail(email, 'paypal-transaction');
+    return result.isValid;
   }
 
   /**
@@ -1885,26 +1884,12 @@ export class PaypalTransactionOrchestrator {
   }
 
   /**
-   * STEP 4: Enhanced email validation with placeholder rejection
+   * STEP 7: Enhanced payout email validation using centralized service
+   * Comprehensive validation including placeholder detection and security checks
    */
   private isValidPayoutEmail(email: string): boolean {
-    if (!email || typeof email !== 'string') return false;
-    
-    const trimmed = email.trim();
-    if (trimmed.length === 0) return false;
-    if (trimmed.length > 254) return false; // RFC standard
-    if (!trimmed.includes('@')) return false;
-    
-    // STEP 4: Reject obvious placeholders
-    const placeholderPatterns = [
-      /^test@/i,
-      /^none@/i, 
-      /^noreply@/i,
-      /^placeholder@/i,
-      /^example@/i
-    ];
-    
-    return !placeholderPatterns.some(pattern => pattern.test(trimmed));
+    const result = emailValidationService.validateEmail(email, 'payout-validation');
+    return result.isValid;
   }
 
   /**
@@ -1926,22 +1911,10 @@ export class PaypalTransactionOrchestrator {
   }
 
   /**
-   * STEP 4: Mask emails for PII-safe logging
+   * STEP 7: Email masking using centralized service for consistent PII protection
    */
   private maskEmail(email: string): string {
-    if (!email || typeof email !== 'string') return 'invalid_email';
-    
-    const parts = email.split('@');
-    if (parts.length !== 2) return 'malformed_email';
-    
-    const localPart = parts[0];
-    const domain = parts[1];
-    
-    if (localPart.length <= 3) {
-      return `${localPart.charAt(0)}***@${domain}`;
-    }
-    
-    return `${localPart.substring(0, 2)}***@${domain}`;
+    return emailValidationService.maskEmail(email);
   }
 
   private validatePreparedData(phase1Result: Phase1Result): {
@@ -2230,30 +2203,18 @@ export class PaypalTransactionOrchestrator {
   /**
    * STEP 3: Deep PayPal email validation beyond basic format checks
    */
-  private validatePayPalEmail(email: string): { isValid: boolean; reason?: string } {
-    // Basic format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return { isValid: false, reason: 'invalid_email_format' };
-    }
-
-    // PayPal-specific validation rules
-    if (email.length > 254) {
-      return { isValid: false, reason: 'email_too_long' };
-    }
-
-    // Check for dangerous characters that could cause PayPal API issues
-    const dangerousChars = /[<>'"&]/;
-    if (dangerousChars.test(email)) {
-      return { isValid: false, reason: 'email_contains_dangerous_chars' };
-    }
-
-    // Normalize whitespace issues
-    if (email !== email.trim()) {
-      return { isValid: false, reason: 'email_has_whitespace' };
-    }
-
-    return { isValid: true };
+  /**
+   * STEP 7: Enhanced PayPal email validation using centralized service
+   * Returns detailed validation results with error codes and suggestions
+   */
+  private validatePayPalEmail(email: string): { isValid: boolean; reason?: string; suggestions?: string[] } {
+    const result = emailValidationService.validateEmail(email, 'paypal-validation');
+    
+    return {
+      isValid: result.isValid,
+      reason: result.errorCode || (result.isValid ? undefined : 'validation_failed'),
+      suggestions: result.suggestions
+    };
   }
 
   /**
@@ -2295,8 +2256,8 @@ export class PaypalTransactionOrchestrator {
     const errorTypes = new Set<string>();
 
     malformed.forEach(item => {
-      const reasons = item.reason.split(', ');
-      reasons.forEach(reason => {
+      const reasons = (item.reason as string).split(', ');
+      reasons.forEach((reason: string) => {
         errorTypes.add(reason);
         breakdown[reason] = (breakdown[reason] || 0) + 1;
       });
@@ -2318,9 +2279,12 @@ export class PaypalTransactionOrchestrator {
   // Utility Methods
   // ============================================================================
 
+  /**
+   * STEP 7: General email validation using centralized service
+   */
   private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const result = emailValidationService.validateEmail(email, 'general-validation');
+    return result.isValid;
   }
 
   // ========================================================================
@@ -2439,10 +2403,7 @@ export class PaypalTransactionOrchestrator {
       }));
 
       // Call PayPal API for this chunk
-      const paypalResponse = await createPaypalPayout(
-        context.cycleSettingId,
-        payoutRequest
-      );
+      const paypalResponse = await createPaypalPayout(payoutRequest);
 
       console.log(`[STEP 6 CHUNKING] Chunk ${chunkRecord.chunkNumber} PayPal response:`, paypalResponse.batch_header?.payout_batch_id);
 
