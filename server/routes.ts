@@ -2767,41 +2767,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Winner selection must be sealed before previewing disbursements" });
       }
 
-      // Filter to eligible winners and generate recipient data
-      const eligibleWinners = winners.filter(w => w.paypalEmail);
-      const ineligibleWinners = winners.filter(w => !w.paypalEmail);
+      // Step 5: Preview Endpoint Parity - Apply same email validation as main disbursement endpoint
+      console.log('[STEP 5 PREVIEW] Applying comprehensive email validation for preview parity');
+
+      // Phase 1: Normalize all emails first for consistent processing (Step 2 Parity)
+      const normalizedWinners = winners.map(winner => ({
+        ...winner,
+        normalizedPaypalEmail: normalizeEmail(winner.paypalEmail)
+      }));
+
+      // Phase 2: Split into valid and invalid email recipients (Step 2 Parity)
+      const validEmailWinners = normalizedWinners.filter(w => isValidPaypalEmail(w.paypalEmail));
+      const invalidEmailWinners = normalizedWinners.filter(w => !isValidPaypalEmail(w.paypalEmail));
       
-      if (eligibleWinners.length === 0) {
+      // Phase 3: Log invalid email winners with PII-safe masking (Step 3 Parity - Logging Only)
+      const invalidEmailDetails = invalidEmailWinners.map(winner => {
+        const maskedEmail = winner.paypalEmail ? maskEmailForLogging(winner.paypalEmail) : '(empty)';
+        const reasonCode = !winner.paypalEmail ? EMAIL_VALIDATION_REASONS.MISSING_EMAIL 
+                         : winner.paypalEmail.trim() === '' ? EMAIL_VALIDATION_REASONS.EMPTY_EMAIL 
+                         : EMAIL_VALIDATION_REASONS.INVALID_FORMAT;
+        
+        let reasonDetails = '';
+        if (!winner.paypalEmail) {
+          reasonDetails = 'No PayPal email provided';
+        } else if (winner.paypalEmail.trim() === '') {
+          reasonDetails = 'Empty PayPal email address';  
+        } else {
+          reasonDetails = 'Invalid PayPal email format';
+        }
+
+        console.log(`[STEP 5 PREVIEW] Invalid email: UserId ${winner.userId}, Email: ${maskedEmail}, Reason: ${reasonCode}`);
+        
+        return {
+          id: winner.id,
+          username: winner.username || 'Unknown',
+          email: winner.email,
+          paypalEmail: winner.paypalEmail || '(empty)',
+          reason: `Invalid PayPal email: ${reasonDetails}`,
+          reasonCode,
+          category: 'email_validation'
+        };
+      });
+
+      // Phase 4: Empty batch protection after email validation (Step 4 Parity)  
+      if (validEmailWinners.length === 0) {
+        const invalidEmailCount = invalidEmailWinners.length;
+        console.log(`[STEP 5 PREVIEW] Empty batch protection: 0 valid emails, ${invalidEmailCount} invalid emails`);
+        
         return res.json({
           success: true,
           preview: {
             previewMode: true,
             eligibleRecipients: 0,
             totalAmount: 0,
+            breakdown: {
+              totalSelected: winners.length,
+              validEmails: 0,
+              invalidEmails: invalidEmailCount,
+              validAmounts: 0,
+              invalidAmounts: 0,
+              finalValid: 0
+            },
             validationResults: {
-              errors: [],
-              warnings: ["No winners with valid PayPal emails found"]
+              errors: [`Email validation failed: 0 valid, ${invalidEmailCount} invalid email(s)`],
+              warnings: ["All selected winners have invalid PayPal email addresses"]
             },
             recipients: [],
             paypalPayloadPreview: null,
-            ineligibleRecipients: ineligibleWinners.map(w => ({
-              id: w.id,
-              username: w.username,
-              email: w.email,
-              reason: "No PayPal email"
-            }))
+            invalidRecipients: invalidEmailDetails,
+            userMessage: "All selected winners have invalid PayPal email addresses. Please update the winner email addresses before processing disbursements.",
+            actionRequired: "fix_paypal_emails",
+            nextSteps: [
+              "Review the invalid recipients list below",
+              "Update PayPal email addresses for invalid recipients", 
+              "Verify email addresses are in valid format (user@domain.com)",
+              "Retry preview after fixing email addresses"
+            ]
           }
         });
       }
 
-      // Create transaction context for Step 4 orchestrator
-      const recipients = eligibleWinners.map(winner => ({
-        cycleWinnerSelectionId: winner.id,
-        userId: winner.userId,
-        paypalEmail: winner.paypalEmail!,
-        amount: Math.round(parseFloat(winner.payoutFinal) * 100), // Convert to cents
+      // Phase 5: Currency and amount validation for valid email winners (Step 2 Parity)
+      const validationResults = validEmailWinners.map(winner => {
+        const amount = winner.payoutFinal || 0;
+        const validation = validateCurrencyAmount(amount, 'USD');
+        return {
+          winner,
+          validation,
+          validatedAmount: validation.normalizedAmount || 0,
+          originalAmount: amount
+        };
+      });
+
+      const validRecipients = validationResults.filter(r => r.validation.valid);
+      const invalidAmountRecipients = validationResults.filter(r => !r.validation.valid);
+
+      // Log amount validation failures for preview
+      const invalidAmountDetails = invalidAmountRecipients.map(({ winner, validation }) => {
+        console.log(`[STEP 5 PREVIEW] Invalid amount: UserId ${winner.userId}, Amount: ${winner.payoutFinal || 0}, Error: ${validation.error}`);
+        return {
+          id: winner.id,
+          username: winner.username || 'Unknown',
+          email: winner.email,
+          paypalEmail: winner.paypalEmail,
+          amount: winner.payoutFinal || 0,
+          reason: `Amount validation: ${validation.error}`,
+          category: 'amount_validation'
+        };
+      });
+
+      // Phase 6: Final empty batch protection after amount validation (Step 4 Parity)
+      if (validRecipients.length === 0) {
+        const invalidEmailCount = invalidEmailWinners.length;
+        const invalidAmountCount = invalidAmountRecipients.length;
+        const totalFailures = invalidEmailCount + invalidAmountCount;
+        
+        const allFailures = [...invalidEmailDetails, ...invalidAmountDetails];
+        
+        console.log(`[STEP 5 PREVIEW] Final empty batch protection: 0 valid recipients, ${totalFailures} total failures`);
+        
+        return res.json({
+          success: true,
+          preview: {
+            previewMode: true,
+            eligibleRecipients: 0,
+            totalAmount: 0,
+            breakdown: {
+              totalSelected: winners.length,
+              validEmails: validEmailWinners.length,
+              invalidEmails: invalidEmailCount,
+              validAmounts: validRecipients.length,
+              invalidAmounts: invalidAmountCount,
+              finalValid: 0
+            },
+            validationResults: {
+              errors: [`Final validation failed: 0 valid, ${invalidEmailCount} email failures, ${invalidAmountCount} amount failures`],
+              warnings: ["All selected winners failed validation checks"]
+            },
+            recipients: [],
+            paypalPayloadPreview: null,
+            invalidRecipients: allFailures,
+            userMessage: "All selected winners failed validation checks. Please review and fix the validation issues before processing disbursements.",
+            actionRequired: "fix_validation_issues",
+            nextSteps: [
+              `Fix ${invalidEmailCount} invalid PayPal email addresses`,
+              `Resolve ${invalidAmountCount} invalid payout amounts`, 
+              "Verify all winners have valid PayPal emails in format (user@domain.com)",
+              "Ensure all payout amounts are positive USD values",
+              "Retry preview after fixing all validation issues"
+            ]
+          }
+        });
+      }
+
+      // Step 5: Create transaction context using validated recipients with normalized emails (Parity)
+      const recipients = validRecipients.map(result => ({
+        cycleWinnerSelectionId: result.winner.id,
+        userId: result.winner.userId,
+        paypalEmail: result.winner.normalizedPaypalEmail,  // Use pre-normalized email for consistency
+        amount: result.validatedAmount,                     // Use validated amount in cents
         currency: "USD",
-        note: `FinBoost Cycle ${cycle.cycleName} Reward`
+        note: `FinBoost Cycle ${cycle.cycleName} Reward - Tier ${result.winner.tier}`
       }));
 
       const totalAmount = recipients.reduce((sum, r) => sum + r.amount, 0);
@@ -2830,7 +2956,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Generate comprehensive preview response
+      // Step 5: Generate comprehensive preview response with validation breakdown (Parity)
+      const invalidEmailCount = invalidEmailWinners.length;
+      const invalidAmountCount = invalidAmountRecipients.length;
+      const allInvalidRecipients = [...invalidEmailDetails, ...invalidAmountDetails];
+      
+      console.log(`[STEP 5 PREVIEW] Validation summary: ${validRecipients.length} valid, ${invalidEmailCount} email failures, ${invalidAmountCount} amount failures`);
+      
       const previewResponse = {
         success: true,
         preview: {
@@ -2838,33 +2970,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cycleId,
           cycleName: cycle.cycleName,
           processMode: processAll ? 'processAll' : 'selective',
-          eligibleRecipients: eligibleWinners.length,
+          eligibleRecipients: validRecipients.length,
           totalRecipients: winners.length,
           totalAmount: totalAmount, // In cents
           totalAmountUSD: (totalAmount / 100).toFixed(2),
-          validationResults: {
-            success: phase1Result.success,
-            errors: phase1Result.errors,
-            warnings: phase1Result.warnings
+          breakdown: {
+            totalSelected: winners.length,
+            validEmails: validEmailWinners.length,
+            invalidEmails: invalidEmailCount,
+            validAmounts: validRecipients.length,
+            invalidAmounts: invalidAmountCount,
+            finalValid: validRecipients.length
           },
-          recipients: eligibleWinners.map((winner, index) => ({
-            cycleWinnerSelectionId: winner.id,
-            userId: winner.userId,
-            username: winner.username,
-            email: winner.email,
-            paypalEmail: winner.paypalEmail,
-            tier: winner.tier,
-            tierRank: winner.tierRank,
+          validationResults: {
+            success: phase1Result.success && validRecipients.length > 0,
+            errors: [
+              ...phase1Result.errors,
+              ...(invalidEmailCount > 0 ? [`${invalidEmailCount} invalid email address(es)`] : []),
+              ...(invalidAmountCount > 0 ? [`${invalidAmountCount} invalid payout amount(s)`] : [])
+            ],
+            warnings: [
+              ...phase1Result.warnings,
+              ...(allInvalidRecipients.length > 0 ? [`${allInvalidRecipients.length} recipient(s) failed validation and will be skipped`] : [])
+            ]
+          },
+          recipients: validRecipients.map((result, index) => ({
+            cycleWinnerSelectionId: result.winner.id,
+            userId: result.winner.userId,
+            username: result.winner.username,
+            email: result.winner.email,
+            paypalEmail: result.winner.normalizedPaypalEmail, // Show normalized email
+            originalPaypalEmail: result.winner.paypalEmail,   // Show original for comparison
+            tier: result.winner.tier,
+            tierRank: result.winner.tierRank,
             amount: recipients[index].amount, // In cents
             amountUSD: (recipients[index].amount / 100).toFixed(2),
-            payoutStatus: winner.payoutStatus
+            payoutStatus: result.winner.payoutStatus,
+            validationStatus: 'valid'
           })),
-          ineligibleRecipients: ineligibleWinners.map(w => ({
-            id: w.id,
-            username: w.username,
-            email: w.email,
-            reason: "No PayPal email"
-          })),
+          invalidRecipients: allInvalidRecipients,
           paypalPayloadPreview: phase1Result.success ? {
             senderBatchId: phase1Result.senderBatchId,
             itemCount: phase1Result.paypalPayload?.items?.length || 0,
@@ -2877,7 +3021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      console.log(`[STEP 5 PREVIEW] Preview generated successfully: ${eligibleWinners.length} recipients, $${(totalAmount / 100).toFixed(2)} total`);
+      console.log(`[STEP 5 PREVIEW] Preview generated successfully: ${validRecipients.length} recipients, $${(totalAmount / 100).toFixed(2)} total`);
       res.json(previewResponse);
 
     } catch (error) {
