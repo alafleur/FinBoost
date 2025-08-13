@@ -542,11 +542,12 @@ export const insertWinnerAllocationTemplateSchema = createInsertSchema(winnerAll
   isDefault: true,
 });
 
-// Payout Batch insert schemas
+// Payout Batch insert schemas (CHATGPT: Added attempt field for retry-safe batches)
 export const insertPayoutBatchSchema = createInsertSchema(payoutBatches).pick({
   cycleSettingId: true,
   senderBatchId: true,
   requestChecksum: true,
+  attempt: true, // CHATGPT: Include attempt field for retry tracking
   totalAmount: true,
   totalRecipients: true,
   adminId: true,

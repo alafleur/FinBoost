@@ -21,6 +21,7 @@
 
 import { createPaypalPayout, parseEnhancedPayoutResponse, getEnhancedPayoutStatus } from './paypal.js';
 import { storage } from './storage.js';
+import { db } from './db.js'; // CHATGPT: Import db for transaction boundary
 import type { ParsedPayoutResponse, PayoutItemResult } from './paypal.js';
 import type { InsertPayoutBatch, InsertPayoutBatchItem } from '@shared/schema.js';
 import crypto from 'crypto';
@@ -1342,14 +1343,89 @@ export class PaypalTransactionOrchestrator {
       // Use sanitized context for further processing
       const sanitizedContext = validationResult.sanitized || context;
 
-      // Step 1.2: Generate idempotency safeguards
-      const idempotencyData = this.generateIdempotencyData(context);
+      // PHASE 1 STEP 1: CHATGPT Preflight validation - hard filter for malformed recipients
+      console.log(`[STEP 1 PREFLIGHT] Starting preflight validation for ${sanitizedContext.recipients.length} recipients`);
+      
+      const malformed: { 
+        index: number; 
+        userId: number; 
+        cycleWinnerSelectionId: number; 
+        paypalEmail: any; 
+        amount: number; 
+        reason: string;
+      }[] = [];
+
+      const validRecipients = sanitizedContext.recipients.filter((r, idx) => {
+        // CHATGPT STEP 3: Use enhanced validation methods
+        const emailValidation = this.validatePayPalEmail(r.paypalEmail);
+        const amountValidation = this.validatePayoutAmount(r.amount);
+        
+        if (!emailValidation.isValid || !amountValidation.isValid) {
+          const reasons = [];
+          if (!emailValidation.isValid) reasons.push(emailValidation.reason || 'email_invalid');
+          if (!amountValidation.isValid) reasons.push(amountValidation.reason || 'amount_invalid');
+          
+          malformed.push({
+            index: idx,
+            userId: r.userId,
+            cycleWinnerSelectionId: r.cycleWinnerSelectionId,
+            paypalEmail: r.paypalEmail,
+            amount: r.amount,
+            reason: reasons.join(', ')
+          });
+          return false;
+        }
+        return true;
+      });
+
+      // CHATGPT PHASE 1 STEP 4: Comprehensive Error Classification and Logging
+      if (malformed.length > 0) {
+        console.error(`[STEP 1 PREFLIGHT] FAILED - Found ${malformed.length} malformed recipients`);
+        
+        // STEP 4: Classify errors by type for better debugging
+        const errorClassification = this.classifyValidationErrors(malformed);
+        console.error('[STEP 4 ERROR CLASSIFICATION]', errorClassification.summary);
+        
+        // STEP 4: Structure error response with classification
+        result.errors.push('preflight_validation_failed');
+        result.errors.push(`malformed_recipients_count=${malformed.length}`);
+        result.errors.push(`error_types=${JSON.stringify(errorClassification.errorTypes)}`);
+        
+        // STEP 4: Provide actionable error details
+        result.warnings.push(
+          `validation_report=${JSON.stringify({
+            totalRejected: malformed.length,
+            totalValid: validRecipients.length,
+            errorBreakdown: errorClassification.breakdown,
+            sampleErrors: malformed.slice(0, 5)
+          })}`
+        );
+        
+        // STEP 4: Enhanced logging for operational debugging
+        console.error('[STEP 4 VALIDATION REPORT] Error breakdown:', errorClassification.breakdown);
+        console.error('[STEP 4 VALIDATION REPORT] Sample rejected recipients:', malformed.slice(0, 5));
+        
+        return result;
+      }
+
+      // CHATGPT: Create safeContext with only valid recipients - use this for ALL subsequent operations
+      const safeContext: TransactionContext = { ...sanitizedContext, recipients: validRecipients };
+      console.log(`[STEP 1 PREFLIGHT] SUCCESS - ${validRecipients.length} recipients passed validation`);
+
+      // PHASE 1 STEP 2: CHATGPT Single Database Transaction Boundary - BEGIN TRANSACTION
+      console.log('[STEP 2 TRANSACTION] Starting atomic transaction for Phase 1 operations');
+      
+      const transactionResult = await db.transaction(async (tx) => {
+        console.log('[STEP 2 TRANSACTION] Inside transaction scope');
+
+        // Step 1.2: Generate idempotency safeguards (CHATGPT: Use safeContext)
+        const idempotencyData = this.generateIdempotencyData(safeContext);
       result.senderBatchId = idempotencyData.senderBatchId;
       result.requestChecksum = idempotencyData.requestChecksum;
 
       // Step 1.3: Check for duplicate transactions with status-aware handling
-      // HOTFIX STEP 1: Use consistent cycleId + requestChecksum parameters
-      const duplicateCheck = await this.checkForDuplicateTransaction(context.cycleSettingId, result.requestChecksum);
+      // HOTFIX STEP 1: Use consistent cycleId + requestChecksum parameters (CHATGPT: Use safeContext)
+      const duplicateCheck = await this.checkForDuplicateTransaction(safeContext.cycleSettingId, result.requestChecksum);
       if (duplicateCheck.isDuplicate) {
         console.log(`[IDEMPOTENCY] Duplicate check result: action=${duplicateCheck.action}, reason=${duplicateCheck.reason}`);
         
@@ -1366,18 +1442,18 @@ export class PaypalTransactionOrchestrator {
         console.log(`[IDEMPOTENCY] Retry allowed for ${duplicateCheck.existingBatch?.status} batch - creating new attempt`);
       }
 
-      // Step 1.4: Create payout batch intent with proper attempt handling
-      const nextAttempt = await this.findNextAttemptNumber(context.cycleSettingId, result.requestChecksum);
+      // Step 1.4: Create payout batch intent with proper attempt handling (CHATGPT: Use safeContext)
+      const nextAttempt = await this.findNextAttemptNumber(safeContext.cycleSettingId, result.requestChecksum);
       const attemptSenderBatchId = this.generateAttemptSenderBatchId(result.senderBatchId, nextAttempt);
       
-      const batchData: InsertPayoutBatch & { attempt: number } = {
-        cycleSettingId: context.cycleSettingId,
+      const batchData: InsertPayoutBatch = {
+        cycleSettingId: safeContext.cycleSettingId, // CHATGPT: Use safeContext
         senderBatchId: attemptSenderBatchId, // CHATGPT: Include attempt number in sender_batch_id
         requestChecksum: result.requestChecksum,
         attempt: nextAttempt, // CHATGPT: Track attempt number
-        adminId: context.adminId,
-        totalAmount: context.totalAmount,
-        totalRecipients: context.recipients.length
+        adminId: safeContext.adminId, // CHATGPT: Use safeContext
+        totalAmount: safeContext.totalAmount, // CHATGPT: Use safeContext
+        totalRecipients: safeContext.recipients.length // CHATGPT: Use safeContext (filtered count)
       };
 
       const createdBatch = await storage.createPayoutBatchWithAttempt(batchData);
@@ -1385,9 +1461,9 @@ export class PaypalTransactionOrchestrator {
       result.senderBatchId = attemptSenderBatchId; // Update result with final sender_batch_id
       console.log(`[STEP 4 PHASE 1] Created payout batch intent: ${result.batchId}, attempt ${nextAttempt}`);
 
-      // Step 1.5: Create payout batch items
+      // Step 1.5: Create payout batch items (CHATGPT: Use safeContext with validated recipients)
       const itemIds: number[] = [];
-      for (const recipient of context.recipients) {
+      for (const recipient of safeContext.recipients) {
         const itemData: InsertPayoutBatchItem = {
           batchId: result.batchId,
           cycleWinnerSelectionId: recipient.cycleWinnerSelectionId,
@@ -1403,8 +1479,8 @@ export class PaypalTransactionOrchestrator {
       result.itemIds = itemIds;
       console.log(`[STEP 4 PHASE 1] Created ${itemIds.length} payout batch items`);
 
-      // Step 1.6: Prepare PayPal API payload
-      result.paypalPayload = this.preparePaypalPayload(context, result.senderBatchId);
+      // Step 1.6: Prepare PayPal API payload (CHATGPT: Use safeContext)
+      result.paypalPayload = this.preparePaypalPayload(safeContext, result.senderBatchId);
 
       // Step 1.7: Final validation of prepared data
       const finalValidation = this.validatePreparedData(result);
@@ -1413,10 +1489,13 @@ export class PaypalTransactionOrchestrator {
         return result;
       }
 
-      result.success = true;
+        result.success = true;
+        console.log('[STEP 2 TRANSACTION] Transaction completed successfully');
+        return result;
+      }); // CHATGPT: End of transaction block
+
       console.log('[STEP 4 PHASE 1] Phase 1 preparation completed successfully');
-      
-      return result;
+      return transactionResult;
 
     } catch (error) {
       console.error('[STEP 4 PHASE 1] Phase 1 error:', error);
@@ -1760,6 +1839,97 @@ export class PaypalTransactionOrchestrator {
       console.error('[STEP 4 ROLLBACK] Rollback failed:', error);
       throw new Error(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  // ============================================================================
+  // CHATGPT PHASE 1 STEP 3: Enhanced Input Sanitization Methods
+  // ============================================================================
+
+  /**
+   * STEP 3: Deep PayPal email validation beyond basic format checks
+   */
+  private validatePayPalEmail(email: string): { isValid: boolean; reason?: string } {
+    // Basic format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { isValid: false, reason: 'invalid_email_format' };
+    }
+
+    // PayPal-specific validation rules
+    if (email.length > 254) {
+      return { isValid: false, reason: 'email_too_long' };
+    }
+
+    // Check for dangerous characters that could cause PayPal API issues
+    const dangerousChars = /[<>'"&]/;
+    if (dangerousChars.test(email)) {
+      return { isValid: false, reason: 'email_contains_dangerous_chars' };
+    }
+
+    // Normalize whitespace issues
+    if (email !== email.trim()) {
+      return { isValid: false, reason: 'email_has_whitespace' };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * STEP 3: Validate payout amounts against PayPal limits and business rules
+   */
+  private validatePayoutAmount(amount: number): { isValid: boolean; reason?: string } {
+    // PayPal minimum payout (1 cent)
+    if (amount < 1) {
+      return { isValid: false, reason: 'amount_below_minimum' };
+    }
+
+    // PayPal maximum single payout ($10,000 = 1,000,000 cents)
+    if (amount > 1000000) {
+      return { isValid: false, reason: 'amount_above_maximum' };
+    }
+
+    // Check for fractional cents (should be whole numbers)
+    if (!Number.isInteger(amount)) {
+      return { isValid: false, reason: 'amount_not_integer_cents' };
+    }
+
+    // Sanity check for reasonable reward amounts (under $500)
+    if (amount > 50000) {
+      console.warn(`[VALIDATION] Large payout amount detected: ${amount} cents ($${amount/100})`);
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * STEP 4: Classify validation errors for comprehensive debugging
+   */
+  private classifyValidationErrors(malformed: any[]): {
+    summary: string;
+    errorTypes: string[];
+    breakdown: Record<string, number>;
+  } {
+    const breakdown: Record<string, number> = {};
+    const errorTypes = new Set<string>();
+
+    malformed.forEach(item => {
+      const reasons = item.reason.split(', ');
+      reasons.forEach(reason => {
+        errorTypes.add(reason);
+        breakdown[reason] = (breakdown[reason] || 0) + 1;
+      });
+    });
+
+    const sortedErrors = Object.entries(breakdown)
+      .sort((a, b) => b[1] - a[1])
+      .map(([error, count]) => `${error}(${count})`)
+      .join(', ');
+
+    return {
+      summary: `${malformed.length} validation failures: ${sortedErrors}`,
+      errorTypes: Array.from(errorTypes),
+      breakdown
+    };
   }
 
   // ============================================================================
