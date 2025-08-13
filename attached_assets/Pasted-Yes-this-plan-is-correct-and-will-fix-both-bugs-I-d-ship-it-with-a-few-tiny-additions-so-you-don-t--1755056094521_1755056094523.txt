@@ -1,0 +1,41 @@
+Yes—this plan is correct and will fix both bugs. I’d ship it with a few tiny additions so you don’t create new edge-case issues.
+
+### ✅ Your steps (agree)
+
+* **Step 1 (mapping):** Change `email` → `paypalEmail` in the recipient mapper **and** in the checksum inputs.
+* **Step 2 (eligibility):** Use `eq(isSealed, true)` and update status filter.
+* **Step 3–4 (tests/validation):** Exactly right.
+
+### 🔧 Add these small safeguards (1–2 min each)
+
+1. **Normalize emails before checksum & send**
+
+   * Trim + lowercase (`paypalEmail.trim().toLowerCase()`), or you’ll get checksum mismatches and occasional PayPal rejections due to case/whitespace.
+
+2. **Sender item ID format (double-check)**
+
+   * Ensure you still send `sender_item_id = 'winner-{cycleWinnerSelectionId}-{userId}'` so the parser maps items back to rows.
+
+3. **Think about including `processing`**
+
+   * If there’s any chance a batch is running, filtering `processing` winners can collide with the in-flight batch.
+   * If you keep `processing` in eligibility, also ensure your **advisory lock** (per cycle) is active so you never double-pick in concurrent runs.
+   * Safer default for bulk runs is **`['pending']` only** unless you’re explicitly retrying stuck items.
+
+4. **Zero-eligible guard**
+
+   * If after filtering there are 0 recipients, return a 400 with a clear message (prevents empty “success”).
+
+5. **Preview parity**
+
+   * Make sure the **preview** endpoint and **process** endpoint use **identical** filters and field names; otherwise preview will say “750 eligible” and process will see 0.
+
+### 🧪 Quick validation script (what to look for)
+
+* **Selective (5 IDs):** No “Invalid PayPal email … undefined” logs; PayPal payload shows proper emails.
+* **Bulk (processAll):** Eligible ≈ 750; batch created with deterministic `sender_batch_id`; items have correct `sender_item_id`.
+* **Idempotency:** Re-run immediately → returns existing batch summary, no new PayPal call.
+* **DB state:** `payout_status` flips to `completed/failed/pending`; `notification_displayed=false` for completed; cycle → `completed`/`partially_completed`.
+* **History/Banner:** Rewards history populated; banner shows and dismiss persists.
+
+Make those small additions and you’re good to push.
