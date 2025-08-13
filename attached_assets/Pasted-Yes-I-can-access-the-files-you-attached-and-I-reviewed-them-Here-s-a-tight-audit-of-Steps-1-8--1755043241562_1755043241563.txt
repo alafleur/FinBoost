@@ -1,0 +1,103 @@
+Yes—I can access the files you attached, and I reviewed them. Here’s a tight audit of **Steps 1–8** based on the code in your uploads:
+
+# Verdict by step
+
+**Step 1 – Batch intent & idempotency infra (schema + storage): ✅ Implemented**
+
+* `shared/schema.ts` defines `payoutBatches` and `payoutBatchItems` with the right fields (e.g., `senderBatchId`, `requestChecksum`, per-item `paypalItemId`, `status`, `errorMessage`, etc.).
+* `server/storage.ts` has the Step-1 helpers: `createPayoutBatch`, `createPayoutBatchItem`, `getPayoutBatch`, `getPayoutBatchItems`, `getPayoutBatchesByCycle`, `generateIdempotencyKey`, `checkExistingBatch`. Looks good.
+
+**Step 2 – Enhanced PayPal parsing: ✅ Implemented**
+
+* `server/paypal.ts` parses batch + items and maps statuses including `SUCCESS/COMPLETED → success`, `PENDING/UNCLAIMED/ONHOLD → pending|unclaimed`, `FAILED/DENIED → failed`.
+* It expects to recover IDs from **`sender_item_id` formatted as `winner-{cycleWinnerSelectionId}-{userId}`** (see `extractWinnerIds()`).
+
+**Step 3 – Storage integration methods: ✅ Implemented**
+
+* `server/storage.ts` includes the Step-3 functions (e.g., `processPaypalResponseResults`, `updatePayoutBatchFromParsedResponse`, `updatePayoutBatchItemsFromResults`, `updateCycleStatusAfterDisbursement`, etc.). Signatures and responsibilities look right.
+
+**Step 4 – Two-phase transaction pattern in the route: ❌ Not wired through the main route**
+
+* In `server/routes.ts`, the **primary endpoint** `/api/admin/winner-cycles/:cycleId/process-disbursements` does **not** use Step-1/3 infra:
+
+  * No call to `createPayoutBatch` / no `requestChecksum` idempotency.
+  * Generates a non-deterministic `batchId = 'batch_${cycleId}_${Date.now()}'` only for logging.
+  * Calls `createPaypalPayout` directly, then runs a DB transaction that sets winners to `processing` and inserts `paypalPayouts` with **`status: "pending"`**—but does **not** finalize per-item results or flip winners to `completed/failed`.
+  * Critically, the **`sender_item_id`** sent to PayPal is currently `user_${userId}_cycle_${cycleId}_${Date.now()}`. That **won’t match** the parser’s `winner-{selectionId}-{userId}` pattern, so you can’t map PayPal items back to winner rows later.
+  * Cycle completion status is not set here.
+* Net: Step-4 logic exists (in storage/orchestrator), but the main route isn’t using it yet.
+
+**Step 5 – Dry-run preview endpoint: ✅ Implemented**
+
+* `/api/admin/winner-cycles/:cycleId/preview-disbursements` exists and imports a `PaypalTransactionOrchestrator`. It computes eligibility and returns a preview. Good.
+
+**Step 6 – Retry / admin overrides: ✅ Implemented**
+
+* `/api/admin/disbursements/:batchId/retry` exists and uses the orchestrator.
+
+**Step 7 – Reconcile endpoint: ✅ Implemented**
+
+* `/api/admin/payout-batches/:batchId/reconcile` exists, fetches latest PayPal batch status, and updates counts.
+
+**Step 8 – Guardrails & observability: ◑ Partially implemented**
+
+* There’s structured logging (`createBatchLogger`), currency/amount validation, and a concurrency check using `getPayoutBatchesByCycle`.
+* I didn’t see rate-limiting on the endpoint, and idempotency isn’t enforced in the main route (see Step-4 note).
+
+---
+
+# What to fix now (minimal, surgical changes)
+
+1. **Standardize `sender_item_id`**
+   In the route where recipients are built, set:
+
+   ```
+   sender_item_id = `winner-${cycleWinnerSelectionId}-${userId}`
+   ```
+
+   so `server/paypal.ts` can map each PayPal item back to the correct winner.
+
+2. **Use the two-phase infra in the main route**
+   Replace the in-route ad-hoc flow with:
+
+   * **Phase A (intent):** `createPayoutBatch(...)` with deterministic `senderBatchId` and `requestChecksum`; `markWinnersProcessing([...])`.
+   * Call PayPal.
+   * **Phase B (finalize):** parse with the new parser, then `finalizePayoutResults(batchId, parsedResults)` and `updateCycleStatusAfterDisbursement(cycleId, adminId)`.
+   * Return a summary from storage (counts, success/failed/pending, cycle status).
+
+3. **Add idempotency check in the route**
+
+   * Before calling PayPal, recompute `requestChecksum` and use `checkExistingBatch(checksum)`. If it exists (non-failed), return that batch summary instead of paying again.
+
+4. **Flip user-visible flags**
+
+   * On success in `finalizePayoutResults`, ensure winners get `payout_status='completed'` (or equivalent), and set `notification_displayed=false` so banners show.
+   * Confirm `/api/cycles/rewards/history` reads from the updated tables/columns.
+
+5. **Optional but wise:** basic rate-limit on the admin disbursement route to prevent rapid double-clicks.
+
+---
+
+# Quick pass/fail you can run (staging)
+
+* **Preview**: POST preview endpoint → you get accurate counts.
+* **Live run**: POST process-disbursements →
+
+  * A `payout_batches` row exists with deterministic `senderBatchId` and `requestChecksum`.
+  * `payout_batch_items` rows exist with `paypalItemId` and mapped statuses.
+  * `cycle_winner_selections` statuses become `completed/failed/pending` accordingly.
+  * `cycle_settings.status` becomes `completed` or `partially_completed`.
+  * Winners see entries in Rewards History; celebration banner shows (and can be dismissed).
+* **Re-run**: same inputs → **no new PayPal call**; a prior batch summary is returned (idempotency).
+* **Retry failed only**: works and does not touch already completed winners.
+* **Reconcile**: moves `pending/unclaimed` to final states when PayPal updates.
+
+---
+
+## Bottom line
+
+* **Steps 1–3, 5–7**: implemented.
+* **Step 8**: partially.
+* **Step 4 (critical integration)**: **not** correctly wired in the main `/process-disbursements` route.
+
+If Replit swaps the main route to use the existing Step-1/3 infra (or the orchestrator) and fixes the `sender_item_id` format, you’ll have the production-grade, idempotent flow you asked for.
