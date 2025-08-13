@@ -1,0 +1,186 @@
+Thanks — I’ve got the file and the repro notes. Here’s a tight plan and drop-in patches so this can’t happen again.
+
+## What’s happening (why PayPal sees `receiver: null`)
+
+Your orchestrator already validates recipients, but the **payload is still built directly from `context.recipients`** and you proceed to Phase 2 whenever `validateTransactionContext` returns `valid`. Any pathway that passes an array containing recipients whose `paypalEmail` is `null`/`""` (e.g., from a partial sanitize, a stale caller, or a mismatched shape) will still map those into `items[].receiver`. That’s exactly what PayPal is complaining about.
+
+So we need **belt-and-suspenders guards** right before we:
+
+1. create payout batch items in storage, and
+2. build the PayPal payload.
+
+If *any* recipient is missing a usable email, we must **fail fast before calling PayPal** and give you a clear list of the offenders.
+
+---
+
+## Minimal, safe fixes (copy-paste patches)
+
+### 1) Add a hard preflight filter + fail-fast (Phase 1)
+
+Insert this **right after** `const validationResult = this.validateTransactionContext(context);` succeeds and **before** you create batch items:
+
+```ts
+// NEW: Hard preflight against malformed recipients (null/empty emails, zero/negative amounts)
+const malformed: { index: number; userId: number; cycleWinnerSelectionId: number; paypalEmail: any; amount: number; }[] = [];
+const validRecipients = context.recipients.filter((r, idx) => {
+  const emailOk = typeof r.paypalEmail === 'string' && r.paypalEmail.trim().length > 0;
+  const amtOk   = typeof r.amount === 'number' && r.amount > 0;
+  if (!emailOk || !amtOk) {
+    malformed.push({
+      index: idx,
+      userId: r.userId,
+      cycleWinnerSelectionId: r.cycleWinnerSelectionId,
+      paypalEmail: r.paypalEmail,
+      amount: r.amount
+    });
+    return false;
+  }
+  return true;
+});
+
+if (malformed.length > 0) {
+  // Do NOT proceed; surface a precise error payload for ops
+  result.errors.push('preflight_rejected_malformed_recipients');
+  result.errors.push(`malformed_count_${malformed.length}`);
+  // Keep it compact but actionable
+  result.warnings.push(
+    `malformed_examples=${JSON.stringify(malformed.slice(0, 10))}` // first 10 only
+  );
+  console.error('[STEP 4 PHASE 1] Preflight failed; malformed recipients detected:', malformed.length);
+  return result;
+}
+
+// IMPORTANT: use the filtered array for all subsequent steps in Phase 1
+const safeContext: TransactionContext = { ...context, recipients: validRecipients };
+```
+
+Then, in the rest of **Phase 1**, replace uses of `context` with `safeContext`:
+
+* While creating batch items
+* When building the PayPal payload
+* When generating checksums
+
+Example adjustments:
+
+```ts
+// Step 1.4: Create payout batch items (use safeContext)
+for (const recipient of safeContext.recipients) {
+  // ... unchanged fields ...
+}
+
+// Step 1.6: Prepare PayPal API payload (use safeContext)
+result.paypalPayload = this.preparePaypalPayload(safeContext, result.senderBatchId);
+
+// (If you compute idempotency/hash) also use safeContext
+const { senderBatchId, requestChecksum } = this.generateIdempotencyData(safeContext);
+```
+
+### 2) Make `preparePaypalPayload` self-defensive
+
+Even though we pass `safeContext`, add a redundant guard so a future caller can’t foot-gun:
+
+```ts
+private preparePaypalPayload(context: TransactionContext, senderBatchId: string): any {
+  const items = (context.recipients || []).filter(r =>
+    typeof r.paypalEmail === 'string' && r.paypalEmail.trim().length > 0 &&
+    typeof r.amount === 'number' && r.amount > 0
+  ).map((recipient) => ({
+    recipient_type: "EMAIL",
+    amount: {
+      value: (recipient.amount / 100).toFixed(2),
+      currency: recipient.currency
+    },
+    receiver: recipient.paypalEmail.trim().toLowerCase(),
+    note: recipient.note || "FinBoost monthly reward",
+    sender_item_id: `winner-${recipient.cycleWinnerSelectionId}-${recipient.userId}`
+  }));
+
+  if (items.length === 0) {
+    throw new Error('preparePaypalPayload_no_valid_items');
+  }
+
+  return {
+    sender_batch_header: {
+      sender_batch_id: senderBatchId,
+      email_subject: "FinBoost Reward Payout",
+      email_message: "You have received a reward payout from FinBoost!"
+    },
+    items
+  };
+}
+```
+
+### 3) Block Phase 2 if `items.length` changed unexpectedly
+
+After building the payload, assert counts so a silent drop of recipients can’t slip by:
+
+```ts
+if (result.paypalPayload.items.length !== safeContext.recipients.length) {
+  result.errors.push('prepared_items_count_mismatch');
+  result.warnings.push(`expected=${safeContext.recipients.length}, prepared=${result.paypalPayload.items.length}`);
+  return result;
+}
+```
+
+### 4) Defensive call to your API wrapper
+
+If your `createPaypalPayout` expects the **full** PayPal body (header + items), pass `result.paypalPayload` (not only `.items`). If it expects only items, keep as is — but I strongly recommend the full body:
+
+```ts
+// Prefer this if your wrapper accepts the full payload:
+const paypalResponse = await createPaypalPayout(result.paypalPayload);
+
+// If your wrapper only accepts items, leave it – but document it clearly.
+```
+
+---
+
+## Quick data hygiene sweep (one-time + recurring)
+
+1. **Surface a remediation list** whenever preflight fails
+   Store `malformed` to an admin-visible table for manual fix:
+
+* `cycle_id, selection_id, user_id, paypal_email, amount, reason`
+
+2. **Backfill job** (safe, idempotent):
+
+* For any `cycle_winner_selection` with `paypal_email IS NULL`, join to `users.billing_paypal_email` (or your canonical profile email field), and update selections where appropriate.
+* Exclude users who **never** provided a PayPal email — keep them in the remediation list instead of guessing.
+
+3. **Upstream integrity rule** (at selection time):
+
+* When you create `winners`/`selections`, enforce `paypal_email IS NOT NULL` (or store an explicit `requires_payment_details = true`).
+* Add an **admin queue** “Needs PayPal email” before the disbursement window opens.
+
+4. **Admin UI nudge** (pre-cycle):
+
+* A banner: “X winners missing PayPal email — resolve before payouts.”
+* Button to export CSV of missing emails.
+
+---
+
+## Sanity checks to add (cheap regression protection)
+
+* **Unit**: constructing payload with a recipient missing `paypalEmail` throws `preparePaypalPayload_no_valid_items`.
+* **Unit**: `validateRecipients` fails if any `paypalEmail` is empty/whitespace.
+* **Integration (dry-run)**: run Phase 1 only; assert `paypalPayload.items.every(i => !!i.receiver)` and counts match; never hit Phase 2 in dry-run mode.
+
+Example dry-run flag:
+
+```ts
+if (process.env.PAYOUTS_DRY_RUN === '1') {
+  result.warnings.push('dry_run_mode_no_api_call');
+  return result; // stop before Phase 2
+}
+```
+
+---
+
+## Why this will fix your 750+ nulls
+
+* **Preflight filter + fail-fast** ensures you *never* reach PayPal with `receiver: null`.
+* **Self-defensive `preparePaypalPayload`** blocks any future misuse.
+* **Count assertion** catches silent drops or mismatches early.
+* **Remediation list + admin UI** turns data issues into an ops workflow rather than a runtime surprise.
+
+If you paste in those patches and re-run Phase 1 (dry-run), you’ll immediately get a concise report of exactly which recipients are missing emails — no PayPal call, no cancelled batches — and you can remediate, then rerun safely (your retry/idempotency scaffolding is already doing its job).
