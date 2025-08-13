@@ -1317,67 +1317,6 @@ export class PaypalTransactionOrchestrator {
   // Validation and Helper Methods
   // ============================================================================
 
-  private async validateTransactionContext(context: TransactionContext): Promise<{
-    isValid: boolean;
-    errors: string[];
-    warnings: string[];
-  }> {
-    const errors: string[] = [];
-    const warnings: string[] = [];
-
-    // Validate recipients array
-    if (!context.recipients || context.recipients.length === 0) {
-      errors.push('No recipients provided');
-    }
-
-    if (context.recipients.length > PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH) {
-      errors.push(`Too many recipients: ${context.recipients.length}. Maximum: ${PaypalTransactionOrchestrator.MAX_RECIPIENTS_PER_BATCH}`);
-    }
-
-    // Validate individual recipients
-    for (let i = 0; i < context.recipients.length; i++) {
-      const recipient = context.recipients[i];
-      
-      if (!recipient.paypalEmail || !this.isValidEmail(recipient.paypalEmail)) {
-        errors.push(`Invalid PayPal email for recipient ${i + 1}: ${recipient.paypalEmail}`);
-      }
-
-      if (recipient.amount < PaypalTransactionOrchestrator.MIN_AMOUNT_CENTS) {
-        errors.push(`Amount too small for recipient ${i + 1}: $${(recipient.amount / 100).toFixed(2)}`);
-      }
-
-      if (recipient.amount > PaypalTransactionOrchestrator.MAX_AMOUNT_CENTS) {
-        errors.push(`Amount too large for recipient ${i + 1}: $${(recipient.amount / 100).toFixed(2)}`);
-      }
-    }
-
-    // Validate total amount consistency
-    const calculatedTotal = context.recipients.reduce((sum, r) => sum + r.amount, 0);
-    if (Math.abs(calculatedTotal - context.totalAmount) > 1) { // Allow 1 cent tolerance for rounding
-      errors.push(`Total amount mismatch: calculated ${calculatedTotal}, provided ${context.totalAmount}`);
-    }
-
-    // Check for duplicate recipients
-    const emailSet = new Set<string>();
-    const duplicateEmails: string[] = [];
-    for (const recipient of context.recipients) {
-      if (emailSet.has(recipient.paypalEmail)) {
-        duplicateEmails.push(recipient.paypalEmail);
-      } else {
-        emailSet.add(recipient.paypalEmail);
-      }
-    }
-    if (duplicateEmails.length > 0) {
-      warnings.push(`Duplicate PayPal emails detected: ${duplicateEmails.join(', ')}`);
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-      warnings
-    };
-  }
-
   private generateIdempotencyData(context: TransactionContext): {
     senderBatchId: string;
     requestChecksum: string;
