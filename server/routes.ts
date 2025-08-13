@@ -2679,7 +2679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(
             eq(cycleWinnerSelections.cycleSettingId, cycleId),
             eq(cycleWinnerSelections.isSealed, true),
-            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready', 'processing']),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'processing']),
             isNotNull(users.paypalEmail)
           ));
 
