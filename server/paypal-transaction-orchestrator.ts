@@ -79,6 +79,7 @@ export interface TransactionContext {
   recipients: PayoutRecipient[];
   totalAmount: number; // In cents
   requestId: string; // Unique request identifier for idempotency
+  senderBatchId: string; // Deterministic sender batch ID for PayPal
 }
 
 export interface Phase1Result {
@@ -997,8 +998,8 @@ export class PaypalTransactionOrchestrator {
     senderBatchId: string;
     requestChecksum: string;
   } {
-    const timestamp = Date.now();
-    const senderBatchId = `finboost-${context.cycleSettingId}-${timestamp}`;
+    // Use the deterministic sender batch ID passed from the route
+    const senderBatchId = context.senderBatchId;
     
     // Create checksum from request data for idempotency
     const checksumData = {

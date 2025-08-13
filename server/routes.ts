@@ -3675,7 +3675,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminId,
         recipients,
         totalAmount,
-        requestId: requestChecksum  // Use checksum as requestId for idempotency
+        requestId: requestChecksum,  // Use checksum as requestId for idempotency
+        senderBatchId: deterministic_batch_id  // Pass deterministic sender batch ID to orchestrator
       };
 
       // Phase 1: Log orchestrator initiation with Step 8 structured logging
