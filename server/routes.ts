@@ -3401,9 +3401,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
           .where(and(
             eq(cycleWinnerSelections.cycleSettingId, cycleId),
-            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
-            isNotNull(users.paypalEmail),
-            isNotNull(cycleWinnerSelections.isSealed)
+            eq(cycleWinnerSelections.isSealed, true),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'processing']),
+            isNotNull(users.paypalEmail)
           ));
 
         winnersToProcess = eligibleWinners.map(w => w.id);
