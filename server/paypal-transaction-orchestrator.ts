@@ -1025,13 +1025,17 @@ export class PaypalTransactionOrchestrator {
     reason?: string;
   }> {
     try {
-      // Check for recent duplicate transaction
+      // Check for recent duplicate transaction with status-aware logic
       const duplicateCheck = await this.checkForDuplicateTransaction(context.requestId);
       if (duplicateCheck.isDuplicate) {
-        return {
-          prevented: true,
-          reason: `Duplicate transaction detected - existing batch: ${duplicateCheck.existingBatchId}`
-        };
+        // Only prevent for active processing or completed batches
+        if (duplicateCheck.action === 'block_in_progress' || duplicateCheck.action === 'return_existing') {
+          return {
+            prevented: true,
+            reason: `${duplicateCheck.reason || 'Duplicate transaction detected'} - existing batch: ${duplicateCheck.existingBatchId}`
+          };
+        }
+        // For 'allow_retry' action, don't prevent - let it proceed as new attempt
       }
 
       // Check for recent processing activity (cooldown period)
@@ -1352,11 +1356,22 @@ export class PaypalTransactionOrchestrator {
       result.senderBatchId = idempotencyData.senderBatchId;
       result.requestChecksum = idempotencyData.requestChecksum;
 
-      // Step 1.3: Check for duplicate transactions
+      // Step 1.3: Check for duplicate transactions with status-aware handling
       const duplicateCheck = await this.checkForDuplicateTransaction(result.requestChecksum);
       if (duplicateCheck.isDuplicate) {
-        result.errors.push(`Duplicate transaction detected: ${duplicateCheck.existingBatchId}`);
-        return result;
+        console.log(`[IDEMPOTENCY] Duplicate check result: action=${duplicateCheck.action}, reason=${duplicateCheck.reason}`);
+        
+        // Handle different duplicate scenarios
+        if (duplicateCheck.action === 'return_existing') {
+          // TODO: Return existing batch summary instead of failing
+          result.errors.push(`Idempotent return: ${duplicateCheck.reason}`);
+          return result;
+        } else if (duplicateCheck.action === 'block_in_progress') {
+          result.errors.push(`Concurrent processing blocked: ${duplicateCheck.reason}`);
+          return result;
+        }
+        // For 'allow_retry': continue processing (create new attempt)
+        console.log(`[IDEMPOTENCY] Retry allowed for ${duplicateCheck.existingBatch?.status} batch - creating new attempt`);
       }
 
       // Step 1.4: Create payout batch intent in database
@@ -1534,13 +1549,59 @@ export class PaypalTransactionOrchestrator {
   private async checkForDuplicateTransaction(requestChecksum: string): Promise<{
     isDuplicate: boolean;
     existingBatchId?: string;
+    action?: 'allow_retry' | 'return_existing' | 'block_in_progress';
+    existingBatch?: any;
+    reason?: string;
   }> {
     try {
       const existingBatch = await storage.getPayoutBatchByChecksum(requestChecksum);
-      return {
-        isDuplicate: !!existingBatch,
-        existingBatchId: existingBatch?.senderBatchId
-      };
+      
+      if (!existingBatch) {
+        return { isDuplicate: false };
+      }
+      
+      // CHATGPT FIX: Status-aware idempotency logic
+      console.log(`[IDEMPOTENCY] Found existing batch ID ${existingBatch.id} with status: ${existingBatch.status}`);
+      
+      switch (existingBatch.status) {
+        // Terminal success states - return existing summary (idempotent)
+        case 'completed':
+        case 'partially_completed':
+        case 'awaiting_reconcile':
+          return {
+            isDuplicate: true,
+            existingBatchId: existingBatch.senderBatchId,
+            action: 'return_existing',
+            existingBatch,
+            reason: `Batch already ${existingBatch.status} - returning existing result`
+          };
+        
+        // Active processing - block concurrent requests
+        case 'processing':
+        case 'executing':
+          return {
+            isDuplicate: true,
+            existingBatchId: existingBatch.senderBatchId,
+            action: 'block_in_progress',
+            existingBatch,
+            reason: `Batch currently ${existingBatch.status} - blocking concurrent request`
+          };
+        
+        // Failed states - allow retry with new attempt
+        case 'failed':
+        case 'cancelled':
+        case 'draft':
+        case 'intent_only':
+        default:
+          console.log(`[IDEMPOTENCY] Allowing retry for ${existingBatch.status} batch - creating new attempt`);
+          return {
+            isDuplicate: false,
+            action: 'allow_retry',
+            existingBatch,
+            reason: `Previous batch ${existingBatch.status} - retry allowed`
+          };
+      }
+      
     } catch (error) {
       console.warn('[STEP 4 ORCHESTRATOR] Duplicate check failed, proceeding:', error);
       return { isDuplicate: false };

@@ -1,0 +1,127 @@
+Short answer: **yes — a previously *cancelled* batch should be retryable and must not trip the duplicate-transaction guard.**
+
+Right now your idempotency check is treating *any* existing batch with the same checksum as a hard duplicate. You want a **status-aware decision** instead.
+
+---
+
+## Recommended idempotency policy (status-aware)
+
+When you look up an existing batch by `(cycleId, requestChecksum)`:
+
+| Existing batch status                                      | Decision                                         | Why                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------- |
+| **completed / partially\_completed / awaiting\_reconcile** | **Return existing summary** (no new PayPal call) | Terminal success (or success pending reconciliation). |
+| **processing / executing**                                 | **409 / in\_progress** (don’t start another)     | Protects against concurrent double-submits.           |
+| **failed / cancelled**                                     | **Allow retry** (create a *new batch attempt*)   | Prior attempt didn’t complete; retry is expected.     |
+| **draft / intent\_only**                                   | **Treat as stale → allow retry**                 | No execution occurred.                                |
+
+> The bug in your payload: a batch with status **cancelled** is being treated as a duplicate blocker. It should be **retryable**.
+
+---
+
+## Implementation outline
+
+### 1) Change the idempotency gate to be status-aware
+
+Instead of “any matching checksum blocks,” do:
+
+```ts
+const prior = await storage.getBatchByChecksum(cycleId, checksum);
+
+if (!prior) proceed();
+
+switch (prior.status) {
+  case 'completed':
+  case 'partially_completed':
+  case 'awaiting_reconcile':
+    return summary(prior); // idempotent return
+  case 'processing':
+  case 'executing':
+    return { ok:false, code:'in_progress', http:409, batchId: prior.id };
+  case 'failed':
+  case 'cancelled':
+  case 'intent_only':
+  default:
+    // allow retry -> create new attempt
+    break;
+}
+```
+
+### 2) Create a new attempt when retrying
+
+* Insert a *new* `payout_batches` row with the **same `request_checksum`** but:
+
+  * a **new** `id` (attempt)
+  * a **new** `sender_batch_id` (`cycle-${cycleId}-${checksum.slice(0,16)}-attempt-${n}`)
+    *(Never reuse a PayPal batch id if the previous one was ever submitted.)*
+  * `supersedes_batch_id = prior.id` (optional, nice for audit)
+  * `attempt = prior.attempt + 1` (optional, but helpful)
+
+> DB index: allow multiple rows with the same checksum; make `(cycle_id, request_checksum, attempt)` unique instead of `(cycle_id, request_checksum)`.
+
+### 3) Per-winner safety
+
+Even when retrying, you must avoid double-paying any winner that might already be marked `completed`:
+
+* Your **eligibility query** for recipients should only include winners with `payout_status IN ('pending'[, 'failed'])` and **exclude** any already `completed`.
+* That guarantees a retry submits only those still unpaid.
+
+### 4) UI/response behavior
+
+When a prior **cancelled** batch is found and a retry is permitted, return a response like:
+
+```json
+{
+  "ok": true,
+  "action": "retry_new_attempt",
+  "previousBatch": { "id": 3, "status": "cancelled" },
+  "newBatch": { "id": 7, "attempt": 2, "senderBatchId": "cycle-18-...-attempt-2" }
+}
+```
+
+This avoids the current 500/duplicate message and makes the behavior clear to admins.
+
+---
+
+## Acceptance tests
+
+1. **Cancelled batch → retry allowed**
+
+   * Given a batch with `status='cancelled'` and no completed items
+   * When running the same selection
+   * Then a **new batch attempt** is created; no duplicate error; execution proceeds.
+
+2. **Completed batch → duplicate idempotent return**
+
+   * Existing completed batch with same checksum
+   * Re-run returns **existing summary** (no new PayPal call).
+
+3. **Processing → in\_progress**
+
+   * Existing batch `processing/executing`
+   * Re-run returns 409 with `code: 'in_progress'`.
+
+4. **Per-winner dedupe**
+
+   * If some winners are already marked `completed`, retry processes only `pending/failed`.
+
+---
+
+## Why this matters
+
+* **Cancelled/failed ≠ duplicate.** They represent attempts that didn’t complete; retry is the safe and expected path.
+* **Status-aware idempotency** preserves safety (no double payments) while unblocking legitimate retries.
+* **Attempt metadata** (`attempt`, `supersedes_batch_id`) keeps audits clean and simplifies support.
+
+---
+
+### Action for your current failure
+
+Change the idempotency check so **status='cancelled' → retry allowed** (create a new attempt with a fresh `sender_batch_id`). That will resolve the exact 500 you posted:
+
+```
+"Phase 1 preparation failed; Duplicate transaction detected: cycle-18-99a3e1433d22f4b7"
+"rootCause": "Found existing batch with checksum: batch ID 3, status cancelled"
+```
+
+…and let your 750 validated recipients proceed.
