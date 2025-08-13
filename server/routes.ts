@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
 import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions, cycleWinnerSelections } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc, or } from "drizzle-orm";
+import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc, or, ne } from "drizzle-orm";
 import * as XLSX from "xlsx";
 import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
@@ -2678,7 +2678,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .leftJoin(users, eq(cycleWinnerSelections.userId, users.id))
           .where(and(
             eq(cycleWinnerSelections.cycleSettingId, cycleId),
-            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready']),
+            eq(cycleWinnerSelections.isSealed, true),
+            inArray(cycleWinnerSelections.payoutStatus, ['pending', 'ready', 'processing']),
             isNotNull(users.paypalEmail)
           ));
 
@@ -3570,7 +3571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recipients: PayoutRecipient[] = validRecipients.map(result => ({
         cycleWinnerSelectionId: result.winner.id,    // Required for orchestrator
         userId: result.winner.userId,                 // Required for orchestrator  
-        paypalEmail: result.winner.paypalEmail!,     // We know it's not null from filtering
+        email: result.winner.paypalEmail!,           // PayPal API expects 'email' field
         amount: result.validatedAmount,               // In cents, validated
         currency: "USD",
         note: `FinBoost Cycle ${cycleId} Reward - Tier ${result.winner.tier}`
@@ -3580,7 +3581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winnerData = recipients.map(r => ({
         id: r.cycleWinnerSelectionId,
         amount: r.amount,
-        email: r.paypalEmail
+        email: r.email
       }));
       const requestChecksum = storage.generateIdempotencyKey(cycleId, winnerData);
       

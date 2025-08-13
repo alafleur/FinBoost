@@ -602,6 +602,8 @@ export class MemStorage implements IStorage {
   private tokens = new Map<string, { userId: number; createdAt: Date }>();
   // Step 3: Session cache for non-winner notification dismissals
   sessionCache = new Map<string, boolean>();
+  // Step 6: Processing lock cache for concurrency control
+  private cache = new Map<string, { expiry: Date; acquired: Date }>();
 
   constructor() {
     this.users = new Map();
@@ -7932,7 +7934,7 @@ export class MemStorage implements IStorage {
       const batches = await db
         .select()
         .from(payoutBatches)
-        .where(eq(payoutBatches.cycleId, cycleId))
+        .where(eq(payoutBatches.cycleSettingId, cycleId))
         .orderBy(payoutBatches.createdAt);
       return batches;
     } catch (error) {
