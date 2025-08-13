@@ -1,0 +1,129 @@
+You’re right—the batch should process **valid** winners and **skip** invalid ones without failing the whole run.
+
+From your screenshot + logs and the files you sent, here’s what’s happening and how to fix it cleanly:
+
+## What’s going wrong
+
+* The **eligibility filter** in `server/routes.ts` only checks `isNotNull(users.paypalEmail)` at the DB level. That lets through:
+
+  * empty strings `''`
+  * whitespace-only `'   '`
+  * obviously invalid formats (no `@`, etc.)
+* Those bad emails are making it into the recipient list, so the orchestrator (or PayPal) trips and the **entire batch** errors out instead of partially succeeding.
+
+## How to make it robust (minimal, safe changes)
+
+### 1) Normalize + validate **before** building recipients
+
+Add a small helper (keep it simple; PayPal doesn’t require perfect RFC compliance):
+
+```ts
+// routes.ts (top or a utils module)
+const isValidPaypalEmail = (raw?: string | null): raw is string => {
+  if (!raw) return false;
+  const email = raw.trim().toLowerCase();
+  if (!email) return false;
+  // conservative sanity check; we do NOT need RFC 5322 here
+  const basic = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return basic.test(email);
+};
+```
+
+Then, when you map eligible winners to recipients:
+
+```ts
+const normalized = allCandidates.map(c => ({
+  ...c,
+  paypalEmail: (c.winner.paypalEmail ?? '').trim().toLowerCase(),
+}));
+
+const validRecipients = normalized.filter(c => isValidPaypalEmail(c.paypalEmail));
+
+const invalidRecipients = normalized.filter(c => !isValidPaypalEmail(c.paypalEmail));
+```
+
+> Important: build the **checksum** from `validRecipients` only:
+
+```ts
+const winnerData = validRecipients.map(r => ({
+  id: r.winner.id,
+  amount: r.validatedAmount,
+  email: r.paypalEmail, // normalized
+}));
+const requestChecksum = storage.generateIdempotencyKey(cycleId, winnerData);
+```
+
+Build `PayoutRecipient[]` from `validRecipients` with the **correct key**:
+
+```ts
+const recipients: PayoutRecipient[] = validRecipients.map(r => ({
+  cycleWinnerSelectionId: r.winner.id,
+  userId: r.winner.userId,
+  paypalEmail: r.paypalEmail, // already normalized
+  amount: r.validatedAmount,
+  currency: "USD",
+  note: `FinBoost Cycle ${cycleId} Reward - Tier ${r.winner.tier}`,
+}));
+```
+
+### 2) Don’t send invalid recipients to the orchestrator
+
+* The orchestrator should receive **only** `recipients` (valid emails).
+* For `invalidRecipients`, **immediately mark them** as failed (or include in summary) *without* blocking the batch:
+
+```ts
+if (invalidRecipients.length) {
+  await storage.updateWinnerProcessingStatusFromResults(batchId, invalidRecipients.map(ir => ({
+    winnerId: ir.winner.id,
+    status: 'failed',
+    error: 'invalid_paypal_email',
+  })));
+  // Optionally: include in response.summary.skipped.invalidEmail
+}
+```
+
+(If you don’t want to write to `payout_batch_items` for invalids, at least count them and return them in the summary as `skippedInvalidEmail` so the admin sees what happened.)
+
+### 3) Keep preview and process in **perfect parity**
+
+* The **preview endpoint** must run the exact same normalization + `isValidPaypalEmail` filter and report:
+
+  * `eligibleValid` (will be sent)
+  * `skippedInvalidEmail` (excluded)
+* Then the **process** endpoint will produce the same counts and behavior. No surprises.
+
+### 4) Guard for empty batch
+
+* If `validRecipients.length === 0`, return **400** with something like:
+
+  > “No valid PayPal recipients to process: 0 valid, X invalid email(s)”
+
+### 5) Sender IDs & idempotency stay the same
+
+* Keep `sender_item_id = winner-{cycleWinnerSelectionId}-{userId}`.
+* Keep deterministic `sender_batch_id = cycle-{cycleId}-{checksum.slice(0,16)}`.
+* Since checksum uses **only valid recipients**, retrying won’t keep clashing with invalid rows.
+
+## Why this works
+
+* PayPal never sees bad items → no batch-level failure due to empty/invalid emails.
+* Valid recipients pay successfully; invalids are **captured as failed** (or clearly skipped).
+* Admin sees a truthful summary: `{ success, failed, skippedInvalidEmail }`.
+
+## Quick test plan
+
+1. Put 5 winners in the selection:
+
+   * 3 with good emails, 1 empty string, 1 `foo@bar` (no TLD).
+2. **Preview**: should report `eligibleValid=3`, `skippedInvalidEmail=2`.
+3. **Process**:
+
+   * PayPal receives exactly 3 items (normalized emails).
+   * DB: 3 winners → `completed/pending/failed` from PayPal; 2 invalid → `failed` (reason `invalid_paypal_email`) or `skippedInvalidEmail` in summary.
+4. **Re-run** (same inputs): returns existing batch summary (idempotency), **no new PayPal call**.
+
+---
+
+### tl;dr
+
+Yes—it **must** process valid winners and **skip** invalid ones. The fix is to normalize + validate email **in `routes.ts` before** building recipients, pass **only valid** recipients to the orchestrator, mark/return invalids as failed or skipped, and keep preview/process logic identical. This prevents a single bad email from tanking the whole batch.
