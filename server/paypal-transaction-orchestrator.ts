@@ -1622,7 +1622,16 @@ export class PaypalTransactionOrchestrator {
         throw new Error(`prepared_items_count_mismatch: PayPal payload has ${phase1Result.paypalPayload.items.length} items but expected ${expectedItemCount} recipients`);
       }
       
-      const paypalResponse = await createPaypalPayout(phase1Result.paypalPayload.items);
+      // Convert PayPal format to createPaypalPayout format
+      const paypalWrapperPayload = phase1Result.paypalPayload.items.map(item => ({
+        email: item.receiver,
+        amount: Math.round(parseFloat(item.amount.value) * 100), // Convert dollars back to cents for wrapper
+        currency: item.amount.currency,
+        note: item.note,
+        recipientId: item.sender_item_id
+      }));
+      
+      const paypalResponse = await createPaypalPayout(paypalWrapperPayload);
       result.paypalResponse = paypalResponse;
 
       // Step 2.3: Parse PayPal response using Step 2 enhanced parsing

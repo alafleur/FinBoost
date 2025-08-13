@@ -15,6 +15,12 @@ Preferred communication style: Simple, everyday language.
 - Document exact changes made for transparency and accountability
 - Use systematic debugging approach - identify, isolate, fix, verify
 
+## Recent Updates (January 13, 2025)
+- **PayPal Disbursement Fix**: Resolved critical bug where PayPal API was receiving null emails
+  - Added missing `paypal_email` column to `cycle_winner_selections` table
+  - Fixed field mapping mismatch between orchestrator and PayPal API (paypalEmail → email)
+  - Successfully tested disbursement for cycle 18 with PayPal Batch ID 6P34E98Y9TD2Q
+
 ## System Architecture
 
 ### Frontend
