@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -453,6 +453,10 @@ export const payoutBatches = pgTable("payout_batches", {
   totalChunks: integer("total_chunks").default(1).notNull(), // Total number of chunks for this batch
   completedChunks: integer("completed_chunks").default(0).notNull(), // Number of completed chunks
   chunkSize: integer("chunk_size").default(500).notNull(), // Number of recipients per chunk
+  // Additional fields from ChatGPT requirements
+  expectedItemCount: integer("expected_item_count"), // Expected number of items in the batch
+  payloadChecksum: text("payload_checksum"), // Checksum of the payload for verification
+  parentBatchId: integer("parent_batch_id"), // Self-reference for parent batch relationship
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -460,53 +464,55 @@ export const payoutBatches = pgTable("payout_batches", {
   uniqueAttempt: unique("payout_batches_cycle_checksum_attempt_unique").on(table.cycleSettingId, table.requestChecksum, table.attempt),
 }));
 
-// STEP 6: Payout Batch Chunks - Individual chunk processing within a batch
+// New: payout_batch_chunks (ChatGPT specification)
 export const payoutBatchChunks = pgTable("payout_batch_chunks", {
   id: serial("id").primaryKey(),
-  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
-  chunkNumber: integer("chunk_number").notNull(), // 1, 2, 3, etc.
-  status: text("status").default("pending").notNull(), // pending, processing, completed, failed, cancelled
-  paypalBatchId: text("paypal_batch_id"), // Individual PayPal batch ID for this chunk
-  senderBatchId: text("sender_batch_id").notNull(), // chunk-specific sender batch ID
-  startIndex: integer("start_index").notNull(), // Starting recipient index in the full batch
-  endIndex: integer("end_index").notNull(), // Ending recipient index in the full batch
-  recipientCount: integer("recipient_count").notNull(), // Number of recipients in this chunk
-  totalAmount: integer("total_amount").notNull(), // Total amount for this chunk in cents
-  successfulCount: integer("successful_count").default(0).notNull(),
-  failedCount: integer("failed_count").default(0).notNull(),
-  pendingCount: integer("pending_count").default(0).notNull(),
-  processingStartedAt: timestamp("processing_started_at"), // When chunk processing began
-  processingCompletedAt: timestamp("processing_completed_at"), // When chunk processing finished
-  errorDetails: text("error_details"), // JSON string for chunk-specific errors
-  retryCount: integer("retry_count").default(0).notNull(), // Retry attempts for this chunk
-  lastRetryAt: timestamp("last_retry_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => ({
-  // Unique constraint: one chunk number per batch
-  uniqueChunk: unique("payout_batch_chunks_batch_chunk_unique").on(table.batchId, table.chunkNumber),
+  batchId: integer("batch_id").notNull(),        // FK to payout_batches.id (int)
+  chunkIndex: integer("chunk_index").notNull(),
+  status: text("status").notNull().default("created"),
+  itemsCount: integer("items_count").notNull(),
+  processedItems: integer("processed_items").notNull().default(0),
+  senderBatchId: text("sender_batch_id"),
+  paypalBatchId: text("paypal_batch_id"),
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uqBatchChunk: uniqueIndex("uq_payout_batch_chunks_batch_chunk").on(t.batchId, t.chunkIndex),
+  idxBatch: index("idx_payout_batch_chunks_batch").on(t.batchId),
+  idxStatus: index("idx_payout_batch_chunks_status").on(t.status),
 }));
 
-// Payout Batch Items - Individual payout records within a batch for reconciliation
+// New: payout_batch_items (ChatGPT specification)
 export const payoutBatchItems = pgTable("payout_batch_items", {
   id: serial("id").primaryKey(),
-  batchId: integer("batch_id").references(() => payoutBatches.id).notNull(),
-  chunkId: integer("chunk_id").references(() => payoutBatchChunks.id), // STEP 6: Link to chunk
-  cycleWinnerSelectionId: integer("cycle_winner_selection_id").references(() => cycleWinnerSelections.id).notNull(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  paypalEmail: text("paypal_email").notNull(), // PayPal email used for this payout
-  amount: integer("amount").notNull(), // Payout amount in cents
-  currency: text("currency").default("USD").notNull(), // Currency code
-  paypalItemId: text("paypal_item_id"), // PayPal payout_item_id for tracking
-  status: text("status").default("pending").notNull(), // pending, processing, success, failed, unclaimed
-  paypalStatus: text("paypal_status"), // Raw PayPal status (SUCCESS, FAILED, PENDING, UNCLAIMED, etc.)
-  errorCode: text("error_code"), // PayPal error code if failed
-  errorMessage: text("error_message"), // Human-readable error description
-  note: text("note"), // Message sent with payout
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  processedAt: timestamp("processed_at"), // When PayPal processed this item
-});
+  batchId: integer("batch_id").notNull(),        // FK payout_batches.id (int)
+  chunkId: integer("chunk_id"),                  // FK payout_batch_chunks.id (int)
+  
+  selectionId: integer("selection_id").notNull(),
+  userId: integer("user_id").notNull(),
+  
+  receiverEmail: text("receiver_email"),
+  amountCents: integer("amount_cents").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  
+  senderItemId: text("sender_item_id").notNull(),
+  paypalItemId: text("paypal_item_id"),
+  status: text("status").notNull().default("pending"),
+  paypalTransactionStatus: text("paypal_transaction_status"),
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+  
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uqSenderItem: uniqueIndex("uq_payout_batch_items_sender_item").on(t.senderItemId),
+  idxBatch: index("idx_payout_batch_items_batch").on(t.batchId),
+  idxChunk: index("idx_payout_batch_items_chunk").on(t.chunkId),
+  idxSelection: index("idx_payout_batch_items_selection").on(t.selectionId),
+  idxStatus: index("idx_payout_batch_items_status").on(t.status),
+}));
 
 // Winner Selection Cycles
 export const winnerSelectionCycles = pgTable("winner_selection_cycles", {
