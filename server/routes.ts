@@ -3624,23 +3624,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Phase 4: Empty batch protection after email validation
+      // Step 4: Empty Batch Protection - Enhanced email validation checkpoint
       if (validEmailWinners.length === 0) {
         const invalidEmailCount = invalidEmailWinners.length;
-        logger.audit('NO_VALID_PAYPAL_EMAILS_FOUND', {
+        logger.audit('EMPTY_BATCH_PROTECTION_EMAIL_VALIDATION', {
           totalWinners: winners.length,
+          validEmailWinners: 0,
           invalidEmailCount,
-          invalidReasons: ['missing_email', 'empty_email', 'invalid_format']
+          invalidReasons: ['missing_email', 'empty_email', 'invalid_format'],
+          protectionTriggered: 'EMAIL_VALIDATION_STAGE'
         });
         logger.end(0, invalidEmailCount);
+        
         return res.status(400).json({
+          success: false,
           error: "No valid PayPal recipients to process",
-          details: `0 valid, ${invalidEmailCount} invalid email(s). All selected winners have missing, empty, or invalid PayPal email addresses.`,
+          details: `Email validation failed: 0 valid, ${invalidEmailCount} invalid email(s)`,
+          userMessage: "All selected winners have invalid PayPal email addresses. Please update the winner email addresses before retrying disbursements.",
+          breakdown: {
+            totalSelected: winners.length,
+            validEmails: 0,
+            invalidEmails: invalidEmailCount,
+            validAmounts: 0, // Not yet validated
+            invalidAmounts: 0 // Not yet validated
+          },
           failed: invalidEmailWinners.map(w => ({ 
             id: w.id, 
+            username: w.username || 'Unknown',
             email: w.email, 
+            paypalEmail: w.paypalEmail || '(empty)',
             reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT
           })),
+          actionRequired: "fix_paypal_emails",
+          nextSteps: [
+            "Review the failed recipients list above",
+            "Update PayPal email addresses for invalid recipients", 
+            "Verify email addresses are in valid format (user@domain.com)",
+            "Retry disbursement after fixing email addresses"
+          ],
+          canRetry: true,
           skippedInvalidEmail: invalidEmailCount,
           totalEligible: totalEligibleCount
         });
@@ -3708,29 +3730,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Phase 6: Final zero-eligible guard after amount validation
+      // Step 4: Empty Batch Protection - Enhanced final validation checkpoint
       if (validRecipients.length === 0) {
+        const invalidEmailCount = invalidEmailWinners.length;
+        const invalidAmountCount = invalidAmountRecipients.length;
+        const totalFailures = invalidEmailCount + invalidAmountCount;
+        
         const allFailures = [
-          ...invalidEmailWinners.map(w => ({ id: w.id, email: w.email, reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT })),
+          ...invalidEmailWinners.map(w => ({ 
+            id: w.id, 
+            username: w.username || 'Unknown',
+            email: w.email, 
+            paypalEmail: w.paypalEmail || '(empty)',
+            reason: EMAIL_VALIDATION_REASONS.INVALID_FORMAT,
+            category: 'email_validation'
+          })),
           ...invalidAmountRecipients.map(r => ({ 
             id: r.winner.id, 
+            username: r.winner.username || 'Unknown',
             email: r.winner.email, 
-            reason: `Amount validation: ${r.validation.error}` 
+            paypalEmail: r.winner.paypalEmail,
+            amount: r.originalAmount,
+            reason: `Amount validation: ${r.validation.error}`,
+            category: 'amount_validation'
           }))
         ];
         
-        logger.audit('ALL_AMOUNTS_INVALID', {
-          totalWinners: validEmailWinners.length,
-          invalidEmailCount: invalidEmailWinners.length,
-          invalidAmountCount: invalidAmountRecipients.length,
+        logger.audit('EMPTY_BATCH_PROTECTION_FINAL_VALIDATION', {
+          totalWinners: winners.length,
+          validEmailWinners: validEmailWinners.length,
+          validRecipients: 0,
+          invalidEmailCount,
+          invalidAmountCount,
+          totalFailures,
+          protectionTriggered: 'FINAL_VALIDATION_STAGE',
           validationErrors: invalidAmountRecipients.map(r => r.validation.error)
         });
-        logger.end(0, allFailures.length);
+        logger.end(0, totalFailures);
+        
         return res.status(400).json({
-          error: "No valid PayPal recipients to process",
-          details: `0 valid, ${invalidEmailWinners.length} invalid email(s), ${invalidAmountRecipients.length} invalid amount(s). No winners can be processed.`,
+          success: false,
+          error: "No valid PayPal recipients to process after full validation",
+          details: `Final validation failed: 0 valid, ${invalidEmailCount} email failures, ${invalidAmountCount} amount failures`,
+          userMessage: "All selected winners failed validation checks. Please review and fix the validation issues before retrying disbursements.",
+          breakdown: {
+            totalSelected: winners.length,
+            validEmails: validEmailWinners.length,
+            invalidEmails: invalidEmailCount,
+            validAmounts: validRecipients.length,
+            invalidAmounts: invalidAmountCount,
+            finalValid: 0
+          },
           failed: allFailures,
-          skippedInvalidEmail: invalidEmailWinners.length,
+          categories: {
+            emailValidation: invalidEmailCount,
+            amountValidation: invalidAmountCount
+          },
+          actionRequired: "fix_validation_issues", 
+          nextSteps: [
+            `Fix ${invalidEmailCount} invalid PayPal email addresses`,
+            `Resolve ${invalidAmountCount} invalid payout amounts`, 
+            "Verify all winners have valid PayPal emails in format (user@domain.com)",
+            "Ensure all payout amounts are positive USD values",
+            "Retry disbursement after fixing all validation issues"
+          ],
+          canRetry: true,
+          skippedInvalidEmail: invalidEmailCount,
+          skippedInvalidAmount: invalidAmountCount,
           totalEligible: totalEligibleCount
         });
       }
