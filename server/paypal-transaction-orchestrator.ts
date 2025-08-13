@@ -1366,19 +1366,24 @@ export class PaypalTransactionOrchestrator {
         console.log(`[IDEMPOTENCY] Retry allowed for ${duplicateCheck.existingBatch?.status} batch - creating new attempt`);
       }
 
-      // Step 1.4: Create payout batch intent in database
-      const batchData: InsertPayoutBatch = {
+      // Step 1.4: Create payout batch intent with proper attempt handling
+      const nextAttempt = await this.findNextAttemptNumber(context.cycleSettingId, result.requestChecksum);
+      const attemptSenderBatchId = this.generateAttemptSenderBatchId(result.senderBatchId, nextAttempt);
+      
+      const batchData: InsertPayoutBatch & { attempt: number } = {
         cycleSettingId: context.cycleSettingId,
-        senderBatchId: result.senderBatchId,
+        senderBatchId: attemptSenderBatchId, // CHATGPT: Include attempt number in sender_batch_id
         requestChecksum: result.requestChecksum,
+        attempt: nextAttempt, // CHATGPT: Track attempt number
         adminId: context.adminId,
         totalAmount: context.totalAmount,
         totalRecipients: context.recipients.length
       };
 
-      const createdBatch = await storage.createPayoutBatch(batchData);
+      const createdBatch = await storage.createPayoutBatchWithAttempt(batchData);
       result.batchId = createdBatch.id;
-      console.log(`[STEP 4 PHASE 1] Created payout batch intent: ${result.batchId}`);
+      result.senderBatchId = attemptSenderBatchId; // Update result with final sender_batch_id
+      console.log(`[STEP 4 PHASE 1] Created payout batch intent: ${result.batchId}, attempt ${nextAttempt}`);
 
       // Step 1.5: Create payout batch items
       const itemIds: number[] = [];
@@ -1517,16 +1522,14 @@ export class PaypalTransactionOrchestrator {
     senderBatchId: string;
     requestChecksum: string;
   } {
-    // Use the deterministic sender batch ID passed from the route
-    const senderBatchId = context.senderBatchId;
-    
-    // Create checksum from request data for idempotency
+    // CHATGPT: Create checksum from normalized request data for idempotency
     const checksumData = {
       cycleSettingId: context.cycleSettingId,
       adminId: context.adminId,
       totalAmount: context.totalAmount,
       recipientCount: context.recipients.length,
-      recipientEmails: context.recipients.map(r => r.paypalEmail).sort(),
+      // CHATGPT: Normalize emails - lowercase and trim for consistency
+      recipientEmails: context.recipients.map(r => r.paypalEmail.toLowerCase().trim()).sort(),
       requestId: context.requestId
     };
     
@@ -1535,7 +1538,35 @@ export class PaypalTransactionOrchestrator {
       .update(JSON.stringify(checksumData))
       .digest('hex');
 
-    return { senderBatchId, requestChecksum };
+    // CHATGPT: Generate deterministic sender_batch_id WITHOUT attempt number (will be added later)
+    const baseSenderBatchId = `cycle-${context.cycleSettingId}-${requestChecksum.slice(0, 16)}`;
+
+    return { 
+      senderBatchId: baseSenderBatchId, // This will be the base - attempt number added in createBatchWithAttempt
+      requestChecksum 
+    };
+  }
+
+  /**
+   * CHATGPT: Create retry-safe sender_batch_id with attempt number
+   */
+  private generateAttemptSenderBatchId(baseSenderBatchId: string, attempt: number): string {
+    return `${baseSenderBatchId}-attempt-${attempt}`;
+  }
+
+  /**
+   * CHATGPT: Find next available attempt number for retry
+   */
+  private async findNextAttemptNumber(cycleId: number, requestChecksum: string): Promise<number> {
+    try {
+      // Find the highest existing attempt number for this checksum
+      const existingBatches = await storage.getPayoutBatchesByChecksum(cycleId, requestChecksum);
+      const maxAttempt = Math.max(...existingBatches.map(b => b.attempt || 1), 0);
+      return maxAttempt + 1;
+    } catch (error) {
+      console.warn('[ATTEMPT] Failed to find next attempt number, defaulting to 1:', error);
+      return 1;
+    }
   }
 
   private async checkForDuplicateTransaction(cycleId: number, requestChecksum: string): Promise<{

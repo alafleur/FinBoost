@@ -9910,12 +9910,13 @@ export class MemStorage implements IStorage {
             eq(payoutBatches.requestChecksum, requestChecksum)
           )
         )
+        .orderBy(desc(payoutBatches.attempt))
         .limit(1);
 
       const batch = batches[0] || null;
       
       if (batch) {
-        console.log(`[STEP 4] Found existing batch with checksum: batch ID ${batch.id}, status ${batch.status}`);
+        console.log(`[STEP 4] Found existing batch with checksum: batch ID ${batch.id}, status ${batch.status}, attempt ${batch.attempt}`);
       } else {
         console.log(`[STEP 4] No existing batch found with checksum for cycle ${cycleId}`);
       }
@@ -9924,6 +9925,54 @@ export class MemStorage implements IStorage {
       
     } catch (error) {
       console.error(`[STEP 4] Error looking up batch by checksum:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * CHATGPT: Get all payout batches by checksum for finding next attempt number
+   */
+  async getPayoutBatchesByChecksum(cycleId: number, requestChecksum: string): Promise<PayoutBatch[]> {
+    try {
+      const batches = await db
+        .select()
+        .from(payoutBatches)
+        .where(
+          and(
+            eq(payoutBatches.cycleSettingId, cycleId),
+            eq(payoutBatches.requestChecksum, requestChecksum)
+          )
+        )
+        .orderBy(sql`${payoutBatches.attempt} DESC`);
+
+      console.log(`[ATTEMPT] Found ${batches.length} existing batches for checksum`);
+      return batches;
+      
+    } catch (error) {
+      console.error(`[ATTEMPT] Error looking up batches by checksum:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * CHATGPT: Create payout batch with attempt number for retry safety
+   */
+  async createPayoutBatchWithAttempt(data: InsertPayoutBatch & { attempt: number }): Promise<PayoutBatch> {
+    console.log(`[STEP 4] Creating payout batch attempt ${data.attempt} for cycle ${data.cycleSettingId}`);
+    
+    try {
+      const created = await db.insert(payoutBatches).values(data).returning();
+      const batch = created[0];
+      
+      if (!batch) {
+        throw new Error('Failed to create payout batch - no data returned');
+      }
+      
+      console.log(`[STEP 4] Created payout batch: ID ${batch.id}, attempt ${batch.attempt}, sender ID: ${batch.senderBatchId}`);
+      return batch;
+      
+    } catch (error) {
+      console.error(`[STEP 4] Error creating payout batch:`, error);
       throw error;
     }
   }

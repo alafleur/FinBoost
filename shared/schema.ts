@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -421,9 +421,10 @@ export const cyclePointsActions = pgTable("cycle_points_actions", {
 export const payoutBatches = pgTable("payout_batches", {
   id: serial("id").primaryKey(),
   cycleSettingId: integer("cycle_setting_id").references(() => cycleSettings.id).notNull(),
-  senderBatchId: text("sender_batch_id").notNull().unique(), // Deterministic: cycle-{cycleId}-{checksum}
+  senderBatchId: text("sender_batch_id").notNull().unique(), // Deterministic: cycle-{cycleId}-{checksum}-attempt-{n}
   requestChecksum: text("request_checksum").notNull(), // Hash of sorted winnerIds + amounts + emails for idempotency
-  status: text("status").default("intent").notNull(), // intent, processing, completed, failed, partially_completed
+  attempt: integer("attempt").default(1).notNull(), // CHATGPT: Attempt number for retries (1, 2, 3, ...)
+  status: text("status").default("intent").notNull(), // intent, processing, completed, failed, partially_completed, cancelled
   adminId: integer("admin_id").references(() => users.id).notNull(), // Admin who initiated the payout
   paypalBatchId: text("paypal_batch_id"), // Returned from PayPal API after successful batch creation
   totalAmount: integer("total_amount").notNull(), // Total amount being paid out in cents
@@ -436,9 +437,13 @@ export const payoutBatches = pgTable("payout_batches", {
   retryCount: integer("retry_count").default(0).notNull(), // Number of retry attempts made
   lastRetryAt: timestamp("last_retry_at"), // Timestamp of last retry attempt
   lastRetryError: text("last_retry_error"), // Details of last retry error
+  supersededById: integer("superseded_by_id").references(() => payoutBatches.id), // CHATGPT: Links to newer attempt
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  // CHATGPT: Change uniqueness from (cycle_id, request_checksum) to include attempt
+  uniqueAttempt: unique("payout_batches_cycle_checksum_attempt_unique").on(table.cycleSettingId, table.requestChecksum, table.attempt),
+}));
 
 // Payout Batch Items - Individual payout records within a batch for reconciliation
 export const payoutBatchItems = pgTable("payout_batch_items", {
