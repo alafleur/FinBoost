@@ -3317,6 +3317,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // Email Validation Infrastructure (Step 1)
+  
+  // Reason codes for failed email validation
+  const EMAIL_VALIDATION_REASONS = {
+    EMPTY_EMAIL: 'invalid_paypal_email',
+    INVALID_FORMAT: 'invalid_paypal_email', 
+    MISSING_EMAIL: 'invalid_paypal_email'
+  } as const;
+
+  // Normalize email: trim whitespace and convert to lowercase for consistent processing
+  function normalizeEmail(rawEmail?: string | null): string {
+    if (!rawEmail) return '';
+    return rawEmail.trim().toLowerCase();
+  }
+
+  // Validate PayPal email format with conservative regex (PayPal doesn't require RFC 5322 compliance)
+  function isValidPaypalEmail(raw?: string | null): raw is string {
+    if (!raw) return false;
+    const email = normalizeEmail(raw);
+    if (!email) return false;
+    
+    // Conservative email validation - basic format check for PayPal compatibility
+    const basicEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return basicEmailRegex.test(email);
+  }
+
+  // Mask email for PII-safe logging (a***@d***.com format)
+  function maskEmailForLogging(email: string): string {
+    if (!email || !email.includes('@')) {
+      return '***@***.***';
+    }
+    
+    const [localPart, domain] = email.split('@');
+    const domainParts = domain.split('.');
+    
+    const maskedLocal = localPart.length > 1 
+      ? localPart[0] + '*'.repeat(Math.min(localPart.length - 1, 3))
+      : '*';
+      
+    const maskedDomain = domainParts.length > 1 
+      ? domainParts[0][0] + '*'.repeat(Math.min(domainParts[0].length - 1, 2)) + '.' + domainParts.slice(1).join('.')
+      : '***.***';
+      
+    return `${maskedLocal}@${maskedDomain}`;
+  }
+
   // Process PayPal disbursements for selected cycle winners (Phases 1-3: Complete Integration)
   app.post("/api/admin/winner-cycles/:cycleId/process-disbursements", requireAdmin, async (req: AuthenticatedRequest, res) => {
     const cycleId = parseInt(req.params.cycleId);
