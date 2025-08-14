@@ -171,6 +171,118 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
     }
   }, [selectedCycle]);
 
+  // ChatGPT Step 4: Resume progress if page reloads mid-disbursement
+  useEffect(() => {
+    const resumeActiveDisbursement = async () => {
+      if (!selectedCycle) return;
+      try {
+        const token = localStorage.getItem('token');
+        const r = await fetch(`/api/admin/payout-batches/active?cycleId=${selectedCycle.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!r.ok) return;
+        const b = await r.json(); // { batchId, status, totalChunks, completedChunks, processedItems, totalItems }
+        if (!b?.batchId) return;
+
+        // Resume showing the progress dialog
+        setShowProcessingDialog(true);
+        setIsProcessingPayouts(true);
+        setProcessingProgress({
+          phase: b.status === 'completed' ? 'Completed' : 'Processing',
+          progress: b.status === 'completed'
+            ? 100
+            : Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
+          message: `Resuming batch ${b.batchId}...`,
+          batchId: b.batchId,
+          chunkCount: b.totalChunks || 1,
+          currentChunk: b.completedChunks || 0
+        });
+
+        // Start polling for status updates
+        if (b.status !== 'completed' && b.status !== 'failed') {
+          const pollStatus = async () => {
+            try {
+              const statusResponse = await fetch(`/api/admin/payout-batches/${b.batchId}/status`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (!statusResponse.ok) throw new Error(`status ${statusResponse.status}`);
+              const s = await statusResponse.json();
+
+              const totalChunks = s.totalChunks || 1;
+              const completedChunks = s.completedChunks ?? 0;
+              const processedItems = s.processedItems ?? 0;
+              const totalItems = s.totalItems ?? 0;
+
+              if (s.status === 'completed') {
+                setProcessingProgress(prev => ({
+                  ...prev,
+                  phase: 'Completed',
+                  progress: 100,
+                  message: `Processed ${processedItems}/${totalItems} items`,
+                  batchId: b.batchId,
+                  chunkCount: totalChunks,
+                  currentChunk: totalChunks
+                }));
+                toast({
+                  title: "✅ Disbursement Complete",
+                  description: `Batch ${b.batchId} finished.`
+                });
+                setTimeout(() => setShowProcessingDialog(false), 1200);
+                await refreshAllCycleData({ forceFresh: true });
+                setIsProcessingPayouts(false);
+                setSelectedForDisbursement(new Set());
+                return;
+              }
+
+              if (s.status === 'failed') {
+                setProcessingProgress(prev => ({
+                  ...prev,
+                  phase: 'Error',
+                  progress: 0,
+                  message: s.error || 'Batch failed',
+                  batchId: b.batchId,
+                  chunkCount: totalChunks,
+                  currentChunk: completedChunks
+                }));
+                toast({
+                  title: "🚨 Batch Failed",
+                  description: s.error || 'See server logs',
+                  variant: "destructive"
+                });
+                setTimeout(() => setShowProcessingDialog(false), 1200);
+                setIsProcessingPayouts(false);
+                return;
+              }
+
+              // Still processing → update progress
+              const pct = Math.max(
+                10,
+                Math.min(99, Math.floor((completedChunks / totalChunks) * 100))
+              );
+              setProcessingProgress(prev => ({
+                ...prev,
+                phase: 'Processing',
+                progress: pct,
+                message: `Chunk ${completedChunks}/${totalChunks} processed — ${processedItems}/${totalItems} items`,
+                batchId: b.batchId,
+                chunkCount: totalChunks,
+                currentChunk: completedChunks
+              }));
+
+              // Keep polling
+              setTimeout(pollStatus, 2000);
+            } catch (_e) {
+              // Network/transient → retry slower
+              setTimeout(pollStatus, 3000);
+            }
+          };
+          pollStatus();
+        }
+      } catch {}
+    };
+    resumeActiveDisbursement();
+  }, [selectedCycle]);
+
   // PHASE 4 STEP 4: Enhanced Cycle Analytics Loading with Cache Busting
   const loadCycleAnalytics = async (forceFresh = false) => {
     if (!selectedCycle) return;

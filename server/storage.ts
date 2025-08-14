@@ -5,7 +5,7 @@ import type { UserPointsHistory, MonthlyReward, UserMonthlyReward, Referral, Use
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { eq, sql, desc, asc, and, lt, gte, ne, lte, between, isNotNull, gt, sum, count, inArray, notInArray, isNull } from "drizzle-orm";
+import { eq, sql, desc, asc, and, or, lt, gte, ne, lte, between, isNotNull, gt, sum, count, inArray, notInArray, isNull } from "drizzle-orm";
 import { db } from "./db";
 
 // Helper function to get cycle fee multiplier based on cycle type
@@ -8082,6 +8082,29 @@ export class MemStorage implements IStorage {
       return items;
     } catch (error) {
       console.error('Error getting payout batch items:', error);
+      throw error;
+    }
+  }
+
+  async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null> {
+    try {
+      const [batch] = await db
+        .select()
+        .from(payoutBatches)
+        .where(
+          and(
+            eq(payoutBatches.cycleId, cycleId),
+            or(
+              eq(payoutBatches.status, 'created'),
+              eq(payoutBatches.status, 'processing')
+            )
+          )
+        )
+        .orderBy(desc(payoutBatches.createdAt))
+        .limit(1);
+      return batch || null;
+    } catch (error) {
+      console.error('Error getting active payout batch for cycle:', error);
       throw error;
     }
   }

@@ -3256,6 +3256,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint to get active batch for a cycle (for resume on reload)
+  app.get('/api/admin/payout-batches/active', requireAdmin, async (req, res) => {
+    try {
+      const cycleId = parseInt(req.query.cycleId as string);
+      
+      if (!cycleId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cycle ID required'
+        });
+      }
+
+      // Get the most recent batch for this cycle that's still processing
+      const activeBatch = await storage.getActivePayoutBatchForCycle(cycleId);
+      
+      if (!activeBatch) {
+        return res.status(404).json({
+          success: false,
+          error: 'No active batch found'
+        });
+      }
+
+      // Get batch chunks if available
+      const batchChunks = await storage.getPayoutBatchChunks(activeBatch.id);
+      const totalChunks = batchChunks.length || 1;
+      const completedChunks = batchChunks.filter((c: any) => c.status === 'completed').length;
+      
+      // Get items for processing count
+      const batchItems = await storage.getPayoutBatchItems(activeBatch.id);
+      const processedItems = batchItems.filter((item: any) => 
+        item.status === 'success' || item.status === 'failed'
+      ).length;
+      const totalItems = batchItems.length;
+
+      res.json({
+        batchId: activeBatch.id,
+        status: activeBatch.status,
+        totalChunks,
+        completedChunks,
+        processedItems,
+        totalItems,
+        paypalBatchId: activeBatch.paypalBatchId
+      });
+
+    } catch (error) {
+      console.error('[Active Batch] Error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get active batch'
+      });
+    }
+  });
+
   /**
    * Override batch status (for manual intervention)
    */
