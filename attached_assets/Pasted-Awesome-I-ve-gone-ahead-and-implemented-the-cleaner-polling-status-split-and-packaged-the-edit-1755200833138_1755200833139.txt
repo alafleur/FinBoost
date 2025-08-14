@@ -1,0 +1,89 @@
+Awesome — I’ve gone ahead and **implemented the cleaner polling/status split** and packaged the edited + new files for you.
+
+## What I changed / added (exactly as you asked)
+
+### ✅ New backend routes (clean polling/status)
+
+**Created:** `server/routes/admin-payout-batches.ts`
+
+* `GET /api/admin/payout-batches/active?cycleId=…` → used by the UI to **resume** an in-flight batch after a reload.
+* `GET /api/admin/payout-batches/:batchId/status` → used by the UI to **poll progress**.
+* Both endpoints check admin from the bearer token, read the batch/items from storage and return:
+
+  ```ts
+  {
+    batchId,
+    status,            // created | processing | completed | failed
+    totalChunks,
+    completedChunks,
+    processedItems,
+    totalItems,
+    paypalBatchId?,    // when available
+    error?             // when failed
+  }
+  ```
+
+**Download:**
+
+* [`server/routes/admin-payout-batches.ts`](sandbox:/mnt/data/server/routes/admin-payout-batches.ts)
+
+### ✅ Register the new routes
+
+**Patched:** `server/routes.ts` (your giant routes file)
+
+* Removed your old inline polling endpoint(s) for `/api/admin/payout-batches/...`
+* Added:
+
+  ```ts
+  import { registerAdminPayoutBatchRoutes } from "./routes/admin-payout-batches";
+  // inside registerRoutes(app):
+  registerAdminPayoutBatchRoutes(app);
+  ```
+
+**Download:**
+
+* [`server/routes.ts` (patched)](sandbox:/mnt/data/server/routes.ts)
+
+> Note: your project’s entry point already calls `registerRoutes(app)` from `index.ts`, so **no changes** were required in `index.ts`.
+
+### ✅ Frontend (admin) — keep the good logic, just ship it
+
+Your attached `CycleOperationsTab.tsx` already implements everything we planned:
+
+* **Resume after reload** via `GET /api/admin/payout-batches/active?cycleId=…` and then switching to the status poller, with the **batch ID displayed in-UI** and a **disabled button** during processing. &#x20;
+* **Status poller** calling `GET /api/admin/payout-batches/:batchId/status` every \~2s, updating `%`, chunk counters and closing on completion/failure.&#x20;
+* Clear **bulk vs selective** processing UI and button-disable rules that include “has active batch ID and not completed.”&#x20;
+
+I’ve exported the component unchanged (it matches the new backend contract).
+**Download:**
+
+* [`client/src/components/admin/CycleOperationsTab.tsx`](sandbox:/mnt/data/client/src/components/admin/CycleOperationsTab.tsx)
+
+---
+
+## What to remove (per your note)
+
+* **`server/routes.ts`**: I already stripped the old inline **status** endpoint for `/api/admin/payout-batches/:batchId/status`. (Your **reconcile** endpoint stays.)&#x20;
+* **`server/storage.ts`**: you mentioned removing a custom `getActivePayoutBatchForCycle` you added. The codebase already contains a proper version used by the new routes; keep **one** canonical implementation. (If you had a duplicate you added at the bottom, delete that duplicate only.)&#x20;
+
+---
+
+## Quick drop-in instructions
+
+1. **Add the two files** above to your repo (or replace with the patched copies).
+2. Ensure your server builds TS under `server/routes/…` (same tsconfig/path setup you already use).
+3. Rebuild + start the server.
+4. In the admin UI, open **Operations → Selected Winners** and hit **Process All Eligible** (or Selective). You’ll see:
+
+   * Button disabled during processing + **batch ID** shown beneath the button.
+   * Progress updates via the new `/status` endpoint.
+   * If the page reloads mid-run, the **resume** call uses `/active` to pick up where it left off.
+
+---
+
+## Notes
+
+* The new backend derives `processedItems`, `totalItems`, and best-effort `chunkInfo` from `batch.metadata` when present; otherwise it falls back to a reasonable heuristic so the UI **always** has a number to show.
+* No database schema or PayPal orchestrator changes. Your existing **/process-disbursements** endpoint remains the initiator.
+
+If you want, I can also generate a **single .zip** with these three files in their correct paths.
