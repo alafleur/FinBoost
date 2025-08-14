@@ -1,0 +1,61 @@
+Yes — I agree with Replit’s diagnosis. Your July 2/2 batch most likely has a **PayPal status of `success`**, while the UI hides the button only if it sees a batch with **status `completed`** for that cycle. That mismatch explains why it still looks like it needs processing even though the \$7,499 payout went through.
+
+I’ve shipped a tight fix so you have multiple guardrails:
+
+## 1) Backend normalization (already prepared for you)
+
+I updated the admin polling routes to **map PayPal’s `success` (and similar)** to a unified **`completed`** status in the API response.
+
+* **Updated file:** `server/routes/admin-payout-batches.ts`
+  [Download](sandbox:/mnt/data/server/routes/admin-payout-batches.ts)
+
+This adds:
+
+```ts
+function normalizeStatus(raw: any): string {
+  const s = String(raw ?? "").toLowerCase();
+  if (["completed", "complete", "success", "succeeded", "done", "finished"].includes(s)) return "completed";
+  if (["processing", "in_progress", "in-progress", "running"].includes(s)) return "processing";
+  if (["failed", "error", "errored", "canceled", "cancelled"].includes(s)) return "failed";
+  return s || "created";
+}
+```
+
+…and uses it when returning the batch:
+
+```ts
+status: normalizeStatus(batch.status),
+```
+
+So even if the DB has `success`, the frontend will now receive `completed` and behave correctly.
+
+## 2) (Optional) One-time data cleanup
+
+If your **UI is checking the DB directly** (not the polling endpoint) to decide whether to hide the button, do a one-time update for past rows:
+
+* In SQL:
+
+```sql
+UPDATE payout_batches
+SET status = 'completed'
+WHERE status IN ('success','succeeded','done','finished');
+```
+
+* In Drizzle/TS, equivalent update where appropriate.
+
+## 3) (Optional) UI relax-the-check
+
+As a belt-and-suspenders approach, you can make the front-end treat both as terminal:
+
+```ts
+const DONE = new Set(["completed", "success"]);
+const isDone = DONE.has((batch?.status || "").toLowerCase());
+```
+
+---
+
+### TL;DR
+
+* The mismatch is real; I agree with Replit.
+* I’ve provided a **drop-in backend file** that **normalizes `success` → `completed`** so your UI won’t misread the state.
+* If your “hide button” check reads directly from DB, run the simple one-time DB update too.
