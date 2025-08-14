@@ -8093,7 +8093,7 @@ export class MemStorage implements IStorage {
         .from(payoutBatches)
         .where(
           and(
-            eq(payoutBatches.cycleId, cycleId),
+            eq(payoutBatches.cycleSettingId, cycleId),
             or(
               eq(payoutBatches.status, 'created'),
               eq(payoutBatches.status, 'processing')
