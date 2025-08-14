@@ -8113,6 +8113,11 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     return null;
   }
 }
+ catch (error) {
+      console.error('Error getting active payout batch for cycle:', error);
+      return null;
+    }
+  }
 
   // Step 8: Concurrency protection - get batches by cycle
   async getPayoutBatchesByCycle(cycleId: number): Promise<PayoutBatch[]> {

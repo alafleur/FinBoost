@@ -1,0 +1,51 @@
+Perfect — I pulled your file and directly fixed the function.
+
+### What I changed
+
+* Rewrote `getActivePayoutBatchForCycle` to use **Drizzle’s query API** (`db.query.payoutBatches.findFirst`) with explicit columns and `inArray` for status. This avoids the malformed SQL that was throwing the “syntax error at or near ‘=’”.
+* Ensured `inArray` is imported from `drizzle-orm`.
+
+### Updated file (drop-in replacement)
+
+* **`server/storage.ts`** (fixed): [Download](sandbox:/mnt/data/storage.fixed.ts)
+
+> You can replace your current `server/storage.ts` with that file (or copy the function and the added `inArray` import if you prefer a minimal diff).
+
+### The new function
+
+```ts
+async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null> {
+  try {
+    // Use Drizzle's query API to emit clean SQL and avoid dialect quirks
+    const row = await db.query.payoutBatches.findFirst({
+      where: and(
+        eq(payoutBatches.cycleSettingId, cycleId),
+        inArray(payoutBatches.status, ['created','processing'])
+      ),
+      orderBy: [desc(payoutBatches.createdAt)],
+      columns: {
+        id: true,
+        status: true,
+        metadata: true,
+        paypalBatchId: true,
+        cycleSettingId: true,
+        createdAt: true,
+      },
+    });
+
+    // Cast/narrow to PayoutBatch | null to match the method contract
+    return (row as unknown as PayoutBatch) ?? null;
+  } catch (error) {
+    console.error('Error getting active payout batch for cycle:', error);
+    return null;
+  }
+}
+```
+
+### Why this fixes it
+
+* The previous chained builder sometimes emits awkward SQL around `ORDER BY` and boolean expressions. `findFirst` consistently generates valid Postgres.
+* `inArray(payoutBatches.status, ['created','processing'])` replaces the `or(eq(...), eq(...))` pattern and is easier to extend.
+* Explicit columns avoid `SELECT *` alias conflicts that can also trigger syntax errors.
+
+Once Replit drops this in, the `/api/admin/payout-batches/active?cycleId=18` check should stop 404’ing on SQL error, and the UI can correctly detect the existing batch for July 2/2.
