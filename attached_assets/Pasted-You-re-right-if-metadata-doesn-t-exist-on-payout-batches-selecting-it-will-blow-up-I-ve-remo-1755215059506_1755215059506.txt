@@ -1,0 +1,61 @@
+You’re right — if `metadata` doesn’t exist on `payout_batches`, selecting it will blow up. I’ve removed it and rebuilt the function to be minimal and safe.
+
+### ✅ Updated `server/storage.ts` (raw-SQL, **no `metadata` select**)
+
+* **Download:** [storage.fixed.sql2.ts](sandbox:/mnt/data/storage.fixed.sql2.ts)
+
+This file replaces `getActivePayoutBatchForCycle` with a version that:
+
+* Uses **raw Postgres SQL** via `db.execute(sql\`…\`)\`
+* **Does not** select `metadata`
+* Tolerates snake/camel casing for key columns via `COALESCE(...)`
+* Filters for active statuses only (`created`, `processing`)
+* Orders by created time and returns the latest row
+
+Here’s the exact function you’ll get in that file:
+
+```ts
+async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null> {
+  try {
+    // Raw SQL, minimal columns, no 'metadata' (table doesn't have it)
+    const result: any = await db.execute(sql`
+      SELECT
+        id,
+        status,
+        COALESCE("paypalBatchId", paypal_batch_id)   AS "paypalBatchId",
+        COALESCE("cycleSettingId", cycle_setting_id) AS "cycleSettingId",
+        COALESCE("createdAt", created_at)           AS "createdAt"
+      FROM payout_batches
+      WHERE (cycle_setting_id = ${cycleId} OR "cycleSettingId" = ${cycleId})
+        AND lower(status) IN ('created','processing')
+      ORDER BY COALESCE("createdAt", created_at) DESC
+      LIMIT 1
+    `);
+
+    const row = (result?.rows ?? result)?.[0] ?? null;
+    return row as unknown as PayoutBatch | null;
+  } catch (error) {
+    console.error('Error getting active payout batch for cycle:', error);
+    return null;
+  }
+}
+```
+
+> Ensure `sql` is imported from `drizzle-orm` at the top of `storage.ts`:
+
+```ts
+import { /* ...existing... */, sql } from "drizzle-orm";
+```
+
+---
+
+### After Replit drops this in
+
+1. Hit: `/api/admin/payout-batches/active?cycleId=18`
+
+   * If there’s an **in-flight** batch, you’ll now get it (no 500/404 due to SQL).
+   * If July 2/2 is truly done, this will correctly return **404** (no active batch).
+
+2. If the button still shows with **“(750 eligible)”**, that part is separate from the active-batch check: it means the **winner rows** weren’t reconciled as paid/excluded post-payout. Apply the one-time reconciliation I shared earlier to mark them **paid** based on `payout_items` terminal statuses; the eligible count will drop and the **Process** button will disappear.
+
+If the logs show any other missing column after this change, paste the exact message and I’ll adjust the SELECT list again in-line.
