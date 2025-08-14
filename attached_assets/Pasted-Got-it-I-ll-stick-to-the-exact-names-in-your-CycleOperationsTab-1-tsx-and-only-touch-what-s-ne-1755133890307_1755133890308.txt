@@ -1,0 +1,258 @@
+Got it — I’ll stick to the exact names in your `CycleOperationsTab (1).tsx` and only touch what’s needed to make the admin UI show real progress.
+
+Below are **drop-in patches** for that file using your variables:
+
+---
+
+# 1) Replace the “fake 25%” with real polling tied to your batchId
+
+**In `handleProcessPayouts`, after:**
+
+```ts
+const data = await response.json();
+```
+
+**Replace your current “success” branch** (where you set `phase: 'Completed', progress: 100` immediately) with this version that **polls** the server:
+
+```ts
+if (response.ok && data?.success) {
+  const token = localStorage.getItem('token');
+  const batchId = data.batchId as string;
+  const chunkInfo = data.batchMetadata?.chunkInfo || {};
+  const totalEligible = data.totalEligible ?? 0;
+
+  // Seed UI immediately
+  setProcessingProgress(prev => ({
+    ...prev,
+    phase: 'Processing',
+    progress: 5, // will be updated by poller
+    message: `Batch ${batchId} created. Tracking progress...`,
+    batchId,
+    chunkCount: chunkInfo.totalChunks || 1,
+    currentChunk: 0
+  }));
+
+  // --- BEGIN POLLER (every ~2s) ---
+  let aborted = false;
+  const pollStatus = async () => {
+    if (aborted) return;
+    try {
+      const r = await fetch(`/api/admin/payout-batches/${batchId}/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error(`status ${r.status}`);
+      const s = await r.json();
+      // expected: { status: 'created|processing|completed|failed', completedChunks, totalChunks, processedItems, totalItems, paypalBatchId, error }
+
+      const totalChunks = s.totalChunks || chunkInfo.totalChunks || 1;
+      const completedChunks = s.completedChunks ?? 0;
+      const processedItems = s.processedItems ?? 0;
+      const totalItems = s.totalItems ?? totalEligible;
+
+      if (s.status === 'completed') {
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Completed',
+          progress: 100,
+          message: `Processed ${processedItems}/${totalItems} items`,
+          batchId,
+          chunkCount: totalChunks,
+          currentChunk: totalChunks
+        }));
+        toast({
+          title: "✅ Disbursement Complete",
+          description: `Batch ${batchId} finished.`
+        });
+        // Give the user a beat to see 100%, then close
+        setTimeout(() => setShowProcessingDialog(false), 1200);
+        // Refresh dashboard/state to reflect the new batch
+        await refreshAllCycleData({ forceFresh: true });
+        setIsProcessingPayouts(false); // move this here (terminal state)
+        return;
+      }
+
+      if (s.status === 'failed') {
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Error',
+          progress: 0,
+          message: s.error || 'Batch failed',
+          batchId,
+          chunkCount: totalChunks,
+          currentChunk: completedChunks
+        }));
+        toast({
+          title: "🚨 Batch Failed",
+          description: s.error || 'See server logs',
+          variant: "destructive"
+        });
+        setTimeout(() => setShowProcessingDialog(false), 1200);
+        setIsProcessingPayouts(false);
+        return;
+      }
+
+      // still processing → update progress
+      const pct = Math.max(
+        10,
+        Math.min(
+          99,
+          Math.floor((completedChunks / totalChunks) * 100)
+        )
+      );
+      setProcessingProgress(prev => ({
+        ...prev,
+        phase: 'Processing',
+        progress: pct,
+        message: `Chunk ${completedChunks}/${totalChunks} processed — ${processedItems}/${totalItems} items`,
+        batchId,
+        chunkCount: totalChunks,
+        currentChunk: completedChunks
+      }));
+
+      // keep polling
+      setTimeout(pollStatus, 2000);
+    } catch (_e) {
+      // network/transient → retry a bit slower
+      setTimeout(pollStatus, 3000);
+    }
+  };
+  pollStatus();
+  // --- END POLLER ---
+
+  // Keep your toasts – just don’t force 100%/close here anymore.
+  // (Remove any immediate setProcessingProgress(...Completed/100) in this branch.)
+
+} else {
+  // existing error handling (unchanged) …
+```
+
+> **Why this matters:** your previous code locked `progress: 25` and then jumped to 100% without ever checking the backend. This poller uses your **existing** state: `processingProgress`, `setProcessingProgress`, `setShowProcessingDialog`, `setIsProcessingPayouts`, and the `refreshAllCycleData` you already have.
+
+---
+
+# 2) Don’t re-enable the button until the batch is done
+
+Near the bottom of `handleProcessPayouts`, you currently have:
+
+```ts
+} finally {
+  setIsProcessingPayouts(false);
+}
+```
+
+This re-enables the “Process” button **immediately after the POST returns**, even though the batch is still running. **Replace** that `finally` with:
+
+```ts
+} finally {
+  // Do NOT flip this off here; the poller sets it on terminal states.
+  // setIsProcessingPayouts(false);
+}
+```
+
+> We already call `setIsProcessingPayouts(false)` inside the poller when the batch reaches `completed` or `failed`.
+
+---
+
+# 3) Show the Batch ID inline (next to the button)
+
+You already render toasts with the Batch ID; also surface it inline so it’s always visible while processing.
+
+Where you render the **Process** button, keep your existing logic but **add** this small block right after it:
+
+```tsx
+{processingProgress?.batchId && (
+  <div className="ml-3 text-xs text-gray-600">
+    Batch:&nbsp;<span className="font-mono">{processingProgress.batchId}</span>
+  </div>
+)}
+```
+
+And make sure the button honors the lock:
+
+```tsx
+<Button
+  onClick={handleProcessPayouts}
+  disabled={isProcessingPayouts || (processingProgress.batchId && processingProgress.phase !== 'Completed')}
+>
+  {isProcessingPayouts ? 'Processing…' : (selectedForDisbursement.size === 0
+    ? `Process All Eligible (${eligibleCount ?? '…'})`
+    : `Process Selected (${selectedForDisbursement.size})`)}
+</Button>
+```
+
+(Use your existing `eligibleCount` if you already compute it in this component; otherwise keep the first label variant you have.)
+
+---
+
+# 4) (Optional) Resume progress if the page reloads mid-run
+
+If you want the dialog to re-open and resume polling on refresh, add this **exact** `useEffect` (names as in your file):
+
+```tsx
+useEffect(() => {
+  const resumeActive = async () => {
+    if (!selectedCycle) return;
+    try {
+      const token = localStorage.getItem('token');
+      const r = await fetch(`/api/admin/payout-batches/active?cycleId=${selectedCycle.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!r.ok) return;
+      const b = await r.json(); // { batchId, status, totalChunks, completedChunks, processedItems, totalItems }
+      if (!b?.batchId) return;
+
+      setShowProcessingDialog(true);
+      setIsProcessingPayouts(true);
+      setProcessingProgress({
+        phase: b.status === 'completed' ? 'Completed' : 'Processing',
+        progress: b.status === 'completed'
+          ? 100
+          : Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
+        message: `Resuming batch ${b.batchId}...`,
+        batchId: b.batchId,
+        chunkCount: b.totalChunks || 1,
+        currentChunk: b.completedChunks || 0
+      });
+
+      // reuse the same poller above by calling the status endpoint loop
+      // (copy the pollStatus() function into a small helper and call it here with b.batchId)
+      // For brevity, replicate poller here if you prefer.
+    } catch {}
+  };
+  resumeActive();
+}, [selectedCycle]);
+```
+
+*(If `/api/admin/payout-batches/active` doesn’t exist yet, you can skip this block; the core fix is the poller in step 1.)*
+
+---
+
+## Backend assumption (already likely present)
+
+The poller calls:
+
+```
+GET /api/admin/payout-batches/:batchId/status
+→ { status, completedChunks, totalChunks, processedItems, totalItems, paypalBatchId, error? }
+```
+
+If this route isn’t live, have Replit expose that JSON from whatever they already log to the DB (`payout_batch_chunks` + `payout_batch_items`).
+
+---
+
+## User UI (minimal, separate from admin)
+
+Since you said user UI is the priority: expose a tiny endpoint and surface one line in the user dashboard:
+
+* **Endpoint:** `GET /api/me/payouts/latest` → `{ status: 'processing|paid|failed|unclaimed', amountCents, cycleId, paidAt? }`
+* **UI:** on load, fetch it and show:
+
+  * “Payout sent on Aug 13” if `paid`.
+  * “Processing…” if `processing`.
+  * “Action needed: confirm your PayPal email” for `unclaimed/receiver_unconfirmed`.
+
+This is one small component on the user side; doesn’t need polling—refresh on page focus.
+
+---
+
+If you want, send me back the chunk of your `handleProcessPayouts` where you set success and I’ll return it with the **exact** replacement block in full so Replit can paste it verbatim.

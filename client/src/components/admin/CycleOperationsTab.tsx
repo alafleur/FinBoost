@@ -836,72 +836,112 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       // STEP 9.4: Comprehensive response handling with bulletproof error integration
       console.log(`[STEP 9 FRONTEND] API Response:`, { status: response.status, data });
       
-      if (response.ok && data.success) {
-        // SUCCESS CASE: Enhanced success handling with batch tracking
-        const processedCount = data.processedCount || 0;
-        const failedCount = data.failed ? data.failed.length : 0;
-        const totalEligible = data.totalEligible || 0;
-        const batchId = data.batchId;
+      if (response.ok && data?.success) {
+        const token = localStorage.getItem('token');
+        const batchId = data.batchId as string;
         const chunkInfo = data.batchMetadata?.chunkInfo || {};
-        
-        // STEP 9.5: Update progress for batch processing feedback
+        const totalEligible = data.totalEligible ?? 0;
+
+        // Seed UI immediately
         setProcessingProgress(prev => ({
           ...prev,
-          phase: 'Completed',
-          progress: 100,
-          message: `Successfully processed ${processedCount} disbursements`,
-          batchId: batchId,
-          chunkCount: chunkInfo.totalChunks || 0,
-          currentChunk: chunkInfo.totalChunks || 0
+          phase: 'Processing',
+          progress: 5, // will be updated by poller
+          message: `Batch ${batchId} created. Tracking progress...`,
+          batchId,
+          chunkCount: chunkInfo.totalChunks || 1,
+          currentChunk: 0
         }));
-        
-        let successMessage = `Successfully processed ${processedCount} payouts`;
-        if (failedCount > 0) {
-          successMessage += ` (${failedCount} failed due to email validation errors)`;
-        }
-        if (batchId) {
-          successMessage += ` - Batch ID: ${batchId}`;
-        }
-        if (chunkInfo.totalChunks > 1) {
-          successMessage += ` - Processed in ${chunkInfo.totalChunks} optimized chunks`;
-        }
 
-        // Enhanced success toast with batch information
-        toast({
-          title: "✅ Disbursement Successful",
-          description: successMessage
-        });
-        
-        // Show batch tracking information if available
-        if (batchId) {
-          setTimeout(() => {
-            toast({
-              title: "📊 Batch Tracking",
-              description: `Track your disbursement progress with Batch ID: ${batchId}`,
-              variant: "default"
+        // --- BEGIN POLLER (every ~2s) ---
+        let aborted = false;
+        const pollStatus = async () => {
+          if (aborted) return;
+          try {
+            const r = await fetch(`/api/admin/payout-batches/${batchId}/status`, {
+              headers: { 'Authorization': `Bearer ${token}` }
             });
-          }, 1500);
-        }
-        
-        // Clear selections after successful processing
-        setSelectedForDisbursement(new Set());
-        
-        // Enhanced audit logging
-        console.log(`[STEP 9 FRONTEND] Disbursement completed successfully:`, {
-          processed: processedCount,
-          failed: failedCount,
-          totalEligible: totalEligible,
-          batchId: batchId,
-          chunks: chunkInfo.totalChunks || 1,
-          timestamp: new Date().toISOString()
-        });
-        
-        // Close processing dialog after brief delay
-        setTimeout(() => setShowProcessingDialog(false), 3000);
-        
-        // Comprehensive state refresh
-        await refreshAllCycleData({ forceFresh: true, showToast: false });
-        
+            if (!r.ok) throw new Error(`status ${r.status}`);
+            const s = await r.json();
+            // expected: { status: 'created|processing|completed|failed', completedChunks, totalChunks, processedItems, totalItems, paypalBatchId, error }
+
+            const totalChunks = s.totalChunks || chunkInfo.totalChunks || 1;
+            const completedChunks = s.completedChunks ?? 0;
+            const processedItems = s.processedItems ?? 0;
+            const totalItems = s.totalItems ?? totalEligible;
+
+            if (s.status === 'completed') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                phase: 'Completed',
+                progress: 100,
+                message: `Processed ${processedItems}/${totalItems} items`,
+                batchId,
+                chunkCount: totalChunks,
+                currentChunk: totalChunks
+              }));
+              toast({
+                title: "✅ Disbursement Complete",
+                description: `Batch ${batchId} finished.`
+              });
+              // Give the user a beat to see 100%, then close
+              setTimeout(() => setShowProcessingDialog(false), 1200);
+              // Refresh dashboard/state to reflect the new batch
+              await refreshAllCycleData({ forceFresh: true });
+              setIsProcessingPayouts(false); // move this here (terminal state)
+              // Clear selections after successful processing
+              setSelectedForDisbursement(new Set());
+              return;
+            }
+
+            if (s.status === 'failed') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                phase: 'Error',
+                progress: 0,
+                message: s.error || 'Batch failed',
+                batchId,
+                chunkCount: totalChunks,
+                currentChunk: completedChunks
+              }));
+              toast({
+                title: "🚨 Batch Failed",
+                description: s.error || 'See server logs',
+                variant: "destructive"
+              });
+              setTimeout(() => setShowProcessingDialog(false), 1200);
+              setIsProcessingPayouts(false);
+              return;
+            }
+
+            // still processing → update progress
+            const pct = Math.max(
+              10,
+              Math.min(
+                99,
+                Math.floor((completedChunks / totalChunks) * 100)
+              )
+            );
+            setProcessingProgress(prev => ({
+              ...prev,
+              phase: 'Processing',
+              progress: pct,
+              message: `Chunk ${completedChunks}/${totalChunks} processed — ${processedItems}/${totalItems} items`,
+              batchId,
+              chunkCount: totalChunks,
+              currentChunk: completedChunks
+            }));
+
+            // keep polling
+            setTimeout(pollStatus, 2000);
+          } catch (_e) {
+            // network/transient → retry a bit slower
+            setTimeout(pollStatus, 3000);
+          }
+        };
+        pollStatus();
+        // --- END POLLER ---
+
       } else {
         // STEP 9.6: Enhanced error handling with defensive architecture responses
         setProcessingProgress(prev => ({
@@ -1017,7 +1057,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       
       setTimeout(() => setShowProcessingDialog(false), 2000);
     } finally {
-      setIsProcessingPayouts(false);
+      // Do NOT flip this off here; the poller sets it on terminal states.
+      // setIsProcessingPayouts(false);
     }
   };
 
@@ -1566,7 +1607,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                           
                           <Button
                             onClick={handleProcessPayouts}
-                            disabled={isProcessingPayouts || (isSelectiveMode && selectedCount === 0)}
+                            disabled={isProcessingPayouts || (isSelectiveMode && selectedCount === 0) || (processingProgress.batchId && processingProgress.phase !== 'Completed')}
                             className={`
                               disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200
                               ${isBulkMode 
@@ -1616,6 +1657,11 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                               </>
                             )}
                           </Button>
+                          {processingProgress?.batchId && (
+                            <div className="mt-2 text-xs text-gray-600">
+                              Batch:&nbsp;<span className="font-mono">{processingProgress.batchId}</span>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}

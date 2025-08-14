@@ -3206,6 +3206,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New endpoint for ChatGPT's polling solution - simplified status for UI
+  app.get('/api/admin/payout-batches/:batchId/status', requireAdmin, async (req, res) => {
+    try {
+      const batchId = parseInt(req.params.batchId);
+
+      const batch = await storage.getPayoutBatch(batchId);
+      if (!batch) {
+        return res.status(404).json({
+          success: false,
+          error: 'Batch not found'
+        });
+      }
+
+      // Get batch chunks if available
+      const batchChunks = await storage.getPayoutBatchChunks(batchId);
+      const totalChunks = batchChunks.length || 1;
+      const completedChunks = batchChunks.filter((c: any) => c.status === 'completed').length;
+      
+      // Get items for processing count
+      const batchItems = await storage.getPayoutBatchItems(batchId);
+      const processedItems = batchItems.filter((item: any) => 
+        item.status === 'success' || item.status === 'failed'
+      ).length;
+      const totalItems = batchItems.length;
+
+      // Determine overall status
+      let status = batch.status;
+      if (batch.status === 'processing' && processedItems === totalItems) {
+        status = 'completed';
+      }
+
+      res.json({
+        status,
+        completedChunks,
+        totalChunks,
+        processedItems,
+        totalItems,
+        paypalBatchId: batch.paypalBatchId,
+        error: batch.errorDetails
+      });
+
+    } catch (error) {
+      console.error('[Polling Status] Error:', error);
+      res.status(500).json({
+        status: 'failed',
+        error: 'Failed to get batch status'
+      });
+    }
+  });
+
   /**
    * Override batch status (for manual intervention)
    */
