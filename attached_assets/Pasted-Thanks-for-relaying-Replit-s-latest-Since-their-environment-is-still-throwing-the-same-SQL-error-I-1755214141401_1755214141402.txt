@@ -1,0 +1,60 @@
+Thanks for relaying Replit’s latest. Since their environment is still throwing the same SQL error, I’ve taken the query-builder completely out of the equation and produced a **raw-SQL** version of the function so Postgres gets a clean, simple statement.
+
+### ✅ Drop-in fixed file for Replit
+
+* **`server/storage.ts` (raw-SQL version)**
+  [Download](sandbox:/mnt/data/storage.fixed.sql.ts)
+
+This file contains a **replacement** for `getActivePayoutBatchForCycle` that uses `db.execute(sql\`…\`)\` and avoids the Drizzle query API entirely.
+
+### The exact replacement function
+
+```ts
+async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null> {
+  try {
+    // Use raw SQL to avoid query-builder quirks causing malformed SQL
+    const result: any = await db.execute(sql`
+      SELECT
+        id,
+        status,
+        metadata,
+        COALESCE("paypalBatchId", paypal_batch_id)   AS "paypalBatchId",
+        COALESCE("cycleSettingId", cycle_setting_id) AS "cycleSettingId",
+        COALESCE("createdAt", created_at)           AS "createdAt"
+      FROM payout_batches
+      WHERE (cycle_setting_id = ${cycleId} OR "cycleSettingId" = ${cycleId})
+        AND lower(status) IN ('created','processing')
+      ORDER BY COALESCE("createdAt", created_at) DESC
+      LIMIT 1
+    `);
+
+    const row = (result?.rows ?? result)?.[0] ?? null;
+    return row as unknown as PayoutBatch | null;
+  } catch (error) {
+    console.error('Error getting active payout batch for cycle:', error);
+    return null;
+  }
+}
+```
+
+**Notes:**
+
+* Uses `lower(status) IN ('created','processing')` to match in-flight batches.
+* Handles both `snake_case` and `camelCase` columns via `COALESCE(...)` for portability.
+* If your project doesn’t already import it, **ensure** you have:
+
+  ```ts
+  import { sql } from "drizzle-orm";
+  ```
+
+  I added that import in the fixed file.
+
+---
+
+### What to expect after this change
+
+* The `/api/admin/payout-batches/active?cycleId=18` call should stop failing with “syntax error at or near '='”.
+* If July 2/2 truly has **no active batch**, `/active` will correctly return **404** (that’s expected after completion).
+* The **Process All Eligible** button will then be controlled by your **eligible winners count** and/or the **latest batch status** (which we already normalize to `completed`). If it still shows, it means the **winner rows weren’t reconciled**—apply the one-time SQL backfill I shared earlier to mark them paid.
+
+If you’d like, I can also generate a **`getLatestPayoutBatchForCycle`** helper and a tiny **`/latest`** endpoint so the UI can show the last completed batch when `/active` is 404.
