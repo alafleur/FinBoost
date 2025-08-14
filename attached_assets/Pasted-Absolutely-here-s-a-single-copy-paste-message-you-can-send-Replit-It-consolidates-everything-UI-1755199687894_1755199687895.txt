@@ -1,0 +1,312 @@
+Absolutely — here’s a single, copy-paste message you can send Replit. It consolidates everything (UI fixes + backend routes + sanity checks) so there’s zero ambiguity.
+
+---
+
+**Subject:** BLOCKER — Finalize disbursement UI/BE integration (paste-in code + exact acceptance criteria)
+
+Team — the backend is working and funds were sent, but the **admin UI still doesn’t truthfully reflect progress**. Execute the following **exact steps**. Do not refactor or rename; just apply the patches and confirm the acceptance criteria.
+
+---
+
+## 0) Scope
+
+* Keep this thread’s focus strictly on **disbursement code**.
+* No redesigns. No feature changes. This is about **accurate, live status** in the Admin UI and the minimal backend endpoints it depends on.
+
+---
+
+## 1) Admin UI — `CycleOperationsTab.tsx` (drop-in fixes)
+
+### A) Replace the fake progress with real polling (every \~2s)
+
+In `handleProcessPayouts`, after:
+
+```ts
+const data = await response.json();
+```
+
+use this **success branch** (keep our existing variable names/state; do NOT introduce new names):
+
+```ts
+if (response.ok && data?.success) {
+  const token = localStorage.getItem('token');
+  const batchId = data.batchId as string;
+  const chunkInfo = data.batchMetadata?.chunkInfo || {};
+  const totalEligible = data.totalEligible ?? 0;
+
+  setProcessingProgress(prev => ({
+    ...prev,
+    phase: 'Processing',
+    progress: 5,
+    message: `Batch ${batchId} created. Tracking progress...`,
+    batchId,
+    chunkCount: chunkInfo.totalChunks || 1,
+    currentChunk: 0
+  }));
+
+  let aborted = false;
+  const pollStatus = async () => {
+    if (aborted) return;
+    try {
+      const r = await fetch(`/api/admin/payout-batches/${batchId}/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error(`status ${r.status}`);
+      const s = await r.json();
+
+      const totalChunks = s.totalChunks || chunkInfo.totalChunks || 1;
+      const completedChunks = s.completedChunks ?? 0;
+      const processedItems = s.processedItems ?? 0;
+      const totalItems = s.totalItems ?? totalEligible;
+
+      if (s.status === 'completed') {
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Completed',
+          progress: 100,
+          message: `Processed ${processedItems}/${totalItems} items`,
+          batchId,
+          chunkCount: totalChunks,
+          currentChunk: totalChunks
+        }));
+        toast({ title: "✅ Disbursement Complete", description: `Batch ${batchId} finished.` });
+        setTimeout(() => setShowProcessingDialog(false), 1200);
+        await refreshAllCycleData({ forceFresh: true });
+        setIsProcessingPayouts(false);
+        return;
+      }
+
+      if (s.status === 'failed') {
+        setProcessingProgress(prev => ({
+          ...prev,
+          phase: 'Error',
+          progress: 0,
+          message: s.error || 'Batch failed',
+          batchId,
+          chunkCount: totalChunks,
+          currentChunk: completedChunks
+        }));
+        toast({ title: "🚨 Batch Failed", description: s.error || 'See server logs', variant: "destructive" });
+        setTimeout(() => setShowProcessingDialog(false), 1200);
+        setIsProcessingPayouts(false);
+        return;
+      }
+
+      const pct = Math.max(10, Math.min(99, Math.floor((completedChunks / totalChunks) * 100)));
+      setProcessingProgress(prev => ({
+        ...prev,
+        phase: 'Processing',
+        progress: pct,
+        message: `Chunk ${completedChunks}/${totalChunks} processed — ${processedItems}/${totalItems} items`,
+        batchId,
+        chunkCount: totalChunks,
+        currentChunk: completedChunks
+      }));
+
+      setTimeout(pollStatus, 2000);
+    } catch {
+      setTimeout(pollStatus, 3000);
+    }
+  };
+  pollStatus();
+
+} else {
+  // keep existing error handling
+}
+```
+
+### B) Do **not** re-enable the button in `finally`
+
+Comment out any `setIsProcessingPayouts(false)` in the `finally` of `handleProcessPayouts`. The poller sets it **only** on terminal states (completed/failed).
+
+### C) Show Batch ID inline and lock the button during processing
+
+Where the Process button renders, **ensure**:
+
+```tsx
+<Button
+  onClick={handleProcessPayouts}
+  disabled={isProcessingPayouts || (processingProgress.batchId && processingProgress.phase !== 'Completed')}
+>
+  {isProcessingPayouts ? 'Processing…' : (selectedForDisbursement.size === 0
+    ? `Process All Eligible (${eligibleCount ?? '…'})`
+    : `Process Selected (${selectedForDisbursement.size})`)}
+</Button>
+
+{processingProgress?.batchId && (
+  <div className="ml-3 text-xs text-gray-600">
+    Batch: <span className="font-mono">{processingProgress.batchId}</span>
+  </div>
+)}
+```
+
+### D) Resume on reload
+
+Keep the existing “active batch” resume logic you added. Ensure any `setProcessingProgress` spreads use `...prev` (not `.prev`). Fix any typos accordingly.
+
+---
+
+## 2) Backend — add the two minimal endpoints the UI polls
+
+Create `server/routes/admin-payout-batches.ts` and register it in your main router. **Do not rename fields.** Return exactly:
+
+```json
+{ "batchId": number, "status": "created|processing|completed|failed",
+  "totalChunks": number, "completedChunks": number,
+  "processedItems": number, "totalItems": number,
+  "paypalBatchId": string|null, "error": string|null }
+```
+
+**Code (paste as-is):**
+
+```ts
+// server/routes/admin-payout-batches.ts
+import { Router, Request, Response } from "express";
+import { and, desc, eq, sql, count, sum } from "drizzle-orm";
+import { db } from "../db";
+import {
+  payoutBatches,
+  payoutBatchChunks,
+  payoutBatchItems,
+} from "../../shared/schema";
+
+const nz = (n: number | null | undefined) => (typeof n === "number" ? n : 0);
+
+async function computeBatchStatus(batchId: number) {
+  const [batch] = await db
+    .select({
+      id: payoutBatches.id,
+      total_chunks: payoutBatches.total_chunks,
+      completed_chunks: payoutBatches.completed_chunks,
+    })
+    .from(payoutBatches)
+    .where(eq(payoutBatches.id, batchId))
+    .limit(1);
+
+  if (!batch) return { notFound: true as const };
+
+  const [chunkAgg] = await db
+    .select({
+      totalChunks: count().as("total_chunks"),
+      completedChunks: sum(sql`CASE WHEN ${payoutBatchChunks.status} = 'completed' THEN 1 ELSE 0 END`).mapWith(Number),
+      failedChunks: sum(sql`CASE WHEN ${payoutBatchChunks.status} = 'failed' THEN 1 ELSE 0 END`).mapWith(Number),
+      processingChunks: sum(sql`CASE WHEN ${payoutBatchChunks.status} = 'processing' THEN 1 ELSE 0 END`).mapWith(Number),
+      itemsProcessed: sum(payoutBatchChunks.processed_items).mapWith(Number),
+    })
+    .from(payoutBatchChunks)
+    .where(eq(payoutBatchChunks.batch_id, batchId));
+
+  const [itemAgg] = await db
+    .select({ totalItems: count().as("total_items") })
+    .from(payoutBatchItems)
+    .where(eq(payoutBatchItems.batch_id, batchId));
+
+  const [lastError] = await db
+    .select({ error_message: payoutBatchChunks.error_message })
+    .from(payoutBatchChunks)
+    .where(and(eq(payoutBatchChunks.batch_id, batchId), eq(payoutBatchChunks.status, "failed")))
+    .orderBy(desc(payoutBatchChunks.updated_at))
+    .limit(1);
+
+  const totalChunks = nz(chunkAgg?.totalChunks) || nz(batch.total_chunks) || 1;
+  const completedChunks = nz(chunkAgg?.completedChunks) || 0;
+  const failedChunks = nz(chunkAgg?.failedChunks) || 0;
+
+  let status: "created" | "processing" | "completed" | "failed" = "created";
+  if (failedChunks > 0) status = "failed";
+  else if (totalChunks > 0 && completedChunks >= totalChunks) status = "completed";
+  else if (nz(chunkAgg?.processingChunks) > 0 || completedChunks > 0) status = "processing";
+
+  return {
+    batchId: batch.id,
+    status,
+    totalChunks,
+    completedChunks,
+    processedItems: nz(chunkAgg?.itemsProcessed),
+    totalItems: nz(itemAgg?.totalItems),
+    paypalBatchId: null,
+    error: lastError?.error_message || null,
+  };
+}
+
+export function registerAdminPayoutBatchRoutes(router: Router) {
+  router.get("/api/admin/payout-batches/:batchId/status", async (req: Request, res: Response) => {
+    const batchId = Number(req.params.batchId);
+    if (!Number.isFinite(batchId)) return res.status(400).json({ error: "invalid_batch_id" });
+    try {
+      const agg = await computeBatchStatus(batchId);
+      if ("notFound" in agg) return res.status(404).json({ error: "batch_not_found" });
+      return res.json(agg);
+    } catch (err) {
+      console.error("status_route_error", { batchId, err });
+      return res.status(500).json({ error: "internal_error" });
+    }
+  });
+
+  router.get("/api/admin/payout-batches/active", async (req: Request, res: Response) => {
+    const cycleId = Number(req.query.cycleId);
+    if (!Number.isFinite(cycleId)) return res.status(400).json({ error: "invalid_cycle_id" });
+    try {
+      const [active] = await db
+        .select({
+          id: payoutBatches.id,
+          total_chunks: payoutBatches.total_chunks,
+          completed_chunks: payoutBatches.completed_chunks,
+          created_at: payoutBatches.created_at,
+        })
+        .from(payoutBatches)
+        .where(and(
+          eq(payoutBatches.cycle_id, cycleId as any),
+          sql`${payoutBatches.completed_chunks} < ${payoutBatches.total_chunks}`
+        ))
+        .orderBy(desc(payoutBatches.created_at))
+        .limit(1);
+
+      if (!active) return res.json({});
+
+      const agg = await computeBatchStatus(active.id);
+      if ("notFound" in agg) return res.json({});
+      return res.json(agg);
+    } catch (err) {
+      console.error("active_route_error", { cycleId, err });
+      return res.status(500).json({ error: "internal_error" });
+    }
+  });
+}
+```
+
+**Register it** in your central router (e.g., `server/routes/index.ts`):
+
+```ts
+import { registerAdminPayoutBatchRoutes } from "./admin-payout-batches";
+export function registerRoutes(app: import("express").Express) {
+  const router = require("express").Router();
+  // existing registrations…
+  registerAdminPayoutBatchRoutes(router);
+  app.use(router);
+}
+```
+
+---
+
+## 3) Sanity checks (must pass)
+
+* Start a disbursement. The dialog shows **real progress** like:
+  `Chunk 2/3 processed — 500/750 items`.
+* **Batch ID** appears inline under the button and in the dialog.
+* **Button is disabled** until the batch reaches a terminal state.
+* Refresh mid-run → dialog **reopens** and continues polling automatically.
+* On completion → dialog **reaches 100%**, **auto-closes**, and the dashboard **refreshes**.
+* No need to read server logs to know the status anymore.
+
+---
+
+## 4) Out of scope (do not touch)
+
+* Do **not** change payout logic, chunking, checksum, or schema names.
+* Do **not** refactor components or route names.
+* Do **not** rename any state variables in `CycleOperationsTab`.
+
+---
+
+If anything in the response shape for `/status` or `/active` differs, update the handlers to **exactly** match what the UI uses above — the UI will not be modified further.
