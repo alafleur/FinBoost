@@ -8105,7 +8105,7 @@ export class MemStorage implements IStorage {
       return batch || null;
     } catch (error) {
       console.error('Error getting active payout batch for cycle:', error);
-      throw error;
+      return null;
     }
   }
 
