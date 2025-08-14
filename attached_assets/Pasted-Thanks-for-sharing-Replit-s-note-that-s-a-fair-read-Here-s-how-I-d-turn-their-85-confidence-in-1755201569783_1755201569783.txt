@@ -1,0 +1,231 @@
+Thanks for sharing Replit’s note — that’s a fair read. Here’s how I’d turn their “85% confidence” into “100% working” with the least risk and time.
+
+# What to do next (tight checklist)
+
+1. **Normalize field names (fix the likely source of most LSP errors)**
+
+* Some tables/fields might be `snake_case` in DB and `camelCase` in code (e.g., `paypal_batch_id` vs `paypalBatchId`, `batch_id` vs `batchId`).
+* Add a tiny adapter layer so the new routes don’t care which casing your schema uses.
+
+**Drop-in patch for `server/routes/admin-payout-batches.ts` (replace the file with this more defensive version):**
+
+```ts
+// server/routes/admin-payout-batches.ts
+import type { Express, Request, Response } from "express";
+import { storage } from "../storage";
+
+// ---- Types used by routes (loose/defensive) ----
+type AnyRecord = Record<string, any>;
+
+interface BatchStatusPayload {
+  batchId: string | number;
+  status: string;
+  totalChunks: number;
+  completedChunks: number;
+  processedItems: number;
+  totalItems: number;
+  paypalBatchId?: string | null;
+  error?: string | null;
+}
+
+// ---- Admin auth (reuse your token->user->isAdmin logic) ----
+async function requireAdminFromToken(req: Request, res: Response): Promise<{ ok: boolean; userId?: number }> {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) return res.status(401).json({ error: "Invalid token" }).end(), { ok: false };
+    const user = await (storage as any).getUserByToken?.(token);
+    if (!user || !user.isAdmin) return res.status(403).json({ error: "Admin access required" }).end(), { ok: false };
+    return { ok: true, userId: user.id };
+  } catch {
+    res.status(401).json({ error: "Authentication failed" });
+    return { ok: false };
+  }
+}
+
+// ---- Field mappers to tolerate snake_case / camelCase ----
+function pick<T = any>(obj: AnyRecord, keys: string[], fallback?: any): T {
+  for (const k of keys) if (obj?.[k] !== undefined) return obj[k];
+  return fallback as T;
+}
+
+function normalizeBatch(raw: AnyRecord) {
+  // tolerate snake_case/camelCase
+  return {
+    id: pick<number>(raw, ["id", "batchId", "batch_id"]),
+    status: pick<string>(raw, ["status"], "created"),
+    metadata: pick<any>(raw, ["metadata", "meta"]),
+    paypalBatchId: pick<string | null>(raw, ["paypalBatchId", "paypal_batch_id"], null),
+    errorDetails: pick<string | null>(raw, ["errorDetails", "error_details", "error"], null),
+  };
+}
+
+function normalizeItems(items: AnyRecord[]) {
+  return items.map((it) => ({
+    status: String(pick<string>(it, ["status"], "")),
+  }));
+}
+
+function deriveChunkInfoFromMeta(metadata: any, totalItems: number, processedItems: number) {
+  let totalChunks = 1;
+  let completedChunks = 0;
+
+  try {
+    const meta = typeof metadata === "string" ? JSON.parse(metadata) : metadata;
+    const chunkInfo = meta?.chunkInfo;
+    if (chunkInfo) {
+      totalChunks = Number(pick(chunkInfo, ["totalChunks", "total_chunks"], 1));
+      completedChunks = Number(pick(chunkInfo, ["completedChunks", "completed_chunks"], 0));
+    } else {
+      // fallback: 100 items ≈ 1 chunk
+      totalChunks = Math.max(1, Math.ceil(totalItems / 100));
+      completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
+    }
+  } catch {
+    totalChunks = Math.max(1, Math.ceil(totalItems / 100));
+    completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
+  }
+
+  return { totalChunks, completedChunks };
+}
+
+function computeBatchStatus(batchRaw: AnyRecord, itemsRaw: AnyRecord[]): BatchStatusPayload {
+  const batch = normalizeBatch(batchRaw);
+  const items = normalizeItems(itemsRaw);
+
+  const terminal = new Set(["success", "failed", "unclaimed", "pending"]);
+  const processedItems = items.filter((it) => terminal.has(it.status.toLowerCase())).length;
+  const totalItems = items.length;
+
+  const { totalChunks, completedChunks } = deriveChunkInfoFromMeta(batch.metadata, totalItems, processedItems);
+
+  return {
+    batchId: batch.id,
+    status: batch.status || "created",
+    totalChunks,
+    completedChunks,
+    processedItems,
+    totalItems,
+    paypalBatchId: batch.paypalBatchId,
+    error: batch.errorDetails,
+  };
+}
+
+export function registerAdminPayoutBatchRoutes(app: Express) {
+  // GET /active: resume an in-flight batch for a cycle
+  app.get("/api/admin/payout-batches/active", async (req: Request, res: Response) => {
+    const auth = await requireAdminFromToken(req, res);
+    if (!auth.ok) return;
+
+    const cycleId = Number(req.query.cycleId);
+    if (!cycleId) return res.status(400).json({ error: "cycleId query param is required" });
+
+    try {
+      // Use your canonical storage method (ensure it exists ONCE in storage.ts)
+      const batch = await (storage as any).getActivePayoutBatchForCycle(cycleId);
+      if (!batch) return res.status(404).json({ error: "No active batch for this cycle" });
+
+      const items = await (storage as any).getPayoutBatchItems(batch.id);
+      return res.json(computeBatchStatus(batch, items));
+    } catch (error) {
+      console.error("[PAYOUT-BATCHES] /active error:", error);
+      return res.status(500).json({ error: "Failed to load active batch status" });
+    }
+  });
+
+  // GET /:batchId/status: poll status for a specific batch
+  app.get("/api/admin/payout-batches/:batchId/status", async (req: Request, res: Response) => {
+    const auth = await requireAdminFromToken(req, res);
+    if (!auth.ok) return;
+
+    const batchId = Number(req.params.batchId);
+    if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+
+    try {
+      const batch = await (storage as any).getPayoutBatch(batchId);
+      if (!batch) return res.status(404).json({ error: "Batch not found" });
+
+      const items = await (storage as any).getPayoutBatchItems(batchId);
+      return res.json(computeBatchStatus(batch, items));
+    } catch (error) {
+      console.error("[PAYOUT-BATCHES] /:batchId/status error:", error);
+      return res.status(500).json({ error: "Failed to load batch status" });
+    }
+  });
+}
+```
+
+This:
+
+* Accepts either `snake_case` **or** `camelCase` from DB/storage
+* Avoids strict typing against your schema (which is likely why you saw \~185 LSP squiggles)
+* Keeps the **exact** response shape the frontend expects
+
+2. **Keep one canonical storage method**
+
+* Ensure **only one** `getActivePayoutBatchForCycle(cycleId)`, `getPayoutBatch(batchId)`, and `getPayoutBatchItems(batchId)` exist in `storage.ts`.
+* If Replit added a quick duplicate earlier, remove the duplicate and keep the one that’s actually used in production.
+
+3. **Add a quick runtime self-check (no PayPal needed)**
+   Run these manually (with a valid admin bearer token) to validate the new endpoints before any real money moves:
+
+```bash
+# If there’s an active batch on cycle 123:
+curl -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  "http://localhost:5000/api/admin/payout-batches/active?cycleId=123"
+
+# For an existing batch id (use a real ID from your DB):
+curl -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  "http://localhost:5000/api/admin/payout-batches/456/status"
+```
+
+**Expected JSON:**
+
+```json
+{
+  "batchId": 456,
+  "status": "processing",
+  "totalChunks": 3,
+  "completedChunks": 1,
+  "processedItems": 500,
+  "totalItems": 750,
+  "paypalBatchId": "P-xxxxx",
+  "error": null
+}
+```
+
+If `totalChunks` looks off during early polling (because metadata isn’t present), that’s OK — the fallback is meant to be approximate. Once your orchestrator writes real `chunkInfo` into `batch.metadata`, the UI will display precise numbers.
+
+4. **(Optional) Add a “field echo” endpoint for fast debugging**
+   If you want to verify what the DB actually returns (names & shapes) without cracking the ORM, add a temporary endpoint in the same file:
+
+```ts
+app.get("/api/admin/payout-batches/:batchId/debug-raw", async (req, res) => {
+  const auth = await requireAdminFromToken(req, res);
+  if (!auth.ok) return;
+  const batchId = Number(req.params.batchId);
+  const batch = await (storage as any).getPayoutBatch(batchId);
+  const items = await (storage as any).getPayoutBatchItems(batchId);
+  res.json({ batch, items });
+});
+```
+
+Hit it once, confirm fields, then remove it.
+
+5. **Frontend sanity**
+   Your `CycleOperationsTab.tsx` already:
+
+* Disables the button during runs
+* Shows **Batch ID**
+* Resumes after reload using `/active`, then polls `/:batchId/status`
+
+No changes needed unless you want to tag the progress label as “\~approx” when `chunkInfo` is missing (optional).
+
+---
+
+## Why this addresses Replit’s concerns
+
+* **Field mapping:** The new normalizers (`pick(...)`) tolerate both snake\_case and camelCase — so mismatches won’t break TS or at runtime.
+* **Testing coverage:** You can validate the endpoints with cURL before triggering PayPal.
+* **LSP errors:** Most squiggles disappear when the routes stop assuming strict schema-specific types. You can re-tighten types later once we align your Drizzle schema declarations with runtime shapes.
+
+If you want, I can also provide a **one-file PR diff** (git patch) for `admin-payout-batches.ts` so they can apply it in one step.
