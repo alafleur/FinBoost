@@ -1,0 +1,71 @@
+Thanks for the screenshot + log details — that explains the weird “750/750 but chunk 7/8” and the modal never closing.
+
+There are **three concrete issues** showing up now:
+
+1. **Heuristic chunk math** made it look like 7/8 even though all items were processed (750/750).
+2. **Batch status never flipped to `completed`** in the DB, so your modal kept polling a “processing” batch.
+3. **304 Not Modified** responses confused the poller into thinking nothing changed (caching/ETag behavior).
+
+I’ve prepared a **drop-in backend update** that addresses all three without touching your PayPal orchestrator.
+
+---
+
+## ✅ What I changed (new file you can provide to Replit)
+
+**File:** `server/routes/admin-payout-batches.ts`
+[Download the updated file](sandbox:/mnt/data/server/routes/admin-payout-batches.ts)
+
+Improvements:
+
+* **No-cache headers** on both `/active` and `/:batchId/status` responses to avoid `304 Not Modified` during polling:
+
+  ```ts
+  res.set("Cache-Control","no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma","no-cache");
+  res.set("Expires","0");
+  ```
+* **Accurate chunk math at completion**: if `processedItems >= totalItems`, we **force** `completedChunks = totalChunks`.
+* **Auto-normalize final status**: if all items are terminal (`processedItems >= totalItems`) we **force** the response status to **`completed`** so the modal can close cleanly even if the DB row didn’t flip yet.
+* **`pollVersion`** (a simple `Date.now()`) is included in the payload to ensure the UI always sees a “new” body, preventing client-side caching artifacts.
+
+This means your existing UI can keep polling `/status` and will get:
+
+```
+status: "completed"
+processedItems: 750
+totalItems: 750
+completedChunks: 8
+totalChunks: 8
+```
+
+…once the last item is processed, even if the batch row hasn’t been updated yet.
+
+> If you’d like, we can also add an **idempotent finalize** step server-side (e.g., set batch.status='completed' when all items terminal). For now I left DB writes out to avoid side-effects in a GET.
+
+---
+
+## Why you saw “750/750 but 7/8”
+
+Your batch didn’t have real `chunkInfo` in metadata, so the endpoint fell back to **100 items ≈ 1 chunk**. For 750 items:
+
+* `totalChunks` → 8
+* `completedChunks` → `floor(750/100)=7`.
+  Now the route corrects this to **8/8** whenever all items are processed.
+
+---
+
+## What you should see after this update
+
+* The polling overlay should move from **processing → completed** once all items are terminal.
+* **Chunks** should display **8/8** (or your real metadata if present).
+* No more **304** returns during polling; you’ll get `200` with `pollVersion` changing.
+
+---
+
+## If the button still shows after modal closes
+
+That’s controlled by **eligible winner count**, not the poller. If it still says **“(750 eligible)”**, it means winners for July 2/2 weren’t reconciled as paid/excluded. Use the one-time reconciliation I shared earlier (map `payout_items` terminal statuses → mark `cycle_winner_selections.paid=true`) and the button will disappear.
+
+---
+
+If you want me to also provide a **tiny finalize endpoint** that writes `status='completed'` to the batch when all items are terminal (so DB stays consistent), say the word and I’ll ship that file too.

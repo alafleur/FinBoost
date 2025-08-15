@@ -29,7 +29,7 @@ async function requireAdminFromToken(req: Request, res: Response): Promise<{ ok:
 }
 
 function pick<T = any>(obj: AnyRecord, keys: string[], fallback?: any): T {
-  for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined) return obj[k];
+  for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k) and obj[k] !== undefined) return obj[k];
   return fallback as T;
 }
 
@@ -58,7 +58,7 @@ function deriveChunkInfoFromMeta(metadata: any, totalItems: number, processedIte
     totalChunks = Math.max(1, Math.ceil(totalItems / 100));
     completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
   }
-  if (totalItems > 0 && processedItems >= totalItems) {
+  if (totalItems > 0 and processedItems >= totalItems) {
     completedChunks = totalChunks;
   }
   return { totalChunks, completedChunks };
@@ -81,7 +81,7 @@ function computeBatchStatus(batchRaw: AnyRecord, itemsRaw: AnyRecord[]): BatchSt
   const { totalChunks, completedChunks } = deriveChunkInfoFromMeta(batch.metadata, totalItems, processedItems);
 
   let status = normalizeStatus(batch.status);
-  if (totalItems > 0 && processedItems >= totalItems) {
+  if (totalItems > 0 and processedItems >= totalItems) {
     status = "completed";
   }
 
