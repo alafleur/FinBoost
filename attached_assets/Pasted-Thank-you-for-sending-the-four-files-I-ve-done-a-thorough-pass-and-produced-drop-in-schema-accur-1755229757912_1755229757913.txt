@@ -1,0 +1,92 @@
+Thank you for sending the four files. I’ve done a thorough pass and produced **drop-in, schema-accurate** updates across backend + frontend, plus a brand-new history routes file.
+
+# ✅ What I changed (aligned to your schema)
+
+**Back end**
+
+1. **`server/storage.ts` →** added production-grade helpers and fixed active-batch lookup:
+
+   * `getActivePayoutBatchForCycle(cycleId)` now uses **snake\_case** columns and only treats **`intent` / `processing`** as active (per your schema).
+   * **New helpers**:
+
+     * `listBatchesForCycle(cycleId)` – returns batches ordered by created time.
+     * `getBatchItemStats(batchId)` – counts & totals by status from `payout_batch_items`.
+     * `createRetryBatchFromFailed(batchId)` – creates a new batch and copies **FAILED** items only.
+     * `markBatchCompletedIfTerminal(batchId)` – finalizes batch to `completed` when all items are terminal.
+2. **`server/routes/admin-payout-batches.ts` →** status polling is now based on **real chunk fields** (`total_chunks`, `processed_chunks`) when present; fallbacks are still in place. Strong **no-cache** headers + `pollVersion` to avoid 304s.
+3. **`server/routes.ts` →** registers the new history routes.
+4. **New:** `server/routes/admin-payout-history.ts` – history list, per-batch summary, and **retry-failed** endpoint.
+
+**Front end**
+5\) **`client/src/components/admin/CycleOperationsTab.tsx` →**
+
+* Clears stuck “Processing…” state on completion.
+* Adds **Last Disbursement** ribbon (success/failed/unclaimed counts).
+* Adds a **History drawer** (list batches, view per-batch summary, retry failed).
+* On completion, fetches `/summary` for the finished batch and shows it immediately.
+
+---
+
+# 📦 Updated files to provide to Replit (ready to paste/replace)
+
+* **`server/storage.ts`** (patched)
+  [Download](sandbox:/mnt/data/storage.patched.ts)
+* **`server/routes.ts`** (patched – registers the new history routes)
+  [Download](sandbox:/mnt/data/routes.patched.ts)
+* **`server/routes/admin-payout-batches.ts`** (patched)
+  [Download](sandbox:/mnt/data/admin-payout-batches.patched.ts)
+* **`client/src/components/admin/CycleOperationsTab.tsx`** (patched)
+  [Download](sandbox:/mnt/data/CycleOperationsTab.patched.tsx)
+* **`server/routes/admin-payout-history.ts`** (new file)
+  [Download](sandbox:/mnt/data/admin-payout-history.ts)
+
+> After dropping these in, ensure `server/routes.ts` imports:
+
+```ts
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+```
+
+and calls:
+
+```ts
+registerAdminPayoutHistoryRoutes(app);
+```
+
+---
+
+# 🔧 Implementation notes (DB-accurate)
+
+* **Active batch detection** is now:
+
+  ```sql
+  WHERE cycle_setting_id = $1
+    AND lower(status) IN ('intent','processing')
+  ```
+
+  (No more `'created'`—that was the earlier mismatch.)
+* **Chunk progress** prefers the batch columns you actually have:
+
+  * `payout_batches.total_chunks` → `totalChunks`
+  * `payout_batches.processed_chunks` → `processedChunks`
+    If not set, the route still derives from items to keep the UI responsive.
+* **Terminal items** for completion: `success`, `failed`, `unclaimed`, `pending`. Once all items are in these states, the status API returns `completed` and (optionally) `markBatchCompletedIfTerminal()` can finalize the DB row.
+
+---
+
+# 🧪 Acceptance checks (quick)
+
+1. Start a new run (or resume an active one) → the modal progresses, then **closes** on completion; the big button no longer says “Processing…”.
+2. After completion, a **green ribbon** appears: “Last disbursement completed… Success/Failed/Unclaimed counts”.
+3. **Open History** → see recent batches for the selected cycle. Click **View** to see a per-batch summary with counts and totals.
+4. If there were failures, click **Retry failed** → new batch appears at the top of history.
+
+---
+
+# ⚠️ Things to watch
+
+* If your orchestrator never sets `total_chunks`/`processed_chunks`, the API will still work off items; but consider filling those fields as you already have `payout_batch_chunks`.
+* The **retry** helper copies only FAILED rows and seeds the new batch with `intent` status. If you need to copy additional fields (e.g., notes), I can extend that insert.
+
+---
+
+If anything in your environment is named slightly differently than the schema I parsed, tell me and I’ll adjust the SQL immediately. Otherwise, these are drop-in.
