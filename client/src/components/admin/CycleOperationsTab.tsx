@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import CycleOperationsTabWrapper from './CycleOperationsTabWrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,6 +154,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
   const [importData, setImportData] = useState<any[]>([]);
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+
 
   // Get active cycle on component mount
   useEffect(() => {
@@ -917,55 +920,9 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
     }
   };
 
-  // PHASE 3 STEP 9: Enhanced Disbursement Processing with Bulletproof Backend Integration
-  const [processingProgress, setProcessingProgress] = useState({
-    phase: '',
-    progress: 0,
-    message: '',
-    batchId: null as string | null,
-    chunkCount: 0,
-    currentChunk: 0
-  });
-  const [showProcessingDialog, setShowProcessingDialog] = useState(false);
-  
-  // History and completion state management
-  const [lastCompletedBatch, setLastCompletedBatch] = useState<any>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [history, setHistory] = useState<any[]>([]);
-  const [selectedSummary, setSelectedSummary] = useState<any>(null);
+  // Wrapper handles disbursement processing, history, and completion state
 
-  // Load disbursement history for current cycle
-  const loadHistory = async () => {
-    if (!selectedCycle) return;
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/payout-batches?cycleId=${selectedCycle.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const batches = await response.json();
-        setHistory(batches);
-      }
-    } catch (e) {
-      console.error('Failed to load history:', e);
-    }
-  };
-
-  // Load batch summary
-  const loadSummary = async (batchId: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/payout-batches/${batchId}/summary`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const summary = await response.json();
-        setSelectedSummary(summary);
-      }
-    } catch (e) {
-      console.error('Failed to load summary:', e);
-    }
-  };
+  // Wrapper handles history and summary loading
 
   // Retry failed items from a batch
   const onRetryFailed = async (batchId: number) => {
@@ -1362,8 +1319,18 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
   const activeCycle = cycleSettings.find(cycle => cycle.isActive);
 
+  // Duplicate removed - defined below
+
   return (
-    <div className="space-y-6">
+    <CycleOperationsTabWrapper
+      selectedCycle={selectedCycle}
+      refreshAllCycleData={refreshAllCycleData}
+      setIsProcessingPayouts={setIsProcessingPayouts}
+      setShowProcessingDialog={setShowProcessingDialog}
+      setProcessingProgress={setProcessingProgress}
+      setSelectedForDisbursement={setSelectedForDisbursement}
+    >
+      <div className="space-y-6">
       {/* PHASE 2B: Enhanced Workflow Progress Indicator */}
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
@@ -2812,6 +2779,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </CycleOperationsTabWrapper>
   );
 }

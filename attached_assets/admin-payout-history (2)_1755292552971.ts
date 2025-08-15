@@ -2,7 +2,6 @@ import type { Express, Request, Response } from "express";
 import { storage } from "../storage";
 
 export function registerAdminPayoutHistoryRoutes(app: Express) {
-
   app.get("/api/admin/payout-batches", async (req: Request, res: Response) => {
     try {
       const cycleId = Number(req.query.cycleId);
