@@ -1,0 +1,10 @@
+*** Begin Patch
+*** Update File: server/routes.ts
+@@
+-import { registerAdminPayoutBatchRoutes } from "./routes/admin-payout-batches";
++import { registerAdminPayoutBatchRoutes } from "./routes/admin-payout-batches";
++import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+@@
+   registerAdminPayoutBatchRoutes(app);
++  registerAdminPayoutHistoryRoutes(app);
+*** End Patch

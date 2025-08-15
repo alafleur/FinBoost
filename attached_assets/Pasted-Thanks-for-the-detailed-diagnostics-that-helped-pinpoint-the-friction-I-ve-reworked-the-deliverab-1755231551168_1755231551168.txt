@@ -1,0 +1,88 @@
+Thanks for the detailed diagnostics — that helped pinpoint the friction. I’ve reworked the deliverables to be **surgical, schema-accurate, and non-invasive** to your existing types and request interfaces.
+
+## What I fixed (and how this avoids the 104 TS errors)
+
+* I did **not** touch your existing route types, `AuthenticatedRequest`, `req.user`, or sessions in `server/routes.ts`.
+* Instead of replacing that file, I’m giving you a **2-line unified diff** to register the new history routes — nothing else.
+* The new route files (`admin-payout-batches`, `admin-payout-history`) are **self-contained** and do not import schema symbols. They use your `storage` API and plain `Request/Response`, avoiding request-type conflicts.
+* `storage.ts` changes are **append-only** helpers (no signature changes, no schema imports in routes). They use your **confirmed snake\_case** columns.
+
+---
+
+## Provide these to Replit
+
+### 1) Replace the admin batch routes (cleaned & defensive)
+
+**`server/routes/admin-payout-batches.ts`**
+[Download](sandbox:/mnt/data/admin-payout-batches.clean.ts)
+
+* No assumptions about `AuthenticatedRequest` or `req.user`.
+* Status normalization: maps PayPal “success” etc. → `completed`.
+* Chunk math prefers `payout_batches.total_chunks/processed_chunks`; otherwise falls back.
+* `no-cache` headers + `pollVersion` to prevent 304 loops.
+
+### 2) Add the history routes file (new)
+
+**`server/routes/admin-payout-history.ts`**
+[Download](sandbox:/mnt/data/server.routes.admin-payout-history.ts)
+
+* Endpoints:
+
+  * `GET /api/admin/payout-batches?cycleId=…` (list batches)
+  * `GET /api/admin/payout-batches/:batchId/summary` (success/failed/unclaimed/pending counts & sums)
+  * `POST /api/admin/payout-batches/:batchId/retry-failed` (new batch with FAILED only; blocks if source is active)
+
+### 3) Apply a *surgical* patch to `server/routes.ts` (no other changes)
+
+**Unified diff:**
+[Download](sandbox:/mnt/data/routes.minimal.patch)
+
+This patch only:
+
+* Adds `import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";`
+* Calls `registerAdminPayoutHistoryRoutes(app);` right after your existing `registerAdminPayoutBatchRoutes(app);`
+
+> This avoids all the “wrong interface / missing imports” errors that happen when replacing your whole file.
+
+### 4) Append storage helpers (append-only patch)
+
+**Unified diff:**
+[Download](sandbox:/mnt/data/storage.append-methods.patch)
+
+Adds only these methods (no other edits):
+
+* `listBatchesForCycle(cycleId)`
+* `getBatchItemStats(batchId)`
+* `createRetryBatchFromFailed(batchId)` (validates source not processing)
+* `markBatchCompletedIfTerminal(batchId)`
+
+They use your confirmed columns:
+
+* **`payout_batches`**: `id, status, cycle_setting_id, created_at, updated_at, completed_at, paypal_batch_id, total_chunks, processed_chunks`
+* **`payout_batch_items`**: `id, batch_id, user_id, paypal_email, amount, currency, status, created_at, updated_at, cycle_winner_selection_id`
+
+---
+
+## Why this integrates cleanly with your codebase
+
+* **No schema imports inside routes** → avoids “Cannot find name ‘payoutBatches’” errors.
+* **No request-type assumptions** → avoids `"Property 'user' does not exist on type 'Request'"`.
+* **Append-only storage methods** → avoids breaking existing `storage` interface references.
+* **Exact snake\_case columns** (from your `schema (7).ts`) → avoids the prior camelCase/metadata mismatches.
+
+---
+
+## After merging
+
+1. Apply `routes.minimal.patch` to `server/routes.ts` (or add the two lines manually).
+2. Append `storage.append-methods.patch` to `server/storage.ts` (or paste the methods at the end of your storage class/object and ensure `sql` is imported from `drizzle-orm`).
+3. Replace `server/routes/admin-payout-batches.ts` with the **clean** version.
+4. Add `server/routes/admin-payout-history.ts`.
+
+Rebuild and start. The app should boot without the 104 TS errors, and you’ll get:
+
+* **Modal that closes** and sets `completed` properly.
+* **History drawer** listing batches with per-batch summaries.
+* **Retry failed** pathway for partial failures.
+
+If anything still trips in your env (e.g., a different `storage` export shape), paste the exact error and I’ll adjust these files to your exact structure, line-by-line.

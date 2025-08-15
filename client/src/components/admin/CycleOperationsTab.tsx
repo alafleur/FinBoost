@@ -218,14 +218,32 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                   ...prev,
                   phase: 'Completed',
                   progress: 100,
-                  message: `Processed ${processedItems}/${totalItems} items`,
-                  batchId: b.batchId,
+                  message: `Disbursement Successful! Processed ${processedItems}/${totalItems} items`,
+                  batchId: null, // Clear batchId to enable button
                   chunkCount: totalChunks,
                   currentChunk: totalChunks
                 }));
+                
+                // Load batch summary for success ribbon
+                try {
+                  const summaryResponse = await fetch(`/api/admin/payout-batches/${b.batchId}/summary`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  if (summaryResponse.ok) {
+                    const summary = await summaryResponse.json();
+                    setLastCompletedBatch({
+                      id: b.batchId,
+                      completedAt: new Date(),
+                      summary
+                    });
+                  }
+                } catch (e) {
+                  console.warn('Failed to load completion summary:', e);
+                }
+                
                 toast({
                   title: "✅ Disbursement Complete",
-                  description: `Batch ${b.batchId} finished.`
+                  description: `Batch ${b.batchId} finished successfully.`
                 });
                 setTimeout(() => setShowProcessingDialog(false), 1200);
                 await refreshAllCycleData({ forceFresh: true });
@@ -281,6 +299,14 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       } catch {}
     };
     resumeActiveDisbursement();
+  }, [selectedCycle]);
+
+  // Load history when cycle changes
+  useEffect(() => {
+    if (selectedCycle) {
+      loadHistory();
+      setLastCompletedBatch(null); // Clear completion state for new cycle
+    }
   }, [selectedCycle]);
 
   // PHASE 4 STEP 4: Enhanced Cycle Analytics Loading with Cache Busting
@@ -870,6 +896,77 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
     currentChunk: 0
   });
   const [showProcessingDialog, setShowProcessingDialog] = useState(false);
+  
+  // History and completion state management
+  const [lastCompletedBatch, setLastCompletedBatch] = useState<any>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [selectedSummary, setSelectedSummary] = useState<any>(null);
+
+  // Load disbursement history for current cycle
+  const loadHistory = async () => {
+    if (!selectedCycle) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/payout-batches?cycleId=${selectedCycle.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const batches = await response.json();
+        setHistory(batches);
+      }
+    } catch (e) {
+      console.error('Failed to load history:', e);
+    }
+  };
+
+  // Load batch summary
+  const loadSummary = async (batchId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/payout-batches/${batchId}/summary`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const summary = await response.json();
+        setSelectedSummary(summary);
+      }
+    } catch (e) {
+      console.error('Failed to load summary:', e);
+    }
+  };
+
+  // Retry failed items from a batch
+  const onRetryFailed = async (batchId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/payout-batches/${batchId}/retry-failed`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Retry Batch Created",
+          description: `New batch ${result.batchId} created with failed items.`
+        });
+        loadHistory(); // Refresh history
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Retry Failed",
+          description: error.error || "Failed to create retry batch",
+          variant: "destructive"
+        });
+      }
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Failed to retry failed items",
+        variant: "destructive"
+      });
+    }
+  };
   
   const handleProcessPayouts = async () => {
     if (!selectedCycle) {
@@ -1695,11 +1792,58 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                         </>
                       )}
                     </Button>
+                    {/* Success Ribbon for Completed Disbursements */}
+                    {lastCompletedBatch && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <div>
+                              <p className="text-sm font-medium text-green-800">
+                                Disbursement Complete
+                              </p>
+                              <p className="text-xs text-green-600">
+                                Batch {lastCompletedBatch.id} • {lastCompletedBatch.summary?.processedCount || 0} disbursements
+                                {lastCompletedBatch.summary?.totalAmount && ` • $${lastCompletedBatch.summary.totalAmount}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              onClick={() => {
+                                loadHistory();
+                                setHistoryOpen(true);
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="text-green-700 border-green-300 hover:bg-green-100"
+                            >
+                              <BarChart3 className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
+                            <Button
+                              onClick={() => setLastCompletedBatch(null)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-green-600 hover:text-green-800"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* ChatGPT Step 3: Enhanced Process PayPal Disbursements Button with Visual Polish */}
                     {(() => {
                       const selectedCount = selectedForDisbursement.size;
                       const isBulkMode = selectedCount === 0;
                       const isSelectiveMode = selectedCount > 0;
+                      
+                      // Hide button if no eligible users OR if batch was just completed
+                      if ((isBulkMode && eligibleCount === 0) || lastCompletedBatch) {
+                        return null;
+                      }
                       
                       return (
                         <div className="relative">
@@ -2515,6 +2659,125 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 <span className="text-gray-600">Bulletproof</span>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disbursement History Drawer */}
+      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Disbursement History
+            </DialogTitle>
+            <DialogDescription>
+              View past disbursement batches and their details for {selectedCycle?.cycleName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {history.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No disbursement history found for this cycle</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {history.map((batch) => (
+                  <div
+                    key={batch.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => loadSummary(batch.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">Batch {batch.id}</h4>
+                          <Badge 
+                            variant={
+                              batch.status === 'completed' ? 'default' :
+                              batch.status === 'failed' ? 'destructive' :
+                              'secondary'
+                            }
+                          >
+                            {batch.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Created: {new Date(batch.createdAt).toLocaleString()}
+                        </p>
+                        {batch.completedAt && (
+                          <p className="text-sm text-gray-600">
+                            Completed: {new Date(batch.completedAt).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        {batch.status === 'failed' && (
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRetryFailed(batch.id);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="text-orange-700 border-orange-300 hover:bg-orange-50"
+                          >
+                            <RefreshCw className="w-4 h-4 mr-1" />
+                            Retry Failed
+                          </Button>
+                        )}
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            loadSummary(batch.id);
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Batch Summary Details */}
+            {selectedSummary && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-3">Batch Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Total Items</p>
+                    <p className="font-medium">{selectedSummary.totalItems || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Processed</p>
+                    <p className="font-medium text-green-600">{selectedSummary.processedCount || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Failed</p>
+                    <p className="font-medium text-red-600">{selectedSummary.failedCount || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Total Amount</p>
+                    <p className="font-medium">${selectedSummary.totalAmount || '0.00'}</p>
+                  </div>
+                </div>
+                
+                {selectedSummary.failedCount > 0 && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
+                    <p className="text-sm text-red-800">
+                      {selectedSummary.failedCount} items failed. You can retry failed items to create a new batch.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
