@@ -1,0 +1,202 @@
+Absolutely—here’s a tightened, implementation-ready plan that incorporates Replit’s feedback and adds safeguards, clear deliverables, and acceptance tests.
+
+# Phase 0 — Stabilize Current Flow (mandatory quick fixes)
+
+**Goal:** Ensure clean completion state and no phantom “Processing…” UI.
+
+**Deliverables**
+
+* Backend: `admin-payout-batches.ts`
+
+  * Return `status: "completed"` when `processedItems >= totalItems`.
+  * Force `completedChunks = totalChunks` in that case.
+  * Add no-cache headers + `pollVersion` to avoid 304s.
+* UI: `CycleOperationsTab.tsx`
+
+  * On `status === "completed"`: `setIsProcessing(false)`, `setActiveBatchId(null)`, store `lastCompletedBatchId`.
+  * Hide main CTA when `eligibleCount === 0` **or** `latestBatch.status === "completed"`.
+
+**Acceptance**
+
+* Modal closes automatically on completion.
+* Top CTA no longer shows “Processing…” once complete.
+* No more 304 loops during polling.
+
+---
+
+# Phase 1 — Disbursement History & Summaries
+
+**Goal:** Persistent, auditable record of all runs with success/failure breakdowns.
+
+**New Routes (server)**
+
+* `server/routes/admin-payout-history.ts`
+
+  * `GET /api/admin/payout-batches?cycleId=` → list batches (id, status, createdAt, completedAt, paypalBatchId).
+  * `GET /api/admin/payout-batches/:batchId/summary` → counts & totals by status (success/failed/unclaimed/pending).
+  * `POST /api/admin/payout-batches/:batchId/retry-failed` → creates a new batch with FAILED items only (idempotent).
+
+**Storage (server/storage.ts)**
+
+* `listBatchesForCycle(cycleId)`
+* `getBatchItemStats(batchId)` → returns `{id,totalItems,success,failed,unclaimed,pending,totals:{...}}`
+* `createRetryBatchFromFailed(batchId)` → inserts a new batch + items from FAILED of prior batch (copy amount, user\_id, email, memo as available).
+* (Optional) `markBatchCompletedIfTerminal(batchId)` → sets `status='completed'`, `completed_at=NOW()` if all items terminal.
+
+**UI**
+
+* `components/admin/history/DisbursementHistoryDrawer.tsx` (new, componentized)
+
+  * Lists batches with status + timestamps.
+  * “View Summary” → shows breakdown & totals.
+  * “Retry failed as new batch” (disabled if the source batch is still processing; shows warning).
+
+**Acceptance**
+
+* Admin can open a History drawer, see recent batches and summaries for the current cycle.
+* Summary shows correct counts and dollar totals.
+* Retry-failed creates a new batch and appears in History instantly.
+
+---
+
+# Phase 2 — Eligibility & Reconciliation (no phantom “eligible”)
+
+**Goal:** Ensure eligible counts reflect reality post-disbursement.
+
+**Backend**
+
+* Reconciliation (automatic or scheduled):
+
+  * After each batch completes (or via `/reconcile` admin action), map `payout_items` terminal statuses to `cycle_winner_selections`:
+
+    * `success/unclaimed/pending` → mark `paid=true` (or `attempted=true` for `pending` if you prefer).
+    * Leave `failed` as unpaid and eligible for retry.
+* Eligibility query:
+
+  * Compute `eligibleCount` as winners **without** a terminal payout item (or explicitly `failed` only, depending on policy).
+
+**UI**
+
+* Eligibility chip reflects reconciled counts.
+* CTA hidden when `eligibleCount === 0`.
+
+**Acceptance**
+
+* After a successful payout + reconciliation, eligible count drops accordingly.
+* Only FAILED remain eligible for “Process” (or “Retry failed” path).
+
+---
+
+# Phase 3 — Concurrency & Safeguards
+
+**Goal:** Prevent accidental double-runs and unsafe retries.
+
+**Backend**
+
+* Guard middleware/checks:
+
+  * Block `POST /process` if there is an active batch for the cycle (`created/processing/pending`).
+  * In `POST /:batchId/retry-failed`, verify the source batch is **not** processing and has at least one FAILED item.
+  * Add simple row-level lock or transactional guard when creating new batches to prevent duplicates.
+
+**UI**
+
+* Disable Process/Retry buttons when:
+
+  * `activeBatchId` exists, or
+  * “another admin” banner indicates an in-flight batch (optional: show who started it if you track startedBy).
+
+**Acceptance**
+
+* No two active batches for the same cycle can exist.
+* Retry-failed is prevented while the source batch is still processing.
+
+---
+
+# Phase 4 — Finalization & Audit UX Polish
+
+**Goal:** Make it unmistakably clear what happened, when, and why.
+
+**Backend**
+
+* Ensure `payout_batches.completed_at` is set when finalizing.
+* Persist `started_by_user_id` (and optional `notes`) when initiating a batch.
+
+**UI**
+
+* Success Ribbon (at top of Selected Winners):
+
+  * “Last Disbursement: Batch #, CompletedAt, Success/Failed/Unclaimed/Pending”
+  * “Retry Failed” and “View History” inline actions.
+* Add per-item table links from summary:
+
+  * “Export CSV” for `success`, `failed`, `unclaimed` (server-side exports).
+
+**Acceptance**
+
+* Admin can reliably answer: “What was paid? What failed? What’s next?” in under 10 seconds.
+
+---
+
+# Phase 5 — Observability & Alerts
+
+**Goal:** Faster diagnosis; proactive alerts on issues.
+
+**Backend**
+
+* Structured logs around:
+
+  * Batch start/end, counts, PayPal batch ID, durations.
+  * Error buckets for API failures vs. validation vs. PayPal responses.
+* Optional Webhook or email/slack alert when:
+
+  * > X% failures in a batch,
+  * Batch stuck > Y minutes in processing,
+  * Reconcile mismatch detected.
+
+**Acceptance**
+
+* Single log stream shows each batch lifecycle and any anomaly alerts.
+
+---
+
+## File-by-file checklist for Replit
+
+**New**
+
+* `server/routes/admin-payout-history.ts`
+* `client/src/components/admin/history/DisbursementHistoryDrawer.tsx`
+
+**Modified**
+
+* `server/routes.ts` → register `registerAdminPayoutHistoryRoutes(app)`
+* `server/routes/admin-payout-batches.ts` → no-cache, completion normalization, chunk fix, `pollVersion`
+* `server/storage.ts` → add `listBatchesForCycle`, `getBatchItemStats`, `createRetryBatchFromFailed`, (`markBatchCompletedIfTerminal` optional)
+* `client/src/components/admin/CycleOperationsTab.tsx` → clear processing state on completion, success ribbon, open history drawer, CTA logic
+
+---
+
+## Minimal API contracts (for the UI)
+
+* `GET /api/admin/payout-batches?cycleId=18`
+  → `[ { id, status, paypalBatchId, createdAt, completedAt } ]`
+
+* `GET /api/admin/payout-batches/:batchId/summary`
+  → `{ id, totalItems, success, failed, unclaimed, pending, totals:{ success, failed, unclaimed, pending } }`
+
+* `POST /api/admin/payout-batches/:batchId/retry-failed`
+  → `{ success: true, batchId: <newId> }`
+
+---
+
+## Test plan (must pass)
+
+1. **Happy path**: Run a batch with all `success/unclaimed` → modal closes, ribbon appears, eligible drops to zero, History shows summary.
+2. **Partial failures**: Inject some `failed` → History shows failed count; “Retry failed” creates a new batch containing only those items.
+3. **Concurrency**: Try to start a new batch while one is `processing` → blocked with clear message; UI buttons disabled.
+4. **Resume on reload**: Refresh mid-run → modal resumes with correct progress; at end, state clears and ribbon appears.
+5. **Audit**: Export CSV from summary and verify totals match PayPal amounts and item counts.
+
+---
+
+If you want, I can prep the exact code for the **history routes file**, the **storage helpers**, and a **clean History drawer component** so Replit can paste them straight in with minimal changes.
