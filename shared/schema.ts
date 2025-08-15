@@ -458,6 +458,7 @@ export const payoutBatches = pgTable("payout_batches", {
   expectedItemCount: integer("expected_item_count"), // Expected number of items in the batch
   payloadChecksum: text("payload_checksum"), // Checksum of the payload for verification
   parentBatchId: integer("parent_batch_id"), // Self-reference for parent batch relationship
+  completedAt: timestamp("completed_at"), // When the batch processing was completed
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
