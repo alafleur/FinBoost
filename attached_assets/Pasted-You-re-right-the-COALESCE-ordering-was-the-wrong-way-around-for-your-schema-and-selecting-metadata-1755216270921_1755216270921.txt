@@ -1,0 +1,53 @@
+You’re right—the COALESCE ordering was the wrong way around for your schema, and selecting `metadata` was also incorrect. I’ve removed both problems and rebuilt the function to use **only the actual snake\_case DB columns** with simple aliases.
+
+### ✅ Drop-in fixed file (uses snake\_case only; no COALESCE; no metadata)
+
+* **`server/storage.ts` (patched):** [Download](sandbox:/mnt/data/storage.fixed.sql3.ts)
+
+This replaces `getActivePayoutBatchForCycle` with a raw-SQL version that matches your table exactly:
+
+```ts
+async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null> {
+  try {
+    // Raw SQL using actual snake_case DB columns; alias to camelCase for TS typing
+    const result: any = await db.execute(sql`
+      SELECT
+        id,
+        status,
+        paypal_batch_id AS "paypalBatchId",
+        cycle_setting_id AS "cycleSettingId",
+        created_at      AS "createdAt"
+      FROM payout_batches
+      WHERE cycle_setting_id = ${cycleId}
+        AND lower(status) IN ('created','processing')
+      ORDER BY created_at DESC
+      LIMIT 1
+    `);
+
+    const row = (result?.rows ?? result)?.[0] ?? null;
+    return row as unknown as PayoutBatch | null;
+  } catch (error) {
+    console.error('Error getting active payout batch for cycle:', error);
+    return null;
+  }
+}
+```
+
+It also ensures `sql` is imported from `drizzle-orm`.
+
+---
+
+## Quick test after Replit drops this in
+
+1. Call:
+
+```
+GET /api/admin/payout-batches/active?cycleId=18
+```
+
+* If an in-flight batch exists, you’ll get it (no SQL error).
+* If July 2/2 is actually completed, this will correctly return **404** (no active batch) — that’s expected.
+
+2. If the UI still shows **“(750 eligible)”** and the big **Process** button after the endpoint is fixed, that indicates the **winner rows weren’t reconciled** post-payout. Run the one-time reconciliation I shared earlier to mark winners as paid based on terminal `payout_items` statuses; the eligible count will drop and the button will disappear.
+
+If any column mismatch pops again, send me the exact error and I’ll adjust immediately.
