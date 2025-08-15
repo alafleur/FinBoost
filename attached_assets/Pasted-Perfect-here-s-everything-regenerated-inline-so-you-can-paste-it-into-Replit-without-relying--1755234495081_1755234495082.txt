@@ -1,0 +1,563 @@
+Perfect — here’s everything regenerated **inline**, so you can paste it into Replit without relying on the expired file session. I’ve split this into (A) exact files you can drop in, and (B) surgical patches where replacing the whole file isn’t safe.
+
+---
+
+# A) Full files (safe to replace as-is)
+
+## 1) `server/routes/admin-payout-batches.ts`
+
+Use this **entire file**. It is schema-accurate (snake\_case), type-light, and defensive.
+
+```ts
+import type { Express, Request, Response } from "express";
+import { storage } from "../storage";
+
+type AnyRecord = Record<string, any>;
+
+interface BatchStatusPayload {
+  batchId: number;
+  status: string;
+  totalChunks: number;
+  completedChunks: number;
+  processedItems: number;
+  totalItems: number;
+  paypalBatchId?: string | null;
+  error?: string | null;
+  pollVersion?: number;
+}
+
+function noCache(res: Response) {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  res.set("Surrogate-Control", "no-store");
+}
+
+function normalizeStatus(raw: any): string {
+  const s = String(raw ?? "").toLowerCase();
+  if (["completed","complete","success","succeeded","done","finished","partially_completed"].includes(s)) return "completed";
+  if (["processing","in_progress","in-progress","pending","intent","running","queued"].includes(s)) return "processing";
+  if (["failed","error","errored","canceled","cancelled"].includes(s)) return "failed";
+  return s || "intent";
+}
+
+// Prefer batch.total_chunks/processed_chunks; fallback to heuristic based on items
+function getChunkInfo(batch: AnyRecord, totalItems: number, processedItems: number) {
+  let totalChunks = Number(batch?.total_chunks ?? batch?.totalChunks ?? 0) || 0;
+  let completedChunks = Number(batch?.processed_chunks ?? batch?.processedChunks ?? 0) || 0;
+
+  if (!totalChunks) totalChunks = Math.max(1, Math.ceil(totalItems / 100));
+  if (!completedChunks) completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
+
+  if (totalItems > 0 && processedItems >= totalItems) {
+    completedChunks = totalChunks;
+  }
+  return { totalChunks, completedChunks };
+}
+
+function countProcessed(items: AnyRecord[]) {
+  const terminal = new Set(["success", "failed", "unclaimed", "pending"]);
+  let processed = 0;
+  for (const it of items) {
+    const st = String(it?.status ?? "").toLowerCase();
+    if (terminal.has(st)) processed++;
+  }
+  return processed;
+}
+
+function buildPayload(batch: AnyRecord, items: AnyRecord[]): BatchStatusPayload {
+  const totalItems = items.length;
+  const processedItems = countProcessed(items);
+  const { totalChunks, completedChunks } = getChunkInfo(batch, totalItems, processedItems);
+
+  let status = normalizeStatus(batch?.status);
+  if (totalItems > 0 && processedItems >= totalItems) {
+    status = "completed";
+  }
+
+  return {
+    batchId: Number(batch.id),
+    status,
+    totalChunks,
+    completedChunks,
+    processedItems,
+    totalItems,
+    paypalBatchId: batch?.paypal_batch_id ?? batch?.paypalBatchId ?? null,
+    error: batch?.error_details ?? batch?.errorDetails ?? null,
+    pollVersion: Date.now(),
+  };
+}
+
+export function registerAdminPayoutBatchRoutes(app: Express) {
+  // GET /api/admin/payout-batches/active?cycleId=18
+  app.get("/api/admin/payout-batches/active", async (req: Request, res: Response) => {
+    noCache(res);
+    const cycleId = Number(req.query.cycleId);
+    if (!cycleId) return res.status(400).json({ error: "cycleId query param is required" });
+
+    try {
+      const batch = await (storage as any).getActivePayoutBatchForCycle(cycleId);
+      if (!batch) return res.status(404).json({ error: "No active batch for this cycle" });
+
+      const items = await (storage as any).getPayoutBatchItems(Number(batch.id));
+      return res.status(200).json(buildPayload(batch, items));
+    } catch (e) {
+      console.error("[ADMIN BATCHES] /active error:", e);
+      return res.status(500).json({ error: "Failed to load active batch" });
+    }
+  });
+
+  // GET /api/admin/payout-batches/:batchId/status
+  app.get("/api/admin/payout-batches/:batchId/status", async (req: Request, res: Response) => {
+    noCache(res);
+    const batchId = Number(req.params.batchId);
+    if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+
+    try {
+      const batch = await (storage as any).getPayoutBatch(batchId);
+      if (!batch) return res.status(404).json({ error: "Batch not found" });
+
+      const items = await (storage as any).getPayoutBatchItems(batchId);
+      return res.status(200).json(buildPayload(batch, items));
+    } catch (e) {
+      console.error("[ADMIN BATCHES] /:batchId/status error:", e);
+      return res.status(500).json({ error: "Failed to load batch status" });
+    }
+  });
+}
+```
+
+---
+
+## 2) `server/routes/admin-payout-history.ts` (NEW)
+
+Use this **entire file**. It adds basic history, per-batch summary, and retry-failed.
+
+```ts
+import type { Express, Request, Response } from "express";
+import { storage } from "../storage";
+
+export function registerAdminPayoutHistoryRoutes(app: Express) {
+  // List batches for a cycle
+  app.get("/api/admin/payout-batches", async (req: Request, res: Response) => {
+    try {
+      const cycleId = Number(req.query.cycleId);
+      if (!cycleId) return res.status(400).json({ error: "cycleId is required" });
+      const rows = await (storage as any).listBatchesForCycle(cycleId);
+      res.json(rows);
+    } catch (e) {
+      console.error("[HISTORY] list error:", e);
+      res.status(500).json({ error: "Failed to load batches" });
+    }
+  });
+
+  // Per-batch summary
+  app.get("/api/admin/payout-batches/:batchId/summary", async (req: Request, res: Response) => {
+    try {
+      const batchId = Number(req.params.batchId);
+      if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+      const sum = await (storage as any).getBatchItemStats(batchId);
+      res.json(sum);
+    } catch (e) {
+      console.error("[HISTORY] summary error:", e);
+      res.status(500).json({ error: "Failed to load batch summary" });
+    }
+  });
+
+  // Create a retry batch with FAILED items only
+  app.post("/api/admin/payout-batches/:batchId/retry-failed", async (req: Request, res: Response) => {
+    try {
+      const batchId = Number(req.params.batchId);
+      if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+      const newBatch = await (storage as any).createRetryBatchFromFailed(batchId);
+      res.json({ success: true, batchId: newBatch.id });
+    } catch (e: any) {
+      console.error("[HISTORY] retry error:", e);
+      res.status(400).json({ error: e?.message || "Failed to create retry batch" });
+    }
+  });
+}
+```
+
+---
+
+# B) Surgical patches (don’t replace the whole file)
+
+## 3) `server/routes.ts`
+
+**Add exactly these two lines**:
+
+```ts
+// at top with other imports:
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+
+// where you register routes (right after registerAdminPayoutBatchRoutes(app)):
+registerAdminPayoutHistoryRoutes(app);
+```
+
+> Don’t change anything else in `routes.ts` to avoid interface/type ripple effects.
+
+---
+
+## 4) `server/storage.ts`
+
+Append these **helpers** to your storage module/class (no breaking changes).
+They use your confirmed snake\_case columns from the schema.
+
+> Ensure `sql` is imported:
+> `import { sql } from "drizzle-orm";`
+
+```ts
+// === Admin Payout History Helpers ===
+
+/** List batches for a cycle (most recent first) */
+async listBatchesForCycle(cycleId: number): Promise<any[]> {
+  const result: any = await db.execute(sql`
+    SELECT
+      id,
+      status,
+      paypal_batch_id AS "paypalBatchId",
+      cycle_setting_id AS "cycleSettingId",
+      created_at      AS "createdAt",
+      updated_at      AS "updatedAt",
+      completed_at    AS "completedAt"
+    FROM payout_batches
+    WHERE cycle_setting_id = ${cycleId}
+    ORDER BY created_at DESC
+  `);
+  return result?.rows ?? [];
+}
+
+/** Aggregate item counts & totals by status */
+async getBatchItemStats(batchId: number): Promise<any> {
+  const result: any = await db.execute(sql`
+    SELECT
+      LOWER(status) AS status,
+      COUNT(*)      AS count,
+      COALESCE(SUM(amount), 0) AS amount
+    FROM payout_batch_items
+    WHERE batch_id = ${batchId}
+    GROUP BY LOWER(status)
+  `);
+
+  const rows = result?.rows ?? [];
+  const by = (k: string) => rows.find((r:any) => r.status === k) || { count: 0, amount: 0 };
+
+  const success    = by("success");
+  const failed     = by("failed");
+  const unclaimed  = by("unclaimed");
+  const pending    = by("pending");
+  const processing = by("processing");
+
+  const totalItems =
+    (Number(success.count)||0) +
+    (Number(failed.count)||0) +
+    (Number(unclaimed.count)||0) +
+    (Number(pending.count)||0) +
+    (Number(processing.count)||0);
+
+  return {
+    id: batchId,
+    totalItems,
+    success: Number(success.count)||0,
+    failed: Number(failed.count)||0,
+    unclaimed: Number(unclaimed.count)||0,
+    pending: Number(pending.count)||0,
+    processing: Number(processing.count)||0,
+    totals: {
+      success: Number(success.amount || 0),
+      failed: Number(failed.amount || 0),
+      unclaimed: Number(unclaimed.amount || 0),
+      pending: Number(pending.amount || 0),
+      processing: Number(processing.amount || 0),
+    }
+  };
+}
+
+/** Create a new batch that contains only FAILED items from a prior batch */
+async createRetryBatchFromFailed(batchId: number): Promise<{ id: number }> {
+  // Validate source batch not active
+  const srcRes: any = await db.execute(sql`
+    SELECT id, cycle_setting_id AS "cycleSettingId", status
+    FROM payout_batches
+    WHERE id = ${batchId}
+    LIMIT 1
+  `);
+  const src = (srcRes?.rows ?? [])[0];
+  if (!src) throw new Error("Original batch not found");
+  const s = String(src.status || "").toLowerCase();
+  if (["intent","processing"].includes(s)) {
+    throw new Error("Cannot retry while source batch is active");
+  }
+
+  // Create new batch
+  const insRes: any = await db.execute(sql`
+    INSERT INTO payout_batches (cycle_setting_id, status, created_at, updated_at)
+    VALUES (${src.cycleSettingId}, 'intent', NOW(), NOW())
+    RETURNING id
+  `);
+  const newBatch = (insRes?.rows ?? [])[0];
+
+  // Copy FAILED items into new batch (basic fields; extend if needed)
+  await db.execute(sql`
+    INSERT INTO payout_batch_items (
+      batch_id, user_id, paypal_email, amount, currency, status, created_at, updated_at, cycle_winner_selection_id
+    )
+    SELECT ${newBatch.id}, user_id, paypal_email, amount, currency, 'intent', NOW(), NOW(), cycle_winner_selection_id
+    FROM payout_batch_items
+    WHERE batch_id = ${batchId} AND LOWER(status) = 'failed'
+  `);
+
+  return { id: newBatch.id };
+}
+
+/** Optional: set batch to 'completed' when all items are terminal */
+async markBatchCompletedIfTerminal(batchId: number): Promise<void> {
+  await db.execute(sql`
+    UPDATE payout_batches b
+    SET status = 'completed',
+        updated_at = NOW()
+    WHERE b.id = ${batchId}
+      AND NOT EXISTS (
+        SELECT 1 FROM payout_batch_items i
+        WHERE i.batch_id = b.id
+          AND LOWER(i.status) NOT IN ('success','failed','unclaimed','pending')
+      )
+      AND LOWER(COALESCE(b.status,'')) <> 'completed'
+  `);
+}
+```
+
+---
+
+# C) Frontend file (fully patched resume logic)
+
+## 5) `client/src/components/admin/CycleOperationsTab.tsx`
+
+If replacing your full file is risky, apply these **3 edits**:
+
+### (i) Add state near the top (if not present)
+
+```ts
+const [lastCompletedBatch, setLastCompletedBatch] = useState<any | null>(null);
+const [historyOpen, setHistoryOpen] = useState(false);
+const [history, setHistory] = useState<any[]>([]);
+const [selectedSummary, setSelectedSummary] = useState<any | null>(null);
+```
+
+### (ii) Replace your “resume on load” function body
+
+Find the `useEffect` that resumes on load and replace its inner function with:
+
+```ts
+useEffect(() => {
+  const resumeActiveDisbursement = async () => {
+    if (!selectedCycle) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const r = await fetch(`/api/admin/payout-batches/active?cycleId=${selectedCycle.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!r.ok) return;
+
+      const b = await r.json(); // { batchId, status, totalChunks, completedChunks, processedItems, totalItems }
+      if (!b?.batchId) return;
+
+      // ✅ If already completed, do NOT reopen the modal; seed the ribbon instead
+      if (String(b.status).toLowerCase() === 'completed') {
+        try {
+          const sr = await fetch(`/api/admin/payout-batches/${b.batchId}/summary`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        if (sr.ok) {
+            const summary = await sr.json();
+            setLastCompletedBatch({
+              id: b.batchId,
+              completedAt: new Date(),
+              ...summary
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to load completion summary on resume:', e);
+        }
+
+        setIsProcessingPayouts(false);
+        setShowProcessingDialog(false);
+        setProcessingProgress({
+          phase: 'Completed',
+          progress: 100,
+          message: `Disbursement Successful!`,
+          batchId: null,
+          chunkCount: b.totalChunks || 1,
+          currentChunk: b.totalChunks || 1,
+        });
+
+        await refreshAllCycleData({ forceFresh: true });
+        return;
+      }
+
+      // Truly in-flight → show modal & poll
+      setShowProcessingDialog(true);
+      setIsProcessingPayouts(true);
+      setProcessingProgress({
+        phase: 'Processing',
+        progress: Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
+        message: `Resuming batch ${b.batchId}...`,
+        batchId: b.batchId,
+        chunkCount: b.totalChunks || 1,
+        currentChunk: b.completedChunks || 0
+      });
+
+      const pollStatus = async () => {
+        try {
+          const statusResponse = await fetch(`/api/admin/payout-batches/${b.batchId}/status`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!statusResponse.ok) throw new Error(`status ${statusResponse.status}`);
+          const s = await statusResponse.json();
+
+          const totalChunks = s.totalChunks || 1;
+          const completedChunks = s.completedChunks ?? 0;
+          const processedItems = s.processedItems ?? 0;
+          const totalItems = s.totalItems ?? 0;
+
+          if (s.status === 'completed') {
+            setProcessingProgress(prev => ({
+              ...prev,
+              phase: 'Completed',
+              progress: 100,
+              message: `Disbursement Successful! Processed ${processedItems}/${totalItems} items`,
+              batchId: null,
+              chunkCount: totalChunks,
+              currentChunk: totalChunks
+            }));
+
+            try {
+              const summaryResponse = await fetch(`/api/admin/payout-batches/${b.batchId}/summary`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (summaryResponse.ok) {
+                const summary = await summaryResponse.json();
+                setLastCompletedBatch({
+                  id: b.batchId,
+                  completedAt: new Date(),
+                  ...summary
+                });
+              }
+            } catch {}
+
+            toast({ title: "✅ Disbursement Complete", description: `Batch ${b.batchId} finished successfully.` });
+            setTimeout(() => setShowProcessingDialog(false), 1200);
+            await refreshAllCycleData({ forceFresh: true });
+            setIsProcessingPayouts(false);
+            setSelectedForDisbursement(new Set());
+            return;
+          }
+
+          if (s.status === 'failed') {
+            setProcessingProgress(prev => ({
+              ...prev,
+              phase: 'Error',
+              progress: 0,
+              message: s.error || 'Batch failed',
+              batchId: b.batchId,
+              chunkCount: totalChunks,
+              currentChunk: completedChunks
+            }));
+            toast({ title: "🚨 Batch Failed", description: s.error || 'See server logs', variant: "destructive" });
+            setTimeout(() => setShowProcessingDialog(false), 1200);
+            setIsProcessingPayouts(false);
+            return;
+          }
+
+          const pct = Math.max(10, Math.min(99, Math.floor((completedChunks / totalChunks) * 100)));
+          setProcessingProgress(prev => ({
+            ...prev,
+            phase: 'Processing',
+            progress: pct,
+            message: `Chunk ${completedChunks}/${totalChunks} processed — ${processedItems}/${totalItems} items`,
+            batchId: b.batchId,
+            chunkCount: totalChunks,
+            currentChunk: completedChunks
+          }));
+          setTimeout(pollStatus, 2000);
+        } catch {
+          setTimeout(pollStatus, 3000);
+        }
+      };
+
+      pollStatus();
+    } catch {}
+  };
+
+  resumeActiveDisbursement();
+}, [selectedCycle]);
+```
+
+### (iii) Seed ribbon on history load (post-refresh)
+
+Where you set `history` (e.g., in your history drawer fetch), add:
+
+```ts
+// After: setHistory(batches);
+if (!lastCompletedBatch && Array.isArray(batches)) {
+  const recentCompleted = batches.find((x: any) => String(x.status).toLowerCase() === 'completed');
+  if (recentCompleted) {
+    try {
+      const token = localStorage.getItem('token');
+      const summary = await fetch(`/api/admin/payout-batches/${recentCompleted.id}/summary`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(r => r.ok ? r.json() : null);
+
+      if (summary) {
+        setLastCompletedBatch({ id: recentCompleted.id, completedAt: recentCompleted.completedAt || new Date(), ...summary });
+      } else {
+        setLastCompletedBatch({ id: recentCompleted.id, completedAt: recentCompleted.completedAt || new Date() });
+      }
+    } catch {}
+  }
+}
+```
+
+> If you already have a success ribbon component, it will light up automatically once `lastCompletedBatch` is set.
+
+---
+
+# D) Replit instructions
+
+1. **Back up** these files:
+
+   * `client/src/components/admin/CycleOperationsTab.tsx`
+   * `server/routes/admin-payout-batches.ts`
+   * `server/routes.ts`
+   * `server/storage.ts`
+
+2. **Replace** the two route files with the full versions above:
+
+   * `server/routes/admin-payout-batches.ts`
+   * `server/routes/admin-payout-history.ts` (**new**)
+
+3. **Edit** `server/routes.ts`:
+
+   * Add the **import** and **registration** lines shown in section B(3).
+
+4. **Append** the four helper methods to your `storage` (and ensure `import { sql } from "drizzle-orm"` is present).
+
+5. **Patch** `CycleOperationsTab.tsx` with the three edits in section C.
+
+6. **Restart** the server & **hard refresh** the browser.
+
+---
+
+## Quick test
+
+* With batch 13 already completed, reload `/admin`:
+
+  * You should **not** see the processing modal.
+  * You **should** see the green “Last disbursement completed” ribbon.
+  * The top button shouldn’t say “Processing…”.
+* Start a new run to confirm modal/progress still works and closes on completion.
+
+If you hit any line-specific TypeScript errors after pasting, paste the exact error messages + line numbers and I’ll adjust the snippet to match your file’s structure precisely.
