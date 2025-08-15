@@ -1,0 +1,128 @@
+Awesome—here are **ready-to-drop-in files** and a **step-by-step plan** for Replit. These fix the “completed on refresh still shows processing” issue and add the history plumbing we discussed.
+
+---
+
+# Files to provide to Replit
+
+### Frontend
+
+* **CycleOperationsTab (fully patched):**
+  [Download `CycleOperationsTab.tsx`](sandbox:/mnt/data/CycleOperationsTab.patched.tsx)
+
+### Backend
+
+* **Admin batch status routes (clean, defensive):**
+  [Download `server/routes/admin-payout-batches.ts`](sandbox:/mnt/data/admin-payout-batches.clean.ts)
+
+* **Disbursement history routes (NEW):**
+  [Download `server/routes/admin-payout-history.ts`](sandbox:/mnt/data/server.routes.admin-payout-history.ts)
+
+* **Routes registrar (patched to register history routes):**
+  [Download `server/routes.ts`](sandbox:/mnt/data/routes.patched.ts)
+
+* **Storage with history helpers (patched):**
+  [Download `server/storage.ts`](sandbox:/mnt/data/storage.patched.ts)
+
+> Prefer full-file replacements for speed. If your team would rather apply diffs:
+>
+> * Minimal `routes.ts` diff: [routes.minimal.patch](sandbox:/mnt/data/routes.minimal.patch)
+> * Append-only storage helpers diff: [storage.append-methods.patch](sandbox:/mnt/data/storage.append-methods.patch)
+
+---
+
+# What changed (quick)
+
+### CycleOperationsTab.tsx
+
+* **Initialization fix:** on page load, if `/active` returns `status: "completed"`, the component **does not** open the processing modal. Instead it:
+
+  * fetches `/api/admin/payout-batches/:id/summary`,
+  * seeds `lastCompletedBatch`,
+  * clears processing flags,
+  * refreshes counts so the big CTA hides.
+* **Polling path unchanged** for true in-flight batches.
+* **Ribbon support:** shows the latest completed batch summary after refresh.
+* Hooks for History/Retry (non-blocking if you haven’t wired the History UI yet).
+
+### server/routes/admin-payout-batches.ts
+
+* **No-cache headers** to avoid 304 loops.
+* **Status normalization** so PayPal “success” → `completed`.
+* **Chunk math** prefers `payout_batches.total_chunks / processed_chunks`, with heuristics as fallback.
+* Returns a monotonic `pollVersion`.
+
+### server/routes/admin-payout-history.ts (NEW)
+
+* `GET /api/admin/payout-batches?cycleId=…` – list batches for the selected cycle.
+* `GET /api/admin/payout-batches/:batchId/summary` – success/failed/unclaimed/pending counts + sums.
+* `POST /api/admin/payout-batches/:batchId/retry-failed` – creates a new batch using **FAILED** items (blocks if source is active).
+
+### server/routes.ts
+
+* Adds the single import + registration call for the new history routes.
+
+### server/storage.ts
+
+* **Append-only** helpers (no breaking changes):
+
+  * `listBatchesForCycle(cycleId)`
+  * `getBatchItemStats(batchId)`
+  * `createRetryBatchFromFailed(batchId)` (validates source not processing)
+  * `markBatchCompletedIfTerminal(batchId)` (optional finalizer)
+* SQL uses your **exact snake\_case** columns from the schema you provided.
+
+---
+
+# Install instructions (Replit)
+
+1. **Back up current files** (just in case):
+
+   * `client/src/components/admin/CycleOperationsTab.tsx`
+   * `server/routes/admin-payout-batches.ts`
+   * `server/routes.ts`
+   * `server/storage.ts`
+
+2. **Replace files** with the downloads above:
+
+   * Put `CycleOperationsTab.patched.tsx` at `client/src/components/admin/CycleOperationsTab.tsx`
+   * Put `admin-payout-batches.clean.ts` at `server/routes/admin-payout-batches.ts`
+   * Put `server.routes.admin-payout-history.ts` at `server/routes/admin-payout-history.ts` (**new file**)
+   * Put `routes.patched.ts` at `server/routes.ts`
+   * Put `storage.patched.ts` at `server/storage.ts`
+
+3. **Rebuild & restart** the server in Replit.
+
+4. **Hard refresh** your browser (or open a fresh tab) to bypass cached JS.
+
+---
+
+# Smoke tests (fast)
+
+### A) Already-completed batch on refresh
+
+* Load `/admin` with a cycle where `/active` returns `{ status: "completed" }`.
+* Expected: **no** modal; **green ribbon** appears; **top-right button** not stuck on “Processing…”.
+
+### B) In-flight batch
+
+* Start a new disbursement.
+* Expected: modal shows progress; when done it closes, ribbon appears, counts refresh.
+
+### C) History endpoints (optional, if you wired UI)
+
+* `GET /api/admin/payout-batches?cycleId=<id>` → array with `{ id, status, paypalBatchId, createdAt, updatedAt, completedAt }`
+* `GET /api/admin/payout-batches/:id/summary` → `{ id, totalItems, success, failed, unclaimed, pending, totals: { … } }`
+* `POST /api/admin/payout-batches/:id/retry-failed` → `{ success: true, batchId: <newId> }`
+
+---
+
+# Notes & safeguards
+
+* All backend SQL uses the **exact** columns from your `schema (7).ts`:
+  `payout_batches` (`status`, `cycle_setting_id`, `paypal_batch_id`, `total_chunks`, `processed_chunks`, `created_at`, `updated_at`, `completed_at`) and `payout_batch_items` (`status`, `amount`, etc.).
+* The retry endpoint **blocks** if the source batch is still `intent`/`processing`.
+* The status route **normalizes** PayPal semantics, so UI logic stays simple.
+
+---
+
+If anything in Replit still complains (e.g., a local helper name is slightly different), paste the exact error line and I’ll ship a corrected file immediately.
