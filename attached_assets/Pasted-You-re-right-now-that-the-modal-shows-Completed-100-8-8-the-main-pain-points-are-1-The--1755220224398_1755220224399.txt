@@ -1,0 +1,350 @@
+You’re right—now that the modal shows **Completed 100% (8/8)**, the main pain points are:
+
+1. The big button area still says **“Processing…”** (stuck UI state).
+2. There’s nowhere to **see the completed run** (who got paid, who failed, totals).
+3. We need a clean path for **partial success** (retry only failures) with solid record-keeping.
+
+Below is a tight, implementation-ready plan with exact code you can hand Replit. It adds a **Disbursement History** panel, precise **batch summaries**, and fixes the **stuck “Processing…”** state.
+
+---
+
+# 1) Fix the stuck “Processing…” UI state
+
+In `client/src/components/admin/CycleOperationsTab.tsx`:
+
+* When the status poller returns `status === "completed"`, **clear the activeBatchId** and **isProcessing** flags, and store a **lastCompletedBatch** in state so we can render a success banner and a “View Summary” link.
+
+```ts
+// Add to component state
+const [lastCompletedBatch, setLastCompletedBatch] = useState<{ id:number; totalItems:number; success:number; failed:number; unclaimed:number; pending:number } | null>(null);
+
+// In your poller: after fetching /api/admin/payout-batches/:batchId/status
+if (payload.status === "completed") {
+  setIsProcessing(false);
+  setActiveBatchId(null);
+  // Optional: pull summary immediately (see new endpoint below)
+  const sum = await fetch(`/api/admin/payout-batches/${payload.batchId}/summary`, { headers: authHeader }).then(r=>r.json());
+  setLastCompletedBatch(sum);
+}
+```
+
+* At the top of the Selected Winners card (where the button is), render a **success ribbon** when `lastCompletedBatch` exists:
+
+```tsx
+{lastCompletedBatch && (
+  <div className="mb-3 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-900">
+    <div className="font-medium">Last disbursement completed</div>
+    <div className="mt-1 flex flex-wrap gap-4">
+      <span>Batch #{lastCompletedBatch.id}</span>
+      <span>Total: {lastCompletedBatch.totalItems}</span>
+      <span>Success: {lastCompletedBatch.success}</span>
+      <span>Unclaimed: {lastCompletedBatch.unclaimed}</span>
+      <span>Failed: {lastCompletedBatch.failed}</span>
+      {lastCompletedBatch.failed > 0 && (
+        <button
+          className="underline"
+          onClick={() => onRetryFailed(lastCompletedBatch.id)}
+        >
+          Retry failed as new batch
+        </button>
+      )}
+      <button
+        className="underline"
+        onClick={() => openHistoryDrawer(/* optional cycleId */)}
+      >
+        View full history
+      </button>
+    </div>
+  </div>
+)}
+```
+
+* Ensure your **primary button** derives from `eligibleCount` and **processing flags**:
+
+```ts
+const showProcessButton = eligibleCount > 0 && !isProcessing && !activeBatchId;
+// When processing or activeBatchId is truthy, render a disabled spinner button.
+// When eligibleCount === 0, hide the button entirely.
+```
+
+---
+
+# 2) Add **Disbursement History** + **Batch Summary** APIs (backend)
+
+### A) New route file: `server/routes/admin-payout-history.ts`
+
+```ts
+import type { Express, Request, Response } from "express";
+import { storage } from "../storage";
+
+export function registerAdminPayoutHistoryRoutes(app: Express) {
+  // GET /api/admin/payout-batches?cycleId=18  -> list batches for a cycle (most recent first)
+  app.get("/api/admin/payout-batches", async (req: Request, res: Response) => {
+    try {
+      const cycleId = Number(req.query.cycleId);
+      if (!cycleId) return res.status(400).json({ error: "cycleId is required" });
+      const batches = await (storage as any).listBatchesForCycle(cycleId);
+      res.json(batches);
+    } catch (e) {
+      console.error("[HISTORY] list error:", e);
+      res.status(500).json({ error: "Failed to load batches" });
+    }
+  });
+
+  // GET /api/admin/payout-batches/:batchId/summary  -> counts & sums by status
+  app.get("/api/admin/payout-batches/:batchId/summary", async (req: Request, res: Response) => {
+    try {
+      const batchId = Number(req.params.batchId);
+      if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+      const summary = await (storage as any).getBatchItemStats(batchId);
+      res.json(summary);
+    } catch (e) {
+      console.error("[HISTORY] summary error:", e);
+      res.status(500).json({ error: "Failed to load batch summary" });
+    }
+  });
+
+  // POST /api/admin/payout-batches/:batchId/retry-failed -> create a new batch for FAILED items only
+  app.post("/api/admin/payout-batches/:batchId/retry-failed", async (req: Request, res: Response) => {
+    try {
+      const batchId = Number(req.params.batchId);
+      if (!batchId) return res.status(400).json({ error: "Invalid batchId" });
+      const newBatch = await (storage as any).createRetryBatchFromFailed(batchId);
+      res.json({ success: true, batchId: newBatch.id });
+    } catch (e) {
+      console.error("[HISTORY] retry-failed error:", e);
+      res.status(500).json({ error: "Failed to create retry batch" });
+    }
+  });
+}
+```
+
+**Register the routes** in `server/routes.ts` (where you registered `registerAdminPayoutBatchRoutes`):
+
+```ts
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+// inside registerRoutes(app):
+registerAdminPayoutHistoryRoutes(app);
+```
+
+### B) Storage helpers (add to `server/storage.ts`)
+
+**1) Batch list for cycle (minimal fields):**
+
+```ts
+import { sql } from "drizzle-orm";
+
+export async function listBatchesForCycle(cycleId: number) {
+  const result: any = await db.execute(sql`
+    SELECT
+      id,
+      status,
+      paypal_batch_id AS "paypalBatchId",
+      created_at      AS "createdAt",
+      completed_at    AS "completedAt"
+    FROM payout_batches
+    WHERE cycle_setting_id = ${cycleId}
+    ORDER BY created_at DESC
+  `);
+  return result?.rows ?? [];
+}
+```
+
+**2) Item stats by status (counts + amounts):**
+
+```ts
+export async function getBatchItemStats(batchId: number) {
+  const result: any = await db.execute(sql`
+    SELECT
+      LOWER(status) AS status,
+      COUNT(*)      AS count,
+      COALESCE(SUM(amount), 0) AS amount
+    FROM payout_items
+    WHERE batch_id = ${batchId}
+    GROUP BY LOWER(status)
+  `);
+
+  const rows = result?.rows ?? [];
+  const index = (key: string) => rows.find(r => r.status === key) || { count: 0, amount: 0 };
+
+  const success   = index("success");
+  const failed    = index("failed");
+  const unclaimed = index("unclaimed");
+  const pending   = index("pending");
+  const total     = (success.count|0) + (failed.count|0) + (unclaimed.count|0) + (pending.count|0);
+
+  return {
+    id: batchId,
+    totalItems: total,
+    success: success.count|0,
+    failed: failed.count|0,
+    unclaimed: unclaimed.count|0,
+    pending: pending.count|0,
+    totals: {
+      success: Number(success.amount || 0),
+      failed: Number(failed.amount || 0),
+      unclaimed: Number(unclaimed.amount || 0),
+      pending: Number(pending.amount || 0),
+    }
+  };
+}
+```
+
+**3) Create a retry batch with FAILED items only (skeleton):**
+
+```ts
+export async function createRetryBatchFromFailed(batchId: number) {
+  // 1) Find the original cycle
+  const batchRow: any = await db.execute(sql`
+    SELECT id, cycle_setting_id AS "cycleSettingId"
+    FROM payout_batches
+    WHERE id = ${batchId}
+    LIMIT 1
+  `);
+  const original = (batchRow?.rows ?? [])[0];
+  if (!original) throw new Error("Original batch not found");
+
+  // 2) Create a new batch row
+  const newBatchRes: any = await db.execute(sql`
+    INSERT INTO payout_batches (cycle_setting_id, status, created_at)
+    VALUES (${original.cycleSettingId}, 'created', NOW())
+    RETURNING id
+  `);
+  const newBatch = (newBatchRes?.rows ?? [])[0];
+
+  // 3) Copy FAILED items into new payout_items for the new batch
+  await db.execute(sql`
+    INSERT INTO payout_items (batch_id, user_id, amount, status, created_at)
+    SELECT ${newBatch.id}, user_id, amount, 'created', NOW()
+    FROM payout_items
+    WHERE batch_id = ${batchId} AND LOWER(status) = 'failed'
+  `);
+
+  return { id: newBatch.id };
+}
+```
+
+> You can extend that insert (e.g., copy PayPal email, memo, etc.). Keep it idempotent by guarding against duplicates if necessary.
+
+---
+
+# 3) Add a **Disbursement History** drawer in the UI
+
+Create a tiny drawer/panel that lists recent batches and links to each summary.
+
+```tsx
+// Pseudocode inside CycleOperationsTab.tsx
+const [historyOpen, setHistoryOpen] = useState(false);
+const [history, setHistory] = useState<any[]>([]);
+const [selectedSummary, setSelectedSummary] = useState<any | null>(null);
+
+async function openHistoryDrawer() {
+  setHistoryOpen(true);
+  const data = await fetch(`/api/admin/payout-batches?cycleId=${cycleId}`, { headers: authHeader }).then(r=>r.json());
+  setHistory(data);
+}
+
+async function loadSummary(batchId:number) {
+  const sum = await fetch(`/api/admin/payout-batches/${batchId}/summary`, { headers: authHeader }).then(r=>r.json());
+  setSelectedSummary(sum);
+}
+
+// In render:
+{historyOpen && (
+  <div className="fixed inset-0 bg-black/30">
+    <aside className="absolute right-0 top-0 h-full w-full max-w-xl bg-white p-4 overflow-auto">
+      <h3 className="text-lg font-semibold mb-3">Disbursement History</h3>
+      <ul className="space-y-2">
+        {history.map(b => (
+          <li key={b.id} className="border rounded p-2 flex items-center justify-between">
+            <div>
+              <div className="font-medium">Batch #{b.id}</div>
+              <div className="text-xs text-gray-500">Status: {b.status} • Created: {new Date(b.createdAt).toLocaleString()}</div>
+            </div>
+            <button className="underline" onClick={() => loadSummary(b.id)}>View</button>
+          </li>
+        ))}
+      </ul>
+
+      {selectedSummary && (
+        <div className="mt-4 border-t pt-3">
+          <div className="font-medium">Batch #{selectedSummary.id} — Summary</div>
+          <div className="text-sm mt-1 grid grid-cols-2 gap-2">
+            <div>Total Items: {selectedSummary.totalItems}</div>
+            <div>Success: {selectedSummary.success}</div>
+            <div>Unclaimed: {selectedSummary.unclaimed}</div>
+            <div>Failed: {selectedSummary.failed}</div>
+            <div>Pending: {selectedSummary.pending}</div>
+            <div>Paid Total: ${selectedSummary.totals.success.toFixed(2)}</div>
+          </div>
+          {selectedSummary.failed > 0 && (
+            <button className="mt-3 rounded bg-blue-600 px-3 py-1 text-white"
+              onClick={async () => {
+                await fetch(`/api/admin/payout-batches/${selectedSummary.id}/retry-failed`, { method: 'POST', headers: authHeader });
+                // reload history to include the new batch
+                openHistoryDrawer();
+              }}>
+              Create retry batch for failed
+            </button>
+          )}
+        </div>
+      )}
+
+      <button className="absolute right-3 top-3" onClick={() => setHistoryOpen(false)}>✕</button>
+    </aside>
+  </div>
+)}
+```
+
+---
+
+# 4) Optional: finalize batch in DB when terminal
+
+To keep database truth in sync, add a safe **finalizer** that sets `status='completed'` and `completed_at=NOW()` when all items are terminal. You can call this at the tail of the orchestrator, or opportunistically inside the `GET /:batchId/status` when `processedItems >= totalItems`:
+
+```ts
+await storage.markBatchCompletedIfTerminal(batchId);
+```
+
+**storage.ts**
+
+```ts
+export async function markBatchCompletedIfTerminal(batchId: number) {
+  await db.execute(sql`
+    UPDATE payout_batches b
+    SET status = 'completed',
+        completed_at = NOW()
+    WHERE b.id = ${batchId}
+      AND NOT EXISTS (
+        SELECT 1 FROM payout_items i
+        WHERE i.batch_id = b.id
+          AND LOWER(i.status) NOT IN ('success','failed','unclaimed','pending')
+      )
+      AND LOWER(COALESCE(b.status,'')) <> 'completed'
+  `);
+}
+```
+
+---
+
+## Summary of deliverables to give Replit
+
+**New files**
+
+* `server/routes/admin-payout-history.ts` (history + summary + retry-failed routes)
+
+**Edits**
+
+* `server/routes.ts`: register `registerAdminPayoutHistoryRoutes(app)`
+* `server/storage.ts`: add `listBatchesForCycle`, `getBatchItemStats`, `createRetryBatchFromFailed`, `markBatchCompletedIfTerminal` (optional)
+* `client/src/components/admin/CycleOperationsTab.tsx`:
+
+  * clear processing state on `status === "completed"`
+  * success ribbon with “View full history” and “Retry failed”
+  * history drawer UI (or a simple modal)
+
+Once these land, you’ll have:
+
+* A modal that **finishes cleanly** and releases the button state,
+* A **disbursement history** view for airtight record-keeping,
+* A clean **retry** flow for partial failures.
