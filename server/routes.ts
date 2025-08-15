@@ -7,7 +7,7 @@ import { findBestContent, fallbackContent } from "./contentDatabase";
 import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, ordersController } from "./paypal";
-import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions, cycleWinnerSelections } from "@shared/schema";
+import { User, users, paypalPayouts, winnerSelectionCycles, winnerSelections, winnerAllocationTemplates, insertCycleSettingSchema, cycleSettings, userCyclePoints, userPointsHistory, userPredictions, predictionQuestions, cycleWinnerSelections, payoutBatches, payoutBatchItems } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, gte, lte, isNull, isNotNull, inArray, asc, or, ne } from "drizzle-orm";
 import * as XLSX from "xlsx";
@@ -15,7 +15,7 @@ import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
 import type { PayoutRecipient, TransactionContext } from './paypal-transaction-orchestrator.js';
 import { registerAdminPayoutBatchRoutes } from "./routes/admin-payout-batches";
-import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+import adminPayoutHistoryRoutes from "./routes/admin-payout-history";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Mount admin payout batch status routes (clean polling endpoints)
   registerAdminPayoutBatchRoutes(app);
-  registerAdminPayoutHistoryRoutes(app);
+  app.use('/api/admin/payout-history', adminPayoutHistoryRoutes);
 // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {

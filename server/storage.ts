@@ -3297,6 +3297,10 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async getAllCycles(): Promise<any[]> {
+    return this.getAllCycleSettings();
+  }
+
   // Stripe integration methods
   async updateUserSubscriptionStatus(userId: number, status: string): Promise<User | null> {
     try {
@@ -10321,6 +10325,72 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
         )
         AND LOWER(COALESCE(b.status,'')) <> 'completed'
     `);
+  }
+
+  // === Admin Payout History Helpers ===
+
+  /** List batches for a cycle (most recent first) */
+  async listBatchesForCycle(cycleId: number): Promise<any[]> {
+    const result: any = await db.execute(sql`
+      SELECT
+        id,
+        status,
+        paypal_batch_id AS "paypalBatchId",
+        cycle_setting_id AS "cycleSettingId",
+        created_at      AS "createdAt",
+        updated_at      AS "updatedAt",
+        completed_at    AS "completedAt"
+      FROM payout_batches
+      WHERE cycle_setting_id = ${cycleId}
+      ORDER BY created_at DESC
+    `);
+    return result?.rows ?? [];
+  }
+
+  /** Aggregate item counts & totals by status */
+  async getBatchItemStats(batchId: number): Promise<any> {
+    const result: any = await db.execute(sql`
+      SELECT
+        LOWER(status) AS status,
+        COUNT(*)      AS count,
+        COALESCE(SUM(amount), 0) AS amount
+      FROM payout_batch_items
+      WHERE batch_id = ${batchId}
+      GROUP BY LOWER(status)
+    `);
+
+    const rows = result?.rows ?? [];
+    const by = (k: string) => rows.find((r:any) => r.status === k) || { count: 0, amount: 0 };
+
+    const success    = by("success");
+    const failed     = by("failed");
+    const unclaimed  = by("unclaimed");
+    const pending    = by("pending");
+    const processing = by("processing");
+
+    const totalItems =
+      (Number(success.count)||0) +
+      (Number(failed.count)||0) +
+      (Number(unclaimed.count)||0) +
+      (Number(pending.count)||0) +
+      (Number(processing.count)||0);
+
+    return {
+      id: batchId,
+      totalItems,
+      success: Number(success.count)||0,
+      failed: Number(failed.count)||0,
+      unclaimed: Number(unclaimed.count)||0,
+      pending: Number(pending.count)||0,
+      processing: Number(processing.count)||0,
+      totals: {
+        success: Number(success.amount || 0),
+        failed: Number(failed.amount || 0),
+        unclaimed: Number(unclaimed.amount || 0),
+        pending: Number(pending.amount || 0),
+        processing: Number(processing.amount || 0),
+      }
+    };
   }
 }
 

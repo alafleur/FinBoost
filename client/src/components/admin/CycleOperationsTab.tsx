@@ -184,14 +184,45 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         const b = await r.json(); // { batchId, status, totalChunks, completedChunks, processedItems, totalItems }
         if (!b?.batchId) return;
 
-        // Resume showing the progress dialog
+        // ✅ If already completed, do NOT reopen the modal; seed the ribbon instead
+        if (String(b.status).toLowerCase() === 'completed') {
+          try {
+            const sr = await fetch(`/api/admin/payout-batches/${b.batchId}/summary`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (sr.ok) {
+              const summary = await sr.json();
+              setLastCompletedBatch({
+                id: b.batchId,
+                completedAt: new Date(),
+                ...summary
+              });
+            }
+          } catch (e) {
+            console.warn('Failed to load completion summary on resume:', e);
+          }
+
+          setIsProcessingPayouts(false);
+          setShowProcessingDialog(false);
+          setProcessingProgress({
+            phase: 'Completed',
+            progress: 100,
+            message: `Disbursement Successful!`,
+            batchId: null,
+            chunkCount: b.totalChunks || 1,
+            currentChunk: b.totalChunks || 1,
+          });
+
+          await refreshAllCycleData({ forceFresh: true });
+          return;
+        }
+
+        // Truly in-flight → show modal & poll
         setShowProcessingDialog(true);
         setIsProcessingPayouts(true);
         setProcessingProgress({
-          phase: b.status === 'completed' ? 'Completed' : 'Processing',
-          progress: b.status === 'completed'
-            ? 100
-            : Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
+          phase: 'Processing',
+          progress: Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
           message: `Resuming batch ${b.batchId}...`,
           batchId: b.batchId,
           chunkCount: b.totalChunks || 1,
@@ -1863,7 +1894,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                           
                           <Button
                             onClick={handleProcessPayouts}
-                            disabled={isProcessingPayouts || (isSelectiveMode && selectedCount === 0) || (processingProgress.batchId && processingProgress.phase !== 'Completed')}
+                            disabled={isProcessingPayouts || (isSelectiveMode && selectedCount === 0) || (!!processingProgress.batchId && processingProgress.phase !== 'Completed')}
                             className={`
                               disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200
                               ${isBulkMode 

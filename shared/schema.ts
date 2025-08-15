@@ -380,6 +380,7 @@ export const cycleWinnerSelections = pgTable("cycle_winner_selections", {
   paypalItemId: text("paypal_item_id"), // Individual PayPal item ID for tracking
   failureReason: text("failure_reason"), // Detailed failure reason if status is failed
   adminNotes: text("admin_notes"), // Admin comments for manual intervention cases
+  payoutError: text("payout_error"), // Error message for failed payouts
   
   // Phase 2A: Enhanced Save/Seal Workflow Fields (Issue #2 Resolution)
   isSealed: boolean("is_sealed").default(false).notNull(), // Individual winner record seal status

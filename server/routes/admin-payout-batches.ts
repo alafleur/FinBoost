@@ -30,26 +30,22 @@ function normalizeStatus(raw: any): string {
   return s || "intent";
 }
 
-// Derive chunk info: prefer batch.total_chunks/processed_chunks; fall back to heuristic
+// Prefer batch.total_chunks/processed_chunks; fallback to heuristic based on items
 function getChunkInfo(batch: AnyRecord, totalItems: number, processedItems: number) {
   let totalChunks = Number(batch?.total_chunks ?? batch?.totalChunks ?? 0) || 0;
   let completedChunks = Number(batch?.processed_chunks ?? batch?.processedChunks ?? 0) || 0;
 
-  if (!totalChunks) {
-    totalChunks = Math.max(1, Math.ceil(totalItems / 100));
-  }
-  if (!completedChunks) {
-    completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
-  }
+  if (!totalChunks) totalChunks = Math.max(1, Math.ceil(totalItems / 100));
+  if (!completedChunks) completedChunks = Math.min(totalChunks, Math.floor(processedItems / 100));
+
   if (totalItems > 0 && processedItems >= totalItems) {
     completedChunks = totalChunks;
   }
   return { totalChunks, completedChunks };
 }
 
-// Count terminal items
 function countProcessed(items: AnyRecord[]) {
-  const terminal = new Set(["success","failed","unclaimed","pending"]);
+  const terminal = new Set(["success", "failed", "unclaimed", "pending"]);
   let processed = 0;
   for (const it of items) {
     const st = String(it?.status ?? "").toLowerCase();
@@ -82,7 +78,7 @@ function buildPayload(batch: AnyRecord, items: AnyRecord[]): BatchStatusPayload 
 }
 
 export function registerAdminPayoutBatchRoutes(app: Express) {
-  // No assumptions about custom Request typings; keep it vanilla.
+  // GET /api/admin/payout-batches/active?cycleId=18
   app.get("/api/admin/payout-batches/active", async (req: Request, res: Response) => {
     noCache(res);
     const cycleId = Number(req.query.cycleId);
@@ -100,6 +96,7 @@ export function registerAdminPayoutBatchRoutes(app: Express) {
     }
   });
 
+  // GET /api/admin/payout-batches/:batchId/status
   app.get("/api/admin/payout-batches/:batchId/status", async (req: Request, res: Response) => {
     noCache(res);
     const batchId = Number(req.params.batchId);
