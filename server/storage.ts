@@ -10222,7 +10222,10 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
         cycle_setting_id AS "cycleSettingId",
         created_at      AS "createdAt",
         updated_at      AS "updatedAt",
-        completed_at    AS "completedAt"
+        total_amount    AS "totalAmount",
+        total_recipients AS "totalRecipients",
+        successful_count AS "successfulCount",
+        failed_count    AS "failedCount"
       FROM payout_batches
       WHERE cycle_setting_id = ${cycleId}
       ORDER BY created_at DESC
@@ -10247,15 +10250,23 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     const unclaimed = by("unclaimed");
     const pending   = by("pending");
     const processing = by("processing");
-    const totalItems = (Number(success.count)||0) + (Number(failed.count)||0) + (Number(unclaimed.count)||0) + (Number(pending.count)||0) + (Number(processing.count)||0);
+    
+    const processedCount = Number(success.count || 0);
+    const failedCount = Number(failed.count || 0);
+    const totalItems = processedCount + failedCount + Number(unclaimed.count || 0) + Number(pending.count || 0) + Number(processing.count || 0);
+    const totalAmount = (Number(success.amount || 0) + Number(failed.amount || 0) + Number(unclaimed.amount || 0) + Number(pending.amount || 0) + Number(processing.amount || 0)) / 100; // Convert from cents to dollars
+    
     return {
       id: batchId,
       totalItems,
-      success: Number(success.count)||0,
-      failed: Number(failed.count)||0,
-      unclaimed: Number(unclaimed.count)||0,
-      pending: Number(pending.count)||0,
-      processing: Number(processing.count)||0,
+      processedCount,
+      failedCount,
+      totalAmount: totalAmount.toFixed(2),
+      success: processedCount,
+      failed: failedCount,
+      unclaimed: Number(unclaimed.count||0),
+      pending: Number(pending.count||0),
+      processing: Number(processing.count||0),
       totals: {
         success: Number(success.amount || 0),
         failed: Number(failed.amount || 0),
