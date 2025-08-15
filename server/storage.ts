@@ -8099,7 +8099,7 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
         created_at      AS "createdAt"
       FROM payout_batches
       WHERE cycle_setting_id = ${cycleId}
-        AND lower(status) IN ('intent','processing')
+        AND lower(status) IN ('created','processing')
       ORDER BY created_at DESC
       LIMIT 1
     `);
@@ -10210,112 +10210,6 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     .where(eq(payoutBatchChunks.id, chunkId));
     
     return chunk[0] || null;
-  }
-
-
-  // === Admin Payout History Helpers ===
-  async listBatchesForCycle(cycleId: number): Promise<any[]> {
-    const result: any = await db.execute(sql`
-      SELECT
-        id,
-        status,
-        paypal_batch_id AS "paypalBatchId",
-        cycle_setting_id AS "cycleSettingId",
-        created_at      AS "createdAt",
-        updated_at      AS "updatedAt",
-        completed_at    AS "completedAt"
-      FROM payout_batches
-      WHERE cycle_setting_id = ${cycleId}
-      ORDER BY created_at DESC
-    `);
-    return result?.rows ?? [];
-  }
-
-  async getBatchItemStats(batchId: number): Promise<any> {
-    const result: any = await db.execute(sql`
-      SELECT
-        LOWER(status) AS status,
-        COUNT(*)      AS count,
-        COALESCE(SUM(amount), 0) AS amount
-      FROM payout_batch_items
-      WHERE batch_id = ${batchId}
-      GROUP BY LOWER(status)
-    `);
-    const rows = result?.rows ?? [];
-    const by = (k: string) => rows.find(r => r.status === k) || { count: 0, amount: 0 };
-    const success   = by("success");
-    const failed    = by("failed");
-    const unclaimed = by("unclaimed");
-    const pending   = by("pending");
-    const processing = by("processing");
-    const totalItems = (success.count|0) + (failed.count|0) + (unclaimed.count|0) + (pending.count|0) + (processing.count|0);
-    return {
-      id: batchId,
-      totalItems,
-      success: parseInt(success.count as any) || 0,
-      failed: parseInt(failed.count as any) || 0,
-      unclaimed: parseInt(unclaimed.count as any) || 0,
-      pending: parseInt(pending.count as any) || 0,
-      processing: parseInt(processing.count as any) || 0,
-      totals: {
-        success: Number(success.amount || 0),
-        failed: Number(failed.amount || 0),
-        unclaimed: Number(unclaimed.amount || 0),
-        pending: Number(pending.amount || 0),
-        processing: Number(processing.amount || 0),
-      }
-    };
-  }
-
-  async createRetryBatchFromFailed(batchId: number): Promise<{ id: number }> {
-    // Ensure source batch is not processing
-    const srcRes: any = await db.execute(sql`
-      SELECT id, cycle_setting_id AS "cycleSettingId", status
-      FROM payout_batches
-      WHERE id = ${batchId}
-      LIMIT 1
-    `);
-    const src = (srcRes?.rows ?? [])[0];
-    if (!src) throw new Error("Original batch not found");
-    const s = String(src.status || "").toLowerCase();
-    if (["intent","processing"].includes(s)) {
-      throw new Error("Cannot retry while source batch is active");
-    }
-
-    // Create new batch
-    const insRes: any = await db.execute(sql`
-      INSERT INTO payout_batches (cycle_setting_id, status, created_at, updated_at)
-      VALUES (${src.cycleSettingId}, 'intent', NOW(), NOW())
-      RETURNING id
-    `);
-    const newBatch = (insRes?.rows ?? [])[0];
-
-    // Copy FAILED items into new batch
-    await db.execute(sql`
-      INSERT INTO payout_batch_items (
-        batch_id, user_id, paypal_email, amount, currency, status, created_at, updated_at, cycle_winner_selection_id
-      )
-      SELECT ${newBatch.id}, user_id, paypal_email, amount, currency, 'intent', NOW(), NOW(), cycle_winner_selection_id
-      FROM payout_batch_items
-      WHERE batch_id = ${batchId} AND LOWER(status) = 'failed'
-    `);
-
-    return { id: newBatch.id };
-  }
-
-  async markBatchCompletedIfTerminal(batchId: number): Promise<void> {
-    await db.execute(sql`
-      UPDATE payout_batches b
-      SET status = 'completed',
-          updated_at = NOW()
-      WHERE b.id = ${batchId}
-        AND NOT EXISTS (
-          SELECT 1 FROM payout_batch_items i
-          WHERE i.batch_id = b.id
-            AND LOWER(i.status) NOT IN ('success','failed','unclaimed','pending')
-        )
-        AND LOWER(COALESCE(b.status,'')) <> 'completed'
-    `);
   }
 }
 

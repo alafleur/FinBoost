@@ -35,7 +35,7 @@ function pick<T = any>(obj: AnyRecord, keys: string[], fallback?: any): T {
 
 function normalizeStatus(raw: any): string {
   const s = String(raw ?? "").toLowerCase();
-  if (["completed","complete","success","succeeded","done","finished"].includes(s)) return "completed";
+  if (["completed", "complete", "success", "succeeded", "done", "finished"].includes(s)) return "completed";
   if (["processing", "in_progress", "in-progress", "running", "pending"].includes(s)) return "processing";
   if (["failed", "error", "errored", "canceled", "cancelled"].includes(s)) return "failed";
   return s || "created";
