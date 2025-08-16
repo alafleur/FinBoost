@@ -1,0 +1,78 @@
+Yep — I agree with Replit’s diagnosis. Your `Admin.tsx` had **duplicate/malformed tab sections** and a big block of **orphaned JSX** inside the Cycles and Cycle-Ops areas. That’s exactly why you see “Expected corresponding JSX closing tag…” errors and startup failures. I’ve done a **surgical fix**:
+
+* **Cycles tab** (`value="cycles"`): replaced the broken block with a clean, minimal section that renders the correct component.
+* **Duplicate Cycle-Ops tab** (`value="cycle-operations"`): removed the **second** duplicate block entirely (kept the first one).
+* Left your new **Disbursement History** page as-is; it compiles cleanly.&#x20;
+
+Below are the **downloadable, ready-to-drop-in files** + quick wiring notes.
+
+---
+
+### ✅ Downloads
+
+**Patched Admin.tsx (fixes malformed JSX & duplicate tab)**
+
+* [Download `Admin.patched.cycles-and-ops.tsx`](sandbox:/mnt/data/Admin.patched.cycles-and-ops.tsx)
+  *Replace your `client/src/pages/Admin.tsx` with this (rename to `Admin.tsx`).*
+  (Patched based on your uploaded file.)&#x20;
+
+**DisbursementHistory.tsx (full page)**
+
+* [Download `DisbursementHistory.tsx`](sandbox:/mnt/data/DisbursementHistory.tsx)
+  *Place at `client/src/components/admin/DisbursementHistory.tsx`.*
+  (This is the same, working page we added earlier.)&#x20;
+
+> If you already placed `DisbursementHistory.tsx` in that path, you don’t need to replace it again.
+
+---
+
+### What I changed (Admin.tsx)
+
+* **Cycles tab reset** to a clean, valid block:
+
+  ```tsx
+  <TabsContent value="cycles">
+    <CycleManagementTab />
+  </TabsContent>
+  ```
+* **Removed the duplicate** `value="cycle-operations"` block that was causing tag mismatches.
+* Left the **Disbursements tab** you already patched to:
+
+  ```tsx
+  <TabsContent value={TAB_DISBURSEMENTS}>
+    <DisbursementHistory />
+  </TabsContent>
+  ```
+
+These changes eliminate the unmatched `</div>`, `</Card>`, `</CardContent>` and duplicated `<TabsContent>` issues reported by Replit.
+
+---
+
+### One-liner wiring check
+
+Make sure `Admin.tsx` has the import for the new page:
+
+```tsx
+// If your @ alias is configured
+import DisbursementHistory from "@/components/admin/DisbursementHistory";
+
+// Otherwise use a relative path (adjust depth if needed)
+// import DisbursementHistory from "../components/admin/DisbursementHistory";
+```
+
+Cycle components are already imported in your file (as seen in your upload), so no changes needed there.&#x20;
+
+---
+
+### After dropping in the files
+
+1. Replace `client/src/pages/Admin.tsx` with the downloaded **Admin.patched.cycles-and-ops.tsx** (rename to `Admin.tsx`).
+2. Ensure `client/src/components/admin/DisbursementHistory.tsx` exists (download above if needed).
+3. Restart the frontend dev server (Vite) and hard-refresh the browser.
+
+You should now have:
+
+* A **stable Admin page** that compiles and loads.
+* A clean **Cycles** tab.
+* A single **Cycle-Operations** tab.
+* A dedicated **Disbursement History** section (no more drawer), reachable via your Disbursements tab.
