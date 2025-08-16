@@ -1,0 +1,77 @@
+Absolutely feasible. Here’s a **drop-in backend route** Replit can add to return disbursement history reliably (with safe fallbacks). It works even if your storage helpers are missing or if fields are snake\_case.
+
+### Download (drop these in)
+
+* **admin-payout-history.ts** — history list + summary + retry-failed
+  [Download](sandbox:/mnt/data/admin-payout-history.ts)
+
+> (If you still need the supporting routes we added earlier)
+> • **admin-payout-export.ts** – CSV export
+> [Download](sandbox:/mnt/data/admin-payout-export.ts)
+> • **admin-cycles.ts** – list cycles
+> [Download](sandbox:/mnt/data/admin-cycles.ts)
+
+---
+
+### Where to place the files
+
+```
+server/
+  routes/
+    admin-payout-history.ts      <-- new (this message)
+    admin-payout-export.ts       <-- if not already added
+    admin-cycles.ts              <-- if not already added
+```
+
+---
+
+### Register the routes (one-time edit)
+
+In `server/routes.ts` (where you register other admin routes):
+
+```ts
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
+import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
+
+// after `const app = express()`
+registerAdminPayoutHistoryRoutes(app);
+registerAdminPayoutExportRoutes(app);
+registerAdminCyclesRoutes(app);
+```
+
+> If `admin-payout-export` or `admin-cycles` are already registered, keep them as-is; just add the history line.
+
+---
+
+### What this route returns (schema-safe)
+
+* `GET /api/admin/payout-batches?cycleId=18` → list batches for a cycle
+  Returns `[{ id, status, createdAt, completedAt, paypalBatchId }]`.
+  If your project exposes `storage.listBatchesForCycle(cycleId)`, it uses that. If not, it **falls back to a direct SQL** against `payout_batches` using `cycle_setting_id`.
+
+* `GET /api/admin/payout-batches/:batchId/summary` → item counts + paid total
+  Uses `storage.getBatchItemStats(batchId)` when present; otherwise **fallback SQL** over `payout_batch_items` to compute `success/failed/unclaimed/pending/processing` and `totals.success` (paid amount).
+
+* `POST /api/admin/payout-batches/:batchId/retry-failed` → optional helper
+  Calls `storage.createRetryBatchFromFailed(batchId)` if your build supports it; otherwise returns a friendly message that retry isn’t enabled.
+
+This matches the fields the new **Disbursements** tab expects. It’s defensive about **snake\_case vs camelCase** and will return data as long as your DB has `payout_batches` and `payout_batch_items`.
+
+---
+
+### After adding
+
+1. Save files and **restart** the backend.
+2. Refresh the Admin → **Disbursements** tab, select **Cycle #18**.
+
+   * You should now see **Batch #13** listed.
+   * Click **View** → summary loads.
+   * **Export CSV** works if you also wired `admin-payout-export.ts`.
+
+If anything still shows empty, open DevTools → Network and share the JSON for:
+
+* `GET /api/admin/payout-batches?cycleId=18`
+* `GET /api/admin/payout-batches/active?cycleId=18`
+
+I’ll adjust the mapping to your exact storage shape if needed.
