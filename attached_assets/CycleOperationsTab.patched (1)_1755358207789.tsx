@@ -12,6 +12,23 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { 
+
+// --- HOTFIX SHIMS (non-invasive) ---------------------------------------------
+// These no-op definitions prevent runtime crashes if wrapper props are not wired.
+// The actual history/ribbon logic is handled by CycleOperationsTabWrapper.
+const _noopAsync = async (..._args: any[]) => {};
+const _noop = (..._args: any[]) => {};
+
+// Ensure local stubs exist if not already defined in this file.
+try {
+  // @ts-ignore
+  if (typeof loadHistory === 'undefined') { var loadHistory = _noopAsync; }
+  // @ts-ignore
+  if (typeof loadSummary === 'undefined') { var loadSummary = _noopAsync; }
+  // @ts-ignore
+  if (typeof onRetryFailed === 'undefined') { var onRetryFailed = _noopAsync; }
+} catch {}
+
   Calendar, 
   Users, 
   DollarSign, 
@@ -40,22 +57,6 @@ import {
   Zap,
   AlertTriangle
 } from 'lucide-react';
-
-// --- HOTFIX SHIMS (non-invasive) ---------------------------------------------
-// These no-op definitions prevent runtime crashes if wrapper props are not wired.
-// The actual history/ribbon logic is handled by CycleOperationsTabWrapper.
-const _noopAsync = async (..._args: any[]) => {};
-const _noop = (..._args: any[]) => {};
-
-// Ensure local stubs exist if not already defined in this file.
-try {
-  // @ts-ignore
-  if (typeof loadHistory === 'undefined') { var loadHistory = _noopAsync; }
-  // @ts-ignore
-  if (typeof loadSummary === 'undefined') { var loadSummary = _noopAsync; }
-  // @ts-ignore
-  if (typeof onRetryFailed === 'undefined') { var onRetryFailed = _noopAsync; }
-} catch {}
 
 interface CycleSetting {
   id: number;

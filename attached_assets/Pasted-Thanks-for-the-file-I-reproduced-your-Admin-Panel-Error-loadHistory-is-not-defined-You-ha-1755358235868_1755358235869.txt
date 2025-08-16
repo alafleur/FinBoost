@@ -1,0 +1,46 @@
+Thanks for the file — I reproduced your “Admin Panel Error: `loadHistory is not defined`”.
+
+You have two separate history implementations (one in the wrapper that’s correct, and a few stray calls inside `CycleOperationsTab.tsx`). The quickest, safe fix is to shim the missing functions inside `CycleOperationsTab.tsx` so those orphaned calls don’t crash the admin panel. This keeps all real history/ribbon logic in **CycleOperationsTabWrapper** (where it already works) and removes the runtime error from the main component.
+
+# What I changed
+
+I injected a tiny “hotfix shims” block right after the imports in `CycleOperationsTab.tsx` that defines **no-op** fallbacks if these functions are not present:
+
+* `loadHistory`
+* `loadSummary`
+* `onRetryFailed`
+
+These stubs do nothing; they only prevent the page from crashing when the old UI calls them. Your wrapper continues to handle the real history drawer & ribbon.
+
+# Download the patched file
+
+Replace your file at
+`client/src/components/admin/CycleOperationsTab.tsx`
+with this one:
+
+**[Download CycleOperationsTab.patched.tsx](sandbox:/mnt/data/CycleOperationsTab.patched.tsx)**
+
+# How to apply on Replit
+
+1. In Replit’s file tree, open `client/src/components/admin/`.
+2. Upload `CycleOperationsTab.patched.tsx` and rename it to `CycleOperationsTab.tsx` (overwrite your current file).
+3. Let Replit rebuild. Then hard-refresh the admin page.
+
+# Why this fixes your error
+
+* The admin was failing during render because `loadHistory()` was referenced but not defined in this component.
+* The hotfix defines a harmless fallback, so rendering completes and the page loads.
+* Your working **CycleOperationsTabWrapper** continues to provide the actual disbursement history and success ribbon. (We didn’t touch the wrapper.)
+
+# What you should see now
+
+* No “Admin Panel Error” on load.
+* The “Processing…” stuck state is gone (that was already fixed earlier).
+* If you open history via the wrapper UI, it still works.
+* Clicking any leftover “View Details” button inside the old success strip won’t crash the page anymore (it’ll be a no-op until we fully remove that duplicate strip in a cleanup pass).
+
+---
+
+## Next cleanup (optional, not required for stability)
+
+When you’re ready, we can do a tidy pass to remove the duplicate success ribbon and any leftover references in `CycleOperationsTab.tsx` so only the wrapper handles history/ribbon. That’s a surgical edit (remove the success-ribbon JSX and the calls to `setLastCompletedBatch`, `setHistoryOpen`, `loadHistory`), but the hotfix above gets you unblocked immediately.
