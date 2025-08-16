@@ -1,0 +1,260 @@
+Short answer: don’t roll back the UI or the new routes. Fix the storage.ts file—there are duplicate functions in it (e.g., awardPoints) causing the 82 LSP errors and blocking the build. Once storage is cleaned, everything else you added should run fine.
+
+Here’s the safest, fast path:
+
+What to keep (no rollback)
+
+client/src/components/admin/CycleOperationsTabWrapper.tsx ✅
+
+client/src/components/admin/CycleOperationsTab.tsx (the version wired to wrapper) ✅
+
+server/routes/admin-payout-history.ts ✅
+
+server/routes/admin-payout-batches.ts ✅
+
+server/routes.ts (with the two route registrations) ✅
+
+shared/schema.ts (with completed_at on payout_batches) ✅
+Just make sure the DB migration has actually added the column (see step 4).
+
+
+What to fix
+
+Only server/storage.ts needs cleanup.
+
+Step 1 — Remove duplicate functions in server/storage.ts
+
+Your LSP diagnostics say you have duplicate implementations (e.g., awardPoints at lines ~895 and ~3085). This usually happens when a large file got merged twice.
+
+Do this inside server/storage.ts:
+
+1. Run a quick scan (in Replit’s search) for these names and make sure only one definition exists for each:
+
+awardPoints
+
+getAllCycles
+
+getActivePayoutBatchForCycle
+
+Any other repeated function names flagged by the diagnostics
+
+
+
+2. For each duplicate:
+
+Keep the version that’s consistent with your current codebase (matching the types your routes call).
+
+Delete the other copy entirely (including any duplicate export inside the storage object/class).
+
+
+
+3. Ensure your storage export shape didn’t get duplicated. If you use something like:
+
+export const storage = { /* methods ... */ }
+
+make sure there’s only one of these, and every method name is unique within it.
+
+
+
+> After this pass, your error count should drop dramatically.
+
+
+
+Step 2 — Keep the history helper methods, but ensure they appear once
+
+Your history routes rely on these four helpers in storage:
+
+listBatchesForCycle(cycleId: number)
+
+getBatchItemStats(batchId: number)
+
+createRetryBatchFromFailed(batchId: number)
+
+markBatchCompletedIfTerminal(batchId: number) (optional finalizer)
+
+
+If you already added them earlier and the file got duplicated, make sure only a single copy of each exists. If they’re missing or you want a known-good version, paste exactly one copy of each at the bottom of server/storage.ts (inside your storage module/class), using snake_case columns:
+
+// Make sure you have: import { sql } from "drizzle-orm";
+// and a valid `db` instance in scope for these methods.
+
+async listBatchesForCycle(cycleId: number): Promise<any[]> {
+  const result: any = await db.execute(sql`
+    SELECT
+      id,
+      status,
+      paypal_batch_id AS "paypalBatchId",
+      cycle_setting_id AS "cycleSettingId",
+      created_at      AS "createdAt",
+      updated_at      AS "updatedAt",
+      completed_at    AS "completedAt"
+    FROM payout_batches
+    WHERE cycle_setting_id = ${cycleId}
+    ORDER BY created_at DESC
+  `);
+  return result?.rows ?? [];
+}
+
+async getBatchItemStats(batchId: number): Promise<any> {
+  const result: any = await db.execute(sql`
+    SELECT
+      LOWER(status) AS status,
+      COUNT(*)      AS count,
+      COALESCE(SUM(amount), 0) AS amount
+    FROM payout_batch_items
+    WHERE batch_id = ${batchId}
+    GROUP BY LOWER(status)
+  `);
+  const rows = result?.rows ?? [];
+  const by = (k: string) => rows.find((r:any) => r.status === k) || { count: 0, amount: 0 };
+
+  const success    = by("success");
+  const failed     = by("failed");
+  const unclaimed  = by("unclaimed");
+  const pending    = by("pending");
+  const processing = by("processing");
+
+  const totalItems =
+    (Number(success.count)||0) +
+    (Number(failed.count)||0) +
+    (Number(unclaimed.count)||0) +
+    (Number(pending.count)||0) +
+    (Number(processing.count)||0);
+
+  return {
+    id: batchId,
+    totalItems,
+    success: Number(success.count)||0,
+    failed: Number(failed.count)||0,
+    unclaimed: Number(unclaimed.count)||0,
+    pending: Number(pending.count)||0,
+    processing: Number(processing.count)||0,
+    totals: {
+      success: Number(success.amount || 0),
+      failed: Number(failed.amount || 0),
+      unclaimed: Number(unclaimed.amount || 0),
+      pending: Number(pending.amount || 0),
+      processing: Number(processing.amount || 0),
+    }
+  };
+}
+
+async createRetryBatchFromFailed(batchId: number): Promise<{ id: number }> {
+  const srcRes: any = await db.execute(sql`
+    SELECT id, cycle_setting_id AS "cycleSettingId", status
+    FROM payout_batches
+    WHERE id = ${batchId}
+    LIMIT 1
+  `);
+  const src = (srcRes?.rows ?? [])[0];
+  if (!src) throw new Error("Original batch not found");
+  const s = String(src.status || "").toLowerCase();
+  if (["intent","processing"].includes(s)) throw new Error("Cannot retry while source batch is active");
+
+  const insRes: any = await db.execute(sql`
+    INSERT INTO payout_batches (cycle_setting_id, status, created_at, updated_at)
+    VALUES (${src.cycleSettingId}, 'intent', NOW(), NOW())
+    RETURNING id
+  `);
+  const newBatch = (insRes?.rows ?? [])[0];
+
+  await db.execute(sql`
+    INSERT INTO payout_batch_items (
+      batch_id, user_id, paypal_email, amount, currency, status, created_at, updated_at, cycle_winner_selection_id
+    )
+    SELECT ${newBatch.id}, user_id, paypal_email, amount, currency, 'intent', NOW(), NOW(), cycle_winner_selection_id
+    FROM payout_batch_items
+    WHERE batch_id = ${batchId} AND LOWER(status) = 'failed'
+  `);
+
+  return { id: newBatch.id };
+}
+
+async markBatchCompletedIfTerminal(batchId: number): Promise<void> {
+  await db.execute(sql`
+    UPDATE payout_batches b
+    SET status = 'completed',
+        updated_at = NOW()
+    WHERE b.id = ${batchId}
+      AND NOT EXISTS (
+        SELECT 1 FROM payout_batch_items i
+        WHERE i.batch_id = b.id
+          AND LOWER(i.status) NOT IN ('success','failed','unclaimed','pending')
+      )
+      AND LOWER(COALESCE(b.status,'')) <> 'completed'
+  `);
+}
+
+> If your storage is a plain object, add these as properties (listBatchesForCycle: async function(...) { ... }). If it’s a class, add them as async methods.
+
+
+
+Step 3 — Make sure your routes call the correct helpers
+
+server/routes/admin-payout-history.ts should be using the exact names above:
+
+storage.listBatchesForCycle(cycleId)
+
+storage.getBatchItemStats(batchId)
+
+storage.createRetryBatchFromFailed(batchId)
+
+
+If you renamed any helper to avoid a collision, mirror that rename both in storage and in this routes file.
+
+Step 4 — Confirm the database column exists
+
+You updated shared/schema.ts to add completed_at. Make sure the database has it:
+
+If you use Drizzle migrations: run the migration that adds completed_at TIMESTAMP NULL to payout_batches.
+
+If not migrated yet, temporarily remove , completed_at AS "completedAt" from the listBatchesForCycle SELECT until the column exists.
+
+
+Step 5 — Rebuild & retest
+
+Save server/storage.ts after de-duplicating functions and re-adding helpers once.
+
+Restart the server in Replit.
+
+Hit:
+
+GET /api/admin/payout-batches?cycleId=<id>
+
+GET /api/admin/payout-batches/<batchId>/summary
+
+POST /api/admin/payout-batches/<batchId>/retry-failed
+
+
+Load the admin UI:
+
+Refresh with a previously completed batch → green ribbon, no modal.
+
+Open History → list + summary + “Retry failed” when applicable.
+
+
+
+
+---
+
+Should we roll back anything?
+
+Only roll back server/storage.ts if you can’t safely remove duplicates. In that case:
+
+1. Restore server/storage.ts to the last known good version (pre-integration).
+
+
+2. Append the four helpers once at the end (using the exact code above).
+
+
+3. Keep all the other changes (schema, routes, wrapper, CycleOperationsTab).
+
+
+
+This preserves your whole integration while removing the source of the 82 diagnostics.
+
+
+---
+
+If you’d like, send me the first ~200 lines and the area around the duplicate error lines (±50 lines) from server/storage.ts, and I’ll give you a precise cut list (which copy to keep + exact lines to delete).
+
