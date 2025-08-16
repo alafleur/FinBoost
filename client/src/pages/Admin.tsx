@@ -5310,53 +5310,9 @@ function AdminComponent() {
 
           <TabsContent value={TAB_DISBURSEMENTS}>
             <DisbursementHistory />
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Cycles</CardTitle>
-                    <Calendar className="h-4 w-4 text-green-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{winnerCycles.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Winner selection cycles
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Current Selection</CardTitle>
-                    <Clock className="h-4 w-4 text-blue-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {selectedCycle ? selectedCycle.cycleName : "None"}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Selected cycle
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+          </TabsContent>
 
-              {/* Winner Cycle Management */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Winner Selection Cycles</CardTitle>
-                      <CardDescription>
-                        Manage random winner selection and disbursement cycles
-                      </CardDescription>
-                    </div>
-                    <Button onClick={() => setShowCreateCycleDialog(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Cycle
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
+          <TabsContent value="cycles">
                   <div className="space-y-4">
                     {winnerCycles.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
@@ -5721,10 +5677,7 @@ function AdminComponent() {
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </TabsContent>
 
-          <TabsContent value="cycles">
             <div className="space-y-6">
               {/* Cycle Configuration Overview */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
