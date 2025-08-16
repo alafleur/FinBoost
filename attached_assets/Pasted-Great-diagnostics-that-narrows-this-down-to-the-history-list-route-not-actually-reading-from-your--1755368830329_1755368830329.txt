@@ -1,0 +1,83 @@
+Great diagnostics—that narrows this down to the **history list route not actually reading from your DB handle**. I built you a drop-in **debuggable** route file that:
+
+* Tries your project’s helper (`storage.listBatchesForCycle` / `getBatchesForCycle`) if it exists.
+* If not (or it returns nothing), it **falls back to raw SQL** against `payout_batches` using several common DB handles (`storage.db.execute`, `.db.query`, `.pool.query`, `.client.query`, `.database.execute`).
+* Adds **clear server logs** (opt-in via `DEBUG_PAY_HISTORY=1`) and returns an `X-History-Branch` header so you know which branch executed.
+* Includes summary + raw debug endpoints.
+
+### 📥 Download (drop-in)
+
+* **admin-payout-history.ts**
+  [Download](sandbox:/mnt/data/admin-payout-history.ts)
+
+> If you still need the supporting routes we added earlier:
+>
+> * **admin-payout-export.ts** (CSV) – [Download](sandbox:/mnt/data/admin-payout-export.ts)
+> * **admin-cycles.ts** (list cycles) – [Download](sandbox:/mnt/data/admin-cycles.ts)
+
+### Where to place the file
+
+```
+server/routes/admin-payout-history.ts
+```
+
+### Register it once
+
+In `server/routes.ts`:
+
+```ts
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+registerAdminPayoutHistoryRoutes(app);
+```
+
+(Keep your existing `registerAdminPayoutExportRoutes` and `registerAdminCyclesRoutes` if already present.)
+
+### Optional: turn on verbose logs
+
+Set an env var before starting the server:
+
+```
+DEBUG_PAY_HISTORY=1
+```
+
+Now the server will log which code path ran, e.g.:
+
+```
+[HISTORY] using storage.listBatchesForCycle
+[HISTORY] trying storage.db.execute
+[HISTORY] success via storage.pool.query rowCount 1
+```
+
+### How to verify (in the browser DevTools → Network)
+
+1. **`GET /api/admin/payout-batches?cycleId=18`**
+
+   * Should return an array with **batch #13**.
+   * Response headers include `X-History-Branch: ...` to show which branch produced the data.
+2. **`GET /api/admin/payout-batches/active?cycleId=18`**
+
+   * Still returns `{ batchId: 13, status: 'completed' }` (as you saw).
+3. If needed, **`GET /api/admin/payout-batches/13/raw`**
+
+   * Dumps the raw row from `payout_batches` to confirm column names and values.
+
+### Why this fixes your case
+
+Your frontend already detects a completed batch via `/active`. The list route was returning `[]` because the storage helper wasn’t found or your DB handle name didn’t match. This file **hunts across common handles** and uses a schema-safe **snake\_case SQL**:
+
+```sql
+select id, status, created_at, completed_at, paypal_batch_id
+from payout_batches
+where cycle_setting_id = $1
+order by created_at desc
+```
+
+…then maps to the JSON shape your Disbursements tab expects.
+
+If you still get `[]` after dropping this in, hit the debug endpoint:
+
+```
+GET /api/admin/payout-batches/debug/handles
+```
+
+and paste the JSON here; I’ll tailor the DB handle selection to your exact setup.
