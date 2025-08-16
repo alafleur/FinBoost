@@ -12,6 +12,30 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { 
+
+// --- HOTFIX SHIMS v2 (non-invasive) ------------------------------------------
+// Keep real history/ribbon logic in CycleOperationsTabWrapper.
+// These stubs prevent runtime ReferenceErrors if the inner tab still references
+// wrapper-managed symbols.
+const __noopAsync = async (..._args: any[]) => {};
+const __noop = (..._args: any[]) => {};
+
+try {
+  // History helpers (legacy calls)
+  // @ts-ignore
+  if (typeof loadHistory === 'undefined') { var loadHistory = __noopAsync; }
+  // @ts-ignore
+  if (typeof loadSummary === 'undefined') { var loadSummary = __noopAsync; }
+  // @ts-ignore
+  if (typeof onRetryFailed === 'undefined') { var onRetryFailed = __noopAsync; }
+
+  // Ribbon state (legacy references)
+  // @ts-ignore
+  if (typeof lastCompletedBatch === 'undefined') { var lastCompletedBatch: any = null; }
+  // @ts-ignore
+  if (typeof setLastCompletedBatch === 'undefined') { var setLastCompletedBatch = (__v:any) => {}; }
+} catch {}
+
   Calendar, 
   Users, 
   DollarSign, 
@@ -41,27 +65,20 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-// --- HOTFIX SHIMS v2 (non-invasive) ------------------------------------------
-// Keep real history/ribbon logic in CycleOperationsTabWrapper.
-// These stubs prevent runtime ReferenceErrors if the inner tab still references
-// wrapper-managed symbols.
-const __noopAsync = async (..._args: any[]) => {};
-const __noop = (..._args: any[]) => {};
+// --- HOTFIX SHIMS (non-invasive) ---------------------------------------------
+// These no-op definitions prevent runtime crashes if wrapper props are not wired.
+// The actual history/ribbon logic is handled by CycleOperationsTabWrapper.
+const _noopAsync = async (..._args: any[]) => {};
+const _noop = (..._args: any[]) => {};
 
+// Ensure local stubs exist if not already defined in this file.
 try {
-  // History helpers (legacy calls)
   // @ts-ignore
-  if (typeof loadHistory === 'undefined') { var loadHistory = __noopAsync; }
+  if (typeof loadHistory === 'undefined') { var loadHistory = _noopAsync; }
   // @ts-ignore
-  if (typeof loadSummary === 'undefined') { var loadSummary = __noopAsync; }
+  if (typeof loadSummary === 'undefined') { var loadSummary = _noopAsync; }
   // @ts-ignore
-  if (typeof onRetryFailed === 'undefined') { var onRetryFailed = __noopAsync; }
-
-  // Ribbon state (legacy references)
-  // @ts-ignore
-  if (typeof lastCompletedBatch === 'undefined') { var lastCompletedBatch: any = null; }
-  // @ts-ignore
-  if (typeof setLastCompletedBatch === 'undefined') { var setLastCompletedBatch = (__v:any) => {}; }
+  if (typeof onRetryFailed === 'undefined') { var onRetryFailed = _noopAsync; }
 } catch {}
 
 interface CycleSetting {

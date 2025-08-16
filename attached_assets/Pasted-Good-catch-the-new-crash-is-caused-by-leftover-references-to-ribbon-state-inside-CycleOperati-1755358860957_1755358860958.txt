@@ -1,0 +1,39 @@
+Good catch — the new crash is caused by **leftover references to ribbon state** inside `CycleOperationsTab.tsx`:
+
+* `setLastCompletedBatch(...)` is being called in the tab, but the ribbon state actually lives in your **`CycleOperationsTabWrapper.tsx`** now. That call throws a `ReferenceError` during render. (Confirmed in your uploaded file.)&#x20;
+
+To unblock you right now, I’ve produced a **downloadable, fully patched file** that adds **safe, no-op shims** for the legacy symbols so they no longer crash:
+
+* `lastCompletedBatch` (stubbed as `null`)
+* `setLastCompletedBatch` (stubbed as a no-op function)
+* (kept from before) `loadHistory`, `loadSummary`, `onRetryFailed` stubs
+
+This approach keeps the **wrapper** as the single source of truth for history + ribbon, while preventing the inner tab’s legacy calls from hard-crashing the Admin panel.
+
+### Download
+
+Replace your file at `client/src/components/admin/CycleOperationsTab.tsx` with this one:
+
+**[📥 CycleOperationsTab.patched.v2.tsx](sandbox:/mnt/data/CycleOperationsTab.patched.v2.tsx)**
+
+### What I changed (surgical + safe)
+
+* Injected a `// HOTFIX SHIMS v2` block **right after the imports** that defines the missing globals **only if they don’t already exist**. This makes the patch non-invasive and future-proof if/when you remove the old references entirely.
+
+### Why this fixes the error
+
+* Rendering previously touched `setLastCompletedBatch` which wasn’t defined in this component. The shim defines it, so the render no longer throws and your Admin panel loads normally.
+* Your **wrapper** continues to manage the ribbon/history and can refresh itself as before.
+
+---
+
+## Next tidy step (optional, once you’re ready)
+
+When you’ve got a moment, we can fully clean the duplication by removing the old success-ribbon JSX and any calls to:
+
+* `setLastCompletedBatch(...)`
+* `loadHistory(...)`
+* `loadSummary(...)`
+* `onRetryFailed(...)`
+
+from **`CycleOperationsTab.tsx`**, leaving all disbursement UI/state inside **`CycleOperationsTabWrapper.tsx`**. That’s just refactoring — the patched file above will keep things stable in the meantime.
