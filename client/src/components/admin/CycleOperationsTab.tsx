@@ -101,6 +101,7 @@ interface CycleOperationsTabProps {
   cycleSettings: CycleSetting[];
   onRefresh: () => void;
   isSelectionSealed?: boolean;
+  handleSetProcessingDialog?: (show: boolean) => void;
   helpers: {
     getPaypalDisplay: (row: any) => string | null;
     isPaypalConfigured: (row: any) => boolean;
@@ -110,7 +111,7 @@ interface CycleOperationsTabProps {
   };
 }
 
-export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelectionSealed = false, helpers }: CycleOperationsTabProps) {
+export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelectionSealed = false, setShowProcessingDialog = () => {}, helpers }: CycleOperationsTabProps) {
   const { toast } = useToast();
   
   // Selection scope state (moved to top level to avoid hooks rule violation)
@@ -154,6 +155,12 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
   const [importData, setImportData] = useState<any[]>([]);
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Processing dialog state
+  const [showProcessingDialog, setShowProcessingDialogLocal] = useState(false);
+
+  // Use the prop function when available, otherwise use local state
+  const handleSetProcessingDialog = setShowProcessingDialog || setShowProcessingDialogLocal;
 
 
 
@@ -206,7 +213,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
           }
 
           setIsProcessingPayouts(false);
-          setShowProcessingDialog(false);
+          handleSetProcessingDialog(false);
           setProcessingProgress({
             phase: 'Completed',
             progress: 100,
@@ -221,7 +228,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         }
 
         // Truly in-flight → show modal & poll
-        setShowProcessingDialog(true);
+        handleSetProcessingDialog(true);
         setIsProcessingPayouts(true);
         setProcessingProgress({
           phase: 'Processing',
@@ -279,7 +286,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                   title: "✅ Disbursement Complete",
                   description: `Batch ${b.batchId} finished successfully.`
                 });
-                setTimeout(() => setShowProcessingDialog(false), 1200);
+                setTimeout(() => handleSetProcessingDialog(false), 1200);
                 await refreshAllCycleData({ forceFresh: true });
                 setIsProcessingPayouts(false);
                 setSelectedForDisbursement(new Set());
@@ -301,7 +308,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                   description: s.error || 'See server logs',
                   variant: "destructive"
                 });
-                setTimeout(() => setShowProcessingDialog(false), 1200);
+                setTimeout(() => handleSetProcessingDialog(false), 1200);
                 setIsProcessingPayouts(false);
                 return;
               }
@@ -968,7 +975,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
     // STEP 9.1: Pre-processing validation and setup
     setIsProcessingPayouts(true);
-    setShowProcessingDialog(true);
+    handleSetProcessingDialog(true);
     setProcessingProgress({
       phase: 'Initializing',
       progress: 0,
@@ -1082,7 +1089,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 description: `Batch ${batchId} finished.`
               });
               // Give the user a beat to see 100%, then close
-              setTimeout(() => setShowProcessingDialog(false), 1200);
+              setTimeout(() => handleSetProcessingDialog(false), 1200);
               // Refresh dashboard/state to reflect the new batch
               await refreshAllCycleData({ forceFresh: true });
               setIsProcessingPayouts(false); // move this here (terminal state)
@@ -1106,7 +1113,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 description: s.error || 'See server logs',
                 variant: "destructive"
               });
-              setTimeout(() => setShowProcessingDialog(false), 1200);
+              setTimeout(() => handleSetProcessingDialog(false), 1200);
               setIsProcessingPayouts(false);
               return;
             }
@@ -1233,7 +1240,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         console.error('=================================================');
         
         // Close processing dialog on error
-        setTimeout(() => setShowProcessingDialog(false), 2000);
+        setTimeout(() => handleSetProcessingDialog(false), 2000);
       }
     } catch (error) {
       // STEP 9.8: Network error handling
@@ -1252,7 +1259,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         variant: "destructive"
       });
       
-      setTimeout(() => setShowProcessingDialog(false), 2000);
+      setTimeout(() => handleSetProcessingDialog(false), 2000);
     } finally {
       // Do NOT flip this off here; the poller sets it on terminal states.
       // setIsProcessingPayouts(false);
@@ -1326,7 +1333,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       selectedCycle={selectedCycle}
       refreshAllCycleData={refreshAllCycleData}
       setIsProcessingPayouts={setIsProcessingPayouts}
-      setShowProcessingDialog={setShowProcessingDialog}
+      handleSetProcessingDialog={handleSetProcessingDialog}
       setProcessingProgress={setProcessingProgress}
       setSelectedForDisbursement={setSelectedForDisbursement}
     >
@@ -2581,7 +2588,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       </Dialog>
 
       {/* PHASE 3 STEP 9: Real-time Processing Dialog with Bulletproof Backend Integration */}
-      <Dialog open={showProcessingDialog} onOpenChange={setShowProcessingDialog}>
+      <Dialog open={showProcessingDialog} onOpenChange={handleSetProcessingDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
