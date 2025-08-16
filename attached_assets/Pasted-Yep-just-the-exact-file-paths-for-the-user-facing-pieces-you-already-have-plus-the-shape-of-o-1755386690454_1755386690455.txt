@@ -1,0 +1,59 @@
+Yep — just the **exact file paths** for the user-facing pieces you already have, plus the shape of one summary API. If you only have some of these, send whatever exists and I’ll wire the rest with fallbacks.
+
+### 1) Existing components (paths)
+
+Please paste the importable paths (as you’d write in code) for any you already have:
+
+* **Streak widget** (e.g., `StreakNotification.tsx`)
+* **Referral panel** (e.g., `ReferralSystem.tsx`)
+* **Prediction card** (reusable component; if it’s only a page, tell me the file)
+* **Quests panel** (if you have one)
+* **Debt Boost card** (proof of paydown UI)
+* **Rewards drawer/panel** (user’s ticket ledger/rewards)
+* **Tier widget** (if you already render tier progress somewhere)
+* **Ticket summary widget** (if you already have a composite card showing tickets)
+* *(Optional)* **Cycle countdown** (if you already built a countdown component)
+
+Example of what to send (fill with your real paths):
+
+```ts
+// examples — replace with your real paths
+Streak: "@/components/StreakNotification"
+Referral: "@/components/ReferralSystem"
+Prediction: "@/components/prediction/PredictionCard"
+Quests: "@/components/quests/QuestsPanel"
+DebtBoost: "@/components/debt/DebtBoostCard"
+RewardsDrawer: "@/components/rewards/RewardsDrawer"
+TierWidget: "@/components/tier/TierProgress"
+TicketSummary: "@/components/tickets/TicketSummaryCard"
+Countdown: "@/components/common/CycleCountdown"
+```
+
+### 2) One API response (so the composer gets data)
+
+Which endpoint should the dashboard call for the user’s cycle summary?
+
+* If you have `/api/me/summary?cycleId=...`, paste a **sample JSON** response.
+* If not, paste the response from whatever you use (or tell me the fields you have).
+
+I’ll map it to:
+
+```ts
+{
+  cycleTickets: number,
+  tier: 'top'|'mid'|'bottom',
+  progressToNextTier: number,  // 0..1
+  hintTicketsToNext?: number | null,
+  cycleEndsAtISO: string
+}
+```
+
+If your names differ, just show me your JSON and I’ll adapt the hook.
+
+### 3) Where to render it
+
+Confirm the page where you want the consolidated dashboard injected (e.g., `client/src/pages/Dashboard.tsx`).
+
+---
+
+Once you send those paths (and the sample JSON for the summary), I’ll return a **ready-to-commit `registry.ts`** with your exact imports wired, plus the small `Dashboard` diff that drops in the composer.
