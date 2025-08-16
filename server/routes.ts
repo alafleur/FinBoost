@@ -14,8 +14,8 @@ import * as XLSX from "xlsx";
 import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
 import type { PayoutRecipient, TransactionContext } from './paypal-transaction-orchestrator.js';
-// Old admin-disbursement routes removed per ChatGPT instructions
-import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history.router";
+// ChatGPT's new router-based solution for numeric cycleId parsing
+import { adminPayoutBatchesRouter } from "./routes/adminPayoutBatchesRouter";
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 
@@ -128,8 +128,8 @@ const requireAdmin = async (req: AuthenticatedRequest, res: express.Response, ne
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Mount admin payout routes (ChatGPT router-based architecture)
-  registerAdminPayoutHistoryRoutes(app);
+  // Mount ChatGPT's fixed admin payout routes (numeric cycleId parsing)
+  app.use('/api/admin/payout-batches', adminPayoutBatchesRouter);
   registerAdminPayoutExportRoutes(app);
   registerAdminCyclesRoutes(app);
 // Authentication routes

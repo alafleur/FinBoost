@@ -1,0 +1,74 @@
+Thanks for the screenshot and the Replit notes—this lines up with what we suspected: the router is now being hit, but the **by-cycle query** is returning an empty array. That usually happens when the ORM is filtering a **numeric column with a string** (e.g., `"18"` vs `18`) or when the query is hitting a slightly different table/column name than expected.
+
+I put together a **drop-in backend patch** that (a) **forces `cycleId` to a number** (the most likely fix), and (b) adds a **Postgres fallback** with light schema introspection so it still works if Prisma model names differ from table names.
+
+### ✅ Download the code
+
+[Download the patch (zip)](sandbox:/mnt/data/finboost-disbursements-overhaul.zip)
+
+Inside the zip:
+
+* `server/routes/adminPayoutBatchesRouter.js` — new route with the numeric filter fix and PG fallback
+* `server/utils/pg.js` — tiny `pg` pool helper (uses `DATABASE_URL`)
+* `server/README-DisbursementsOverhaul.md` — quick setup/verify steps
+
+---
+
+## What this fixes (in plain English)
+
+* `GET /api/admin/payout-batches?cycleId=18`
+  Now **parses `cycleId` to an integer** before querying (Prisma and many ORMs won’t match when a string is passed for a numeric column—result is `[]`, which is exactly what you’re seeing).
+* If Prisma models don’t match your actual table names (or are missing), the route **falls back to PostgreSQL**, auto-detecting likely table/column names (`payout_batches` / `payout_items`, etc.) and returns viable rows with `item_count` (and `total_amount` when an amount column is present).
+
+---
+
+## Quick install & wire-up (copy/paste)
+
+1. Add the files from the zip into your repo preserving paths:
+
+```
+server/routes/adminPayoutBatchesRouter.js
+server/utils/pg.js
+server/README-DisbursementsOverhaul.md
+```
+
+2. Ensure `pg` is installed:
+
+```bash
+npm i pg
+# or
+yarn add pg
+```
+
+3. Confirm `DATABASE_URL` is set in Replit Secrets. If your DB enforces SSL:
+
+* set `PGSSLMODE=require` (the helper tolerates self-signed).
+
+4. Register the router (in your Express bootstrap, e.g., `server/index.js`):
+
+```js
+const { adminPayoutBatchesRouter } = require('./routes/adminPayoutBatchesRouter');
+app.use('/api/admin/payout-batches', adminPayoutBatchesRouter);
+```
+
+Remove/disable any old payout-batches route to avoid conflicts.
+
+---
+
+## How to verify
+
+* Start the server and open the admin Disbursements tab (or hit via curl/Postman):
+
+  * `GET /api/admin/payout-batches?cycleId=18`
+  * `GET /api/admin/payout-batches/active`
+* Expect the first call to **return rows** (not `[]`) if batches exist for cycle 18.
+* Your UI “Loading…” card should switch to showing the batch list.
+
+---
+
+## Why I’m confident this addresses the remaining issue
+
+* Your logs show `/active` returns data while `/` with `cycleId=18` returns `[]`. That difference is classic **type-mismatch** behavior in ORMs.
+* The patch **forces numeric filtering** and, if Prisma model naming doesn’t match your tables, **falls back to SQL** with conservative column detection so it still returns your rows.
+
+If you want me to also ship a **front-end “Batches” card** that renders the returned structure (with counts/totals and an error/empty state), say the word and I’ll include a ready-to-drop React component too.
