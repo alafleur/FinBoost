@@ -1,0 +1,251 @@
+Awesome—let’s pivot cleanly to **user-facing gamification**. Here’s a focused, implementation-ready plan you can hand to Replit and track as PRs. No timelines, just **order of execution**, API contracts, components, and acceptance criteria.
+
+# FinBoost — User Gamification Workstream Plan
+
+## Goals & guardrails
+
+* Drive daily engagement and paid conversion via **Tickets**, **streaks**, **quests**, and **clear progress**.
+* Keep copy compliant (AMOE always visible where relevant).
+* Minimize churn: plug into current layouts; don’t rework mobile/desktop structure pre-launch.
+
+---
+
+## Phase 0 — Foundation (one PR)
+
+**Backend**
+
+* **API: User Summary**
+
+  * `GET /api/me/summary?cycleId=<id>`
+  * Returns: `{ cycleTickets, tier: 'top'|'mid'|'bottom', progressToNextTier: 0–1, streak: { count, hasGrace }, cycleEndsAtISO, prizePool }`
+* **API: Ticket Ledger**
+
+  * `GET /api/me/ledger?cycleId=<id>&limit=50&cursor=<ts>`
+  * Each entry: `{ id, ts, source: 'lesson'|'quiz'|'streak'|'quest'|'prediction'|'debt_boost'|'referral', refId, tickets, note }`
+* **Tier Calculation contract**
+
+  * Server returns the user’s tier and **progress to next tier** (0–1). Source of thresholds: current cycle distribution or admin setting; keep logic server-side.
+
+**Frontend**
+
+* Add a common hook `useUserSummary(cycleId)` and `useTicketLedger(cycleId)` with SWR (or your fetch wrapper), caching + 30s revalidate.
+
+**Acceptance**
+
+* Hitting `/me/summary` and `/me/ledger` in dev console returns data for the authenticated user with no UI changes yet.
+
+---
+
+## Phase 1 — Ticket Meter, Tier Tracker, Cycle Countdown (two PRs)
+
+**Frontend**
+
+1. **Ticket Meter** (Dashboard)
+
+* `client/src/components/gamification/TicketMeter.tsx`
+
+  * Props: `{ tickets: number, delta?: number }`
+  * Shows current cycle tickets; when `delta` provided, animates a brief `+XX` pop.
+
+2. **Tier Tracker + Tips**
+
+* `TierTracker.tsx`
+
+  * Props: `{ tier: 'top'|'mid'|'bottom', progressToNextTier: number }`
+  * Progress bar + micro-tip: “Earn \~N Tickets to reach Mid/Top tier” (N from `/me/summary`).
+
+3. **Cycle Countdown**
+
+* `CycleCountdown.tsx`
+
+  * Props: `{ cycleEndsAtISO: string }`
+  * Ticks down; when <24h, shows subtle urgency style.
+
+**Backend**
+
+* None (uses Phase 0 endpoints).
+
+**Acceptance**
+
+* Dashboard shows all three blocks for an authenticated user, with skeletons while loading.
+* Triggering any ticket-earning event shows a +Δ pop on the meter.
+
+---
+
+## Phase 2 — Streaks (one PR)
+
+**Backend**
+
+* **Data**: `user_streaks` table or fields on user profile:
+
+  * `current_count`, `last_awarded_date`, `grace_used_in_window` (boolean for last 7 days).
+* **API**
+
+  * `GET /api/me/streak` → `{ count, hasGrace }`
+  * `POST /api/me/streak/ping` (idempotent; credits once per UTC day on qualifying action).
+* Award path: on lesson/quiz complete → server calls streak service → returns whether the streak incremented and tickets awarded.
+
+**Frontend**
+
+* `StreakBar.tsx` (Dashboard + Header mini)
+
+  * Props: `{ count, hasGrace }`
+  * Show a “freeze”/grace indicator.
+* Toast on first action of the day: “Daily streak +1 — +X Tickets”.
+
+**Acceptance**
+
+* Completing a lesson on two consecutive UTC days increments `count`.
+* Missing one day within a 7-day window consumes grace (no reset). Missing again resets.
+
+---
+
+## Phase 3 — Weekly Quests (one PR)
+
+**Backend**
+
+* **Data**
+
+  * `quests` (template): `{ id, label, specJSON, rewardTickets, activeWindow }`
+  * `user_quests`: `{ userId, questId, progressJSON, completed, claimedAt }`
+* **API**
+
+  * `GET /api/me/quests` → array of active quests with computed progress.
+  * `POST /api/me/quests/:id/claim` → awards tickets if completed & unclaimed.
+
+**Frontend**
+
+* `QuestsPanel.tsx`
+
+  * Cards showing progress (e.g., “3/4 lessons this week”), claim CTA, and reward.
+
+**Acceptance**
+
+* Progress updates live as lessons/quizzes are completed.
+* Claim button disabled until completed; double-claim prevented server-side.
+
+---
+
+## Phase 4 — Mid-Cycle Prediction Question (one PR)
+
+**Backend**
+
+* **Data**
+
+  * `prediction_questions` (per cycle, one active): `{ id, cycleId, question, options[], resolvesAt, scoringRule }`
+  * `user_predictions`: `{ userId, questionId, answer, submittedAt, awardedTickets }`
+* **API**
+
+  * `GET /api/me/prediction/current?cycleId=<id>`
+  * `POST /api/me/prediction/submit` `{ answer }`
+  * Admin/job awards tickets on resolve per scoringRule (skill-based bump).
+
+**Frontend**
+
+* `PredictionCard.tsx` on Dashboard while open; result banner after resolve.
+
+**Acceptance**
+
+* User can submit exactly once; cannot edit after submission.
+* After resolve, `/current` returns the outcome + awarded tickets.
+
+---
+
+## Phase 5 — Debt Boost (proof of paydown) (one PR)
+
+**Backend**
+
+* **Data**
+
+  * `debt_proofs`: `{ id, userId, cycleId, fileUrl, amountCents, status: 'PENDING'|'VERIFIED'|'REJECTED', reason }`
+* **API**
+
+  * `GET /api/me/debt-boost?cycleId=<id>`
+  * `POST /api/me/debt-boost` (multipart: file + `amountCents`)
+  * Admin verification endpoint (already in place? otherwise add).
+  * Award on status transition to VERIFIED.
+
+**Frontend**
+
+* `DebtBoostCard.tsx`
+
+  * Upload → shows status pill; on VERIFIED shows awarded tickets.
+
+**Acceptance**
+
+* Upload succeeds; pending state visible; verification flips status and grants tickets.
+
+---
+
+## Phase 6 — Referral Panel (one PR)
+
+**Backend**
+
+* You’ve enabled dual-sided incentive; ensure:
+
+  * `GET /api/me/referrals` → `{ code, link, referred: [{email,status}], rewardStatus }`
+  * Award tickets/\$ when referee completes first paid month.
+
+**Frontend**
+
+* `ReferralPanel.tsx` with native share + copy code.
+* Small “progress” list of referred friends.
+
+**Acceptance**
+
+* Sharing works; referred list updates; reward reflects backend status.
+
+---
+
+## Phase 7 — Rewards Drawer & Winners Wall (one PR)
+
+**Backend**
+
+* **API**
+
+  * `GET /api/me/rewards?cycleId=<id>` → summary + recent ledger entries.
+  * `GET /api/rewards/winners?limit=20` → first name + initial, prize, activity snippet.
+
+**Frontend**
+
+* `RewardsDrawer.tsx` (from header icon or Dashboard button).
+* `WinnersWall.tsx` section with tasteful anonymization.
+
+**Acceptance**
+
+* Drawer opens from header; ledger paginates; winners list renders.
+
+---
+
+## Copy & compliance (parallel PR)
+
+* Replace “Points” with “Tickets” everywhere (done).
+* Tooltip component: **“Tickets are entries into our prize pool. No purchase necessary. See AMOE.”** with modal linking to AMOE.
+* FAQ/Help updates in-app to match landing page.
+
+---
+
+## Instrumentation & QA (parallel)
+
+* Track: daily active lessons, Tickets earned/user/day, streak adoption (% with streak ≥3), quest completion rate, prediction participation, referral conversion.
+* Tests:
+
+  * Unit: streak logic, quest progress, prediction submission guard.
+  * Integration: ledger entries issued on all earn events.
+  * E2E: happy paths for Dashboard widgets and claims.
+
+---
+
+## Feature flags & rollout
+
+* `.env` or simple server flags for: `FEATURE_STREAKS`, `FEATURE_QUESTS`, `FEATURE_PREDICTION`, `FEATURE_DEBT_BOOST`, `FEATURE_REWARDS_DRAWER`.
+* Each component reads flag; backend blocks endpoints if disabled (returns 404).
+
+---
+
+## What I can ship next (your call)
+
+1. **Phase 0 & Phase 1 code bundle** (backend endpoints + three React components wired into Dashboard), zipped and ready to drop in.
+2. Or start with **Streaks (Phase 2)** if you want the biggest immediate engagement lift first.
+
+If you want me to go straight to code, say which option (1 or 2) and I’ll deliver the downloadable files in my next message.
