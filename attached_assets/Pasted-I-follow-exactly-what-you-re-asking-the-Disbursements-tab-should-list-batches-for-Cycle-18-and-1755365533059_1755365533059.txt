@@ -1,0 +1,78 @@
+I follow exactly what you’re asking: the **Disbursements tab should list batches for Cycle 18**, and the UI flow should make sense. Right now it’s empty because the history endpoint isn’t returning any rows. That’s usually one of these:
+
+1. The **history routes aren’t mounted** in `server/routes.ts` → the request returns 404 so the UI shows “No batches”.
+2. The **storage method returns \[]** (e.g., snake\_case vs camelCase mismatch, or the helper doesn’t exist).
+3. Cycle 18 completed before history was wired up; **/active** says `completed` but history returns empty.
+
+I’ve given you two fixes:
+
+---
+
+## A) Safer server route (tolerant + fallback)
+
+I rebuilt `admin-payout-history.ts` so it:
+
+* Uses your project’s `storage.listBatchesForCycle(cycleId)` **if available**.
+* If that returns nothing (or isn’t present), it **falls back to a direct query** against `payout_batches` using `cycle_setting_id` (snake\_case), returning `id, status, created_at, completed_at, paypal_batch_id`.
+* Provides a summary endpoint that also has a minimal **direct-query fallback** to compute success/failed/unclaimed/pending/processing and paid total.
+
+**Download (drop-in replace):**
+
+* **[admin-payout-history.ts](sandbox:/mnt/data/admin-payout-history.ts)**
+
+**Be sure it’s registered in `server/routes.ts`:**
+
+```ts
+import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+registerAdminPayoutHistoryRoutes(app);
+```
+
+---
+
+## B) Friendlier client page when list is empty
+
+I updated the Disbursement History page to detect a “completed batch exists but list is empty” case. If `/api/admin/payout-batches?cycleId=18` returns `[]`, it pings `/api/admin/payout-batches/active?cycleId=18` and, if it sees `status: 'completed'`, shows a yellow hint explaining that **history isn’t loaded** (most often because routes weren’t registered yet) — so you know where to look.
+
+**Download (drop-in replace):**
+
+* **[DisbursementHistory.tsx](sandbox:/mnt/data/DisbursementHistory.tsx)**
+
+Put it here: `client/src/components/admin/DisbursementHistory.tsx`.
+
+---
+
+## After you drop these in
+
+1. Ensure `registerAdminPayoutHistoryRoutes(app)` exists in `server/routes.ts` (along with the export + cycles routes we already added).
+2. Restart backend + frontend.
+3. Open DevTools → **Network** tab while on Disbursements:
+
+   * `/api/admin/payout-batches?cycleId=18` should be **200** with an array (contains batch **#13** if that’s your completed one).
+   * If still empty, the page will show a **yellow hint** if `/active` reports a completed batch — that confirms the DB has a batch, and the list route is what needed mounting.
+
+---
+
+## About the flow (what you’ll see)
+
+* **Cycle Operations** tab continues to show the current cycle’s **winner grid, selection/lock**, and—only while a batch is processing—the progress dialog. After completion, the *button hides* and there’s just a small ribbon. We don’t “move” the whole cycle to another tab; we add history to Disbursements.
+* **Disbursements** tab is your **per-cycle historical source of truth**:
+
+  * cycle picker at top,
+  * list of batches with created/completed timestamps and PayPal Batch ID,
+  * per-batch summary (success/failed/unclaimed/pending/processing + paid total),
+  * **Export CSV**.
+
+If you want Cycle 18 to **disappear** from Cycle Ops the moment it finishes, we can hide the selection grid entirely once a completed batch is detected and replace it with “View in Disbursements” link. Totally doable; I left the grid visible so admins can still inspect winners post-run, but we can flip that behavior if you prefer.
+
+---
+
+## Quick recap of what to implement now
+
+* Replace the two files with the downloads above:
+
+  * `server/routes/admin-payout-history.ts`
+  * `client/src/components/admin/DisbursementHistory.tsx`
+* Confirm `server/routes.ts` mounts `registerAdminPayoutHistoryRoutes(app)`.
+* Restart both processes.
+
+Once that’s in, Disbursements for Cycle 18 should populate with Batch #13. If it doesn’t, tell me what the network responses are (status code + small JSON snippet) and I’ll tailor the route to your exact storage shape.
