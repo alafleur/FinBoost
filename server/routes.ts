@@ -18,6 +18,7 @@ import type { PayoutRecipient, TransactionContext } from './paypal-transaction-o
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { adminPayoutBatchesRouter } = require("./routes/adminPayoutBatchesRouter");
+const { payoutBatchSummaryRouter } = require("./routes/payoutBatchSummaryRouter");
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 
@@ -132,6 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Mount ChatGPT's fixed admin payout routes (numeric cycleId parsing)
   app.use('/api/admin/payout-batches', adminPayoutBatchesRouter);
+  app.use('/api/admin/payout-batches', payoutBatchSummaryRouter);
   registerAdminPayoutExportRoutes(app);
   registerAdminCyclesRoutes(app);
 // Authentication routes
