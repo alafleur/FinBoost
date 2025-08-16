@@ -1835,8 +1835,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                           <div className="flex items-center space-x-2">
                             <Button
                               onClick={() => {
-                                loadHistory();
-                                setHistoryOpen(true);
+                                // History functionality is handled by wrapper
+                                console.log('History button clicked - handled by wrapper');
                               }}
                               variant="outline"
                               size="sm"
@@ -2688,123 +2688,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       </Dialog>
 
       {/* Disbursement History Drawer */}
-      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-600" />
-              Disbursement History
-            </DialogTitle>
-            <DialogDescription>
-              View past disbursement batches and their details for {selectedCycle?.cycleName}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {history.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>No disbursement history found for this cycle</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {history.map((batch) => (
-                  <div
-                    key={batch.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => loadSummary(batch.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium">Batch {batch.id}</h4>
-                          <Badge 
-                            variant={
-                              batch.status === 'completed' ? 'default' :
-                              batch.status === 'failed' ? 'destructive' :
-                              'secondary'
-                            }
-                          >
-                            {batch.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          Created: {new Date(batch.createdAt).toLocaleString()}
-                        </p>
-                        {batch.completedAt && (
-                          <p className="text-sm text-gray-600">
-                            Completed: {new Date(batch.completedAt).toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {batch.status === 'failed' && (
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onRetryFailed(batch.id);
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="text-orange-700 border-orange-300 hover:bg-orange-50"
-                          >
-                            <RefreshCw className="w-4 h-4 mr-1" />
-                            Retry Failed
-                          </Button>
-                        )}
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            loadSummary(batch.id);
-                          }}
-                          variant="outline"
-                          size="sm"
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Batch Summary Details */}
-            {selectedSummary && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-medium text-blue-900 mb-3">Batch Summary</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-600">Total Items</p>
-                    <p className="font-medium">{selectedSummary.totalItems || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Processed</p>
-                    <p className="font-medium text-green-600">{selectedSummary.processedCount || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Failed</p>
-                    <p className="font-medium text-red-600">{selectedSummary.failedCount || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Total Amount</p>
-                    <p className="font-medium">${selectedSummary.totalAmount || '0.00'}</p>
-                  </div>
-                </div>
-                
-                {selectedSummary.failedCount > 0 && (
-                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                    <p className="text-sm text-red-800">
-                      {selectedSummary.failedCount} items failed. You can retry failed items to create a new batch.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* History dialog removed - handled by wrapper */}
+      {/* History functionality completely handled by CycleOperationsTabWrapper */}
       </div>
     </CycleOperationsTabWrapper>
   );
