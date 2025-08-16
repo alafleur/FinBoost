@@ -16,6 +16,8 @@ import { upload, getFileUrl } from "./fileUpload";
 import type { PayoutRecipient, TransactionContext } from './paypal-transaction-orchestrator.js';
 import { registerAdminPayoutBatchRoutes } from "./routes/admin-payout-batches";
 import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history";
+import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
+import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -129,6 +131,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mount admin payout batch status routes (clean polling endpoints)
   registerAdminPayoutBatchRoutes(app);
   registerAdminPayoutHistoryRoutes(app);
+  registerAdminPayoutExportRoutes(app);
+  registerAdminCyclesRoutes(app);
 // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {

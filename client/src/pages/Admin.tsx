@@ -20,6 +20,7 @@ import 'react-quill/dist/quill.snow.css';
 import CycleManagementTab from "@/components/admin/CycleManagementTab";
 import CycleOperationsTab from "@/components/admin/CycleOperationsTab";
 import PredictionsTab from "@/components/admin/PredictionsTab";
+import DisbursementHistory from "@/components/admin/DisbursementHistory";
 import {
   Settings,
   Plus,
@@ -61,6 +62,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 // Constants for tab consistency
 const TAB_CYCLE_OPS = 'cycle-operations';
+const TAB_DISBURSEMENTS = 'disbursements';
 
 // Auth helper to prevent 401s
 const fetchWithAuth = (url: string, init: RequestInit = {}) => {
@@ -2545,6 +2547,7 @@ function AdminComponent() {
             <TabsTrigger value="quiz" className="flex-shrink-0">Quiz</TabsTrigger>
             <TabsTrigger value="cycle-management" className="flex-shrink-0">Cycle Management</TabsTrigger>
             <TabsTrigger value={TAB_CYCLE_OPS} className="flex-shrink-0">Cycle Operations</TabsTrigger>
+            <TabsTrigger value={TAB_DISBURSEMENTS} className="flex-shrink-0">Disbursements</TabsTrigger>
             <TabsTrigger value="predictions" className="flex-shrink-0">Predictions</TabsTrigger>
             <TabsTrigger value="points" className="flex-shrink-0">Points</TabsTrigger>
             <TabsTrigger value="actions" className="flex-shrink-0">Actions</TabsTrigger>
@@ -5305,37 +5308,8 @@ function AdminComponent() {
             </div>
           </TabsContent>
 
-          <TabsContent value="disbursements">
-            <div className="space-y-6">
-              {/* Disbursement Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Pool</CardTitle>
-                    <Target className="h-4 w-4 text-blue-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">${poolData?.totalPool ?? 0}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Available for disbursement
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Eligible Users</CardTitle>
-                    <Crown className="h-4 w-4 text-yellow-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {users.filter((u: any) => u.subscriptionStatus === 'active' && u.paypalEmail).length}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      With PayPal emails
-                    </p>
-                  </CardContent>
-                </Card>
+          <TabsContent value={TAB_DISBURSEMENTS}>
+            <DisbursementHistory />
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
