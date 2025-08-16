@@ -1,202 +1,99 @@
 /**
- * Admin Payout Batches Router (disbursements overhaul) — v2
- * Fixes schema detection for cycle column: now prefers `cycle_setting_id`.
+ * Admin Payout Batches Router — v3 (Simple, Observable, Deterministic)
+ *
+ * NO GUESSING. Uses the known, working schema seen via /active:
+ *   Table: payout_batches
+ *   Columns: id, cycle_setting_id, status, sender_batch_id, created_at
+ *
+ * Optional: if table `payout_items(batch_id)` exists, we also return `item_count` via a subquery.
  */
 
 const express = require('express');
 const router = express.Router();
 
-let prisma = null;
-try {
-  const { PrismaClient } = require('@prisma/client');
-  prisma = new PrismaClient();
-  console.log('[disb-overhaul] Prisma detected.');
-} catch (e) {
-  console.log('[disb-overhaul] Prisma not detected, will use PG if available.');
-}
-
 let pgPool = null;
 try {
   const { pool } = require('../utils/pg');
   pgPool = pool || null;
-  if (pgPool) console.log('[disb-overhaul] PG pool ready.');
-} catch (e) {
-  console.log('[disb-overhaul] PG helper not available.');
-}
-
-let resolved = null;
-
-async function detectTablesAndColumns() {
-  if (resolved) return resolved;
-
-  const batchTableCandidates = ['payout_batches', 'disbursement_batches', 'paypal_payout_batches'];
-  const itemTableCandidates  = ['payout_items', 'disbursement_items', 'paypal_payout_items'];
-
-  const colCandidates = {
-    batch: {
-      id: ['id', 'batch_id'],
-      // IMPORTANT: prefer cycle_setting_id for your schema
-      cycleId: ['cycle_setting_id', 'cycle_id', 'cycleId'],
-      createdAt: ['created_at', 'createdAt', 'inserted_at'],
-      status: ['status', 'state'],
-      provider: ['payout_provider', 'provider', 'channel'],
-      senderBatchId: ['sender_batch_id', 'senderBatchId']
-    },
-    item: {
-      id: ['id', 'item_id'],
-      batchId: ['batch_id', 'batchId', 'payout_batch_id'],
-      amount: ['amount', 'payout_amount', 'value_cents', 'value'],
-      currency: ['currency', 'currency_code'],
-      receiver: ['receiver', 'recipient', 'receiver_email']
-    }
-  };
-
-  const out = { batchTable: null, itemTable: null, cols: { batch: {}, item: {} } };
-
-  if (!pgPool) { resolved = out; return out; }
-
-  const q = (text, params) => pgPool.query(text, params);
-  const tablesRes = await q(`select table_name from information_schema.tables where table_schema='public'`);
-  const tables = tablesRes.rows.map(r => r.table_name);
-
-  out.batchTable = batchTableCandidates.find(t => tables.includes(t)) || null;
-  out.itemTable  = itemTableCandidates.find(t => tables.includes(t))  || null;
-
-  async function pickCols(table, candidatesMap) {
-    if (!table) return {};
-    const colsRes = await q(
-      `select column_name from information_schema.columns where table_schema='public' and table_name=$1`,
-      [table]
-    );
-    const cols = colsRes.rows.map(r => r.column_name);
-    const chosen = {};
-    Object.entries(candidatesMap).forEach(([logical, candList]) => {
-      chosen[logical] = candList.find(c => cols.includes(c)) || candList[0];
-    });
-    return chosen;
+  if (!pgPool) {
+    console.error('[disb-overhaul:v3] PG pool not available. Set DATABASE_URL and install `pg`.');
   }
-
-  out.cols.batch = await pickCols(out.batchTable, colCandidates.batch);
-  out.cols.item  = await pickCols(out.itemTable,  colCandidates.item);
-
-  resolved = out;
-  console.log('[disb-overhaul] Resolved schema:', out);
-  return out;
+} catch (e) {
+  console.error('[disb-overhaul:v3] Failed to load PG helper.', e);
 }
 
+/** Validate and coerce cycleId */
 function parseCycleId(req) {
-  // Fix: enforce number — prior implementation treated it as string, causing zero matches in ORMs.
   const raw = req.query.cycleId ?? req.params.cycleId;
   const n = Number(raw);
-  if (!Number.isInteger(n) || n < 0) {
-    return { error: 'Invalid cycleId', value: null };
-  }
+  if (!Number.isInteger(n) || n < 0) return { error: 'Invalid cycleId', value: null };
   return { error: null, value: n };
 }
 
-async function prismaFindBatchesByCycle(cycleId) {
-  if (!prisma) return null;
-  const modelNames = ['payoutBatch', 'PayoutBatch', 'disbursementBatch', 'DisbursementBatch', 'paypalPayoutBatch', 'PaypalPayoutBatch'];
-
-  for (const m of modelNames) {
-    const model = prisma[m];
-    if (!model || typeof model.findMany !== 'function') continue;
-    try {
-      // include either field if it exists in the model
-      const rows = await model.findMany({
-        where: { OR: [{ cycleId }, { cycle_id: cycleId }, { cycle_setting_id: cycleId }] },
-        orderBy: [{ createdAt: 'desc' }],
-        take: 100
-      });
-      if (Array.isArray(rows)) return rows;
-    } catch (e) {}
-  }
-  return null;
+/** Check if a table and (optionally) a column exists in public schema */
+async function tableExists(table) {
+  const q = `select 1 from information_schema.tables where table_schema='public' and table_name=$1`;
+  const { rows } = await pgPool.query(q, [table]);
+  return rows.length > 0;
+}
+async function columnExists(table, column) {
+  const q = `select 1 from information_schema.columns where table_schema='public' and table_name=$1 and column_name=$2`;
+  const { rows } = await pgPool.query(q, [table, column]);
+  return rows.length > 0;
+}
+async function hasItemsTable() {
+  return (await tableExists('payout_items')) && (await columnExists('payout_items', 'batch_id'));
 }
 
-// PG path
-async function pgFindBatchesByCycle(cycleId) {
-  if (!pgPool) return null;
-  const spec = await detectTablesAndColumns();
-  if (!spec.batchTable) return null;
-
-  const b = spec.cols.batch;
-  const i = spec.cols.item;
-  const hasItems = !!spec.itemTable;
-
-  // Build a safe query that doesn't depend on optional amounts
-  const text = `
-    SELECT
-      b.${b.id}               AS id,
-      b.${b.cycleId}          AS cycle_id,
-      b.${b.status}           AS status,
-      b.${b.senderBatchId}    AS sender_batch_id,
-      b.${b.provider}         AS provider,
-      b.${b.createdAt}        AS created_at,
-      ${hasItems ? `COUNT(it.${i.id})::int` : `0`} AS item_count
-      ${hasItems && i.amount ? `, COALESCE(SUM(CASE WHEN it.${i.amount} IS NULL THEN 0 ELSE it.${i.amount} END),0) AS total_amount` : ``}
-    FROM ${spec.batchTable} b
-    ${hasItems ? `LEFT JOIN ${spec.itemTable} it ON it.${i.batchId} = b.${b.id}` : ``}
-    WHERE b.${b.cycleId} = $1
-    GROUP BY b.${b.id}, b.${b.cycleId}, b.${b.status}, b.${b.senderBatchId}, b.${b.provider}, b.${b.createdAt}
-    ORDER BY b.${b.createdAt} DESC
-    LIMIT 100
-  `.replace(/\s+/g, ' ').trim();
-
-  const { rows } = await pgPool.query(text, [cycleId]);
-  return rows;
-}
-
-// GET /api/admin/payout-batches?cycleId=18
+/** GET /api/admin/payout-batches?cycleId=18 */
 router.get('/', async (req, res) => {
+  if (!pgPool) return res.status(500).json({ error: 'Database not configured' });
   const { error, value: cycleId } = parseCycleId(req);
   if (error) return res.status(400).json({ error });
 
   try {
-    // 1) Try Prisma with numeric filter (fixes previous bug when value was string)
-    const prismaRows = await prismaFindBatchesByCycle(cycleId);
-    if (Array.isArray(prismaRows)) {
-      return res.json(prismaRows);
-    }
+    const includeItems = await hasItemsTable();
 
-    // 2) Fallback to PG with schema introspection
-    const pgRows = await pgFindBatchesByCycle(cycleId);
-    if (Array.isArray(pgRows)) {
-      return res.json(pgRows);
-    }
+    const baseFields = `b.id, b.cycle_setting_id, b.status, b.sender_batch_id, b.created_at`;
+    const itemsField = includeItems ? `, (SELECT COUNT(*)::int FROM payout_items it WHERE it.batch_id = b.id) AS item_count` : ``;
 
-    // 3) As a last resort return empty (but at least we tried the numeric filter)
-    return res.json([]);
+    const sql = `
+      SELECT ${baseFields}${itemsField}
+      FROM payout_batches b
+      WHERE b.cycle_setting_id = $1
+      ORDER BY b.created_at DESC
+      LIMIT 100
+    `.replace(/\s+/g, ' ').trim();
+
+    const { rows } = await pgPool.query(sql, [cycleId]);
+    return res.json(rows);
   } catch (err) {
-    console.error('[disb-overhaul] /payout-batches error', err);
+    console.error('[disb-overhaul:v3] /payout-batches error', err);
     return res.status(500).json({ error: 'Failed to fetch payout batches' });
   }
 });
 
-// GET /api/admin/payout-batches/active  => latest batch (any cycle)
+/** GET /api/admin/payout-batches/active */
 router.get('/active', async (_req, res) => {
+  if (!pgPool) return res.status(500).json({ error: 'Database not configured' });
   try {
-    if (prisma) {
-      const model = prisma['payoutBatch'] || prisma['PayoutBatch'] || prisma['disbursementBatch'] || prisma['DisbursementBatch'];
-      if (model && typeof model.findFirst === 'function') {
-        const row = await model.findFirst({ orderBy: [{ createdAt: 'desc' }] });
-        if (row) return res.json(row);
-      }
-    }
+    const includeItems = await hasItemsTable();
 
-    if (pgPool) {
-      const spec = await detectTablesAndColumns();
-      if (spec.batchTable) {
-        const b = spec.cols.batch;
-        const text = `SELECT b.* FROM ${spec.batchTable} b ORDER BY b.${b.createdAt} DESC LIMIT 1`.replace(/\s+/g, ' ').trim();
-        const { rows } = await pgPool.query(text);
-        if (rows[0]) return res.json(rows[0]);
-      }
-    }
+    const baseFields = `b.id, b.cycle_setting_id, b.status, b.sender_batch_id, b.created_at`;
+    const itemsField = includeItems ? `, (SELECT COUNT(*)::int FROM payout_items it WHERE it.batch_id = b.id) AS item_count` : ``;
 
-    return res.status(404).json({ error: 'No active batch found' });
+    const sql = `
+      SELECT ${baseFields}${itemsField}
+      FROM payout_batches b
+      ORDER BY b.created_at DESC
+      LIMIT 1
+    `.replace(/\s+/g, ' ').trim();
+
+    const { rows } = await pgPool.query(sql);
+    if (!rows[0]) return res.status(404).json({ error: 'No active batch found' });
+    return res.json(rows[0]);
   } catch (err) {
-    console.error('[disb-overhaul] /payout-batches/active error', err);
+    console.error('[disb-overhaul:v3] /payout-batches/active error', err);
     return res.status(500).json({ error: 'Failed to fetch active batch' });
   }
 });
