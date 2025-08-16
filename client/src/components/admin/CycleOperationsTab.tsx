@@ -97,11 +97,21 @@ interface EnhancedWinnerData {
   savedBy?: number;
 }
 
+interface ProcessingProgress {
+  phase: string;
+  progress: number;
+  message: string;
+  batchId: number | null;
+  chunkCount: number;
+  currentChunk: number;
+}
+
 interface CycleOperationsTabProps {
   cycleSettings: CycleSetting[];
   onRefresh: () => void;
   isSelectionSealed?: boolean;
-  handleSetProcessingDialog?: (show: boolean) => void;
+  setShowProcessingDialog?: (show: boolean) => void;
+  setProcessingProgress?: (progress: ProcessingProgress | ((prev: ProcessingProgress) => ProcessingProgress)) => void;
   helpers: {
     getPaypalDisplay: (row: any) => string | null;
     isPaypalConfigured: (row: any) => boolean;
@@ -111,7 +121,7 @@ interface CycleOperationsTabProps {
   };
 }
 
-export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelectionSealed = false, setShowProcessingDialog = () => {}, helpers }: CycleOperationsTabProps) {
+export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelectionSealed = false, setShowProcessingDialog = () => {}, setProcessingProgress = () => {}, helpers }: CycleOperationsTabProps) {
   const { toast } = useToast();
   
   // Selection scope state (moved to top level to avoid hooks rule violation)
@@ -158,9 +168,18 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
   // Processing dialog state
   const [showProcessingDialog, setShowProcessingDialogLocal] = useState(false);
+  const [processingProgress, setProcessingProgressLocal] = useState<ProcessingProgress>({
+    phase: 'Idle',
+    progress: 0,
+    message: '',
+    batchId: null,
+    chunkCount: 0,
+    currentChunk: 0
+  });
 
-  // Use the prop function when available, otherwise use local state
+  // Use the prop functions when available, otherwise use local state
   const handleSetProcessingDialog = setShowProcessingDialog || setShowProcessingDialogLocal;
+  const handleSetProcessingProgress = setProcessingProgress || setProcessingProgressLocal;
 
 
 
@@ -214,7 +233,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
           setIsProcessingPayouts(false);
           handleSetProcessingDialog(false);
-          setProcessingProgress({
+          handleSetProcessingProgress({
             phase: 'Completed',
             progress: 100,
             message: `Disbursement Successful!`,
@@ -230,7 +249,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         // Truly in-flight → show modal & poll
         handleSetProcessingDialog(true);
         setIsProcessingPayouts(true);
-        setProcessingProgress({
+        handleSetProcessingProgress({
           phase: 'Processing',
           progress: Math.max(5, Math.floor(((b.completedChunks ?? 0) / (b.totalChunks || 1)) * 100)),
           message: `Resuming batch ${b.batchId}...`,
@@ -255,7 +274,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
               const totalItems = s.totalItems ?? 0;
 
               if (s.status === 'completed') {
-                setProcessingProgress(prev => ({
+                handleSetProcessingProgress(prev => ({
                   ...prev,
                   phase: 'Completed',
                   progress: 100,
@@ -294,7 +313,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
               }
 
               if (s.status === 'failed') {
-                setProcessingProgress(prev => ({
+                handleSetProcessingProgress(prev => ({
                   ...prev,
                   phase: 'Error',
                   progress: 0,
@@ -318,7 +337,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 10,
                 Math.min(99, Math.floor((completedChunks / totalChunks) * 100))
               );
-              setProcessingProgress(prev => ({
+              handleSetProcessingProgress(prev => ({
                 ...prev,
                 phase: 'Processing',
                 progress: pct,
@@ -976,7 +995,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
     // STEP 9.1: Pre-processing validation and setup
     setIsProcessingPayouts(true);
     handleSetProcessingDialog(true);
-    setProcessingProgress({
+    handleSetProcessingProgress({
       phase: 'Initializing',
       progress: 0,
       message: 'Preparing disbursement request...',
@@ -997,7 +1016,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         modeDescription = "bulk processing of all eligible winners";
         console.log('[STEP 9 FRONTEND] Disbursement mode: bulk (processAll: true)');
         
-        setProcessingProgress(prev => ({
+        handleSetProcessingProgress(prev => ({
           ...prev,
           phase: 'Validation',
           progress: 10,
@@ -1010,7 +1029,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         modeDescription = `selective processing of ${selectedWinnerIds.length} selected winners`;
         console.log(`[STEP 9 FRONTEND] Disbursement mode: selective (${selectedWinnerIds.length} winners)`);
         
-        setProcessingProgress(prev => ({
+        handleSetProcessingProgress(prev => ({
           ...prev,
           phase: 'Validation',
           progress: 10,
@@ -1019,7 +1038,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       }
 
       // STEP 9.3: Enhanced API call with defensive architecture integration
-      setProcessingProgress(prev => ({
+      handleSetProcessingProgress(prev => ({
         ...prev,
         phase: 'Processing',
         progress: 25,
@@ -1047,7 +1066,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
         const totalEligible = data.totalEligible ?? 0;
 
         // Seed UI immediately
-        setProcessingProgress(prev => ({
+        handleSetProcessingProgress(prev => ({
           ...prev,
           phase: 'Processing',
           progress: 5, // will be updated by poller
@@ -1075,7 +1094,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
             const totalItems = s.totalItems ?? totalEligible;
 
             if (s.status === 'completed') {
-              setProcessingProgress(prev => ({
+              handleSetProcessingProgress(prev => ({
                 ...prev,
                 phase: 'Completed',
                 progress: 100,
@@ -1099,7 +1118,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
             }
 
             if (s.status === 'failed') {
-              setProcessingProgress(prev => ({
+              handleSetProcessingProgress(prev => ({
                 ...prev,
                 phase: 'Error',
                 progress: 0,
@@ -1126,7 +1145,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
                 Math.floor((completedChunks / totalChunks) * 100)
               )
             );
-            setProcessingProgress(prev => ({
+            handleSetProcessingProgress(prev => ({
               ...prev,
               phase: 'Processing',
               progress: pct,
@@ -1148,7 +1167,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
 
       } else {
         // STEP 9.6: Enhanced error handling with defensive architecture responses
-        setProcessingProgress(prev => ({
+        handleSetProcessingProgress(prev => ({
           ...prev,
           phase: 'Error',
           progress: 0,
@@ -1246,7 +1265,7 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       // STEP 9.8: Network error handling
       console.error('[STEP 9 FRONTEND] Network/System error:', error);
       
-      setProcessingProgress(prev => ({
+      handleSetProcessingProgress(prev => ({
         ...prev,
         phase: 'Error',
         progress: 0,
@@ -1333,8 +1352,8 @@ export default function CycleOperationsTab({ cycleSettings, onRefresh, isSelecti
       selectedCycle={selectedCycle}
       refreshAllCycleData={refreshAllCycleData}
       setIsProcessingPayouts={setIsProcessingPayouts}
-      handleSetProcessingDialog={handleSetProcessingDialog}
-      setProcessingProgress={setProcessingProgress}
+      setShowProcessingDialog={handleSetProcessingDialog}
+      setProcessingProgress={handleSetProcessingProgress}
       setSelectedForDisbursement={setSelectedForDisbursement}
     >
       <div className="space-y-6">
