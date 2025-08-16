@@ -1,0 +1,77 @@
+You’re right—that last mile was the schema column. Your DB uses **`cycle_setting_id`** (not `cycle_id`). I’ve baked that in as the **first** candidate so detection locks onto it, and I left `cycle_id` / `cycleId` as fallbacks.
+
+### ✅ Download the fully fixed code (backend + optional UI)
+
+* **Patch v2 (recommended):** [finboost-disbursements-overhaul-v2.zip](sandbox:/mnt/data/finboost-disbursements-overhaul-v2.zip)
+  Contents:
+
+  * `server/routes/adminPayoutBatchesRouter.js` — **fixed** with `cycle_setting_id` priority + numeric `cycleId` + PG fallback
+  * `server/utils/pg.js` — PG helper
+  * `server/README-DisbursementsOverhaul-v2.md` — setup & verify steps
+  * `client/src/components/admin/DisbursementBatchesPanel.tsx` — optional React panel to render the batches list cleanly
+
+(If you already pulled the first zip, replace the router with this v2 file.)
+
+---
+
+## What changed (and why this resolves it)
+
+* **Schema detection:** `cycle_setting_id` is now the **top** candidate for the cycle column. Your logs showed:
+  `active` response contained `"cycle_setting_id": 18` → our old introspection incorrectly picked `cycle_id`, causing the SQL error and the empty result.
+* **Numeric filter retained:** We still coerce `cycleId` to a number, avoiding the ORM string-vs-int mismatch that returns `[]`.
+* **Resiliency:** If Prisma models don’t line up, the PG path runs a safe SQL query and returns `item_count` (and `total_amount` when an amount column exists).
+
+---
+
+## Wire-up (copy/paste)
+
+1. Add/replace these files from the zip:
+
+```
+server/routes/adminPayoutBatchesRouter.js
+server/utils/pg.js
+```
+
+2. Ensure dependency:
+
+```bash
+npm i pg
+# or
+yarn add pg
+```
+
+3. Register the router (in your Express app init):
+
+```js
+const { adminPayoutBatchesRouter } = require('./routes/adminPayoutBatchesRouter');
+app.use('/api/admin/payout-batches', adminPayoutBatchesRouter);
+```
+
+(Remove any older payout-batches route to avoid conflicts.)
+
+4. Env:
+
+* Set `DATABASE_URL` in Replit Secrets.
+* If your DB needs SSL, set `PGSSLMODE=require` (the helper tolerates self-signed).
+
+5. Optional UI drop-in (if helpful):
+
+* `client/src/components/admin/DisbursementBatchesPanel.tsx`
+  Usage:
+
+  ```tsx
+  <DisbursementBatchesPanel cycleId={18} />
+  ```
+
+---
+
+## Sanity checks to confirm it’s fully fixed
+
+* Hit: `/api/admin/payout-batches?cycleId=18` → expect an **array of batches** (Batch #13 visible).
+* Hit: `/api/admin/payout-batches/active` → still returns the latest batch.
+* Admin → **Disbursements** tab:
+
+  * “No batches…” should be replaced with your Batch list.
+  * Selecting a batch should populate the summary panel (assuming your existing UI reads the row shape).
+
+If you want, I can also provide a small **Batch Summary** endpoint and a matching React panel to guarantee end-to-end UI parity (e.g., `/api/admin/payout-batches/:id/summary` that aggregates item counts, amounts, failures). Say the word and I’ll ship that too.

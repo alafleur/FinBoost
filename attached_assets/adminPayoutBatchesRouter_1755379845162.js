@@ -1,3 +1,4 @@
+
 /**
  * Admin Payout Batches Router (disbursements overhaul) — v2
  * Fixes schema detection for cycle column: now prefers `cycle_setting_id`.
@@ -85,7 +86,6 @@ async function detectTablesAndColumns() {
 }
 
 function parseCycleId(req) {
-  // Fix: enforce number — prior implementation treated it as string, causing zero matches in ORMs.
   const raw = req.query.cycleId ?? req.params.cycleId;
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 0) {
@@ -114,7 +114,6 @@ async function prismaFindBatchesByCycle(cycleId) {
   return null;
 }
 
-// PG path
 async function pgFindBatchesByCycle(cycleId) {
   if (!pgPool) return null;
   const spec = await detectTablesAndColumns();
@@ -124,7 +123,6 @@ async function pgFindBatchesByCycle(cycleId) {
   const i = spec.cols.item;
   const hasItems = !!spec.itemTable;
 
-  // Build a safe query that doesn't depend on optional amounts
   const text = `
     SELECT
       b.${b.id}               AS id,
@@ -147,25 +145,17 @@ async function pgFindBatchesByCycle(cycleId) {
   return rows;
 }
 
-// GET /api/admin/payout-batches?cycleId=18
 router.get('/', async (req, res) => {
   const { error, value: cycleId } = parseCycleId(req);
   if (error) return res.status(400).json({ error });
 
   try {
-    // 1) Try Prisma with numeric filter (fixes previous bug when value was string)
     const prismaRows = await prismaFindBatchesByCycle(cycleId);
-    if (Array.isArray(prismaRows)) {
-      return res.json(prismaRows);
-    }
+    if (Array.isArray(prismaRows)) return res.json(prismaRows);
 
-    // 2) Fallback to PG with schema introspection
     const pgRows = await pgFindBatchesByCycle(cycleId);
-    if (Array.isArray(pgRows)) {
-      return res.json(pgRows);
-    }
+    if (Array.isArray(pgRows)) return res.json(pgRows);
 
-    // 3) As a last resort return empty (but at least we tried the numeric filter)
     return res.json([]);
   } catch (err) {
     console.error('[disb-overhaul] /payout-batches error', err);
@@ -173,7 +163,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/admin/payout-batches/active  => latest batch (any cycle)
 router.get('/active', async (_req, res) => {
   try {
     if (prisma) {

@@ -14,8 +14,10 @@ import * as XLSX from "xlsx";
 import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
 import type { PayoutRecipient, TransactionContext } from './paypal-transaction-orchestrator.js';
-// ChatGPT's new router-based solution for numeric cycleId parsing
-import { adminPayoutBatchesRouter } from "./routes/adminPayoutBatchesRouter";
+// ChatGPT's v2 router with cycle_setting_id schema fix
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { adminPayoutBatchesRouter } = require("./routes/adminPayoutBatchesRouter");
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 
