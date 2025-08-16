@@ -1,0 +1,67 @@
+You’re right—I overcomplicated it. Thanks for pushing on this.
+
+I rebuilt the router to be **simple, deterministic, and aligned to the exact schema you already proved via `/active`**. No guessing. No “smart” detection. Just the real columns you have.
+
+### ✅ Download the clean, fixed code (final)
+
+**[finboost-disbursements-overhaul-v3.zip](sandbox:/mnt/data/finboost-disbursements-overhaul-v3.zip)**
+
+Contents:
+
+* `server/routes/adminPayoutBatchesRouter.js` — **ONLY** queries:
+
+  * Table: `payout_batches`
+  * Columns: `id`, `cycle_setting_id`, `status`, `sender_batch_id`, `created_at`
+  * `/api/admin/payout-batches?cycleId=<n>` → returns batches for that cycle
+  * `/api/admin/payout-batches/active` → returns the latest batch
+  * Optional: adds `item_count` **only if** `payout_items(batch_id)` actually exists (checked directly via `information_schema`; otherwise it omits that field)
+* `server/utils/pg.js` — tiny PG helper
+* `server/README-DisbursementsOverhaul-v3.md` — one-pager setup
+
+---
+
+## Drop-in steps (copy/paste)
+
+1. Add/replace files from the zip:
+
+```
+server/routes/adminPayoutBatchesRouter.js
+server/utils/pg.js
+```
+
+2. Ensure dependency:
+
+```bash
+npm i pg
+# or
+yarn add pg
+```
+
+3. Register the router in your Express app:
+
+```js
+const { adminPayoutBatchesRouter } = require('./routes/adminPayoutBatchesRouter');
+app.use('/api/admin/payout-batches', adminPayoutBatchesRouter);
+```
+
+(Remove any older payout-batches route.)
+
+4. Env:
+
+* `DATABASE_URL` (Replit Secrets)
+* If needed: `PGSSLMODE=require`
+
+---
+
+## What you should see
+
+* `GET /api/admin/payout-batches/active` returns:
+
+  ```json
+  {"id":13,"cycle_setting_id":18,"status":"PROCESSING","sender_batch_id":"...","created_at":"..."}
+  ```
+* `GET /api/admin/payout-batches?cycleId=18` returns an **array** of rows with those same fields (plus `item_count` only if `payout_items(batch_id)` exists).
+
+This matches your working `/active` contract exactly, so the **Batches** list should finally populate instead of “No batches for this cycle yet.”
+
+If your UI expects any *extra* field, tell me which one and I’ll add it explicitly (still without guessing).
