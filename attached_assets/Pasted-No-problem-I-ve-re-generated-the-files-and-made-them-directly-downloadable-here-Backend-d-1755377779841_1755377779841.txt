@@ -1,0 +1,91 @@
+No problem — I’ve re-generated the files and made them directly downloadable here:
+
+### Backend (drop into `server/routes/`)
+
+* **admin-payout-history.router.ts**
+  [Download](sandbox:/mnt/data/admin-payout-history.router.ts)
+
+* **admin-payout-export.ts** (CSV export for a batch)
+  [Download](sandbox:/mnt/data/admin-payout-export.ts)
+
+* **admin-cycles.ts** (cycles list)
+  [Download](sandbox:/mnt/data/admin-cycles.ts)
+
+### Frontend (drop into `client/src/components/admin/`)
+
+* **DisbursementHistory.tsx**
+  [Download](sandbox:/mnt/data/DisbursementHistory.tsx)
+
+---
+
+## What changed / why this fixes it
+
+* The history routes are mounted via an **Express Router at `/api/admin`** so the final paths match the UI calls exactly:
+
+  * `GET /api/admin/payout-batches?cycleId=18`
+  * `GET /api/admin/payout-batches/:batchId/summary`
+  * `GET /api/admin/payout-batches/ping` (sanity check)
+
+* The server route uses your `storage` helpers **if available**, otherwise falls back to **raw SQL** against `payout_batches` and `payout_batch_items` (snake\_case), trying several DB handles (`db.execute`, `db.query`, `pool.query`, etc.). It also emits an `X-History-Branch` header so you can see which code path ran.
+
+* The Disbursements UI detects the “completed via `/active` but history empty” case and shows the yellow hint (which you’re seeing). Once the route returns data, the list will populate.
+
+---
+
+## Install steps
+
+1. **Backend**
+
+   * Place the three `.ts` files in `server/routes/`.
+   * Register the history router **once** in your server setup (e.g. `server/routes.ts` or wherever you build `app`):
+
+     ```ts
+     import { registerAdminPayoutHistoryRoutes } from "./routes/admin-payout-history.router";
+     import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
+     import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
+
+     // after `const app = express()`
+     registerAdminPayoutHistoryRoutes(app);
+     registerAdminPayoutExportRoutes(app);
+     registerAdminCyclesRoutes(app);
+     ```
+   * Optional verbose logs:
+
+     ```
+     DEBUG_PAY_HISTORY=1
+     ```
+
+2. **Frontend**
+
+   * Put `DisbursementHistory.tsx` into `client/src/components/admin/`.
+   * Ensure your `Admin.tsx` Disbursements tab renders `<DisbursementHistory />`.
+
+3. **Restart both** backend and frontend.
+
+---
+
+## Quick smoke tests (before checking the UI)
+
+* **Ping** (proves routing is mounted correctly):
+
+  ```
+  GET /api/admin/payout-batches/ping
+  ```
+
+  Expect: `{ ok: true, at: "/api/admin/payout-batches/ping" }`.
+
+* **List**:
+
+  ```
+  GET /api/admin/payout-batches?cycleId=18
+  ```
+
+  Expect: an array with Batch **#13**. Check the `X-History-Branch` header to see whether it used `storage.listBatchesForCycle`, `storage.getBatchesForCycle`, or `fallback.sql`.
+
+* **Summary**:
+
+  ```
+  GET /api/admin/payout-batches/13/summary
+  ```
+
+If `/ping` works but `?cycleId=18` returns `[]`, the route is mounted and we’re in the data path — share the `X-History-Branch` header and I’ll tweak the SQL/mapping to your exact schema. If `/ping` doesn’t work, place the `registerAdminPayoutHistoryRoutes(app)` call **before** any catch-all or auth middleware that could be swallowing the request.
