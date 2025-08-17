@@ -1,0 +1,68 @@
+Great questions—here’s how to pin down your **production API hostname**, and exactly what I need from you to wire Postmark with your *real* details.
+
+## How to find your production API hostname
+
+Your “production API hostname” is the public URL where your backend (Express) is reachable. Common patterns:
+
+* `https://api.getfinboost.com` (custom subdomain pointing to your hosting)
+* or a hosting URL (e.g., a Replit Deployments URL) until you CNAME a pretty domain to it
+
+Where to look:
+
+1. **Your hosting dashboard (e.g., Replit → Deployments):** It shows a public URL.
+2. **DNS (Cloudflare/Registrar):** If you already created a record like `api.getfinboost.com`, that’s your hostname.
+3. **Your frontend env/config:** Look for `VITE_API_URL`, `API_BASE_URL`, or similar in `.env` or build config.
+4. **Your proxy/server config:** If you terminate TLS behind a proxy, check that config for the public name.
+
+If you don’t have a pretty domain yet, you can:
+
+* Use the hosting URL as-is (set the webhook there), **or**
+* Create a DNS **CNAME** `api.getfinboost.com` → your hosting URL, then use `https://api.getfinboost.com`.
+
+---
+
+## What I need from you (to use your actual Postmark info)
+
+Please paste these values (or confirm them) and I’ll finalize the config/webhook string:
+
+1. **API base (production)**
+
+   * `PRODUCTION_API_BASE`: e.g., `https://api.getfinboost.com` (or your hosting URL)
+
+2. **Postmark credentials & stream**
+
+   * `POSTMARK_SERVER_TOKEN`: your **production** Server Token
+   * `POSTMARK_MESSAGE_STREAM`: transactional stream (usually `outbound`, or your custom stream slug)
+
+3. **From + brand**
+
+   * `EMAIL_FROM`: `FinBoost <no-reply@txn.getfinboost.com>`
+     (use this once `txn.getfinboost.com` is authenticated in Postmark)
+   * `SUPPORT_EMAIL`: `support@getfinboost.com` (you already chose this)
+   * `BRAND_ADDRESS`: your legal address (e.g., `FinBoost Inc., Toronto, ON`)
+
+4. **Webhook**
+
+   * `POSTMARK_WEBHOOK_SECRET`: pick any string (I’ll bake the URL with it)
+   * I’ll return:
+     `https://<PRODUCTION_API_BASE>/api/webhooks/postmark?secret=<POSTMARK_WEBHOOK_SECRET>`
+     (with your real domain and secret filled in)
+
+5. **Domain status**
+
+   * Confirm you’ve **added/authenticated** the sending domain for `txn.getfinboost.com` in Postmark (DKIM + Return-Path records).
+   * Until that’s done, you can still develop with the **Sandbox** token.
+
+6. *(Optional)* If you prefer using **Postmark Template IDs/Aliases** instead of our local HTML:
+
+   * Send the Template Alias/ID for each: `verify-email`, `password-reset`, `payout-processed`, `amoe-receipt`, plus the dynamic fields you defined. I’ll switch the adapter to `sendEmailWithTemplate`.
+
+---
+
+### TL;DR
+
+* Tell me your **production API base URL** (e.g., `https://api.getfinboost.com`) and the **Postmark token/stream**.
+* Confirm **From** + **Support** + **Brand address** and a **webhook secret**.
+* Confirm **txn.getfinboost.com** is authenticated (or say “still pending”).
+
+Once you paste those, I’ll return the exact env block and the final **webhook URL string** to copy into Postmark.
