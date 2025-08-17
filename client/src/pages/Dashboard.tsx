@@ -52,8 +52,6 @@ import DashboardStats from "@/components/DashboardStats";
 import WinnerCelebrationBanner from "@/components/WinnerCelebrationBanner";
 import KeepGoingMessage from "@/components/KeepGoingMessage";
 import { educationContent } from "@/data/educationContent";
-import { useUserGamificationSummary } from "@/hooks/useUserGamificationSummary";
-import GamificationDashboard from "@/components/gamification/GamificationDashboard";
 
 
 
@@ -85,9 +83,6 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
-  // Gamification dashboard data
-  const { data: gamificationSummary, loading: gamificationLoading, error: gamificationError } = useUserGamificationSummary();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<any>(null);
@@ -632,18 +627,6 @@ export default function Dashboard() {
             <TabsContent value="overview" className="mt-0 space-y-8">
               {/* Step 3: Winner Celebration Banner - Prominent placement on Overview tab */}
               <WinnerCelebrationBanner />
-
-              {/* Gamification Dashboard */}
-              {gamificationSummary && !gamificationLoading && !gamificationError && (
-                <div className="space-y-4">
-                  <SectionHeader 
-                    icon={Star}
-                    iconColor="blue"
-                    title="Your Progress"
-                  />
-                  <GamificationDashboard summary={gamificationSummary} />
-                </div>
-              )}
 
               {/* Unified Stats Cards Component */}
               <DashboardStats 
@@ -1288,19 +1271,6 @@ export default function Dashboard() {
             <TabsContent value="overview" className="mt-0 space-y-6">
               {/* Step 3: Winner Celebration Banner - Desktop Overview tab */}
               <WinnerCelebrationBanner />
-
-              {/* Gamification Dashboard */}
-              {gamificationSummary && !gamificationLoading && !gamificationError && (
-                <div className="space-y-4">
-                  <SectionHeader 
-                    icon={Star}
-                    iconColor="blue"
-                    title="Your Progress"
-                    titleSize="lg"
-                  />
-                  <GamificationDashboard summary={gamificationSummary} />
-                </div>
-              )}
 
               {/* Unified Stats Cards Component */}
               <DashboardStats 
