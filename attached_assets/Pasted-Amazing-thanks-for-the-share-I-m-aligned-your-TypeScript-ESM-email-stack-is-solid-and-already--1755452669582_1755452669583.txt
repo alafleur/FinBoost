@@ -1,0 +1,106 @@
+Amazing — thanks for the share. I’m aligned: your TypeScript + ESM email stack is solid and already wired correctly. Since the dev review says everything’s green, here’s a tight **go-live checklist** plus a couple of quick smoke tests.
+
+# Go-live checklist (transactional email)
+
+1. **Switch from mock → Postmark**
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=<your Postmark server token>
+POSTMARK_MESSAGE_STREAM=outbound   # or your custom transactional stream
+EMAIL_FROM="FinBoost <no-reply@txn.finboost.app>"
+SUPPORT_EMAIL=support@finboost.app
+BRAND_ADDRESS="FinBoost Inc., 123 Example St, Toronto, ON"
+POSTMARK_WEBHOOK_SECRET=<choose a secret>
+```
+
+2. **Authenticate your sending domain** (Postmark UI)
+
+* Use a **separate subdomain** for transactional, e.g. `txn.finboost.app`.
+* Add DKIM + Return-Path (Postmark provides records) and make sure SPF aligns with Postmark.
+* Keep your marketing on a different subdomain (e.g., `mail.finboost.app`) to isolate reputation.
+
+3. **Webhook**
+
+* In Postmark → Webhooks → Message events:
+  `https://<your-api-domain>/api/webhooks/postmark?secret=<POSTMARK_WEBHOOK_SECRET>`
+* You already mounted `express.json()` before routes — good.
+
+4. **Message streams & templates**
+
+* Confirm your transactional stream is selected (default `outbound`).
+* You can keep using the **local HTML templates** (already wired), or later switch to Postmark Template IDs without changing your calling code interface.
+
+---
+
+# 10-minute smoke tests (safe with Sandbox token)
+
+**A) Verify-email**
+
+```bash
+curl -X POST http://localhost:3000/api/dev/email/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "verify-email",
+    "to": "you@example.com",
+    "model": {
+      "firstName": "Alex",
+      "verifyUrl": "https://finboost.app/verify?token=abc123",
+      "supportEmail": "support@finboost.app",
+      "brandAddress": "FinBoost Inc., 123 Example St, Toronto, ON"
+    }
+  }'
+```
+
+**B) Password reset**
+
+```bash
+curl -X POST http://localhost:3000/api/dev/email/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "password-reset",
+    "to": "you@example.com",
+    "model": {
+      "firstName": "Alex",
+      "resetUrl": "https://finboost.app/reset?token=xyz",
+      "supportEmail": "support@finboost.app",
+      "brandAddress": "FinBoost Inc., 123 Example St, Toronto, ON"
+    }
+  }'
+```
+
+**C) Payout processed**
+
+```bash
+curl -X POST http://localhost:3000/api/dev/email/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "payout-processed",
+    "to": "you@example.com",
+    "model": {
+      "cycleId": 18,
+      "amountPretty": "$25.00",
+      "supportEmail": "support@finboost.app",
+      "brandAddress": "FinBoost Inc., 123 Example St, Toronto, ON"
+    }
+  }'
+```
+
+> Expect HTTP 200 and a Postmark response JSON. With a **Sandbox** token, nothing goes to real inboxes, but the API behaves like production.
+
+---
+
+# Optional (soon): bounce/complaint suppression
+
+Your webhook currently logs events (perfect start). Next step is to persist **hard bounces** and **spam complaints** to a suppression store and prevent **marketing** to those addresses (transactional can remain, depending on policy). If you want, I’ll add a tiny `suppressions.ts` service and extend `postmarkWebhook.ts` to upsert `{email, reason, ts, source}`.
+
+---
+
+# Ops guardrails
+
+* **Rate limiting & retries:** Let Postmark handle retries, but log non-200 responses from `sendEmail`.
+* **Observability:** Add a logger tag to all sends (e.g., `context: 'verify-email'`) so you can trace sends in logs.
+* **Secret hygiene:** Tokens in env only; never commit.
+* **CASL/Unsubscribe:** Marketing stays separate and must honor unsubscribes; transactional should not include a marketing unsubscribe footer.
+
+If you want me to wire the suppression store now (or switch to Postmark Template IDs), say the word and I’ll ship a tiny TS patch you can drop in.
