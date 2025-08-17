@@ -1,0 +1,102 @@
+Awesome — we can start coding right now. Here’s exactly what I need from you, plus a ready-to-drop kit.
+
+## What I need from you
+
+* **Server Token** (Sandbox is fine): add it to your env as `POSTMARK_SERVER_TOKEN`.
+* **From address** you want to use (e.g., `FinBoost <no-reply@txn.finboost.app>`): set `EMAIL_FROM`.
+* **Message stream** (optional): defaults to `outbound`. If you use a custom transactional stream, set `POSTMARK_MESSAGE_STREAM`.
+* **Brand footer info** (for templates):
+
+  * `SUPPORT_EMAIL` (e.g., `support@finboost.app`)
+  * `BRAND_ADDRESS` (e.g., `FinBoost Inc., 123 Example St, Toronto, ON`)
+* **Webhook secret** (optional, recommended): choose any string and set `POSTMARK_WEBHOOK_SECRET`. We’ll add `?secret=...` to the webhook URL.
+
+You can DM the actual values later; the code uses env vars so you don’t need to send me secrets.
+
+---
+
+## Download the implementation
+
+**[finboost-email-postmark-kit.zip](sandbox:/mnt/data/finboost-email-postmark-kit.zip)**
+
+**What’s inside**
+
+* `server/services/email/EmailService.js` — provider-agnostic facade (`postmark` or `mock`).
+* `server/services/email/providers/postmark.js` — Postmark adapter (uses your env vars).
+* `server/services/email/providers/mock.js` — local dev, no network.
+* `server/services/email/render.js` — tiny `{{var}}` renderer (no deps).
+* `server/services/email/templates/` — minimal responsive HTML templates:
+
+  * `verify_email.html`, `password_reset.html`, `payout_processed.html`, `amoe_receipt.html`, `base.html`
+* `server/routes/devEmailTest.js` — **dev-only** route to test sends.
+* `server/routes/postmarkWebhook.js` — webhook stub for bounces/complaints/deliveries.
+* `server/README-Email-Postmark.md` — one-pager setup.
+
+---
+
+## How to wire it (copy/paste)
+
+1. **Install**
+
+```bash
+npm i postmark
+```
+
+2. **Env (Replit Secrets)**
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=your_sandbox_or_live_token
+POSTMARK_MESSAGE_STREAM=outbound
+EMAIL_FROM="FinBoost <no-reply@txn.finboost.app>"
+SUPPORT_EMAIL=support@finboost.app
+BRAND_ADDRESS="FinBoost Inc., 123 Example St, Toronto, ON"
+POSTMARK_WEBHOOK_SECRET=choose-a-secret
+```
+
+3. **Mount routes (in your Express app)**
+
+```js
+// Dev-only test route — do NOT enable in production
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/dev/email', require('./routes/devEmailTest'));
+}
+
+// Webhook receiver
+app.use('/api/webhooks/postmark', require('./routes/postmarkWebhook'));
+```
+
+4. **Send a test (sandbox OK)**
+
+```js
+const EmailService = require('./services/email/EmailService');
+
+await EmailService.get().send('verify-email', {
+  to: 'you@example.com',
+  model: {
+    firstName: 'Alex',
+    verifyUrl: 'https://finboost.app/verify?token=abc123',
+    supportEmail: process.env.SUPPORT_EMAIL,
+    brandAddress: process.env.BRAND_ADDRESS
+  }
+});
+```
+
+5. **Webhook (optional now, useful soon)**
+
+* In Postmark, set the webhook to:
+
+  ```
+  https://<your-api-domain>/api/webhooks/postmark?secret=<POSTMARK_WEBHOOK_SECRET>
+  ```
+* We’ll later store bounces/complaints to a suppression table; for now it just logs.
+
+---
+
+## Notes
+
+* You can switch to local no-send mode anytime: `EMAIL_PROVIDER=mock`.
+* If you prefer Postmark **Template IDs/Aliases**, I can swap the adapter to use `sendEmailWithTemplate`—just send me the IDs and dynamic fields.
+* When you’re ready to go live, authenticate your `txn.finboost.app` domain in Postmark (SPF/DKIM) and point the **Transactional** stream to it.
+
+If you want me to integrate specific send points (verify, reset, payout processed) in your codebase, tell me the function names/paths and I’ll drop in the exact calls.
