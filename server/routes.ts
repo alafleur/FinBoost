@@ -21,6 +21,8 @@ const { adminPayoutBatchesRouter } = require("./routes/adminPayoutBatchesRouter"
 const { payoutBatchSummaryRouter } = require("./routes/payoutBatchSummaryRouter");
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
+import devEmailTest from './routes/devEmailTest.js';
+import postmarkWebhook from './routes/postmarkWebhook.js';
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -7700,6 +7702,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to delete prediction question' });
     }
   });
+
+  // Mount email service routes
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/dev/email', devEmailTest);
+  }
+  app.use('/api/webhooks/postmark', postmarkWebhook);
 
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;

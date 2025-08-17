@@ -1,0 +1,94 @@
+Great catch on the TS/ESM mismatch — I’ve converted the entire implementation to **TypeScript with ES modules** and fixed the template base/body include so it’s robust.
+
+### Download (TypeScript, ESM-ready)
+
+**[finboost-email-postmark-kit-ts.zip](sandbox:/mnt/data/finboost-email-postmark-kit-ts.zip)**
+
+### What changed vs. the last version
+
+* All code is now **`.ts`** with `import`/`export`.
+* Added strong **types** (`TemplateKey`, `SendOptions`, `EmailProvider`).
+* Fixed HTML templating: `{{> base.html}}` wraps your body into `base.html` at `{{> body.html}}` (no missing partials).
+* Express routes are **TypeScript** (`devEmailTest.ts`, `postmarkWebhook.ts`) with default exports.
+
+---
+
+## Files included
+
+```
+server/
+  services/email/
+    types.ts
+    EmailService.ts
+    render.ts
+    providers/
+      postmark.ts
+      mock.ts
+    templates/
+      base.html
+      verify_email.html
+      password_reset.html
+      payout_processed.html
+      amoe_receipt.html
+  routes/
+    devEmailTest.ts
+    postmarkWebhook.ts
+  README-Email-Postmark-TS.md
+```
+
+## How to integrate (copy/paste)
+
+1. **Install**
+
+```bash
+npm i postmark
+```
+
+2. **Env**
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=your_sandbox_or_live_token
+POSTMARK_MESSAGE_STREAM=outbound
+EMAIL_FROM="FinBoost <no-reply@txn.finboost.app>"
+SUPPORT_EMAIL=support@finboost.app
+BRAND_ADDRESS="FinBoost Inc., 123 Example St, Toronto, ON"
+POSTMARK_WEBHOOK_SECRET=choose-a-secret
+```
+
+3. **Mount routes (in your Express TS app)**
+
+```ts
+import devEmailTest from './routes/devEmailTest.js';
+import postmarkWebhook from './routes/postmarkWebhook.js';
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/dev/email', devEmailTest);
+}
+app.use('/api/webhooks/postmark', postmarkWebhook);
+```
+
+4. **Send a test**
+
+```ts
+import { getEmail } from '../services/email/EmailService.js';
+
+await getEmail().send('verify-email', {
+  to: 'you@example.com',
+  model: {
+    firstName: 'Alex',
+    verifyUrl: 'https://finboost.app/verify?token=abc123',
+    supportEmail: process.env.SUPPORT_EMAIL,
+    brandAddress: process.env.BRAND_ADDRESS
+  }
+});
+```
+
+### Notes
+
+* You can set `EMAIL_PROVIDER=mock` for no-network local testing.
+* When you switch to Postmark **Templates** (IDs/Aliases) later, I can swap the adapter to `sendEmailWithTemplate` without changing your calling code.
+* If your server runs from a different working directory, the renderer reads templates from:
+  `server/services/email/templates` (adjust `render.ts` base path if needed).
+
+If you want, send me your current `app.ts` (or the file where routes are mounted) and I’ll return it with the exact `import` + `app.use(...)` lines inserted.
