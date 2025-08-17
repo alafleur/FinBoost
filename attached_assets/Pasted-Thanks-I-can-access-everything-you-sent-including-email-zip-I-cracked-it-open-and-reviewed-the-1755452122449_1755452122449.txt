@@ -1,0 +1,111 @@
+Thanks — I can access everything you sent, including `email.zip`. I cracked it open and reviewed the exact files you asked for.
+
+# What I reviewed (from your upload)
+
+From `email.zip` (paths inside the archive use an `email/` folder prefix):
+
+* `email/EmailService.ts`
+* `email/providers/postmark.ts`
+* `email/providers/mock.ts`
+* `email/types.ts`
+* `email/render.ts`
+* `email/templates/{base.html, verify_email.html, password_reset.html, payout_processed.html, amoe_receipt.html}`
+
+From the standalone files you posted:
+
+* `routes (15).ts` (subset of `server/routes.ts`)
+* `devEmailTest (1).ts` (your `server/routes/devEmailTest.ts`)
+* `postmarkWebhook (1).ts` (your `server/routes/postmarkWebhook.ts`)
+
+# Alignment check — ✅ looks good
+
+* **Language/Module system:** All TypeScript with ES module `import`/`export` ✅
+* **Provider facade:** `EmailService.ts` selects `postmark` or `mock` by `EMAIL_PROVIDER` ✅
+* **Postmark adapter:** Uses `ServerClient.sendEmail` with `HtmlBody`, `TextBody`, `MessageStream`, `From` from env ✅
+* **Templates:** Minimal, brandable HTML; each content file starts with `{{> base.html}}` and base contains `{{> body.html}}` ✅
+* **Local renderer:** Simple mustache-style interpolation + base/body injection ✅
+* **Dev test route:** `POST /api/dev/email/test` sends by template key; typed to `TemplateKey` ✅
+* **Webhook route:** Accepts events, optional `?secret=...` ✅
+
+# Two small gaps to close
+
+1. **Routes are imported but not mounted**
+   In your `routes (15).ts`, I see:
+
+   ```
+   import devEmailTest from './routes/devEmailTest.js';
+   import postmarkWebhook from './routes/postmarkWebhook.js';
+   ```
+
+   …but I do **not** see the corresponding `app.use(...)` lines in the snippet you shared. Add these (near your other route mounts):
+
+   ```ts
+   // Dev-only email test route — DO NOT enable in production
+   if (process.env.NODE_ENV !== 'production') {
+     app.use('/api/dev/email', devEmailTest);
+   }
+
+   // Postmark webhooks (bounces, complaints, deliveries)
+   app.use('/api/webhooks/postmark', postmarkWebhook);
+   ```
+
+2. **Body parser must be active before the webhook**
+   Make sure `app.use(express.json({ limit: '1mb' }))` (or equivalent) runs **before** mounting `/api/webhooks/postmark`; otherwise `req.body` will be empty.
+
+# Quick smoke test (sandbox-safe)
+
+1. **Set env vars**
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=your_sandbox_or_live_token
+POSTMARK_MESSAGE_STREAM=outbound
+EMAIL_FROM="FinBoost <no-reply@txn.finboost.app>"
+SUPPORT_EMAIL=support@finboost.app
+BRAND_ADDRESS="FinBoost Inc., 123 Example St, Toronto, ON"
+POSTMARK_WEBHOOK_SECRET=choose-a-secret
+```
+
+2. **Dev send (works with Sandbox tokens)**
+
+```bash
+curl -X POST http://localhost:3000/api/dev/email/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": "verify-email",
+    "to": "you@example.com",
+    "model": {
+      "firstName": "Alex",
+      "verifyUrl": "https://finboost.app/verify?token=abc",
+      "supportEmail": "support@finboost.app",
+      "brandAddress": "FinBoost Inc., 123 Example St, Toronto, ON"
+    }
+  }'
+```
+
+3. **Webhook**
+   Set your Postmark webhook to:
+
+```
+https://<your-api-domain>/api/webhooks/postmark?secret=<POSTMARK_WEBHOOK_SECRET>
+```
+
+(You’ll see events in server logs. Later we can persist bounces/complaints to your suppression store.)
+
+# Nits / optional polish (not blockers)
+
+* **TS import extensions:** You’re using `import ... from './something.js'` inside `.ts` files. That’s correct for Node ESM at runtime, but if TypeScript complains in your setup, switch to extensionless imports (`'./providers/postmark'`) and ensure `moduleResolution` is compatible. If it compiles cleanly now, you’re fine.
+* **Footer defaults:** If you want guaranteed footer values without repeating them in every `model`, we can inject defaults in the provider:
+
+  ```ts
+  const modelWithDefaults = {
+    supportEmail: process.env.SUPPORT_EMAIL,
+    brandAddress: process.env.BRAND_ADDRESS,
+    ...model
+  };
+  ```
+* **Template key hardening:** You already typed `TemplateKey`, so the dev route can’t send unknown templates. Good. Keep that pattern when calling `EmailService` elsewhere.
+
+---
+
+If you want, send me the current **top of `server/app.ts` (or wherever `express.json` is configured)** and the **section where you mount routes**; I’ll return a tiny patch with the exact `app.use(...)` lines inserted in the right place. Otherwise, adding the two `app.use` blocks above and confirming body-parser order should make your setup fully functional.
