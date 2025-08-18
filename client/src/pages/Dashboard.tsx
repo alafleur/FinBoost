@@ -52,6 +52,7 @@ import DashboardStats from "@/components/DashboardStats";
 import WinnerCelebrationBanner from "@/components/WinnerCelebrationBanner";
 import KeepGoingMessage from "@/components/KeepGoingMessage";
 import { educationContent } from "@/data/educationContent";
+import VerificationBanner from "@/components/VerificationBanner";
 
 
 
@@ -549,6 +550,11 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
+      {/* Email Verification Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <VerificationBanner emailVerified={user?.emailVerified} email={user?.email} />
+      </div>
 
       {isMobile ? (
         /* Mobile Layout with Complete Feature Parity */

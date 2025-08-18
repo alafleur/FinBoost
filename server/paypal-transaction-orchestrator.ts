@@ -2111,6 +2111,26 @@ export class PaypalTransactionOrchestrator {
             case 'SUCCESS':
               newState = 'disbursement_completed' as const;
               reason = 'PayPal disbursement completed successfully';
+              
+              // Send payout processed email notification
+              try {
+                const { sendPayoutProcessedEmail } = await import('./services/email/payoutEmail.js');
+                const storage = (await import('./storage.js')).default;
+                const winner = await storage.getCycleWinnerSelection(batchItem.cycleWinnerSelectionId);
+                const cycle = await storage.getCycleSetting(winner.cycleSettingId);
+                
+                if (winner && winner.email) {
+                  await sendPayoutProcessedEmail({
+                    to: winner.email,
+                    cycleId: cycle.id,
+                    amountPretty: `$${(batchItem.amount / 100).toFixed(2)}`
+                  });
+                  console.log(`[PAYOUT EMAIL] Sent notification to ${winner.email} for cycle ${cycle.id}`);
+                }
+              } catch (emailError) {
+                console.error('[PAYOUT EMAIL] Failed to send notification:', emailError);
+                // Don't fail the disbursement for email errors
+              }
               break;
             case 'FAILED':
             case 'DENIED':

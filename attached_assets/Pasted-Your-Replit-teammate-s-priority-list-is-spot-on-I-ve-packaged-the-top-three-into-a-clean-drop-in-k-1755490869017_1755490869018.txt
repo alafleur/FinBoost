@@ -1,0 +1,89 @@
+Your Replit teammate’s priority list is spot-on. I’ve packaged the top three into a clean, drop-in kit so you can keep shipping while Postmark approval finishes.
+
+# Download: hardening + UX kit
+
+**[finboost-email-hardening-and-ux.zip](sandbox:/mnt/data/finboost-email-hardening-and-ux.zip)**
+
+### What’s inside
+
+* `server/routes/authEmail.secure.ts`
+
+  * **Token hashing** (SHA-256): stores only the hash in DB; raw token is only in the email link
+  * **Dual-lookup**: accepts both legacy (raw-stored) and new (hash-stored) tokens, so you won’t break existing links
+  * **Rate limiting**: 5 req/min on `/verify/request` and `/password/request`
+* `server/services/email/payoutEmail.ts`
+
+  * Tiny helper to send “payout processed” emails (`getEmail().send('payout-processed', ...)`)
+* `client/src/components/VerificationBanner.tsx`
+
+  * Dashboard banner that detects `emailVerified` and shows a **Resend** button
+
+### Install
+
+```bash
+npm i express-rate-limit bcryptjs
+```
+
+### Wire it up (2 mins)
+
+1. **Replace router**
+
+   * Rename `server/routes/authEmail.secure.ts` → `authEmail.ts` (or update your import)
+   * You already mount it at `/api/auth`, so no further changes needed:
+
+     ```ts
+     import authEmailRouter from './routes/authEmail.js';
+     app.use('/api/auth', authEmailRouter);
+     ```
+
+2. **Add banner to Dashboard**
+
+```tsx
+import VerificationBanner from "@/components/VerificationBanner";
+
+// in your Dashboard component JSX:
+<VerificationBanner />
+```
+
+* It calls `/api/auth/me` to fetch `{ user.email, user.emailVerified }`.
+* If your `/api/auth/me` shape differs, pass explicit props:
+
+  ```tsx
+  <VerificationBanner emailVerified={user.emailVerified} email={user.email} />
+  ```
+
+3. **Wire verification into signup**
+   Right after creating a user on the **server**, trigger a send:
+
+```ts
+await fetch('http://localhost:5000/api/auth/verify/request', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: newUser.email }),
+});
+```
+
+(or call your router handler internally if you prefer).
+
+4. **Payout emails**
+   In your PayPal disbursement success path:
+
+```ts
+import { sendPayoutProcessedEmail } from '../services/email/payoutEmail.js';
+
+await sendPayoutProcessedEmail({
+  to: winner.email,
+  cycleId,
+  amountPretty, // e.g., "$25.00"
+});
+```
+
+---
+
+## Why this matches the plan
+
+* **Must-do**: verification wired into signup + UX banner so users aren’t confused.
+* **Security wins**: hashed tokens + per-route rate limits to prevent abuse.
+* **Natural extension**: payout emails integrated with your existing disbursement flow.
+
+If you want, I can also ship a tiny **/api/me** enhancement that guarantees `emailVerified` is present, or a Drizzle **webhook events** table for Postmark (bounces/complaints) so you can get observability without touching your core flows.
