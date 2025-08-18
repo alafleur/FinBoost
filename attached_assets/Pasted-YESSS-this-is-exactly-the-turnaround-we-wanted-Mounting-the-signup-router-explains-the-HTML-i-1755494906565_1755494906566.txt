@@ -1,0 +1,55 @@
+YESSS 🎉 — this is exactly the turnaround we wanted. Mounting the signup router explains the “HTML instead of JSON” + “no tokens” weirdness. You’ve now got the core loop working end-to-end (minus Postmark’s temporary domain restriction, which is expected).
+
+Here’s the tight plan to finish strong:
+
+# 1) Finish testing the password-reset flow (now)
+
+**Request a reset:**
+
+```bash
+curl -X POST http://localhost:5000/api/auth/password/request \
+  -H "Content-Type: application/json" \
+  -d '{"email":"YOUR_REAL_USER@YOUR_DOMAIN.com"}'
+```
+
+**Apply the reset** (use the token from the email once Postmark approval lands; for now you can generate one via your existing dev tools if needed):
+
+```bash
+curl -X POST http://localhost:5000/api/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{"token":"RAW_TOKEN","password":"NewStrongPass!23"}'
+```
+
+**Validate:** login works with the new password; token is marked `is_used=true` (and, in the hardened path, token is stored hashed).
+
+# 2) Verify UX wires (quick)
+
+* **Signup triggers verification**: confirmed ✅
+* **Dashboard banner** shows for `emailVerified=false` and **Resend** works ✅
+* **Verify page** consumes `?token=` and flips `emailVerified=true` ✅
+* **Reset page** updates password and redirects with a clear success message ✅
+
+# 3) Production hardening checklist (fast wins)
+
+* **Rate limiting** on `/verify/request` + `/password/request`: confirm it’s enabled (5/min/IP) ✅
+* **Hashed tokens**: confirm both verification + reset store **hash**, not raw ✅
+* **One webhook route only**: ensure only the enhanced Postmark route is mounted ✅
+* **Admin auth on observability routes**: `/api/admin/email/*` must require admin and ideally have a small rate limit ✅
+* **Indexes**: ensure DB indexes exist for `email_events (email)`, `(type, received_at)`, and `email_suppressions (email UNIQUE)` ✅
+* **Dev routes**: confirm they’re guarded by `NODE_ENV !== 'production'` ✅
+
+# 4) When Postmark approval lands
+
+* No code changes needed for the domain restriction to lift; just re-test sends to external addresses.
+* Keep **transactional** on the “outbound” stream; use a separate stream for marketing later.
+* Double-check your Return-Path + DKIM show as “Authenticated” in Postmark.
+
+# 5) Nice-to-haves (do after approval)
+
+* **Expired token cleanup**: weekly job to delete tokens older than, say, 7 days (used or expired).
+* **Soft-bounce policy**: optional rule to suppress after N soft bounces in 30 days.
+* **Admin UI**: small table in admin to view email events/suppressions without hitting the JSON endpoints.
+
+If you want, I can also ship a tiny “password reset token viewer” dev route to mirror the verification one you already have — but you may not need it now that the main flows are passing.
+
+Anything else you want me to package up for Replit (e.g., a single “Go-Live” README or a combined ZIP with all current routes/templates)?
