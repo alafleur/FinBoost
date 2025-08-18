@@ -23,7 +23,7 @@ import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 import devEmailTest from './routes/devEmailTest.js';
 import postmarkWebhook from './routes/postmarkWebhook.js';
-import authEmailRouter from './routes/authEmail.js';
+import authCompatRouter from './routes/authCompat.js';
 import adminEmailRouter from './routes/adminEmail.js';
 import signupRouter from './routes/signup.js';
 
@@ -142,8 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerAdminPayoutExportRoutes(app);
   registerAdminCyclesRoutes(app);
   
-  // Email Authentication Routes
-  app.use('/api/auth', authEmailRouter);
+  // Email Authentication Routes (with compatibility aliases)
+  app.use('/api/auth', authCompatRouter);
   
   // Admin Email Management Routes (with admin authentication)
   app.use('/api/admin/email', requireAdmin, adminEmailRouter);
@@ -7723,7 +7723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Mount auth routes
   app.use('/api/auth', signupRouter);
-  app.use('/api/auth', authEmailRouter);
+  app.use('/api/auth', authCompatRouter);
   app.use('/api/admin/email', adminEmailRouter);
 
   // Expose broadcast functions for use in other routes
