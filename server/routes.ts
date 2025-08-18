@@ -144,8 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Authentication Routes
   app.use('/api/auth', authEmailRouter);
   
-  // Admin Email Management Routes
-  app.use('/api/admin/email', adminEmailRouter);
+  // Admin Email Management Routes (with admin authentication)
+  app.use('/api/admin/email', requireAdmin, adminEmailRouter);
   
   // Postmark Webhook for Email Events and Suppressions
   app.use('/api/webhooks/postmark', postmarkWebhook);
@@ -7718,7 +7718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.NODE_ENV !== 'production') {
     app.use('/api/dev/email', devEmailTest);
   }
-  app.use('/api/webhooks/postmark', postmarkWebhook);
+  // Note: Webhook route already mounted at line 154 above - removing duplicate
 
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;

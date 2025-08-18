@@ -7,7 +7,29 @@ export async function recordEmailEvent(payload: any) {
   const email = String(payload.Recipient || payload.Email || payload.EmailAddress || '').toLowerCase();
   const messageId = String(payload.MessageID || payload.MessageId || '');
   const stream = String(payload.MessageStream || '');
-  await db.insert(emailEvents).values({ type, email, messageId, stream, payload });
+  
+  // Create deterministic hash for idempotency (ChatGPT recommendation)
+  const crypto = await import('crypto');
+  const payloadString = JSON.stringify(payload, Object.keys(payload).sort());
+  const payloadHash = crypto.createHash('sha256').update(payloadString).digest('hex');
+  
+  try {
+    await db.insert(emailEvents).values({ 
+      type, 
+      email, 
+      messageId, 
+      stream, 
+      payload, 
+      payloadHash 
+    });
+  } catch (error: any) {
+    // Handle duplicate events gracefully (idempotency protection)
+    if (error.code === '23505') { // Unique constraint violation
+      console.log(`[EMAIL_EVENT] Duplicate event ignored: ${messageId} ${type}`);
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function upsertSuppression(email: string, reason: 'bounce' | 'complaint' | 'manual', lastEventAt?: Date) {

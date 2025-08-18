@@ -921,6 +921,12 @@ export const emailEvents = pgTable('email_events', {
   stream: varchar('stream', { length: 64 }),
   payload: jsonb('payload').notNull(),
   receivedAt: timestamp('received_at').notNull().defaultNow(),
+  payloadHash: varchar('payload_hash', { length: 64 }).notNull(), // SHA-256 hash for idempotency
+}, (table) => {
+  return {
+    // Idempotency constraint to prevent duplicate events
+    uniqueEvent: unique().on(table.messageId, table.type, table.payloadHash),
+  };
 });
 
 export const emailSuppressions = pgTable('email_suppressions', {
