@@ -1,5 +1,5 @@
 // client/src/pages/Payouts.tsx
-// Updated to use consolidated /api/rewards/history so winners appear as Pending/Queued/Paid.
+// Rewards page — uses final API fields (paidTotalCents, pendingTotalCents).
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,6 @@ export default function Payouts() {
         const data: RewardsResponse = await response.json();
         setHistory(data);
       } else {
-        // try alias if primary path isn't wired yet
         const alt = await apiRequest("GET", `/api/cycles/rewards/history${cacheBust}`);
         if (alt.ok) {
           const data: RewardsResponse = await alt.json();

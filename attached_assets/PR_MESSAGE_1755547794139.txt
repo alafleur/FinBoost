@@ -1,0 +1,32 @@
+PR: Rewards History — Finalized API Contract + UI Alignment
+
+Summary
+- Finalizes /api/rewards/history contract to separate PAID vs PENDING totals.
+- Keeps items visible even if secondary lookups (cycle names / payout items) fail.
+- Aligns UI copy: “Total Earned” = paid only; “Pending / Queued” = in-flight.
+- Normalizes payout statuses: processing|queued|earned|pending -> `earned`, success|paid -> `paid`.
+
+Files
+- server/storage.ts — returns:
+  {
+    summary: { paidTotalCents, pendingTotalCents, rewardsReceived },
+    items: RewardItem[]
+  }
+- server/routes.ts — exposes /api/rewards/history (+ legacy alias) with no-store caching.
+- client/src/pages/Payouts.tsx — uses new fields and preserves accurate labels.
+- server/diag/rewardsDiag.ts — optional diagnostics route helper (admin-only).
+- shared/schema.ts — minimal Drizzle tables (merge if you already have a schema).
+
+Acceptance Criteria
+- For user180@test.com (user_id=1980), GET /api/rewards/history returns:
+  summary.paidTotalCents = 0
+  summary.pendingTotalCents >= 32500
+  items includes an entry for cycleId=18 with status=earned and amountCents=32500
+- Rewards page shows:
+  Total Earned = $0.00
+  Pending / Queued = $325.00
+  History row: “July 2/2 — $325.00” with status chip “earned/queued”.
+
+Notes
+- Secondary queries are wrapped in try/catch; winner data is authoritative.
+- No Drizzle joins or sql`` templates are used, avoiding orderSelectedFields issues.

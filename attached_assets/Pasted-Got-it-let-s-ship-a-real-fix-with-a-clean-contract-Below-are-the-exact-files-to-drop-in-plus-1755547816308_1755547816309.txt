@@ -1,0 +1,71 @@
+Got it — let’s ship a **real fix with a clean contract**. Below are the exact files to drop in, plus a short message to paste to Replit.
+
+# Download the patched files
+
+* **server/storage.ts** — finalized API contract with separate totals, defensive queries, and no Drizzle joins
+  [Download](sandbox:/mnt/data/server/storage.ts)
+* **client/src/pages/Payouts.tsx** — consumes the new fields and keeps labels accurate (paid vs pending)
+  [Download](sandbox:/mnt/data/client/src/pages/Payouts.tsx)
+* **PR message for Replit** — copy/paste this into your PR description
+  [Download](sandbox:/mnt/data/PR_MESSAGE.txt)
+
+# What this ships (succinct)
+
+* **API response (final):**
+
+  ```ts
+  {
+    summary: {
+      paidTotalCents,      // sum(status === 'paid')
+      pendingTotalCents,   // sum(status in ['earned','pending'])
+      rewardsReceived      // count(status === 'paid')
+    },
+    items: Array<{
+      cycleId: number
+      cycleLabel: string
+      awardedAt: string|null
+      amountCents: number
+      status: 'pending'|'earned'|'paid'|'failed'
+      paidAt: string|null
+    }>
+  }
+  ```
+* **Status normalization:** `processing|queued|earned|pending → 'earned'`; `success|paid → 'paid'`.
+* **Defensive reads:** three simple selects (winners, names, payouts) with try/catch—if a secondary query fails, the endpoint still returns the **winner item** rather than crashing.
+* **UI alignment:** “**Total Earned**” now shows **paid only**; “**Pending / Queued**” shows in-flight amounts; the History list shows the item as **earned/queued**.
+
+# Paste this to Replit (PR summary)
+
+```
+PR: Rewards History — Finalized API Contract + UI Alignment
+
+Summary
+- Finalizes /api/rewards/history contract to separate PAID vs PENDING totals.
+- Keeps items visible even if secondary lookups (cycle names / payout items) fail.
+- Aligns UI copy: “Total Earned” = paid only; “Pending / Queued” = in-flight.
+- Normalizes payout statuses: processing|queued|earned|pending -> `earned`, success|paid -> `paid`.
+
+Files
+- server/storage.ts — returns:
+  {
+    summary: { paidTotalCents, pendingTotalCents, rewardsReceived },
+    items: RewardItem[]
+  }
+- client/src/pages/Payouts.tsx — uses new fields and preserves accurate labels.
+
+Acceptance Criteria
+- For user180@test.com (user_id=1980), GET /api/rewards/history returns:
+  summary.paidTotalCents = 0
+  summary.pendingTotalCents >= 32500
+  items includes an entry for cycleId=18 with status=earned and amountCents=32500
+- Rewards page shows:
+  Total Earned = $0.00
+  Pending / Queued = $325.00
+  History row: “July 2/2 — $325.00” with status chip “earned/queued”.
+
+Notes
+- Secondary queries are wrapped in try/catch; winner data is authoritative.
+- No Drizzle joins or sql`` templates are used, avoiding orderSelectedFields issues.
+```
+
+If you also want this exposed at your legacy alias (`/api/cycles/rewards/history`), tell me and I’ll add the route file too.

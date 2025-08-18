@@ -20,6 +20,7 @@ import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
 import TestPayPal from "./pages/TestPayPal";
 import Predictions from "./pages/Predictions";
+import Payouts from "./pages/Payouts";
 import { useEffect } from "react";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/lesson/:id" component={Lesson} />
       <Route path="/profile" component={Profile} />
       <Route path="/predictions" component={Predictions} />
+      <Route path="/payouts" component={Payouts} />
       <Route path="/support" component={Support} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/test-paypal" component={TestPayPal} />

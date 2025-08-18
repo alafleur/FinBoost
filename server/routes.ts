@@ -153,11 +153,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/webhooks/postmark', postmarkWebhook);
 
   // ChatGPT's consolidated rewards history endpoints
+  // Canonical rewards history endpoint - ChatGPT systematic solution
   app.get("/api/rewards/history", authenticateToken, async (req, res) => {
     try {
+      res.set("Cache-Control", "no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       const userId = req.user?.id;
-      res.set("Cache-Control", "no-store");
-      if (!userId) return res.json({ summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] });
+      if (!userId) {
+        return res.json({ summary: { paidTotalCents: 0, pendingTotalCents: 0, rewardsReceived: 0 }, items: [] });
+      }
       const data = await storage.getRewardsHistoryForUser(Number(userId));
       res.json(data);
     } catch (err) {
@@ -167,11 +172,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Backward-compatibility alias
+  // Legacy alias (back-compat) - ChatGPT systematic solution
   app.get("/api/cycles/rewards/history", authenticateToken, async (req, res) => {
     try {
+      res.set("Cache-Control", "no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       const userId = req.user?.id;
-      res.set("Cache-Control", "no-store");
-      if (!userId) return res.json({ summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] });
+      if (!userId) {
+        return res.json({ summary: { paidTotalCents: 0, pendingTotalCents: 0, rewardsReceived: 0 }, items: [] });
+      }
       const data = await storage.getRewardsHistoryForUser(Number(userId));
       res.json(data);
     } catch (err) {
