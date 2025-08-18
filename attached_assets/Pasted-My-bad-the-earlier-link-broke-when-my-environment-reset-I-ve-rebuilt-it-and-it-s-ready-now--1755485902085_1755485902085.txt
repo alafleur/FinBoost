@@ -1,0 +1,49 @@
+My bad — the earlier link broke when my environment reset. I’ve rebuilt it and it’s ready now:
+
+**[Download: finboost-email-workflows-patch-ts.zip](sandbox:/mnt/data/finboost-email-workflows-patch-ts.zip)**
+
+What’s inside (TypeScript, ESM-safe):
+
+* `server/routes/authEmail.ts` — adds:
+
+  * `POST /api/auth/verify/request`
+  * `GET /api/auth/verify`
+  * `POST /api/auth/password/request`
+  * `POST /api/auth/password/reset`
+* `shared/patches/schema.emailVerification.ts` — copy into `@shared/schema.ts` (adds `emailVerificationTokens` + optional `emailVerified/verifiedAt`).
+* `server/services/email/templates/verify_email.html` — matches your base/body include style.
+
+Quick install steps:
+
+1. Add the schema block to `@shared/schema.ts`, run your Drizzle migration.
+2. Mount the router in `server/routes.ts`:
+
+   ```ts
+   import authEmailRouter from './routes/authEmail.js';
+   app.use('/api/auth', authEmailRouter);
+   ```
+3. Ensure env vars (you likely already have):
+
+   ```
+   EMAIL_PROVIDER=postmark
+   POSTMARK_SERVER_TOKEN=****
+   POSTMARK_MESSAGE_STREAM=outbound
+   EMAIL_FROM=FinBoost <no-reply@txn.getfinboost.com>
+   SUPPORT_EMAIL=support@getfinboost.com
+   BRAND_ADDRESS=FinBoost Inc., Toronto, ON
+   POSTMARK_WEBHOOK_SECRET=****
+   VERIFY_BASE_URL=https://getfinboost.com/verify
+   RESET_BASE_URL=https://getfinboost.com/reset
+   ```
+4. If needed: `npm i bcryptjs`
+
+Smoke tests (port 5000):
+
+```bash
+curl -X POST http://localhost:5000/api/auth/verify/request -H "Content-Type: application/json" -d '{"email":"you@example.com"}'
+curl "http://localhost:5000/api/auth/verify?token=YOUR_TOKEN"
+curl -X POST http://localhost:5000/api/auth/password/request -H "Content-Type: application/json" -d '{"email":"you@example.com"}'
+curl -X POST http://localhost:5000/api/auth/password/reset -H "Content-Type: application/json" -d '{"token":"YOUR_TOKEN","password":"NewStrongPass!23"}'
+```
+
+If you run into any of the 81 TS errors again, send me the specific diagnostics (or the relevant chunk of `server/routes.ts`) and I’ll patch accordingly.

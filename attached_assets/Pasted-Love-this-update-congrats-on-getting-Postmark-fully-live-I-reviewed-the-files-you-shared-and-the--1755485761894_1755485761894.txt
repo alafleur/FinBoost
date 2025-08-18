@@ -1,0 +1,88 @@
+Love this update — congrats on getting Postmark fully live. I reviewed the files you shared and the status reads as “ready to integrate,” with the only blocker being the TypeScript errors in `server/routes.ts`. To keep you moving, I’ve packaged a **drop-in workflow patch** that doesn’t touch the big routes file: it adds a small router for email verification & password resets, plus a tiny schema snippet for verification tokens.
+
+# Download the patch
+
+**[finboost-email-workflows-patch-ts.zip](sandbox:/mnt/data/finboost-email-workflows-patch-ts.zip)**
+
+# What’s inside (and how to apply)
+
+1. **New router** — `server/routes/authEmail.ts`
+   Registers:
+
+   * `POST /api/auth/verify/request` → sends a verification email
+   * `GET /api/auth/verify` → validates token, marks user verified
+   * `POST /api/auth/password/request` → sends reset link
+   * `POST /api/auth/password/reset` → applies new password
+
+   Uses your existing Postmark service (`getEmail().send`) and Drizzle DB. No changes needed in `storage.ts`.
+
+2. **Schema snippet** — `shared/patches/schema.emailVerification.ts`
+   Copy the code block into your `@shared/schema.ts`:
+
+   * Adds `emailVerificationTokens` table
+   * (Optionally) adds `emailVerified` / `verifiedAt` to `users`
+     You already have `passwordResetTokens` in your schema (see your file), so we reuse that for resets.&#x20;
+
+3. **Template** — `server/services/email/templates/verify_email.html`
+   Same include style as your emails: each template starts with `{{> base.html}}` and injects into the base at `{{> body.html}}`. (This matches your `base.html` structure.)&#x20;
+
+# Wire-up (one line)
+
+In `server/routes.ts` where you mount routers, add:
+
+```ts
+import authEmailRouter from './routes/authEmail.js';
+app.use('/api/auth', authEmailRouter);
+```
+
+Your file already imports and mounts the Postmark routes correctly (I saw the imports/mounts). The new authEmail router keeps changes minimal.&#x20;
+
+# Env (you already set most of these)
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=****
+POSTMARK_MESSAGE_STREAM=outbound
+EMAIL_FROM=FinBoost <no-reply@txn.getfinboost.com>
+SUPPORT_EMAIL=support@getfinboost.com
+BRAND_ADDRESS=FinBoost Inc., Toronto, ON
+POSTMARK_WEBHOOK_SECRET=****
+# Frontend URLs for links:
+VERIFY_BASE_URL=https://getfinboost.com/verify
+RESET_BASE_URL=https://getfinboost.com/reset
+```
+
+# Local tests (port 5000)
+
+```bash
+# Send verification email
+curl -X POST http://localhost:5000/api/auth/verify/request \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com"}'
+
+# Complete verification (token arrives by email)
+curl "http://localhost:5000/api/auth/verify?token=YOUR_TOKEN"
+
+# Send reset email
+curl -X POST http://localhost:5000/api/auth/password/request \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com"}'
+
+# Apply new password
+curl -X POST http://localhost:5000/api/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{"token":"YOUR_TOKEN","password":"NewStrongPass!23"}'
+```
+
+# Why this avoids the 81 TS errors
+
+* We don’t edit your massive `server/routes.ts`; we add a small, self-contained router (`authEmail.ts`) and mount it.
+* The router calls Drizzle directly for tokens & user updates, so we don’t have to extend your `storage.ts` interface for now.
+* Password resets reuse your existing `passwordResetTokens` table.&#x20;
+
+# Next small lift (optional)
+
+* If your `users` table doesn’t yet have `emailVerified/verifiedAt`, add them per the schema snippet.
+* After this patch is mounted and schema updated, you can **gate app features** for unverified users (check `emailVerified` flag server-side or in your auth middleware).
+
+If you want, send me the **current Drizzle user model portion** of `@shared/schema.ts`. I’ll splice in the exact `emailVerified` fields and return a ready-to-paste diff so it compiles cleanly the first time.
