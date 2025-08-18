@@ -1,0 +1,106 @@
+awesome — i built you a complete, drop-in set of files to ship the consolidated rewards history (winners show up as Pending/Queued immediately, then flip to Paid when disbursed).
+
+# What you’re getting (download links)
+
+* **shared/schema.ts** — minimal Drizzle tables for the three real tables you said you use
+  [Download](sandbox:/mnt/data/shared/schema.ts)
+* **server/storage.ts** — data access that merges `cycle_winner_selections` with `payout_batch_items` and returns a tidy `{ summary, items }` payload
+  [Download](sandbox:/mnt/data/server/storage.ts)
+* **server/routes.ts** — registers `GET /api/rewards/history` (plus a back-compat alias to `/api/cycles/rewards/history`)
+  [Download](sandbox:/mnt/data/server/routes.ts)
+* **client/src/pages/Payouts.tsx** — rewired to call the new endpoint and render Total Earned + Pending/Queued + History with statuses
+  [Download](sandbox:/mnt/data/client/src/pages/Payouts.tsx)
+* **(optional)** client/src/pages/Dashboard.tsx — included as a no-op placeholder; keep your current dashboard as-is
+  [Download](sandbox:/mnt/data/client/src/pages/Dashboard.tsx)
+
+> Note: adjust the `db` and `authenticateToken` import paths if your project structure differs (see comments at the top of each file).
+
+---
+
+## Why this fixes the issue you saw
+
+* Your current **Payouts** page fetches from a Stripe-only endpoint (`GET /api/stripe/payouts`), which won’t include cycle winners that are selected but not yet paid, so the UI shows “No payouts yet.” &#x20;
+* Your **Dashboard** already mounts rewards components (e.g., `RewardsHistory`, `RewardsSummary`), so surfacing a consolidated history aligns with your UX.&#x20;
+* On the backend you already have scaffolding that returns winner history at `/api/cycles/rewards/history` and reads from `cycle_winner_selections` joined to `cycle_settings`. I kept that behavior but standardized it under `/api/rewards/history` as well, so the frontend can call one place. &#x20;
+* The schema you shared includes the state machine fields (e.g., `payout_status`) in `cycle_winner_selections`, which we now normalize into UI statuses (`pending`, `earned`, `paid`, `failed`) and, when available, we reconcile against `payout_batch_items` for definitive “paid” timestamps.&#x20;
+
+---
+
+## What changed (at a glance)
+
+* **New endpoint:** `GET /api/rewards/history` → returns
+
+  ```ts
+  {
+    summary: { totalEarnedCents: number, rewardsReceived: number },
+    items: Array<{
+      cycleId: number,
+      cycleLabel: string | null,
+      awardedAt: string | null,
+      amountCents: number,
+      status: "pending" | "earned" | "paid" | "failed",
+      paidAt: string | null
+    }>
+  }
+  ```
+* **Server logic:** merges sealed winners from `cycle_winner_selections` with any match in `payout_batch_items` (by `user_id` + `cycle_setting_id`) to finalize amount and status.
+* **Client Payouts page:** calls `/api/rewards/history`, shows:
+
+  * **Total Earned** (sum of paid items),
+  * **Pending / Queued** (non-paid + non-failed sums),
+  * **Rewards Received** (count of paid items),
+  * Per-cycle rows w/ status chips and dates.
+
+---
+
+## How to wire it up (quick)
+
+1. **Drop in the files** above into your repo at the same paths.
+2. **Adjust imports**
+
+   * In `server/storage.ts`, change `import { db } from "./db"` and middleware import in `server/routes.ts` to match your project.
+3. **Register the routes**
+   In your server bootstrap (where you initialize Express), import and call:
+
+   ```ts
+   import { registerRewardsRoutes } from "./server/routes";
+   registerRewardsRoutes(app);
+   ```
+
+   (If you already expose `/api/cycles/rewards/history`, the new file also provides it as an alias so nothing breaks.)
+4. **Client:** the provided `client/src/pages/Payouts.tsx` already points to `/api/rewards/history`. Your current page was wired to Stripe payouts only.&#x20;
+5. **Build & run**.
+
+---
+
+## “Send this to Replit” message
+
+> **Context for consolidated rewards endpoint**
+>
+> We’re standardizing the rewards view so winners appear immediately with a status (Pending/Queued/Earned) and flip to Paid when disbursed. Our real table names differ from the previous assumptions; please use:
+>
+> * **Tables:** `cycle_winner_selections`, `cycle_settings`, `payout_batch_items`
+> * **Key columns used:**
+>
+>   * `cycle_winner_selections`: `id`, `user_id`, `cycle_setting_id`, `payout_final` (cents), `reward_amount` (legacy), `payout_status`, `is_sealed`, `sealed_at`, `selection_date`&#x20;
+>   * `cycle_settings`: `id`, `cycle_name`, `cycle_start_date`, `cycle_end_date` (joined for labels)&#x20;
+>   * `payout_batch_items`: `user_id`, `cycle_setting_id`, `amount_cents`, `status`, `paid_at` (used to confirm “paid”)
+>
+> **Endpoints**
+>
+> * Add `GET /api/rewards/history` → returns `{ summary, items }` with merged data from the two sources. Back-compat alias: `GET /api/cycles/rewards/history`. (We already had a cycles route; the new one is the canonical path going forward.)&#x20;
+>
+> **Files included** (drop-in):
+>
+> * `shared/schema.ts` (minimal Drizzle table exports for the three tables)
+> * `server/storage.ts` (adds `getRewardsHistoryForUser(userId)`; merges winners with batch items)
+> * `server/routes.ts` (registers routes + alias)
+> * `client/src/pages/Payouts.tsx` (rewired to `/api/rewards/history`, renders Total Earned, Pending/Queued, History)
+>
+> **Frontend note**
+>
+> * The previous Payouts page pulled only Stripe payouts (`/api/stripe/payouts`), which hid winners that weren’t paid yet; the new page calls `/api/rewards/history` and shows statuses accordingly.&#x20;
+
+---
+
+if you want me to also refactor your existing `routes (18).ts`/`storage (10).ts` inline instead of drop-in replacements, say the word and I’ll ship edited versions keyed exactly to your file structure.

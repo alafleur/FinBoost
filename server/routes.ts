@@ -150,6 +150,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Postmark Webhook for Email Events and Suppressions
   app.use('/api/webhooks/postmark', postmarkWebhook);
+
+  // ChatGPT's consolidated rewards history endpoints
+  app.get("/api/rewards/history", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.json({ summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] });
+      const data = await storage.getRewardsHistoryForUser(Number(userId));
+      res.json(data);
+    } catch (err) {
+      console.error("GET /api/rewards/history error", err);
+      res.status(500).json({ error: "Failed to load rewards history" });
+    }
+  });
+
+  // Backward-compatibility alias
+  app.get("/api/cycles/rewards/history", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) return res.json([]);
+      const data = await storage.getRewardsHistoryForUser(Number(userId));
+      res.json(data);
+    } catch (err) {
+      console.error("GET /api/cycles/rewards/history error", err);
+      res.status(500).json({ error: "Failed to load cycle rewards history" });
+    }
+  });
+
 // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {
