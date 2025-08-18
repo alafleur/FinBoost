@@ -1,0 +1,31 @@
+thanks for the log—great catch. i’ve patched the Drizzle query to use `inArray(...)` (and added a guard for empty arrays). here are the **downloadable, full code files** you can drop in:
+
+* **server/storage.ts** (fixed): uses `inArray(payoutBatchItems.cycleSettingId, cycleIds)`; no more `sql.array`
+  [Download](sandbox:/mnt/data/server/storage.ts)
+* **server/routes.ts** (unchanged from prior step): registers `GET /api/rewards/history` (+ alias)
+  [Download](sandbox:/mnt/data/server/routes.ts)
+* **shared/schema.ts** (unchanged from prior step): minimal Drizzle tables for `cycle_winner_selections`, `cycle_settings`, `payout_batch_items`
+  [Download](sandbox:/mnt/data/shared/schema.ts)
+* **client/src/pages/Payouts.tsx** (unchanged from prior step): calls `/api/rewards/history` and renders Pending/Queued/Paid
+  [Download](sandbox:/mnt/data/client/src/pages/Payouts.tsx)
+* **client/src/pages/Dashboard.tsx** (optional/no-op)
+  [Download](sandbox:/mnt/data/client/src/pages/Dashboard.tsx)
+
+### exact change in `server/storage.ts`
+
+* **Imports:** `import { and, desc, eq, inArray, sql } from "drizzle-orm";`
+* **Where clause fix:**
+
+  ```ts
+  // OLD (buggy):
+  // sql`${payoutBatchItems.cycleSettingId} = ANY(${sql.array(cycleIds, "int4")})`
+
+  // NEW (correct):
+  inArray(payoutBatchItems.cycleSettingId, cycleIds)
+  ```
+* **Safety:** if `cycleIds.length === 0`, we skip the payout query to avoid invalid SQL.
+* **Status mapping:** still normalizes DB states to `"pending" | "earned" | "paid" | "failed"`.
+
+### “send this to Replit” note
+
+> The consolidated rewards endpoint was crashing because Drizzle doesn’t support `sql.array()`. I replaced it with `inArray(payoutBatchItems.cycleSettingId, cycleIds)` and added an empty-array guard. Please deploy the updated `server/storage.ts`. The UI already points to `/api/rewards/history`, so [user180@test.com](mailto:user180@test.com)’s July 2/2 win should now appear as **Queued/Pending** (and flip to **Paid** once disbursed).

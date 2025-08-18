@@ -10536,18 +10536,30 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
       }
 
       // 2) Get payout batch items for these cycles (if any)
-      const cycleIds = [...new Set(winners.map(w => Number(w.cycleId)))];
-      const payoutItems = await db.select({
-          cycleSettingId: payoutBatchItems.cycleSettingId,
-          amountCents: payoutBatchItems.amountCents,
-          status: payoutBatchItems.status,
-          paidAt: payoutBatchItems.paidAt
-        })
-        .from(payoutBatchItems)
-        .where(and(
-          eq(payoutBatchItems.userId, userId),
-          sql`${payoutBatchItems.cycleSettingId} = ANY(${sql.array(cycleIds, "int4")})`
-        ));
+      const cycleIds = [...new Set(winners.map(w => Number(w.cycleId)).filter(n => Number.isFinite(n)))] as number[];
+      
+      let payoutItems: Array<{ cycleSettingId: number; amountCents: number; status: string; paidAt: Date | null }> = [];
+      
+      if (cycleIds.length > 0) {
+        const rows = await db.select({
+            cycleSettingId: payoutBatchItems.cycleSettingId,
+            amountCents: payoutBatchItems.amountCents,
+            status: payoutBatchItems.status,
+            paidAt: payoutBatchItems.paidAt
+          })
+          .from(payoutBatchItems)
+          .where(and(
+            eq(payoutBatchItems.userId, userId),
+            inArray(payoutBatchItems.cycleSettingId, cycleIds)
+          ));
+        
+        payoutItems = rows.map(r => ({
+          cycleSettingId: Number(r.cycleSettingId),
+          amountCents: Number(r.amountCents),
+          status: String(r.status),
+          paidAt: (r.paidAt as any) ?? null
+        }));
+      }
 
       // 3) Map payout items by cycle for easy lookup
       const byCycle = new Map<number, { amountCents: number; status: string; paidAt: Date | null }>();
