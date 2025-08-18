@@ -24,6 +24,7 @@ import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 import devEmailTest from './routes/devEmailTest.js';
 import postmarkWebhook from './routes/postmarkWebhook.js';
 import authEmailRouter from './routes/authEmail.js';
+import adminEmailRouter from './routes/adminEmail.js';
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -142,6 +143,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Email Authentication Routes
   app.use('/api/auth', authEmailRouter);
+  
+  // Admin Email Management Routes
+  app.use('/api/admin/email', adminEmailRouter);
+  
+  // Postmark Webhook for Email Events and Suppressions
+  app.use('/api/webhooks/postmark', postmarkWebhook);
 // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {

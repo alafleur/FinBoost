@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, unique, uniqueIndex, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -911,3 +911,29 @@ export type PredictionResult = typeof predictionResults.$inferSelect;
 // Email Verification Token Types
 export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
 export type InsertEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
+
+// Email Events and Suppressions for Postmark Webhook Integration
+export const emailEvents = pgTable('email_events', {
+  id: serial('id').primaryKey(),
+  type: varchar('type', { length: 64 }).notNull(),
+  email: varchar('email', { length: 320 }).notNull(),
+  messageId: varchar('message_id', { length: 128 }),
+  stream: varchar('stream', { length: 64 }),
+  payload: jsonb('payload').notNull(),
+  receivedAt: timestamp('received_at').notNull().defaultNow(),
+});
+
+export const emailSuppressions = pgTable('email_suppressions', {
+  id: serial('id').primaryKey(),
+  email: varchar('email', { length: 320 }).notNull().unique(),
+  reason: varchar('reason', { length: 64 }).notNull(),
+  source: varchar('source', { length: 64 }).notNull().default('postmark'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  lastEventAt: timestamp('last_event_at'),
+});
+
+export type EmailEvent = typeof emailEvents.$inferSelect;
+export type InsertEmailEvent = typeof emailEvents.$inferInsert;
+export type EmailSuppression = typeof emailSuppressions.$inferSelect;
+export type InsertEmailSuppression = typeof emailSuppressions.$inferInsert;

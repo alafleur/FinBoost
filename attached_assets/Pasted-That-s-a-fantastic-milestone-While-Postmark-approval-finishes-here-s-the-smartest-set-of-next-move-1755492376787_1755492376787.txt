@@ -1,0 +1,71 @@
+That’s a fantastic milestone. While Postmark approval finishes, here’s the smartest set of next moves you can ship right now — I also included a ready-to-drop kit for webhook ingestion + suppressions.
+
+# What to do next (in order)
+
+1. **Wire verification into signup** (if not already)
+
+   * After creating a user, trigger `POST /api/auth/verify/request` with their email.
+   * Gate key actions behind `emailVerified`.
+
+2. **Add observability + safety**
+
+   * Ingest Postmark events (Delivery, Bounce, SpamComplaint) and **auto-suppress** marketing to bounced/complaint addresses.
+   * Keep transactional flowing even if suppressed; you decide policy later.
+
+3. **Admin visibility**
+
+   * Quick admin endpoints to list recent email events and current suppressions.
+
+4. **(Already in motion) Payout emails**
+
+   * You’ve integrated the send; once approval lands you’ll have end-to-end notification.
+
+---
+
+# Drop-in kit: Webhook ingestion + suppressions
+
+**[Download: finboost-email-webhook-suppressions.zip](sandbox:/mnt/data/finboost-email-webhook-suppressions.zip)**
+
+### What’s inside
+
+* `server/routes/postmarkWebhook.enhanced.ts`
+  Enhanced webhook route that records events and suppresses on **HardBounce** / **SpamComplaint**.
+* `server/services/email/suppressions.ts`
+  Helpers to record events, upsert suppressions, check suppression status, and basic list queries.
+* `shared/patches/schema.emailEvents.ts`
+  Drizzle tables: `email_events` (full payload log) and `email_suppressions` (marketing-only blocklist).
+* `server/routes/adminEmail.ts` *(optional)*
+
+  * `GET /api/admin/email/events?limit=50&offset=0&type=Bounce&email=user@x.com`
+  * `GET /api/admin/email/suppressions?limit=50&offset=0&search=@domain.com`
+
+### How to wire it (2 mins)
+
+1. **Schema**
+
+   * Copy `shared/patches/schema.emailEvents.ts` into `@shared/schema.ts`.
+   * Run a migration to create the two tables.
+
+2. **Mount routes**
+
+   ```ts
+   import postmarkWebhookEnhanced from './routes/postmarkWebhook.enhanced.js';
+   app.use('/api/webhooks/postmark', postmarkWebhookEnhanced);
+
+   // Optional admin read-only
+   import adminEmailRouter from './routes/adminEmail.js';
+   app.use('/api/admin/email', adminEmailRouter);
+   ```
+
+3. **(Optional) Marketing guard**
+
+   * Before sending **marketing** messages, call `isSuppressed(email)` from `server/services/email/suppressions.ts`.
+   * Leave transactional as-is.
+
+---
+
+If you want, I can also:
+
+* add a tiny “Email Events” panel to your admin UI, or
+* output a Drizzle migration file tailored to your exact schema file names, or
+* wire the verification trigger directly into your signup handler (paste me that function and I’ll return a patched file).
