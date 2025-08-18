@@ -23,6 +23,7 @@ import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 import devEmailTest from './routes/devEmailTest.js';
 import postmarkWebhook from './routes/postmarkWebhook.js';
+import authEmailRouter from './routes/authEmail.js';
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -138,6 +139,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/admin/payout-batches', payoutBatchSummaryRouter);
   registerAdminPayoutExportRoutes(app);
   registerAdminCyclesRoutes(app);
+  
+  // Email Authentication Routes
+  app.use('/api/auth', authEmailRouter);
 // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {

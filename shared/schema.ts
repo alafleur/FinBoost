@@ -64,6 +64,10 @@ export const users = pgTable("users", {
   paypalEmail: text("paypal_email"), // PayPal email for receiving payouts
   payoutMethod: text("payout_method").default("paypal"), // paypal, stripe, bank_transfer
 
+  // Email Verification
+  emailVerified: boolean("email_verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at"),
+
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -227,6 +231,17 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   expiresAt: timestamp("expires_at").notNull(),
   isUsed: boolean("is_used").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Email Verification Tokens
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  usedAt: timestamp("used_at"),
 });
 
 // Reward Distribution Settings
@@ -892,3 +907,7 @@ export type UserPrediction = typeof userPredictions.$inferSelect;
 
 export type InsertPredictionResult = z.infer<typeof insertPredictionResultSchema>;
 export type PredictionResult = typeof predictionResults.$inferSelect;
+
+// Email Verification Token Types
+export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
+export type InsertEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
