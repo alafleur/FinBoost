@@ -18,7 +18,7 @@ export default function PayoutSetupCard() {
   const handleConnectOnboarding = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/stripe/connect-onboarding");
+      const response = await apiRequest("POST", "/api/paypal/connect-onboarding");
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.onboardingUrl) {

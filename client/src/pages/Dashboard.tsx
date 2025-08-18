@@ -78,6 +78,7 @@ interface User {
   nextBillingDate?: string;
   lastPaymentAmount?: number;
   lastPaymentStatus?: string;
+  emailVerified?: boolean;
 }
 
 export default function Dashboard() {
@@ -219,6 +220,32 @@ export default function Dashboard() {
       [task]: true
     }));
   };
+
+  // Listen for URL changes to update active tab
+  useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam && ['overview', 'learn', 'referrals', 'rewards', 'board', 'profile'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    const currentUrl = new URL(window.location.href);
+    const currentTab = currentUrl.searchParams.get('tab') || 'overview';
+    
+    if (currentTab !== activeTab) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set('tab', activeTab);
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const fetchData = async () => {
