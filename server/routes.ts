@@ -155,6 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/rewards/history", authenticateToken, async (req, res) => {
     try {
       const userId = req.user?.id;
+      res.set("Cache-Control", "no-store");
       if (!userId) return res.json({ summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] });
       const data = await storage.getRewardsHistoryForUser(Number(userId));
       res.json(data);
@@ -168,12 +169,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cycles/rewards/history", authenticateToken, async (req, res) => {
     try {
       const userId = req.user?.id;
-      if (!userId) return res.json([]);
+      res.set("Cache-Control", "no-store");
+      if (!userId) return res.json({ summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] });
       const data = await storage.getRewardsHistoryForUser(Number(userId));
       res.json(data);
     } catch (err) {
       console.error("GET /api/cycles/rewards/history error", err);
-      res.status(500).json({ error: "Failed to load cycle rewards history" });
+      res.status(500).json({ error: "Failed to load rewards history" });
     }
   });
 

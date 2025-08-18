@@ -1,5 +1,5 @@
 // client/src/pages/Payouts.tsx
-// Updated to use consolidated /api/rewards/history so winners appear as Pending/Queued/Paid.
+// Add cache-busting to fetch to avoid 304s on stale empty responses
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";

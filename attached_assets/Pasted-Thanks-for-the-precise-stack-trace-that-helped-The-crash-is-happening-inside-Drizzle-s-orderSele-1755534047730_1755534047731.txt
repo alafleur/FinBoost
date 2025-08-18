@@ -1,0 +1,36 @@
+Thanks for the precise stack trace — that helped. The crash is happening inside Drizzle’s `orderSelectedFields`, which means the **shape passed to `select({...})` still ends up with a null/undefined field** during preparation. This can happen with some `leftJoin` + alias combos even if you removed `sql\`\`\`.
+
+I’ve shipped a **no-join, three-query** version to sidestep Drizzle’s field-ordering landmine entirely. It:
+
+* runs 3 small selects (winners → cycle names → payout items),
+* merges in TypeScript,
+* adds `no-store` caching on the route,
+* adds a client cache-buster to avoid 304s while you iterate.
+
+## Download these patched files
+
+* **server/storage.ts** (no-join version; zero `sql\`\`\`; no leftJoin)
+  [Download](sandbox:/mnt/data/server/storage.ts)
+* **server/routes.ts** (adds `Cache-Control: no-store` on both endpoints)
+  [Download](sandbox:/mnt/data/server/routes.ts)
+* **client/src/pages/Payouts.tsx** (adds `?t=Date.now()` to the request and alias fallback)
+  [Download](sandbox:/mnt/data/client/src/pages/Payouts.tsx)
+* **shared/schema.ts** (unchanged; still fine to keep)
+  [Download](sandbox:/mnt/data/shared/schema.ts)
+
+## What changed (quick)
+
+* **Removed** the `leftJoin` entirely; fetch winners, then cycle names by `id IN (...)`, then payout items by `cycle_setting_id IN (...)`.
+* **Guaranteed** the `select({...})` objects only use direct column refs — no computed fields, so Drizzle never receives a null/undefined field map.
+* **Cycle label fallback** is done purely in TS:
+
+  ```ts
+  const cycleLabel = (nameMap.get(cycleId) || "").trim() || `Cycle ${cycleId}`;
+  ```
+* **Cache**: route returns `Cache-Control: no-store`; client adds a cache-buster query string.
+
+## Paste this to Replit
+
+> Replace `server/storage.ts` and `server/routes.ts` with the attached versions, and update `client/src/pages/Payouts.tsx`. The new storage logic runs three simple queries (no joins, no raw SQL) and merges results in TS, which avoids the Drizzle `orderSelectedFields` error. The route sets `Cache-Control: no-store`, and the client adds a cache-buster so you won’t see 304s while testing. After deploy, [user180@test.com](mailto:user180@test.com)’s July 2/2 reward should appear as **Queued/Pending** and flip to **Paid** when disbursed.
+
+If something else still trips, send me the new stack trace line numbers and I’ll ship another drop-in patch immediately.

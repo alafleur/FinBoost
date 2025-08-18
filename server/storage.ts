@@ -10494,7 +10494,7 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     `);
   }
 
-  // ChatGPT's hardened consolidated rewards history implementation
+  // ChatGPT's no-join implementation: avoids Drizzle leftJoin field ordering bug
   async getRewardsHistoryForUser(userId: number): Promise<RewardsHistoryResponse> {
     function normalizePayoutStatus(raw?: string): "pending" | "earned" | "paid" | "failed" {
       switch ((raw || "").toLowerCase()) {
@@ -10513,18 +10513,16 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     }
 
     try {
-      // 1) Winners for this user (sealed only) - NO raw SQL templates
+      // 1) Pull winners for user — sealed only
       const winners = await db
         .select({
           cycleId: cycleWinnerSelections.cycleSettingId,
           awardedAt: cycleWinnerSelections.sealedAt,
-          rewardAmount: cycleWinnerSelections.payoutFinal,
-          rewardAmountFallback: cycleWinnerSelections.rewardAmount,
+          payoutFinal: cycleWinnerSelections.payoutFinal,
+          rewardAmount: cycleWinnerSelections.rewardAmount,
           payoutStatus: cycleWinnerSelections.payoutStatus,
-          dbCycleName: cycleSettings.cycleName,
         })
         .from(cycleWinnerSelections)
-        .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
         .where(and(eq(cycleWinnerSelections.userId, userId), eq(cycleWinnerSelections.isSealed, true)))
         .orderBy(desc(cycleWinnerSelections.sealedAt));
 
@@ -10536,11 +10534,25 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
         new Set(winners.map((w) => Number(w.cycleId)).filter((n) => Number.isFinite(n)))
       ) as number[];
 
-      // 2) Payout batch items for these cycles (if any)
-      let payoutItems:
-        | Array<{ cycleSettingId: number; amountCents: number; status: string; paidAt: Date | null }>
-        | [] = [];
+      // 2) Map cycle id -> cycle name
+      const nameMap = new Map<number, string>();
+      if (cycleIds.length > 0) {
+        const names = await db
+          .select({
+            id: cycleSettings.id,
+            name: cycleSettings.cycleName,
+          })
+          .from(cycleSettings)
+          .where(inArray(cycleSettings.id, cycleIds));
+        for (const row of names) {
+          const id = Number(row.id);
+          const nm = (row.name ? String(row.name) : "").trim();
+          nameMap.set(id, nm);
+        }
+      }
 
+      // 3) Pull payout items for these cycles (if any)
+      const payoutMap = new Map<number, { amountCents: number; status: string; paidAt: Date | null }>();
       if (cycleIds.length > 0) {
         const rows = await db
           .select({
@@ -10552,38 +10564,30 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
           .from(payoutBatchItems)
           .where(and(eq(payoutBatchItems.userId, userId), inArray(payoutBatchItems.cycleSettingId, cycleIds)));
 
-        payoutItems = rows.map((r) => ({
-          cycleSettingId: Number(r.cycleSettingId),
-          amountCents: Number(r.amountCents),
-          status: String(r.status || ""),
-          paidAt: (r.paidAt as any) ?? null,
-        }));
+        for (const r of rows) {
+          payoutMap.set(Number(r.cycleSettingId), {
+            amountCents: Number(r.amountCents || 0),
+            status: String(r.status || ""),
+            paidAt: (r.paidAt as any) ?? null,
+          });
+        }
       }
 
-      const byCycle = new Map<number, { amountCents: number; status: string; paidAt: Date | null }>();
-      payoutItems.forEach((p) =>
-        byCycle.set(Number(p.cycleSettingId), {
-          amountCents: Number(p.amountCents),
-          status: p.status,
-          paidAt: p.paidAt as any,
-        })
-      );
-
+      // 4) Reconcile into UI items
       const items: RewardsHistoryItem[] = winners.map((w) => {
         const cycleId = Number(w.cycleId);
-        const match = byCycle.get(cycleId);
+        const paid = payoutMap.get(cycleId);
+
         const amount =
-          (match?.amountCents ?? 0) ||
+          (paid?.amountCents ?? 0) ||
+          Number(w.payoutFinal || 0) ||
           Number(w.rewardAmount || 0) ||
-          Number(w.rewardAmountFallback || 0) ||
           0;
 
-        const status = normalizePayoutStatus(match?.status || w.payoutStatus || "pending");
-        const paidAt = match?.paidAt ? new Date(match.paidAt).toISOString() : null;
+        const status = normalizePayoutStatus(paid?.status || w.payoutStatus || "pending");
+        const paidAt = paid?.paidAt ? new Date(paid.paidAt).toISOString() : null;
         const awardedAt = w.awardedAt ? new Date(w.awardedAt as any).toISOString() : null;
-
-        // Avoid Drizzle SQL template issues: compute label purely in TS.
-        const cycleLabel = (w.dbCycleName && String(w.dbCycleName).trim()) || `Cycle ${cycleId}`;
+        const cycleLabel = (nameMap.get(cycleId) || "").trim() || `Cycle ${cycleId}`;
 
         return {
           cycleId,
