@@ -27,6 +27,8 @@ import { initGTM, addGTMNoScript } from "./lib/gtm";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Verify from "./pages/Verify";
+import Reset from "./pages/Reset";
 
 function Router() {
   // Track page views automatically
@@ -55,6 +57,8 @@ function Router() {
 
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/verify" component={Verify} />
+      <Route path="/reset" component={Reset} />
       <Route component={NotFound} />
     </Switch>
   );
