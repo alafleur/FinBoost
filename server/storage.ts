@@ -10618,7 +10618,7 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
       });
 
       const totalEarnedCents = items
-        .filter((i) => i.status === "paid")
+        .filter((i) => i.status === "paid" || i.status === "earned")
         .reduce((s, i) => s + (i.amountCents || 0), 0);
       const rewardsReceived = items.filter((i) => i.status === "paid").length;
 
