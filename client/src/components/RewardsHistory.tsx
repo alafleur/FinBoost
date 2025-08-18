@@ -30,9 +30,19 @@ interface Disbursement {
 }
 
 interface RewardsData {
-  disbursements: Disbursement[];
-  totalEarned: number;
-  totalCount: number;
+  summary: {
+    paidTotalCents: number;
+    pendingTotalCents: number;
+    rewardsReceived: number;
+  };
+  items: {
+    cycleId: number;
+    cycleLabel: string | null;
+    awardedAt: string | null;
+    amountCents: number;
+    status: "pending" | "earned" | "paid" | "failed";
+    paidAt: string | null;
+  }[];
 }
 
 export default function RewardsHistory() {
@@ -279,18 +289,27 @@ export default function RewardsHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="text-center">
               <div className="text-3xl font-bold mb-1 text-gray-900">
-                ${((rewardsData?.totalEarned || 0) / 100).toFixed(2)}
+                ${((rewardsData?.summary.paidTotalCents || 0) / 100).toFixed(2)}
               </div>
               <p className="text-gray-600 text-sm">Total Earned</p>
+              <p className="text-xs text-gray-500">Paid rewards</p>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1 text-yellow-600">
+                ${((rewardsData?.summary.pendingTotalCents || 0) / 100).toFixed(2)}
+              </div>
+              <p className="text-gray-600 text-sm">Pending / Queued</p>
+              <p className="text-xs text-gray-500">Awaiting processing</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold mb-1 text-gray-900">
-                {rewardsData?.totalCount || 0}
+                {rewardsData?.summary.rewardsReceived || 0}
               </div>
               <p className="text-gray-600 text-sm">Rewards Received</p>
+              <p className="text-xs text-gray-500">Count of paid</p>
             </div>
           </div>
           
