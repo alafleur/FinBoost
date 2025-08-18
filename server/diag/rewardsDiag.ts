@@ -87,7 +87,7 @@ async function getDrizzleVersion(): Promise<string> {
 
 async function runSchemaProbe(report: DiagnosticReport): Promise<void> {
   try {
-    // Check actual database schema for key tables
+    // Check actual database schema for key tables using raw SQL
     const schemaQuery = `
       SELECT 
         table_name, 
@@ -101,7 +101,8 @@ async function runSchemaProbe(report: DiagnosticReport): Promise<void> {
     `;
 
     const actualSchema = await db.execute(schemaQuery);
-    report.details.schemaProbe.actualColumns = actualSchema.rows;
+    const rows = actualSchema.rows || [];
+    report.details.schemaProbe.actualColumns = rows;
 
     // Check for expected key columns
     const expectedColumns = [
@@ -113,7 +114,7 @@ async function runSchemaProbe(report: DiagnosticReport): Promise<void> {
     ];
 
     for (const expected of expectedColumns) {
-      const exists = actualSchema.rows.some((row: any) => 
+      const exists = rows.some((row: any) => 
         row.table_name === expected.table && row.column_name === expected.column
       );
       if (!exists) {
@@ -155,7 +156,7 @@ async function runDrizzleProbe(report: DiagnosticReport): Promise<void> {
 
 async function runRawSqlProbe(report: DiagnosticReport): Promise<void> {
   try {
-    // Test equivalent raw SQL query
+    // Test equivalent raw SQL query using direct SQL without parameters for now
     const rawQuery = `
       SELECT 
         cycle_setting_id as "cycleId",
@@ -164,12 +165,12 @@ async function runRawSqlProbe(report: DiagnosticReport): Promise<void> {
         reward_amount as "rewardAmount",
         payout_status as "payoutStatus"
       FROM cycle_winner_selections 
-      WHERE user_id = $1 AND is_sealed = true 
+      WHERE user_id = 1980 AND is_sealed = true 
       LIMIT 1
     `;
 
-    const rawResult = await db.execute(rawQuery, [1980]);
-    report.details.rawSqlProbe.queryResults = rawResult.rows;
+    const rawResult = await db.execute(rawQuery);
+    report.details.rawSqlProbe.queryResults = rawResult.rows || [];
 
   } catch (error) {
     report.details.rawSqlProbe.status = "fail";
@@ -195,7 +196,9 @@ async function runDataIntegrityProbe(report: DiagnosticReport): Promise<void> {
       `;
       
       const result = await db.execute(nullCountQuery);
-      const nullCount = parseInt(result.rows[0]?.null_count || "0");
+      const rows = result.rows || [];
+      const firstRow = rows[0] as any;
+      const nullCount = parseInt(firstRow?.null_count || "0");
       
       report.details.dataIntegrityProbe.nullCounts[`${check.table}.${check.column}`] = nullCount;
       

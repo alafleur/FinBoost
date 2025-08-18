@@ -10534,42 +10534,56 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
         new Set(winners.map((w) => Number(w.cycleId)).filter((n) => Number.isFinite(n)))
       ) as number[];
 
-      // 2) Map cycle id -> cycle name
+      // 2) Map cycle id -> cycle name (with null safety for Drizzle field ordering)
       const nameMap = new Map<number, string>();
       if (cycleIds.length > 0) {
-        const names = await db
-          .select({
-            id: cycleSettings.id,
-            name: cycleSettings.cycleName,
-          })
-          .from(cycleSettings)
-          .where(inArray(cycleSettings.id, cycleIds));
-        for (const row of names) {
-          const id = Number(row.id);
-          const nm = (row.name ? String(row.name) : "").trim();
-          nameMap.set(id, nm);
+        try {
+          const names = await db
+            .select({
+              id: cycleSettings.id,
+              name: cycleSettings.cycleName,
+            })
+            .from(cycleSettings)
+            .where(inArray(cycleSettings.id, cycleIds));
+          for (const row of names) {
+            if (row && typeof row.id !== 'undefined') {
+              const id = Number(row.id);
+              const nm = (row.name ? String(row.name) : "").trim();
+              nameMap.set(id, nm);
+            }
+          }
+        } catch (error) {
+          console.warn('Cycle names query failed, using fallback labels:', error);
+          // Continue with empty nameMap - will use fallback labels
         }
       }
 
-      // 3) Pull payout items for these cycles (if any)
+      // 3) Pull payout items for these cycles (with null safety for Drizzle field ordering)
       const payoutMap = new Map<number, { amountCents: number; status: string; paidAt: Date | null }>();
       if (cycleIds.length > 0) {
-        const rows = await db
-          .select({
-            cycleSettingId: payoutBatchItems.cycleSettingId,
-            amountCents: payoutBatchItems.amountCents,
-            status: payoutBatchItems.status,
-            paidAt: payoutBatchItems.paidAt,
-          })
-          .from(payoutBatchItems)
-          .where(and(eq(payoutBatchItems.userId, userId), inArray(payoutBatchItems.cycleSettingId, cycleIds)));
+        try {
+          const rows = await db
+            .select({
+              cycleSettingId: payoutBatchItems.cycleSettingId,
+              amountCents: payoutBatchItems.amountCents,
+              status: payoutBatchItems.status,
+              paidAt: payoutBatchItems.paidAt,
+            })
+            .from(payoutBatchItems)
+            .where(and(eq(payoutBatchItems.userId, userId), inArray(payoutBatchItems.cycleSettingId, cycleIds)));
 
-        for (const r of rows) {
-          payoutMap.set(Number(r.cycleSettingId), {
-            amountCents: Number(r.amountCents || 0),
-            status: String(r.status || ""),
-            paidAt: (r.paidAt as any) ?? null,
-          });
+          for (const r of rows) {
+            if (r && typeof r.cycleSettingId !== 'undefined') {
+              payoutMap.set(Number(r.cycleSettingId), {
+                amountCents: Number(r.amountCents || 0),
+                status: String(r.status || ""),
+                paidAt: (r.paidAt as any) ?? null,
+              });
+            }
+          }
+        } catch (error) {
+          console.warn('Payout items query failed, using winner data only:', error);
+          // Continue with empty payoutMap - will use winner selection data
         }
       }
 
@@ -10585,6 +10599,10 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
           0;
 
         const status = normalizePayoutStatus(paid?.status || w.payoutStatus || "pending");
+        
+        // Convert "processing" status to "earned" for UI compatibility
+        const finalStatus = status === "pending" && w.payoutStatus === "processing" ? "earned" : status;
+        
         const paidAt = paid?.paidAt ? new Date(paid.paidAt).toISOString() : null;
         const awardedAt = w.awardedAt ? new Date(w.awardedAt as any).toISOString() : null;
         const cycleLabel = (nameMap.get(cycleId) || "").trim() || `Cycle ${cycleId}`;
@@ -10594,7 +10612,7 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
           cycleLabel,
           awardedAt,
           amountCents: amount,
-          status,
+          status: finalStatus,
           paidAt,
         };
       });
