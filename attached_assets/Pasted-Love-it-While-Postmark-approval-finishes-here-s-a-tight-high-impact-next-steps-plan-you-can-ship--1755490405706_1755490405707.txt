@@ -1,0 +1,63 @@
+Love it. While Postmark approval finishes, here’s a tight, high-impact next-steps plan you can ship now (no dependency on approval).
+
+# 0) Wire it into signup (must-do)
+
+* **Trigger verification on signup:** call `POST /api/auth/verify/request { email }` after creating the user.
+* **Gate access:** treat `emailVerified=false` as limited mode (e.g., dashboard banner + block sensitive actions).
+* **Add “Resend verification”** button on the “check your inbox” screen.
+
+# 1) UX polish (1–2 hours)
+
+* **Verification banner:** If `!emailVerified`, show a dismissible banner on Dashboard with a “Resend” CTA.
+* **Reset page copy:** Add strength meter + show password rules.
+* **Success redirects:** After verify/reset, redirect to login with a toast.
+
+# 2) Security hardening (quick wins)
+
+* **Rate limiting:** `express-rate-limit` on `/verify/request` and `/password/request` (e.g., 5/min/IP).
+* **CAPTCHA (optional):** add hCaptcha/Cloudflare Turnstile to `/password/request`.
+* **Token storage defense:** store only a **hash of the token** in DB (prevents use if DB leaked). Keep the raw token only in the link.
+
+# 3) Ops & observability
+
+* **Webhook ingestion:** Persist Postmark webhook events (Delivery, Bounce, SpamComplaint) to a table.
+* **Suppression logic:** Auto-suppress **marketing** to bounced/complaint addresses; allow critical transactional at your discretion.
+* **Runbook:** Add alerts on repeated bounces per domain (>5/day) and API send failures.
+
+# 4) Backfill plan (your 1,503 users)
+
+* **Mark existing users as unverified** (if not already).
+* **Soft campaign:** Queue verification emails in small batches (e.g., 200/hour) once approval lands.
+* **UI notice:** If a user logs in unverified, surface banner + CTA.
+
+# 5) Payout notifications hookup
+
+* In your PayPal disbursement success path, call:
+
+  ```
+  getEmail().send('payout-processed', {
+    to: user.email,
+    model: { cycleId, amountPretty, supportEmail, brandAddress }
+  });
+  ```
+* Add an admin “Resend payout email” action on the batch details panel.
+
+# 6) Content/branding quick pass
+
+* **Finalize copy** in templates (subject lines + legal footer).
+* **Plain-text part:** already auto-generated, but glance over for readability.
+* **Support links:** ensure `support@getfinboost.com` is consistent.
+
+# 7) Compliance touch (Canada/CASL)
+
+* Transactional is fine without unsubscribe, but keep **business identification** in footer (address + support email). You’ve done this—just confirm address is final.
+
+---
+
+If you’d like, I can:
+
+* ship a tiny **VerificationBanner.tsx** and **Resend route** patch, or
+* add a **token hashing** update to the router + migration, or
+* create a **webhook ingestion** table + handler you can drop in.
+
+Tell me which one you want first, and I’ll deliver the ready-to-drop files.
