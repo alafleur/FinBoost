@@ -1,0 +1,61 @@
+Perfect — I can ship you a clean, drop-in signup with verification so Replit can integrate immediately.
+
+# Download (give this to Replit)
+
+**[finboost-signup-with-verification.zip](sandbox:/mnt/data/finboost-signup-with-verification.zip)**
+
+### What’s inside
+
+* `server/routes/signup.ts` — full signup route wired to email verification
+
+  * Creates user (bcrypt), normalizes email, checks duplicates
+  * Generates a 24-hour **verification token** (SHA-256 hash stored)
+  * Sends the **verify-email** template via your existing EmailService (Postmark)
+  * Returns `201 { success: true, userId, needVerification: true }`
+* `README-Signup-With-Verification.md` — one-page install + smoke tests
+
+### How to apply (2 steps)
+
+1. **Replace your current signup route**
+
+   * Back up your existing `server/routes/signup.ts`.
+   * Drop in the new file from the zip (same path/name).
+   * It uses **ESM** import specifiers (`../db.js`, `../services/email/EmailService.js`) to match your codebase.
+
+2. **Ensure it’s mounted**
+   In `server/routes.ts` you should already have (or add):
+
+   ```ts
+   import signupRouter from './routes/signup.js';
+   app.use('/api/auth', signupRouter);
+   ```
+
+### Env required (you already set these during Postmark setup)
+
+```
+EMAIL_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=****
+POSTMARK_MESSAGE_STREAM=outbound
+EMAIL_FROM="FinBoost <no-reply@txn.getfinboost.com>"
+SUPPORT_EMAIL=support@getfinboost.com
+BRAND_ADDRESS="FinBoost Inc., Toronto, ON"
+VERIFY_BASE_URL=https://getfinboost.com/verify
+```
+
+### Smoke test (port 5000)
+
+```bash
+curl -X POST http://localhost:5000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com","password":"StrongPass!23","username":"you"}'
+```
+
+Expected:
+
+* `201` with `{ success: true, needVerification: true }`
+* A row is created in `email_verification_tokens` (token stored as a **hash**)
+* A verification email is sent with a link like `https://getfinboost.com/verify?token=...`
+
+---
+
+If Replit prefers that I **patch your exact file** instead of replacing it, forward me the current `server/routes/signup.ts` contents and I’ll return a diff that only adds the token + send step after user creation.

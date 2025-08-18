@@ -25,6 +25,7 @@ import devEmailTest from './routes/devEmailTest.js';
 import postmarkWebhook from './routes/postmarkWebhook.js';
 import authEmailRouter from './routes/authEmail.js';
 import adminEmailRouter from './routes/adminEmail.js';
+import signupRouter from './routes/signup.js';
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -7719,6 +7720,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     app.use('/api/dev/email', devEmailTest);
   }
   // Note: Webhook route already mounted at line 154 above - removing duplicate
+  
+  // Mount auth routes
+  app.use('/api/auth', signupRouter);
+  app.use('/api/auth', authEmailRouter);
+  app.use('/api/admin/email', adminEmailRouter);
 
   // Expose broadcast functions for use in other routes
   (httpServer as any).broadcastAnalyticsUpdate = broadcastAnalyticsUpdate;
