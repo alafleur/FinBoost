@@ -26,6 +26,7 @@ import postmarkWebhook from './routes/postmarkWebhook.js';
 import authCompatRouter from './routes/authCompat.js';
 import adminEmailRouter from './routes/adminEmail.js';
 import signupRouter from './routes/signup.js';
+import { runRewardsDiagnostics } from './diag/rewardsDiag.js';
 
 // Initialize Stripe only if secret key is available
 let stripe: Stripe | null = null;
@@ -176,6 +177,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       console.error("GET /api/cycles/rewards/history error", err);
       res.status(500).json({ error: "Failed to load rewards history" });
+    }
+  });
+
+  // ChatGPT's diagnostic route for rewards system failures
+  app.get("/api/admin/diag/rewards", requireAdmin, async (req, res) => {
+    try {
+      const diagnosticReport = await runRewardsDiagnostics();
+      res.json(diagnosticReport);
+    } catch (error) {
+      console.error("Diagnostic route error:", error);
+      res.status(500).json({ 
+        error: "Diagnostic system failure", 
+        details: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
