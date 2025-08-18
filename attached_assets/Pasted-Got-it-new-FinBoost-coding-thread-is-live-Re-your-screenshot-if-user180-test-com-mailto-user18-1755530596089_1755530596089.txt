@@ -1,0 +1,223 @@
+Got it—new FinBoost coding thread is live. Re your screenshot: if **[user180@test.com](mailto:user180@test.com)** won the **July 2/2** cycle but sees \$0.00 and no entries, the most likely cause is the Rewards page only tallying **paid payouts**, while that cycle’s winner entries were never materialized into payout items (or are still in `pending/earned`)—which aligns with the earlier PayPal “null receiver” issue and the missing `/api/admin/payout-batches` calls you saw.
+
+Here’s a tight triage + fix you can hand to Replit.
+
+# What to check first (DB truth)
+
+Run these to see where the break is:
+
+```sql
+-- 1) Who is the user?
+SELECT id, email FROM users WHERE email='user180@test.com';
+
+-- Keep this as :user_id
+-- 2) Confirm they’re recorded as a winner for the July 2/2 cycle
+SELECT cw.id, cw.user_id, cw.cycle_id, cw.prize_amount_cents, cw.created_at
+FROM cycle_winners cw
+JOIN cycles c ON c.id = cw.cycle_id
+WHERE cw.user_id = :user_id
+  AND (c.label ILIKE '%July%' OR c.name ILIKE '%Jul%')
+ORDER BY c.start_date DESC;
+
+-- 3) See if there are payout items for that cycle & user
+SELECT pi.id, pi.status, pi.amount_cents, pi.paid_at, pi.reason, pi.cycle_id, pi.recipient_email
+FROM payout_items pi
+WHERE pi.user_id = :user_id
+  AND pi.reason = 'cycle_prize'
+ORDER BY pi.created_at DESC;
+
+-- 4) If you store rewards in a user-rewards table, check it too
+SELECT * FROM user_rewards WHERE user_id = :user_id ORDER BY created_at DESC;
+```
+
+**Interpretation:**
+
+* If (2) returns a row but (3) returns **no rows**, the user is a winner but the payout item was never created → UI shows \$0.00.
+* If (3) returns rows but **status != 'paid'**, your UI is likely summing only `paid` → shows \$0.00 instead of “Pending”.
+* If (2) returns **no rows**, the admin-side “winner” wasn’t persisted (edge case).
+
+# Backend: make Rewards show “Won/Pending/Paid” (not just Paid)
+
+### New consolidated endpoint
+
+Add a read-only endpoint that merges **winners** and **payouts** so the client can display pending vs. paid:
+
+```ts
+// GET /api/rewards/history
+// Returns summary + line items for the signed-in user
+app.get('/api/rewards/history', requireAuth, async (req, res) => {
+  const userId = req.user.id;
+
+  const winners = await db.$queryRaw/*sql*/`
+    SELECT c.id AS cycle_id, c.label, c.start_date, c.end_date,
+           cw.prize_amount_cents,
+           cw.created_at AS awarded_at
+    FROM cycle_winners cw
+    JOIN cycles c ON c.id = cw.cycle_id
+    WHERE cw.user_id = ${userId}
+    ORDER BY c.start_date DESC`;
+
+  const payouts = await db.$queryRaw/*sql*/`
+    SELECT cycle_id, status, amount_cents, paid_at, created_at AS scheduled_at
+    FROM payout_items
+    WHERE user_id = ${userId} AND reason = 'cycle_prize'`;
+
+  // index payouts by cycle
+  const byCycle = new Map<string, any>();
+  for (const p of payouts) {
+    byCycle.set(String(p.cycle_id), p);
+  }
+
+  const items = winners.map(w => {
+    const p = byCycle.get(String(w.cycle_id));
+    const status = p?.status ?? 'pending'; // pending until payout item exists/paid
+    const amount_cents = p?.amount_cents ?? w.prize_amount_cents;
+    return {
+      cycleId: w.cycle_id,
+      cycleLabel: w.label,
+      awardedAt: w.awarded_at,
+      amountCents: amount_cents,
+      status,               // 'pending' | 'earned' | 'paid' | 'failed'
+      paidAt: p?.paid_at ?? null
+    };
+  });
+
+  const totalEarnedCents = items
+    .filter(i => i.status === 'paid')
+    .reduce((s, i) => s + (i.amountCents || 0), 0);
+
+  const rewardsReceived = items.filter(i => i.status === 'paid').length;
+
+  res.json({
+    summary: { totalEarnedCents, rewardsReceived },
+    items
+  });
+});
+```
+
+> This ensures winners show up **immediately** as “Pending” even before a payout exists/has succeeded.
+
+# Frontend: consume the new endpoint & stop hiding history
+
+Update your Rewards page to show both **Summary** and **History** using the new API. Crucially, **don’t gate the history behind “has payment info”**.
+
+```tsx
+// RewardsHistory.tsx (simplified)
+type RewardItem = {
+  cycleId: string;
+  cycleLabel: string;
+  awardedAt: string;
+  amountCents: number;
+  status: 'pending'|'earned'|'paid'|'failed';
+  paidAt?: string|null;
+};
+
+type RewardsResponse = {
+  summary: { totalEarnedCents: number; rewardsReceived: number };
+  items: RewardItem[];
+};
+
+export default function RewardsHistory() {
+  const [data, setData] = useState<RewardsResponse | null>(null);
+
+  useEffect(() => {
+    fetch('/api/rewards/history').then(r => r.json()).then(setData);
+  }, []);
+
+  if (!data) return null;
+
+  const dollars = (cents:number) => `$${(cents/100).toFixed(2)}`;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary */}
+      <section className="rounded-2xl border p-4">
+        <h2 className="text-lg font-semibold">Your Rewards Success Story</h2>
+        <div className="mt-3 flex items-end gap-10">
+          <div>
+            <div className="text-3xl font-bold">{dollars(data.summary.totalEarnedCents)}</div>
+            <div className="text-xs text-muted-foreground">Total Earned</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold">{data.summary.rewardsReceived}</div>
+            <div className="text-xs text-muted-foreground">Rewards Received</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment info CTA can live separately, but never hide history */}
+      {/* ...Setup Payment Info card... */}
+
+      {/* History */}
+      <section className="rounded-2xl border p-4">
+        <h3 className="text-base font-semibold">Reward History</h3>
+        {data.items.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">No rewards yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y">
+            {data.items.map((it) => (
+              <li key={it.cycleId} className="py-3 flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{it.cycleLabel}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Awarded {new Date(it.awardedAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">{dollars(it.amountCents)}</div>
+                  <div className="text-xs">
+                    {it.status === 'paid' ? 'Paid' :
+                     it.status === 'earned' ? 'Queued' :
+                     it.status === 'failed' ? 'Failed — contact support' :
+                     'Pending'}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+```
+
+# Backfill (if winners exist but payout items don’t)
+
+Once you confirm `cycle_winners` has the record and `payout_items` is empty, do a one-time backfill so the payout pipeline can pick it up:
+
+```sql
+-- Example backfill (adjust table/column names to your schema!)
+INSERT INTO payout_items (id, user_id, cycle_id, amount_cents, status, reason, recipient_email, created_at)
+SELECT gen_random_uuid(), cw.user_id, cw.cycle_id, cw.prize_amount_cents,
+       'earned'::text, 'cycle_prize'::text, u.email, now()
+FROM cycle_winners cw
+JOIN users u ON u.id = cw.user_id
+LEFT JOIN payout_items pi
+  ON pi.user_id = cw.user_id
+ AND pi.cycle_id = cw.cycle_id
+ AND pi.reason = 'cycle_prize'
+WHERE pi.id IS NULL;
+```
+
+Also fix the **null receiver** issue before batching again:
+
+* Ensure `recipient_email` maps to verified payout email (or your PayPal receiver) and is **non-null**.
+* Add a NOT NULL constraint + validation at the batch builder.
+
+# “Setup Payment Info” shouldn’t hide history
+
+Keep that CTA visible, but don’t condition the history/summary on payment profile presence. Users should always see “Pending \$X for July 2/2” even if they still need to add payout details.
+
+# Quick message you can paste to Replit
+
+> We have a user ([user180@test.com](mailto:user180@test.com)) who won the July 2/2 cycle but sees \$0.00 and no items on Rewards. Please:
+>
+> 1. Run the SQL in the triage section to confirm: the user has a row in `cycle_winners`, but no corresponding `payout_items`, or `payout_items` exists but status isn’t `paid`.
+> 2. Implement `GET /api/rewards/history` (code above) so the client shows winners as **Pending/Queued/Paid** instead of only summing `paid`.
+> 3. Update the Rewards page to always render history from that endpoint; do not hide history behind payment-setup checks.
+> 4. If `cycle_winners` exists but payout rows don’t, run the provided backfill to create `payout_items` with `status='earned'`.
+> 5. Fix the PayPal batch builder to require `recipient_email` (non-null) and re-run the batch for any `earned` items.
+> 6. Confirm the July 2/2 prize for [user180@test.com](mailto:user180@test.com) appears as “Pending” immediately, and as “Paid” once the payout succeeds.
+
+If you want, I can also draft the exact PR description and break this into two commits (API + UI) for them.
