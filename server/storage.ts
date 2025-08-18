@@ -10494,19 +10494,18 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     `);
   }
 
-  // ChatGPT's consolidated rewards history implementation
+  // ChatGPT's hardened consolidated rewards history implementation
   async getRewardsHistoryForUser(userId: number): Promise<RewardsHistoryResponse> {
     function normalizePayoutStatus(raw?: string): "pending" | "earned" | "paid" | "failed" {
       switch ((raw || "").toLowerCase()) {
         case "success":
         case "paid":
-        case "completed":
           return "paid";
         case "failed":
           return "failed";
         case "earned":
         case "queued":
-        case "processing":
+        case "pending":
           return "earned";
         default:
           return "pending";
@@ -10514,86 +10513,94 @@ async getActivePayoutBatchForCycle(cycleId: number): Promise<PayoutBatch | null>
     }
 
     try {
-      // 1) Get sealed winners for this user
-      const winners = await db.select({
+      // 1) Winners for this user (sealed only) - NO raw SQL templates
+      const winners = await db
+        .select({
           cycleId: cycleWinnerSelections.cycleSettingId,
           awardedAt: cycleWinnerSelections.sealedAt,
           rewardAmount: cycleWinnerSelections.payoutFinal,
           rewardAmountFallback: cycleWinnerSelections.rewardAmount,
           payoutStatus: cycleWinnerSelections.payoutStatus,
-          cycleName: sql<string>`COALESCE(${cycleSettings.cycleName}, CONCAT('Cycle ', ${cycleWinnerSelections.cycleSettingId}))`,
+          dbCycleName: cycleSettings.cycleName,
         })
         .from(cycleWinnerSelections)
         .leftJoin(cycleSettings, eq(cycleWinnerSelections.cycleSettingId, cycleSettings.id))
-        .where(and(
-          eq(cycleWinnerSelections.userId, userId),
-          eq(cycleWinnerSelections.isSealed, true)
-        ))
+        .where(and(eq(cycleWinnerSelections.userId, userId), eq(cycleWinnerSelections.isSealed, true)))
         .orderBy(desc(cycleWinnerSelections.sealedAt));
 
       if (!winners || winners.length === 0) {
         return { summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] };
       }
 
-      // 2) Get payout batch items for these cycles (if any)
-      const cycleIds = [...new Set(winners.map(w => Number(w.cycleId)).filter(n => Number.isFinite(n)))] as number[];
-      
-      let payoutItems: Array<{ cycleSettingId: number; amountCents: number; status: string; paidAt: Date | null }> = [];
-      
+      const cycleIds = Array.from(
+        new Set(winners.map((w) => Number(w.cycleId)).filter((n) => Number.isFinite(n)))
+      ) as number[];
+
+      // 2) Payout batch items for these cycles (if any)
+      let payoutItems:
+        | Array<{ cycleSettingId: number; amountCents: number; status: string; paidAt: Date | null }>
+        | [] = [];
+
       if (cycleIds.length > 0) {
-        const rows = await db.select({
+        const rows = await db
+          .select({
             cycleSettingId: payoutBatchItems.cycleSettingId,
             amountCents: payoutBatchItems.amountCents,
             status: payoutBatchItems.status,
-            paidAt: payoutBatchItems.paidAt
+            paidAt: payoutBatchItems.paidAt,
           })
           .from(payoutBatchItems)
-          .where(and(
-            eq(payoutBatchItems.userId, userId),
-            inArray(payoutBatchItems.cycleSettingId, cycleIds)
-          ));
-        
-        payoutItems = rows.map(r => ({
+          .where(and(eq(payoutBatchItems.userId, userId), inArray(payoutBatchItems.cycleSettingId, cycleIds)));
+
+        payoutItems = rows.map((r) => ({
           cycleSettingId: Number(r.cycleSettingId),
           amountCents: Number(r.amountCents),
-          status: String(r.status),
-          paidAt: (r.paidAt as any) ?? null
+          status: String(r.status || ""),
+          paidAt: (r.paidAt as any) ?? null,
         }));
       }
 
-      // 3) Map payout items by cycle for easy lookup
       const byCycle = new Map<number, { amountCents: number; status: string; paidAt: Date | null }>();
-      payoutItems.forEach(p => byCycle.set(Number(p.cycleSettingId), { 
-        amountCents: Number(p.amountCents), 
-        status: p.status, 
-        paidAt: p.paidAt as any 
-      }));
+      payoutItems.forEach((p) =>
+        byCycle.set(Number(p.cycleSettingId), {
+          amountCents: Number(p.amountCents),
+          status: p.status,
+          paidAt: p.paidAt as any,
+        })
+      );
 
-      // 4) Build consolidated items with proper status mapping
-      const items: RewardsHistoryItem[] = winners.map(w => {
-        const match = byCycle.get(Number(w.cycleId));
-        const amount = match?.amountCents ?? (Number(w.rewardAmount || 0) || Number(w.rewardAmountFallback || 0) || 0);
+      const items: RewardsHistoryItem[] = winners.map((w) => {
+        const cycleId = Number(w.cycleId);
+        const match = byCycle.get(cycleId);
+        const amount =
+          (match?.amountCents ?? 0) ||
+          Number(w.rewardAmount || 0) ||
+          Number(w.rewardAmountFallback || 0) ||
+          0;
+
         const status = normalizePayoutStatus(match?.status || w.payoutStatus || "pending");
         const paidAt = match?.paidAt ? new Date(match.paidAt).toISOString() : null;
-        
+        const awardedAt = w.awardedAt ? new Date(w.awardedAt as any).toISOString() : null;
+
+        // Avoid Drizzle SQL template issues: compute label purely in TS.
+        const cycleLabel = (w.dbCycleName && String(w.dbCycleName).trim()) || `Cycle ${cycleId}`;
+
         return {
-          cycleId: Number(w.cycleId),
-          cycleLabel: w.cycleName,
-          awardedAt: w.awardedAt ? new Date(w.awardedAt as any).toISOString() : null,
+          cycleId,
+          cycleLabel,
+          awardedAt,
           amountCents: amount,
           status,
-          paidAt
+          paidAt,
         };
       });
 
-      // 5) Calculate summary
-      const totalEarnedCents = items.filter(i => i.status === "paid").reduce((s, i) => s + (i.amountCents || 0), 0);
-      const rewardsReceived = items.filter(i => i.status === "paid").length;
+      const totalEarnedCents = items
+        .filter((i) => i.status === "paid")
+        .reduce((s, i) => s + (i.amountCents || 0), 0);
+      const rewardsReceived = items.filter((i) => i.status === "paid").length;
 
-      return { 
-        summary: { totalEarnedCents, rewardsReceived }, 
-        items 
-      };
+      return { summary: { totalEarnedCents, rewardsReceived }, items };
     } catch (error) {
       console.error('Error getting rewards history for user:', error);
       return { summary: { totalEarnedCents: 0, rewardsReceived: 0 }, items: [] };

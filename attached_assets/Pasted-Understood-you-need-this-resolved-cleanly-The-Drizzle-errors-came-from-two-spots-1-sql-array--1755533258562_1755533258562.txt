@@ -1,0 +1,41 @@
+Understood—you need this resolved cleanly. The Drizzle errors came from two spots:
+
+1. `sql.array(...)` — fixed previously by switching to `inArray(...)`.
+2. The `sql\`COALESCE(..., CONCAT(...))\`\` expression — Drizzle choked on it during field ordering.
+
+I’ve now removed **all** raw `sql` template usage from the storage layer and moved fallbacks to TypeScript. This eliminates the “Cannot convert undefined or null to object” error.
+
+# Download the fixed files
+
+* **server/storage.ts** (fully hardened: no `sql\`\``calls, safe fallbacks,`inArray\` used)
+  [Download](sandbox:/mnt/data/server/storage.ts)
+* **server/routes.ts** (same as earlier; still correct)
+  [Download](sandbox:/mnt/data/server/routes.ts)
+* **shared/schema.ts** (same as earlier)
+  [Download](sandbox:/mnt/data/shared/schema.ts)
+* **client/src/pages/Payouts.tsx** (same as earlier; UI is already correct)
+  [Download](sandbox:/mnt/data/client/src/pages/Payouts.tsx)
+* **client/src/pages/Dashboard.tsx** (optional/no-op)
+  [Download](sandbox:/mnt/data/client/src/pages/Dashboard.tsx)
+
+# What changed in `server/storage.ts` (summary)
+
+* Removed every `sql\`\`\` call and **compute labels in TS**:
+
+  ```ts
+  const cycleLabel = (w.dbCycleName?.trim()) || `Cycle ${cycleId}`;
+  ```
+* Kept the safe set-membership:
+
+  ```ts
+  inArray(payoutBatchItems.cycleSettingId, cycleIds)
+  ```
+* Guarded for empty arrays before querying `payout_batch_items`.
+* Normalized statuses to `"pending" | "earned" | "paid" | "failed"`.
+* Amount resolution prefers `payout_batch_items.amount_cents`, then `payout_final`, then legacy `reward_amount`.
+
+# Paste to Replit (short)
+
+> Replace `server/storage.ts` with the attached file. It removes raw SQL templates (which caused `Cannot convert undefined or null to object` in Drizzle) and uses `inArray(...)`. The endpoint `GET /api/rewards/history` will now return data even when cycle names are null. The UI already points to this endpoint, so [user180@test.com](mailto:user180@test.com)’s July 2/2 prize should appear as **Queued/Pending** and then flip to **Paid** when the payout batch succeeds.
+
+If anything else trips in logs, send me the exact stack trace line and I’ll ship another drop-in patch.
