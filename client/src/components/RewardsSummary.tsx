@@ -1,64 +1,34 @@
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { DollarSign, Crown, Target, Clock, Gift, ExternalLink } from 'lucide-react';
-import { useLocation } from 'wouter';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-
-type RewardsResponse = {
-  summary: {
-    paidTotalCents: number;
-    pendingTotalCents: number;
-    rewardsReceived: number;
-  };
-  items: Array<{
-    cycleId: number;
-    cycleLabel: string;
-    awardedAt: string | null;
-    amountCents: number;
-    status: "pending" | "earned" | "paid" | "failed";
-    paidAt: string | null;
-  }>;
-};
-
-function dollars(cents: number | undefined | null) {
-  const v = typeof cents === "number" ? cents : 0;
-  return `$${(v / 100).toFixed(2)}`;
-}
+// client/src/components/RewardsSummary.tsx
+import { useRewardsData } from "@/hooks/useRewardsData";
+import RewardsSummaryCards from "@/components/RewardsSummaryCards";
 
 export default function RewardsSummary() {
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<RewardsResponse["summary"] | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const { data, isLoading } = useRewardsData();
+  const summary = data?.summary ?? { paidTotalCents: 0, pendingTotalCents: 0, rewardsReceived: 0 };
 
-  useEffect(() => {
-    fetchRewardsHistory();
-    fetchUserData();
-  }, []);
+  if (isLoading) {
+    // Lightweight skeleton that keeps layout stable
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {[0,1,2].map((i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
+              <div className="h-6 w-32 bg-gray-200 animate-pulse rounded" />
+              <div className="h-3 w-28 bg-gray-100 animate-pulse rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  const fetchRewardsHistory = async () => {
-    setLoading(true);
-    try {
-      const ts = `?t=${Date.now()}`;
-      let res = await apiRequest("GET", `/api/rewards/history${ts}`);
-      if (!res.ok) {
-        res = await apiRequest("GET", `/api/cycles/rewards/history${ts}`);
-      }
-      if (res.ok) {
-        const data: RewardsResponse = await res.json();
-        setSummary(data.summary);
-      } else {
-        setSummary({ paidTotalCents: 0, pendingTotalCents: 0, rewardsReceived: 0 });
-      }
-    } catch (e) {
-      console.error("Rewards summary fetch failed:", e);
-      setSummary({ paidTotalCents: 0, pendingTotalCents: 0, rewardsReceived: 0 });
-    } finally {
-      setLoading(false);
-    }
-  };
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg">
+      <RewardsSummaryCards summary={summary} ctaHref="/dashboard?tab=rewards" compactHeader />
+    </div>
+  );
+}
 
   const fetchUserData = async () => {
     try {
