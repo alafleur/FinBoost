@@ -1,40 +1,64 @@
-import type { Express } from 'express';
+import type { Express, Request, Response } from 'express';
+import express from 'express';
+import crypto from 'crypto';
 import { recordEmailEvent, upsertSuppression } from '../services/email/suppressions.js';
 
+/** Verify Postmark signature if POSTMARK_WEBHOOK_SECRET is set. */
+function verifySignature(req: Request, raw: string): boolean {
+  const secret = process.env.POSTMARK_WEBHOOK_SECRET;
+  if (!secret) return true; // no secret configured
+  const sig = req.header('X-Postmark-Webhook-Signature') || '';
+  if (!sig) return false;
+  const hmac = crypto.createHmac('sha256', secret).update(raw, 'utf8').digest('base64');
+  
+  // Ensure same length for timingSafeEqual
+  const sigBuffer = Buffer.from(sig);
+  const hmacBuffer = Buffer.from(hmac);
+  if (sigBuffer.length !== hmacBuffer.length) return false;
+  
+  return crypto.timingSafeEqual(sigBuffer, hmacBuffer);
+}
+
 /**
- * Postmark webhook receiver.
+ * Postmark webhook receiver with HMAC verification.
  * Map all bounce/complaint events to our suppression table.
  */
 export function registerPostmarkWebhook(app: Express) {
-  app.post('/api/webhooks/postmark', async (req, res) => {
-    const payload = req.body || {};
-    try {
-      await recordEmailEvent(payload);
+  app.post('/api/webhooks/postmark',
+    // Use raw body for signature validation
+    express.raw({ type: 'application/json' }),
+    async (req: Request, res: Response) => {
+      const raw = req.body?.toString?.('utf8') || '';
+      try {
+        if (!verifySignature(req, raw)) {
+          console.warn('[POSTMARK] invalid webhook signature');
+          return res.status(200).json({ ok: true });
+        }
+        const payload = JSON.parse(raw);
+        await recordEmailEvent(payload);
 
-      const type = String(payload.RecordType || payload.Type || '').toLowerCase();
-      const subtype = String(payload.Type || payload.BounceType || '').toLowerCase();
-      const inactive = Boolean(payload.Inactive);
-      const email = String(payload.Recipient || payload.Email || payload.EmailAddress || '');
+        const type = String(payload.RecordType || payload.Type || '').toLowerCase();
+        const subtype = String(payload.Type || payload.BounceType || '').toLowerCase();
+        const inactive = Boolean(payload.Inactive);
+        const email = String(payload.Recipient || payload.Email || payload.EmailAddress || '');
 
-      // Hard bounces, spam complaints, or inactive -> suppress
-      const isHardBounce = type.includes('bounce') && /hardbounce|hard|bademail|blocked/i.test(subtype);
-      const isComplaint = type.includes('spam') || type.includes('complaint');
-      const shouldSuppress = inactive || isHardBounce || isComplaint;
+        const isHardBounce = type.includes('bounce') && /hardbounce|hard|bademail|blocked|invalid/i.test(subtype);
+        const isComplaint = type.includes('spam') || type.includes('complaint');
+        const shouldSuppress = inactive || isHardBounce || isComplaint;
 
-      if (shouldSuppress && email) {
-        await upsertSuppression(email, isComplaint ? 'complaint' : 'bounce', new Date(payload.ReceivedAt || Date.now()));
+        if (shouldSuppress && email) {
+          await upsertSuppression(email, isComplaint ? 'complaint' : 'bounce', new Date(payload.ReceivedAt || Date.now()));
+        }
+        res.json({ ok: true });
+      } catch (err: any) {
+        console.error('[POSTMARK WEBHOOK] error:', err?.message || err);
+        res.status(200).json({ ok: true }); // always 200
       }
-
-      res.json({ ok: true });
-    } catch (err: any) {
-      console.error('[POSTMARK WEBHOOK] Error processing event:', err?.message || err);
-      res.status(200).json({ ok: true }); // Always 200 to satisfy Postmark
     }
-  });
+  );
 }
 
 // Legacy export for backward compatibility
-import express from 'express';
 const router = express.Router();
 
 router.post('/', async (req, res) => {

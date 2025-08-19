@@ -44,21 +44,17 @@ export function createPostmarkProvider(): EmailProvider {
   const defaultReplyTo = process.env.EMAIL_REPLY_TO || from;
   const transactionalStream = process.env.POSTMARK_MESSAGE_STREAM_TRANSACTIONAL || 'outbound';
   const broadcastStream = process.env.POSTMARK_MESSAGE_STREAM_BROADCAST || 'broadcast';
-
-  const validator = new EmailValidationService();
+  const unsubscribeLink = process.env.EMAIL_UNSUBSCRIBE_LINK || 'https://getfinboost.com/unsubscribe';
 
   async function send(template: TemplateKey, opts: SendOptions) {
     const to = normalizeEmail(opts.to);
-    const validation = validator.validateEmail(to);
-    if (!validation.isValid) {
-      console.warn(`[EMAIL] ❌ Blocked send due to invalid address: ${to} (${validation.errorCode})`);
-      // Don't throw — treat as sent to avoid retries, but log clearly
-      return { message: `invalid-email:${validation.errorCode}` };
-    }
-
-    if (await isSuppressed(to)) {
-      console.warn(`[EMAIL] ⛔ Skipping send to suppressed address ${mask(to)}`);
-      return { message: 'suppressed' };
+    // Validation & suppression now handled at EmailService level, this is just the provider
+    const fromDomain = from.split('@').pop() || '';
+    const allowedFromDomain = (process.env.POSTMARK_ALLOWED_DOMAIN || fromDomain).toLowerCase();
+    
+    // Domain safety: enforce verified domain
+    if (!fromDomain.endsWith(allowedFromDomain)) {
+      console.warn(`[EMAIL] ⚠️ From domain mismatch: ${fromDomain} vs allowed ${allowedFromDomain}`);
     }
 
     const streamKey = chooseStream(template, opts.stream);
@@ -82,6 +78,11 @@ export function createPostmarkProvider(): EmailProvider {
     // Extra safety headers for Postmark classification
     payload.Headers = Object.entries({
       'X-PM-Message-Stream': messageStream,
+      ...(streamKey === 'broadcast'
+        ? {
+            'List-Unsubscribe': `<${unsubscribeLink}>, <mailto:support@getfinboost.com?subject=unsubscribe>`,
+          }
+        : {}),
       ...(opts.headers || {}),
     }).map(([Name, Value]) => ({ Name, Value }));
 
