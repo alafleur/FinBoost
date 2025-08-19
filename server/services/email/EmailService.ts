@@ -1,13 +1,30 @@
+import type { EmailProvider, SendOptions, TemplateKey } from './types.js';
 import { createPostmarkProvider } from './providers/postmark.js';
 import { createMockProvider } from './providers/mock.js';
-import type { EmailProvider } from './types.js';
 
-function getProviderName(): string {
-  return process.env.EMAIL_PROVIDER || 'postmark';
+export class EmailService {
+  private provider: EmailProvider;
+
+  constructor() {
+    const providerName = process.env.EMAIL_PROVIDER || 'postmark';
+    switch (providerName) {
+      case 'mock':
+        this.provider = createMockProvider();
+        break;
+      case 'postmark':
+      default:
+        this.provider = createPostmarkProvider();
+    }
+  }
+
+  async send(template: TemplateKey, opts: SendOptions) {
+    return this.provider.send(template, opts);
+  }
 }
 
+// Legacy function for backward compatibility
 function createProvider(): EmailProvider {
-  const name = getProviderName();
+  const name = process.env.EMAIL_PROVIDER || 'postmark';
   if (name === 'mock') return createMockProvider();
   return createPostmarkProvider();
 }

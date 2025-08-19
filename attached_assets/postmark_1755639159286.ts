@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { renderTemplate } from '../render.js';
 import type { EmailProvider, MessageStream, SendOptions, TemplateKey } from '../types.js';
 import { isSuppressed, normalizeEmail, upsertSuppression } from '../suppressions.js';
@@ -6,10 +7,10 @@ import { EmailValidationService } from '../../../email-validation-service.js';
 const POSTMARK_API = 'https://api.postmarkapp.com/email';
 
 const TEMPLATE_FILE: Record<TemplateKey, string> = {
-  'verify-email': 'verify_email.html',
-  'password-reset': 'password_reset.html',
-  'payout-processed': 'payout_processed.html',
-  'amoe-receipt': 'amoe_receipt.html',
+  'verify-email': 'verify-email.html',
+  'password-reset': 'password-reset.html',
+  'payout-processed': 'payout-processed.html',
+  'amoe-receipt': 'amoe-receipt.html',
   'generic': 'generic.html',
 };
 
@@ -49,7 +50,7 @@ export function createPostmarkProvider(): EmailProvider {
 
   async function send(template: TemplateKey, opts: SendOptions) {
     const to = normalizeEmail(opts.to);
-    const validation = validator.validateEmail(to);
+    const validation = validator.validate(to);
     if (!validation.isValid) {
       console.warn(`[EMAIL] ❌ Blocked send due to invalid address: ${to} (${validation.errorCode})`);
       // Don't throw — treat as sent to avoid retries, but log clearly

@@ -80,15 +80,3 @@ export async function listSuppressions(opts: { limit?: number; offset?: number; 
   }
   return db.select().from(emailSuppressions).orderBy(desc(emailSuppressions.updatedAt)).limit(limit).offset(offset);
 }
-
-export async function listEvents(opts: { limit?: number; offset?: number; search?: string }) {
-  const limit = Math.min(Math.max(1, opts.limit || 50), 200);
-  const offset = Math.max(0, opts.offset || 0);
-  if (opts.search) {
-    return db.select().from(emailEvents)
-      .where(like(emailEvents.email, `%${normalizeEmail(opts.search)}%`))
-      .orderBy(desc(emailEvents.receivedAt))
-      .limit(limit).offset(offset);
-  }
-  return db.select().from(emailEvents).orderBy(desc(emailEvents.receivedAt)).limit(limit).offset(offset);
-}

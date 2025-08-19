@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["gitFull", "playwright-driver"]
+packages = ["gitFull", "playwright-driver", "jq"]
 
 [deployment]
 deploymentTarget = "autoscale"

@@ -1,0 +1,84 @@
+Awesome—congrats on the Postmark approval. I dug through the files you shared and put together a clean, *drop-in hardening patch* that (1) stops sends to addresses that will bounce, (2) separates Transactional vs Broadcast streams, (3) records & suppresses bounces/complaints, and (4) gives you a safe dev test route.
+
+### What was wrong (quickly)
+
+* The Postmark provider always tried to send, regardless of past bounces/suppressions, and always used the default stream.&#x20;
+* You already receive webhook events and write them to the DB, but you weren’t *checking suppression before sending*, so bad addresses kept being retried. &#x20;
+* The database already has proper tables for events & suppressions, so we can enforce “don’t send” centrally.&#x20;
+* You have a solid email validator—let’s use it at send-time too.&#x20;
+
+---
+
+## ✅ Download the patch
+
+**[Download: postmark-hardening-patch.zip](sandbox:/mnt/data/postmark-hardening-patch.zip)**
+(Contains only safe, generic code—no secrets.)
+
+### What’s inside (new/updated files)
+
+```
+server/services/email/types.ts
+server/services/email/render.ts
+server/services/email/suppressions.ts
+server/services/email/providers/postmark.ts
+server/services/email/EmailService.ts
+server/routes/postmarkWebhook.ts
+server/routes/devEmailTest.ts
+.env.example
+README-POSTMARK-HARDENING.md
+```
+
+### Highlights
+
+* **Pre-send suppression check**: skip sending to any email in `email_suppressions`.&#x20;
+* **7-layer validation** before send (uses your existing validator).&#x20;
+* **Transactional vs Broadcast** stream routing with sane defaults (verify/reset/payout → Transactional, AMOE/bulk → Broadcast).
+* **Webhook** stays idempotent and turns hard bounces/complaints/inactive into suppressions automatically.&#x20;
+* **Dev test route** (`/api/dev/email-test`) protected with a secret header—so you can test without risking your bounce rate.
+* **ENV** plumbing via `.env.example` (no real keys included).
+
+---
+
+## How to install (straightforward)
+
+1. **Copy files** from the zip into your repo (preserve folders).
+2. **Set env vars** using `.env.example` (token, from address, streams).
+3. **Wire routes** in your server bootstrap (where you register routes):
+
+```ts
+import { registerPostmarkWebhook } from './routes/postmarkWebhook.js';
+import { registerDevEmailTest } from './routes/devEmailTest.js';
+
+registerPostmarkWebhook(app);
+registerDevEmailTest(app); // dev only
+```
+
+4. **Set Postmark webhook** → `POST https://<your-domain>/api/webhooks/postmark`.
+
+---
+
+## How this keeps you under 10% bounce
+
+1. **We never send to suppressed addresses** (suppressed by webhook or manual).
+2. **We validate & normalize** before any send (reject obvious bad/placeholder emails).&#x20;
+3. **Streams are correct**: Transactional (outbound) for one-to-one, Broadcast for bulk.
+4. **Dev testing won’t harm reputation** (secret-guarded route + you choose the stream/recipient).
+
+---
+
+## Postmark dashboard steps (quick)
+
+* **Verify sender domain & DKIM** (Postmark ➜ Sender Signatures).
+* **Use the Transactional stream** for all app flows; reserve Broadcast for opt-in lists.
+* **Warm up**: start with a couple of your own inboxes (e.g., @gmail), not placeholder domains.
+* **Turn on the webhook** now so every bounce/complaint is captured and suppressed.
+
+---
+
+### Why this matches your codebase
+
+* It uses your existing tables `email_events` and `email_suppressions`.&#x20;
+* It keeps the provider pattern and Postmark JSON API you’re already using.&#x20;
+* It reuses your validator and extends your current suppression utilities.&#x20;
+
+If you want me to bundle this as a PR-style diff instead of a zip, say the word and I’ll drop that in next.

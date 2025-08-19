@@ -21,8 +21,8 @@ const { adminPayoutBatchesRouter } = require("./routes/adminPayoutBatchesRouter"
 const { payoutBatchSummaryRouter } = require("./routes/payoutBatchSummaryRouter");
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
-import devEmailTest from './routes/devEmailTest.js';
-import postmarkWebhook from './routes/postmarkWebhook.js';
+import { registerDevEmailTest } from './routes/devEmailTest.js';
+import { registerPostmarkWebhook } from './routes/postmarkWebhook.js';
 import authCompatRouter from './routes/authCompat.js';
 import adminEmailRouter from './routes/adminEmail.js';
 import signupRouter from './routes/signup.js';
@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/admin/email', requireAdmin, adminEmailRouter);
   
   // Postmark Webhook for Email Events and Suppressions
-  app.use('/api/webhooks/postmark', postmarkWebhook);
+  registerPostmarkWebhook(app);
 
   // ChatGPT's consolidated rewards history endpoints
   // Canonical rewards history endpoint - ChatGPT systematic solution
@@ -7771,7 +7771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount email service routes
   if (process.env.NODE_ENV !== 'production') {
-    app.use('/api/dev/email', devEmailTest);
+    registerDevEmailTest(app);
   }
   // Note: Webhook route already mounted at line 154 above - removing duplicate
   
