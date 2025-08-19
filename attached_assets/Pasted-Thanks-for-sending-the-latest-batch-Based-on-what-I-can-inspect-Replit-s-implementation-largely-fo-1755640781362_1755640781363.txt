@@ -1,0 +1,77 @@
+Thanks for sending the latest batch. Based on what I can inspect, Replit’s implementation largely follows what we designed (validation, suppression, stream routing, webhook), but there are a few production-readiness gaps I’d still close before we stamp this “done”.
+
+## Quick verdict
+
+* ✅ Core pieces are in: 7-layer validation, suppression checks, transactional vs broadcast, webhook → suppression.
+* ⚠️ Missing (or unclear) from what I can see:
+
+  1. **Webhook authenticity**: I don’t see HMAC signature verification. Without it, anyone could spoof a “bounce” and suppress an address.
+  2. **Centralized guard at the service layer**: Your provider checks are good, but we also want validation + suppression enforced in `EmailService.send(...)` so *any* provider (now or later) can’t bypass it.
+  3. **Broadcast compliance niceties**: Add `List-Unsubscribe` on broadcast sends to keep reputation strong and help recipients exit gracefully.
+  4. **Safer dev testing**: A small rate-limit on the `/api/dev/email-test` route prevents accidental spikes.
+
+I’ve packaged those final improvements as a tiny addendum so you can drop them in.
+
+---
+
+## Download: Production Hardening Addendum
+
+**[postmark\_prod\_addendum.zip](sandbox:/mnt/data/postmark_prod_addendum.zip)**
+
+### What’s inside
+
+* `server/services/email/EmailService.ts`
+  Centralized pre-send guard (validation + suppression) so *all* providers are safe.
+* `server/services/email/providers/postmark.ts`
+  Domain guard, correct stream headers, and **`List-Unsubscribe`** for broadcast sends.
+* `server/routes/postmarkWebhook.ts`
+  **HMAC signature verification** (Express raw body) via `POSTMARK_WEBHOOK_SECRET`.
+* `server/routes/devEmailTest.ts`
+  Secret-protected **and rate-limited** test route.
+* `server/services/email/types.ts` and `.env.postmark.addendum.example`
+  (Type defs + env hints)
+* `README.md` with wiring instructions.
+
+> These are drop-in replacements/adds; they won’t break the pieces Replit already wired.
+
+---
+
+## How to wire (1 minute)
+
+1. Copy the files from the zip into your repo (keep paths).
+2. Add to your server bootstrap:
+
+```ts
+import { registerPostmarkWebhook } from "./server/routes/postmarkWebhook";
+import { registerDevEmailTest } from "./server/routes/devEmailTest";
+
+registerPostmarkWebhook(app);
+registerDevEmailTest(app); // dev only
+```
+
+3. Set env vars (example file included):
+
+```
+POSTMARK_SERVER_TOKEN=pm_...
+POSTMARK_MESSAGE_STREAM_TRANSACTIONAL=outbound
+POSTMARK_MESSAGE_STREAM_BROADCAST=broadcast
+POSTMARK_WEBHOOK_SECRET=change_me
+EMAIL_FROM="FinBoost <notifications@getfinboost.com>"
+EMAIL_REPLY_TO="support@getfinboost.com"
+EMAIL_UNSUBSCRIBE_LINK="https://getfinboost.com/unsubscribe"
+DEV_EMAIL_TEST_SECRET=change_me
+```
+
+---
+
+## Final production checklist
+
+* **DNS**: DKIM + SPF for `getfinboost.com` (and DMARC=`p=none` to start).
+* **From address**: always the verified domain (no @gmail).
+* **Streams**: transactional flows → `outbound`; bulk/AMOE → `broadcast`.
+* **Webhook**: confirm it returns **200 OK** quickly and records events; with HMAC on.
+* **Bounce rate recovery**: send the remaining quota only to known-good inboxes to dilute the early 7/7 bounces (7/70 = 10%).
+* **Templates**: broadcast templates include clear footer + unsubscribe info (the header helps but add the footer text too).
+* **Logs/metrics**: watch Postmark dashboard + your own logs for `error:*` and `suppressed`.
+
+If you want, I can also bundle a tiny suppression viewer endpoint/UI next so you can see (and unsuppress) addresses without touching the DB.
