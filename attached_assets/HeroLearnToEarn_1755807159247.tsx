@@ -41,60 +41,9 @@ const HeroLearnToEarn: React.FC<Props> = ({ phone }) => {
 
   return (
     <section id="hero" className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-8 lg:pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-8 lg:pt-16">
         <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-10 items-center">
-          {/* LEFT SIDE: Headline + Copy + CTAs */}
-          <div className="order-1 lg:order-1">
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-4 py-1.5 mb-5">
-              <span className="text-blue-700 font-semibold text-xs md:text-sm">Learn to earn</span>
-            </div>
-
-            <h1 className="text-[38px] leading-[0.95] sm:text-[44px] md:text-[56px] lg:text-[64px] font-black tracking-tight mb-4">
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Learn Real Finance Tools
-              </span>
-              <span className="block text-slate-900">Earn Real Cash</span>
-            </h1>
-
-            <p className="text-base md:text-lg text-slate-600 max-w-2xl mb-5">
-              Complete short lessons and real-world actions to collect{" "}
-              <span className="font-semibold text-slate-800">tickets</span> for cash drawings — free to join.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center">
-                  <Ticket className="w-3.5 h-3.5" />
-                </div>
-                Ticket entries
-              </span>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center">
-                  <Wallet className="w-3.5 h-3.5" />
-                </div>
-                Real money tools
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <a
-                href="/auth?mode=signup"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                Start Free
-              </a>
-              <a
-                href="#preview"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-3 border border-slate-300 text-slate-800 font-semibold bg-white hover:bg-slate-50 transition"
-              >
-                How it works
-              </a>
-            </div>
-
-            <p className="text-xs text-slate-500">
-              No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
-            </p>
-          </div>
+          {/* LEFT SIDE IS RENDERED BY YOUR EXISTING MARKUP IN HomeV3 */}
 
           {/* RIGHT: Frameless screenshot + tags + ticket bubble */}
           <div className="order-2 lg:order-2 w-full mt-8 lg:mt-0 flex lg:justify-end">

@@ -1,0 +1,45 @@
+Got it—I see exactly what you’re asking:
+
+* Keep the left side (headline + copy) as-is ✅
+* Make the **right side** look like the earlier version: **no phone frame**, soft drop-shadow, **vertical subject tags** on the left of the screenshot, and the **ticket bubble** at the bottom-right ✅
+* On **mobile**, put the **headline before the screenshot** ✅
+
+I’ve made a **surgical** update that does only that, without touching the rest of the page.
+
+# What I changed (precisely)
+
+* Replaced the internals of the `HeroLearnToEarn` component so the **right side** matches your original design (no frame, tags, ticket bubble).
+* Enforced mobile ordering (**text first**, screenshot second) with `order-1` / `order-2`.
+* Kept our pixel-perfect image approach to stay razor-sharp (exact 240/304 CSS widths + width-based `srcSet`, no scale animations).
+
+# Drop-in file (ready to use)
+
+I generated a drop-in component you can place into your repo:
+
+**Path:** `client/src/components/HeroLearnToEarn.tsx`
+This is the only file you need to replace. Your current `HomeV3.tsx` already imports and uses it correctly (so no other edits required).&#x20;
+
+**Download:**
+[Download the patch zip](sandbox:/mnt/data/finboost-hero-patch.zip)
+
+Inside the zip:
+
+* `client/src/components/HeroLearnToEarn.tsx` – the updated component
+* `README.md` – 30-second apply steps
+
+> If downloading is flaky in your environment, you can also copy the file contents from the zip directly into your project.
+
+# Notes to Replit (context + why this fixes RHS)
+
+* The screenshot is rendered **without a frame**, with a soft shadow and glow.
+* **Subject tags** (Budget, Credit, Savings, Investing, Debt) are absolutely positioned along the left rail.
+* The **ticket bubble** sits bottom-right of the screenshot.
+* **Crispness is preserved**: the image uses fixed CSS widths (`w-[240px]` mobile, `w-[304px]` desktop) and width-based `srcSet` (240w/304w + 480w/608w for retina). There are **no scale transforms**, so the browser never resamples.
+
+# Verification checklist
+
+* **Mobile:** headline appears **above** the screenshot (it will; `order-1` vs `order-2`).
+* **Right side:** visually matches your earlier iteration (tags + ticket bubble + no frame).
+* **Crispness:** in DevTools, confirm rendered width **240px** (mobile) / **304px** (desktop) and that `currentSrc` chooses the matching **240w/304w** (or **480w/608w** on retina).
+
+If you want more (or fewer) subject tags, edit the `TAGS` array at the top of the component—no other changes needed.
