@@ -1,3 +1,4 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import {
@@ -143,7 +144,7 @@ const HeroLearnToEarn: React.FC<Props> = ({ phone }) => {
                 className="w-full h-auto block select-none"
                 loading="eager"
                 decoding="async"
-                fetchPriority="high"
+                fetchpriority="high"
                 draggable={false}
                 style={{ imageRendering: "auto", backfaceVisibility: "hidden", transform: "translateZ(0)" }}
               />
