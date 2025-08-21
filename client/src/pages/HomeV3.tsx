@@ -1138,18 +1138,15 @@ export default function HomeV3() {
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
                         // Backward-compatible fallback (works today)
-                        src={
-                          screenshots[activeScreenshot].s304    // prefer desktop 1× if present on desktop
-                            ?? screenshots[activeScreenshot].m240
-                            ?? screenshots[activeScreenshot].screenshotPath
-                        }
+                        src={screenshots[activeScreenshot].screenshotPath}
 
                         // Width-based srcset so the browser picks exact 1×/2× sizes per breakpoint
+                        // Note: These properties don't exist yet, but code is ready for when they do
                         srcSet={[
-                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 240w` : null,
-                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 480w` : null,
-                          screenshots[activeScreenshot].s304 ? `${screenshots[activeScreenshot].s304} 304w` : null,
-                          screenshots[activeScreenshot].s608 ? `${screenshots[activeScreenshot].s608} 608w` : null,
+                          (screenshots[activeScreenshot] as any).m240 ? `${(screenshots[activeScreenshot] as any).m240} 240w` : null,
+                          (screenshots[activeScreenshot] as any).m480 ? `${(screenshots[activeScreenshot] as any).m480} 480w` : null,
+                          (screenshots[activeScreenshot] as any).s304 ? `${(screenshots[activeScreenshot] as any).s304} 304w` : null,
+                          (screenshots[activeScreenshot] as any).s608 ? `${(screenshots[activeScreenshot] as any).s608} 608w` : null,
                         ].filter(Boolean).join(', ')}
 
                         // Tell the browser the CSS width of the image at each breakpoint
