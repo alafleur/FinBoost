@@ -1137,28 +1137,53 @@ export default function HomeV3() {
                     {/* Exact screen area */}
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
-                        src={screenshots[activeScreenshot].screenshotPath}
+                        // Backward-compatible fallback (works today)
+                        src={
+                          screenshots[activeScreenshot].s304    // prefer desktop 1× if present on desktop
+                            ?? screenshots[activeScreenshot].m240
+                            ?? screenshots[activeScreenshot].screenshotPath
+                        }
+
+                        // Width-based srcset so the browser picks exact 1×/2× sizes per breakpoint
+                        srcSet={[
+                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 240w` : null,
+                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 480w` : null,
+                          screenshots[activeScreenshot].s304 ? `${screenshots[activeScreenshot].s304} 304w` : null,
+                          screenshots[activeScreenshot].s608 ? `${screenshots[activeScreenshot].s608} 608w` : null,
+                        ].filter(Boolean).join(', ')}
+
+                        // Tell the browser the CSS width of the image at each breakpoint
+                        sizes="(min-width: 1024px) 304px, 240px"
+
                         alt={screenshots[activeScreenshot].title}
                         className="w-full h-full object-contain will-change-transform"
-                        /* Fade only — no scale (prevents resampling blur) */
+
+                        /* Fade only — no scale (prevents resampling blur during transition) */
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.35 }}
+
                         loading="lazy"
                         decoding="async"
                         draggable={false}
+
+                        // Optional: keep if you're using the dynamic aspectRatio container;
+                        // updates the frame's height to match the actual image ratio.
                         onLoad={(e) => {
                           const img = e.currentTarget;
-                          if (img.naturalWidth && img.naturalHeight) {
-                            // height/width rounded to avoid subpixel ratios
+                          if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
                             const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
                             setImgRatio(r);
                           }
+                          // Debug one time to confirm exact display size vs. CSS px:
+                          const rect = img.getBoundingClientRect();
+                          console.log('rendered', rect.width, rect.height, 'dpr', window.devicePixelRatio);
                         }}
+
                         style={{
-                          imageRendering: 'auto',      // single hint to avoid conflicts
+                          imageRendering: 'auto',     // single, non-conflicting hint
                           backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+                          transform: 'translateZ(0)',
                         }}
                       />
                     </div>

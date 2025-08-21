@@ -1,0 +1,134 @@
+You’re absolutely right: until the **image pixels match the display pixels**, the browser will resample and you’ll see softness. The fix has to make the phone screen render your screenshots at their **native DPR-correct size**—not scaled down to 240×431 CSS px from a 341×612 PNG.
+
+Below is a precise, copy-paste package for Replit that does **only** two things:
+
+1. keeps your existing phone frame size, but feeds the browser **width-specific `srcSet`** so it can pick **240w/304w** (1×) and **480w/608w** (2×) assets exactly;
+2. (optional) logs the actual rendered width to verify we’re matching.
+
+No other sections, copy, or layout change.
+
+---
+
+## A) What assets to export (this is the root fix)
+
+Your inner “screen” width is:
+
+* **Mobile:** `w-64` (256) – `p-2` (8px × 2) = **240 CSS px**
+* **Desktop:** `lg:w-80` (320) – `p-2` (8px × 2) = **304 CSS px**
+
+For crisp retina on 2× displays, export **both 1× and 2×** for each breakpoint using your screenshot aspect ratio (≈ **612/341 = 1.795**):
+
+* **Mobile 1×:** **240×431**
+* **Mobile 2×:** **480×862**
+* **Desktop 1×:** **304×547**
+* **Desktop 2×:** **608×1094**
+
+> You can keep the same filenames for each step (e.g., `step1_m240.png`, `step1_m480.png`, `step1_d304.png`, `step1_d608.png`). If you only have the single 341×612 right now, the code will still work, but you’ll still see resampling. The crispness comes when these 4 sizes exist.
+
+---
+
+## B) Tiny, surgical code change (replace only the `<motion.img … />`)
+
+**Leave your status bar and wrappers as-is.** Replace just the image block you pasted with the version below. It supports the new four assets and falls back to your current `screenshotPath` if any are missing.
+
+```tsx
+<motion.img
+  // Backward-compatible fallback (works today)
+  src={
+    screenshots[activeScreenshot].s304    // prefer desktop 1× if present on desktop
+      ?? screenshots[activeScreenshot].m240
+      ?? screenshots[activeScreenshot].screenshotPath
+  }
+
+  // Width-based srcset so the browser picks exact 1×/2× sizes per breakpoint
+  srcSet={[
+    screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 240w` : null,
+    screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 480w` : null,
+    screenshots[activeScreenshot].s304 ? `${screenshots[activeScreenshot].s304} 304w` : null,
+    screenshots[activeScreenshot].s608 ? `${screenshots[activeScreenshot].s608} 608w` : null,
+  ].filter(Boolean).join(', ')}
+
+  // Tell the browser the CSS width of the image at each breakpoint
+  sizes="(min-width: 1024px) 304px, 240px"
+
+  alt={screenshots[activeScreenshot].title}
+  className="w-full h-full object-contain will-change-transform"
+
+  /* Fade only — no scale (prevents resampling blur during transition) */
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.35 }}
+
+  loading="lazy"
+  decoding="async"
+  draggable={false}
+
+  // Optional: keep if you're using the dynamic aspectRatio container;
+  // updates the frame's height to match the actual image ratio.
+  onLoad={(e) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
+      const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+      setImgRatio(r);
+    }
+    // Debug one time to confirm exact display size vs. CSS px:
+    // const rect = img.getBoundingClientRect();
+    // console.log('rendered', rect.width, rect.height, 'dpr', window.devicePixelRatio);
+  }}
+
+  style={{
+    imageRendering: 'auto',     // single, non-conflicting hint
+    backfaceVisibility: 'hidden',
+    transform: 'translateZ(0)',
+  }}
+/>
+```
+
+### Expected screenshot object (add keys gradually)
+
+In your `screenshots[...]` items, add these when you export:
+
+```ts
+{
+  title: "Step 1",
+  // existing
+  screenshotPath: step1_fallback, // your current 341×612 (fallback only)
+
+  // NEW exact sizes (add as you export):
+  m240: step1_m240,  // 240×431
+  m480: step1_m480,  // 480×862
+  s304: step1_s304,  // 304×547  (s = "screen/desktop")
+  s608: step1_s608,  // 608×1094
+}
+```
+
+> You don’t need to ship all four at once; start with **m240** and **m480** and you’ll see a big improvement on mobile. Add **s304** and **s608** for desktop crispness.
+
+---
+
+## C) (Optional) Keep or drop the dynamic aspect ratio
+
+* If you already added the `imgRatio` + `aspectRatio` container, keep it—no harm; it prevents stretching.
+* If you want to simplify, you can remove it once the `srcSet` is supplying exact sizes; the mismatch blur is solved by the asset sizes.
+
+---
+
+## D) Why the previous fix couldn’t fully solve it
+
+* `aspectRatio` prevents distortion, but **doesn’t prevent scaling**; your 341px image was still rendered at \~240 CSS px → resampled blur.
+* CSS hints (`image-rendering`, GPU) optimize how, but they **don’t remove** the need to resample.
+* The only way to make it crisp is to **feed the browser files that match your CSS widths (and DPR)**—which is exactly what `srcSet` + those four sizes do.
+
+---
+
+## E) Quick QA checklist
+
+* Open dev tools, select the `<img>`, and check **Rendered size** (Chrome shows it) and `currentSrc`:
+
+  * Mobile breakpoint: currentSrc should be the **240w** (1×) or **480w** (2×) file.
+  * Desktop breakpoint: currentSrc should be the **304w** or **608w** file.
+* Confirm the computed CSS width is **240** (mobile) and **304** (desktop). If you change paddings/margins, update the `sizes` string accordingly.
+
+---
+
+If you want, paste one `screenshots[...]` item’s imports and I’ll fill in the key names (`m240/m480/s304/s608`) exactly as you’re bundling them.
