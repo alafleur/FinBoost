@@ -73,6 +73,7 @@ import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
 import HeroLearnToEarn from "@/components/HeroLearnToEarn";
+import HeroPhone from "@/components/HeroPhone";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
@@ -939,81 +940,7 @@ export default function HomeV3() {
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
             {/* Phone Preview - Mobile Bottom, Desktop Right */}
             <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="relative"
-              >
-                {/* Fixed Phone mockup - Exact CSS width for crisp screenshots */}
-                {/* FIXED: Container width accounts for p-2 padding (16px total) to achieve exact screen dimensions */}
-                <div
-                  className="relative w-[256px] lg:w-[320px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
-                  style={{ aspectRatio: 1 / imgRatio }}
-                >
-                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
-                    {/* Status bar (fixed height) */}
-                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
-                      <span>9:41</span>
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
-                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
-                      </div>
-                    </div>
-
-                    {/* Exact screen area */}
-                    <div className="flex-1 overflow-hidden flex items-start justify-center">
-                      <motion.img
-                        // ✅ Use the exact-width mobile 1× as the baseline source
-                        src={screenshots[activeScreenshot].m240}
-
-                        // ✅ Width-based sources for mobile/desktop & 1×/2× (retina)
-                        srcSet={[
-                          screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
-                          screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
-                          screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
-                          screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
-                        ].filter(Boolean).join(', ')}
-
-                        // ✅ Tell the browser the CSS width of the screen at each breakpoint
-                        sizes="(min-width: 1024px) 304px, 240px"
-
-                        alt={screenshots[activeScreenshot].title}
-                        className="w-full h-full object-contain"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.35 }}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
-                            // keep your responsive frame height in sync with the actual asset
-                            setImgRatio(img.naturalHeight / img.naturalWidth);
-                          }
-                          // DEBUG: Verify pixel-perfect matching
-                          const rect = img.getBoundingClientRect();
-                          console.log('🔍 PIXEL-PERFECT TEST:');
-                          console.log('- CSS width:', Math.round(rect.width), 'px');
-                          console.log('- Current src:', img.currentSrc);
-                          console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
-                          console.log('- Expected: 240×431 (mobile) or 304×547 (desktop)');
-                          console.log('- Perfect match?', 
-                            (Math.round(rect.width) === 240 && img.naturalWidth === 240) ||
-                            (Math.round(rect.width) === 304 && img.naturalWidth === 304)
-                          );
-                        }}
-                        style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
-                      />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
-                </div>
-              </motion.div>
+              <HeroPhone shot={screenshots[activeScreenshot]} />
 
               {/* Mobile navigation with arrows and dots - positioned below phone */}
               <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
