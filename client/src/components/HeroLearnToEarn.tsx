@@ -13,38 +13,38 @@ const PHONE_CSS_WIDTHS = { mobile: 240, desktop: 304 } as const;
 
 export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative overflow-hidden bg-white pt-20 sm:pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-8 items-center py-16 lg:py-24">
           {/* Left: Headline + copy */}
           <div className="lg:col-span-6">
-            <h1 className="font-extrabold tracking-tight leading-[0.9] text-5xl sm:text-6xl lg:text-7xl">
-              <span className="block bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1">
                 LEARN REAL FINANCE TOOLS
               </span>
               <span className="block text-slate-900">EARN REAL CASH</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg text-slate-600">
+            <p className="mt-6 max-w-xl text-lg text-slate-600 leading-relaxed">
               Complete short lessons and actions to collect tickets for cash drawings—free to join.
             </p>
 
-            <div className="mt-8 flex items-center gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <a
                 href="/signup"
-                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-white text-lg font-semibold shadow-xl shadow-blue-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
               >
                 Start Free
               </a>
               <a
-                href="#how-it-works"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-900 hover:bg-slate-50"
+                href="#preview"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-8 py-4 text-lg font-semibold text-slate-900 hover:bg-slate-50 transition-colors"
               >
                 How it works
               </a>
             </div>
 
-            <div className="mt-5 text-sm text-slate-500">
+            <div className="mt-6 text-sm text-slate-500">
               $3,750 prize pool • 750 winners • Tickets unlock entries
             </div>
             <div className="mt-2 text-[12px] text-slate-400">
@@ -52,34 +52,48 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
             </div>
           </div>
 
-          {/* Right: Ticket + tool icons + phone */}
+          {/* Right: Phone + prominent ticket + tool icons */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div className="relative w-[260px] lg:w-[340px]">
-              {/* Ticket stub (decorative) */}
-              <svg
-                viewBox="0 0 640 360"
-                className="absolute -left-10 -top-8 rotate-[-10deg] w-44 sm:w-52 lg:w-64 drop-shadow-xl"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <defs>
-                  <linearGradient id="tix" x1="0" x2="1">
-                    <stop offset="0" stopColor="#2563EB" /> {/* blue-600 */}
-                    <stop offset="1" stopColor="#4F46E5" /> {/* indigo-600 */}
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
-                  fill="url(#tix)"
-                />
-                <path d="M320 40v280" stroke="rgba(0,0,0,0.08)" strokeWidth="8" strokeDasharray="10 14"/>
-              </svg>
+            <div className="relative w-[300px] lg:w-[380px]">
+              {/* Prominent ticket stub - repositioned and enlarged */}
+              <div className="absolute -top-16 -right-8 lg:-top-20 lg:-right-12 z-20">
+                <svg
+                  viewBox="0 0 640 360"
+                  className="w-56 sm:w-64 lg:w-80 drop-shadow-2xl rotate-12"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <defs>
+                    <linearGradient id="tix" x1="0" x2="1">
+                      <stop offset="0" stopColor="#2563EB" />
+                      <stop offset="1" stopColor="#9333EA" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                    fill="url(#tix)"
+                  />
+                  <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
+                  <text x="320" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
+                  <text x="320" y="140" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
+                  <text x="320" y="260" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="24" fontWeight="600">$3,750</text>
+                  <text x="320" y="290" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="16">PRIZE POOL</text>
+                </svg>
+              </div>
 
-              {/* Tool icons flowing into the ticket (decorative) */}
-              <div className="absolute -left-16 top-12 flex flex-col gap-3 opacity-95" aria-hidden="true">
-                <IconBubble label="Budget"   Icon={Piggy}   delay={0} />
-                <IconBubble label="Credit"    Icon={Card}    delay={0.12} />
-                <IconBubble label="Savings"   Icon={Target}  delay={0.24} />
+              {/* Expanded tool icons - left side */}
+              <div className="absolute -left-20 top-8 flex flex-col gap-3 opacity-95" aria-hidden="true">
+                <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
+                <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
+                <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
+                <IconBubble label="Savings"    Icon={Target}    delay={0.24} />
+              </div>
+
+              {/* Additional tool icons - right side */}
+              <div className="absolute -right-16 top-20 flex flex-col gap-3 opacity-95" aria-hidden="true">
+                <IconBubble label="Insurance"  Icon={Shield}    delay={0.32} />
+                <IconBubble label="Taxes"      Icon={Calculator} delay={0.40} />
+                <IconBubble label="Emergency"  Icon={Dollar}    delay={0.48} />
               </div>
 
               {/* Phone image (crisp, width-based srcSet) */}
@@ -93,7 +107,7 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
                 ].join(", ")}
                 sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
                 alt={phone.alt ?? "FinBoost app"}
-                className="relative ml-6 lg:ml-10 w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl"
+                className="relative ml-6 lg:ml-10 w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl z-10"
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
@@ -149,5 +163,34 @@ function Target(props: any) { return (
     <circle cx="12" cy="12" r="8" strokeWidth="1.8"/>
     <circle cx="12" cy="12" r="4" strokeWidth="1.8"/>
     <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+  </svg>
+); }
+function TrendUp(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17" strokeWidth="1.8"/>
+    <polyline points="16,7 22,7 22,13" strokeWidth="1.8"/>
+  </svg>
+); }
+function Shield(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path d="M12,22s8-4 8-10V5l-8-3L4,5v7c0,6 8,10 8,10z" strokeWidth="1.8"/>
+  </svg>
+); }
+function Calculator(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="1.8"/>
+    <line x1="8" y1="6" x2="16" y2="6" strokeWidth="1.8"/>
+    <line x1="16" y1="10" x2="16" y2="10" strokeWidth="1.8"/>
+    <line x1="12" y1="10" x2="12" y2="10" strokeWidth="1.8"/>
+    <line x1="8" y1="10" x2="8" y2="10" strokeWidth="1.8"/>
+    <line x1="16" y1="14" x2="16" y2="14" strokeWidth="1.8"/>
+    <line x1="12" y1="14" x2="12" y2="14" strokeWidth="1.8"/>
+    <line x1="8" y1="14" x2="8" y2="14" strokeWidth="1.8"/>
+  </svg>
+); }
+function Dollar(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <line x1="12" y1="1" x2="12" y2="23" strokeWidth="1.8"/>
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeWidth="1.8"/>
   </svg>
 ); }
