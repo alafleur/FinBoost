@@ -1112,19 +1112,15 @@ export default function HomeV3() {
             <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
               <motion.div
                 key={activeScreenshot}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Adaptive Phone mockup - Sized to match screenshot native dimensions */}
+                {/* Fixed Phone mockup - Exact CSS width for crisp screenshots */}
                 <div
-                  className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
-                  style={{ 
-                    // Frame size adapts to screenshot: adds padding + phone chrome to native image size
-                    width: `${((screenshots[activeScreenshot] as any).naturalWidth || 341) / 16 + 1}rem`,  // convert px to rem + padding
-                    height: `${((screenshots[activeScreenshot] as any).naturalHeight || 612) / 16 + 1}rem`
-                  }}
+                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // height adapts to maintain image proportions
                 >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
                   <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
@@ -1168,25 +1164,18 @@ export default function HomeV3() {
                         decoding="async"
                         draggable={false}
 
-                        // Store natural dimensions and update frame size
+                        // Update aspect ratio for responsive frame height
                         onLoad={(e) => {
                           const img = e.currentTarget;
                           if (img.naturalWidth && img.naturalHeight) {
-                            // Store dimensions for dynamic frame sizing
-                            (screenshots[activeScreenshot] as any).naturalWidth = img.naturalWidth;
-                            (screenshots[activeScreenshot] as any).naturalHeight = img.naturalHeight;
-                            // Force re-render to apply new frame size
                             setImgRatio(img.naturalHeight / img.naturalWidth);
                           }
-                          // Debug: confirm we're displaying at native resolution
+                          // Debug: verify exact CSS width (should be 240 mobile, 304 desktop)
                           const rect = img.getBoundingClientRect();
-                          console.log('native', img.naturalWidth, img.naturalHeight, 'rendered', rect.width, rect.height, 'scaling:', Math.round((rect.width / img.naturalWidth) * 100) + '%');
+                          console.log('CSS width:', rect.width, 'should be 240 mobile / 304 desktop');
                         }}
 
                         style={{
-                          // Display at exact native resolution - no scaling
-                          width: `${(screenshots[activeScreenshot] as any).naturalWidth || 341}px`,
-                          height: `${(screenshots[activeScreenshot] as any).naturalHeight || 612}px`,
                           imageRendering: 'auto',
                           backfaceVisibility: 'hidden',
                           transform: 'translateZ(0)',

@@ -1,0 +1,87 @@
+Short version: I agree with the “slight improvement” diagnosis, and the remaining blur is coming from two things we can fix quickly:
+
+1. **An ancestor is still scaling the phone**
+   In your current file, the wrapper around the phone mockup animates `scale: 0.95 → 1`. Even after the animation, browsers can end up rendering on fractional device pixels, which shows up as your “rendered 329px vs native 341px” measurement. Kill all scale on **any ancestor** of the image and use opacity/translate instead. You have this right now:
+
+```tsx
+<motion.div
+  key={activeScreenshot}
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.4 }}
+  className="relative"
+>
+```
+
+Change to:
+
+```tsx
+<motion.div
+  key={activeScreenshot}
+  initial={{ opacity: 0, y: 8 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+  className="relative"
+>
+```
+
+(Opacity + small translate = no resampling blur.)&#x20;
+
+2. **Feed the browser exact-width assets for your CSS widths**
+   Your “screen” area is 240 px wide on mobile (w-64 – p-2) and 304 px on desktop (lg\:w-80 – p-2). To be truly crisp (especially on 2× DPR), export and serve these exact widths via `srcSet`:
+
+| Breakpoint | CSS width | 1× asset | 2× asset |
+| ---------- | --------: | -------: | -------: |
+| Mobile     |    240 px |  240×431 |  480×862 |
+| Desktop    |    304 px |  304×547 | 608×1094 |
+
+In your `screenshots[]` items, add:
+
+```ts
+{
+  // existing fallback
+  screenshotPath: step1_fallback_341x612,
+
+  // NEW precise sizes
+  m240: step1_m240,  // 240×431
+  m480: step1_m480,  // 480×862
+  s304: step1_s304,  // 304×547
+  s608: step1_s608,  // 608×1094
+}
+```
+
+And keep the width-based `srcSet`:
+
+```tsx
+srcSet={[
+  s.m240 && `${s.m240} 240w`,
+  s.m480 && `${s.m480} 480w`,
+  s.s304 && `${s.s304} 304w`,
+  s.s608 && `${s.s608} 608w`,
+].filter(Boolean).join(', ')}
+sizes="(min-width: 1024px) 304px, 240px"
+```
+
+**Important clean-ups:**
+
+* Remove the inline `style={{ width: naturalWidth, height: naturalHeight }}` on the `<img>` and the dynamic REM frame sizing. Those force layout to fight your grid/container and reintroduce non-exact widths. Let the phone **frame** stay `w-64 lg:w-80` and let the screen area be `w-full` with a fixed **CSS** width (240/304).
+* Keep `imageRendering: 'auto'` and avoid `crisp-edges` unless you test and prefer the jaggier look for UI text on your target browsers.
+* Verify with DevTools: `getBoundingClientRect().width` should read **exactly 240** on mobile and **304** on desktop; `currentSrc` should be your **480w** (mobile @2×) or **608w** (desktop @2×) files on retina.
+
+**About the proposed gloss/shine:** looks nice, but add it **after** we lock pixel-perfect rendering. Any overlay is fine (a subtle diagonal linear-gradient via a pseudo-element) once the image is crisp.
+
+**Why your console showed 329 px:**
+Two culprits in the current file:
+
+* The wrapper `motion.div` scaling (see #1).
+* The dynamic REM sizing and/or parent grid squeezing the phone narrower than the image’s native CSS width, causing a \~4% shrink (341→329) and residual antialiasing.
+
+**Action list for Replit (fast):**
+
+1. Remove **all** `scale` animations from ancestors of the phone preview; switch to opacity/translate.
+2. Revert the phone frame to fixed `w-64 lg:w-80` (no dynamic REM math).
+3. Ensure the inner “screen” container resolves to **exact 240/304 CSS px** and the `<img>` is `w-full h-full object-contain`.
+4. Export and wire the 240/480 and 304/608 assets via `srcSet` above.
+5. Verify: rendered width = 240/304; `currentSrc` = 480/608 on 2× DPR; zero blur.
+
+Once those are in, we can add the subtle gloss effect you mentioned without risking image softness.
