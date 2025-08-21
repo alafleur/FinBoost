@@ -44,12 +44,12 @@ import {
   Smartphone,
 } from "lucide-react";
 
-// Import app screenshots
-import step1Screenshot from "@assets/Step 1 Learn & Complete Lessons_v1_1754287351239.png";
-import step2Screenshot from "@assets/Step 2 Take Financial Actions_v1_1754287375585.png";
-import step3Screenshot from "@assets/Step 3 Climb the Leaderboard_v1_1754287383280.png";
-import step4Screenshot from "@assets/Step 4 Win Real Cash Rewards_v1_1754287391648.png";
-import rewardsSystemScreenshot from "@assets/Rewards System (Tiers)_v1_1754288320243.png";
+// Import high-resolution app screenshots for crisp display
+import step1Screenshot from "@assets/Step 1 Learn & Complete Lessons_v1_1755745601876.png";
+import step2Screenshot from "@assets/Step 2 Take Financial Actions_v1_1755745601875.png";
+import step3Screenshot from "@assets/Step 3 Climb the Leaderboard_v1_1755745601874.png";
+import step4Screenshot from "@assets/Step 4 Win Real Cash Rewards_v1_1755745601873.png";
+import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
 /**
  * Carousel state management interface
@@ -444,7 +444,7 @@ export default function HomeV3() {
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
   const [activeScreenshot, setActiveScreenshot] = useState(0);
 
-  // How It Works step-by-step process data with actual app screenshots
+  // How It Works step-by-step process data with high-resolution app screenshots
   const screenshots = useMemo(
     () => [
       {
@@ -1114,9 +1114,9 @@ export default function HomeV3() {
                 transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Responsive Phone mockup */}
+                {/* Responsive Phone mockup - Optimized for high-res screenshots */}
                 <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden transform-gpu">
                     {/* Status bar */}
                     <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
                       <span>9:41</span>
@@ -1127,7 +1127,7 @@ export default function HomeV3() {
                       </div>
                     </div>
 
-                    {/* App screenshot content */}
+                    {/* App screenshot content - Optimized for crispness */}
                     <div className="h-full bg-white overflow-hidden flex items-start justify-center">
                       <motion.img
                         src={screenshots[activeScreenshot].screenshotPath}
@@ -1139,9 +1139,21 @@ export default function HomeV3() {
                         loading="lazy"
                         decoding="async"
                         style={{
-                          imageRendering: 'auto',
+                          // Enhanced image rendering for maximum crispness
+                          imageRendering: '-webkit-optimize-contrast',
+                          WebkitImageRendering: '-webkit-optimize-contrast',
+                          MozImageRendering: '-moz-crisp-edges',
+                          msImageRendering: '-ms-interpolation-mode: nearest-neighbor',
+                          imageRendering: 'crisp-edges',
+                          // GPU acceleration and pixel alignment
                           backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',
+                          transform: 'translate3d(0, 0, 0)',
+                          // Prevent sub-pixel rendering issues
+                          WebkitFontSmoothing: 'antialiased',
+                          MozOsxFontSmoothing: 'grayscale',
+                          // Ensure pixel-perfect rendering
+                          objectFit: 'contain',
+                          objectPosition: 'center',
                         }}
                       />
                     </div>
@@ -2056,7 +2068,7 @@ export default function HomeV3() {
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
                 <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden">
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden transform-gpu">
                     {/* Status bar */}
                     <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
                       <span>9:41</span>
@@ -2067,13 +2079,31 @@ export default function HomeV3() {
                       </div>
                     </div>
 
-                    {/* App screenshot content */}
+                    {/* App screenshot content - Optimized for crispness */}
                     <div className="h-full bg-white overflow-hidden flex items-start justify-center">
                       <img
                         src={rewardsSystemScreenshot}
                         alt="Tier Thresholds & Rewards Interface"
                         className="max-w-full max-h-full object-contain"
                         loading="lazy"
+                        decoding="async"
+                        style={{
+                          // Enhanced image rendering for maximum crispness
+                          imageRendering: '-webkit-optimize-contrast',
+                          WebkitImageRendering: '-webkit-optimize-contrast',
+                          MozImageRendering: '-moz-crisp-edges',
+                          msImageRendering: '-ms-interpolation-mode: nearest-neighbor',
+                          imageRendering: 'crisp-edges',
+                          // GPU acceleration and pixel alignment
+                          backfaceVisibility: 'hidden',
+                          transform: 'translate3d(0, 0, 0)',
+                          // Prevent sub-pixel rendering issues
+                          WebkitFontSmoothing: 'antialiased',
+                          MozOsxFontSmoothing: 'grayscale',
+                          // Ensure pixel-perfect rendering
+                          objectFit: 'contain',
+                          objectPosition: 'center',
+                        }}
                       />
                     </div>
                   </div>
