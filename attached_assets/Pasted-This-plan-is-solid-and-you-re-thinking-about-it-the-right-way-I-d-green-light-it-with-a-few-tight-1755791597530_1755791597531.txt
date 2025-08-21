@@ -1,0 +1,91 @@
+This plan is solid and you’re thinking about it the right way. I’d green-light it with a few **tight edits** so we keep the hero crisp, compliant, and fast.
+
+## Aligned ✅
+
+* Phase breakdown (analysis → build → polish → test)
+* Keep the **existing srcSet/sizes** system and don’t add deps
+* Inline SVGs for ticket/tools
+* No `scale()` animations (opacity/translate only)
+* Keep Early Access section directly under the hero
+
+## Small but important edits 🔧
+
+1. **Lock the image widths in one place**
+
+   * Create a tiny constant so `sizes` never drifts from CSS:
+
+   ```ts
+   // widths used by the phone mockup
+   const PHONE_CSS_WIDTHS = { mobile: 240, desktop: 304 }; // px
+   // <img … sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
+   ```
+
+   If paddings/widths change later, you update it in one spot.
+
+2. **LCP optimization (hero image)**
+
+   * In `index.html` add a preload for the **first** hero phone image:
+
+   ```html
+   <link
+     rel="preload"
+     as="image"
+     href="/assets/phone-hero_m240.png"
+     imagesrcset="/assets/phone-hero_m240.png 240w, /assets/phone-hero_m480.png 480w, /assets/phone-hero_s304.png 304w, /assets/phone-hero_s608.png 608w"
+     imagesizes="(min-width:1024px) 304px, 240px"
+     fetchpriority="high"
+   />
+   ```
+
+   * On the hero `<img>`, use `loading="eager"` **and** `fetchpriority="high"` to make it the LCP target:
+
+   ```tsx
+   loading="eager" fetchpriority="high" decoding="async"
+   ```
+
+3. **Heading + accessibility**
+
+   * Ensure this is the **only `<h1>`** on the page.
+   * Decorative SVGs: `aria-hidden="true"` and `focusable="false"`.
+   * CTA order: primary then secondary; both keyboard-focusable.
+
+4. **Legal & copy lock**
+
+   * Keep the micro-disclaimer under CTAs:
+     *“No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.”*
+   * Keep “tickets → cash drawings” wording everywhere in the hero (headline/subhead/buttons remain neutral).
+
+5. **Crispness guardrails**
+
+   * Verify **no ancestor** (including wrappers) uses `scale` in Framer Motion variants at rest.
+   * Confirm DevTools: **Rendered width** 240 (mobile) / 304 (desktop) and `currentSrc` = **480w/608w** on 2× DPR devices.
+   * Set `pointer-events-none` on decorative overlays (gloss/shine) so they never block taps.
+
+6. **Early Access section hand-off**
+
+   * Match the screenshot’s blue/indigo gradient and spacing; keep it a **separate section** immediately after the hero.
+   * Tiles should remain purely presentational (no onClick) unless you plan to deep-link to docs.
+
+7. **Motion preferences**
+
+   * Respect reduced motion:
+
+   ```css
+   @media (prefers-reduced-motion: reduce) {
+     .hero-animate { animation: none; transform: none; opacity: 1; }
+   }
+   ```
+
+## Final Go/No-Go checklist ✅
+
+* [ ] `<h1>` matches: **LEARN REAL FINANCE TOOLS** (blue/indigo gradient) / **EARN REAL CASH** (black)
+* [ ] Subhead uses **tickets → drawings** language
+* [ ] CTAs: **Start Free** (filled brand blue), **How it works** (outline)
+* [ ] Hero phone `<img>` uses width-based `srcSet` (240/480/304/608) and correct `sizes`
+* [ ] No `scale()` animations at rest anywhere near the hero
+* [ ] Early Access Guarantee section renders under hero with 4 tiles
+* [ ] Preload in `index.html` + `fetchpriority="high"` on the hero image
+* [ ] DevTools: rendered width 240/304, `currentSrc` = 480/608 on retina
+* [ ] Lighthouse: LCP stable, CLS \~0, no new blocking resources
+
+If they follow the plan with the edits above, we’ll get the Underdog-style clarity, keep the image sharpness we worked hard for, and stay fast/compliant.
