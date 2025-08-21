@@ -1178,17 +1178,18 @@ export default function HomeV3() {
                         // Backward-compatible fallback (works today)
                         src={screenshots[activeScreenshot].screenshotPath}
 
-                        // Width-based srcset so the browser picks exact 1×/2× sizes per breakpoint
-                        // Note: These properties don't exist yet, but code is ready for when they do
+                        // Density-based srcSet to force exact pixel matching
                         srcSet={[
-                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 240w` : null,
-                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 480w` : null,
-                          screenshots[activeScreenshot].s304 ? `${screenshots[activeScreenshot].s304} 304w` : null,
-                          screenshots[activeScreenshot].s608 ? `${screenshots[activeScreenshot].s608} 608w` : null,
-                        ].filter(Boolean).join(', ')}
-
-                        // Tell the browser the CSS width of the image at each breakpoint
-                        sizes="(min-width: 1024px) 304px, 240px"
+                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 1x` : null,
+                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 2x` : null,
+                        ].filter(Boolean).join(', ')} 
+                        
+                        // Use media queries to switch between mobile/desktop image sets
+                        style={{
+                          imageRendering: 'auto',
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',
+                        }}
 
                         alt={screenshots[activeScreenshot].title}
                         className="w-full h-full object-contain"
@@ -1217,12 +1218,6 @@ export default function HomeV3() {
                           console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
                           console.log('- Device pixel ratio:', window.devicePixelRatio);
                           console.log('- Expected width: 240px (mobile) or 304px (desktop)');
-                        }}
-
-                        style={{
-                          imageRendering: 'auto',
-                          backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',
                         }}
                       />
                     </div>
