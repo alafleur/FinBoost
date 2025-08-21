@@ -1116,44 +1116,35 @@ export default function HomeV3() {
               >
                 {/* Responsive Phone mockup - Optimized for high-res screenshots */}
                 <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden transform-gpu">
-                    {/* Status bar */}
-                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
+                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
                       <span>9:41</span>
                       <div className="flex space-x-1">
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm"></div>
-                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm"></div>
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
                       </div>
                     </div>
 
-                    {/* App screenshot content - Optimized for crispness */}
-                    <div className="h-full bg-white overflow-hidden flex items-start justify-center">
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
                         src={screenshots[activeScreenshot].screenshotPath}
                         alt={screenshots[activeScreenshot].title}
-                        className="max-w-full max-h-full object-contain will-change-transform"
+                        className="w-full h-full object-contain will-change-transform"
+                        /* Fade only — no scale (prevents resampling blur) */
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.35 }}
                         loading="lazy"
                         decoding="async"
+                        draggable={false}
                         style={{
-                          // Enhanced image rendering for maximum crispness
-                          imageRendering: '-webkit-optimize-contrast',
-                          WebkitImageRendering: '-webkit-optimize-contrast',
-                          MozImageRendering: '-moz-crisp-edges',
-                          msImageRendering: '-ms-interpolation-mode: nearest-neighbor',
-                          imageRendering: 'crisp-edges',
-                          // GPU acceleration and pixel alignment
+                          imageRendering: 'auto',          // single, unambiguous hint for photos/UI
                           backfaceVisibility: 'hidden',
-                          transform: 'translate3d(0, 0, 0)',
-                          // Prevent sub-pixel rendering issues
-                          WebkitFontSmoothing: 'antialiased',
-                          MozOsxFontSmoothing: 'grayscale',
-                          // Ensure pixel-perfect rendering
-                          objectFit: 'contain',
-                          objectPosition: 'center',
+                          transform: 'translateZ(0)',      // GPU hint to keep edges crisp
                         }}
                       />
                     </div>
@@ -2068,41 +2059,31 @@ export default function HomeV3() {
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
                 <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden transform-gpu">
-                    {/* Status bar */}
-                    <div className="bg-slate-50 h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600">
+                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
                       <span>9:41</span>
                       <div className="flex space-x-1">
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm"></div>
-                        <div className="w-4 h-1 bg-green-500 rounded-sm"></div>
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 bg-green-500 rounded-sm" />
                       </div>
                     </div>
 
-                    {/* App screenshot content - Optimized for crispness */}
-                    <div className="h-full bg-white overflow-hidden flex items-start justify-center">
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <img
                         src={rewardsSystemScreenshot}
                         alt="Tier Thresholds & Rewards Interface"
-                        className="max-w-full max-h-full object-contain"
+                        className="w-full h-full object-contain"
                         loading="lazy"
                         decoding="async"
+                        draggable={false}
                         style={{
-                          // Enhanced image rendering for maximum crispness
-                          imageRendering: '-webkit-optimize-contrast',
-                          WebkitImageRendering: '-webkit-optimize-contrast',
-                          MozImageRendering: '-moz-crisp-edges',
-                          msImageRendering: '-ms-interpolation-mode: nearest-neighbor',
-                          imageRendering: 'crisp-edges',
-                          // GPU acceleration and pixel alignment
+                          imageRendering: 'auto',          // single, unambiguous hint for photos/UI
                           backfaceVisibility: 'hidden',
-                          transform: 'translate3d(0, 0, 0)',
-                          // Prevent sub-pixel rendering issues
-                          WebkitFontSmoothing: 'antialiased',
-                          MozOsxFontSmoothing: 'grayscale',
-                          // Ensure pixel-perfect rendering
-                          objectFit: 'contain',
-                          objectPosition: 'center',
+                          transform: 'translateZ(0)',      // GPU hint to keep edges crisp
                         }}
                       />
                     </div>
