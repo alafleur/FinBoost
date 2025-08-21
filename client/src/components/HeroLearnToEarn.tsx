@@ -55,11 +55,11 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
           {/* Right: Phone + prominent ticket + tool icons */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
             <div className="relative w-[300px] lg:w-[380px]">
-              {/* Prominent ticket stub - repositioned and enlarged */}
-              <div className="absolute -top-16 -right-8 lg:-top-20 lg:-right-12 z-20">
+              {/* Clean ticket stub */}
+              <div className="absolute -top-12 -right-6 lg:-top-16 lg:-right-8 z-20">
                 <svg
                   viewBox="0 0 640 360"
-                  className="w-56 sm:w-64 lg:w-80 drop-shadow-2xl rotate-12"
+                  className="w-40 sm:w-48 lg:w-56 drop-shadow-xl rotate-12"
                   aria-hidden="true"
                   focusable="false"
                 >
@@ -74,23 +74,17 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
                     fill="url(#tix)"
                   />
                   <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
-                  <text x="320" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
-                  <text x="320" y="140" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
-                  <text x="320" y="260" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="24" fontWeight="600">$3,750</text>
-                  <text x="320" y="290" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="16">PRIZE POOL</text>
+                  <text x="320" y="140" textAnchor="middle" fill="white" fontSize="36" fontWeight="bold">TICKET</text>
+                  <text x="320" y="180" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="20">CASH DRAWING</text>
                 </svg>
               </div>
 
-              {/* Expanded tool icons - left side */}
+              {/* Financial category icons - left side only */}
               <div className="absolute -left-20 top-8 flex flex-col gap-3 opacity-95" aria-hidden="true">
                 <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
                 <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
                 <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
                 <IconBubble label="Savings"    Icon={Target}    delay={0.24} />
-              </div>
-
-              {/* Additional tool icons - right side */}
-              <div className="absolute -right-16 top-20 flex flex-col gap-3 opacity-95" aria-hidden="true">
                 <IconBubble label="Insurance"  Icon={Shield}    delay={0.32} />
                 <IconBubble label="Taxes"      Icon={Calculator} delay={0.40} />
                 <IconBubble label="Emergency"  Icon={Dollar}    delay={0.48} />
