@@ -1175,14 +1175,8 @@ export default function HomeV3() {
                     {/* Exact screen area */}
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
-                        // Backward-compatible fallback (works today)
-                        src={screenshots[activeScreenshot].screenshotPath}
-
-                        // Density-based srcSet to force exact pixel matching
-                        srcSet={[
-                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 1x` : null,
-                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 2x` : null,
-                        ].filter(Boolean).join(', ')} 
+                        // Force exact 1x pixel matching - no srcSet to prevent browser scaling
+                        src={screenshots[activeScreenshot].m240} 
                         
                         // Use media queries to switch between mobile/desktop image sets
                         style={{
@@ -1218,6 +1212,7 @@ export default function HomeV3() {
                           console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
                           console.log('- Device pixel ratio:', window.devicePixelRatio);
                           console.log('- Expected width: 240px (mobile) or 304px (desktop)');
+                          console.log('- SCALING TEST: Using 1x images only. Should be perfectly crisp now.');
                         }}
                       />
                     </div>
