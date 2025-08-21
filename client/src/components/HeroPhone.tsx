@@ -12,7 +12,7 @@ type Shot = {
 
 export default function HeroPhone({ shot }: { shot: Shot }) {
   return (
-    <div className="relative select-none">
+    <div className="shrink-0 lg:mr-[-16px] relative select-none"> {/* Make sure the phone block never shrinks, slight negative margin for that off-edge look */}
       {/* OUTER FRAME (no fixed width so padding doesn't reduce inner screen area) */}
       <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
         {/* EXACT SCREEN SIZE — this guarantees pixel-perfect rendering */}
@@ -45,8 +45,8 @@ export default function HeroPhone({ shot }: { shot: Shot }) {
         </div>
       </div>
 
-      {/* SUBJECT CHIPS (desktop only, stacked left) */}
-      <ul className="hidden lg:flex flex-col gap-4 absolute -left-40 top-24">
+      {/* SUBJECT CHIPS — keep them outside normal flow, desktop only */}
+      <ul className="hidden lg:flex flex-col gap-6 absolute left-[-140px] top-10">
         {["Budget", "Credit", "Savings", "Investing", "Debt"].map((label) => (
           <li
             key={label}
@@ -63,8 +63,8 @@ export default function HeroPhone({ shot }: { shot: Shot }) {
         ))}
       </ul>
 
-      {/* TICKET BADGE (desktop only, bottom-right) */}
-      <div className="hidden lg:flex items-center gap-3 absolute -bottom-6 right-6 rounded-2xl bg-white px-4 py-3 shadow-md ring-1 ring-slate-200">
+      {/* TICKET BADGE — desktop only */}
+      <div className="hidden lg:flex items-center gap-3 absolute bottom-[-20px] right-[-6px] rounded-xl bg-white/90 backdrop-blur px-4 py-3 shadow-md">
         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M4 7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3a2 2 0 1 0 0 4v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a2 2 0 1 0 0-4V7z"/>

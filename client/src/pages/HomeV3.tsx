@@ -939,7 +939,7 @@ export default function HomeV3() {
           {/* Unified Responsive Layout */}
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
             {/* Phone Preview - Mobile Bottom, Desktop Right */}
-            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
+            <div className="order-2 lg:order-2 flex items-start justify-center lg:justify-end overflow-visible">
               <HeroPhone shot={screenshots[activeScreenshot]} />
 
               {/* Mobile navigation with arrows and dots - positioned below phone */}
