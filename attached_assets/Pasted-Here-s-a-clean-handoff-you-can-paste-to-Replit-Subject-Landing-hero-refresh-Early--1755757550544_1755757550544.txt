@@ -1,0 +1,69 @@
+Here’s a clean handoff you can paste to Replit:
+
+---
+
+**Subject:** Landing hero refresh + Early Access Guarantee block (tickets-first, crisp images)
+
+**Why**
+
+* We just solved the screenshot blur by serving exact-width assets (240/480 and 304/608) with `srcSet`.
+* Next, we want the hero to lean into **“learn to earn”** with **tickets → cash draws** and to **preserve Early Access messaging** directly under the hero.
+
+**Scope**
+
+1. **Hero (single responsive component)**
+
+   * Headline (stacked, bold):
+
+     * Line 1 (brand yellow): **LEARN REAL FINANCE TOOLS**
+     * Line 2 (black): **EARN REAL CASH**
+   * Subheadline: “Complete short lessons and actions to collect tickets for cash drawings—free to join.”
+   * CTAs: **Start Free** (filled) and **How it works** (outline).
+   * Micro-disclaimer (12px, muted): “No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.”
+   * Visual: keep our **phone mockup** (crisp `srcSet`) with a **ticket stub** behind it and **tool icons** (budget/credit/savings) flowing into the ticket.
+     *No new dependencies; inline SVGs only. No `scale()` animations—use opacity/translate if needed.*
+
+2. **Early Access Guarantee section (immediately below hero)**
+
+   * Pill badge: “EARLY ACCESS GUARANTEE”
+   * Line: “Here’s what we guarantee every early access member:”
+   * Down arrow icon
+   * Four tiles (brand blue gradient, white text):
+
+     * **\$5,000+ Minimum Pool Size**
+     * **50% Member Fees To Rewards Pool**
+     * **40%+ Minimum Member Win Rate**
+     * **\$250+ Minimum Top Reward**
+
+**Implementation notes**
+
+* **Design consistency:** Tailwind utilities with our existing palette (`text-yellow-400`, `text-slate-*`, blue/indigo gradient on tiles), rounded corners, soft shadows. Keep the current spacing scale.
+* **Crisp images:** Phone image must keep the **width-based `srcSet`** + `sizes` like we used in the blur fix:
+  `srcSet: 240w, 480w, 304w, 608w` and `sizes="(min-width:1024px) 304px, 240px"`.
+* **No new libs.** Inline SVG for the ticket and tool icons.
+* **Performance:** Preload the first hero phone image (with `imagesrcset/imagesizes`) in `index.html`.
+* **Accessibility:** Proper `alt` for the phone image; decorative SVGs `aria-hidden="true"`.
+
+**Suggested file changes**
+
+* `client/src/pages/HomeV3.tsx`: insert the hero and the Early Access block (single responsive section each).
+* Optionally create `client/src/components/HeroLearnToEarn.tsx` and `client/src/components/EarlyAccessGuarantee.tsx` and import them into `HomeV3` for cleanliness.
+
+**Acceptance criteria**
+
+* Hero renders the new headline/subheadline and tickets language.
+* Phone image is razor-sharp on mobile (240px CSS width) and desktop (304px CSS width) with correct 2× picks on retina (480/608).
+* No element in the hero (or ancestors) uses `scale()` at rest.
+* Early Access Guarantee block matches the screenshot: pill badge, headline, arrow, and the four tiles.
+* No dependency additions; passes lint; visually consistent with the current theme.
+
+**QA checklist**
+
+* In DevTools, the hero phone `<img>` shows **Rendered width** 240 (mobile) / 304 (desktop).
+* `currentSrc` points to **480w/608w** on 2× DPR devices.
+* Check keyboard focus order (CTAs then links).
+* Verify mobile spacing doesn’t clip the ticket SVG or icons.
+
+---
+
+If you need the exact JSX snippets I proposed for both sections, say the word and I’ll paste the drop-in components tailored to your current asset paths.
