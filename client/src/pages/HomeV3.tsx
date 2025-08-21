@@ -45,10 +45,31 @@ import {
 } from "lucide-react";
 
 // Import high-resolution app screenshots for crisp display
+// Original fallback screenshots (341×612)
 import step1Screenshot from "@assets/Step 1 Learn & Complete Lessons_v1_1755745601876.png";
 import step2Screenshot from "@assets/Step 2 Take Financial Actions_v1_1755745601875.png";
 import step3Screenshot from "@assets/Step 3 Climb the Leaderboard_v1_1755745601874.png";
 import step4Screenshot from "@assets/Step 4 Win Real Cash Rewards_v1_1755745601873.png";
+
+// Pixel-perfect screenshots for zero blur rendering
+// Mobile: 240×431 (1×), 480×862 (2×)
+// Desktop: 304×547 (1×), 608×1094 (2×)
+import step1_m240 from "@/assets/screenshots/step1_m240.png";
+import step1_m480 from "@/assets/screenshots/step1_m480.png";
+import step1_s304 from "@/assets/screenshots/step1_s304.png";  
+import step1_s608 from "@/assets/screenshots/step1_s608.png";
+import step2_m240 from "@/assets/screenshots/step2_m240.png";
+import step2_m480 from "@/assets/screenshots/step2_m480.png";
+import step2_s304 from "@/assets/screenshots/step2_s304.png";
+import step2_s608 from "@/assets/screenshots/step2_s608.png";
+import step3_m240 from "@/assets/screenshots/step3_m240.png";
+import step3_m480 from "@/assets/screenshots/step3_m480.png";
+import step3_s304 from "@/assets/screenshots/step3_s304.png";
+import step3_s608 from "@/assets/screenshots/step3_s608.png";
+import step4_m240 from "@/assets/screenshots/step4_m240.png";
+import step4_m480 from "@/assets/screenshots/step4_m480.png";
+import step4_s304 from "@/assets/screenshots/step4_s304.png";
+import step4_s608 from "@/assets/screenshots/step4_s608.png";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
 /**
@@ -454,7 +475,12 @@ export default function HomeV3() {
         title: "Step 1: Learn & Complete Lessons",
         description:
           "Complete easily digestible lessons and quizzes to earn pool tickets and build your knowledge",
-        screenshotPath: step1Screenshot,
+        screenshotPath: step1Screenshot,  // 341×612 fallback
+        // Pixel-perfect assets for zero blur
+        m240: step1_m240,  // 240×431 mobile 1×
+        m480: step1_m480,  // 480×862 mobile 2×
+        s304: step1_s304,  // 304×547 desktop 1×
+        s608: step1_s608,  // 608×1094 desktop 2×
         icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
@@ -462,6 +488,10 @@ export default function HomeV3() {
         description:
           "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more tickets",
         screenshotPath: step2Screenshot,
+        m240: step2_m240,
+        m480: step2_m480,
+        s304: step2_s304,
+        s608: step2_s608,
         icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
@@ -469,6 +499,10 @@ export default function HomeV3() {
         description:
           "Your number of tickets determines your tier placement. Higher tiers get larger shares of the total rewards pool",
         screenshotPath: step3Screenshot,
+        m240: step3_m240,
+        m480: step3_m480,
+        s304: step3_s304,
+        s608: step3_s608,
         icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
@@ -476,6 +510,10 @@ export default function HomeV3() {
         description:
           "At cycle end, winners are drawn on a ticket-weighted basis. The more tickets you have, the better your odds",
         screenshotPath: step4Screenshot,
+        m240: step4_m240,
+        m480: step4_m480,
+        s304: step4_s304,
+        s608: step4_s608,
         icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
     ],
@@ -1143,10 +1181,10 @@ export default function HomeV3() {
                         // Width-based srcset so the browser picks exact 1×/2× sizes per breakpoint
                         // Note: These properties don't exist yet, but code is ready for when they do
                         srcSet={[
-                          (screenshots[activeScreenshot] as any).m240 ? `${(screenshots[activeScreenshot] as any).m240} 240w` : null,
-                          (screenshots[activeScreenshot] as any).m480 ? `${(screenshots[activeScreenshot] as any).m480} 480w` : null,
-                          (screenshots[activeScreenshot] as any).s304 ? `${(screenshots[activeScreenshot] as any).s304} 304w` : null,
-                          (screenshots[activeScreenshot] as any).s608 ? `${(screenshots[activeScreenshot] as any).s608} 608w` : null,
+                          screenshots[activeScreenshot].m240 ? `${screenshots[activeScreenshot].m240} 240w` : null,
+                          screenshots[activeScreenshot].m480 ? `${screenshots[activeScreenshot].m480} 480w` : null,
+                          screenshots[activeScreenshot].s304 ? `${screenshots[activeScreenshot].s304} 304w` : null,
+                          screenshots[activeScreenshot].s608 ? `${screenshots[activeScreenshot].s608} 608w` : null,
                         ].filter(Boolean).join(', ')}
 
                         // Tell the browser the CSS width of the image at each breakpoint
