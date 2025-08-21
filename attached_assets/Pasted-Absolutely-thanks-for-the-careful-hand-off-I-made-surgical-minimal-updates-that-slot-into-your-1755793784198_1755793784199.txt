@@ -1,0 +1,61 @@
+Absolutely—thanks for the careful hand-off. I made **surgical, minimal** updates that slot into your current structure (no page rewrite this time). Your existing `HomeV3.tsx` already renders the hero via `<HeroLearnToEarn />` and the Early Access section via `<EarlyAccessGuarantee />`, so we only need to drop in refined versions of those two components.&#x20;
+
+# What’s included (single-component, responsive, brand-consistent)
+
+* **HeroLearnToEarn.tsx**
+
+  * Keeps a **single `<h1>`** (“LEARN REAL FINANCE TOOLS / EARN REAL CASH”) with the blue→indigo gradient you’re using elsewhere.
+  * **Tickets language** baked into the subhead (“collect tickets for cash drawings—free to join.”).
+  * **Dual CTAs** (Start Free / How it works).
+  * **No scale animations**—opacity/translate only so the phone screenshot stays crisp.
+  * **Pixel-perfect screenshot delivery** using your 240/480/304/608 **width-based `srcSet`** + exact `sizes` for zero blur on mobile & desktop (incl. retina).
+  * Inline **ticket + tools badges** (decorative, `aria-hidden`), matching your brand blue/indigo—no off-brand colors.
+
+* **EarlyAccessGuarantee.tsx**
+
+  * Keeps your **Early Access Guarantee** presentation (headline + 4 tiles) with your gradient/rounded card look.
+  * Simple motion (opacity/translate), no scale.
+
+I did **not** touch any other sections. If you previously added console debug in “How it works,” you can remove it later for cleanliness; it’s optional and separate from this change.
+
+# Download (drop-in only)
+
+[Download the update (zip)](sandbox:/mnt/data/finboost_hero_update.zip)
+
+**Files inside:**
+
+```
+client/src/components/HeroLearnToEarn.tsx
+client/src/components/EarlyAccessGuarantee.tsx
+docs/README_hero_update.md
+```
+
+# How to apply (2 minutes)
+
+1. **Copy** both component files into your repo at the same paths:
+
+```
+client/src/components/HeroLearnToEarn.tsx
+client/src/components/EarlyAccessGuarantee.tsx
+```
+
+> `HomeV3.tsx` already imports/uses them, so no further code changes should be required.&#x20;
+
+2. *(Optional but recommended)* Preload the LCP hero image in `index.html`:
+
+```html
+<link rel="preload" as="image" href="/assets/screenshots/step1_m240.png"
+  imagesrcset="/assets/screenshots/step1_m240.png 240w, /assets/screenshots/step1_m480.png 480w, /assets/screenshots/step1_s304.png 304w, /assets/screenshots/step1_s608.png 608w"
+  imagesizes="(min-width:1024px) 304px, 240px"
+  fetchpriority="high">
+```
+
+3. *(Optional)* If you still have the “PIXEL-PERFECT TEST” logs in the “How it works” phone image `onLoad`, remove them to keep prod logs clean later.
+
+# Why this is safe
+
+* **Single component** pattern preserved (hero works on both desktop/mobile).
+* **Brand & spacing** follow the same Tailwind tokens (blue/indigo gradients, rounded-xl/2xl, container widths, paddings).
+* **Image crispness** preserved—same width-based `srcSet` / `sizes` approach you validated.
+
+If anything feels off after you paste these in, ping me and I’ll tweak the copy/spacing **without** touching the rest of the page.
