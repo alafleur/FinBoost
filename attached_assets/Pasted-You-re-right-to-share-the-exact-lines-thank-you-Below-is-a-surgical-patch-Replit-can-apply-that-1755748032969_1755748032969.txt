@@ -1,0 +1,151 @@
+You’re right to share the exact lines—thank you. Below is a **surgical patch** Replit can apply that only touches the phone mockup. It has three tiny steps:
+
+1. add one `useState` for the image aspect ratio,
+2. switch the outer phone container from fixed heights to a computed **aspect-ratio**,
+3. replace the `<motion.img>` with a fade-only, DPR-aware version that also **updates the aspect ratio on load**.
+
+No other sections/copy/layout are changed.
+
+---
+
+## 1) Add a ratio state (near other hooks at the top of `HomeV3.tsx`)
+
+Make sure `useState` is imported, then add:
+
+```tsx
+// Default to your previous frame ratio (320×600 → 600/320)
+const [imgRatio, setImgRatio] = useState(600 / 320); // height / width
+```
+
+> If `useState` isn’t imported yet at the top:
+> `import React, { useState } from 'react';` (or just add `useState` to your existing React import)
+
+---
+
+## 2) Tweak the **outer phone container** (one line edit)
+
+**Find** the outer container that currently has fixed heights:
+
+```tsx
+<div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+```
+
+**Replace it with** (remove the `h-[480px]` and `lg:h-[600px]` classes; add the `style`):
+
+```tsx
+<div
+  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  style={{ aspectRatio: 1 / imgRatio }}  // precise height from current width
+>
+```
+
+This makes the phone frame height match the **actual screenshot ratio** (no scaling blur).
+
+---
+
+## 3) Replace **only** the `<motion.img>` block (using your 20-line context)
+
+You sent these lines:
+
+```tsx
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
+                      </div>
+                    </div>
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
+                      <motion.img
+                        src={screenshots[activeScreenshot].screenshotPath}
+                        alt={screenshots[activeScreenshot].title}
+                        className="w-full h-full object-contain will-change-transform"
+                        /* Fade only — no scale (prevents resampling blur) */
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.35 }}
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        style={{
+                          imageRendering: 'auto',          // single, unambiguous hint for photos/UI
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',      // GPU hint to keep edges crisp
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+```
+
+**Replace only the `<motion.img … />` portion** (leave the status bar and wrappers) with this DPR-aware version that updates the aspect ratio from the actual image:
+
+```tsx
+      <motion.img
+        src={screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath}
+        srcSet={[
+          (screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath)
+            ? `${screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath} 1x`
+            : null,
+          screenshots[activeScreenshot].screenshotPath2x
+            ? `${screenshots[activeScreenshot].screenshotPath2x} 2x`
+            : null,
+          screenshots[activeScreenshot].screenshotPath3x
+            ? `${screenshots[activeScreenshot].screenshotPath3x} 3x`
+            : null,
+        ].filter(Boolean).join(', ')}
+        sizes="(min-width: 1024px) 320px, 256px"
+        alt={screenshots[activeScreenshot].title}
+        className="w-full h-full object-contain will-change-transform"
+        /* Fade only — no scale (prevents resampling blur) */
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth && img.naturalHeight) {
+            // height/width rounded to avoid subpixel ratios
+            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+            setImgRatio(r);
+          }
+        }}
+        style={{
+          imageRendering: 'auto',      // single hint to avoid conflicts
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+        }}
+      />
+```
+
+This keeps everything else **identical** and adds:
+
+* **`srcSet`** for retina when you add 2×/3× files (works fine with just 1× today).
+* **`onLoad`** to compute the actual aspect ratio and set the container height precisely (so there’s no scaling blur).
+
+---
+
+## Asset note (for later, optional but recommended)
+
+When you’re ready, export each screenshot at:
+
+* 1×: **320 × 600**
+* 2×: **640 × 1200**
+* 3×: **960 × 1800** (optional)
+
+Then set `screenshotPath1x/2x/3x` on your `screenshots[...]` entries. The code above will pick them up automatically.
+
+---
+
+## Optional toggle (only if needed)
+
+If, after this, a specific browser still looks soft, temporarily toggle `imageRendering: 'crisp-edges'` **instead of** `auto` to test. Keep only one hint; don’t stack multiple.
+
+---
+
+If you want this delivered as a ready-to-apply **unified diff** or a PR patch against your current file, paste the few lines above the outer container line as well and I’ll format it exactly to your file context.

@@ -1,0 +1,130 @@
+You’re both right: the structural fix removed fractional scaling, but the screenshots are **still being scaled** because (a) their native aspect ratio doesn’t match the phone frame and (b) there’s no DPR (`srcSet`) yet. Here’s a **surgical patch** you can hand to Replit that:
+
+* keeps the single component + existing layout,
+* **aligns the container to the image’s real aspect ratio at runtime** (so there’s no scaling blur),
+* adds **optional DPR support** via `srcSet` (1×/2×/3×), but works fine if you only have 1× today,
+* keeps opacity-only animation (no scale), and uses **one** rendering hint.
+
+---
+
+## 1) Add a tiny state for image ratio (near the top of `HomeV3.tsx` component)
+
+Put this next to your other `useState` hooks:
+
+```tsx
+// Default to your old frame ratio (320×600 → 8/15 ≈ 1.875) until the image loads
+const [imgRatio, setImgRatio] = useState(600 / 320); // height / width
+```
+
+---
+
+## 2) Replace ONLY the phone mockup block (inner container + image)
+
+Find the phone mockup container that currently has `w-64 h-[480px] lg:w-80 lg:h-[600px]`.
+**Keep the width classes**, but **remove the fixed heights** and drive height from aspect-ratio instead.
+
+```tsx
+<div
+  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  style={{ aspectRatio: 1 / imgRatio }} // height = width * imgRatio (no scaling)
+>
+  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+    {/* Status bar (fixed height) */}
+    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+      <span>9:41</span>
+      <div className="flex space-x-1">
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
+      </div>
+    </div>
+
+    {/* Exact screen region (fills the rest with no fractional pixels) */}
+    <div className="flex-1 overflow-hidden flex items-start justify-center">
+      <motion.img
+        src={screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath}
+        srcSet={[
+          // works even if you only have 1x — undefined entries are filtered out
+          screenshots[activeScreenshot].screenshotPath1x
+            ?? screenshots[activeScreenshot].screenshotPath
+              ? `${screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath} 1x`
+              : null,
+          screenshots[activeScreenshot].screenshotPath2x
+            ? `${screenshots[activeScreenshot].screenshotPath2x} 2x`
+            : null,
+          screenshots[activeScreenshot].screenshotPath3x
+            ? `${screenshots[activeScreenshot].screenshotPath3x} 3x`
+            : null,
+        ].filter(Boolean).join(', ')}
+        sizes="(min-width: 1024px) 320px, 256px"
+        alt={screenshots[activeScreenshot].title}
+        className="w-full h-full object-contain will-change-transform"
+        initial={{ opacity: 0 }}  // fade only — no scale
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth && img.naturalHeight) {
+            // height/width (rounded to avoid subpixel ratios)
+            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+            setImgRatio(r);
+          }
+        }}
+        style={{
+          imageRendering: 'auto',         // single, unambiguous hint
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
+      />
+    </div>
+  </div>
+
+  {/* home-button bar */}
+  <div className="absolute bottom-1 lg:bottom-2 left-1/2 -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full" />
+</div>
+```
+
+**Why this works**
+
+* `aspectRatio: 1 / imgRatio` automatically sets the container’s **exact height** from the current width (256px mobile / 320px desktop), so the screenshot is *not scaled* to an arbitrary frame.
+* The **onLoad** handler reads the screenshot’s native dimensions and updates the ratio, so whatever PNG you drop in, the phone frame will match it perfectly.
+* `srcSet` adds **retina** support the moment you add 2×/3× assets (works fine if you only have 1× today).
+
+---
+
+## 3) (Optional) Add 2×/3× assets when ready
+
+For each screenshot object (e.g., `screenshots[...]`) you can add:
+
+```ts
+{
+  title: 'Overview',
+  screenshotPath:  step1_1x,           // backward-compatible
+  screenshotPath1x: step1_1x,          // 320 × 600
+  screenshotPath2x: step1_2x,          // 640 × 1200
+  screenshotPath3x: step1_3x,          // 960 × 1800 (optional)
+}
+```
+
+The code above will automatically pick them up.
+
+---
+
+## 4) (Optional) Try a tighter look
+
+If you prefer *zero* letterboxing (with a tiny crop), change `object-contain` to `object-cover` once 2× assets are in. That eliminates any interpolation entirely.
+
+---
+
+## 5) Sanity checks for the stack
+
+* **Vite** normally **does not compress** PNGs by default; it copies them as assets. If you installed an image optimizer plugin, whitelist these UI screenshots (or set its quality to max).
+* Ensure there are **no other `image-rendering:` rules** applied elsewhere to these images—keep one hint only.
+* Test on iPhone/MBP (retina) and Windows Chrome (1×). With dynamic aspect ratio + `srcSet`, screenshots should be crisp everywhere.
+
+---
+
+If you want, paste the 15–20 lines around your current `<motion.img>` and I’ll return a unified diff showing exactly what to replace—nothing else touched.
