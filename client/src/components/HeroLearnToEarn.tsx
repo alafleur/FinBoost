@@ -54,9 +54,9 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
 
           {/* Right: Phone + prominent ticket + tool icons */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
-            <div className="relative w-[300px] lg:w-[380px]">
+            <div className="relative flex justify-center lg:justify-end w-full max-w-[400px] lg:max-w-none">
               {/* Ticket stub - behind phone */}
-              <div className="absolute top-8 right-4 lg:top-12 lg:right-8 z-0">
+              <div className="absolute top-8 -right-2 lg:top-12 lg:right-8 z-0">
                 <svg
                   viewBox="0 0 640 360"
                   className="w-32 sm:w-36 lg:w-40 drop-shadow-lg rotate-12 opacity-90"
@@ -79,8 +79,8 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
                 </svg>
               </div>
 
-              {/* Financial category icons - left side only */}
-              <div className="absolute -left-20 top-8 flex flex-col gap-3 opacity-95" aria-hidden="true">
+              {/* Financial category icons - left side only, mobile hidden */}
+              <div className="absolute -left-16 lg:-left-20 top-8 flex-col gap-3 opacity-95 hidden sm:flex" aria-hidden="true">
                 <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
                 <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
                 <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
@@ -90,23 +90,25 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
                 <IconBubble label="Emergency"  Icon={Dollar}    delay={0.48} />
               </div>
 
-              {/* Phone image (crisp, width-based srcSet) */}
-              <img
-                src={phone.m240}
-                srcSet={[
-                  `${phone.m240} 240w`,
-                  `${phone.m480} 480w`,
-                  `${phone.s304} 304w`,
-                  `${phone.s608} 608w`,
-                ].join(", ")}
-                sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
-                alt={phone.alt ?? "FinBoost app"}
-                className="relative ml-6 lg:ml-10 w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl z-10"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
-              />
+              {/* Phone image (crisp, width-based srcSet) - centered on mobile */}
+              <div className="relative flex justify-center lg:justify-start">
+                <img
+                  src={phone.m240}
+                  srcSet={[
+                    `${phone.m240} 240w`,
+                    `${phone.m480} 480w`,
+                    `${phone.s304} 304w`,
+                    `${phone.s608} 608w`,
+                  ].join(", ")}
+                  sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
+                  alt={phone.alt ?? "FinBoost app"}
+                  className="w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl z-10 lg:ml-10"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
+                />
+              </div>
             </div>
           </div>
         </div>
