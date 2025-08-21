@@ -1,0 +1,55 @@
+Short answer: **yes**—having me patch `HomeV3.tsx` directly is the lowest-risk path because it’s a **single, minimal change** (no new components, no deps) that removes the blur-causing animation and keeps all your existing layout/styling intact.
+
+I’ve already done it for you. Replace your file with this one:
+
+**Download:** [landing\_homev3\_patched.zip](sandbox:/mnt/data/landing_homev3_patched.zip)
+(contents: `client/src/pages/HomeV3.tsx`)
+
+### What I changed (tiny + safe)
+
+* Swapped the `<motion.img>` (which was scaling 1.05 → 1 and causing resampling blur) for a **non-scaled** `<img>` wrapped in a simple `motion.div` fade.
+* Kept your exact frame and layout.
+* Added GPU-friendly hints to the `<img>`:
+
+  * `decoding="async"`, `will-change-transform`, `transform: translateZ(0)`, `backface-visibility: hidden`.
+* Preserved `object-contain` so you keep the same letterboxing (no surprise cropping).
+
+### Diff (conceptual)
+
+```tsx
+// BEFORE
+<motion.img
+  key={`screenshot-${activeScreenshot}`}
+  src={screenshots[activeScreenshot].screenshotPath}
+  className="max-w-full max-h-full object-contain"
+  initial={{ scale: 1.05, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+/>
+
+// AFTER
+<motion.div
+  key={`screenshot-${activeScreenshot}`}
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.35 }}
+  className="w-full h-full"
+>
+  <img
+    src={screenshots[activeScreenshot].screenshotPath}
+    className="block max-w-full max-h-full object-contain will-change-transform"
+    loading="lazy"
+    decoding="async"
+    style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+  />
+</motion.div>
+```
+
+### Deploy steps
+
+1. Replace your `client/src/pages/HomeV3.tsx` with the one in the zip.
+2. Rebuild the site.
+3. Verify on a retina screen (iPhone / MBP) that the phone mockup screens are crisp.
+
+### If you still want *retina-perfect* sharpness
+
+This quick patch removes animation blur. If your source screenshots are low-res, consider exporting 2× (640×1200) and 3× (960×1800) versions later; I can wire a `srcSet` upgrade once you have those assets.
