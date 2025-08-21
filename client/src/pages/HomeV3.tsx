@@ -1130,14 +1130,19 @@ export default function HomeV3() {
                     {/* App screenshot content */}
                     <div className="h-full bg-white overflow-hidden flex items-start justify-center">
                       <motion.img
-                        key={`screenshot-${activeScreenshot}`}
                         src={screenshots[activeScreenshot].screenshotPath}
                         alt={screenshots[activeScreenshot].title}
-                        className="max-w-full max-h-full object-contain"
-                        initial={{ scale: 1.05, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.4 }}
+                        className="max-w-full max-h-full object-contain will-change-transform"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.35 }}
                         loading="lazy"
+                        decoding="async"
+                        style={{
+                          imageRendering: 'auto',
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',
+                        }}
                       />
                     </div>
                   </div>
