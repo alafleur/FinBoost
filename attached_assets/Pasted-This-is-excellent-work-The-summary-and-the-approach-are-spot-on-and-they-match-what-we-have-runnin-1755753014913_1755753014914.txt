@@ -1,0 +1,59 @@
+This is excellent work. The summary and the approach are spot-on, and they match what we have running in `HomeV3` now (width-based `srcSet` + `sizes`, fade-only animation, and no container scaling).&#x20;
+
+### Why your result makes sense
+
+* The only reliable way to kill UI blur is **pixel matching**. Your 16 exact-dimension exports (240/480 and 304/608) remove browser resampling, and `srcSet` + `sizes` lets each device pick the perfect file. That’s the right fix.
+
+### If you still see “a bit” of softness on some machines
+
+That’s usually one of these (easy to verify):
+
+1. **Ancestor transforms**
+   Make sure nothing up the tree applies `scale()` at rest (including via framer-motion). Use opacity/translate for entrances. (Looks correct now, but worth re-checking the hero container once.)
+
+2. **Wrong `sizes` after CSS tweaks**
+   If you ever change the phone width or padding, update `sizes`. It must reflect the **CSS width** of the image area:
+
+```tsx
+sizes="(min-width: 1024px) 304px, 240px"
+```
+
+3. **Retina not getting the 2× file**
+   In DevTools, check the `<img>`’s **Rendered size** and **currentSrc**.
+
+   * DPR ≥ 2 should pick **480w** (mobile) or **608w** (desktop).
+   * If it’s pulling 240w/304w, re-check the `srcSet` entries and `sizes` value.
+
+4. **Browser zoom/DPR oddities**
+   At anything but 100% zoom, the browser can land on fractional device pixels. Test at 100% and (in Chrome) disable device simulation.
+
+### Two tiny polish upgrades (optional)
+
+* **Preload the first hero screenshot** to improve LCP:
+
+```html
+<link
+  rel="preload"
+  as="image"
+  href="/assets/screenshots/step1_s304.png"
+  imagesrcset="/assets/screenshots/step1_m240.png 240w,
+               /assets/screenshots/step1_m480.png 480w,
+               /assets/screenshots/step1_s304.png 304w,
+               /assets/screenshots/step1_s608.png 608w"
+  imagesizes="(min-width: 1024px) 304px, 240px"
+/>
+```
+
+Put this in `index.html` (or your `<Helmet>` in the landing page).
+
+* **Offer WebP/AVIF** alternates (smaller download, same crispness). Keep PNG as fallback if you need exact pixel parity for all browsers.
+
+### Quick QA checklist for Replit
+
+* DevTools → select the image: **Rendered width** = 240 (mobile) / 304 (desktop).
+* DevTools → **currentSrc** = 480w (mobile on DPR≥2) / 608w (desktop on DPR≥2).
+* No `scale()` on any ancestor at rest.
+* No console logs left in `onLoad` (clean up when done).
+* If the phone frame or paddings change, update `sizes`.
+
+Net-net: the fix you shipped is the correct long-term solution. Any lingering softness you’re noticing will be one of the checklist items above, not the image pipeline itself.

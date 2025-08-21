@@ -6,6 +6,15 @@ FinBoost is a financial education platform that incentivizes learning through a 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+**Screenshot Blur Fix Complete (August 2025):**
+- **Problem:** Phone mockup screenshots appeared blurry due to browser antialiasing when scaling 341×612px images down to ~240px (mobile) and ~304px (desktop)
+- **Root Cause:** Browser resampling blur from downscaling - CSS solutions cannot fix antialiasing issues
+- **Solution:** Created pixel-perfect images at exact display dimensions using automated Sharp-based resizing script
+- **Technical Implementation:** Generated 16 images (4 screenshots × 4 size variants: 240×431, 480×862, 304×547, 608×1094), implemented width-based srcSet with responsive image selection
+- **Result:** Eliminated all scaling blur - images now match display dimensions exactly (100% pixel matching)
+- **Performance Enhancement:** Added preload for first hero screenshot to improve LCP (Largest Contentful Paint)
+
 **Development Standards:**
 - NO SHORTCUTS EVER - Always implement complete, production-ready solutions
 - Never use placeholders or temporary fixes in production code

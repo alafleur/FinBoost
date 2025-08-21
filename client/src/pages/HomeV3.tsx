@@ -1208,9 +1208,6 @@ export default function HomeV3() {
                           if (img.naturalWidth && img.naturalHeight) {
                             setImgRatio(img.naturalHeight / img.naturalWidth);
                           }
-                          // Debug: verify exact CSS width (should be 240 mobile, 304 desktop)
-                          const rect = img.getBoundingClientRect();
-                          console.log('CSS width:', rect.width, 'should be 240 mobile / 304 desktop');
                         }}
 
                         style={{

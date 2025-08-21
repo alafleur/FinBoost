@@ -13,7 +13,20 @@
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family:Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload first hero screenshot for better LCP performance -->
+    <link
+      rel="preload"
+      as="image"
+      href="/src/assets/screenshots/step1_s304.png"
+      imagesrcset="/src/assets/screenshots/step1_m240.png 240w,
+                   /src/assets/screenshots/step1_m480.png 480w,
+                   /src/assets/screenshots/step1_s304.png 304w,
+                   /src/assets/screenshots/step1_s608.png 608w"
+      imagesizes="(min-width: 1024px) 304px, 240px"
+    />
+    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
