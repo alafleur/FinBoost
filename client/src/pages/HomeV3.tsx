@@ -1175,49 +1175,47 @@ export default function HomeV3() {
                     {/* Exact screen area */}
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
-                        // Back to working state - then we'll fix blur properly
-                        src={screenshots[activeScreenshot].screenshotPath} 
-                        
-                        // Use media queries to switch between mobile/desktop image sets
-                        style={{
-                          imageRendering: 'auto',
-                          backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',
-                        }}
+                        // ✅ Use the exact-width mobile 1× as the baseline source
+                        src={screenshots[activeScreenshot].m240}
+
+                        // ✅ Width-based sources for mobile/desktop & 1×/2× (retina)
+                        srcSet={[
+                          screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
+                          screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
+                          screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
+                          screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
+                        ].filter(Boolean).join(', ')}
+
+                        // ✅ Tell the browser the CSS width of the screen at each breakpoint
+                        sizes="(min-width: 1024px) 304px, 240px"
 
                         alt={screenshots[activeScreenshot].title}
                         className="w-full h-full object-contain"
-
-                        /* Fade only — no scale (prevents resampling blur during transition) */
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.35 }}
-
                         loading="lazy"
                         decoding="async"
                         draggable={false}
-
-                        // Update aspect ratio for responsive frame height
                         onLoad={(e) => {
                           const img = e.currentTarget;
-                          if (img.naturalWidth && img.naturalHeight) {
+                          if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
+                            // keep your responsive frame height in sync with the actual asset
                             setImgRatio(img.naturalHeight / img.naturalWidth);
                           }
-                          // DEBUG: Check actual dimensions vs expected
+                          // DEBUG: Verify pixel-perfect matching
                           const rect = img.getBoundingClientRect();
-                          console.log('🔍 BLUR DEBUG:');
+                          console.log('🔍 PIXEL-PERFECT TEST:');
                           console.log('- CSS width:', Math.round(rect.width), 'px');
-                          console.log('- CSS height:', Math.round(rect.height), 'px'); 
                           console.log('- Current src:', img.currentSrc);
                           console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
-                          console.log('- Device pixel ratio:', window.devicePixelRatio);
-                          console.log('- Expected width: 240px (mobile) or 304px (desktop)');
-                          console.log('- Back to working state. Now debugging blur properly.');
-                          
-                          // DEBUG: Check if optimized images exist
-                          console.log('- m240 image path:', screenshots[activeScreenshot].m240);
-                          console.log('- Does m240 exist?', screenshots[activeScreenshot].m240 !== undefined);
+                          console.log('- Expected: 240×431 (mobile) or 304×547 (desktop)');
+                          console.log('- Perfect match?', 
+                            (Math.round(rect.width) === 240 && img.naturalWidth === 240) ||
+                            (Math.round(rect.width) === 304 && img.naturalWidth === 304)
+                          );
                         }}
+                        style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
                       />
                     </div>
                   </div>

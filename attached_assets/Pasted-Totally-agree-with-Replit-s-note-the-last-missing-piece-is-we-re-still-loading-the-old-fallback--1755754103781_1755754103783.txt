@@ -1,0 +1,48 @@
+Totally agree with Replit’s note — the last missing piece is we’re still loading the old fallback (`screenshotPath`). Swap the `src` to the pixel-perfect asset *and* give the browser the full width-based `srcSet` so desktop/retina pick the right file automatically.
+
+Here’s the **exact change** to make in `HomeV3.tsx` where your `<motion.img>` currently uses `screenshotPath` (you shared this block earlier). Replace just the image props as shown:
+
+```tsx
+<motion.img
+  // ✅ Use the exact-width mobile 1× as the baseline source
+  src={screenshots[activeScreenshot].m240}
+
+  // ✅ Width-based sources for mobile/desktop & 1×/2× (retina)
+  srcSet={[
+    screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
+    screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
+    screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
+    screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
+  ].filter(Boolean).join(', ')}
+
+  // ✅ Tell the browser the CSS width of the screen at each breakpoint
+  sizes="(min-width: 1024px) 304px, 240px"
+
+  alt={screenshots[activeScreenshot].title}
+  className="w-full h-full object-contain will-change-transform"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.35 }}
+  loading="lazy"
+  decoding="async"
+  draggable={false}
+  onLoad={(e) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
+      // keep your responsive frame height in sync with the actual asset
+      setImgRatio(img.naturalHeight / img.naturalWidth);
+    }
+  }}
+  style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+/>
+```
+
+Why this fixes it:
+
+* **Zero resampling** on mobile (240 CSS px gets the 240w/480w file); **zero resampling** on desktop (304 CSS px gets 304w/608w).
+* `srcSet` + `sizes` lets the browser choose the precise variant for the current DPR.
+* Keeping the `onLoad` ratio update preserves your dynamic frame height.
+
+Also: remove any lingering **scale** animations on ancestors of the phone (use opacity/translate instead) to avoid fractional pixel rendering.
+
+Your file currently uses the fallback `screenshotPath` for `src` in that block — switching to `m240` with the `srcSet` above is the correct final step.&#x20;
