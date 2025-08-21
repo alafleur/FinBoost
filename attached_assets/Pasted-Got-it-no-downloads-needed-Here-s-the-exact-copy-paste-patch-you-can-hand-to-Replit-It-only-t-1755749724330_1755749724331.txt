@@ -1,0 +1,117 @@
+Got it—no downloads needed. Here’s the **exact, copy-paste** patch you can hand to Replit. It only touches the phone mockup.
+
+---
+
+# 1) Add the ratio state (top of `HomeV3.tsx`)
+
+Make sure `useState` is imported, then add this near your other hooks:
+
+```tsx
+// Default to your previous frame ratio (320×600 → 600/320)
+const [imgRatio, setImgRatio] = useState(600 / 320); // height / width
+```
+
+If needed, ensure the import includes `useState`:
+
+```tsx
+import React, { useState } from 'react';
+// (or add useState to your existing React import)
+```
+
+---
+
+# 2) Outer phone container: one-line change
+
+**Find** the line with fixed heights:
+
+```tsx
+<div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+```
+
+**Replace with** (remove the `h-*` classes and add `style`):
+
+```tsx
+<div
+  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+>
+```
+
+---
+
+# 3) Replace ONLY the `<motion.img … />` block
+
+Use this DPR-ready, fade-only version that updates the aspect ratio from the image’s natural size. Keep your status bar and wrappers exactly as they are.
+
+```tsx
+<motion.img
+  src={screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath}
+  srcSet={[
+    (screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath)
+      ? `${screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath} 1x`
+      : null,
+    screenshots[activeScreenshot].screenshotPath2x
+      ? `${screenshots[activeScreenshot].screenshotPath2x} 2x`
+      : null,
+    screenshots[activeScreenshot].screenshotPath3x
+      ? `${screenshots[activeScreenshot].screenshotPath3x} 3x`
+      : null,
+  ].filter(Boolean).join(', ')}
+  sizes="(min-width: 1024px) 320px, 256px"
+  alt={screenshots[activeScreenshot].title}
+  className="w-full h-full object-contain will-change-transform"
+  /* Fade only — no scale (prevents resampling blur) */
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.35 }}
+  loading="lazy"
+  decoding="async"
+  draggable={false}
+  onLoad={(e) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      // height/width rounded to avoid subpixel ratios
+      const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+      setImgRatio(r);
+    }
+  }}
+  style={{
+    imageRendering: 'auto',      // single hint to avoid conflicts
+    backfaceVisibility: 'hidden',
+    transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+  }}
+/>
+```
+
+---
+
+## Optional (when you have retina assets)
+
+Export each screen at:
+
+* **1×** = 320×600
+* **2×** = 640×1200
+* **3×** = 960×1800 (optional)
+
+Then add to each `screenshots[...]` item (the code above auto-detects these):
+
+```ts
+{
+  // keep your current props…
+  screenshotPath: step1_1x,    // fallback
+  screenshotPath1x: step1_1x,  // 1×
+  screenshotPath2x: step1_2x,  // 2×
+  screenshotPath3x: step1_3x,  // 3× (optional)
+}
+```
+
+---
+
+## Why this fixes your exact blur
+
+* Your PNGs (e.g., **341×612**) were being **downscaled** to \~**240×431** → browser smoothing → blur.
+* The `aspectRatio` + `onLoad` alignment makes the **frame match the image’s real ratio**, eliminating forced scale.
+* `srcSet` lets retina devices pull sharper sources when you add them.
+* Fade-only animation avoids any resampling during transitions.
+
+If you want a unified diff against your file, I can format one around the lines you provided; otherwise, the three snippets above are all Replit needs to paste in.

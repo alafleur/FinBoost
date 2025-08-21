@@ -1118,7 +1118,10 @@ export default function HomeV3() {
                 className="relative"
               >
                 {/* Responsive Phone mockup - Dynamic aspect ratio for crisp screenshots */}
-                <div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+                <div
+                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+                >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
                   <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
                     {/* Status bar (fixed height) */}
@@ -1134,9 +1137,21 @@ export default function HomeV3() {
                     {/* Exact screen area */}
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
-                        src={screenshots[activeScreenshot].screenshotPath}
+                        src={screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath}
+                        srcSet={[
+                          (screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath)
+                            ? `${screenshots[activeScreenshot].screenshotPath1x ?? screenshots[activeScreenshot].screenshotPath} 1x`
+                            : null,
+                          screenshots[activeScreenshot].screenshotPath2x
+                            ? `${screenshots[activeScreenshot].screenshotPath2x} 2x`
+                            : null,
+                          screenshots[activeScreenshot].screenshotPath3x
+                            ? `${screenshots[activeScreenshot].screenshotPath3x} 3x`
+                            : null,
+                        ].filter(Boolean).join(', ')}
+                        sizes="(min-width: 1024px) 320px, 256px"
                         alt={screenshots[activeScreenshot].title}
-                        className="object-contain will-change-transform"
+                        className="w-full h-full object-contain will-change-transform"
                         /* Fade only — no scale (prevents resampling blur) */
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -1146,16 +1161,16 @@ export default function HomeV3() {
                         draggable={false}
                         onLoad={(e) => {
                           const img = e.currentTarget;
-                          console.log(`Image natural dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
-                          console.log(`Image display dimensions: ${img.offsetWidth}x${img.offsetHeight}`);
-                          console.log(`Container dimensions: ${img.parentElement?.offsetWidth}x${img.parentElement?.offsetHeight}`);
+                          if (img.naturalWidth && img.naturalHeight) {
+                            // height/width rounded to avoid subpixel ratios
+                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+                            setImgRatio(r);
+                          }
                         }}
                         style={{
-                          imageRendering: 'pixelated',
-                          maxWidth: '100%',
-                          maxHeight: '100%',
-                          width: 'auto',
-                          height: 'auto',
+                          imageRendering: 'auto',      // single hint to avoid conflicts
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
                         }}
                       />
                     </div>
@@ -2069,7 +2084,10 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
-                <div className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50">
+                <div
+                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+                >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
                   <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
                     {/* Status bar (fixed height) */}
@@ -2091,11 +2109,18 @@ export default function HomeV3() {
                         loading="lazy"
                         decoding="async"
                         draggable={false}
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          if (img.naturalWidth && img.naturalHeight) {
+                            // height/width rounded to avoid subpixel ratios
+                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+                            setImgRatio(r);
+                          }
+                        }}
                         style={{
-                          imageRendering: 'crisp-edges',
-                          width: '192px',
-                          height: '340px',
-                          objectFit: 'contain',
+                          imageRendering: 'auto',      // single hint to avoid conflicts
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
                         }}
                       />
                     </div>

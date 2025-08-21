@@ -1,0 +1,80 @@
+You nailed the diagnosis: the browser is scaling the screenshots (natural 341×612 vs. display \~240×431 CSS px), which triggers smoothing and makes UI text look soft. Here’s a **surgical, code-only fix** plus a small zip you can hand to Replit.
+
+
+
+# What I changed (only the phone mockup)
+
+1. **Dynamic aspect ratio** for the phone frame so it matches each image exactly (no stretch/downscale).
+2. **DPR-aware `srcSet`** so retina screens can render true-crisp (works even if you only have 1× today; it just falls back).
+3. **Fade-only animation** (no scale) and a single `imageRendering: 'auto'` hint to avoid browser conflicts.
+
+# Download
+
+[Download the patch & snippet zip](sandbox:/mnt/data/landing_phone_mockup_fix.zip)
+
+The zip contains:
+
+* `phone-mockup-snippet.tsx` – drop-in replacement for only the `<motion.img … />` block you pasted.
+* `phone-mockup-patch.diff` – unified diff against your current block (replaces the `<motion.img>` and nothing else).
+* `OUTER-CONTAINER-INSTRUCTION.txt` – one-line change to the **outer** phone container (remove fixed heights; add `aspectRatio`).
+* `screenshots-srcset-example.ts` – how to add 1×/2×/3× assets later (optional but recommended).
+
+# Exactly what to do (copy/paste)
+
+1. **Add/ensure** the ratio hook (you already have this in your current file):
+
+```ts
+const [imgRatio, setImgRatio] = useState(600 / 320); // height/width default
+```
+
+2. **Outer container**: find the line with fixed heights and replace as shown.
+
+**Find**
+
+```tsx
+<div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+```
+
+**Replace with**
+
+```tsx
+<div
+  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  style={{ aspectRatio: 1 / imgRatio }}
+>
+```
+
+3. **Replace only the `<motion.img … />` block** in the section you sent with the contents of `phone-mockup-snippet.tsx` from the zip. (It’s the same 20-line region you pasted.)
+
+Highlights of the new `<motion.img>`:
+
+* Reads the image’s **natural** width/height on `onLoad` and updates `imgRatio` so the frame height is exact pixel-for-pixel.
+* Accepts optional `screenshotPath1x/2x/3x` via `srcSet` (falls back to your current `screenshotPath` if those aren’t provided yet).
+* Uses fade-only animation; no scale (prevents resampling blur during transitions).
+
+# Asset guidance (for true retina crispness)
+
+The structural fix removes avoidable scaling, but your current PNGs are **341×612**. On a 2× display, a 240 CSS-px width needs **480 device px**. To be perfectly crisp everywhere, export:
+
+* **1×**: 320×600 (or your chosen phone-screen CSS box)
+* **2×**: 640×1200
+* **3×**: 960×1800 (optional)
+
+Then wire them like:
+
+```ts
+{
+  screenshotPath: step1_1x,          // fallback
+  screenshotPath1x: step1_1x,        // 320×600
+  screenshotPath2x: step1_2x,        // 640×1200
+  screenshotPath3x: step1_3x,        // 960×1800
+}
+```
+
+# Why this resolves the blur
+
+* The frame’s **height** now comes from the image’s real aspect ratio → no squeeze/stretch.
+* The image renders in an **exact pixel box** (no animation scaling, no conflicting rendering hints).
+* When you add 2×/3× assets, retina devices pull the higher-res source and stop upscaling.
+
+If you want me to turn this into a single, ready-to-merge PR patch against your repo with the exact file path (`client/src/pages/HomeV3.tsx`), just say the word and I’ll ship the diff.
