@@ -31,10 +31,10 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
 
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <a
-                href="/signup"
+                href="/auth?mode=signup"
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-white text-lg font-semibold shadow-xl shadow-blue-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
               >
-                Start Free
+                Join Early Access
               </a>
               <a
                 href="#preview"
