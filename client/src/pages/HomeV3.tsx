@@ -1175,8 +1175,8 @@ export default function HomeV3() {
                     {/* Exact screen area */}
                     <div className="flex-1 overflow-hidden flex items-start justify-center">
                       <motion.img
-                        // Force exact 1x pixel matching - no srcSet to prevent browser scaling
-                        src={screenshots[activeScreenshot].m240} 
+                        // Back to working state - then we'll fix blur properly
+                        src={screenshots[activeScreenshot].screenshotPath} 
                         
                         // Use media queries to switch between mobile/desktop image sets
                         style={{
@@ -1212,7 +1212,11 @@ export default function HomeV3() {
                           console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
                           console.log('- Device pixel ratio:', window.devicePixelRatio);
                           console.log('- Expected width: 240px (mobile) or 304px (desktop)');
-                          console.log('- SCALING TEST: Using 1x images only. Should be perfectly crisp now.');
+                          console.log('- Back to working state. Now debugging blur properly.');
+                          
+                          // DEBUG: Check if optimized images exist
+                          console.log('- m240 image path:', screenshots[activeScreenshot].m240);
+                          console.log('- Does m240 exist?', screenshots[activeScreenshot].m240 !== undefined);
                         }}
                       />
                     </div>
