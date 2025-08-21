@@ -1119,7 +1119,7 @@ export default function HomeV3() {
               >
                 {/* Responsive Phone mockup - Dynamic aspect ratio for crisp screenshots */}
                 <div
-                  className="relative w-80 lg:w-96 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
                   style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
                 >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
@@ -2073,7 +2073,7 @@ export default function HomeV3() {
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
                 <div
-                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
+                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
                   style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
                 >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
