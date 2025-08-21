@@ -44,48 +44,14 @@ import {
   Smartphone,
 } from "lucide-react";
 
-// Import high-resolution app screenshots for crisp display
-// Original fallback screenshots (341×612)
-import step1Screenshot from "@assets/Step 1 Learn & Complete Lessons_v1_1755745601876.png";
-import step2Screenshot from "@assets/Step 2 Take Financial Actions_v1_1755745601875.png";
-import step3Screenshot from "@assets/Step 3 Climb the Leaderboard_v1_1755745601874.png";
-import step4Screenshot from "@assets/Step 4 Win Real Cash Rewards_v1_1755745601873.png";
 
-// Pixel-perfect screenshots for zero blur rendering
-// Mobile: 240×431 (1×), 480×862 (2×)
-// Desktop: 304×547 (1×), 608×1094 (2×)
-import step1_m240 from "@/assets/screenshots/step1_m240.png";
-import step1_m480 from "@/assets/screenshots/step1_m480.png";
-import step1_s304 from "@/assets/screenshots/step1_s304.png";  
-import step1_s608 from "@/assets/screenshots/step1_s608.png";
-import step2_m240 from "@/assets/screenshots/step2_m240.png";
-import step2_m480 from "@/assets/screenshots/step2_m480.png";
-import step2_s304 from "@/assets/screenshots/step2_s304.png";
-import step2_s608 from "@/assets/screenshots/step2_s608.png";
-import step3_m240 from "@/assets/screenshots/step3_m240.png";
-import step3_m480 from "@/assets/screenshots/step3_m480.png";
-import step3_s304 from "@/assets/screenshots/step3_s304.png";
-import step3_s608 from "@/assets/screenshots/step3_s608.png";
-import step4_m240 from "@/assets/screenshots/step4_m240.png";
-import step4_m480 from "@/assets/screenshots/step4_m480.png";
-import step4_s304 from "@/assets/screenshots/step4_s304.png";
-import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
-import HeroLearnToEarn from "@/components/HeroLearnToEarn";
-import HeroPhone from "@/components/HeroPhone";
+import HeroCentered from "@/components/HeroCentered";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
-import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
-/**
- * Carousel state management interface
- */
-interface CarouselState {
-  currentStep: number;
-  isAutoPlaying: boolean;
-  isPaused: boolean;
-  hasUserInteracted: boolean;
-}
+
+
 
 /**
  * Custom hook for carousel state management with comprehensive controls
@@ -468,110 +434,16 @@ export default function HomeV3() {
   const [location, navigate] = useLocation();
   const [communitySize, setCommunitySize] = useState(5000);
   const [rewardsPercentage, setRewardsPercentage] = useState(79);
-  const [activeScreenshot, setActiveScreenshot] = useState(0);
+
   
   // Default to your previous frame ratio (320×600 → 600/320)
   const [imgRatio, setImgRatio] = useState(600 / 320); // height / width
 
   // How It Works step-by-step process data with high-resolution app screenshots
-  const screenshots = useMemo(
-    () => [
-      {
-        title: "Step 1: Learn & Complete Lessons",
-        description:
-          "Complete easily digestible lessons and quizzes to earn pool tickets and build your knowledge",
-        screenshotPath: step1Screenshot,  // 341×612 fallback
-        // Pixel-perfect assets for zero blur
-        m240: step1_m240,  // 240×431 mobile 1×
-        m480: step1_m480,  // 480×862 mobile 2×
-        s304: step1_s304,  // 304×547 desktop 1×
-        s608: step1_s608,  // 608×1094 desktop 2×
-        icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
-      },
-      {
-        title: "Step 2: Take Financial Actions",
-        description:
-          "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more tickets",
-        screenshotPath: step2Screenshot,
-        m240: step2_m240,
-        m480: step2_m480,
-        s304: step2_s304,
-        s608: step2_s608,
-        icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
-      },
-      {
-        title: "Step 3: Climb the Leaderboard",
-        description:
-          "Your number of tickets determines your tier placement. Higher tiers get larger shares of the total rewards pool",
-        screenshotPath: step3Screenshot,
-        m240: step3_m240,
-        m480: step3_m480,
-        s304: step3_s304,
-        s608: step3_s608,
-        icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
-      },
-      {
-        title: "Step 4: Win Real Cash Rewards",
-        description:
-          "At cycle end, winners are drawn on a ticket-weighted basis. The more tickets you have, the better your odds",
-        screenshotPath: step4Screenshot,
-        m240: step4_m240,
-        m480: step4_m480,
-        s304: step4_s304,
-        s608: step4_s608,
-        icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
-      },
-    ],
-    [],
-  );
+
 
   // Memoized steps data for performance (keeping original structure for other sections)
-  const stepsData = useMemo(
-    () => [
-      {
-        icon: <BookOpen className="w-8 h-8" />,
-        title: "Learn Financial Skills",
-        description:
-          "Complete short lessons and quizzes to build practical knowledge. Topics include budgeting, credit, debt, investing, and more. Earn tickets per module and quiz.",
-        screenshot: "lesson-module.png",
-        caption: "Complete short lessons like this to earn 20 tickets.",
-        gradient: "from-accent to-accent-light",
-      },
-      {
-        icon: <Target className="w-8 h-8" />,
-        title: "Take Real Financial Actions",
-        description:
-          "Submit proof of real-world financial actions — like paying down debt, increasing savings, or building a budget. Earn bonus tickets based on impact.",
-        screenshot: "debt-submission.png",
-        caption: "Verified debt payments earn big bonus tickets.",
-        gradient: "from-accent to-accent-light",
-      },
-      {
-        icon: <BarChart3 className="w-8 h-8" />,
-        title: "Track Your Leaderboard Position",
-        description:
-          "Your tickets determine your spot on the leaderboard — and your shot at real cash rewards. Watch your ranking rise as you learn and take action.",
-        screenshot: "leaderboard-screenshot.png",
-        caption:
-          "Your ticket total determines your leaderboard position and reward odds.",
-        gradient: "from-accent to-accent-light",
-      },
-      {
-        icon: <Trophy className="w-8 h-8" />,
-        title: "Compete for Cash Rewards",
-        description:
-          "Winners are selected using a point-weighted system — the more you learn and take action, the better your chances. Real cash rewards distributed monthly.",
-        screenshot: "tier-dashboard.png",
-        caption:
-          "Top contributors win real cash through our point-weighted reward system.",
-        gradient: "from-accent to-accent-light",
-      },
-    ],
-    [],
-  );
 
-  // Initialize carousel state management
-  const carousel = useCarouselState(stepsData.length, 5000);
 
   const handleJoinEarlyAccess = useCallback(() => {
     // Set URL search params and navigate
@@ -895,20 +767,20 @@ export default function HomeV3() {
       <Navbar />
 
       {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
-      <HeroLearnToEarn
-        phone={{
-          m240: screenshots[0].m240,
-          m480: screenshots[0].m480,
-          s304: screenshots[0].s304,
-          s608: screenshots[0].s608,
-          alt: screenshots[0].title,
+      <HeroCentered
+        onStart={() => navigate("/signup")}
+        onHowItWorks={() => {
+          const element = document.getElementById("preview");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
         }}
       />
 
       {/* Early Access Guarantee Section */}
       <EarlyAccessGuarantee />
 
-      {/* App Preview - Interactive Phone Mockup */}
+      {/* How It Works Section - Text Only */}
       <section
         id="preview"
         className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white"
@@ -936,54 +808,215 @@ export default function HomeV3() {
             </p>
           </motion.div>
 
-          {/* Unified Responsive Layout */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-            {/* Phone Preview - Mobile Bottom, Desktop Right */}
-            <div className="order-2 lg:order-2 flex items-start justify-center lg:justify-end overflow-visible">
-              <HeroPhone shot={screenshots[activeScreenshot]} />
+          {/* Simple Steps Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            {/* Step 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-xl shadow-sm border border-slate-200"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg text-slate-900 mb-2">Learn & Complete</h3>
+              <p className="text-slate-600 text-sm">Complete short lessons on budgeting, credit, and investing basics</p>
+            </motion.div>
 
-              {/* Mobile navigation with arrows and dots - positioned below phone */}
-              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
-                {/* Left Arrow */}
-                <button
-                  onClick={() => {
-                    const prevIndex =
-                      activeScreenshot === 0
-                        ? screenshots.length - 1
-                        : activeScreenshot - 1;
-                    setActiveScreenshot(prevIndex);
-                  }}
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                  aria-label="Previous screenshot"
-                >
-                  <ChevronLeft className="w-4 h-4 text-slate-600" />
-                </button>
+            {/* Step 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-xl shadow-sm border border-slate-200"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg text-slate-900 mb-2">Take Actions</h3>
+              <p className="text-slate-600 text-sm">Apply what you learned with real financial actions and proof</p>
+            </motion.div>
 
-                {/* Dots */}
-                <div className="flex space-x-2">
-                  {screenshots.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        console.log(
-                          "Dot clicked:",
-                          index,
-                          "Previous state:",
-                          activeScreenshot,
-                        );
-                        setActiveScreenshot(index);
-                      }}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        activeScreenshot === index
-                          ? "bg-blue-600 w-8"
-                          : "bg-slate-300 hover:bg-slate-400"
-                      }`}
-                      aria-label={`View ${screenshots[index].title}`}
-                    />
-                  ))}
-                </div>
+            {/* Step 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-xl shadow-sm border border-slate-200"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg text-slate-900 mb-2">Climb Leaderboard</h3>
+              <p className="text-slate-600 text-sm">Earn tickets and compete with others on the monthly leaderboard</p>
+            </motion.div>
 
-                {/* Right Arrow */}
+            {/* Step 4 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="text-center p-6 bg-white rounded-xl shadow-sm border border-slate-200"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg text-slate-900 mb-2">Win Real Cash</h3>
+              <p className="text-slate-600 text-sm">Monthly cash drawings for active members. More tickets = better odds</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Learning Module Section - Enhanced Design */}
+      <section
+        id="learn"
+        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 relative overflow-hidden"
+      >
+        {/* Enhanced Background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-200/5 to-purple-200/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-blue-700 font-semibold text-sm">
+                FINANCIAL EDUCATION
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
+              Some Examples of Your
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                FinBoost Lessons
+              </span>
+            </h2>
+            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
+              Real financial education via 3-5 minute lessons and interactive
+              quizzes based on proven strategies for common real-life scenarios
+            </p>
+          </motion.div>
+
+          {/* Learning modules content will continue here */}
+          <div className="text-center">
+            <p className="text-gray-600">Learning modules content coming soon...</p>
+          </div>
+      </section>
+
+      {/* Why FinBoost Isn't Just Another Finance App - Refined Platform Overview Format */}
+      <section
+        id="trust"
+        className="bg-gradient-to-b from-white via-slate-50 to-white py-16 px-4 sm:px-6 lg:px-8 relative"
+      >
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-blue-700 font-semibold text-sm">
+                WHY FINBOOST
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Why FinBoost Isn't Just Another Finance App
+            </h2>
+          </motion.div>
+
+          {/* Clean Tier Card Format - Responsive 2x2 Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto items-stretch">
+            {[
+              {
+                title: "Debt Progress Pays",
+                subtitle:
+                  "Student loans, credit cards, buy now pay later — every payment forward can earn you money back.",
+              },
+              {
+                title: "Rising Costs Reality",
+                subtitle:
+                  "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
+              },
+              {
+                title: "Addressing Beyond Just Next Month",
+                subtitle:
+                  "FinBoost is about freedom from near-term stress and building momentum toward long-term goals.",
+              },
+              {
+                title: "A Better Approach",
+                subtitle:
+                  "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      {item.subtitle}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-12"
+          >
+            <p className="text-center text-base text-slate-500 max-w-xl mx-auto">
+              Whether you're just starting out or already budgeting, FinBoost
+              meets you where you are — and helps you level up.
+            </p>
+          </motion.div>
+      </section>
+
+      {/* Membership Value Breakdown */}
+      <section className="py-20 px-4 bg-white relative overflow-hidden">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-purple-600/10 to-purple-800/10 backdrop-blur-sm border border-purple-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-purple-700 font-semibold text-sm">
+                MEMBERSHIP VALUES
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Membership Value Breakdown
+            </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Compare our premium membership value against other financial education platforms
+            </p>
+          </div>
+        </div>
                 <button
                   onClick={() => {
                     const nextIndex =
