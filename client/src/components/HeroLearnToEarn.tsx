@@ -1,121 +1,88 @@
+// client/src/components/HeroLearnToEarn.tsx
 import React from "react";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Ticket, PiggyBank, CreditCard, LineChart, Wallet } from "lucide-react";
 
-/**
- * Exact CSS screen sizes we target for pixel-perfect images.
- * Screen (not container) is 240×431 on mobile and 304×547 on desktop.
- */
-const SCREEN_W_MOBILE = 240;
-const SCREEN_H_MOBILE = 431;
-const SCREEN_W_DESKTOP = 304;
-const SCREEN_H_DESKTOP = 547;
-
-type PhoneSrc = {
-  m240: string; // 240×431
-  m480: string; // 480×862 (2x)
-  s304: string; // 304×547
-  s608: string; // 608×1094 (2x)
-  alt: string;
+type PhoneSources = {
+  m240: string;  // 240×431
+  m480: string;  // 480×862
+  s304: string;  // 304×547
+  s608: string;  // 608×1094
+  alt?: string;
 };
 
-interface Props {
-  phone: PhoneSrc;
-}
+const PHONE_CSS_WIDTHS = { mobile: 240, desktop: 304 } as const;
 
-const SubjectChip: React.FC<{ icon: React.ReactNode; label: string }> = ({
-  icon,
-  label,
-}) => (
-  <div className="flex items-center gap-2 rounded-full bg-white shadow-lg/50 shadow-slate-900/10 border border-slate-200 px-4 py-2 text-slate-700">
-    <span className="w-4 h-4 text-indigo-600">{icon}</span>
-    <span className="text-sm font-semibold">{label}</span>
-  </div>
-);
-
-const HeroLearnToEarn: React.FC<Props> = ({ phone }) => {
+export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
   return (
-    <section className="relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-10 lg:pt-14">
-        {/* 2-col on desktop, stacked on mobile; headline first on mobile */}
-        <div className="grid lg:grid-cols-2 items-center gap-10 lg:gap-14">
-          {/* LEFT: Copy */}
-          <div>
-
-
-            <h1 className="tracking-tight text-slate-900 text-[40px] leading-[1.05] sm:text-[56px] md:text-[64px] font-black">
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Learn Real
-                <br className="hidden sm:block" /> Finance Tools
+    <section className="relative overflow-hidden bg-white">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-8 items-center py-16 lg:py-24">
+          {/* Left: Headline + copy */}
+          <div className="lg:col-span-6">
+            <h1 className="font-extrabold tracking-tight leading-[0.9] text-5xl sm:text-6xl lg:text-7xl">
+              <span className="block bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+                LEARN REAL FINANCE TOOLS
               </span>
-              <span className="block text-slate-900 mt-2">Earn Real Cash</span>
+              <span className="block text-slate-900">EARN REAL CASH</span>
             </h1>
 
-            <p className="mt-6 text-lg text-slate-600 max-w-xl">
-              Complete short lessons and real-world actions to collect{" "}
-              <span className="font-semibold text-slate-800">tickets</span> for
-              cash drawings — free to join.
+            <p className="mt-6 max-w-xl text-lg text-slate-600">
+              Complete short lessons and actions to collect tickets for cash drawings—free to join.
             </p>
 
-            {/* badges row */}
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Badge className="bg-white text-slate-700 border border-slate-200 hover:bg-white">
-                <span className="inline-flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-indigo-600" />
-                  Ticket entries
-                </span>
-              </Badge>
-              <Badge className="bg-white text-slate-700 border border-slate-200 hover:bg-white">
-                <span className="inline-flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-indigo-600" />
-                  Real money tools
-                </span>
-              </Badge>
-            </div>
-
-            {/* CTAs */}
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex items-center gap-4">
               <a
-                href="/auth?mode=signup"
-                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg hover:shadow-xl transition-all"
+                href="/signup"
+                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
               >
                 Start Free
               </a>
               <a
-                href="#how"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-3 text-base font-semibold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50"
+                href="#how-it-works"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-900 hover:bg-slate-50"
               >
                 How it works
               </a>
             </div>
 
-            {/* disclaimer */}
-            <p className="mt-6 text-sm text-slate-500">
-              No purchase necessary. 18+. Odds vary by number of tickets. Terms
-              apply.
-            </p>
+            <div className="mt-5 text-sm text-slate-500">
+              $3,750 prize pool • 750 winners • Tickets unlock entries
+            </div>
+            <div className="mt-2 text-[12px] text-slate-400">
+              No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+            </div>
           </div>
 
-          {/* RIGHT: Phone screenshot with chips and ticket badge */}
-          <div className="relative lg:justify-self-end">
-            {/* SUBJECT CHIPS — vertically anchored to the left of the screen box */}
-            <div className="hidden lg:flex flex-col gap-4 absolute -left-40 top-6">
-              <SubjectChip icon={<PiggyBank />} label="Budget" />
-              <SubjectChip icon={<CreditCard />} label="Credit" />
-              <SubjectChip icon={<Wallet />} label="Savings" />
-              <SubjectChip icon={<LineChart />} label="Investing" />
-              <SubjectChip icon={<Ticket />} label="Debt" />
-            </div>
+          {/* Right: Ticket + tool icons + phone */}
+          <div className="lg:col-span-6 flex justify-center lg:justify-end">
+            <div className="relative w-[260px] lg:w-[340px]">
+              {/* Ticket stub (decorative) */}
+              <svg
+                viewBox="0 0 640 360"
+                className="absolute -left-10 -top-8 rotate-[-10deg] w-44 sm:w-52 lg:w-64 drop-shadow-xl"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <defs>
+                  <linearGradient id="tix" x1="0" x2="1">
+                    <stop offset="0" stopColor="#2563EB" /> {/* blue-600 */}
+                    <stop offset="1" stopColor="#4F46E5" /> {/* indigo-600 */}
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                  fill="url(#tix)"
+                />
+                <path d="M320 40v280" stroke="rgba(0,0,0,0.08)" strokeWidth="8" strokeDasharray="10 14"/>
+              </svg>
 
-            {/* Screenshot container: exact screen size (no scaling) */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="relative mx-auto lg:mx-0"
-            >
-              {/* Desktop: 304×547; Mobile: 240×431 */}
+              {/* Tool icons flowing into the ticket (decorative) */}
+              <div className="absolute -left-16 top-12 flex flex-col gap-3 opacity-95" aria-hidden="true">
+                <IconBubble label="Budget"   Icon={Piggy}   delay={0} />
+                <IconBubble label="Credit"    Icon={Card}    delay={0.12} />
+                <IconBubble label="Savings"   Icon={Target}  delay={0.24} />
+              </div>
+
+              {/* Phone image (crisp, width-based srcSet) */}
               <img
                 src={phone.m240}
                 srcSet={[
@@ -124,48 +91,63 @@ const HeroLearnToEarn: React.FC<Props> = ({ phone }) => {
                   `${phone.s304} 304w`,
                   `${phone.s608} 608w`,
                 ].join(", ")}
-                sizes={`(min-width:1024px) ${SCREEN_W_DESKTOP}px, ${SCREEN_W_MOBILE}px`}
-                width={SCREEN_W_DESKTOP}
-                height={SCREEN_H_DESKTOP}
-                alt={phone.alt}
-                className={[
-                  `block`,
-                  `w-[${SCREEN_W_MOBILE}px] h-[${SCREEN_H_MOBILE}px]`,
-                  `lg:w-[${SCREEN_W_DESKTOP}px] lg:h-[${SCREEN_H_DESKTOP}px]`,
-                  "rounded-[28px] lg:rounded-[32px] object-cover select-none",
-                  "shadow-[0_22px_60px_-10px_rgba(2,6,23,0.35)]",
-                ].join(" ")}
-                style={{
-                  imageRendering: "auto",
-                  transform: "translateZ(0)",
-                  backfaceVisibility: "hidden",
-                }}
-                draggable={false}
+                sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
+                alt={phone.alt ?? "FinBoost app"}
+                className="relative ml-6 lg:ml-10 w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
               />
-
-              {/* Optional blue wedge banner like earlier iteration */}
-              <div className="hidden lg:block absolute -top-6 left-1/2 -translate-x-1/2 w-[280px] h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl shadow-lg" />
-
-              {/* TICKETS badge at bottom-right */}
-              <div className="hidden lg:flex items-center gap-3 absolute -bottom-6 right-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl">
-                <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center">
-                  <Ticket className="w-4 h-4" />
-                </div>
-                <div className="text-left">
-                  <div className="text-xs text-slate-500 leading-none">
-                    TICKETS
-                  </div>
-                  <div className="text-sm font-semibold text-slate-800">
-                    Earn entries
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Reduced motion: keep things still if user prefers */}
+      <style>{`
+        @media (prefers-reduced-motion: reduce) {
+          .icon-float { animation: none !important; transform: none !important; }
+        }
+        @keyframes floatY { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+      `}</style>
     </section>
   );
-};
+}
 
-export default HeroLearnToEarn;
+/* --- Small icon bubble component (no extra deps) --- */
+function IconBubble({
+  label, Icon, delay = 0,
+}: { label: string; Icon: (p: any) => JSX.Element; delay?: number }) {
+  return (
+    <div
+      className="icon-float flex items-center gap-2 bg-white/90 backdrop-blur rounded-full px-3 py-2 shadow"
+      style={{ animation: `floatY 4s ease-in-out ${delay}s infinite alternate` }}
+    >
+      <Icon className="w-4 h-4 text-slate-700" />
+      <span className="text-xs font-medium text-slate-700">{label}</span>
+    </div>
+  );
+}
+
+/* --- Minimal inline icons --- */
+function Piggy(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path strokeWidth="1.8" d="M4 12a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1a3 3 0 0 1-3 3h-1l-1.5 2h-2l-1-2H9a5 5 0 0 1-5-5Z"/>
+    <circle cx="14" cy="10" r="1.2" fill="currentColor"/>
+  </svg>
+); }
+function Card(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <rect x="3" y="5" width="18" height="14" rx="2" strokeWidth="1.8"/>
+    <path d="M3 10h18" strokeWidth="1.8"/>
+    <rect x="6" y="13" width="5" height="2" rx="1" strokeWidth="1.8"/>
+  </svg>
+); }
+function Target(props: any) { return (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <circle cx="12" cy="12" r="8" strokeWidth="1.8"/>
+    <circle cx="12" cy="12" r="4" strokeWidth="1.8"/>
+    <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+  </svg>
+); }
