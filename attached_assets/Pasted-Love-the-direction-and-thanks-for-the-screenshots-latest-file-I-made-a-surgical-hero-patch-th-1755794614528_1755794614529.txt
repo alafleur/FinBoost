@@ -1,0 +1,45 @@
+Love the direction—and thanks for the screenshots + latest file. I made a **surgical** hero patch that addresses all three asks:
+
+* **Bring back the ticket chip** ✅ (floating “Tickets” badge)
+* **Remove the phone frame** ✅ (screenshot-only with soft, premium shadow)
+* **Fix mobile order** ✅ (screenshot **first**, headline **second** on small screens)
+
+I kept your pixel-perfect image pipeline (240/304 CSS widths with 480/608 for retina), **no scale animations** on the image, and the styling matches your current blue→indigo scheme. This is a **drop-in replacement** for your existing `HeroLearnToEarn` component—no other page rewrites.
+
+### What to do
+
+1. **Download & unzip**
+   [Download the patch (zip)](sandbox:/mnt/data/finboost-hero-patch.zip)
+
+2. **Place the file**
+   Put the file at:
+
+   ```
+   client/src/components/HeroLearnToEarn.tsx
+   ```
+
+   (replace your current one, if it exists)
+
+3. **No other code changes required**
+   `HomeV3` can continue to render:
+
+   ```tsx
+   <HeroLearnToEarn phone={...} />
+   ```
+
+### What changed (carefully, and only here)
+
+* **Crispness preserved**: exact CSS widths `240px` (mobile) and `304px` (desktop) + `srcSet`/`sizes` unchanged; **no** scale transforms on the `<img>`.
+* **“No frame” look**: rounded-3xl screenshot-only with a soft ambient spotlight and shadow.
+* **Ticket image**: restored as a floating gradient chip (left side), `aria-hidden`, non-interactive.
+* **Mobile layout**: image is `order-1`, headline is `order-2`; desktop flips to headline left / image right.
+* **CTAs & copy**: identical messaging structure (chips, Start Free, How it works, micro-disclaimer).
+
+### Quick test checklist
+
+* On mobile, the screenshot appears **above** the headline.
+* In DevTools, the rendered image width is **240px** (mobile) or **304px** (desktop); `currentSrc` resolves to 480w/608w on retina.
+* No blurry downscaling, no frame bezel, soft shadow only.
+* Ticket chip visible on md+ breakpoints.
+
+If you also want the **no-frame + shadow** look extended to any other phone visuals on the page, say the word—I’ll mirror this exact treatment there too without touching the rest of the layout.
