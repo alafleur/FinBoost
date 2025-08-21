@@ -70,6 +70,10 @@ import step4_m240 from "@/assets/screenshots/step4_m240.png";
 import step4_m480 from "@/assets/screenshots/step4_m480.png";
 import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
+
+// Hero Components
+import HeroLearnToEarn from "@/components/HeroLearnToEarn";
+import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
 /**
@@ -889,232 +893,19 @@ export default function HomeV3() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Hero Section - Enhanced with Animated Gradient */}
-      <section
-        id="hero"
-        className="relative min-h-screen flex items-center pt-20 sm:pt-16 pb-12 px-6 overflow-hidden"
-      >
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-accent-light/10 to-accent-light/20">
-          <div
-            className="absolute inset-0 bg-gradient-to-tr from-transparent via-accent-light/10 to-accent-light/15 animate-pulse"
-            style={{ animationDuration: "4s" }}
-          ></div>
-        </div>
+      {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
+      <HeroLearnToEarn
+        phone={{
+          m240: screenshots[0].m240,
+          m480: screenshots[0].m480,
+          s304: screenshots[0].s304,
+          s608: screenshots[0].s608,
+          alt: screenshots[0].title,
+        }}
+      />
 
-        {/* Enhanced floating background elements */}
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-accent-light/20 to-accent-light/15 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          ></motion.div>
-          <motion.div
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-accent-light/20 to-accent-light/15 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-          ></motion.div>
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-accent-light/15 to-accent-light/20 rounded-full blur-2xl"
-            animate={{
-              rotate: [0, 180, 360],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          ></motion.div>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto text-center z-10">
-          {/* Staggered headline animation */}
-          <div className="mb-8 md:mb-10 pb-2">
-            <motion.h1
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <motion.span
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-                className="inline-block"
-              >
-                Turn Financial Stress into
-              </motion.span>
-              <motion.span
-                className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
-              >
-                Financial Progress – Together
-              </motion.span>
-            </motion.h1>
-          </div>
-
-          <motion.p
-            className="text-base md:text-xl text-slate-600 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
-          >
-            Join bi-weekly cycles where you complete short financial lessons and
-            actions to earn tickets. Compete with other members to win your
-            share of the rewards pool — the more tickets you earn, the better
-            your odds to win real cash rewards.
-          </motion.p>
-
-          {/* Enhanced CTA Buttons */}
-          <motion.div
-            className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center items-center mb-12 md:mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.4, ease: "easeOut" }}
-          >
-            <motion.div
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              className="relative"
-            >
-              {/* Enhanced glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
-              <Button
-                size="lg"
-                className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 md:px-10 py-4 md:py-5 text-lg md:text-xl font-bold rounded-xl shadow-xl shadow-blue-500/25 border-0 h-auto transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
-                onClick={handleJoinEarlyAccess}
-              >
-                <Trophy className="mr-2 md:mr-3 h-5 w-5 md:h-6 md:w-6 icon-bounce" />
-                Join Early Access
-                <ArrowRight className="ml-2 md:ml-3 h-5 w-5 md:h-6 md:w-6" />
-              </Button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.6, ease: "easeOut" }}
-              className="flex items-center text-slate-600 bg-white/80 backdrop-blur-sm rounded-full px-4 md:px-6 py-2 md:py-3 border border-slate-200 shadow-lg"
-            >
-              <Users className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-              <span className="font-semibold text-sm md:text-base">
-                Early access membership is limited
-              </span>
-            </motion.div>
-          </motion.div>
-
-          {/* Early Access Guarantees */}
-          <motion.div
-            className="text-center mt-16 md:mt-20 mb-16 md:mb-20 max-w-5xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.8, ease: "easeOut" }}
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                EARLY ACCESS GUARANTEE
-              </span>
-            </div>
-            <p className="text-slate-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
-              Here's what we guarantee every early access member:
-            </p>
-
-            {/* Animated Down Arrow */}
-            <motion.div
-              className="flex justify-center mb-6 md:mb-8"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 2.0 }}
-            >
-              <motion.div
-                animate={{
-                  y: [0, 8, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm rounded-full border border-blue-200/50 shadow-lg"
-              >
-                <motion.svg
-                  className="w-5 h-5 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3, delay: 2.2 }}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </motion.svg>
-              </motion.div>
-            </motion.div>
-
-            {/* Clean Blue Card Format - Responsive 2x2 Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto items-stretch">
-              {[
-                {
-                  title: "$5,000+ Minimum Pool Size",
-                },
-                {
-                  title: "50% Member Fees To Rewards Pool",
-                },
-                {
-                  title: "40%+ Minimum Member Win Rate",
-                },
-                {
-                  title: "$250+ Minimum Top Reward",
-                },
-              ].map((guarantee, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 2.0 + index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                    <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
-                      <div className="relative z-10">
-                        <h3 className="text-base font-semibold text-white">
-                          {guarantee.title}
-                        </h3>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Early Access Guarantee Section */}
+      <EarlyAccessGuarantee />
 
       {/* App Preview - Interactive Phone Mockup */}
       <section

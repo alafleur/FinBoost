@@ -1,0 +1,40 @@
+Yes—this slots into your existing `HomeV3` conventions. A few notes to make it 100% seamless:
+
+* **Variables/state:** You can pass your existing `screenshots[activeScreenshot]` straight into the `HeroLearnToEarn` prop (or inline it). No new state is required, and it works whether your hero is static or rotates.
+* **Image system:** It uses the same **m240/m480/s304/s608** keys and the same width-based `srcSet`/`sizes` pattern you already implemented.
+* **Styling:** Pure Tailwind (same palette: blue/indigo + slate), rounded corners, soft shadows—no new deps, same formatting style.
+* **Responsive:** Single component for mobile/desktop (`lg:` breakpoints), no separate mobile file.
+* **Motion:** If you prefer to keep Framer, just use `<motion.img>` with **opacity/translate only** (no `scale()`).
+
+If you want it fully in-file (no extra component), here’s the **exact phone image block** using your variables as-is:
+
+```tsx
+const PHONE_CSS_WIDTHS = { mobile: 240, desktop: 304 } as const;
+
+<motion.img
+  src={screenshots[activeScreenshot].m240}
+  srcSet={[
+    screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
+    screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
+    screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
+    screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
+  ].filter(Boolean).join(", ")}
+  sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
+  alt={screenshots[activeScreenshot].title}
+  className="w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl"
+  initial={{ opacity: 0, y: 8 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.35 }}
+  loading="eager"
+  fetchPriority="high"
+  decoding="async"
+/>
+```
+
+If you prefer to keep your **`setImgRatio`** + `aspectRatio` frame, just add:
+
+```tsx
+onLoad={(e) => setImgRatio(e.currentTarget.naturalHeight / e.currentTarget.naturalWidth)}
+```
+
+Bottom line: it’s consistent with your code structure, naming, style, and it remains a single responsive component.
