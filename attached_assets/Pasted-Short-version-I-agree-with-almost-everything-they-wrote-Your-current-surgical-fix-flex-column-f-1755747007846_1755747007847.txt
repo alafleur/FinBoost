@@ -1,0 +1,53 @@
+Short version: I agree with almost everything they wrote. Your current surgical fix (flex column + fade-only + one rendering hint) is the right baseline. Where I’d be careful is their suggestion to switch to `image-rendering: crisp-edges`—that *can* look sharper in some cases, but it’s non-standard, maps to nearest-neighbor in many engines, and often makes UI text look jaggy. With our layout eliminating scaling, `auto` is usually the best default.
+
+Here’s how I’d proceed, in priority order:
+
+1. **Keep the structural fix** (what you have now)
+
+   * `flex flex-col` screen → exact integer pixel box
+   * **no scale** animation (opacity only)
+   * single `imageRendering: 'auto'` hint
+
+2. **Add DPR handling (tiny change, big payoff)**
+   If you have 2× screenshots, wire them in. This is the most reliable way to be crisp on retina.
+
+   ```tsx
+   <img
+     src={screenshots[activeScreenshot].screenshotPath1x}
+     srcSet={[
+       `${screenshots[activeScreenshot].screenshotPath1x} 1x`,
+       `${screenshots[activeScreenshot].screenshotPath2x} 2x`,
+       // optional:
+       // `${screenshots[activeScreenshot].screenshotPath3x} 3x`,
+     ].join(', ')}
+     sizes="(min-width: 1024px) 320px, 256px"
+     className="w-full h-full object-contain will-change-transform"
+     loading="lazy"
+     decoding="async"
+     style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+   />
+   ```
+
+   Asset targets: 320×600 (1×), 640×1200 (2×), optional 960×1800 (3×).
+
+3. **Only A/B test `crisp-edges` if you still see softness**
+
+   * It’s not consistently implemented: Chrome often uses `pixelated` semantics; Safari support is patchy.
+   * It’s best only when a bitmap is being *scaled* (which we’ve eliminated).
+   * If you want a quick toggle without CSS conflicts, drive it from a single inline style:
+
+     ```tsx
+     const preferCrisp = false; // flip to true to test
+     <img style={{ imageRendering: preferCrisp ? 'crisp-edges' : 'auto' }} … />
+     ```
+
+     (Don’t stack multiple `image-rendering` rules; pick one.)
+
+4. **Phone frame**
+   If you want an even “tighter” look, you can change `object-contain` → `object-cover` (will crop slightly) once the 2× assets are in. That usually reads more premium in a phone mockup, but it’s optional.
+
+### Bottom line
+
+* Replit’s review is fair, and the structural fix is the key win you were missing.
+* I recommend **keep `imageRendering: 'auto'` as the default**, then add **`srcSet`** for DPR. That will give you crisp, professional screenshots across Chrome/Safari/Firefox without risking jaggies.
+* If—after 2× assets—you still want to squeeze the last 1–2% of sharpness, do a controlled A/B on `crisp-edges` and keep it only where it clearly improves the result.
