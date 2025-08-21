@@ -1191,7 +1191,7 @@ export default function HomeV3() {
                         sizes="(min-width: 1024px) 304px, 240px"
 
                         alt={screenshots[activeScreenshot].title}
-                        className="w-full h-full object-contain will-change-transform"
+                        className="w-full h-full object-contain"
 
                         /* Fade only — no scale (prevents resampling blur during transition) */
                         initial={{ opacity: 0 }}
@@ -1208,6 +1208,15 @@ export default function HomeV3() {
                           if (img.naturalWidth && img.naturalHeight) {
                             setImgRatio(img.naturalHeight / img.naturalWidth);
                           }
+                          // DEBUG: Check actual dimensions vs expected
+                          const rect = img.getBoundingClientRect();
+                          console.log('🔍 BLUR DEBUG:');
+                          console.log('- CSS width:', Math.round(rect.width), 'px');
+                          console.log('- CSS height:', Math.round(rect.height), 'px'); 
+                          console.log('- Current src:', img.currentSrc);
+                          console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
+                          console.log('- Device pixel ratio:', window.devicePixelRatio);
+                          console.log('- Expected width: 240px (mobile) or 304px (desktop)');
                         }}
 
                         style={{
@@ -1386,7 +1395,7 @@ export default function HomeV3() {
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     animate={{
-                      scale: activeScreenshot === index ? 1.02 : 1,
+                      scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
                     }}
                     transition={{ duration: 0.2 }}
                   >
