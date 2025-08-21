@@ -1122,8 +1122,8 @@ export default function HomeV3() {
                   className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
                   style={{ 
                     // Frame size adapts to screenshot: adds padding + phone chrome to native image size
-                    width: `${(screenshots[activeScreenshot].naturalWidth || 341) / 16 + 1}rem`,  // convert px to rem + padding
-                    height: `${(screenshots[activeScreenshot].naturalHeight || 612) / 16 + 1}rem`
+                    width: `${((screenshots[activeScreenshot] as any).naturalWidth || 341) / 16 + 1}rem`,  // convert px to rem + padding
+                    height: `${((screenshots[activeScreenshot] as any).naturalHeight || 612) / 16 + 1}rem`
                   }}
                 >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
@@ -1173,8 +1173,8 @@ export default function HomeV3() {
                           const img = e.currentTarget;
                           if (img.naturalWidth && img.naturalHeight) {
                             // Store dimensions for dynamic frame sizing
-                            screenshots[activeScreenshot].naturalWidth = img.naturalWidth;
-                            screenshots[activeScreenshot].naturalHeight = img.naturalHeight;
+                            (screenshots[activeScreenshot] as any).naturalWidth = img.naturalWidth;
+                            (screenshots[activeScreenshot] as any).naturalHeight = img.naturalHeight;
                             // Force re-render to apply new frame size
                             setImgRatio(img.naturalHeight / img.naturalWidth);
                           }
@@ -1185,8 +1185,8 @@ export default function HomeV3() {
 
                         style={{
                           // Display at exact native resolution - no scaling
-                          width: `${screenshots[activeScreenshot].naturalWidth || 341}px`,
-                          height: `${screenshots[activeScreenshot].naturalHeight || 612}px`,
+                          width: `${(screenshots[activeScreenshot] as any).naturalWidth || 341}px`,
+                          height: `${(screenshots[activeScreenshot] as any).naturalHeight || 612}px`,
                           imageRendering: 'auto',
                           backfaceVisibility: 'hidden',
                           transform: 'translateZ(0)',
