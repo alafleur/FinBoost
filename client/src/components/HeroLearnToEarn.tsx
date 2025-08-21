@@ -42,12 +42,7 @@ const HeroLearnToEarn: React.FC<Props> = ({ phone }) => {
         <div className="grid lg:grid-cols-2 items-center gap-10 lg:gap-14">
           {/* LEFT: Copy */}
           <div>
-            {/* small pill */}
-            <div className="inline-block rounded-full border border-blue-200 bg-blue-50/50 px-5 py-2 mb-6">
-              <span className="text-blue-700 font-semibold text-sm">
-                Learn to earn
-              </span>
-            </div>
+
 
             <h1 className="tracking-tight text-slate-900 text-[40px] leading-[1.05] sm:text-[56px] md:text-[64px] font-black">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">

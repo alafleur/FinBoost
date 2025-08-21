@@ -947,9 +947,10 @@ export default function HomeV3() {
                 className="relative"
               >
                 {/* Fixed Phone mockup - Exact CSS width for crisp screenshots */}
+                {/* IMPORTANT: Tailwind cannot see template-literal classes. Use LITERAL pixel widths so purge works. */}
                 <div
-                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
-                  style={{ aspectRatio: 1 / imgRatio }}  // height adapts to maintain image proportions
+                  className="relative w-[240px] lg:w-[304px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}
                 >
                   {/* Make the phone screen a flex column so the image area is an exact pixel box */}
                   <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">

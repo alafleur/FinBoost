@@ -1,0 +1,45 @@
+You’re totally right about the root cause: Tailwind won’t pick up template-literal class names. The purge step can’t “see” `w-[${SCREEN_W_MOBILE}px]`, so it drops the rule and your phone mockup ends up with inconsistent sizing. The fix is to use **literal pixel values in the class names**.
+
+I’ve packaged a tiny, surgical patch you can apply directly:
+
+**Download:** [homev3-hero-literal-width-fix.zip](sandbox:/mnt/data/homev3-hero-literal-width-fix.zip)
+
+What’s inside:
+
+* `homev3-hero-size-fix.patch` – replaces any dynamic/templated widths with **literal** Tailwind classes:
+
+  * `w-[240px]` (mobile) and `lg:w-[304px]` (desktop) on the hero phone container
+  * keeps `sizes="(min-width: 1024px) 304px, 240px"` (must remain literal)
+* `README.md` – quick steps and verification checklist
+
+How to apply (git):
+
+```bash
+unzip homev3-hero-literal-width-fix.zip
+git apply homev3-hero-size-fix.patch
+```
+
+Manual edit (if not using git):
+
+* In `client/src/pages/HomeV3.tsx`, find the hero phone container and change the container class from any dynamic value (e.g., `w-[${SCREEN_W_MOBILE}px] lg:w-[${SCREEN_W_DESKTOP}px]` or `w-64 lg:w-80`) to:
+
+  ```tsx
+  className="relative w-[240px] lg:w-[304px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  ```
+* Ensure the image `sizes` attribute is **exactly**:
+
+  ```tsx
+  sizes="(min-width: 1024px) 304px, 240px"
+  ```
+
+Optional clean-up (matches your feedback):
+
+* Remove the small “Learn to earn” pill above the H1. If it’s rendered from a separate hero component, delete it there or add `hidden` to that pill’s container.
+
+Sanity checks after build:
+
+* In DevTools, the phone container width should read **240px** (mobile) and **304px** (desktop).
+* The image’s `currentSrc` should resolve to **240w/304w** (or **480w/608w** on retina).
+* Visually, the right-hand mockup should match the earlier “good” iteration and no longer drift in size.
+
+If you want me to ship a full `HomeV3.tsx` replacement instead of a patch, say the word and I’ll export it with the changes baked in.
