@@ -1,0 +1,85 @@
+Got it—let’s keep this **surgical** and only touch the phone mockup so the screenshots look crisp. Below is a tiny, drop-in patch for your **existing** `HomeV3.tsx`. It does three things:
+
+1. Removes any image scaling during animation
+2. Stops the browser from re-sampling the bitmap (no conflicting CSS)
+3. Makes the phone “screen” a real **flex column** so the screenshot area is an exact, integer-pixel box
+
+I’m not changing copy, sections, or layout—just the phone block. (This is the block inside **“How FinBoost Works” → Responsive Phone mockup**.)&#x20;
+
+---
+
+## Minimal patch (replace just this block)
+
+**Find the phone mockup container** in `HomeV3.tsx` (the one that starts with `w-64 h-[480px]` / `lg:w-80 lg:h-[600px]`). Replace its **inner content** from the white rounded screen down to the `<motion.img>` with the version below:
+
+```tsx
+<div className="relative w-64 h-[480px] lg:w-80 lg:h-[600px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50">
+  {/* NOTE: make the screen a flex column so the status bar consumes fixed height and the image fills the rest precisely */}
+  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+    {/* Status bar (fixed height, no overlap) */}
+    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+      <span>9:41</span>
+      <div className="flex space-x-1">
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
+      </div>
+    </div>
+
+    {/* Exact screen area: fills remaining space; no fractional pixels */}
+    <div className="flex-1 overflow-hidden flex items-start justify-center">
+      <motion.img
+        src={screenshots[activeScreenshot].screenshotPath}
+        alt={screenshots[activeScreenshot].title}
+        className="w-full h-full object-contain will-change-transform"
+        /* fade only — no scale animation that triggers blur */
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        style={{
+          /* single, unambiguous rendering hint for photos */
+          imageRendering: 'auto',
+          /* keep pixels sharp during any parent transforms */
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)'
+        }}
+      />
+    </div>
+  </div>
+
+  {/* home-button bar */}
+  <div className="absolute bottom-1 lg:bottom-2 left-1/2 -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full" />
+</div>
+```
+
+### Why this fixes the blur
+
+* **No `scale` animation** on the bitmap → no resampling fuzz.
+* **Single rendering hint** (`imageRendering: 'auto'`) → avoids conflicting vendor properties that can degrade quality.
+* **Exact screen region** (`flex flex-col`, status bar `flex-shrink-0`, image wrapper `flex-1`) → the image fills an integer-pixel box, preventing fractional scaling.
+
+---
+
+## If you want “retina-perfect”
+
+Your screenshots already look good; to be *pixel-razor* on high-DPI displays, export these optional sizes and wire them later (no need today):
+
+* 1×: **320×600**
+* 2×: **640×1200**
+* 3×: **960×1800**
+
+When you have them, I can give you a tiny `srcSet` upgrade that still keeps this one block intact.
+
+---
+
+## Optional (only if you still see softness)
+
+* Swap `object-contain` → `object-cover` (will crop slightly, but eliminates any letterboxing resampling).
+* Ensure the source images aren’t being **downscaled** by the bundler (Vite keeps big PNGs as files by default—so you’re fine).
+
+---
+
+If you want, paste the snippet you’re replacing and I’ll return it back with **only** this patch applied, so there’s zero risk of touching anything else.
