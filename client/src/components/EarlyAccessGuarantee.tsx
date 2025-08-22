@@ -14,7 +14,7 @@ export default function EarlyAccessGuarantee() {
             </span>
           </div>
           
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
             Here's what we guarantee every early access member:
           </h2>
 
@@ -43,7 +43,7 @@ function GuaranteeTile({ label }: { label: string }) {
     <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
       <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
         <div className="relative z-10">
-          <h3 className="text-xl font-semibold text-white mb-1">
+          <h3 className="text-base font-semibold text-white mb-1">
             {label}
           </h3>
         </div>
