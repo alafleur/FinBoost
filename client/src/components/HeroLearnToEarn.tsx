@@ -15,34 +15,67 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
   return (
     <section className="relative overflow-hidden bg-white pt-20 sm:pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Minimal, confident hero */}
-        <div className="text-center py-32 lg:py-48 px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight max-w-6xl mx-auto mb-8">
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-2">
-              Learn Finance,
-            </span>
-            <span className="block text-slate-900">
-              Win Real Cash
-            </span>
-          </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-8 items-center py-16 lg:py-24">
+          {/* Left: Headline + copy */}
+          <div className="lg:col-span-7">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1">
+                Learn Finance,
+              </span>
+              <span className="block text-slate-900">Win Real Cash</span>
+            </h1>
 
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Master money skills while competing for cash prizes
-          </p>
+            <p className="mt-6 max-w-xl text-lg text-slate-600 leading-relaxed">
+              Master real financial skills while competing for cash prizes. Every lesson completed earns tickets for upcoming drawings.
+            </p>
+            
+            <p className="mt-4 max-w-xl text-base text-slate-500 leading-relaxed">
+              Build lasting financial knowledge that pays dividends beyond any prize.
+            </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="/auth?mode=signup"
-              className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-5 py-2.5 text-white text-base font-medium shadow-sm transition-colors"
-            >
-              Start Competing
-            </a>
-            <a
-              href="#preview"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-300 hover:border-slate-400 px-5 py-2.5 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              How it works
-            </a>
+            <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
+              <a
+                href="/auth?mode=signup"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-5 py-2.5 text-white text-base font-medium shadow-sm transition-colors"
+              >
+                Start Learning & Competing
+              </a>
+              <a
+                href="#preview"
+                className="inline-flex items-center justify-center rounded-lg border border-slate-300 hover:border-slate-400 px-5 py-2.5 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                How it works
+              </a>
+            </div>
+
+            <div className="mt-6 text-sm text-slate-500">
+              Learn, earn tickets, compete for cash prizes
+            </div>
+            <div className="mt-2 text-xs text-slate-400">
+              No purchase necessary. 18+. Odds vary by number of tickets. Educational value regardless of winning. Terms apply.
+            </div>
+          </div>
+
+          {/* Right: Phone mockup */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="relative">
+              <img
+                src={phone.m240}
+                srcSet={[
+                  `${phone.m240} 240w`,
+                  `${phone.m480} 480w`,
+                  `${phone.s304} 304w`,
+                  `${phone.s608} 608w`,
+                ].join(", ")}
+                sizes={`(min-width:1024px) ${PHONE_CSS_WIDTHS.desktop}px, ${PHONE_CSS_WIDTHS.mobile}px`}
+                alt={phone.alt ?? "FinBoost app"}
+                className="w-[240px] lg:w-[304px] h-auto rounded-[2rem] shadow-2xl"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
+              />
+            </div>
           </div>
         </div>
       </div>
