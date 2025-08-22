@@ -55,43 +55,43 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
           {/* Right: Phone + prominent ticket + tool icons */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
             <div className="relative flex justify-center lg:justify-end w-full max-w-[400px] lg:max-w-none">
-              {/* Ticket stub - behind phone */}
-              <div className="absolute top-8 -right-2 lg:top-12 lg:right-8 z-0">
-                <svg
-                  viewBox="0 0 640 360"
-                  className="w-32 sm:w-36 lg:w-40 drop-shadow-lg rotate-12 opacity-90"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <defs>
-                    <linearGradient id="tix" x1="0" x2="1">
-                      <stop offset="0" stopColor="#2563EB" />
-                      <stop offset="1" stopColor="#9333EA" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
-                    fill="url(#tix)"
-                  />
-                  <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
-                  <text x="320" y="140" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
-                  <text x="320" y="180" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
-                </svg>
-              </div>
-
-              {/* Financial category icons - left side only, mobile hidden */}
-              <div className="absolute -left-16 lg:-left-20 top-8 flex-col gap-3 opacity-95 hidden sm:flex" aria-hidden="true">
-                <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
-                <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
-                <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
-                <IconBubble label="Savings"    Icon={Target}    delay={0.24} />
-                <IconBubble label="Insurance"  Icon={Shield}    delay={0.32} />
-                <IconBubble label="Taxes"      Icon={Calculator} delay={0.40} />
-                <IconBubble label="Emergency"  Icon={Dollar}    delay={0.48} />
-              </div>
-
               {/* Phone image (crisp, width-based srcSet) - centered on mobile */}
               <div className="relative flex justify-center lg:justify-start">
+                {/* Ticket stub - behind phone */}
+                <div className="absolute top-8 -right-2 lg:top-12 lg:right-8 z-0">
+                  <svg
+                    viewBox="0 0 640 360"
+                    className="w-32 sm:w-36 lg:w-40 drop-shadow-lg rotate-12 opacity-90"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <defs>
+                      <linearGradient id="tix" x1="0" x2="1">
+                        <stop offset="0" stopColor="#2563EB" />
+                        <stop offset="1" stopColor="#9333EA" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                      fill="url(#tix)"
+                    />
+                    <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
+                    <text x="320" y="140" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
+                    <text x="320" y="180" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
+                  </svg>
+                </div>
+
+                {/* Financial category icons - tethered to phone left side */}
+                <div className="absolute -left-20 lg:-left-24 top-12 lg:top-16 flex flex-col gap-3 opacity-95 hidden sm:flex" aria-hidden="true">
+                  <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
+                  <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
+                  <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
+                  <IconBubble label="Savings"    Icon={Target}    delay={0.24} />
+                  <IconBubble label="Insurance"  Icon={Shield}    delay={0.32} />
+                  <IconBubble label="Taxes"      Icon={Calculator} delay={0.40} />
+                  <IconBubble label="Emergency"  Icon={Dollar}    delay={0.48} />
+                </div>
+
                 <img
                   src={phone.m240}
                   srcSet={[
