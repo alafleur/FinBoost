@@ -20,13 +20,17 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
           <div className="lg:col-span-6">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1">
-                Learn Real Finance Tools
+                Learn Finance,
               </span>
-              <span className="block text-slate-900">Earn Real Cash</span>
+              <span className="block text-slate-900">Win Real Cash</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-slate-600 leading-relaxed">
-              Complete short lessons and actions to collect tickets for cash drawings.
+              Master real financial skills while competing for cash prizes. Every lesson completed earns tickets for upcoming drawings.
+            </p>
+            
+            <p className="mt-4 max-w-xl text-base text-slate-500 leading-relaxed">
+              Build lasting financial knowledge that pays dividends beyond any prize.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
@@ -34,7 +38,7 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
                 href="/auth?mode=signup"
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-white text-lg font-semibold shadow-xl shadow-blue-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40"
               >
-                Join Early Access
+                Start Learning & Competing
               </a>
               <a
                 href="#preview"
@@ -45,10 +49,10 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
             </div>
 
             <div className="mt-6 text-sm text-slate-500">
-              Learn, act, earn tickets for cash drawings
+              Learn, earn tickets, compete for cash prizes
             </div>
-            <div className="mt-2 text-[12px] text-slate-400">
-              No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+            <div className="mt-2 text-[11px] text-slate-400">
+              No purchase necessary. 18+. Odds vary by number of tickets. Educational value regardless of winning. Terms apply.
             </div>
           </div>
 
@@ -57,32 +61,78 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
             <div className="relative flex justify-center lg:justify-end w-full max-w-[400px] lg:max-w-none">
               {/* Phone image (crisp, width-based srcSet) - centered on mobile */}
               <div className="relative flex justify-center lg:justify-start">
-                {/* Ticket stub - behind phone */}
-                <div className="absolute top-8 -right-2 lg:top-12 lg:right-8 z-0">
-                  <svg
-                    viewBox="0 0 640 360"
-                    className="w-32 sm:w-36 lg:w-40 drop-shadow-lg rotate-12 opacity-90"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <defs>
-                      <linearGradient id="tix" x1="0" x2="1">
-                        <stop offset="0" stopColor="#2563EB" />
-                        <stop offset="1" stopColor="#9333EA" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
-                      fill="url(#tix)"
-                    />
-                    <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
-                    <text x="320" y="140" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
-                    <text x="320" y="180" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
-                  </svg>
+                {/* Ticket stack - more prominent behind phone */}
+                <div className="absolute top-4 -right-6 lg:top-8 lg:right-4 z-0">
+                  {/* Stack of 4 tickets with slight offsets */}
+                  <div className="relative">
+                    {/* Back ticket */}
+                    <svg
+                      viewBox="0 0 640 360"
+                      className="absolute w-36 sm:w-40 lg:w-44 drop-shadow-lg rotate-[15deg] opacity-80"
+                      style={{ transform: "rotate(15deg) translate(8px, 8px)" }}
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <defs>
+                        <linearGradient id="tix1" x1="0" x2="1">
+                          <stop offset="0" stopColor="#1e40af" />
+                          <stop offset="1" stopColor="#7c3aed" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                        fill="url(#tix1)"
+                      />
+                      <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
+                    </svg>
+                    
+                    {/* Middle ticket */}
+                    <svg
+                      viewBox="0 0 640 360"
+                      className="absolute w-36 sm:w-40 lg:w-44 drop-shadow-lg rotate-[12deg] opacity-85"
+                      style={{ transform: "rotate(12deg) translate(4px, 4px)" }}
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <defs>
+                        <linearGradient id="tix2" x1="0" x2="1">
+                          <stop offset="0" stopColor="#2563EB" />
+                          <stop offset="1" stopColor="#8b5cf6" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                        fill="url(#tix2)"
+                      />
+                      <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
+                    </svg>
+                    
+                    {/* Front ticket with text */}
+                    <svg
+                      viewBox="0 0 640 360"
+                      className="relative w-36 sm:w-40 lg:w-44 drop-shadow-xl rotate-[9deg] opacity-95"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <defs>
+                        <linearGradient id="tix3" x1="0" x2="1">
+                          <stop offset="0" stopColor="#2563EB" />
+                          <stop offset="1" stopColor="#9333EA" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M40 40h520c6 0 10 4 10 10v40a30 30 0 1 0 0 60v100c0 6-4 10-10 10H40c-6 0-10-4-10-10v-40a30 30 0 1 0 0-60V50c0-6 4-10 10-10z"
+                        fill="url(#tix3)"
+                      />
+                      <path d="M320 40v280" stroke="rgba(255,255,255,0.3)" strokeWidth="8" strokeDasharray="10 14"/>
+                      <text x="320" y="140" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold">TICKET</text>
+                      <text x="320" y="180" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="18">CASH DRAWING</text>
+                    </svg>
+                  </div>
                 </div>
 
-                {/* Financial category icons - tethered to phone left side */}
-                <div className="absolute -left-20 lg:-left-24 top-12 lg:top-16 flex flex-col gap-3 opacity-95 hidden sm:flex" aria-hidden="true">
+                {/* Financial category icons - tethered to phone left side, reduced opacity for background context */}
+                <div className="absolute -left-20 lg:-left-24 top-12 lg:top-16 flex flex-col gap-3 opacity-60 hidden sm:flex" aria-hidden="true">
                   <IconBubble label="Budget"     Icon={Piggy}     delay={0} />
                   <IconBubble label="Credit"     Icon={Card}      delay={0.08} />
                   <IconBubble label="Investing"  Icon={TrendUp}   delay={0.16} />
