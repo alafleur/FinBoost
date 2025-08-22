@@ -39,7 +39,7 @@ export default function HeroSplit() {
                   src={step4_s304}
                   alt="FinBoost winner notification - $325 cash reward"
                   loading="eager"
-                  fetchpriority="high"
+                  fetchPriority="high"
                   width="304"
                   height="547"
                 />
@@ -69,7 +69,7 @@ export default function HeroSplit() {
           </div>
 
           {/* Mobile: Stacked layout with proper copy structure */}
-          <div className="lg:hidden text-center space-y-4">
+          <div className="lg:hidden text-center space-y-6">
             <h1 className="font-extrabold tracking-tight leading-[1.05]
                            text-[clamp(2rem,7vw,5.25rem)]">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
@@ -79,22 +79,40 @@ export default function HeroSplit() {
                 Earn Real Cash
               </span>
             </h1>
+            
+            {/* Mobile phone screenshot */}
+            <div className="flex justify-center">
+              <img
+                className="w-auto h-[300px] sm:h-[340px]
+                           rounded-[24px] shadow-xl shadow-slate-900/15
+                           ring-1 ring-gray-200/50"
+                srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                sizes="(max-width: 640px) 240px, 304px"
+                src={step4_m480}
+                alt="FinBoost winner notification - $325 cash reward"
+                loading="eager"
+                width="240"
+                height="431"
+              />
+            </div>
           </div>
 
-          {/* Clean subhead */}
-          <p className="mx-auto mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
+          {/* Clean subhead with improved spacing */}
+          <p className="mx-auto mt-10 md:mt-12 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
             Complete financial lessons and real-world actions to earn <span className="font-semibold text-slate-800">tickets</span> for weekly cash drawings — free to join.
           </p>
 
-          {/* Simple CTAs */}
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          {/* CTAs brought up into hero */}
+          <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
             <a
               href="/auth?mode=signup"
               className="inline-flex h-12 items-center justify-center rounded-lg px-6
                          font-semibold text-white shadow-sm
                          bg-gradient-to-r from-blue-600 to-purple-600
                          hover:from-blue-700 hover:to-purple-700
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                         transition-all duration-200"
+              aria-label="Start free with FinBoost"
             >
               Start Free
             </a>
@@ -104,14 +122,16 @@ export default function HeroSplit() {
               className="inline-flex h-12 items-center justify-center rounded-lg px-6
                          font-semibold text-slate-700 
                          border border-slate-300 hover:bg-slate-50
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
+                         transition-all duration-200"
+              aria-label="Learn how FinBoost works"
             >
               How it works
             </a>
           </div>
 
-          {/* Legal */}
-          <p className="mt-6 pb-16 text-center text-sm text-slate-500 max-w-2xl mx-auto">
+          {/* Legal with tighter spacing */}
+          <p className="mt-4 text-center text-sm text-slate-500 max-w-2xl mx-auto">
             No purchase necessary. 18+. Odds vary by number of tickets earned. <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
           </p>
         </div>
