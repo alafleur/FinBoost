@@ -1,0 +1,51 @@
+Thanks for the nudge — I’ve packaged the cleaned-up, split hero as a single drop-in file you can download and use right away.
+
+**What’s in this version**
+
+* Real split layout: gradient “Learn Real Finance” on the left, “Earn Real Cash” on the right, phone screenshot centered.
+* Pixel-perfect image rendering (240 px mobile / 304 px desktop) with proper `srcSet` (2× assets used automatically on retina).
+* No placeholders or synthetic numbers.
+* Calm spacing + subtle vertical glow divider behind the phone.
+* Keeps your brand gradient on the left headline; strong slate headline on the right.
+* Minimal CSS assumptions (pure Tailwind classes). No `motion`/scale animations that could blur images.
+
+**Download the file**
+
+* [Download `HeroSplit.tsx`](sandbox:/mnt/data/HeroSplit.tsx)
+
+**Where to place**
+Put this file where your other sections live (e.g., `client/src/pages/sections/HeroSplit.tsx` or similar), then import and render it in `HomeV3.tsx` (or your page component):
+
+```tsx
+import HeroSplit from "./HeroSplit";
+
+export default function HomeV3() {
+  return (
+    <>
+      <HeroSplit />
+      {/* rest of the page */}
+    </>
+  );
+}
+```
+
+**Asset expectations**
+This component imports your existing crisp assets:
+
+```
+@assets/screenshots/step1_m240.png   // 240×431
+@assets/screenshots/step1_m480.png   // 480×862
+@assets/screenshots/step1_s304.png   // 304×547
+@assets/screenshots/step1_s608.png   // 608×1094
+```
+
+If your alias differs, just tweak the import paths at the top.
+
+**Why this should fix the remaining pain points**
+
+* The phone image is **never** scaled off its designed widths (240 / 304), so there’s no browser resampling blur.
+* `sizes` guides the browser to pick the correct asset; retina devices will grab the 2× automatically.
+* The hero spacing is deliberate (no cramped feel; more white space for authority).
+* Typography hierarchy matches the Underdog-style confidence without being a copy.
+
+If you want me to inline this into your existing `HomeV3.tsx` for you, paste that file here and I’ll merge it carefully without touching anything else.
