@@ -1,17 +1,17 @@
 import React from "react";
 
-// Winner notification screenshot (step4) - much better than learning modules
-import step4_m240 from '../assets/screenshots/step4_m240.png';
-import step4_m480 from '../assets/screenshots/step4_m480.png';
-import step4_s304 from '../assets/screenshots/step4_s304.png';
-import step4_s608 from '../assets/screenshots/step4_s608.png';
+// NOTE: If your alias differs, change "@assets" to "@/assets" or a relative path.
+import step1_m240 from "@assets/screenshots/step1_m240.png";
+import step1_m480 from "@assets/screenshots/step1_m480.png";
+import step1_s304 from "@assets/screenshots/step1_s304.png";
+import step1_s608 from "@assets/screenshots/step1_s608.png";
 
 /**
  * Split hero:
  * - Desktop: gradient "Learn Real Finance" (left) • phone (center) • "Earn Real Cash" (right)
  * - Mobile: stacked headline above phone
  * - Pixel-perfect phone widths: 240px (mobile) / 304px (desktop) with 2× assets via srcSet
- * - Winner notification screenshot for authentic cash reward messaging
+ * - Pure Tailwind static classes (safe for JIT/purge). No scale animations.
  */
 export default function HeroSplit() {
   return (
@@ -43,7 +43,7 @@ export default function HeroSplit() {
             </h1>
           </div>
 
-          {/* Phone (frameless, exact widths) with winner notification */}
+          {/* Phone (frameless, exact widths) */}
           <div className="relative mx-auto">
             {/* VERY soft vertical hairline to tie sides together */}
             <div
@@ -51,10 +51,10 @@ export default function HeroSplit() {
               className="pointer-events-none absolute left-1/2 top-[-16%] hidden h-[132%] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-slate-300/30 to-transparent lg:block"
             />
             <img
-              src={step4_m240}
-              srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+              src={step1_m240}
+              srcSet={`${step1_m240} 240w, ${step1_m480} 480w, ${step1_s304} 304w, ${step1_s608} 608w`}
               sizes="(min-width:1024px) 304px, 240px"
-              alt="FinBoost winner notification - $325 cash reward"
+              alt="FinBoost app — rewards view"
               className="block h-auto w-[240px] rounded-[2rem] shadow-xl shadow-slate-900/10 ring-1 ring-black/5 lg:w-[304px]"
               decoding="async"
               loading="eager"
@@ -72,13 +72,13 @@ export default function HeroSplit() {
           </div>
         </div>
 
-        {/* MOBILE phone with winner notification */}
+        {/* MOBILE phone */}
         <div className="lg:hidden mb-8 flex justify-center">
           <img
-            src={step4_m240}
-            srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+            src={step1_m240}
+            srcSet={`${step1_m240} 240w, ${step1_m480} 480w, ${step1_s304} 304w, ${step1_s608} 608w`}
             sizes="(min-width:1024px) 304px, 240px"
-            alt="FinBoost winner notification - $325 cash reward"
+            alt="FinBoost app — rewards view"
             className="block h-auto w-[240px] rounded-[1.75rem] shadow-xl shadow-slate-900/10 ring-1 ring-black/5"
             decoding="async"
             loading="eager"
@@ -93,20 +93,25 @@ export default function HeroSplit() {
           <span className="font-semibold text-slate-900">tickets</span> for weekly cash drawings — free to join.
         </p>
 
-        {/* Single CTA */}
-        <div className="mt-6 flex justify-center">
+        {/* CTAs */}
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <a
-            href="/auth?mode=signup"
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:from-blue-700 hover:to-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-            aria-label="Join early access with FinBoost"
+            href="/signup"
+            className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           >
-            Join Early Access
+            Start Free
+          </a>
+          <a
+            href="#how-it-works"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-900 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
+          >
+            How it works
           </a>
         </div>
 
         {/* Legal */}
         <p className="mt-4 text-center text-sm text-slate-500">
-          No purchase necessary. 18+. Odds vary by number of tickets earned. <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
+          No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
         </p>
       </div>
     </section>
