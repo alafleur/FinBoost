@@ -1,0 +1,93 @@
+I’m here—and I’m still engaged. Sorry this has been frustrating. Let’s stop iterating on “clever” visuals and ship something **ultra-plain, professional, and safe** that you can drop in right now.
+
+Below is a **dead-simple hero**: no gradients, no gimmicks, no fake numbers, no side artwork—just clean type, sane spacing, and two CTAs. It’s center-aligned (per your earlier preference when removing the screenshot) and uses only **static Tailwind classes**.
+
+---
+
+### Drop-in file: `HeroBaseline.tsx`
+
+```tsx
+import React from "react";
+
+export default function HeroBaseline() {
+  return (
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6">
+        {/* Give the hero real breathing room without looking empty */}
+        <div className="py-20 sm:py-24 md:py-28 lg:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            {/* Headline */}
+            <h1 className="font-extrabold leading-[1.1] tracking-tight text-slate-900
+                           text-4xl sm:text-5xl md:text-6xl">
+              <span className="block text-slate-900">Learn Finance,</span>
+              <span className="block text-slate-900">Win Real Cash</span>
+            </h1>
+
+            {/* Subhead */}
+            <p className="mt-6 text-base sm:text-lg leading-relaxed text-slate-600">
+              Short lessons and real-world actions earn{" "}
+              <span className="font-semibold text-slate-800">tickets</span> for cash drawings — free to join.
+            </p>
+
+            {/* CTAs */}
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <a
+                href="/auth?mode=signup"
+                className="inline-flex h-12 items-center justify-center rounded-lg px-6
+                           font-semibold text-white bg-blue-600 hover:bg-blue-700
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                Start Free
+              </a>
+
+              <a
+                href="#how-it-works"
+                className="inline-flex h-12 items-center justify-center rounded-lg px-5
+                           font-semibold text-slate-900 border border-slate-300 hover:bg-slate-50"
+              >
+                How it works
+              </a>
+            </div>
+
+            {/* Legal */}
+            <p className="mt-5 text-xs sm:text-sm text-slate-500">
+              No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+**Why this should feel right now**
+
+* **No placeholders, no numbers, no art.** Nothing fake or fussy.
+* **Predictable scale**: `text-4xl/5xl/6xl` with tight leading; no oversized “billboard” text.
+* **Simple rhythm**: `py-20/24/28/32` and `mt-6 → mt-8 → mt-5` for calm vertical spacing.
+* **Static Tailwind classes** only (safe for JIT/purge).
+* **Accessible**: clear heading, contrast, and focus states.
+
+**How to use**
+
+1. Save as `HeroBaseline.tsx` (e.g., `client/src/components/HeroBaseline.tsx`).
+2. In `HomeV3.tsx`, import and render near the top:
+
+   ```tsx
+   import HeroBaseline from "@/components/HeroBaseline";
+   // ...
+   <HeroBaseline />
+   ```
+
+---
+
+If you want this even *quieter*: change the primary button to `bg-slate-900 hover:bg-slate-800` for a neutral, “serious” look.
+
+If you prefer **left-aligned** instead, change:
+
+* wrapper `text-center` → `text-left`
+* CTA container `items-center sm:justify-center` → `items-start sm:justify-start`
+* keep everything else the same.
+
+If this still doesn’t meet your bar, tell me **one** thing you want different (alignment, size, spacing, or button style). I’ll adjust that single dial without reworking the whole thing again.
