@@ -8,7 +8,7 @@ export default function HeroSplit() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pt-20 md:pt-24 lg:pt-28 pb-10 md:pb-12">
+        <div className="pt-16 md:pt-20 lg:pt-24 pb-6 md:pb-8">
 
           {/* Desktop: Three-column split layout */}
           <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
@@ -31,7 +31,7 @@ export default function HeroSplit() {
               
               <div className="relative z-10">
                 <img
-                  className="w-auto h-[380px] xl:h-[420px] 2xl:h-[460px] 
+                  className="w-auto h-[320px] xl:h-[360px] 2xl:h-[400px] 
                              rounded-[28px] shadow-xl shadow-slate-900/15
                              ring-1 ring-gray-200/50"
                   srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
@@ -68,7 +68,7 @@ export default function HeroSplit() {
           </div>
 
           {/* Mobile: Stacked layout with proper copy structure */}
-          <div className="lg:hidden text-center space-y-6">
+          <div className="lg:hidden text-center space-y-4">
             <h1 className="font-extrabold tracking-tight leading-[1.05]
                            text-[clamp(2rem,7vw,5.25rem)]">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
@@ -82,7 +82,7 @@ export default function HeroSplit() {
             {/* Mobile phone screenshot */}
             <div className="flex justify-center">
               <img
-                className="w-auto h-[300px] sm:h-[340px]
+                className="w-auto h-[260px] sm:h-[280px]
                            rounded-[24px] shadow-xl shadow-slate-900/15
                            ring-1 ring-gray-200/50"
                 srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
@@ -97,12 +97,12 @@ export default function HeroSplit() {
           </div>
 
           {/* Clean subhead with improved spacing */}
-          <p className="mx-auto mt-10 md:mt-12 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
+          <p className="mx-auto mt-6 md:mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
             Complete financial lessons and real-world actions to earn <span className="font-semibold text-slate-800">tickets</span> for weekly cash drawings — free to join.
           </p>
 
           {/* CTAs brought up into hero */}
-          <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
             <a
               href="/auth?mode=signup"
               className="inline-flex h-12 items-center justify-center rounded-lg px-6
