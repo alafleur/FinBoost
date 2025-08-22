@@ -8,13 +8,13 @@ export default function HeroSplit() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pt-20 md:pt-24 lg:pt-28 pb-16">
+        <div className="pt-20 md:pt-24 lg:pt-28 pb-10 md:pb-12">
 
-          {/* Three-column split layout - Hidden on mobile */}
-          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 items-center">
+          {/* Desktop: Three-column split layout */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
             {/* Left — Learn Real Finance (3 lines) */}
             <div className="text-right">
-              <h1 className="font-extrabold tracking-tight leading-[0.9]
+              <h1 className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch] ml-auto
                              text-5xl xl:text-6xl 2xl:text-7xl
                              text-transparent bg-clip-text
                              bg-gradient-to-r from-blue-600 to-purple-600">
@@ -25,38 +25,40 @@ export default function HeroSplit() {
             </div>
 
             {/* Center — Frameless phone with winner notification */}
-            <div className="flex justify-center mx-8">
-              <div className="relative">
-                {/* Frameless screenshot with premium effects */}
-                <div className="relative">
-                  <img
-                    className="w-auto h-[380px] xl:h-[420px] 2xl:h-[460px] 
-                               rounded-[28px] shadow-2xl
-                               ring-1 ring-gray-200/50
-                               [box-shadow:0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.05),0_0_20px_rgba(59,130,246,0.15)]"
-                    srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-                    sizes="304px"
-                    src={step4_s304}
-                    alt="FinBoost winner notification - $325 cash reward"
-                    loading="eager"
-                  />
-                  
-                  {/* Premium gloss overlay */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
-                                  pointer-events-none"></div>
-                  
-                  {/* Subtle blue glow effect */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
-                                  pointer-events-none"></div>
-                </div>
+            <div className="flex justify-center self-center relative">
+              {/* Subtle vertical divider hint */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200/8 to-transparent -translate-x-1/2 pointer-events-none"></div>
+              
+              <div className="relative z-10">
+                <img
+                  className="w-auto h-[380px] xl:h-[420px] 2xl:h-[460px] 
+                             rounded-[28px] shadow-xl shadow-slate-900/15
+                             ring-1 ring-gray-200/50"
+                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                  sizes="304px"
+                  src={step4_s304}
+                  alt="FinBoost winner notification - $325 cash reward"
+                  loading="eager"
+                  fetchpriority="high"
+                  width="304"
+                  height="547"
+                />
+                
+                {/* Premium gloss overlay */}
+                <div className="absolute inset-0 rounded-[28px] 
+                                bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                pointer-events-none"></div>
+                
+                {/* Subtle blue glow effect */}
+                <div className="absolute inset-0 rounded-[28px] 
+                                [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                pointer-events-none"></div>
               </div>
             </div>
 
             {/* Right — Earn Real Cash (3 lines) */}
             <div className="text-left">
-              <h2 className="font-extrabold tracking-tight leading-[0.9]
+              <h2 className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch]
                              text-5xl xl:text-6xl 2xl:text-7xl
                              text-slate-900">
                 Earn<br />
@@ -66,13 +68,16 @@ export default function HeroSplit() {
             </div>
           </div>
 
-          {/* Mobile-only simplified content */}
-          <div className="lg:hidden text-center">
-            <h1 className="font-extrabold tracking-tight leading-tight
-                           text-4xl sm:text-5xl
-                           text-transparent bg-clip-text
-                           bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
-              Learn Finance.<br />Earn Cash.
+          {/* Mobile: Stacked layout with proper copy structure */}
+          <div className="lg:hidden text-center space-y-4">
+            <h1 className="font-extrabold tracking-tight leading-[1.05]
+                           text-[clamp(2rem,7vw,5.25rem)]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Learn Real Finance
+              </span>
+              <span className="block text-slate-900 mt-2">
+                Earn Real Cash
+              </span>
             </h1>
           </div>
 

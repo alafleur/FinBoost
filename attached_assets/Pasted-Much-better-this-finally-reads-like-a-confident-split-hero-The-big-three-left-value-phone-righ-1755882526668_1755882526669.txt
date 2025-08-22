@@ -1,0 +1,77 @@
+Much better—this finally reads like a confident split-hero. The “big three” (left value, phone, right value) are clear, and the screenshot looks crisp. A few tight tweaks will push it over the line:
+
+## Highest-impact tweaks (do these first)
+
+1. **Bring CTAs up into the hero, right under the subhead.**
+   That subcopy is strong, but there’s nothing actionable above the fold in your screenshot. Add a primary and a quiet secondary:
+
+   * **Primary:** “Start Free”
+   * **Secondary (outline):** “How it works”
+   * Keep them on one row, 16–24px gap, stacked on mobile.
+
+2. **Tighten the vertical rhythm.**
+   Right now there’s a hair too much air between the big columns and the subhead, and not enough before CTAs.
+
+   * Container: `pt-20 md:pt-24 lg:pt-28  pb-10 md:pb-12`
+   * Space from headline columns to subhead: `mt-10 md:mt-12`
+   * Space from subhead to CTAs: `mt-6`
+   * Space from CTAs to legal line: `mt-4`
+
+3. **Make the two headlines feel deliberately “balanced”, not just big.**
+
+   * Keep left in brand gradient (blue→violet).
+   * Keep right in near-black, but reduce letter-spacing slightly (`tracking-tight`) and tighten line-height (`leading-[1.02]`).
+   * Cap each block’s width so line breaks look intentional: `max-w-[13ch]` on both columns works well.
+
+4. **Align the phone vertically with the midline of both headlines.**
+   Centering the phone vertically within the grid makes the composition feel “locked in.” If it’s already centered, you’re good; if not, use `self-center` on the phone column.
+
+## Composition / layout polish
+
+* **Grid widths.** Use an asymmetric grid so the phone has its own natural column:
+  `grid-cols-1 lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16`.
+  This avoids text columns “fighting” the phone for space.
+
+* **Subtle divider hint.** A **very** soft 1px vertical gradient line behind the phone (opacity \~6–8%) can help stitch the sides together without feeling gimmicky.
+
+* **Shadow + depth on the phone.**
+  The current shadow is close; reduce the spread a touch so it’s more premium than “drop-shadowy.” Try `shadow-xl shadow-slate-900/15` on light, `shadow-2xl/20` on large.
+
+## Mobile behavior (important)
+
+* **Order:** Headline → subhead → CTAs → phone.
+  Keep the “Learn Real Finance / Earn Real Cash” as a single stack (don’t split left/right on small).
+* **Font scaling:** Use clamps so it never feels shouty:
+  `text-[clamp(2rem,7vw,5.25rem)]` for the big words, `leading-[1.05]`.
+
+## Accessibility & semantics
+
+* **One H1 for SEO, two visual blocks.**
+  Wrap both sides in a single `<h1>` with two block spans. For screen readers, include a hidden full phrase like:
+  “Learn real finance — earn real cash.”
+
+* **Button labels:** Prefer verb-first, clear actions (good as is). Make sure both buttons have `aria-label`s that include “FinBoost”.
+
+## Performance / crispness (you already did most of this)
+
+* Keep the **pixel-perfect screen** (240/304) with `srcSet` and `sizes` so retina devices pick 2×.
+* Add `fetchpriority="high"` to the hero image and include an explicit `width`/`height` to kill any CLS.
+* Preload the most likely hero image in `index.html`.
+
+## Optional micro-accents (use sparingly)
+
+* **Subject chips** (Budget / Credit / Savings) can sit on the *left side only* and fade in slightly on large screens. Keep them tiny and subtle (no neon) to avoid noise. If it feels busy, omit.
+
+---
+
+### Quick checklist you can hand to Replit
+
+* [ ] Add CTAs directly under the subhead (primary + outline).
+* [ ] Adjust spacing: `mt-12` before subhead, `mt-6` before CTAs, `mt-4` before legal.
+* [ ] Cap headline widths with `max-w-[13ch]`, set `leading-[1.02]`, `tracking-tight`.
+* [ ] Use grid: `lg:grid-cols-[1fr_auto_1fr]` with `lg:gap-12 xl:gap-16`; center the phone (`self-center`).
+* [ ] Ensure mobile order: H1 → subhead → CTAs → phone; clamp headline sizes.
+* [ ] Keep hero image `srcSet/sizes`, add `fetchpriority="high"` and `width/height`.
+* [ ] (Optional) ultra-soft vertical hairline behind phone.
+
+Do those and you’ll have a hero that finally *feels* like a real-money competition product—clean, confident, and conversion-ready without trying too hard.
