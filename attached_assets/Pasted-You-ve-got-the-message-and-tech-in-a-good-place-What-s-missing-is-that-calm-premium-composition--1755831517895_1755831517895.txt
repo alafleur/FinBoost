@@ -1,0 +1,198 @@
+You’ve got the message and tech in a good place. What’s missing is that “calm, premium” composition: bigger air, tighter typographic hierarchy, fewer flourishes. Here’s a focused plan + drop-in code you can hand to Replit to lock this down fast (with a future slot for your explainer video).
+
+
+
+---
+
+# What to change (design rules)
+
+1. Layout
+
+* Use a single, generous column on mobile. On desktop, a simple 12-col split: text (7) + optional media (5).
+* Kill any badges/pills above the headline. The hero should start with the H1.
+* Keep only two CTAs on one row.
+
+2. Typography
+
+* Two-line headline with clear hierarchy: line 1 uses a subtle blue→purple gradient; line 2 in solid near-black.
+* Tight tracking, no shadow, no strokes.
+* Subhead sits at a modest size; don’t oversell it.
+
+3. Whitespace & rhythm
+
+* Top/bottom padding: \~96px mobile, \~128px+ desktop.
+* Max width for text block: 700–760px.
+* Space between headline and subhead: 16–20px. Between subhead and CTAs: 24px.
+
+4. CTAs
+
+* Primary: filled gradient; Secondary: quiet outline.
+* Button height \~48px (not jumbo), medium weight, rounded-lg.
+
+5. Legal microcopy
+
+* One quiet line below the CTAs (same as you have): “No purchase necessary…” Don’t add icons.
+
+6. Media (for later)
+
+* Replace the right-side phone with a clean **16:9 video poster** box. No phone frame, no tags. Just a soft shadow and a centered play icon. (Until the video is ready, the box stays as a poster image.)
+
+---
+
+# Drop-in code (two options)
+
+### A) Text-only, centered hero (use this now if you want zero media)
+
+```tsx
+// components/HeroClean.tsx
+import { ArrowRight } from "lucide-react";
+
+export default function HeroClean() {
+  return (
+    <section className="relative bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="font-extrabold tracking-tight leading-[1.05]">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 text-[clamp(2.25rem,6vw,3.75rem)]">
+              Learn Finance
+            </span>
+            <span className="block text-slate-900 text-[clamp(2.25rem,6vw,3.75rem)]">
+              Win Real Cash
+            </span>
+          </h1>
+
+          <p className="mt-5 text-slate-600 text-[clamp(1rem,2.2vw,1.125rem)] leading-relaxed">
+            Master real financial skills while competing for cash prizes. Every lesson
+            completed earns tickets for upcoming drawings—free to join.
+          </p>
+
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <a
+              href="/auth?mode=signup"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-6 font-semibold text-white
+                         bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              Start Free
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+
+            <a
+              href="#how-it-works"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-5 font-semibold
+                         text-slate-900 border border-slate-300 hover:bg-slate-50"
+            >
+              How it works
+            </a>
+          </div>
+
+          <p className="mt-4 text-sm text-slate-500">
+            No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+### B) Split hero with a future video slot (keeps the professional “competition platform” vibe)
+
+```tsx
+// components/HeroSplitVideo.tsx
+import { ArrowRight, Play } from "lucide-react";
+
+export default function HeroSplitVideo() {
+  return (
+    <section className="relative bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Text */}
+        <div className="lg:col-span-7">
+          <h1 className="font-extrabold tracking-tight leading-[1.05]">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 text-[clamp(2.25rem,5.5vw,3.75rem)]">
+              Learn Finance
+            </span>
+            <span className="block text-slate-900 text-[clamp(2.25rem,5.5vw,3.75rem)]">
+              Win Real Cash
+            </span>
+          </h1>
+
+          <p className="mt-5 text-slate-600 text-[clamp(1rem,2.2vw,1.125rem)] leading-relaxed max-w-xl">
+            Master real financial skills while competing for cash prizes. Every lesson
+            completed earns tickets for upcoming drawings—free to join.
+          </p>
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <a
+              href="/auth?mode=signup"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-6 font-semibold text-white
+                         bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              Start Free
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+
+            <a
+              href="#how-it-works"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-5 font-semibold
+                         text-slate-900 border border-slate-300 hover:bg-slate-50"
+            >
+              How it works
+            </a>
+          </div>
+
+          <p className="mt-4 text-sm text-slate-500">
+            No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+          </p>
+        </div>
+
+        {/* Media (video poster placeholder) */}
+        <div className="lg:col-span-5">
+          <div
+            className="relative aspect-video w-full rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden"
+            aria-label="Explainer video placeholder"
+          >
+            {/* Poster image goes here when you have it; for now a subtle gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50" />
+            <button
+              className="absolute inset-0 m-auto h-14 w-14 rounded-full bg-white shadow-lg ring-1 ring-slate-200
+                         flex items-center justify-center hover:scale-105 transition-transform"
+              aria-label="Play explainer"
+            >
+              <Play className="h-6 w-6 text-slate-900" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+> **Why this code will “just work” with your stack**
+>
+> * Only **static** Tailwind class names (no template literals), so JIT/purge won’t drop styles.
+> * Nothing that risks fractional scaling: no images, no phone frames, no `p-2` math gotchas.
+> * Typography, spacing, and CTAs match the rest of your scheme.
+
+---
+
+# Exactly how to wire it
+
+1. Add one of the components above under `components/` (pick **HeroClean** now, or **HeroSplitVideo** if you want the right-side media slot ready).
+2. In `HomeV3`, replace the current hero import and usage (`<HeroLearnToEarn .../>`) with your chosen component.&#x20;
+3. Keep the rest of the page intact (Early Access, etc.).
+
+---
+
+# Acceptance checklist (for you & Replit)
+
+* [ ] Only one `<h1>` in the hero.
+* [ ] Desktop padding ≥ 128px top/bottom; mobile ≥ 96px.
+* [ ] Headline line 1 is gradient, line 2 solid; no other decorations.
+* [ ] Two CTAs only; 48px tall; no oversized hover effects.
+* [ ] One legal line below CTAs.
+* [ ] (If using Split) Media box is **16:9**, soft shadow, centered play button, no phone frame/tags.
+
+If you’d like, I can also provide a tiny CSS snippet to standardize buttons and spacing tokens so future edits stay consistent.

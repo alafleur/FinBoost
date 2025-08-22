@@ -72,7 +72,7 @@ import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
-import HeroLearnToEarn from "@/components/HeroLearnToEarn";
+import HeroSplitVideo from "@/components/HeroSplitVideo";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
@@ -894,15 +894,7 @@ export default function HomeV3() {
       <Navbar />
 
       {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
-      <HeroLearnToEarn
-        phone={{
-          m240: screenshots[0].m240,
-          m480: screenshots[0].m480,
-          s304: screenshots[0].s304,
-          s608: screenshots[0].s608,
-          alt: screenshots[0].title,
-        }}
-      />
+      <HeroSplitVideo />
 
       {/* Early Access Guarantee Section */}
       <EarlyAccessGuarantee />
