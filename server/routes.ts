@@ -15,10 +15,8 @@ import path from "path";
 import { upload, getFileUrl } from "./fileUpload";
 import type { PayoutRecipient, TransactionContext } from './paypal-transaction-orchestrator.js';
 // ChatGPT's v2 router with cycle_setting_id schema fix
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { adminPayoutBatchesRouter } = require("./routes/adminPayoutBatchesRouter");
-const { payoutBatchSummaryRouter } = require("./routes/payoutBatchSummaryRouter");
+import { adminPayoutBatchesRouter } from "./routes/adminPayoutBatchesRouter.js";
+import { payoutBatchSummaryRouter } from "./routes/payoutBatchSummaryRouter.js";
 import { registerAdminPayoutExportRoutes } from "./routes/admin-payout-export";
 import { registerAdminCyclesRoutes } from "./routes/admin-cycles";
 import { registerDevEmailTest } from './routes/devEmailTest.js';

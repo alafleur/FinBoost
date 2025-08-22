@@ -12,27 +12,31 @@
  *   GET /api/admin/payout-batches/:id/summary
  */
 
-const express = require('express');
+import express from 'express';
+import { pool } from '../utils/pg.js';
+
 const router = express.Router();
-const { pool } = require('../utils/pg');
 
 if (!pool) {
   console.error('[payout-batch-summary] PG pool not available. Set DATABASE_URL and install `pg`.');
 }
 
 /** helpers */
-async function tableExists(table) {
+async function tableExists(table: string): Promise<boolean> {
+  if (!pool) return false;
   const q = `select 1 from information_schema.tables where table_schema='public' and table_name=$1`;
   const { rows } = await pool.query(q, [table]);
   return rows.length > 0;
 }
-async function columnExists(table, column) {
+
+async function columnExists(table: string, column: string): Promise<boolean> {
+  if (!pool) return false;
   const q = `select 1 from information_schema.columns where table_schema='public' and table_name=$1 and column_name=$2`;
   const { rows } = await pool.query(q, [table, column]);
   return rows.length > 0;
 }
 
-router.get('/:id/summary', async (req, res) => {
+router.get('/:id/summary', async (req: express.Request, res: express.Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 0) return res.status(400).json({ error: 'Invalid id' });
   if (!pool) return res.status(500).json({ error: 'Database not configured' });
@@ -54,7 +58,7 @@ router.get('/:id/summary', async (req, res) => {
       const hasItemsTable = await tableExists('payout_items');
       let counts = null;
       let totals = null;
-      let failures = [];
+      let failures: Array<{ code: string; count: number }> = [];
 
       if (hasItemsTable) {
         const hasBatchId   = await columnExists('payout_items', 'batch_id');
@@ -128,13 +132,13 @@ router.get('/:id/summary', async (req, res) => {
               ORDER BY count DESC
             `.replace(/\s+/g, ' ').trim();
             const r = await client.query(failSql, [id]);
-            failures = r.rows.map(row => ({ code: row.code, count: Number(row.count) }));
+            failures = r.rows.map((row: any) => ({ code: row.code, count: Number(row.count) }));
           }
         }
       }
 
       // Build response
-      const out = {
+      const out: any = {
         batchId: b.id,
         cycleSettingId: b.cycle_setting_id,
         status: b.status,
@@ -155,4 +159,4 @@ router.get('/:id/summary', async (req, res) => {
   }
 });
 
-module.exports = { payoutBatchSummaryRouter: router };
+export { router as payoutBatchSummaryRouter };
