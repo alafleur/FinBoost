@@ -15,17 +15,10 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
   return (
     <section className="relative overflow-hidden bg-white pt-20 sm:pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Text-focused hero with strategic spacing and typography */}
-        <div className="text-center py-24 lg:py-40 px-4">
-          {/* Competition badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium mb-8">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
-            Live Competition Platform
-          </div>
-
-          {/* Main headline with dramatic spacing */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight max-w-5xl mx-auto mb-12">
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 pb-2">
+        {/* Minimal, confident hero */}
+        <div className="text-center py-32 lg:py-48 px-4">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight max-w-6xl mx-auto mb-8">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-2">
               Learn Finance,
             </span>
             <span className="block text-slate-900">
@@ -33,41 +26,23 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
             </span>
           </h1>
 
-          {/* Core value proposition */}
-          <div className="max-w-3xl mx-auto mb-16">
-            <p className="text-xl md:text-2xl text-slate-600 font-medium leading-relaxed mb-6">
-              Master money skills while competing for cash prizes
-            </p>
-            
-            <p className="text-lg text-slate-500 leading-relaxed">
-              Every lesson earns you tickets. Knowledge builds wealth. Winners get paid.
-            </p>
-          </div>
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-12 leading-relaxed">
+            Master money skills while competing for cash prizes
+          </p>
 
-          {/* Action buttons with emphasis */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/auth?mode=signup"
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 text-white text-lg font-semibold shadow-xl shadow-blue-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-105"
+              className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-5 py-2.5 text-white text-base font-medium shadow-sm transition-colors"
             >
-              Start Learning & Competing
+              Start Competing
             </a>
             <a
               href="#preview"
-              className="inline-flex items-center justify-center rounded-xl border-2 border-slate-300 hover:border-slate-400 px-8 py-4 text-lg font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-300"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-300 hover:border-slate-400 px-5 py-2.5 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              See How It Works
+              How it works
             </a>
-          </div>
-
-          {/* Competition details */}
-          <div className="text-center space-y-3">
-            <p className="text-base text-slate-600 font-medium">
-              Learn → Earn Tickets → Win Cash Prizes
-            </p>
-            <p className="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              No purchase necessary. 18+. Educational value guaranteed regardless of winning. Prize odds vary by participation. Terms apply.
-            </p>
           </div>
         </div>
       </div>
