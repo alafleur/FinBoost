@@ -938,63 +938,71 @@ export default function HomeV3() {
                 transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Frameless screenshot with same styling as hero section */}
-                <div className="relative">
-                  <motion.img
-                    // Use the exact-width mobile 1× as the baseline source
-                    src={screenshots[activeScreenshot].m240}
+                {/* Fixed Phone mockup - Exact CSS width for crisp screenshots */}
+                <div
+                  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // height adapts to maintain image proportions
+                >
+                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
+                      </div>
+                    </div>
 
-                    // Width-based sources for mobile/desktop & 1×/2× (retina)
-                    srcSet={[
-                      screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
-                      screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
-                      screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
-                      screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
-                    ].filter(Boolean).join(', ')}
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
+                      <motion.img
+                        // ✅ Use the exact-width mobile 1× as the baseline source
+                        src={screenshots[activeScreenshot].m240}
 
-                    // Tell the browser the CSS width of the screen at each breakpoint
-                    sizes="(min-width: 1024px) 304px, 240px"
+                        // ✅ Width-based sources for mobile/desktop & 1×/2× (retina)
+                        srcSet={[
+                          screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
+                          screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
+                          screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
+                          screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
+                        ].filter(Boolean).join(', ')}
 
-                    alt={screenshots[activeScreenshot].title}
-                    className="w-[240px] lg:w-[304px] h-auto 
-                               rounded-[28px] shadow-xl shadow-slate-900/15
-                               ring-1 ring-gray-200/50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.35 }}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      // DEBUG: Verify pixel-perfect matching
-                      const rect = img.getBoundingClientRect();
-                      console.log('🔍 PIXEL-PERFECT TEST:');
-                      console.log('- CSS width:', Math.round(rect.width), 'px');
-                      console.log('- Current src:', img.currentSrc);
-                      console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
-                      console.log('- Expected: 240×431 (mobile) or 304×547 (desktop)');
-                      console.log('- Perfect match?', 
-                        (Math.round(rect.width) === 240 && img.naturalWidth === 240) ||
-                        (Math.round(rect.width) === 304 && img.naturalWidth === 304)
-                      );
-                    }}
-                    style={{ 
-                      imageRendering: 'auto', 
-                      backfaceVisibility: 'hidden', 
-                      WebkitBackfaceVisibility: 'hidden'
-                    }}
-                  />
-                  
-                  {/* Premium gloss overlay (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
-                                  pointer-events-none"></div>
-                  
-                  {/* Subtle blue glow effect (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
-                                  pointer-events-none"></div>
+                        // ✅ Tell the browser the CSS width of the screen at each breakpoint
+                        sizes="(min-width: 1024px) 304px, 240px"
+
+                        alt={screenshots[activeScreenshot].title}
+                        className="w-full h-full object-contain"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.35 }}
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          if (img.naturalWidth && img.naturalHeight && typeof setImgRatio === 'function') {
+                            // keep your responsive frame height in sync with the actual asset
+                            setImgRatio(img.naturalHeight / img.naturalWidth);
+                          }
+                          // DEBUG: Verify pixel-perfect matching
+                          const rect = img.getBoundingClientRect();
+                          console.log('🔍 PIXEL-PERFECT TEST:');
+                          console.log('- CSS width:', Math.round(rect.width), 'px');
+                          console.log('- Current src:', img.currentSrc);
+                          console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
+                          console.log('- Expected: 240×431 (mobile) or 304×547 (desktop)');
+                          console.log('- Perfect match?', 
+                            (Math.round(rect.width) === 240 && img.naturalWidth === 240) ||
+                            (Math.round(rect.width) === 304 && img.naturalWidth === 304)
+                          );
+                        }}
+                        style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
                 </div>
               </motion.div>
 
