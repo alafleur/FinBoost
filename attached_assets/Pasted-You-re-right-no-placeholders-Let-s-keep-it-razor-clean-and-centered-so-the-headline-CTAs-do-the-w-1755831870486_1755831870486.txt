@@ -1,0 +1,134 @@
+You’re right—no placeholders. Let’s keep it razor-clean and centered so the headline + CTAs do the work, and add only light, credible proof chips. No images, no frames, no scaling risk.
+
+Below is a **drop-in hero** that:
+
+* centers everything (desktop & mobile),
+* uses only static Tailwind classes (safe with purge/JIT),
+* has two clear CTAs,
+* includes small trust chips (optional),
+* keeps your legal line,
+* and adds zero media/placeholder elements.
+
+---
+
+## `HeroFocused.tsx` (drop-in)
+
+```tsx
+// components/HeroFocused.tsx
+import { ArrowRight, Ticket } from "lucide-react";
+
+export default function HeroFocused() {
+  return (
+    <section className="relative bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-3xl text-center">
+          {/* Headline */}
+          <h1 className="font-extrabold tracking-tight leading-[1.05]">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 text-[clamp(2.25rem,6vw,3.75rem)]">
+              Learn Finance
+            </span>
+            <span className="block text-slate-900 text-[clamp(2.25rem,6vw,3.75rem)]">
+              Win Real Cash
+            </span>
+          </h1>
+
+          {/* Subhead */}
+          <p className="mt-5 text-slate-600 text-[clamp(1rem,2.2vw,1.125rem)] leading-relaxed">
+            Short lessons and real-world actions earn{" "}
+            <span className="font-semibold text-slate-800">tickets</span> for cash
+            drawings — free to join.
+          </p>
+
+          {/* Trust chips (optional) */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
+              <Ticket className="mr-1.5 h-4 w-4 text-purple-600" /> Tickets unlock entries
+            </span>
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
+              $3,750 prize pool
+            </span>
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
+              750 winners
+            </span>
+          </div>
+
+          {/* CTAs */}
+          <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <a
+              href="/auth?mode=signup"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-6 font-semibold text-white
+                         bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              Start Free
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+
+            <a
+              href="#how-it-works"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-5 font-semibold
+                         text-slate-900 border border-slate-300 hover:bg-slate-50"
+            >
+              How it works
+            </a>
+          </div>
+
+          {/* Legal line */}
+          <p className="mt-4 text-sm text-slate-500">
+            No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+### How to wire it (2 steps)
+
+1. Save as `components/HeroFocused.tsx`.
+2. In your `HomeV3` page, import and render it at the top (replace the current hero):
+
+```tsx
+import HeroFocused from "@/components/HeroFocused";
+// ...
+<HeroFocused />
+```
+
+---
+
+## Why this will stick
+
+* **No media at all** → nothing to scale or blur, nothing for Tailwind to purge.
+* **One clear H1**, tight subhead, **two CTAs**, and a single legal line.
+* **Trust chips** are plain text + an inline icon—easy to remove if you want it even more minimal.
+
+---
+
+## Optional polish (still zero media)
+
+If you want a hair more “premium” without introducing images:
+
+* Add a **very light background gradient** behind the section (kept to white-ish tones so it never competes):
+
+```html
+<section className="relative bg-gradient-to-b from-white via-white to-slate-50">
+```
+
+* Or a **thin underline** under the second headline line:
+
+```html
+<span className="mx-auto mt-3 block h-[2px] w-16 rounded bg-gradient-to-r from-blue-600 to-purple-600" />
+```
+
+(Place it right after the second `<span>` in the H1.)
+
+---
+
+## Copy you can A/B test (same layout)
+
+* “**Learn real finance tools. Earn real cash.**”
+* “**Master money skills. Win real cash.**”
+* “**Level up your finances. Win real cash.**”
+
+Pick one, keep the subhead tight, and resist adding extras. This gives you a strong, credible hero now—and you can slot in an explainer *later* as its own section when it’s truly ready.
