@@ -956,7 +956,7 @@ export default function HomeV3() {
                     sizes="(min-width: 1024px) 304px, 240px"
 
                     alt={screenshots[activeScreenshot].title}
-                    className="w-auto h-[260px] lg:h-[320px] 
+                    className="w-[240px] lg:w-[304px] h-auto 
                                rounded-[28px] shadow-xl shadow-slate-900/15
                                ring-1 ring-gray-200/50"
                     initial={{ opacity: 0 }}
