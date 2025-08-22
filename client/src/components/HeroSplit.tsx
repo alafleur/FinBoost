@@ -1,8 +1,8 @@
 import React from "react";
-import step1_m240 from '../assets/screenshots/step1_m240.png';
-import step1_m480 from '../assets/screenshots/step1_m480.png';
-import step1_s304 from '../assets/screenshots/step1_s304.png';
-import step1_s608 from '../assets/screenshots/step1_s608.png';
+import step4_m240 from '../assets/screenshots/step4_m240.png';
+import step4_m480 from '../assets/screenshots/step4_m480.png';
+import step4_s304 from '../assets/screenshots/step4_s304.png';
+import step4_s608 from '../assets/screenshots/step4_s608.png';
 
 export default function HeroSplit() {
   return (
@@ -10,63 +10,70 @@ export default function HeroSplit() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="pt-20 md:pt-24 lg:pt-28 pb-16">
 
-          {/* Three-column split layout */}
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_auto_1fr] lg:gap-12">
-            {/* Left — gradient brand side */}
-            <div className="text-left lg:text-right">
-              <h1 className="font-extrabold tracking-tight leading-tight
-                             text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+          {/* Three-column split layout - Hidden on mobile */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 items-center">
+            {/* Left — Learn Real Finance (3 lines) */}
+            <div className="text-right">
+              <h1 className="font-extrabold tracking-tight leading-[0.9]
+                             text-5xl xl:text-6xl 2xl:text-7xl
                              text-transparent bg-clip-text
                              bg-gradient-to-r from-blue-600 to-purple-600">
-                Learn Real Finance
+                Learn<br />
+                Real<br />
+                Finance
               </h1>
             </div>
 
-            {/* Center — Phone mockup */}
-            <div className="flex justify-center lg:mx-8">
-              <div className="relative max-w-sm mx-auto">
-                {/* Phone frame with subtle styling */}
-                <div className="relative bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
-                  {/* Status bar simulation */}
-                  <div className="bg-black rounded-t-[2rem] px-4 py-2 flex justify-between items-center text-white text-sm">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                    </div>
-                    <div className="font-medium">12:34</div>
-                    <div className="flex space-x-1">
-                      <div className="w-4 h-2 border border-white rounded-sm"></div>
-                      <div className="w-1 h-1 bg-white rounded-full"></div>
-                    </div>
-                  </div>
+            {/* Center — Frameless phone with winner notification */}
+            <div className="flex justify-center mx-8">
+              <div className="relative">
+                {/* Frameless screenshot with premium effects */}
+                <div className="relative">
+                  <img
+                    className="w-auto h-[380px] xl:h-[420px] 2xl:h-[460px] 
+                               rounded-[28px] shadow-2xl
+                               ring-1 ring-gray-200/50
+                               [box-shadow:0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.05),0_0_20px_rgba(59,130,246,0.15)]"
+                    srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                    sizes="304px"
+                    src={step4_s304}
+                    alt="FinBoost winner notification - $325 cash reward"
+                    loading="eager"
+                  />
                   
-                  {/* Phone screen with responsive image */}
-                  <div className="bg-white rounded-b-[2rem] overflow-hidden">
-                    <img
-                      className="w-full h-auto block"
-                      srcSet={`${step1_m240} 240w, ${step1_m480} 480w, ${step1_s304} 304w, ${step1_s608} 608w`}
-                      sizes="(max-width: 768px) 240px, 304px"
-                      src={step1_m480}
-                      alt="FinBoost app showing winner notification"
-                      loading="eager"
-                    />
-                  </div>
+                  {/* Premium gloss overlay */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                  pointer-events-none"></div>
                   
-                  {/* Subtle reflection effect */}
-                  <div className="absolute inset-x-2 top-2 h-1/3 bg-gradient-to-b from-white/10 to-transparent rounded-t-[2rem] pointer-events-none"></div>
+                  {/* Subtle blue glow effect */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                  pointer-events-none"></div>
                 </div>
               </div>
             </div>
 
-            {/* Right — earn side */}
-            <div className="text-right lg:text-left">
-              <h2 className="font-extrabold tracking-tight leading-tight
-                             text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+            {/* Right — Earn Real Cash (3 lines) */}
+            <div className="text-left">
+              <h2 className="font-extrabold tracking-tight leading-[0.9]
+                             text-5xl xl:text-6xl 2xl:text-7xl
                              text-slate-900">
-                Earn Real Cash
+                Earn<br />
+                Real<br />
+                Cash
               </h2>
             </div>
+          </div>
+
+          {/* Mobile-only simplified content */}
+          <div className="lg:hidden text-center">
+            <h1 className="font-extrabold tracking-tight leading-tight
+                           text-4xl sm:text-5xl
+                           text-transparent bg-clip-text
+                           bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
+              Learn Finance.<br />Earn Cash.
+            </h1>
           </div>
 
           {/* Clean subhead */}
