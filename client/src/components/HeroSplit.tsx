@@ -8,7 +8,7 @@ export default function HeroSplit() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pt-16 md:pt-20 lg:pt-24 pb-6 md:pb-8">
+        <div className="pt-20 md:pt-20 lg:pt-24 pb-6 md:pb-8">
 
           {/* Desktop: Three-column split layout */}
           <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
@@ -70,11 +70,11 @@ export default function HeroSplit() {
           {/* Mobile: Stacked layout with proper copy structure */}
           <div className="lg:hidden text-center space-y-4">
             <h1 className="font-extrabold tracking-tight leading-[1.05]
-                           text-[clamp(2rem,7vw,5.25rem)]">
+                           text-[clamp(1.75rem,6vw,4.5rem)]">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                 Learn Real Finance
               </span>
-              <span className="block text-slate-900 mt-2">
+              <span className="block text-slate-900 mt-1">
                 Earn Real Cash
               </span>
             </h1>
