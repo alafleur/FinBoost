@@ -1,113 +1,127 @@
 import React from "react";
-
-// Winner notification screenshot (step4) - much better than learning modules
 import step4_m240 from '../assets/screenshots/step4_m240.png';
 import step4_m480 from '../assets/screenshots/step4_m480.png';
 import step4_s304 from '../assets/screenshots/step4_s304.png';
 import step4_s608 from '../assets/screenshots/step4_s608.png';
 
-/**
- * Split hero:
- * - Desktop: gradient "Learn Real Finance" (left) • phone (center) • "Earn Real Cash" (right)
- * - Mobile: stacked headline above phone
- * - Pixel-perfect phone widths: 240px (mobile) / 304px (desktop) with 2× assets via srcSet
- * - Winner notification screenshot for authentic cash reward messaging
- */
 export default function HeroSplit() {
   return (
-    <section className="relative overflow-hidden bg-white">
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-14 lg:pt-24 lg:pb-20">
-        {/* MOBILE: stacked */}
-        <div className="mb-10 text-center lg:hidden">
-          <h1 className="text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-5xl">
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Learn Real Finance
-            </span>
-          </h1>
-          <h2 className="mt-2 text-4xl font-extrabold leading-[1.04] tracking-tight text-slate-900 sm:text-5xl">
-            Earn Real Cash
-          </h2>
-        </div>
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
 
-        {/* DESKTOP: split */}
-        <div className="hidden items-center gap-10 lg:grid lg:grid-cols-[1fr_auto_1fr]">
-          {/* Left headline */}
-          <div className="text-left">
-            <h1 className="font-extrabold tracking-tight leading-[1.02] text-[3rem] xl:text-[4.5rem] 2xl:text-[5.5rem]">
-              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Learn Real
-              </span>
-              <span className="block -mt-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          {/* Desktop: Three-column split layout */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
+            {/* Left — Learn Real Finance (3 lines) */}
+            <div className="text-right">
+              <h1 className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch] ml-auto
+                             text-5xl xl:text-6xl 2xl:text-7xl
+                             text-transparent bg-clip-text
+                             bg-gradient-to-r from-blue-600 to-purple-600">
+                Learn<br />
+                Real<br />
                 Finance
+              </h1>
+            </div>
+
+            {/* Center — Frameless phone with winner notification */}
+            <div className="flex justify-center self-center relative">
+              {/* Subtle vertical divider hint */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200/8 to-transparent -translate-x-1/2 pointer-events-none"></div>
+              
+              <div className="relative z-10">
+                <img
+                  className="w-auto h-[320px] xl:h-[360px] 2xl:h-[400px] 
+                             rounded-[28px] shadow-xl shadow-slate-900/15
+                             ring-1 ring-gray-200/50"
+                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                  sizes="304px"
+                  src={step4_s304}
+                  alt="FinBoost winner notification - $325 cash reward"
+                  loading="eager"
+                  width="304"
+                  height="547"
+                />
+                
+                {/* Premium gloss overlay */}
+                <div className="absolute inset-0 rounded-[28px] 
+                                bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                pointer-events-none"></div>
+                
+                {/* Subtle blue glow effect */}
+                <div className="absolute inset-0 rounded-[28px] 
+                                [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                pointer-events-none"></div>
+              </div>
+            </div>
+
+            {/* Right — Earn Real Cash (3 lines) */}
+            <div className="text-left">
+              <h2 className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch]
+                             text-5xl xl:text-6xl 2xl:text-7xl
+                             text-slate-900">
+                Earn<br />
+                Real<br />
+                Cash
+              </h2>
+            </div>
+          </div>
+
+          {/* Mobile: Stacked layout with proper copy structure */}
+          <div className="lg:hidden text-center space-y-4">
+            <h1 className="font-extrabold tracking-tight leading-[1.05]
+                           text-[clamp(1.75rem,6vw,4.5rem)]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Learn Real Finance
+              </span>
+              <span className="block text-slate-900 mt-1">
+                Earn Real Cash
               </span>
             </h1>
+            
+            {/* Mobile phone screenshot */}
+            <div className="flex justify-center">
+              <img
+                className="w-auto h-[260px] sm:h-[280px]
+                           rounded-[24px] shadow-xl shadow-slate-900/15
+                           ring-1 ring-gray-200/50"
+                srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                sizes="(max-width: 640px) 240px, 304px"
+                src={step4_m480}
+                alt="FinBoost winner notification - $325 cash reward"
+                loading="eager"
+                width="240"
+                height="431"
+              />
+            </div>
           </div>
 
-          {/* Phone (frameless, exact widths) with winner notification */}
-          <div className="relative mx-auto">
-            {/* VERY soft vertical hairline to tie sides together */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[-16%] hidden h-[132%] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-slate-300/30 to-transparent lg:block"
-            />
-            <img
-              src={step4_m240}
-              srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-              sizes="(min-width:1024px) 304px, 240px"
-              alt="FinBoost winner notification - $325 cash reward"
-              className="block h-auto w-[240px] rounded-[2rem] shadow-xl shadow-slate-900/10 ring-1 ring-black/5 lg:w-[304px]"
-              decoding="async"
-              loading="eager"
-              draggable={false}
-              style={{ imageRendering: "auto", backfaceVisibility: "hidden" }}
-            />
+          {/* Clean subhead with improved spacing */}
+          <p className="mx-auto mt-6 md:mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
+            Complete financial lessons and real-world actions to earn <span className="font-semibold text-slate-800">tickets</span> for weekly cash drawings — free to join.
+          </p>
+
+          {/* Single CTA */}
+          <div className="mt-6 flex justify-center">
+            <a
+              href="/auth?mode=signup"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-8
+                         font-semibold text-white shadow-sm
+                         bg-gradient-to-r from-blue-600 to-purple-600
+                         hover:from-blue-700 hover:to-purple-700
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                         transition-all duration-200"
+              aria-label="Join early access with FinBoost"
+            >
+              Join Early Access
+            </a>
           </div>
 
-          {/* Right headline */}
-          <div className="text-right">
-            <h2 className="font-extrabold tracking-tight leading-[1.02] text-slate-900 text-[3rem] xl:text-[4.5rem] 2xl:text-[5.5rem]">
-              <span className="block">Earn Real</span>
-              <span className="block -mt-1">Cash</span>
-            </h2>
-          </div>
+          {/* Legal with tighter spacing */}
+          <p className="mt-4 text-center text-sm text-slate-500 max-w-2xl mx-auto">
+            No purchase necessary. 18+. Odds vary by number of tickets earned. <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
+          </p>
         </div>
-
-        {/* MOBILE phone with winner notification */}
-        <div className="lg:hidden mb-8 flex justify-center">
-          <img
-            src={step4_m240}
-            srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-            sizes="(min-width:1024px) 304px, 240px"
-            alt="FinBoost winner notification - $325 cash reward"
-            className="block h-auto w-[240px] rounded-[1.75rem] shadow-xl shadow-slate-900/10 ring-1 ring-black/5"
-            decoding="async"
-            loading="eager"
-            draggable={false}
-            style={{ imageRendering: "auto" }}
-          />
-        </div>
-
-        {/* Subhead */}
-        <p className="mx-auto max-w-3xl text-center text-lg leading-relaxed text-slate-700">
-          Complete financial lessons and real‑world actions to earn{" "}
-          <span className="font-semibold text-slate-900">tickets</span> for weekly cash drawings — free to join.
-        </p>
-
-        {/* Single CTA */}
-        <div className="mt-6 flex justify-center">
-          <a
-            href="/auth?mode=signup"
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:from-blue-700 hover:to-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-            aria-label="Join early access with FinBoost"
-          >
-            Join Early Access
-          </a>
-        </div>
-
-        {/* Legal */}
-        <p className="mt-4 text-center text-sm text-slate-500">
-          No purchase necessary. 18+. Odds vary by number of tickets earned. <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
-        </p>
       </div>
     </section>
   );
