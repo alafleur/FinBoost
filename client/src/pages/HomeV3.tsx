@@ -938,26 +938,12 @@ export default function HomeV3() {
                 transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Frameless screenshot with same styling as hero section */}
+                {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
                 <div className="relative">
                   <motion.img
-                    // Use the exact-width mobile 1× as the baseline source
-                    src={screenshots[activeScreenshot].m240}
-
-                    // Width-based sources for mobile/desktop & 1×/2× (retina)
-                    srcSet={[
-                      screenshots[activeScreenshot].m240 && `${screenshots[activeScreenshot].m240} 240w`,
-                      screenshots[activeScreenshot].m480 && `${screenshots[activeScreenshot].m480} 480w`,
-                      screenshots[activeScreenshot].s304 && `${screenshots[activeScreenshot].s304} 304w`,
-                      screenshots[activeScreenshot].s608 && `${screenshots[activeScreenshot].s608} 608w`,
-                    ].filter(Boolean).join(', ')}
-
-                    // Tell the browser the CSS width of the screen at each breakpoint
-                    sizes="(min-width: 1024px) 304px, 240px"
-
+                    src={screenshots[activeScreenshot].screenshotPath}
                     alt={screenshots[activeScreenshot].title}
-                    className="w-[240px] lg:w-[304px] h-auto 
-                               rounded-[28px] shadow-xl shadow-slate-900/15
+                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
                                ring-1 ring-gray-200/50"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -965,25 +951,6 @@ export default function HomeV3() {
                     loading="lazy"
                     decoding="async"
                     draggable={false}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      // DEBUG: Verify pixel-perfect matching
-                      const rect = img.getBoundingClientRect();
-                      console.log('🔍 PIXEL-PERFECT TEST:');
-                      console.log('- CSS width:', Math.round(rect.width), 'px');
-                      console.log('- Current src:', img.currentSrc);
-                      console.log('- Natural size:', img.naturalWidth + 'x' + img.naturalHeight);
-                      console.log('- Expected: 240×431 (mobile) or 304×547 (desktop)');
-                      console.log('- Perfect match?', 
-                        (Math.round(rect.width) === 240 && img.naturalWidth === 240) ||
-                        (Math.round(rect.width) === 304 && img.naturalWidth === 304)
-                      );
-                    }}
-                    style={{ 
-                      imageRendering: 'auto', 
-                      backfaceVisibility: 'hidden', 
-                      WebkitBackfaceVisibility: 'hidden'
-                    }}
                   />
                   
                   {/* Premium gloss overlay (same as hero) */}
