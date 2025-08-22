@@ -1,0 +1,14 @@
+HomeV3 patch (manual steps)
+1) Add this import near the top with your other imports:
+   import FAQ from "@/components/FAQ";  // or "../components/FAQ" if you don't use path aliases
+
+2) If HomeV3 already imports framer-motion, make sure it includes AnimatePresence:
+   import { motion, AnimatePresence } from "framer-motion";
+
+3) Render the FAQ just above your footer:
+   ...
+   <FAQ />
+   <Footer />
+   ...
+
+4) No additional deps required. All Tailwind classes are static.

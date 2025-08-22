@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,7 +14,7 @@ const faqs: QA[] = [
   },
   {
     q: "Do I need to pay to participate?",
-    a: <>You can join free. A paid membership unlocks full access and helps fund the <strong>member rewards pool</strong> (see "Membership value").</>,
+    a: <>You can join free. A paid membership unlocks full access and helps fund the <strong>member rewards pool</strong> (see “Membership value”).</>,
   },
   {
     q: "Is purchase necessary?",
@@ -27,7 +26,7 @@ const faqs: QA[] = [
   },
   {
     q: "When do drawings happen?",
-    a: <>At the end of each cycle (shown in-app). You'll always see your ticket total and cycle timing on your dashboard.</>,
+    a: <>At the end of each cycle (shown in-app). You’ll always see your ticket total and cycle timing on your dashboard.</>,
   },
   {
     q: "How do payouts work?",
@@ -42,7 +41,7 @@ const faqs: QA[] = [
     a: <>We follow standard security practices and only request information needed for learning, verification, and payouts.</>,
   },
   {
-    q: "Does 'real finance' mean real actions?",
+    q: "Does “real finance” mean real actions?",
     a: <>Yes. Beyond lessons, you can submit proof of real steps (e.g., a debt payment) to earn <strong>bonus tickets</strong>.</>,
   },
 ];

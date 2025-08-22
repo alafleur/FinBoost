@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import FAQ from "@/components/FAQ";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -1967,6 +1968,8 @@ export default function HomeV3() {
         </div>
       </section>
 
+      <FAQ />
+      
       <Footer />
     </div>
   );
