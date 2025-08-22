@@ -1,0 +1,75 @@
+You’re right—the “broken image” in the split-hero is coming from that huge, corrupted base64 string. The rest of your app already has the pixel-perfect image pipeline wired (m240/m480/s304/s608 with `sizes`), so the fix is simply to make the split-hero use the same imports + `srcSet` pattern.
+
+Below is a drop-in replacement for the phone image block in **`HeroSplit.tsx`** (remove the `data:image/...` string entirely and use this). It mirrors the exact approach already working in `HomeV3` (see the screenshots array and `srcSet/sizes` usage there). &#x20;
+
+---
+
+### 1) Imports (top of `HeroSplit.tsx`)
+
+```tsx
+import step1_m240 from '@assets/screenshots/step1_m240.png';
+import step1_m480 from '@assets/screenshots/step1_m480.png';
+import step1_s304 from '@assets/screenshots/step1_s304.png';
+import step1_s608 from '@assets/screenshots/step1_s608.png';
+```
+
+### 2) Replace the entire base64 `<img ...>` with this block
+
+```tsx
+{/* Phone frame — width accounts for p-2 (8px × 2) so the inner screen is 240/304px exactly */}
+<div
+  className="relative w-64 lg:w-80 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] lg:rounded-[3rem] p-2 shadow-xl lg:shadow-2xl shadow-slate-900/50"
+  style={{ aspectRatio: 431 / 240 }}  // prevents CLS; matches 240×431 screen box
+>
+  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+    {/* status bar */}
+    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+      <span>9:41</span>
+      <div className="flex space-x-1">
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-3 h-1 lg:w-4 lg:h-2 bg-slate-300 rounded-sm" />
+        <div className="w-4 h-1 lg:w-6 lg:h-2 bg-green-500 rounded-sm" />
+      </div>
+    </div>
+
+    {/* exact screen area; pixel-perfect assets */}
+    <div className="flex-1 overflow-hidden flex items-start justify-center">
+      <img
+        // 1× baseline matches CSS screen width (240px mobile / 304px desktop)
+        src={step1_m240}
+        srcSet={[
+          `${step1_m240} 240w`,
+          `${step1_m480} 480w`,
+          `${step1_s304} 304w`,
+          `${step1_s608} 608w`,
+        ].join(', ')}
+        sizes="(min-width:1024px) 304px, 240px"
+        alt="FinBoost app — Learn screen"
+        className="w-full h-full object-contain"
+        loading="eager"
+        decoding="async"
+        draggable={false}
+        style={{ imageRendering: 'auto', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+      />
+    </div>
+  </div>
+
+  {/* soft reflection */}
+  <div className="absolute bottom-1 lg:bottom-2 left-1/2 -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+</div>
+```
+
+### Why this fixes it
+
+* **No more base64**: we import real files so the browser isn’t trying to decode a corrupted data URL.
+* **Pixel-perfect, no blur**: the inner screen renders at **240 px / 304 px** and the `srcSet + sizes` picks **240w/304w** (or 480w/608w on retina), exactly like your working section in `HomeV3`.&#x20;
+* **Tailwind is static**: widths are literal (`w-64`/`lg:w-80`) so they survive JIT purge (no template-literal classes).
+* **Padding math handled**: `w-64` (256px) with `p-2` yields a 240px inner screen; `lg:w-80` (320px) yields 304px inner. (This matches the pattern you’re already using.)
+
+### Optional polish
+
+* If you want to reuse the **same rotating screenshots** used in the “How it works” section, you can lift the existing `screenshots` data and swap the four imports above for the corresponding `screenshots[activeScreenshot].m240/...` refs; the `srcSet/sizes` block can be copied verbatim from `HomeV3`. &#x20;
+
+---
+
+If you paste those snippets into `HeroSplit.tsx`, the broken image goes away immediately and you’ll get the same crisp, zero-blur rendering you already verified elsewhere.
