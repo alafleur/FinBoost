@@ -20,13 +20,13 @@ export default function HeroLearnToEarn({ phone }: { phone: PhoneSources }) {
           <div className="lg:col-span-6">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight md:leading-[1.15] lg:leading-[1.1] tracking-tight">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 pb-1">
-                LEARN REAL FINANCE TOOLS
+                Learn Real Finance Tools
               </span>
-              <span className="block text-slate-900">EARN REAL CASH</span>
+              <span className="block text-slate-900">Earn Real Cash</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-slate-600 leading-relaxed">
-              Complete short lessons and actions to collect tickets for cash drawings—free to join.
+              Complete short lessons and actions to collect tickets for cash drawings.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
