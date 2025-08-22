@@ -8,7 +8,7 @@ export default function HeroSplit() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pt-20 md:pt-20 lg:pt-24 pb-6 md:pb-8">
+        <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
 
           {/* Desktop: Three-column split layout */}
           <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
@@ -101,31 +101,19 @@ export default function HeroSplit() {
             Complete financial lessons and real-world actions to earn <span className="font-semibold text-slate-800">tickets</span> for weekly cash drawings — free to join.
           </p>
 
-          {/* CTAs brought up into hero */}
-          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+          {/* Single CTA */}
+          <div className="mt-6 flex justify-center">
             <a
               href="/auth?mode=signup"
-              className="inline-flex h-12 items-center justify-center rounded-lg px-6
+              className="inline-flex h-12 items-center justify-center rounded-lg px-8
                          font-semibold text-white shadow-sm
                          bg-gradient-to-r from-blue-600 to-purple-600
                          hover:from-blue-700 hover:to-purple-700
                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                          transition-all duration-200"
-              aria-label="Start free with FinBoost"
+              aria-label="Join early access with FinBoost"
             >
-              Start Free
-            </a>
-
-            <a
-              href="#how-it-works"
-              className="inline-flex h-12 items-center justify-center rounded-lg px-6
-                         font-semibold text-slate-700 
-                         border border-slate-300 hover:bg-slate-50
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
-                         transition-all duration-200"
-              aria-label="Learn how FinBoost works"
-            >
-              How it works
+              Join Early Access
             </a>
           </div>
 
