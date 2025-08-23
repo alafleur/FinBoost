@@ -627,47 +627,285 @@ export default function HomeV3() {
     }
   }, []);
 
-  // Debug state logging
+  const formatMembers = useCallback((count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(0)}K`;
+    }
+    return count.toString();
+  }, []);
+
+  // Comprehensive touch/swipe gesture handling for mobile
+  const [touchState, setTouchState] = useState({
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    isDragging: false,
+    threshold: 50, // Minimum swipe distance in pixels
+  });
+
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      setTouchState((prev) => ({
+        ...prev,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        currentX: touch.clientX,
+        currentY: touch.clientY,
+        isDragging: true,
+      }));
+
+      // Pause auto-advance during touch interaction
+      carousel.pauseAutoPlay();
+    },
+    [carousel],
+  );
+
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent) => {
+      if (!touchState.isDragging) return;
+
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      setTouchState((prev) => ({
+        ...prev,
+        currentX: touch.clientX,
+        currentY: touch.clientY,
+      }));
+
+      // Prevent default scroll behavior during horizontal swipes
+      const deltaX = Math.abs(touch.clientX - touchState.startX);
+      const deltaY = Math.abs(touch.clientY - touchState.startY);
+
+      if (deltaX > deltaY && deltaX > 10) {
+        event.preventDefault();
+      }
+    },
+    [touchState],
+  );
+
+  const handleTouchEnd = useCallback(
+    (event: React.TouchEvent) => {
+      if (!touchState.isDragging) return;
+
+      const deltaX = touchState.currentX - touchState.startX;
+      const deltaY = touchState.currentY - touchState.startY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Only process horizontal swipes that exceed threshold
+      if (absX > touchState.threshold && absX > absY) {
+        try {
+          if (deltaX > 0) {
+            // Swipe right - go to previous step
+            carousel.prevStep();
+
+            // Analytics tracking
+            if (typeof window !== "undefined" && window.gtag) {
+              window.gtag("event", "carousel_swipe", {
+                event_category: "engagement",
+                direction: "right",
+                current_step: carousel.currentStep,
+                swipe_distance: absX,
+              });
+            }
+          } else {
+            // Swipe left - go to next step
+            carousel.nextStep();
+
+            // Analytics tracking
+            if (typeof window !== "undefined" && window.gtag) {
+              window.gtag("event", "carousel_swipe", {
+                event_category: "engagement",
+                direction: "left",
+                current_step: carousel.currentStep,
+                swipe_distance: absX,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error handling swipe gesture:", error);
+        }
+      }
+
+      // Reset touch state
+      setTouchState((prev) => ({
+        ...prev,
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+      }));
+
+      // Resume auto-advance after touch interaction
+      setTimeout(() => carousel.resumeAutoPlay(), 100);
+    },
+    [touchState, carousel],
+  );
+
+  // Legacy swipe handler for compatibility
+  const handleSwipeGesture = useCallback(
+    (direction: "left" | "right") => {
+      if (direction === "left") {
+        carousel.nextStep();
+      } else if (direction === "right") {
+        carousel.prevStep();
+      }
+    },
+    [carousel],
+  );
+
+  // Comprehensive keyboard navigation for accessibility
+  const handleKeyNavigation = useCallback(
+    (event: React.KeyboardEvent) => {
+      try {
+        let handled = false;
+
+        switch (event.key) {
+          case "ArrowLeft":
+          case "h": // Vim-style navigation
+            event.preventDefault();
+            carousel.prevStep();
+            handled = true;
+            break;
+
+          case "ArrowRight":
+          case "l": // Vim-style navigation
+            event.preventDefault();
+            carousel.nextStep();
+            handled = true;
+            break;
+
+          case "Home":
+          case "g": // Vim-style "go to beginning"
+            event.preventDefault();
+            carousel.goToStep(0);
+            handled = true;
+            break;
+
+          case "End":
+          case "G": // Vim-style "go to end"
+            event.preventDefault();
+            carousel.goToStep(stepsData.length - 1);
+            handled = true;
+            break;
+
+          case " ":
+          case "p": // Pause/play
+            event.preventDefault();
+            carousel.toggleAutoPlay();
+            handled = true;
+            break;
+
+          case "Escape":
+            event.preventDefault();
+            carousel.pauseAutoPlay();
+            handled = true;
+            break;
+
+          default:
+            // Handle number keys (1-4) for direct navigation
+            const stepNumber = parseInt(event.key);
+            if (stepNumber >= 1 && stepNumber <= stepsData.length) {
+              event.preventDefault();
+              carousel.goToStep(stepNumber - 1);
+              handled = true;
+            }
+            break;
+        }
+
+        // Analytics tracking for keyboard navigation
+        if (handled && typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "carousel_keyboard_nav", {
+            event_category: "engagement",
+            key_pressed: event.key,
+            current_step: carousel.currentStep,
+            total_steps: stepsData.length,
+          });
+        }
+      } catch (error) {
+        console.error("Error handling keyboard navigation:", error);
+      }
+    },
+    [carousel, stepsData.length],
+  );
+
+  // Intersection Observer for performance optimization
+  const [sectionRef, setSectionRef] = useState<HTMLElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
+
   useEffect(() => {
-    console.log("📱 HomeV3 State Debug:", {
-      activeScreenshot,
-      imgRatio,
-      communitySize,
-      rewardsPercentage,
-      carouselState: {
-        currentStep: carousel.currentStep,
-        isAutoPlaying: carousel.isAutoPlaying,
-        isPaused: carousel.isPaused,
-        hasUserInteracted: carousel.hasUserInteracted,
+    if (!sectionRef) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        const inView = entry.isIntersecting;
+
+        setIsInView(inView);
+
+        // Pause/resume auto-advance based on visibility
+        if (inView && !carousel.hasUserInteracted) {
+          carousel.resumeAutoPlay();
+        } else {
+          carousel.pauseAutoPlay();
+        }
+
+        // Analytics tracking for viewport visibility
+        if (typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "carousel_visibility", {
+            event_category: "engagement",
+            is_visible: inView,
+            current_step: carousel.currentStep,
+          });
+        }
       },
-    });
-  }, [activeScreenshot, imgRatio, communitySize, rewardsPercentage, carousel]);
+      {
+        threshold: 0.5, // Trigger when 50% of element is visible
+        rootMargin: "0px",
+      },
+    );
+
+    observer.observe(sectionRef);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [sectionRef, carousel]);
+
+  // Accessibility: Announce step changes to screen readers
+  const [announceText, setAnnounceText] = useState("");
+
+  useEffect(() => {
+    const currentStepData = stepsData[carousel.currentStep];
+    if (currentStepData) {
+      setAnnounceText(
+        `Step ${carousel.currentStep + 1} of ${stepsData.length}: ${currentStepData.title}`,
+      );
+    }
+  }, [carousel.currentStep, stepsData]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Hero Section - Enhanced HeroSplit Integration */}
-      <section className="relative min-h-screen flex flex-col">
-        <HeroSplit />
-        <EarlyAccessGuarantee />
-      </section>
+      {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
+      <HeroSplit />
 
-      {/* How It Works - Interactive App Preview Section */}
+      {/* Early Access Guarantee Section */}
+      <EarlyAccessGuarantee />
+
+      {/* App Preview - Interactive Phone Mockup */}
       <section
-        id="how-it-works"
-        className="py-20 px-4 relative overflow-hidden bg-gradient-to-br from-slate-50/80 via-blue-50/30 to-purple-50/30"
+        id="preview"
+        className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white"
       >
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/5 to-purple-400/5 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/5 to-blue-400/5 rounded-full blur-xl"></div>
-          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/3 rounded-full blur-lg"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/3 rounded-full blur-lg"></div>
-        </div>
-
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Header */}
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -681,302 +919,261 @@ export default function HomeV3() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              Turn Financial Progress Into
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Real Cash Rewards
-              </span>
+              How FinBoost Works
+              <span className="block text-slate-900">(and How You Win)</span>
             </h2>
-            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto mb-8">
-              FinBoost rewards you for building real financial skills and taking
-              positive financial actions. Here's exactly how it works:
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Four simple steps to turn your financial learning into real cash
+              rewards
             </p>
           </motion.div>
 
-          {/* Interactive Layout: Screenshots + Cards */}
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            {/* Left: Phone Mockup with Screenshots - Enhanced */}
-            <div className="order-2 lg:order-2 flex justify-center">
-              <div className="relative">
-                {/* Phone Frame with Enhanced Design */}
-                <motion.div
-                  className="relative bg-gradient-to-b from-slate-800 via-slate-900 to-black rounded-[2.5rem] p-2 shadow-2xl"
-                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  viewport={{ once: true }}
-                  style={{
-                    background:
-                      "linear-gradient(145deg, #1e293b 0%, #0f172a 50%, #000000 100%)",
-                    boxShadow:
-                      "0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+          {/* Unified Responsive Layout */}
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
+            {/* Phone Preview - Mobile Bottom, Desktop Right */}
+            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
+              <motion.div
+                key={activeScreenshot}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="relative"
+              >
+                {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
+                <div className="relative">
+                  <motion.img
+                    src={screenshots[activeScreenshot].screenshotPath}
+                    alt={screenshots[activeScreenshot].title}
+                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
+                               ring-1 ring-gray-200/50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.35 }}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                  
+                  {/* Premium gloss overlay (same as hero) */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                  pointer-events-none"></div>
+                  
+                  {/* Subtle blue glow effect (same as hero) */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                  pointer-events-none"></div>
+                </div>
+              </motion.div>
+
+              {/* Mobile navigation with arrows and dots - positioned below phone */}
+              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
+                {/* Left Arrow */}
+                <button
+                  onClick={() => {
+                    const prevIndex =
+                      activeScreenshot === 0
+                        ? screenshots.length - 1
+                        : activeScreenshot - 1;
+                    setActiveScreenshot(prevIndex);
                   }}
+                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                  aria-label="Previous screenshot"
                 >
-                  {/* Phone Inner Frame */}
-                  <div className="bg-black rounded-[2.2rem] p-1 relative overflow-hidden">
-                    {/* Status Bar Area */}
-                    <div className="h-8 bg-black rounded-t-[2rem] flex items-center justify-center">
-                      <div className="w-20 h-1 bg-white/20 rounded-full"></div>
-                    </div>
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                </button>
 
-                    {/* Screenshot Container with Pixel-Perfect Images */}
-                    <div className="relative bg-white rounded-[1.8rem] overflow-hidden">
-                      <motion.img
-                        key={`screenshot-${activeScreenshot}`}
-                        src={screenshots[activeScreenshot].screenshotPath}
-                        srcSet={`
-                          ${screenshots[activeScreenshot].m240} 240w,
-                          ${screenshots[activeScreenshot].m480} 480w,
-                          ${screenshots[activeScreenshot].s304} 304w,
-                          ${screenshots[activeScreenshot].s608} 608w
-                        `}
-                        sizes="
-                          (max-width: 768px) 240px,
-                          304px
-                        "
-                        alt={screenshots[activeScreenshot].title}
-                        className="w-full h-auto block"
-                        style={{
-                          aspectRatio: `${240} / ${431}`, // Maintain exact aspect ratio
-                          objectFit: "contain",
-                          imageRendering: "crisp-edges",
-                        }}
-                        initial={{ opacity: 0, scale: 1.05 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        onLoad={(e) => {
-                          console.log(
-                            "📷 Screenshot loaded:",
-                            activeScreenshot,
-                            "Dimensions:",
-                            e.currentTarget.naturalWidth,
-                            "×",
-                            e.currentTarget.naturalHeight,
-                          );
-                          setImgRatio(
-                            e.currentTarget.naturalHeight /
-                              e.currentTarget.naturalWidth,
-                          );
-                        }}
-                      />
-
-                      {/* Home Indicator */}
-                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-black/10 rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Phone Reflection Effect */}
-                  <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none"></div>
-                </motion.div>
-
-                {/* Enhanced Navigation Controls */}
-                <div className="flex items-center justify-center space-x-4 mt-6">
-                  {/* Left Arrow */}
-                  <button
-                    onClick={() => {
-                      const prevIndex =
-                        activeScreenshot === 0
-                          ? screenshots.length - 1
-                          : activeScreenshot - 1;
-                      setActiveScreenshot(prevIndex);
-                    }}
-                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                    aria-label="Previous screenshot"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-slate-600" />
-                  </button>
-
-                  {/* Dots */}
-                  <div className="flex space-x-2">
-                    {screenshots.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          console.log(
-                            "Dot clicked:",
-                            index,
-                            "Previous state:",
-                            activeScreenshot,
-                          );
-                          setActiveScreenshot(index);
-                        }}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          activeScreenshot === index
-                            ? "bg-blue-600 w-8"
-                            : "bg-slate-300 hover:bg-slate-400"
-                        }`}
-                        aria-label={`View ${screenshots[index].title}`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Right Arrow */}
-                  <button
-                    onClick={() => {
-                      const nextIndex =
-                        activeScreenshot === screenshots.length - 1
-                          ? 0
-                          : activeScreenshot + 1;
-                      setActiveScreenshot(nextIndex);
-                    }}
-                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                    aria-label="Next screenshot"
-                  >
-                    <ChevronRight className="w-4 h-4 text-slate-600" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
-              <div className="order-1 lg:order-1">
-                {/* Mobile: Single Flipping Card */}
-                <div className="lg:hidden px-4">
-                  <motion.div
-                    key={`mobile-card-${activeScreenshot}`}
-                    className="dashboard-card-primary p-5 rounded-xl cursor-pointer"
-                    onClick={() => {
-                      const nextIndex =
-                        (activeScreenshot + 1) % screenshots.length;
-                      console.log(
-                        "Card flipped to:",
-                        nextIndex,
-                        "Previous state:",
-                        activeScreenshot,
-                      );
-                      setActiveScreenshot(nextIndex);
-                    }}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <motion.div
-                        key={`mobile-icon-${activeScreenshot}`}
-                        className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {React.cloneElement(screenshots[activeScreenshot].icon, {
-                          className: "w-6 h-6 text-white",
-                        })}
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <motion.h3
-                            key={`mobile-title-${activeScreenshot}`}
-                            className="font-semibold text-lg text-slate-900"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1, duration: 0.3 }}
-                          >
-                            {screenshots[activeScreenshot].title}
-                          </motion.h3>
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
-                            <ArrowRight className="w-4 h-4 text-blue-600" />
-                          </div>
-                        </div>
-                        <motion.p
-                          key={`mobile-desc-${activeScreenshot}`}
-                          className="text-slate-600 text-sm leading-relaxed mb-4"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2, duration: 0.3 }}
-                        >
-                          {screenshots[activeScreenshot].description}
-                        </motion.p>
-
-                        {/* Step indicator */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex space-x-2">
-                            {screenshots.map((_, index) => (
-                              <div
-                                key={index}
-                                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                  activeScreenshot === index
-                                    ? "bg-blue-600 w-6"
-                                    : "bg-slate-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-slate-500 font-medium">
-                            {activeScreenshot + 1} of {screenshots.length}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Desktop: Four Individual Cards */}
-                <div className="hidden lg:block space-y-3">
-                  {screenshots.map((screenshot, index) => (
-                    <motion.div
-                      key={`desktop-card-${index}-${activeScreenshot}`}
-                      className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                        activeScreenshot === index
-                          ? "dashboard-card-primary"
-                          : "bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300"
-                      }`}
+                {/* Dots */}
+                <div className="flex space-x-2">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
                       onClick={() => {
                         console.log(
-                          "Desktop card clicked:",
+                          "Dot clicked:",
                           index,
                           "Previous state:",
                           activeScreenshot,
                         );
                         setActiveScreenshot(index);
                       }}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      animate={{
-                        scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
-                      }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                            activeScreenshot === index
-                              ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                              : "bg-slate-100 group-hover:bg-slate-200"
-                          }`}
-                        >
-                          {React.cloneElement(screenshot.icon, {
-                            className: `w-6 h-6 ${activeScreenshot === index ? "text-white" : "text-slate-600"}`,
-                          })}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-lg text-slate-900">
-                              {screenshot.title}
-                            </h3>
-                            <div
-                              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                                activeScreenshot === index
-                                  ? "bg-blue-100"
-                                  : "bg-slate-100 group-hover:bg-slate-200"
-                              }`}
-                            >
-                              <ArrowRight
-                                className={`w-3 h-3 transition-colors ${
-                                  activeScreenshot === index
-                                    ? "text-blue-600"
-                                    : "text-slate-400"
-                                }`}
-                              />
-                            </div>
-                          </div>
-                          <p className="text-slate-600 text-sm leading-relaxed">
-                            {screenshot.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        activeScreenshot === index
+                          ? "bg-blue-600 w-8"
+                          : "bg-slate-300 hover:bg-slate-400"
+                      }`}
+                      aria-label={`View ${screenshots[index].title}`}
+                    />
                   ))}
                 </div>
+
+                {/* Right Arrow */}
+                <button
+                  onClick={() => {
+                    const nextIndex =
+                      activeScreenshot === screenshots.length - 1
+                        ? 0
+                        : activeScreenshot + 1;
+                    setActiveScreenshot(nextIndex);
+                  }}
+                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                  aria-label="Next screenshot"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
+            </div>
+
+            {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
+            <div className="order-1 lg:order-1">
+              {/* Mobile: Single Flipping Card */}
+              <div className="lg:hidden px-4">
+                <motion.div
+                  key={`mobile-card-${activeScreenshot}`}
+                  className="dashboard-card-primary p-5 rounded-xl cursor-pointer"
+                  onClick={() => {
+                    const nextIndex =
+                      (activeScreenshot + 1) % screenshots.length;
+                    console.log(
+                      "Card flipped to:",
+                      nextIndex,
+                      "Previous state:",
+                      activeScreenshot,
+                    );
+                    setActiveScreenshot(nextIndex);
+                  }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-start space-x-3">
+                    <motion.div
+                      key={`mobile-icon-${activeScreenshot}`}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {React.cloneElement(screenshots[activeScreenshot].icon, {
+                        className: "w-6 h-6 text-white",
+                      })}
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <motion.h3
+                          key={`mobile-title-${activeScreenshot}`}
+                          className="font-semibold text-lg text-slate-900"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1, duration: 0.3 }}
+                        >
+                          {screenshots[activeScreenshot].title}
+                        </motion.h3>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                          <ArrowRight className="w-4 h-4 text-blue-600" />
+                        </div>
+                      </div>
+                      <motion.p
+                        key={`mobile-desc-${activeScreenshot}`}
+                        className="text-slate-600 text-sm leading-relaxed mb-4"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                      >
+                        {screenshots[activeScreenshot].description}
+                      </motion.p>
+
+                      {/* Step indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-2">
+                          {screenshots.map((_, index) => (
+                            <div
+                              key={index}
+                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                activeScreenshot === index
+                                  ? "bg-blue-600 w-6"
+                                  : "bg-slate-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-slate-500 font-medium">
+                          {activeScreenshot + 1} of {screenshots.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Desktop: Four Individual Cards */}
+              <div className="hidden lg:block space-y-3">
+                {screenshots.map((screenshot, index) => (
+                  <motion.div
+                    key={`desktop-card-${index}-${activeScreenshot}`}
+                    className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
+                      activeScreenshot === index
+                        ? "dashboard-card-primary"
+                        : "bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300"
+                    }`}
+                    onClick={() => {
+                      console.log(
+                        "Desktop card clicked:",
+                        index,
+                        "Previous state:",
+                        activeScreenshot,
+                      );
+                      setActiveScreenshot(index);
+                    }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    animate={{
+                      scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-start space-x-4">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                          activeScreenshot === index
+                            ? "bg-gradient-to-br from-blue-500 to-purple-600"
+                            : "bg-slate-100 group-hover:bg-slate-200"
+                        }`}
+                      >
+                        {React.cloneElement(screenshot.icon, {
+                          className: `w-6 h-6 ${activeScreenshot === index ? "text-white" : "text-slate-600"}`,
+                        })}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-lg text-slate-900">
+                            {screenshot.title}
+                          </h3>
+                          <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                              activeScreenshot === index
+                                ? "bg-blue-100"
+                                : "bg-slate-100 group-hover:bg-slate-200"
+                            }`}
+                          >
+                            <ArrowRight
+                              className={`w-3 h-3 transition-colors ${
+                                activeScreenshot === index
+                                  ? "text-blue-600"
+                                  : "text-slate-400"
+                              }`}
+                            />
+                          </div>
+                        </div>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                          {screenshot.description}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
@@ -1249,7 +1446,7 @@ export default function HomeV3() {
               How Your Membership Fuels the Movement
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Your membership isn't just a transaction — it's your access to
+              Your membership isn’t just a transaction — it’s your access to
               financial growth and real cash rewards funded by the community.
             </p>
           </motion.div>
@@ -1286,116 +1483,300 @@ export default function HomeV3() {
                 <Users className="w-8 h-8 text-white icon-bounce" />
               </div>
               <h4 className="text-xl font-bold text-white mb-4">
-                Collective Rewards Pool
+                Rewards Pool
               </h4>
               <p className="text-white/90 leading-relaxed">
-                Most of your membership goes directly toward the monthly rewards
-                pool — cash prizes that get distributed to community members who
-                actively engage and make financial progress.
+                The majority of every membership funds the rewards pool — where
+                you can win real cash by completing lessons and building your
+                financial habits. The bigger the community, the bigger the
+                rewards.
               </p>
-            </motion.div>
-          </div>
-
-          {/* Interactive Community Size Simulator */}
-          <div className="mt-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="dashboard-card-primary rounded-2xl p-8"
-            >
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">
-                  Real-Time Community Impact
-                </h3>
-                <p className="text-slate-600 max-w-2xl mx-auto">
-                  See how the rewards pool grows as more members join. Your
-                  monthly membership directly funds real cash prizes for the
-                  community.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Users className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900 mb-1">
-                    {communitySize.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-slate-600">Community Members</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <DollarSign className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900 mb-1">
-                    {formatCurrency(calculateRewardsPool(communitySize))}
-                  </div>
-                  <div className="text-sm text-slate-600">
-                    Monthly Rewards Pool
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Trophy className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900 mb-1">
-                    {rewardsPercentage}%
-                  </div>
-                  <div className="text-sm text-slate-600">Goes to Rewards</div>
-                </div>
-              </div>
-
-              {/* Interactive Slider */}
-              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-slate-200">
-                <div className="flex items-center space-x-4 mb-4">
-                  <label className="flex items-center space-x-2 text-sm font-medium text-slate-700">
-                    <div className="w-4 h-4 rounded bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-white" />
-                    </div>
-                    Community Size
-                  </label>
-                </div>
-                <input
-                  type="range"
-                  min="250"
-                  max="15000"
-                  step="250"
-                  value={communitySize}
-                  onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <div className="flex justify-between text-xs text-slate-500 mt-2">
-                  <span>250 Members</span>
-                  <span>15,000+ Members</span>
-                </div>
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-sm text-slate-600">
-                  <span className="font-semibold text-slate-900">
-                    Current projection:
-                  </span>{" "}
-                  With {communitySize.toLocaleString()} members, we distribute{" "}
-                  <span className="font-semibold text-green-600">
-                    {formatCurrency(calculateRewardsPool(communitySize))}
-                  </span>{" "}
-                  in monthly rewards ({rewardsPercentage}% of revenue goes
-                  directly to community prizes)
-                </p>
-              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Success Stories / Social Proof */}
-      <section className="bg-gradient-to-b from-white to-slate-50 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+      {/* Reward Pool Mechanics - Show Real Impact */}
+      <section
+        id="pool-mechanics"
+        className="py-20 px-4 bg-gradient-to-br from-blue-50/40 via-white to-purple-50/40"
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-2 mb-6 shadow-lg">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-sm">
+                STRENGTH IN NUMBERS
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
+              Toggle the Dial to See the Power of the Collective
+            </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              The rewards pool described above isn't just theory. Move the
+              slider below to see how community growth translates to real reward
+              potential for every member.
+            </p>
+          </motion.div>
+
+          {/* Main Layout: Left Controls + Right Visual */}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+            {/* LEFT SIDE: Interactive Controls and Cards */}
+            <div className="space-y-8">
+              {/* Dial Control */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <label className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <Users className="h-5 w-5 text-white" />
+                    </div>
+                    Community Size
+                  </label>
+                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    {formatMembers(communitySize)} members
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="range"
+                    value={communitySize}
+                    onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                    max={10000}
+                    min={250}
+                    step={250}
+                    className="w-full h-4 bg-gradient-to-r from-slate-200 via-blue-400/60 to-purple-500 rounded-lg appearance-none cursor-pointer slider-enhanced shadow-inner"
+                  />
+                  <div className="flex justify-between text-sm font-semibold text-slate-600 mt-4">
+                    <span>250 members</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      5K members
+                    </span>
+                    <span>10K+ members</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Stats Cards */}
+              <div className="grid sm:grid-cols-3 gap-3">
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Member
+                    <br />
+                    Rewards %
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    50-90%
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Guaranteed
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    back to members
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <DollarSign className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Monthly Pool
+                    <br />
+                    Size
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Total Rewards
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    to be distributed
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Top
+                    <br />
+                    Reward
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Up to{" "}
+                    {formatCurrency(
+                      Math.round(calculateRewardsPool(communitySize) * 0.05),
+                    )}
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Top Reward
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    to cycle winner
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE: Donut Chart Only */}
+            <div className="flex justify-center lg:justify-start">
+              {/* Dynamic Donut Chart */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                <div className="relative w-64 h-64 mb-6 mx-auto">
+                  <svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    {/* Background circle */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                    />
+                    {/* Rewards percentage */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="url(#rewardsGradient)"
+                      strokeWidth="8"
+                      strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                      strokeLinecap="round"
+                      className="drop-shadow-lg"
+                      initial={{ strokeDasharray: "109.95 109.95" }}
+                      animate={{
+                        strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`,
+                      }}
+                      transition={{ duration: 1.2, ease: "easeInOut" }}
+                    />
+                    {/* Operations percentage */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#94a3b8"
+                      strokeWidth="8"
+                      strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
+                      strokeDashoffset={`-${rewardsPercentage * 2.199}`}
+                      strokeLinecap="round"
+                      initial={{ strokeDasharray: "109.95 109.95" }}
+                      animate={{
+                        strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
+                        strokeDashoffset: `-${rewardsPercentage * 2.199}`,
+                      }}
+                      transition={{ duration: 1.2, ease: "easeInOut" }}
+                    />
+
+                    {/* Gradient definition */}
+                    <defs>
+                      <linearGradient
+                        id="rewardsGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+
+                  {/* Center content */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-4xl font-black text-slate-800">
+                      $20
+                    </div>
+                    <div className="text-sm text-slate-500 font-medium">
+                      Monthly Membership
+                    </div>
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
+                    <span className="text-slate-700 font-medium">
+                      Majority → Member Funded Cash Rewards Pool
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
+                    <span className="text-slate-700 font-medium">
+                      Portion → Financial Education + Platform Access
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mt-16"
+          >
+            <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">
+              * Rewards pool statistics shown are illustrative and based on
+              projected membership levels. Actual rewards may vary based on
+              community growth and platform performance.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Reward Tiers Explainer */}
+      <section id="tiers" className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1405,126 +1786,168 @@ export default function HomeV3() {
           >
             <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
               <span className="text-blue-700 font-semibold text-sm">
-                SUCCESS STORIES
+                REWARDS SYSTEM
               </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
-              Real Progress, Real Results
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Not Winner Take All — Members at All Stages Win
             </h2>
-            <p className="text-lg text-slate-600">
-              Members are already seeing the power of incentivized financial
-              education
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Users are placed in tiers based on tickets. The more you learn,
+              the more you earn. Tickets aren't just for progress — they
+              increase your chances at real cash rewards. At the end of each
+              cycle, members with more tickets are eligible for larger potential
+              payouts. Winners are selected based on ticket-weighted random
+              draws.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Sarah Chen",
-                role: "Marketing Professional",
-                achievement: "Paid off $12K credit card debt",
-                quote:
-                  "The debt payment challenges kept me motivated. Earning points for every payment made it feel like a game I was winning.",
-                tickets: "1,847 tickets earned",
-                reward: "$240 won in March",
-              },
-              {
-                name: "Marcus Rodriguez",
-                role: "Recent Graduate",
-                achievement: "Built 6-month emergency fund",
-                quote:
-                  "FinBoost taught me emergency fund strategies that actually work with my salary. The lessons are short but really practical.",
-                tickets: "932 tickets earned",
-                reward: "Won $180 in April",
-              },
-              {
-                name: "Jessica Park",
-                role: "Teacher",
-                achievement: "Negotiated 15% salary increase",
-                quote:
-                  "The salary negotiation module gave me scripts that actually worked. I earned back my membership fee 60x over.",
-                tickets: "2,156 tickets earned",
-                reward: "$420 won in May",
-              },
-            ].map((story, index) => (
+          {/* Tier explanation with integrated phone */}
+          <div className="relative mb-12">
+            {/* Main content container */}
+            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:justify-center">
+              {/* Left side - Tier Cards */}
+              <div className="w-full lg:w-auto lg:flex-shrink-0">
+                <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
+                  {[
+                    {
+                      tier: "Tier 1",
+                      subtitle: "Top Third",
+                      rewardLevel: "Premium Rewards",
+                    },
+                    {
+                      tier: "Tier 2",
+                      subtitle: "Middle Third",
+                      rewardLevel: "Standard Rewards",
+                    },
+                    {
+                      tier: "Tier 3",
+                      subtitle: "Lower Third",
+                      rewardLevel: "Base Rewards",
+                    },
+                  ].map((tier, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
+                          <div className="relative z-10">
+                            <h3 className="text-xl font-semibold text-white mb-1">
+                              {tier.tier}
+                            </h3>
+                            <p className="text-white/90 text-sm">
+                              {tier.subtitle} = {tier.rewardLevel}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Caption below tier boxes */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="text-center mt-8"
+                >
+                  <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    Higher Effort → Higher Tier → Larger Rewards
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Right side - Phone Frame (positioned closer on desktop) */}
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
+                className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
-                <Card className="h-full dashboard-card-primary hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-lg">
-                          {story.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900">
-                          {story.name}
-                        </div>
-                        <div className="text-sm text-slate-600">
-                          {story.role}
-                        </div>
+                <div
+                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+                >
+                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 bg-green-500 rounded-sm" />
                       </div>
                     </div>
-                    <div className="mb-4">
-                      <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 mb-2">
-                        <Trophy className="w-3 h-3 mr-1" />
-                        {story.achievement}
-                      </div>
+
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
+                      <img
+                        src={rewardsSystemScreenshot}
+                        alt="Tier Thresholds & Rewards Interface"
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          if (img.naturalWidth && img.naturalHeight) {
+                            // height/width rounded to avoid subpixel ratios
+                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+                            setImgRatio(r);
+                          }
+                        }}
+                        style={{
+                          imageRendering: 'auto',      // single hint to avoid conflicts
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+                        }}
+                      />
                     </div>
-                    <blockquote className="text-slate-600 text-sm italic mb-4">
-                      "{story.quote}"
-                    </blockquote>
-                    <div className="text-xs text-slate-500 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span>{story.tickets}</span>
-                        <Badge variant="secondary" className="text-xs">
-                          {story.reward}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                </div>
               </motion.div>
-            ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hero-gloss btn-enhanced-hover interactive-glow text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                onClick={handleJoinEarlyAccess}
+              >
+                <Trophy className="mr-2 h-5 w-5 icon-bounce" />
+                Join Early Access
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section - Enhanced */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 overflow-hidden">
-        {/* Enhanced background effects */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 animate-gradient-x"></div>
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/3 left-1/3 w-20 h-20 bg-white/10 rounded-full blur-lg animate-pulse delay-500"></div>
-          <div className="absolute bottom-1/3 right-1/3 w-24 h-24 bg-white/5 rounded-full blur-lg animate-pulse delay-700"></div>
-        </div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+      {/* Final CTA - Blue to Purple Gradient Background */}
+      <section
+        id="cta"
+        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 px-6 text-center"
+      >
+        <div className="max-w-4xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="inline-block bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-6 magnetic-hover">
-              <span className="text-white font-semibold text-sm">
-                READY TO START?
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-              Turn Your Financial Journey Into
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                Real Rewards
-              </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
+              Ready to Take Control of Your Financial Future?
             </h2>
             <p className="text-lg leading-relaxed text-white/90 mb-8 max-w-3xl mx-auto">
               Join FinBoost today and turn your effort into rewards — with real
