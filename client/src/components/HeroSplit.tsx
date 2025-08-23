@@ -67,24 +67,24 @@ export default function HeroSplit() {
             </div>
           </div>
 
-          {/* Mobile: Corner text positioning with centered tilted screenshot */}
-          <div className="lg:hidden relative min-h-[480px] sm:min-h-[520px]">
-            {/* Top-left: Learn Real Finance */}
-            <div className="absolute top-0 left-0 z-10">
-              <h1 className="font-extrabold tracking-tight leading-[1.05]
-                             text-[clamp(1.5rem,5vw,2.5rem)]
+          {/* Mobile: Large impact layout like Underdog example */}
+          <div className="lg:hidden relative min-h-[75vh] flex flex-col justify-between py-4">
+            {/* Top: Learn Real Finance - Much larger */}
+            <div className="text-center px-4">
+              <h1 className="font-extrabold tracking-tight leading-[0.95]
+                             text-[clamp(2.5rem,12vw,4rem)]
                              text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Learn<br />
-                Real<br />
-                Finance
+                LEARN<br />
+                REAL<br />
+                FINANCE
               </h1>
             </div>
             
-            {/* Center: Mobile phone screenshot with subtle rotation */}
-            <div className="absolute inset-0 flex items-center justify-center">
+            {/* Center: Large mobile phone screenshot */}
+            <div className="flex-1 flex items-center justify-center px-4">
               <img
-                className="w-auto h-[260px] sm:h-[280px]
-                           rounded-[24px] shadow-xl shadow-slate-900/15
+                className="w-auto h-[50vh] max-h-[420px] min-h-[350px]
+                           rounded-[28px] shadow-2xl shadow-slate-900/20
                            ring-1 ring-gray-200/50 rotate-[3deg]"
                 srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
                 sizes="(max-width: 640px) 240px, 304px"
@@ -96,14 +96,14 @@ export default function HeroSplit() {
               />
             </div>
             
-            {/* Bottom-right: Earn Real Cash */}
-            <div className="absolute bottom-0 right-0 z-10">
-              <h2 className="font-extrabold tracking-tight leading-[1.05]
-                             text-[clamp(1.5rem,5vw,2.5rem)]
-                             text-slate-900 text-right">
-                Earn<br />
-                Real<br />
-                Cash
+            {/* Bottom: Earn Real Cash - Much larger */}
+            <div className="text-center px-4">
+              <h2 className="font-extrabold tracking-tight leading-[0.95]
+                             text-[clamp(2.5rem,12vw,4rem)]
+                             text-slate-900">
+                EARN<br />
+                REAL<br />
+                CASH
               </h2>
             </div>
           </div>
