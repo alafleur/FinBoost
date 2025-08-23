@@ -8,7 +8,7 @@ export default function HeroSplit() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pt-16 md:pt-20 lg:pt-24 pb-10">
+        <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
 
           {/* Desktop: Three-column split layout */}
           <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
@@ -31,7 +31,7 @@ export default function HeroSplit() {
               
               <div className="relative z-10 rotate-[8deg]">
                 <img
-                  className="w-auto h-[360px] xl:h-[420px] 2xl:h-[480px] 
+                  className="w-auto h-[320px] xl:h-[360px] 2xl:h-[400px] 
                              rounded-[28px] shadow-xl shadow-slate-900/15
                              ring-1 ring-gray-200/50"
                   srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
@@ -67,10 +67,12 @@ export default function HeroSplit() {
             </div>
           </div>
 
+          {/* Mobile: Stacked layout with proper copy structure */}
+          
           {/* Mobile: Stacked layout with proper copy structure (updated for top-left copy / bottom-right image) */}
-          <div className="lg:hidden relative px-4 pt-4 pb-40 min-h-[520px]">
+          <div className="lg:hidden relative px-4 pt-2 pb-24">
             {/* Copy top-left */}
-            <div className="max-w-[22rem] text-left space-y-4 relative z-10">
+            <div className="max-w-[22rem] text-left space-y-4">
               <h1 className="font-extrabold tracking-tight leading-[1.05]
                              text-[clamp(1.75rem,6vw,4.5rem)]">
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
@@ -83,11 +85,11 @@ export default function HeroSplit() {
             </div>
 
             {/* Angled screenshot bottom-right */}
-            <div className="pointer-events-none absolute bottom-0 right-0 w-[78%] max-w-[340px] rotate-[8deg] drop-shadow-2xl z-0">
+            <div className="pointer-events-none absolute -bottom-6 right-[-4%] w-[72%] max-w-[320px] rotate-[8deg] drop-shadow-2xl">
               <img
                 className="w-full h-auto rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50"
                 srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-                sizes="(max-width: 640px) 78vw, 304px"
+                sizes="(max-width: 640px) 240px, 304px"
                 src={step4_m480}
                 alt="FinBoost winner notification - $325 cash reward"
                 loading="eager"
@@ -99,6 +101,8 @@ export default function HeroSplit() {
               <div className="absolute inset-0 rounded-[24px] bg-gradient-to-tr from-transparent via-white/5 to-white/20"></div>
             </div>
           </div>
+
+          
 
           {/* Clean subhead with improved spacing */}
           <p className="mx-auto mt-6 md:mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">

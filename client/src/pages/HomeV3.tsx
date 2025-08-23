@@ -653,12 +653,21 @@ export default function HomeV3() {
         <EarlyAccessGuarantee />
       </section>
 
-      {/* App Preview - Interactive Phone Mockup */}
+      {/* How It Works - Interactive App Preview Section */}
       <section
-        id="preview"
-        className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white"
+        id="how-it-works"
+        className="py-20 px-4 relative overflow-hidden bg-gradient-to-br from-slate-50/80 via-blue-50/30 to-purple-50/30"
       >
-        <div className="max-w-7xl mx-auto">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/5 to-purple-400/5 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/5 to-blue-400/5 rounded-full blur-xl"></div>
+          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/3 rounded-full blur-lg"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/3 rounded-full blur-lg"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -672,261 +681,302 @@ export default function HomeV3() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              How FinBoost Works
-              <span className="block text-slate-900">(and How You Win)</span>
+              Turn Financial Progress Into
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Real Cash Rewards
+              </span>
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Four simple steps to turn your financial learning into real cash
-              rewards
+            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto mb-8">
+              FinBoost rewards you for building real financial skills and taking
+              positive financial actions. Here's exactly how it works:
             </p>
           </motion.div>
 
-          {/* Unified Responsive Layout */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-            {/* Phone Preview - Mobile Bottom, Desktop Right */}
-            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="relative"
-              >
-                {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
-                <div className="relative">
-                  <motion.img
-                    src={screenshots[activeScreenshot].screenshotPath}
-                    alt={screenshots[activeScreenshot].title}
-                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
-                               ring-1 ring-gray-200/50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.35 }}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                  />
-                  
-                  {/* Premium gloss overlay (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
-                                  pointer-events-none"></div>
-                  
-                  {/* Subtle blue glow effect (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
-                                  pointer-events-none"></div>
-                </div>
-              </motion.div>
-
-              {/* Mobile navigation with arrows and dots - positioned below phone */}
-              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
-                {/* Left Arrow */}
-                <button
-                  onClick={() => {
-                    const prevIndex =
-                      activeScreenshot === 0
-                        ? screenshots.length - 1
-                        : activeScreenshot - 1;
-                    setActiveScreenshot(prevIndex);
+          {/* Interactive Layout: Screenshots + Cards */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Left: Phone Mockup with Screenshots - Enhanced */}
+            <div className="order-2 lg:order-2 flex justify-center">
+              <div className="relative">
+                {/* Phone Frame with Enhanced Design */}
+                <motion.div
+                  className="relative bg-gradient-to-b from-slate-800 via-slate-900 to-black rounded-[2.5rem] p-2 shadow-2xl"
+                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  viewport={{ once: true }}
+                  style={{
+                    background:
+                      "linear-gradient(145deg, #1e293b 0%, #0f172a 50%, #000000 100%)",
+                    boxShadow:
+                      "0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
                   }}
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                  aria-label="Previous screenshot"
                 >
-                  <ChevronLeft className="w-4 h-4 text-slate-600" />
-                </button>
+                  {/* Phone Inner Frame */}
+                  <div className="bg-black rounded-[2.2rem] p-1 relative overflow-hidden">
+                    {/* Status Bar Area */}
+                    <div className="h-8 bg-black rounded-t-[2rem] flex items-center justify-center">
+                      <div className="w-20 h-1 bg-white/20 rounded-full"></div>
+                    </div>
 
-                {/* Dots */}
-                <div className="flex space-x-2">
-                  {screenshots.map((_, index) => (
-                    <button
-                      key={index}
+                    {/* Screenshot Container with Pixel-Perfect Images */}
+                    <div className="relative bg-white rounded-[1.8rem] overflow-hidden">
+                      <motion.img
+                        key={`screenshot-${activeScreenshot}`}
+                        src={screenshots[activeScreenshot].screenshotPath}
+                        srcSet={`
+                          ${screenshots[activeScreenshot].m240} 240w,
+                          ${screenshots[activeScreenshot].m480} 480w,
+                          ${screenshots[activeScreenshot].s304} 304w,
+                          ${screenshots[activeScreenshot].s608} 608w
+                        `}
+                        sizes="
+                          (max-width: 768px) 240px,
+                          304px
+                        "
+                        alt={screenshots[activeScreenshot].title}
+                        className="w-full h-auto block"
+                        style={{
+                          aspectRatio: `${240} / ${431}`, // Maintain exact aspect ratio
+                          objectFit: "contain",
+                          imageRendering: "crisp-edges",
+                        }}
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        onLoad={(e) => {
+                          console.log(
+                            "📷 Screenshot loaded:",
+                            activeScreenshot,
+                            "Dimensions:",
+                            e.currentTarget.naturalWidth,
+                            "×",
+                            e.currentTarget.naturalHeight,
+                          );
+                          setImgRatio(
+                            e.currentTarget.naturalHeight /
+                              e.currentTarget.naturalWidth,
+                          );
+                        }}
+                      />
+
+                      {/* Home Indicator */}
+                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-black/10 rounded-full"></div>
+                    </div>
+                  </div>
+
+                  {/* Phone Reflection Effect */}
+                  <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none"></div>
+                </motion.div>
+
+                {/* Enhanced Navigation Controls */}
+                <div className="flex items-center justify-center space-x-4 mt-6">
+                  {/* Left Arrow */}
+                  <button
+                    onClick={() => {
+                      const prevIndex =
+                        activeScreenshot === 0
+                          ? screenshots.length - 1
+                          : activeScreenshot - 1;
+                      setActiveScreenshot(prevIndex);
+                    }}
+                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                    aria-label="Previous screenshot"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-slate-600" />
+                  </button>
+
+                  {/* Dots */}
+                  <div className="flex space-x-2">
+                    {screenshots.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          console.log(
+                            "Dot clicked:",
+                            index,
+                            "Previous state:",
+                            activeScreenshot,
+                          );
+                          setActiveScreenshot(index);
+                        }}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          activeScreenshot === index
+                            ? "bg-blue-600 w-8"
+                            : "bg-slate-300 hover:bg-slate-400"
+                        }`}
+                        aria-label={`View ${screenshots[index].title}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Right Arrow */}
+                  <button
+                    onClick={() => {
+                      const nextIndex =
+                        activeScreenshot === screenshots.length - 1
+                          ? 0
+                          : activeScreenshot + 1;
+                      setActiveScreenshot(nextIndex);
+                    }}
+                    className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
+                    aria-label="Next screenshot"
+                  >
+                    <ChevronRight className="w-4 h-4 text-slate-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
+              <div className="order-1 lg:order-1">
+                {/* Mobile: Single Flipping Card */}
+                <div className="lg:hidden px-4">
+                  <motion.div
+                    key={`mobile-card-${activeScreenshot}`}
+                    className="dashboard-card-primary p-5 rounded-xl cursor-pointer"
+                    onClick={() => {
+                      const nextIndex =
+                        (activeScreenshot + 1) % screenshots.length;
+                      console.log(
+                        "Card flipped to:",
+                        nextIndex,
+                        "Previous state:",
+                        activeScreenshot,
+                      );
+                      setActiveScreenshot(nextIndex);
+                    }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <motion.div
+                        key={`mobile-icon-${activeScreenshot}`}
+                        className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {React.cloneElement(screenshots[activeScreenshot].icon, {
+                          className: "w-6 h-6 text-white",
+                        })}
+                      </motion.div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <motion.h3
+                            key={`mobile-title-${activeScreenshot}`}
+                            className="font-semibold text-lg text-slate-900"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1, duration: 0.3 }}
+                          >
+                            {screenshots[activeScreenshot].title}
+                          </motion.h3>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
+                            <ArrowRight className="w-4 h-4 text-blue-600" />
+                          </div>
+                        </div>
+                        <motion.p
+                          key={`mobile-desc-${activeScreenshot}`}
+                          className="text-slate-600 text-sm leading-relaxed mb-4"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.2, duration: 0.3 }}
+                        >
+                          {screenshots[activeScreenshot].description}
+                        </motion.p>
+
+                        {/* Step indicator */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex space-x-2">
+                            {screenshots.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                  activeScreenshot === index
+                                    ? "bg-blue-600 w-6"
+                                    : "bg-slate-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-slate-500 font-medium">
+                            {activeScreenshot + 1} of {screenshots.length}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Desktop: Four Individual Cards */}
+                <div className="hidden lg:block space-y-3">
+                  {screenshots.map((screenshot, index) => (
+                    <motion.div
+                      key={`desktop-card-${index}-${activeScreenshot}`}
+                      className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
+                        activeScreenshot === index
+                          ? "dashboard-card-primary"
+                          : "bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300"
+                      }`}
                       onClick={() => {
                         console.log(
-                          "Dot clicked:",
+                          "Desktop card clicked:",
                           index,
                           "Previous state:",
                           activeScreenshot,
                         );
                         setActiveScreenshot(index);
                       }}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        activeScreenshot === index
-                          ? "bg-blue-600 w-8"
-                          : "bg-slate-300 hover:bg-slate-400"
-                      }`}
-                      aria-label={`View ${screenshots[index].title}`}
-                    />
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      animate={{
+                        scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                            activeScreenshot === index
+                              ? "bg-gradient-to-br from-blue-500 to-purple-600"
+                              : "bg-slate-100 group-hover:bg-slate-200"
+                          }`}
+                        >
+                          {React.cloneElement(screenshot.icon, {
+                            className: `w-6 h-6 ${activeScreenshot === index ? "text-white" : "text-slate-600"}`,
+                          })}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-semibold text-lg text-slate-900">
+                              {screenshot.title}
+                            </h3>
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                                activeScreenshot === index
+                                  ? "bg-blue-100"
+                                  : "bg-slate-100 group-hover:bg-slate-200"
+                              }`}
+                            >
+                              <ArrowRight
+                                className={`w-3 h-3 transition-colors ${
+                                  activeScreenshot === index
+                                    ? "text-blue-600"
+                                    : "text-slate-400"
+                                }`}
+                              />
+                            </div>
+                          </div>
+                          <p className="text-slate-600 text-sm leading-relaxed">
+                            {screenshot.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
-
-                {/* Right Arrow */}
-                <button
-                  onClick={() => {
-                    const nextIndex =
-                      activeScreenshot === screenshots.length - 1
-                        ? 0
-                        : activeScreenshot + 1;
-                    setActiveScreenshot(nextIndex);
-                  }}
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                  aria-label="Next screenshot"
-                >
-                  <ChevronRight className="w-4 h-4 text-slate-600" />
-                </button>
-              </div>
-            </div>
-
-            {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
-            <div className="order-1 lg:order-1">
-              {/* Mobile: Single Flipping Card */}
-              <div className="lg:hidden px-4">
-                <motion.div
-                  key={`mobile-card-${activeScreenshot}`}
-                  className="dashboard-card-primary p-5 rounded-xl cursor-pointer"
-                  onClick={() => {
-                    const nextIndex =
-                      (activeScreenshot + 1) % screenshots.length;
-                    console.log(
-                      "Card flipped to:",
-                      nextIndex,
-                      "Previous state:",
-                      activeScreenshot,
-                    );
-                    setActiveScreenshot(nextIndex);
-                  }}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-start space-x-3">
-                    <motion.div
-                      key={`mobile-icon-${activeScreenshot}`}
-                      className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {React.cloneElement(screenshots[activeScreenshot].icon, {
-                        className: "w-6 h-6 text-white",
-                      })}
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <motion.h3
-                          key={`mobile-title-${activeScreenshot}`}
-                          className="font-semibold text-lg text-slate-900"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1, duration: 0.3 }}
-                        >
-                          {screenshots[activeScreenshot].title}
-                        </motion.h3>
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
-                          <ArrowRight className="w-4 h-4 text-blue-600" />
-                        </div>
-                      </div>
-                      <motion.p
-                        key={`mobile-desc-${activeScreenshot}`}
-                        className="text-slate-600 text-sm leading-relaxed mb-4"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.3 }}
-                      >
-                        {screenshots[activeScreenshot].description}
-                      </motion.p>
-
-                      {/* Step indicator */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
-                          {screenshots.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                activeScreenshot === index
-                                  ? "bg-blue-600 w-6"
-                                  : "bg-slate-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-slate-500 font-medium">
-                          {activeScreenshot + 1} of {screenshots.length}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Desktop: Four Individual Cards */}
-              <div className="hidden lg:block space-y-3">
-                {screenshots.map((screenshot, index) => (
-                  <motion.div
-                    key={`desktop-card-${index}-${activeScreenshot}`}
-                    className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                      activeScreenshot === index
-                        ? "dashboard-card-primary"
-                        : "bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300"
-                    }`}
-                    onClick={() => {
-                      console.log(
-                        "Desktop card clicked:",
-                        index,
-                        "Previous state:",
-                        activeScreenshot,
-                      );
-                      setActiveScreenshot(index);
-                    }}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{
-                      scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                          activeScreenshot === index
-                            ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                            : "bg-slate-100 group-hover:bg-slate-200"
-                        }`}
-                      >
-                        {React.cloneElement(screenshot.icon, {
-                          className: `w-6 h-6 ${activeScreenshot === index ? "text-white" : "text-slate-600"}`,
-                        })}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-lg text-slate-900">
-                            {screenshot.title}
-                          </h3>
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                              activeScreenshot === index
-                                ? "bg-blue-100"
-                                : "bg-slate-100 group-hover:bg-slate-200"
-                            }`}
-                          >
-                            <ArrowRight
-                              className={`w-3 h-3 transition-colors ${
-                                activeScreenshot === index
-                                  ? "text-blue-600"
-                                  : "text-slate-400"
-                              }`}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {screenshot.description}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
               </div>
             </div>
           </div>
