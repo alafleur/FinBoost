@@ -73,7 +73,6 @@ import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
-import HeroSplit from "@/components/HeroSplit";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
@@ -627,1349 +626,918 @@ export default function HomeV3() {
     }
   }, []);
 
-  const formatMembers = useCallback((count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(0)}K`;
+  // Sample financial topics for the lessons preview
+  const sampleTopics = useMemo(
+    () => [
+      { icon: <CreditCard className="w-4 h-4" />, title: "Understanding Credit Scores" },
+      { icon: <Home className="w-4 h-4" />, title: "Mortgage & Refinancing" },
+      { icon: <Calculator className="w-4 h-4" />, title: "Compound Interest" },
+      { icon: <PiggyBank className="w-4 h-4" />, title: "Emergency Fund Basics" },
+      { icon: <BarChart3 className="w-4 h-4" />, title: "Investment Portfolio Basics" },
+      { icon: <Shield className="w-4 h-4" />, title: "Insurance Fundamentals" },
+      { icon: <Target className="w-4 h-4" />, title: "Budget Creation & Tracking" },
+      { icon: <DollarSign className="w-4 h-4" />, title: "Debt Payoff Strategies" },
+      { icon: <TrendingUp className="w-4 h-4" />, title: "Stock Market Basics" },
+      { icon: <Lock className="w-4 h-4" />, title: "Retirement Planning 101" },
+      { icon: <BookOpen className="w-4 h-4" />, title: "Personal Finance Fundamentals" },
+      { icon: <Timer className="w-4 h-4" />, title: "Side Hustle Strategies" },
+      { icon: <Award className="w-4 h-4" />, title: "Financial Goal Setting" },
+      { icon: <BadgeDollarSign className="w-4 h-4" />, title: "Passive Income Streams" },
+      { icon: <Sparkles className="w-4 h-4" />, title: "Advanced Investment Strategies" },
+      { icon: <GraduationCap className="w-4 h-4" />, title: "Student Loan Management" },
+      { icon: <Users className="w-4 h-4" />, title: "Family Financial Planning" },
+      { icon: <Trophy className="w-4 h-4" />, title: "Wealth Building Mindset" },
+      { icon: <AlertTriangle className="w-4 h-4" />, title: "Financial Risk Management" },
+      { icon: <CheckCircle className="w-4 h-4" />, title: "Tax Optimization" },
+    ],
+    [],
+  );
+
+  // Debug state for development
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("📱 HomeV3 State Debug:", {
+        activeScreenshot,
+        imgRatio,
+        communitySize,
+        rewardsPercentage,
+        carouselState: {
+          currentStep: carousel.currentStep,
+          isAutoPlaying: carousel.isAutoPlaying,
+          isPaused: carousel.isPaused,
+          hasUserInteracted: carousel.hasUserInteracted,
+        },
+      });
     }
-    return count.toString();
-  }, []);
+  }, [
+    activeScreenshot,
+    imgRatio,
+    communitySize,
+    rewardsPercentage,
+    carousel.currentStep,
+    carousel.isAutoPlaying,
+    carousel.isPaused,
+    carousel.hasUserInteracted,
+  ]);
 
-  // Comprehensive touch/swipe gesture handling for mobile
-  const [touchState, setTouchState] = useState({
-    startX: 0,
-    startY: 0,
-    currentX: 0,
-    currentY: 0,
-    isDragging: false,
-    threshold: 50, // Minimum swipe distance in pixels
-  });
-
-  const handleTouchStart = useCallback(
-    (event: React.TouchEvent) => {
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      setTouchState((prev) => ({
-        ...prev,
-        startX: touch.clientX,
-        startY: touch.clientY,
-        currentX: touch.clientX,
-        currentY: touch.clientY,
-        isDragging: true,
-      }));
-
-      // Pause auto-advance during touch interaction
-      carousel.pauseAutoPlay();
-    },
-    [carousel],
-  );
-
-  const handleTouchMove = useCallback(
-    (event: React.TouchEvent) => {
-      if (!touchState.isDragging) return;
-
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      setTouchState((prev) => ({
-        ...prev,
-        currentX: touch.clientX,
-        currentY: touch.clientY,
-      }));
-
-      // Prevent default scroll behavior during horizontal swipes
-      const deltaX = Math.abs(touch.clientX - touchState.startX);
-      const deltaY = Math.abs(touch.clientY - touchState.startY);
-
-      if (deltaX > deltaY && deltaX > 10) {
-        event.preventDefault();
-      }
-    },
-    [touchState],
-  );
-
-  const handleTouchEnd = useCallback(
-    (event: React.TouchEvent) => {
-      if (!touchState.isDragging) return;
-
-      const deltaX = touchState.currentX - touchState.startX;
-      const deltaY = touchState.currentY - touchState.startY;
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
-
-      // Only process horizontal swipes that exceed threshold
-      if (absX > touchState.threshold && absX > absY) {
-        try {
-          if (deltaX > 0) {
-            // Swipe right - go to previous step
-            carousel.prevStep();
-
-            // Analytics tracking
-            if (typeof window !== "undefined" && window.gtag) {
-              window.gtag("event", "carousel_swipe", {
-                event_category: "engagement",
-                direction: "right",
-                current_step: carousel.currentStep,
-                swipe_distance: absX,
-              });
-            }
-          } else {
-            // Swipe left - go to next step
-            carousel.nextStep();
-
-            // Analytics tracking
-            if (typeof window !== "undefined" && window.gtag) {
-              window.gtag("event", "carousel_swipe", {
-                event_category: "engagement",
-                direction: "left",
-                current_step: carousel.currentStep,
-                swipe_distance: absX,
-              });
-            }
-          }
-        } catch (error) {
-          console.error("Error handling swipe gesture:", error);
-        }
-      }
-
-      // Reset touch state
-      setTouchState((prev) => ({
-        ...prev,
-        isDragging: false,
-        startX: 0,
-        startY: 0,
-        currentX: 0,
-        currentY: 0,
-      }));
-
-      // Resume auto-advance after touch interaction
-      setTimeout(() => carousel.resumeAutoPlay(), 100);
-    },
-    [touchState, carousel],
-  );
-
-  // Legacy swipe handler for compatibility
-  const handleSwipeGesture = useCallback(
-    (direction: "left" | "right") => {
-      if (direction === "left") {
-        carousel.nextStep();
-      } else if (direction === "right") {
-        carousel.prevStep();
-      }
-    },
-    [carousel],
-  );
-
-  // Comprehensive keyboard navigation for accessibility
-  const handleKeyNavigation = useCallback(
-    (event: React.KeyboardEvent) => {
-      try {
-        let handled = false;
-
-        switch (event.key) {
-          case "ArrowLeft":
-          case "h": // Vim-style navigation
-            event.preventDefault();
-            carousel.prevStep();
-            handled = true;
-            break;
-
-          case "ArrowRight":
-          case "l": // Vim-style navigation
-            event.preventDefault();
-            carousel.nextStep();
-            handled = true;
-            break;
-
-          case "Home":
-          case "g": // Vim-style "go to beginning"
-            event.preventDefault();
-            carousel.goToStep(0);
-            handled = true;
-            break;
-
-          case "End":
-          case "G": // Vim-style "go to end"
-            event.preventDefault();
-            carousel.goToStep(stepsData.length - 1);
-            handled = true;
-            break;
-
-          case " ":
-          case "p": // Pause/play
-            event.preventDefault();
-            carousel.toggleAutoPlay();
-            handled = true;
-            break;
-
-          case "Escape":
-            event.preventDefault();
-            carousel.pauseAutoPlay();
-            handled = true;
-            break;
-
-          default:
-            // Handle number keys (1-4) for direct navigation
-            const stepNumber = parseInt(event.key);
-            if (stepNumber >= 1 && stepNumber <= stepsData.length) {
-              event.preventDefault();
-              carousel.goToStep(stepNumber - 1);
-              handled = true;
-            }
-            break;
-        }
-
-        // Analytics tracking for keyboard navigation
-        if (handled && typeof window !== "undefined" && window.gtag) {
-          window.gtag("event", "carousel_keyboard_nav", {
-            event_category: "engagement",
-            key_pressed: event.key,
-            current_step: carousel.currentStep,
-            total_steps: stepsData.length,
-          });
-        }
-      } catch (error) {
-        console.error("Error handling keyboard navigation:", error);
-      }
-    },
-    [carousel, stepsData.length],
-  );
-
-  // Intersection Observer for performance optimization
-  const [sectionRef, setSectionRef] = useState<HTMLElement | null>(null);
-  const [isInView, setIsInView] = useState(false);
-
+  // Pixel-perfect test debugging for zero blur verification
   useEffect(() => {
-    if (!sectionRef) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        const inView = entry.isIntersecting;
-
-        setIsInView(inView);
-
-        // Pause/resume auto-advance based on visibility
-        if (inView && !carousel.hasUserInteracted) {
-          carousel.resumeAutoPlay();
-        } else {
-          carousel.pauseAutoPlay();
-        }
-
-        // Analytics tracking for viewport visibility
-        if (typeof window !== "undefined" && window.gtag) {
-          window.gtag("event", "carousel_visibility", {
-            event_category: "engagement",
-            is_visible: inView,
-            current_step: carousel.currentStep,
-          });
-        }
-      },
-      {
-        threshold: 0.5, // Trigger when 50% of element is visible
-        rootMargin: "0px",
-      },
-    );
-
-    observer.observe(sectionRef);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [sectionRef, carousel]);
-
-  // Accessibility: Announce step changes to screen readers
-  const [announceText, setAnnounceText] = useState("");
-
-  useEffect(() => {
-    const currentStepData = stepsData[carousel.currentStep];
-    if (currentStepData) {
-      setAnnounceText(
-        `Step ${carousel.currentStep + 1} of ${stepsData.length}: ${currentStepData.title}`,
+    const testElement = document.querySelector('[data-step="4"] picture img');
+    if (testElement && process.env.NODE_ENV === "development") {
+      const computedStyle = window.getComputedStyle(testElement);
+      const cssWidth = parseFloat(computedStyle.width);
+      const naturalWidth = (testElement as HTMLImageElement).naturalWidth;
+      const naturalHeight = (testElement as HTMLImageElement).naturalHeight;
+      
+      console.log("🔍 PIXEL-PERFECT TEST:");
+      console.log("- CSS width:", cssWidth, "px");
+      console.log("- Current src:", (testElement as HTMLImageElement).currentSrc);
+      console.log("- Natural size:", `${naturalWidth}x${naturalHeight}`);
+      console.log("- Expected: 240×431 (mobile) or 304×547 (desktop)");
+      console.log("- Perfect match?", 
+        (cssWidth === 240 && naturalWidth === 240) || 
+        (cssWidth === 304 && naturalWidth === 304)
       );
     }
-  }, [carousel.currentStep, stepsData]);
+  }, [activeScreenshot]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <Navbar />
 
-      {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
-      <HeroSplit />
-
-      {/* Early Access Guarantee Section */}
-      <EarlyAccessGuarantee />
-
-      {/* App Preview - Interactive Phone Mockup */}
-      <section
-        id="preview"
-        className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white"
-      >
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                HOW IT WORKS
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              How FinBoost Works
-              <span className="block text-slate-900">(and How You Win)</span>
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Four simple steps to turn your financial learning into real cash
-              rewards
-            </p>
-          </motion.div>
-
-          {/* Unified Responsive Layout */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
-            {/* Phone Preview - Mobile Bottom, Desktop Right */}
-            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
-              <motion.div
-                key={activeScreenshot}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="relative"
-              >
-                {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
-                <div className="relative">
-                  <motion.img
-                    src={screenshots[activeScreenshot].screenshotPath}
-                    alt={screenshots[activeScreenshot].title}
-                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
-                               ring-1 ring-gray-200/50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.35 }}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                  />
-                  
-                  {/* Premium gloss overlay (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
-                                  pointer-events-none"></div>
-                  
-                  {/* Subtle blue glow effect (same as hero) */}
-                  <div className="absolute inset-0 rounded-[28px] 
-                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
-                                  pointer-events-none"></div>
-                </div>
-              </motion.div>
-
-              {/* Mobile navigation with arrows and dots - positioned below phone */}
-              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
-                {/* Left Arrow */}
-                <button
-                  onClick={() => {
-                    const prevIndex =
-                      activeScreenshot === 0
-                        ? screenshots.length - 1
-                        : activeScreenshot - 1;
-                    setActiveScreenshot(prevIndex);
-                  }}
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                  aria-label="Previous screenshot"
-                >
-                  <ChevronLeft className="w-4 h-4 text-slate-600" />
-                </button>
-
-                {/* Dots */}
-                <div className="flex space-x-2">
-                  {screenshots.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        console.log(
-                          "Dot clicked:",
-                          index,
-                          "Previous state:",
-                          activeScreenshot,
-                        );
-                        setActiveScreenshot(index);
-                      }}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        activeScreenshot === index
-                          ? "bg-blue-600 w-8"
-                          : "bg-slate-300 hover:bg-slate-400"
-                      }`}
-                      aria-label={`View ${screenshots[index].title}`}
-                    />
-                  ))}
-                </div>
-
-                {/* Right Arrow */}
-                <button
-                  onClick={() => {
-                    const nextIndex =
-                      activeScreenshot === screenshots.length - 1
-                        ? 0
-                        : activeScreenshot + 1;
-                    setActiveScreenshot(nextIndex);
-                  }}
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white hover:scale-105"
-                  aria-label="Next screenshot"
-                >
-                  <ChevronRight className="w-4 h-4 text-slate-600" />
-                </button>
-              </div>
-            </div>
-
-            {/* Interactive Cards - Responsive: Single flipping card on mobile, 4 cards on desktop */}
-            <div className="order-1 lg:order-1">
-              {/* Mobile: Single Flipping Card */}
-              <div className="lg:hidden px-4">
-                <motion.div
-                  key={`mobile-card-${activeScreenshot}`}
-                  className="dashboard-card-primary p-5 rounded-xl cursor-pointer"
-                  onClick={() => {
-                    const nextIndex =
-                      (activeScreenshot + 1) % screenshots.length;
-                    console.log(
-                      "Card flipped to:",
-                      nextIndex,
-                      "Previous state:",
-                      activeScreenshot,
-                    );
-                    setActiveScreenshot(nextIndex);
-                  }}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+      {/* HERO SECTION - Inlined hero with Step 4 screenshot */}
+      <section className="relative pt-16 pb-8 md:pb-12 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[600px]">
+            
+            {/* Left: Text content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="flex flex-col justify-center space-y-6 lg:space-y-8"
+            >
+              <div className="space-y-4">
+                <motion.h1 
+                  className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-slate-900 leading-tight"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <div className="flex items-start space-x-3">
-                    <motion.div
-                      key={`mobile-icon-${activeScreenshot}`}
-                      className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {React.cloneElement(screenshots[activeScreenshot].icon, {
-                        className: "w-6 h-6 text-white",
-                      })}
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <motion.h3
-                          key={`mobile-title-${activeScreenshot}`}
-                          className="font-semibold text-lg text-slate-900"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1, duration: 0.3 }}
-                        >
-                          {screenshots[activeScreenshot].title}
-                        </motion.h3>
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
-                          <ArrowRight className="w-4 h-4 text-blue-600" />
-                        </div>
-                      </div>
-                      <motion.p
-                        key={`mobile-desc-${activeScreenshot}`}
-                        className="text-slate-600 text-sm leading-relaxed mb-4"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.3 }}
-                      >
-                        {screenshots[activeScreenshot].description}
-                      </motion.p>
-
-                      {/* Step indicator */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
-                          {screenshots.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                activeScreenshot === index
-                                  ? "bg-blue-600 w-6"
-                                  : "bg-slate-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-slate-500 font-medium">
-                          {activeScreenshot + 1} of {screenshots.length}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Desktop: Four Individual Cards */}
-              <div className="hidden lg:block space-y-3">
-                {screenshots.map((screenshot, index) => (
-                  <motion.div
-                    key={`desktop-card-${index}-${activeScreenshot}`}
-                    className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                      activeScreenshot === index
-                        ? "dashboard-card-primary"
-                        : "bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-md border border-slate-200 hover:border-slate-300"
-                    }`}
-                    onClick={() => {
-                      console.log(
-                        "Desktop card clicked:",
-                        index,
-                        "Previous state:",
-                        activeScreenshot,
-                      );
-                      setActiveScreenshot(index);
-                    }}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    animate={{
-                      scale: 1, // REMOVED: activeScreenshot === index ? 1.02 : 1, (causes blur)
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                          activeScreenshot === index
-                            ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                            : "bg-slate-100 group-hover:bg-slate-200"
-                        }`}
-                      >
-                        {React.cloneElement(screenshot.icon, {
-                          className: `w-6 h-6 ${activeScreenshot === index ? "text-white" : "text-slate-600"}`,
-                        })}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-lg text-slate-900">
-                            {screenshot.title}
-                          </h3>
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
-                              activeScreenshot === index
-                                ? "bg-blue-100"
-                                : "bg-slate-100 group-hover:bg-slate-200"
-                            }`}
-                          >
-                            <ArrowRight
-                              className={`w-3 h-3 transition-colors ${
-                                activeScreenshot === index
-                                  ? "text-blue-600"
-                                  : "text-slate-400"
-                              }`}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {screenshot.description}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Learning Module Section - Enhanced Design */}
-      <section
-        id="learn"
-        className="py-20 px-4 bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 relative overflow-hidden"
-      >
-        {/* Enhanced Background decorative elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
-          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-200/5 to-purple-200/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Header Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                FINANCIAL EDUCATION
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              Some Examples of Your
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                FinBoost Lessons
-              </span>
-            </h2>
-            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
-              Real financial education via 3-5 minute lessons and interactive
-              quizzes based on proven strategies for common real-life scenarios
-            </p>
-          </motion.div>
-
-          {/* Single Column Layout - What You'll Master */}
-          <div className="mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            ></motion.div>
-
-            {/* Mobile Single Card with Navigation + Desktop Grid */}
-            <MasterTopicsSection
-              topics={[
-                {
-                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Auto Loans and Refinancing",
-                },
-                {
-                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Harness Compound Growth Power",
-                },
-                {
-                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Strategic Student Loan Repayment Plans",
-                },
-
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Do Small Daily Purchases Really Add Up?",
-                },
-                {
-                  icon: <CreditCard className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Credit Utilization and Borrowing Power",
-                },
-                {
-                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Navigate Buy Now, Pay Later Risks",
-                },
-                {
-                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Build Smart Emergency Fund Strategy",
-                },
-                {
-                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Rethink the 30% Rent Rule",
-                },
-                {
-                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Master Debt Payoff Strategies",
-                },
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Decode APR vs APY Differences",
-                },
-                {
-                  icon: <Home className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "When Renting Actually Beats Buying",
-                },
-                {
-                  icon: <Zap className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Stop Lifestyle Inflation Before It Starts",
-                },
-                {
-                  icon: <Eye className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Hidden Fees That Drain Your Bank Account",
-                },
-                {
-                  icon: <Smartphone className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Why Your Phone Bill Is Probably Too High",
-                },
-                {
-                  icon: <BadgeDollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title:
-                    "The 50/30/20 Budget Rule: Finding Your Perfect Balance",
-                },
-                {
-                  icon: <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title:
-                    "Side Hustle Income: Tax Implications You Need to Know",
-                },
-                {
-                  icon: <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Building Credit from Zero: Your First Steps",
-                },
-                {
-                  icon: <Shield className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title:
-                    "Insurance That Actually Matters vs. Overpriced Coverage",
-                },
-                {
-                  icon: <Calculator className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "401(k) vs. Roth IRA: Which Should You Choose First?",
-                },
-                {
-                  icon: <Target className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title:
-                    "Setting Realistic Financial Goals That Actually Stick",
-                },
-                {
-                  icon: <PiggyBank className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "High-Yield Savings: Where to Park Your Money",
-                },
-                {
-                  icon: <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Red Flags in Investment Offers and Financial Scams",
-                },
-                {
-                  icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Personal Finance Books Worth Your Time (and Money)",
-                },
-                {
-                  icon: <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />,
-                  title: "Negotiating Your Salary: Scripts That Actually Work",
-                },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Why FinBoost Isn't Just Another Finance App - Refined Platform Overview Format */}
-      <section
-        id="trust"
-        className="bg-gradient-to-b from-white via-slate-50 to-white py-16 px-4 sm:px-6 lg:px-8 relative"
-      >
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                WHY FINBOOST
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Why FinBoost Isn't Just Another Finance App
-            </h2>
-          </motion.div>
-
-          {/* Clean Tier Card Format - Responsive 2x2 Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto items-stretch">
-            {[
-              {
-                title: "Debt Progress Pays",
-                subtitle:
-                  "Student loans, credit cards, buy now pay later — every payment forward can earn you money back.",
-              },
-              {
-                title: "Rising Costs Reality",
-                subtitle:
-                  "Everything costs more, saving feels impossible. Small wins add up to real rewards.",
-              },
-              {
-                title: "Addressing Beyond Just Next Month",
-                subtitle:
-                  "FinBoost is about freedom from near-term stress and building momentum toward long-term goals.",
-              },
-              {
-                title: "A Better Approach",
-                subtitle:
-                  "Most apps focus on today's spending. We reward steps toward tomorrow's security.",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
-                    <div className="relative z-10">
-                      <h3 className="text-xl font-semibold text-white mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-white/90 text-sm">{item.subtitle}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Soft Footer Transition */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="mt-12"
-          >
-            <p className="text-center text-base text-slate-500 max-w-xl mx-auto">
-              Whether you're just starting out or already budgeting, FinBoost
-              meets you where you are — and helps you level up.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Visual divider */}
-      <div className="border-t border-gray-200 my-10" />
-
-      {/* Membership Value Breakdown */}
-      <section id="membership" className="w-full bg-gray-50 py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                MEMBERSHIP VALUE
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-6">
-              How Your Membership Fuels the Movement
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Your membership isn’t just a transaction — it’s your access to
-              financial growth and real cash rewards funded by the community.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
-                <GraduationCap className="w-8 h-8 text-white icon-bounce" />
-              </div>
-              <h4 className="text-xl font-bold text-white mb-4">
-                Financial Modules
-              </h4>
-              <p className="text-white/90 leading-relaxed">
-                A portion of your membership supports full access to our growing
-                library of financial lessons, quizzes, and real-world action
-                incentives — all designed to build genuine financial skills.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 magnetic-hover">
-                <Users className="w-8 h-8 text-white icon-bounce" />
-              </div>
-              <h4 className="text-xl font-bold text-white mb-4">
-                Rewards Pool
-              </h4>
-              <p className="text-white/90 leading-relaxed">
-                The majority of every membership funds the rewards pool — where
-                you can win real cash by completing lessons and building your
-                financial habits. The bigger the community, the bigger the
-                rewards.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Reward Pool Mechanics - Show Real Impact */}
-      <section
-        id="pool-mechanics"
-        className="py-20 px-4 bg-gradient-to-br from-blue-50/40 via-white to-purple-50/40"
-      >
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-2 mb-6 shadow-lg">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-sm">
-                STRENGTH IN NUMBERS
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
-              Toggle the Dial to See the Power of the Collective
-            </h2>
-            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              The rewards pool described above isn't just theory. Move the
-              slider below to see how community growth translates to real reward
-              potential for every member.
-            </p>
-          </motion.div>
-
-          {/* Main Layout: Left Controls + Right Visual */}
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* LEFT SIDE: Interactive Controls and Cards */}
-            <div className="space-y-8">
-              {/* Dial Control */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <label className="text-xl font-bold text-slate-800 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                      <Users className="h-5 w-5 text-white" />
-                    </div>
-                    Community Size
-                  </label>
-                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                    {formatMembers(communitySize)} members
+                  Learn Real Finance
+                  <br />
+                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                    Earn Real Cash
                   </span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="range"
-                    value={communitySize}
-                    onChange={(e) => setCommunitySize(parseInt(e.target.value))}
-                    max={10000}
-                    min={250}
-                    step={250}
-                    className="w-full h-4 bg-gradient-to-r from-slate-200 via-blue-400/60 to-purple-500 rounded-lg appearance-none cursor-pointer slider-enhanced shadow-inner"
-                  />
-                  <div className="flex justify-between text-sm font-semibold text-slate-600 mt-4">
-                    <span>250 members</span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                      5K members
-                    </span>
-                    <span>10K+ members</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Stats Cards */}
-              <div className="grid sm:grid-cols-3 gap-3">
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
-                    <ShieldCheck className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">
-                    Illustrative Member
-                    <br />
-                    Rewards %
-                  </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    50-90%
-                  </div>
-                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    Guaranteed
-                  </div>
-                  <div className="text-xs text-slate-500 font-medium">
-                    back to members
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
-                    <DollarSign className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">
-                    Illustrative Monthly Pool
-                    <br />
-                    Size
-                  </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    {formatCurrency(calculateRewardsPool(communitySize))}
-                  </div>
-                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    Total Rewards
-                  </div>
-                  <div className="text-xs text-slate-500 font-medium">
-                    to be distributed
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
-                    <Trophy className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-xs font-semibold text-slate-600 mb-1">
-                    Illustrative Top
-                    <br />
-                    Reward
-                  </div>
-                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    Up to{" "}
-                    {formatCurrency(
-                      Math.round(calculateRewardsPool(communitySize) * 0.05),
-                    )}
-                  </div>
-                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
-                    Top Reward
-                  </div>
-                  <div className="text-xs text-slate-500 font-medium">
-                    to cycle winner
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* RIGHT SIDE: Donut Chart Only */}
-            <div className="flex justify-center lg:justify-start">
-              {/* Dynamic Donut Chart */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="relative w-64 h-64 mb-6 mx-auto">
-                  <svg
-                    className="w-full h-full transform -rotate-90"
-                    viewBox="0 0 100 100"
-                  >
-                    {/* Background circle */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                    />
-                    {/* Rewards percentage */}
-                    <motion.circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="url(#rewardsGradient)"
-                      strokeWidth="8"
-                      strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
-                      strokeLinecap="round"
-                      className="drop-shadow-lg"
-                      initial={{ strokeDasharray: "109.95 109.95" }}
-                      animate={{
-                        strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`,
-                      }}
-                      transition={{ duration: 1.2, ease: "easeInOut" }}
-                    />
-                    {/* Operations percentage */}
-                    <motion.circle
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke="#94a3b8"
-                      strokeWidth="8"
-                      strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
-                      strokeDashoffset={`-${rewardsPercentage * 2.199}`}
-                      strokeLinecap="round"
-                      initial={{ strokeDasharray: "109.95 109.95" }}
-                      animate={{
-                        strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
-                        strokeDashoffset: `-${rewardsPercentage * 2.199}`,
-                      }}
-                      transition={{ duration: 1.2, ease: "easeInOut" }}
-                    />
-
-                    {/* Gradient definition */}
-                    <defs>
-                      <linearGradient
-                        id="rewardsGradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="100%"
-                      >
-                        <stop offset="0%" stopColor="#3b82f6" />
-                        <stop offset="100%" stopColor="#8b5cf6" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-
-                  {/* Center content */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-4xl font-black text-slate-800">
-                      $20
-                    </div>
-                    <div className="text-sm text-slate-500 font-medium">
-                      Monthly Membership
-                    </div>
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">
-                      Majority → Member Funded Cash Rewards Pool
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
-                    <span className="text-slate-700 font-medium">
-                      Portion → Financial Education + Platform Access
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Disclaimer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mt-16"
-          >
-            <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">
-              * Rewards pool statistics shown are illustrative and based on
-              projected membership levels. Actual rewards may vary based on
-              community growth and platform performance.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Reward Tiers Explainer */}
-      <section id="tiers" className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-blue-700 font-semibold text-sm">
-                REWARDS SYSTEM
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Not Winner Take All — Members at All Stages Win
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Users are placed in tiers based on tickets. The more you learn,
-              the more you earn. Tickets aren't just for progress — they
-              increase your chances at real cash rewards. At the end of each
-              cycle, members with more tickets are eligible for larger potential
-              payouts. Winners are selected based on ticket-weighted random
-              draws.
-            </p>
-          </motion.div>
-
-          {/* Tier explanation with integrated phone */}
-          <div className="relative mb-12">
-            {/* Main content container */}
-            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:justify-center">
-              {/* Left side - Tier Cards */}
-              <div className="w-full lg:w-auto lg:flex-shrink-0">
-                <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
-                  {[
-                    {
-                      tier: "Tier 1",
-                      subtitle: "Top Third",
-                      rewardLevel: "Premium Rewards",
-                    },
-                    {
-                      tier: "Tier 2",
-                      subtitle: "Middle Third",
-                      rewardLevel: "Standard Rewards",
-                    },
-                    {
-                      tier: "Tier 3",
-                      subtitle: "Lower Third",
-                      rewardLevel: "Base Rewards",
-                    },
-                  ].map((tier, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                    >
-                      <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                        <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
-                          <div className="relative z-10">
-                            <h3 className="text-xl font-semibold text-white mb-1">
-                              {tier.tier}
-                            </h3>
-                            <p className="text-white/90 text-sm">
-                              {tier.subtitle} = {tier.rewardLevel}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Caption below tier boxes */}
-                <motion.div
+                </motion.h1>
+                
+                <motion.p 
+                  className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-lg"
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  viewport={{ once: true }}
-                  className="text-center mt-8"
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
                 >
-                  <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                    Higher Effort → Higher Tier → Larger Rewards
-                  </p>
-                </motion.div>
+                  Build financial literacy through interactive lessons and real-world actions. 
+                  Compete for monthly cash rewards from a shared pool funded by our community.
+                </motion.p>
               </div>
 
-              {/* Right side - Phone Frame (positioned closer on desktop) */}
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: true }}
-                className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex flex-col sm:flex-row gap-4"
               >
-                <div
-                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
-                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+                <Button
+                  onClick={handleJoinEarlyAccess}
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 group"
                 >
-                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
-                    {/* Status bar (fixed height) */}
-                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
-                      <span>9:41</span>
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
-                        <div className="w-4 h-1 bg-green-500 rounded-sm" />
+                  Join Early Access
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-slate-300 hover:border-blue-300 text-slate-700 hover:text-blue-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-blue-50/50"
+                  onClick={() => {
+                    const howItWorksSection = document.getElementById('how-it-works');
+                    if (howItWorksSection) {
+                      howItWorksSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  See How It Works
+                </Button>
+              </motion.div>
+
+              {/* Early Access Guarantee */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+              >
+                <EarlyAccessGuarantee />
+              </motion.div>
+            </motion.div>
+
+            {/* Right: Phone mockup with Step 4 screenshot */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              className="flex justify-center lg:justify-end"
+            >
+              <div className="relative">
+                {/* Phone frame container */}
+                <div className="relative transform rotate-2 hover:rotate-1 transition-transform duration-500">
+                  {/* Main phone frame */}
+                  <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] p-2 shadow-2xl">
+                    {/* Screen bezel */}
+                    <div className="bg-black rounded-[2.25rem] p-1">
+                      {/* Actual screen content */}
+                      <div className="relative bg-white rounded-[2rem] overflow-hidden">
+                        {/* Step 4 screenshot with pixel-perfect rendering */}
+                        <picture>
+                          {/* Desktop: Show larger images */}
+                          <source 
+                            media="(min-width: 768px)" 
+                            srcSet={`${step4_s304} 1x, ${step4_s608} 2x`}
+                            width="304"
+                            height="547"
+                          />
+                          {/* Mobile: Show smaller images */}
+                          <img
+                            src={step4_m240}
+                            srcSet={`${step4_m240} 1x, ${step4_m480} 2x`}
+                            alt="FinBoost app showing winner celebration screen"
+                            width="240"
+                            height="431"
+                            className="w-full h-auto object-cover"
+                            loading="eager"
+                            style={{ 
+                              width: 'clamp(240px, 50vw, 304px)',
+                              height: 'auto',
+                              imageRendering: 'crisp-edges'
+                            }}
+                          />
+                        </picture>
+                        
+                        {/* Subtle glow overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
                       </div>
                     </div>
-
-                    {/* Exact screen area */}
-                    <div className="flex-1 overflow-hidden flex items-start justify-center">
-                      <img
-                        src={rewardsSystemScreenshot}
-                        alt="Tier Thresholds & Rewards Interface"
-                        className="w-full h-full object-contain"
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          if (img.naturalWidth && img.naturalHeight) {
-                            // height/width rounded to avoid subpixel ratios
-                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
-                            setImgRatio(r);
-                          }
-                        }}
-                        style={{
-                          imageRendering: 'auto',      // single hint to avoid conflicts
-                          backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
-                        }}
-                      />
-                    </div>
+                    
+                    {/* Phone details */}
+                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-16 h-1.5 bg-slate-700 rounded-full" />
+                    <div className="absolute top-6 right-4 w-2 h-2 bg-slate-700 rounded-full" />
                   </div>
-                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                  
+                  {/* Floating elements around phone */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-4 -left-4 w-8 h-8 bg-green-500 rounded-full shadow-lg flex items-center justify-center"
+                  >
+                    <DollarSign className="w-4 h-4 text-white" />
+                  </motion.div>
+                  
+                  <motion.div
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute -bottom-6 -right-6 w-10 h-10 bg-blue-500 rounded-full shadow-lg flex items-center justify-center"
+                  >
+                    <Trophy className="w-5 h-5 text-white" />
+                  </motion.div>
+                  
+                  <motion.div
+                    animate={{ x: [0, 8, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-1/3 -left-6 w-6 h-6 bg-purple-500 rounded-full shadow-lg flex items-center justify-center"
+                  >
+                    <Sparkles className="w-3 h-3 text-white" />
+                  </motion.div>
                 </div>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="text-center mt-8">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hero-gloss btn-enhanced-hover interactive-glow text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
-                onClick={handleJoinEarlyAccess}
-              >
-                <Trophy className="mr-2 h-5 w-5 icon-bounce" />
-                Join Early Access
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+                
+                {/* Background decoration */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 to-purple-100/20 rounded-full blur-3xl scale-150 -z-10" />
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA - Blue to Purple Gradient Background */}
-      <section
-        id="cta"
-        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 px-6 text-center"
-      >
-        <div className="max-w-4xl mx-auto">
+      {/* HOW IT WORKS - Interactive Carousel Section */}
+      <section id="how-it-works" className="py-12 md:py-20 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-100/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            className="text-center mb-12 md:mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-              Ready to Take Control of Your Financial Future?
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              How FinBoost{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                Works
+              </span>
             </h2>
-            <p className="text-lg leading-relaxed text-white/90 mb-8 max-w-3xl mx-auto">
-              Join FinBoost today and turn your effort into rewards — with real
-              stakes, real skills, and collective power behind you.
+            <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Four simple steps to build financial literacy and compete for real cash rewards
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                size="lg"
-                className="btn-secondary py-3 px-8 text-lg rounded-xl border-0 h-auto shadow-lg"
-                onClick={() => (window.location.href = "/auth?mode=signup")}
+          </motion.div>
+
+          {/* Interactive Steps Display */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Left Side: Step Information */}
+            <motion.div
+              key={carousel.currentStep}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 30 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="space-y-6"
+            >
+              {/* Step Badge */}
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-lg">
+                  {screenshots[carousel.currentStep].icon}
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1 text-sm font-medium"
+                >
+                  Step {carousel.currentStep + 1} of {screenshots.length}
+                </Badge>
+              </div>
+
+              {/* Step Content */}
+              <div className="space-y-4">
+                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 leading-tight">
+                  {screenshots[carousel.currentStep].title}
+                </h3>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  {screenshots[carousel.currentStep].description}
+                </p>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="flex items-center justify-between pt-4">
+                <div className="flex space-x-2">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => carousel.goToStep(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        index === carousel.currentStep
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 w-8"
+                          : "bg-slate-300 hover:bg-slate-400"
+                      }`}
+                      aria-label={`Go to step ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={carousel.prevStep}
+                    className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 hover:border-blue-300 flex items-center justify-center transition-all duration-300 hover:shadow-lg group"
+                    aria-label="Previous step"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-slate-600 group-hover:text-blue-600" />
+                  </button>
+                  <button
+                    onClick={carousel.nextStep}
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 flex items-center justify-center transition-all duration-300 hover:shadow-lg group"
+                    aria-label="Next step"
+                  >
+                    <ChevronRight className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Side: Interactive Phone Mockup */}
+            <motion.div
+              key={carousel.currentStep}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex justify-center lg:justify-end"
+              data-step={carousel.currentStep}
+            >
+              <div className="relative">
+                {/* Phone Frame */}
+                <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] p-2 shadow-2xl transform hover:scale-105 transition-transform duration-500">
+                  {/* Screen Bezel */}
+                  <div className="bg-black rounded-[2.25rem] p-1">
+                    {/* Screen Content - Pixel Perfect Screenshots */}
+                    <div className="relative bg-white rounded-[2rem] overflow-hidden">
+                      <picture>
+                        {/* Desktop: Show larger crisp images */}
+                        <source 
+                          media="(min-width: 768px)" 
+                          srcSet={`${screenshots[carousel.currentStep].s304} 1x, ${screenshots[carousel.currentStep].s608} 2x`}
+                          width="304"
+                          height="547"
+                        />
+                        {/* Mobile: Show smaller crisp images */}
+                        <img
+                          src={screenshots[carousel.currentStep].m240}
+                          srcSet={`${screenshots[carousel.currentStep].m240} 1x, ${screenshots[carousel.currentStep].m480} 2x`}
+                          alt={`${screenshots[carousel.currentStep].title} - FinBoost app screenshot`}
+                          width="240"
+                          height="431"
+                          className="w-full h-auto object-cover"
+                          loading="eager"
+                          style={{ 
+                            width: 'clamp(240px, 50vw, 304px)',
+                            height: 'auto',
+                            imageRendering: 'crisp-edges'
+                          }}
+                        />
+                      </picture>
+                      
+                      {/* Subtle screen glow */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Phone Details */}
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-16 h-1.5 bg-slate-700 rounded-full"></div>
+                  <div className="absolute top-6 right-4 w-2 h-2 bg-slate-700 rounded-full"></div>
+                </div>
+                
+                {/* Background Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl scale-150 -z-10"></div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-center mt-12 md:mt-16"
+          >
+            <Button
+              onClick={handleJoinEarlyAccess}
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 group"
+            >
+              Start Your Financial Journey
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* LESSONS PREVIEW SECTION */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-br from-purple-100/30 to-blue-100/30 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 md:mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Master{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                Financial Topics
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Interactive lessons covering everything from basic budgeting to advanced investment strategies
+            </p>
+          </motion.div>
+
+          {/* Interactive Lessons Preview with Custom Scrolling */}
+          <MasterTopicsSection topics={sampleTopics} />
+
+          {/* Value Proposition Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="grid md:grid-cols-3 gap-6 mt-16"
+          >
+            <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-6 relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                  Bite-Sized Learning
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Each lesson takes 5-10 minutes. Learn at your own pace without overwhelming complexity.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-6 relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                  Practical Application
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Every lesson connects to real-world actions you can take immediately to improve your finances.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-6 relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                  Rewarded Progress
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Earn tickets for every completed lesson and quiz, building toward real cash rewards.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* REWARDS SYSTEM SECTION */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-1/4 left-0 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl -translate-x-1/2"></div>
+        <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-gradient-to-br from-purple-200/20 to-blue-200/20 rounded-full blur-3xl translate-x-1/2"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 md:mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Real{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                Cash Rewards
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Our unique reward system distributes real money to active learners every month
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: Rewards System Visual */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-slate-200/60">
+                <img
+                  src={rewardsSystemScreenshot}
+                  alt="FinBoost tier-based rewards system showing Bronze, Silver, Gold, and Platinum tiers"
+                  className="w-full h-auto rounded-xl shadow-lg"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 via-transparent to-purple-500/5 rounded-2xl pointer-events-none"></div>
+              </div>
+              
+              {/* Floating reward badges */}
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-lg flex items-center justify-center"
               >
-                <Trophy className="mr-2 h-5 w-5 icon-bounce" />
-                Get Early Access Now
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <DollarSign className="w-8 h-8 text-white" />
+              </motion.div>
+              
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full shadow-lg flex items-center justify-center"
+              >
+                <Trophy className="w-6 h-6 text-white" />
+              </motion.div>
+            </motion.div>
+
+            {/* Right: Rewards Explanation */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <div className="space-y-4">
+                <h3 className="text-2xl md:text-3xl font-bold text-slate-900">
+                  Tier-Based Reward System
+                </h3>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  The more you learn and take action, the higher your tier placement. 
+                  Higher tiers receive proportionally larger shares of the monthly reward pool.
+                </p>
+              </div>
+
+              {/* Tier Benefits */}
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+                    <Award className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-900 mb-1">Bronze Tier</h4>
+                    <p className="text-slate-600">Entry level with basic reward eligibility and learning access</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-900 mb-1">Silver Tier</h4>
+                    <p className="text-slate-600">Increased reward share and access to advanced content</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-900 mb-1">Gold Tier</h4>
+                    <p className="text-slate-600">Premium rewards and exclusive financial planning tools</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-900 mb-1">Platinum Tier</h4>
+                    <p className="text-slate-600">Highest reward allocation and priority support access</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200/50">
+                <h4 className="text-lg font-semibold text-slate-900 mb-2 flex items-center">
+                  <BadgeDollarSign className="w-5 h-5 text-blue-600 mr-2" />
+                  Monthly Pool Distribution
+                </h4>
+                <p className="text-slate-700 leading-relaxed">
+                  {rewardsPercentage}% of subscription revenue goes directly back to active members. 
+                  With {communitySize.toLocaleString()} members, that's approximately{" "}
+                  <span className="font-semibold text-blue-700">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
+                  </span>{" "}
+                  in monthly rewards.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* COMMUNITY STATS SECTION */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 md:mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Join Our{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                Growing Community
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Real people building financial literacy and competing for meaningful rewards
+            </p>
+          </motion.div>
+
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="p-6 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                    {communitySize.toLocaleString()}+
+                  </div>
+                  <div className="text-slate-600 font-medium">Active Learners</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="p-6 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <DollarSign className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
+                  </div>
+                  <div className="text-slate-600 font-medium">Monthly Rewards Pool</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="p-6 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                    20+
+                  </div>
+                  <div className="text-slate-600 font-medium">Learning Modules</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <Card className="group bg-white/80 backdrop-blur-lg border border-slate-200/60 hover:border-blue-200/80 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50/50 to-yellow-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CardContent className="p-6 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Trophy className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                    {rewardsPercentage}%
+                  </div>
+                  <div className="text-slate-600 font-medium">Revenue to Rewards</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Community Growth Visualization */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-slate-200/60"
+          >
+            <div className="text-center mb-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+                Rewards Scale with Community Growth
+              </h3>
+              <p className="text-lg text-slate-600">
+                As our community grows, so does the monthly rewards pool for all members
+              </p>
+            </div>
+
+            {/* Interactive Community Size Selector */}
+            <div className="space-y-6">
+              <div className="text-center">
+                <label className="text-sm font-medium text-slate-700 mb-2 block">
+                  Community Size: {communitySize.toLocaleString()} members
+                </label>
+                <input
+                  type="range"
+                  min="250"
+                  max="15000"
+                  step="250"
+                  value={communitySize}
+                  onChange={(e) => setCommunitySize(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-slate-500 mt-1">
+                  <span>250</span>
+                  <span>15,000+</span>
+                </div>
+              </div>
+
+              {/* Real-time Calculations */}
+              <div className="grid md:grid-cols-3 gap-4 text-center">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                  <div className="text-2xl font-bold text-blue-900">
+                    {formatCurrency(communitySize * 20)}
+                  </div>
+                  <div className="text-sm text-blue-700">Monthly Revenue</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                  <div className="text-2xl font-bold text-green-900">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
+                  </div>
+                  <div className="text-sm text-green-700">Rewards Pool ({rewardsPercentage}%)</div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                  <div className="text-2xl font-bold text-purple-900">
+                    {Math.round(calculateRewardsPool(communitySize) / communitySize)}
+                  </div>
+                  <div className="text-sm text-purple-700">Avg. per Member</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section id="faq" className="py-16 md:py-24 bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 md:mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Frequently Asked{" "}
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+                Questions
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              Everything you need to know about FinBoost and how it works
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <FAQ />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FINAL CTA SECTION */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent"></div>
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="space-y-8"
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+              Ready to Start Your{" "}
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text text-transparent">
+                Financial Journey?
+              </span>
+            </h2>
+
+            <p className="text-xl md:text-2xl text-slate-300 leading-relaxed max-w-3xl mx-auto">
+              Join thousands of learners building financial literacy while competing for real cash rewards
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Button
+                onClick={handleJoinEarlyAccess}
+                size="lg"
+                className="bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 hover:from-blue-600 hover:via-purple-600 hover:to-blue-700 text-white px-10 py-5 rounded-xl font-semibold text-xl shadow-2xl hover:shadow-3xl transition-all duration-300 group border-0"
+              >
+                Join Early Access Now
+                <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </Button>
+
+              <div className="flex items-center space-x-2 text-slate-300">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span className="text-lg">Free to join</span>
+              </div>
+            </div>
+
+            {/* Final guarantee */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+            >
+              <div className="flex items-center justify-center space-x-3 mb-3">
+                <ShieldCheck className="w-6 h-6 text-green-400" />
+                <span className="text-lg font-semibold text-white">Early Access Guarantee</span>
+              </div>
+              <p className="text-slate-300 leading-relaxed">
+                Lock in your spot with early access pricing and exclusive founder benefits. 
+                Limited to first 10,000 members.
+              </p>
             </motion.div>
           </motion.div>
         </div>
       </section>
 
-      <FAQ />
-      
       <Footer />
     </div>
   );
