@@ -73,7 +73,7 @@ import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
-import UnderdogHero from "@/components/UnderdogHero";
+import HeroSplit from "@/components/HeroSplit";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
@@ -895,7 +895,7 @@ export default function HomeV3() {
       <Navbar />
 
       {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
-      <UnderdogHero />
+      <HeroSplit />
 
       {/* Early Access Guarantee Section */}
       <EarlyAccessGuarantee />
