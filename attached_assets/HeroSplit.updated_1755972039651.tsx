@@ -67,6 +67,8 @@ export default function HeroSplit() {
             </div>
           </div>
 
+          {/* Mobile: Stacked layout with proper copy structure */}
+          
           {/* Mobile: Stacked layout with proper copy structure (updated for top-left copy / bottom-right image) */}
           <div className="lg:hidden relative px-4 pt-2 pb-24">
             {/* Copy top-left */}
@@ -99,6 +101,8 @@ export default function HeroSplit() {
               <div className="absolute inset-0 rounded-[24px] bg-gradient-to-tr from-transparent via-white/5 to-white/20"></div>
             </div>
           </div>
+
+          
 
           {/* Clean subhead with improved spacing */}
           <p className="mx-auto mt-6 md:mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
