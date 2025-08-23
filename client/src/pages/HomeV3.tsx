@@ -627,62 +627,291 @@ export default function HomeV3() {
     }
   }, []);
 
-  // Debug state tracking 
+  const formatMembers = useCallback((count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(0)}K`;
+    }
+    return count.toString();
+  }, []);
+
+  // Comprehensive touch/swipe gesture handling for mobile
+  const [touchState, setTouchState] = useState({
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    isDragging: false,
+    threshold: 50, // Minimum swipe distance in pixels
+  });
+
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      setTouchState((prev) => ({
+        ...prev,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        currentX: touch.clientX,
+        currentY: touch.clientY,
+        isDragging: true,
+      }));
+
+      // Pause auto-advance during touch interaction
+      carousel.pauseAutoPlay();
+    },
+    [carousel],
+  );
+
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent) => {
+      if (!touchState.isDragging) return;
+
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      setTouchState((prev) => ({
+        ...prev,
+        currentX: touch.clientX,
+        currentY: touch.clientY,
+      }));
+
+      // Prevent default scroll behavior during horizontal swipes
+      const deltaX = Math.abs(touch.clientX - touchState.startX);
+      const deltaY = Math.abs(touch.clientY - touchState.startY);
+
+      if (deltaX > deltaY && deltaX > 10) {
+        event.preventDefault();
+      }
+    },
+    [touchState],
+  );
+
+  const handleTouchEnd = useCallback(
+    (event: React.TouchEvent) => {
+      if (!touchState.isDragging) return;
+
+      const deltaX = touchState.currentX - touchState.startX;
+      const deltaY = touchState.currentY - touchState.startY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Only process horizontal swipes that exceed threshold
+      if (absX > touchState.threshold && absX > absY) {
+        try {
+          if (deltaX > 0) {
+            // Swipe right - go to previous step
+            carousel.prevStep();
+
+            // Analytics tracking
+            if (typeof window !== "undefined" && window.gtag) {
+              window.gtag("event", "carousel_swipe", {
+                event_category: "engagement",
+                direction: "right",
+                current_step: carousel.currentStep,
+                swipe_distance: absX,
+              });
+            }
+          } else {
+            // Swipe left - go to next step
+            carousel.nextStep();
+
+            // Analytics tracking
+            if (typeof window !== "undefined" && window.gtag) {
+              window.gtag("event", "carousel_swipe", {
+                event_category: "engagement",
+                direction: "left",
+                current_step: carousel.currentStep,
+                swipe_distance: absX,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error handling swipe gesture:", error);
+        }
+      }
+
+      // Reset touch state
+      setTouchState((prev) => ({
+        ...prev,
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+      }));
+
+      // Resume auto-advance after touch interaction
+      setTimeout(() => carousel.resumeAutoPlay(), 100);
+    },
+    [touchState, carousel],
+  );
+
+  // Legacy swipe handler for compatibility
+  const handleSwipeGesture = useCallback(
+    (direction: "left" | "right") => {
+      if (direction === "left") {
+        carousel.nextStep();
+      } else if (direction === "right") {
+        carousel.prevStep();
+      }
+    },
+    [carousel],
+  );
+
+  // Comprehensive keyboard navigation for accessibility
+  const handleKeyNavigation = useCallback(
+    (event: React.KeyboardEvent) => {
+      try {
+        let handled = false;
+
+        switch (event.key) {
+          case "ArrowLeft":
+          case "h": // Vim-style navigation
+            event.preventDefault();
+            carousel.prevStep();
+            handled = true;
+            break;
+
+          case "ArrowRight":
+          case "l": // Vim-style navigation
+            event.preventDefault();
+            carousel.nextStep();
+            handled = true;
+            break;
+
+          case "Home":
+          case "g": // Vim-style "go to beginning"
+            event.preventDefault();
+            carousel.goToStep(0);
+            handled = true;
+            break;
+
+          case "End":
+          case "G": // Vim-style "go to end"
+            event.preventDefault();
+            carousel.goToStep(stepsData.length - 1);
+            handled = true;
+            break;
+
+          case " ":
+          case "p": // Pause/play
+            event.preventDefault();
+            carousel.toggleAutoPlay();
+            handled = true;
+            break;
+
+          case "Escape":
+            event.preventDefault();
+            carousel.pauseAutoPlay();
+            handled = true;
+            break;
+
+          default:
+            // Handle number keys (1-4) for direct navigation
+            const stepNumber = parseInt(event.key);
+            if (stepNumber >= 1 && stepNumber <= stepsData.length) {
+              event.preventDefault();
+              carousel.goToStep(stepNumber - 1);
+              handled = true;
+            }
+            break;
+        }
+
+        // Analytics tracking for keyboard navigation
+        if (handled && typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "carousel_keyboard_nav", {
+            event_category: "engagement",
+            key_pressed: event.key,
+            current_step: carousel.currentStep,
+            total_steps: stepsData.length,
+          });
+        }
+      } catch (error) {
+        console.error("Error handling keyboard navigation:", error);
+      }
+    },
+    [carousel, stepsData.length],
+  );
+
+  // Intersection Observer for performance optimization
+  const [sectionRef, setSectionRef] = useState<HTMLElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
+
   useEffect(() => {
-    console.log("📱 HomeV3 State Debug:", {
-      activeScreenshot,
-      imgRatio,
-      communitySize,
-      rewardsPercentage,
-      carouselState: {
-        currentStep: carousel.currentStep,
-        isAutoPlaying: carousel.isAutoPlaying,
-        isPaused: carousel.isPaused,
-        hasUserInteracted: carousel.hasUserInteracted,
+    if (!sectionRef) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        const inView = entry.isIntersecting;
+
+        setIsInView(inView);
+
+        // Pause/resume auto-advance based on visibility
+        if (inView && !carousel.hasUserInteracted) {
+          carousel.resumeAutoPlay();
+        } else {
+          carousel.pauseAutoPlay();
+        }
+
+        // Analytics tracking for viewport visibility
+        if (typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "carousel_visibility", {
+            event_category: "engagement",
+            is_visible: inView,
+            current_step: carousel.currentStep,
+          });
+        }
       },
-    });
-  }, [
-    activeScreenshot,
-    imgRatio,
-    communitySize,
-    rewardsPercentage,
-    carousel.currentStep,
-    carousel.isAutoPlaying,
-    carousel.isPaused,
-    carousel.hasUserInteracted,
-  ]);
+      {
+        threshold: 0.5, // Trigger when 50% of element is visible
+        rootMargin: "0px",
+      },
+    );
+
+    observer.observe(sectionRef);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [sectionRef, carousel]);
+
+  // Accessibility: Announce step changes to screen readers
+  const [announceText, setAnnounceText] = useState("");
+
+  useEffect(() => {
+    const currentStepData = stepsData[carousel.currentStep];
+    if (currentStepData) {
+      setAnnounceText(
+        `Step ${carousel.currentStep + 1} of ${stepsData.length}: ${currentStepData.title}`,
+      );
+    }
+  }, [carousel.currentStep, stepsData]);
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Hero Section with Next-Gen Two Column Layout */}
+      {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
       <HeroSplit />
 
-      {/* Early Access Guarantee */}
+      {/* Early Access Guarantee Section */}
       <EarlyAccessGuarantee />
 
-      {/* How FinBoost Works - Enhanced Interactive Design */}
+      {/* App Preview - Interactive Phone Mockup */}
       <section
-        id="how-it-works"
-        className="py-16 md:py-20 px-4 md:px-6 bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden"
+        id="preview"
+        className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white"
       >
-        {/* Enhanced background decorative elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-xl"></div>
-          <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-blue-300/5 rounded-full blur-lg"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-purple-300/5 rounded-full blur-lg"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Header */}
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-12 md:mb-16"
+            className="text-center mb-16"
           >
             <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
               <span className="text-blue-700 font-semibold text-sm">
@@ -690,64 +919,55 @@ export default function HomeV3() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-              Earn Real Cash by Building
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Financial Skills
-              </span>
+              How FinBoost Works
+              <span className="block text-slate-900">(and How You Win)</span>
             </h2>
-            <p className="text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
-              Turn your financial education and smart money moves into real
-              rewards through our innovative ticket-based reward system
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Four simple steps to turn your financial learning into real cash
+              rewards
             </p>
           </motion.div>
 
-          {/* Desktop Two-Column + Mobile Single-Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            {/* Screenshots with precise pixel-perfect rendering for zero blur */}
-            <div className="order-2 lg:order-2 relative">
-              {/* Zero-blur phone mockup using responsive srcSet */}
-              <div className="relative mx-auto max-w-[280px] md:max-w-[320px]">
-                {/* Phone frame with enhanced styling */}
-                <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2.5rem] p-2 shadow-2xl">
-                  <div className="bg-black rounded-[2rem] p-1">
-                    <div className="relative bg-white rounded-[1.5rem] overflow-hidden" style={{ aspectRatio: imgRatio }}>
-                      {/* Responsive image with zero scaling blur */}
-                      <motion.img
-                        key={`screenshot-${activeScreenshot}`}
-                        src={screenshots[activeScreenshot].m240}
-                        srcSet={`
-                          ${screenshots[activeScreenshot].m240} 240w,
-                          ${screenshots[activeScreenshot].m480} 480w,
-                          ${screenshots[activeScreenshot].s304} 304w,
-                          ${screenshots[activeScreenshot].s608} 608w
-                        `}
-                        sizes="(max-width: 767px) 240px, 304px"
-                        alt={screenshots[activeScreenshot].title}
-                        className="w-full h-full object-cover"
-                        initial={{ opacity: 0, scale: 1.05 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                        onLoad={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          const ratio = img.naturalHeight / img.naturalWidth;
-                          console.log("📷 Screenshot loaded:", activeScreenshot, "Dimensions:", img.naturalWidth, "×", img.naturalHeight);
-                          setImgRatio(ratio);
-                        }}
-                      />
-
-                      {/* Subtle screen glare effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none"></div>
-                    </div>
-                  </div>
-
-                  {/* Phone details */}
-                  <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-slate-700 rounded-full"></div>
-                  <div className="absolute top-8 right-4 w-2 h-2 bg-slate-700 rounded-full"></div>
+          {/* Unified Responsive Layout */}
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 lg:items-center">
+            {/* Phone Preview - Mobile Bottom, Desktop Right */}
+            <div className="order-2 lg:order-2 flex flex-col items-center lg:items-start">
+              <motion.div
+                key={activeScreenshot}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="relative"
+              >
+                {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
+                <div className="relative">
+                  <motion.img
+                    src={screenshots[activeScreenshot].screenshotPath}
+                    alt={screenshots[activeScreenshot].title}
+                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
+                               ring-1 ring-gray-200/50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.35 }}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                  
+                  {/* Premium gloss overlay (same as hero) */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                  pointer-events-none"></div>
+                  
+                  {/* Subtle blue glow effect (same as hero) */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                  pointer-events-none"></div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Enhanced Navigation */}
-              <div className="flex items-center justify-center mt-6 space-x-4">
+              {/* Mobile navigation with arrows and dots - positioned below phone */}
+              <div className="lg:hidden flex items-center justify-center space-x-4 mt-4">
                 {/* Left Arrow */}
                 <button
                   onClick={() => {
@@ -767,7 +987,7 @@ export default function HomeV3() {
                 <div className="flex space-x-2">
                   {screenshots.map((_, index) => (
                     <button
-                      key={`dot-${index}`}
+                      key={index}
                       onClick={() => {
                         console.log(
                           "Dot clicked:",
@@ -870,7 +1090,7 @@ export default function HomeV3() {
                         <div className="flex space-x-2">
                           {screenshots.map((_, index) => (
                             <div
-                              key={`mobile-indicator-${index}`}
+                              key={index}
                               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                                 activeScreenshot === index
                                   ? "bg-blue-600 w-6"
@@ -892,7 +1112,7 @@ export default function HomeV3() {
               <div className="hidden lg:block space-y-3">
                 {screenshots.map((screenshot, index) => (
                   <motion.div
-                    key={`desktop-card-${index}`}
+                    key={`desktop-card-${index}-${activeScreenshot}`}
                     className={`group p-6 rounded-xl cursor-pointer transition-all duration-300 ${
                       activeScreenshot === index
                         ? "dashboard-card-primary"
@@ -1168,7 +1388,7 @@ export default function HomeV3() {
               },
             ].map((item, index) => (
               <motion.div
-                key={`why-finboost-${index}`}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -1226,7 +1446,7 @@ export default function HomeV3() {
               How Your Membership Fuels the Movement
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Your membership isn't just a transaction — it's your access to
+              Your membership isn’t just a transaction — it’s your access to
               financial growth and real cash rewards funded by the community.
             </p>
           </motion.div>
@@ -1263,135 +1483,25 @@ export default function HomeV3() {
                 <Users className="w-8 h-8 text-white icon-bounce" />
               </div>
               <h4 className="text-xl font-bold text-white mb-4">
-                Collective Rewards Pool
+                Rewards Pool
               </h4>
               <p className="text-white/90 leading-relaxed">
-                The majority of member fees fund our rewards pool. As our
-                community grows, so does the prize money — creating a sustainable
-                system where learning pays.
+                The majority of every membership funds the rewards pool — where
+                you can win real cash by completing lessons and building your
+                financial habits. The bigger the community, the bigger the
+                rewards.
               </p>
-            </motion.div>
-          </div>
-
-          {/* Dynamic Rewards Calculator */}
-          <div className="mt-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-slate-200 relative overflow-hidden"
-            >
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full -translate-y-32 translate-x-32"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100/40 to-transparent rounded-full translate-y-24 -translate-x-24"></div>
-
-              <div className="relative z-10">
-                <div className="text-center mb-12">
-                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                    Real-Time Rewards Calculator
-                  </h3>
-                  <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                    See how community growth increases rewards for everyone. The
-                    larger our community, the bigger the prize pool.
-                  </p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-8 mb-12 items-center">
-                  {/* Community Size Counter */}
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 magnetic-hover">
-                      <Users className="w-10 h-10 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 mb-2">
-                      {communitySize.toLocaleString()}
-                    </div>
-                    <div className="text-gray-600 font-medium">Members</div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="hidden md:flex justify-center">
-                    <ArrowRight className="w-8 h-8 text-blue-500" />
-                  </div>
-
-                  {/* Monthly Pool */}
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 magnetic-hover">
-                      <DollarSign className="w-10 h-10 text-white" />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 mb-2">
-                      {formatCurrency(calculateRewardsPool(communitySize))}
-                    </div>
-                    <div className="text-gray-600 font-medium">Monthly Pool</div>
-                  </div>
-                </div>
-
-                {/* Key Insights */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-blue-50 rounded-xl p-6">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
-                        <BarChart3 className="w-5 h-5 text-white" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900">
-                        Pool Allocation
-                      </h4>
-                    </div>
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      <span className="font-semibold">{rewardsPercentage}%</span>{" "}
-                      of member fees go directly to rewards. As we grow, this
-                      percentage increases, maximizing member benefits.
-                    </p>
-                  </div>
-
-                  <div className="bg-purple-50 rounded-xl p-6">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
-                        <Trophy className="w-5 h-5 text-white" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900">
-                        Fair Distribution
-                      </h4>
-                    </div>
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      Rewards are distributed through ticket-weighted draws.
-                      More learning and action = more tickets = better odds.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-8 text-center">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      size="lg"
-                      className="btn-primary py-3 px-8 text-lg rounded-xl h-auto"
-                      onClick={handleJoinEarlyAccess}
-                    >
-                      <Sparkles className="mr-2 h-5 w-5 icon-bounce" />
-                      Join The Movement
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </motion.div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Tier System with Screenshot */}
+      {/* Reward Pool Mechanics - Show Real Impact */}
       <section
-        id="rewards"
-        className="py-20 px-6 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white relative overflow-hidden"
+        id="pool-mechanics"
+        className="py-20 px-4 bg-gradient-to-br from-blue-50/40 via-white to-purple-50/40"
       >
-        {/* Background decorative elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-48 h-48 bg-purple-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/5 to-purple-400/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1399,151 +1509,439 @@ export default function HomeV3() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-block bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
-              <span className="text-white font-semibold text-sm">
-                TIER SYSTEM
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-purple-600/10 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-2 mb-6 shadow-lg">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-semibold text-sm">
+                STRENGTH IN NUMBERS
               </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
-              Climb the Tiers, Increase Your
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
-                Reward Potential
-              </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
+              Toggle the Dial to See the Power of the Collective
             </h2>
-            <p className="text-lg leading-relaxed text-white/90 max-w-3xl mx-auto">
-              Your ticket count determines your tier placement. Higher tiers get
-              larger shares of the monthly rewards pool.
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              The rewards pool described above isn't just theory. Move the
+              slider below to see how community growth translates to real reward
+              potential for every member.
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Tier Visual */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="relative mx-auto max-w-lg bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-3 shadow-2xl">
-                <div className="bg-white rounded-xl overflow-hidden">
-                  <img
-                    src={rewardsSystemScreenshot}
-                    alt="FinBoost tier system showing Bronze, Silver, Gold, and Platinum tiers"
-                    className="w-full h-auto"
-                  />
+          {/* Main Layout: Left Controls + Right Visual */}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+            {/* LEFT SIDE: Interactive Controls and Cards */}
+            <div className="space-y-8">
+              {/* Dial Control */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <label className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <Users className="h-5 w-5 text-white" />
+                    </div>
+                    Community Size
+                  </label>
+                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    {formatMembers(communitySize)} members
+                  </span>
                 </div>
-              </div>
+                <div className="relative">
+                  <input
+                    type="range"
+                    value={communitySize}
+                    onChange={(e) => setCommunitySize(parseInt(e.target.value))}
+                    max={10000}
+                    min={250}
+                    step={250}
+                    className="w-full h-4 bg-gradient-to-r from-slate-200 via-blue-400/60 to-purple-500 rounded-lg appearance-none cursor-pointer slider-enhanced shadow-inner"
+                  />
+                  <div className="flex justify-between text-sm font-semibold text-slate-600 mt-4">
+                    <span>250 members</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      5K members
+                    </span>
+                    <span>10K+ members</span>
+                  </div>
+                </div>
+              </motion.div>
 
-              {/* Floating elements */}
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
-                <Star className="w-4 h-4 text-yellow-900" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
-                <Trophy className="w-5 h-5 text-white" />
-              </div>
-            </motion.div>
-
-            {/* Tier Descriptions */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="space-y-6"
-            >
-              {[
-                {
-                  tier: "Bronze",
-                  range: "0-99 tickets",
-                  share: "20%",
-                  color: "from-amber-600 to-amber-700",
-                  description:
-                    "Starting tier for new members. Build your foundation.",
-                },
-                {
-                  tier: "Silver",
-                  range: "100-299 tickets",
-                  share: "25%",
-                  color: "from-slate-400 to-slate-500",
-                  description:
-                    "Growing engagement with consistent learning and actions.",
-                },
-                {
-                  tier: "Gold",
-                  range: "300-599 tickets",
-                  share: "30%",
-                  color: "from-yellow-400 to-yellow-500",
-                  description:
-                    "Advanced members demonstrating strong financial progress.",
-                },
-                {
-                  tier: "Platinum",
-                  range: "600+ tickets",
-                  share: "25%",
-                  color: "from-slate-300 to-slate-400",
-                  description:
-                    "Elite tier for our most dedicated financial achievers.",
-                },
-              ].map((tier, index) => (
+              {/* Stats Cards */}
+              <div className="grid sm:grid-cols-3 gap-3">
                 <motion.div
-                  key={`tier-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-4 h-4 rounded-full bg-gradient-to-r ${tier.color}`}
-                      ></div>
-                      <h4 className="text-xl font-bold text-white">
-                        {tier.tier}
-                      </h4>
-                      <Badge className="bg-white/20 text-white border-white/30">
-                        {tier.share}
-                      </Badge>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Member
+                    <br />
+                    Rewards %
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    50-90%
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Guaranteed
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    back to members
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <DollarSign className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Monthly Pool
+                    <br />
+                    Size
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    {formatCurrency(calculateRewardsPool(communitySize))}
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Total Rewards
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    to be distributed
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm border border-blue-200/40 rounded-xl p-4 text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-xs font-semibold text-slate-600 mb-1">
+                    Illustrative Top
+                    <br />
+                    Reward
+                  </div>
+                  <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Up to{" "}
+                    {formatCurrency(
+                      Math.round(calculateRewardsPool(communitySize) * 0.05),
+                    )}
+                  </div>
+                  <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1">
+                    Top Reward
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    to cycle winner
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE: Donut Chart Only */}
+            <div className="flex justify-center lg:justify-start">
+              {/* Dynamic Donut Chart */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                <div className="relative w-64 h-64 mb-6 mx-auto">
+                  <svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    {/* Background circle */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                    />
+                    {/* Rewards percentage */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="url(#rewardsGradient)"
+                      strokeWidth="8"
+                      strokeDasharray={`${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`}
+                      strokeLinecap="round"
+                      className="drop-shadow-lg"
+                      initial={{ strokeDasharray: "109.95 109.95" }}
+                      animate={{
+                        strokeDasharray: `${rewardsPercentage * 2.199} ${(100 - rewardsPercentage) * 2.199}`,
+                      }}
+                      transition={{ duration: 1.2, ease: "easeInOut" }}
+                    />
+                    {/* Operations percentage */}
+                    <motion.circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke="#94a3b8"
+                      strokeWidth="8"
+                      strokeDasharray={`${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`}
+                      strokeDashoffset={`-${rewardsPercentage * 2.199}`}
+                      strokeLinecap="round"
+                      initial={{ strokeDasharray: "109.95 109.95" }}
+                      animate={{
+                        strokeDasharray: `${(100 - rewardsPercentage) * 2.199} ${rewardsPercentage * 2.199}`,
+                        strokeDashoffset: `-${rewardsPercentage * 2.199}`,
+                      }}
+                      transition={{ duration: 1.2, ease: "easeInOut" }}
+                    />
+
+                    {/* Gradient definition */}
+                    <defs>
+                      <linearGradient
+                        id="rewardsGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+
+                  {/* Center content */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-4xl font-black text-slate-800">
+                      $20
+                    </div>
+                    <div className="text-sm text-slate-500 font-medium">
+                      Monthly Membership
                     </div>
                   </div>
-                  <p className="text-white/90 text-sm mb-2">{tier.range}</p>
-                  <p className="text-white/80 text-sm">{tier.description}</p>
-                </motion.div>
-              ))}
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                viewport={{ once: true }}
-                className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-xl p-6 border border-blue-400/30"
-              >
-                <div className="flex items-center mb-3">
-                  <ShieldCheck className="w-6 h-6 text-blue-400 mr-3" />
-                  <h4 className="text-lg font-bold text-white">Fair & Transparent</h4>
                 </div>
-                <p className="text-white/90 text-sm">
-                  Winners are selected through ticket-weighted random draws.
-                  More tickets = higher odds, but everyone has a chance to win.
-                </p>
+
+                {/* Legend */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-sm"></div>
+                    <span className="text-slate-700 font-medium">
+                      Majority → Member Funded Cash Rewards Pool
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-4 h-4 bg-slate-400 rounded-sm"></div>
+                    <span className="text-slate-700 font-medium">
+                      Portion → Financial Education + Platform Access
+                    </span>
+                  </div>
+                </div>
               </motion.div>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mt-16"
+          >
+            <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">
+              * Rewards pool statistics shown are illustrative and based on
+              projected membership levels. Actual rewards may vary based on
+              community growth and platform performance.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Reward Tiers Explainer */}
+      <section id="tiers" className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <div className="inline-block bg-gradient-to-r from-blue-600/10 to-blue-800/10 backdrop-blur-sm border border-blue-200 rounded-full px-6 py-2 mb-6 badge-premium-gloss magnetic-hover">
+              <span className="text-blue-700 font-semibold text-sm">
+                REWARDS SYSTEM
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Not Winner Take All — Members at All Stages Win
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Users are placed in tiers based on tickets. The more you learn,
+              the more you earn. Tickets aren't just for progress — they
+              increase your chances at real cash rewards. At the end of each
+              cycle, members with more tickets are eligible for larger potential
+              payouts. Winners are selected based on ticket-weighted random
+              draws.
+            </p>
+          </motion.div>
+
+          {/* Tier explanation with integrated phone */}
+          <div className="relative mb-12">
+            {/* Main content container */}
+            <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:justify-center">
+              {/* Left side - Tier Cards */}
+              <div className="w-full lg:w-auto lg:flex-shrink-0">
+                <div className="flex flex-col gap-4 max-w-lg mx-auto lg:mx-0">
+                  {[
+                    {
+                      tier: "Tier 1",
+                      subtitle: "Top Third",
+                      rewardLevel: "Premium Rewards",
+                    },
+                    {
+                      tier: "Tier 2",
+                      subtitle: "Middle Third",
+                      rewardLevel: "Standard Rewards",
+                    },
+                    {
+                      tier: "Tier 3",
+                      subtitle: "Lower Third",
+                      rewardLevel: "Base Rewards",
+                    },
+                  ].map((tier, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <Card className="h-full border-2 border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        <CardContent className="p-4 text-center bg-gradient-to-r from-blue-700 to-blue-900 relative tier-badge-gloss tier-badge-enhanced">
+                          <div className="relative z-10">
+                            <h3 className="text-xl font-semibold text-white mb-1">
+                              {tier.tier}
+                            </h3>
+                            <p className="text-white/90 text-sm">
+                              {tier.subtitle} = {tier.rewardLevel}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Caption below tier boxes */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="text-center mt-8"
+                >
+                  <p className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                    Higher Effort → Higher Tier → Larger Rewards
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Right side - Phone Frame (positioned closer on desktop) */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
+              >
+                <div
+                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
+                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
+                >
+                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
+                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
+                    {/* Status bar (fixed height) */}
+                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
+                      <span>9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
+                        <div className="w-4 h-1 bg-green-500 rounded-sm" />
+                      </div>
+                    </div>
+
+                    {/* Exact screen area */}
+                    <div className="flex-1 overflow-hidden flex items-start justify-center">
+                      <img
+                        src={rewardsSystemScreenshot}
+                        alt="Tier Thresholds & Rewards Interface"
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          if (img.naturalWidth && img.naturalHeight) {
+                            // height/width rounded to avoid subpixel ratios
+                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+                            setImgRatio(r);
+                          }
+                        }}
+                        style={{
+                          imageRendering: 'auto',      // single hint to avoid conflicts
+                          backfaceVisibility: 'hidden',
+                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hero-gloss btn-enhanced-hover interactive-glow text-white px-8 py-3 text-lg font-bold rounded-xl shadow-lg border-0 h-auto transition-all duration-300"
+                onClick={handleJoinEarlyAccess}
+              >
+                <Trophy className="mr-2 h-5 w-5 icon-bounce" />
+                Join Early Access
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 px-6 bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 text-white relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.3),transparent_70%)]"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.3),transparent_70%)]"></div>
-        </div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+      {/* Final CTA - Blue to Purple Gradient Background */}
+      <section
+        id="cta"
+        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 px-6 text-center"
+      >
+        <div className="max-w-4xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
