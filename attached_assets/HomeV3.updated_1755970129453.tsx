@@ -73,6 +73,7 @@ import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
+import Hero from "@/components/Hero";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
@@ -894,103 +895,7 @@ export default function HomeV3() {
       <Navbar />
 
       {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
-      
-      {/* HERO — Top-left copy, bottom-right angled screenshot (mobile-first) */}
-      <section id="hero" className="relative overflow-hidden bg-white">
-        {/* Mobile layout: stacked copy with absolute image bottom-right */}
-        <div className="md:hidden relative max-w-7xl mx-auto px-4 pt-8 pb-20">
-          <div className="max-w-[22rem]">
-            <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900">
-              <span className="block">Learn Real Finance</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Earn Real Cash</span>
-            </h1>
-            <p className="mt-3 text-slate-600">
-              Complete financial lessons and real‑world actions to earn tickets for weekly cash drawings — free to join.
-            </p>
-            <div className="mt-5 flex items-center gap-3">
-              <Button
-                onClick={handleJoinEarlyAccess}
-                className="rounded-2xl px-5 py-3 font-semibold shadow-md bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.98]"
-              >
-                Join Early Access
-              </Button>
-              <a href="#how-it-works" className="rounded-2xl px-4 py-3 font-semibold border border-slate-300 text-slate-800 hover:bg-slate-50">
-                How it works
-              </a>
-            </div>
-            <p className="mt-3 text-xs text-slate-500">
-              No purchase necessary. 18+. Odds vary by entrants and tickets. See Official Rules.
-            </p>
-          </div>
-
-          {/* angled screenshot in the bottom-right */}
-          <div className="pointer-events-none absolute -bottom-6 right-[-6%] w-[78%] max-w-[320px] rotate-[8deg] drop-shadow-2xl">
-            <picture>
-              <source media="(min-width:768px)" srcSet={step4_s608} />
-              <img
-                src={step4_m480}
-                alt="FinBoost app preview — Winner screen"
-                className="w-full h-auto rounded-[28px] ring-1 ring-gray-200/60 shadow-xl"
-                decoding="async"
-                loading="eager"
-                draggable={false}
-              />
-            </picture>
-            {/* subtle gloss */}
-            <div className="absolute inset-0 rounded-[28px] bg-gradient-to-tr from-transparent via-white/10 to-white/25"></div>
-          </div>
-        </div>
-
-        {/* Desktop / tablet: two-column with right-aligned angled screenshot */}
-        <div className="hidden md:block">
-          <div className="relative max-w-7xl mx-auto px-8 py-16">
-            <div className="grid grid-cols-12 gap-8 items-center">
-              <div className="col-span-6">
-                <h1 className="text-6xl font-extrabold leading-[0.95] tracking-tight text-slate-900">
-                  <span className="block">Learn Real Finance</span>
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Earn Real Cash</span>
-                </h1>
-                <p className="mt-6 text-lg text-slate-600 max-w-xl">
-                  Complete financial lessons and real‑world actions to earn tickets for weekly cash drawings — free to join.
-                </p>
-                <div className="mt-7 flex items-center gap-4">
-                  <Button
-                    onClick={handleJoinEarlyAccess}
-                    className="rounded-2xl px-6 py-3.5 font-semibold shadow-md bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.98]"
-                  >
-                    Join Early Access
-                  </Button>
-                  <a href="#how-it-works" className="rounded-2xl px-5 py-3.5 font-semibold border border-slate-300 text-slate-800 hover:bg-slate-50">
-                    How it works
-                  </a>
-                </div>
-                <p className="mt-4 text-xs text-slate-500">
-                  No purchase necessary. 18+. Odds vary by entrants and tickets. See Official Rules.
-                </p>
-              </div>
-
-              {/* right visual */}
-              <div className="col-span-6 relative h-[520px]">
-                <div className="absolute right-0 top-0 w-[78%] max-w-[480px] rotate-[8deg]">
-                  <picture>
-                    <source media="(min-width:768px)" srcSet={step4_s608} />
-                    <img
-                      src={step4_m480}
-                      alt="FinBoost app preview — Winner screen"
-                      className="w-full h-auto rounded-[28px] ring-1 ring-gray-200/60 shadow-2xl"
-                      decoding="async"
-                      loading="eager"
-                      draggable={false}
-                    />
-                  </picture>
-                  <div className="absolute inset-0 rounded-[28px] bg-gradient-to-tr from-transparent via-white/10 to-white/25"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <Hero />
 
       {/* Early Access Guarantee Section */}
       <EarlyAccessGuarantee />
