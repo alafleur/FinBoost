@@ -6,8 +6,24 @@ import step4_s608 from '../assets/screenshots/step4_s608.png';
 
 export default function HeroSplit() {
   return (
-    <section className="bg-white">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="bg-white relative overflow-hidden">
+      {/* Radial gradient backdrop - positioned behind phone screenshot */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Desktop gradient - emanates from center where phone sits */}
+        <div className="hidden lg:block absolute inset-0 bg-gradient-radial from-blue-500/8 via-purple-500/4 to-transparent opacity-60" 
+             style={{
+               background: 'radial-gradient(ellipse 800px 600px at 50% 45%, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.04) 35%, transparent 70%)'
+             }}>
+        </div>
+        
+        {/* Mobile gradient - emanates from bottom-right where phone sits */}
+        <div className="lg:hidden absolute inset-0 opacity-60"
+             style={{
+               background: 'radial-gradient(ellipse 600px 500px at 85% 75%, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.04) 35%, transparent 70%)'
+             }}>
+        </div>
+      </div>
+      <div className="mx-auto max-w-7xl px-6 relative z-10">
         <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
 
           {/* Desktop: Three-column split layout */}
