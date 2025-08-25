@@ -10,16 +10,16 @@ export default function HeroSplit() {
       {/* Radial gradient backdrop - positioned behind phone screenshot */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Desktop gradient - emanates from center where phone sits */}
-        <div className="hidden lg:block absolute inset-0 bg-gradient-radial from-blue-500/8 via-purple-500/4 to-transparent opacity-60" 
+        <div className="hidden lg:block absolute inset-0" 
              style={{
-               background: 'radial-gradient(ellipse 800px 600px at 50% 45%, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.04) 35%, transparent 70%)'
+               background: 'radial-gradient(ellipse 800px 600px at 50% 45%, rgba(59, 130, 246, 0.12) 0%, rgba(147, 51, 234, 0.06) 35%, transparent 70%)'
              }}>
         </div>
         
         {/* Mobile gradient - emanates from bottom-right where phone sits */}
-        <div className="lg:hidden absolute inset-0 opacity-60"
+        <div className="lg:hidden absolute inset-0"
              style={{
-               background: 'radial-gradient(ellipse 600px 500px at 85% 75%, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.04) 35%, transparent 70%)'
+               background: 'radial-gradient(ellipse 600px 500px at 85% 75%, rgba(59, 130, 246, 0.12) 0%, rgba(147, 51, 234, 0.06) 35%, transparent 70%)'
              }}>
         </div>
       </div>
