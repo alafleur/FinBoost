@@ -70,35 +70,36 @@ export default function HeroSplit() {
 
           {/* Mobile: Stacked layout with proper copy structure */}
           <div className="lg:hidden relative px-4 pt-2 pb-36 min-h-[520px]">
-            {/* Copy top-left (same copy, not all caps) */}
-            <div className="max-w-[22rem] text-left space-y-4 relative z-10">
-              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(1.75rem,6vw,4.5rem)]">
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                  Learn Real Finance
-                </span>
-                <span className="block text-slate-900 mt-1">
-                  Earn Real Cash
-                </span>
-              </h1>
-            </div>
+  {/* Copy top-left (same copy, not all caps) */}
+  <div className="max-w-[22rem] text-left space-y-4 relative z-10">
+    <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(1.75rem,6vw,4.5rem)]">
+      <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+        Learn Real Finance
+      </span>
+      <span className="block text-slate-900 mt-1">
+        Earn Real Cash
+      </span>
+    </h1>
+  </div>
 
-            {/* Screenshot bottom-right with slight angle; uses existing step4_* assets */}
-            <div className="pointer-events-none absolute bottom-0 right-0 w-[76%] max-w-[340px] rotate-[8deg] drop-shadow-2xl z-0">
-              <img
-                className="w-full h-auto rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50"
-                srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-                sizes="(max-width: 640px) 76vw, 304px"
-                src={step4_m480}
-                alt="FinBoost winner notification - $325 cash reward"
-                loading="eager"
-                decoding="async"
-                draggable={false}
-                width="240"
-                height="431"
-              />
-              {/* subtle gloss */}
-              <div className="absolute inset-0 rounded-[24px] bg-gradient-to-tr from-transparent via-white/5 to-white/20"></div>
-            </div>
+  {/* Screenshot bottom-right with slight angle; uses existing step4_* assets */}
+  <div className="pointer-events-none absolute bottom-0 right-0 w-[76%] max-w-[340px] rotate-[8deg] drop-shadow-2xl z-0">
+    <img
+      className="w-full h-auto rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50"
+      srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+      sizes="(max-width: 640px) 76vw, 304px"
+      src={step4_m480}
+      alt="FinBoost winner notification - $325 cash reward"
+      loading="eager"
+      decoding="async"
+      draggable={false}
+      width="240"
+      height="431"
+    />
+    {/* subtle gloss */}
+    <div className="absolute inset-0 rounded-[24px] bg-gradient-to-tr from-transparent via-white/5 to-white/20"></div>
+  </div>
+</div>
           </div>
 
           {/* Clean subhead with improved spacing */}
