@@ -1863,7 +1863,7 @@ export default function HomeV3() {
                 </motion.div>
               </div>
 
-              {/* Right side - Phone Frame (positioned closer on desktop) */}
+              {/* Right side - Frameless Phone (positioned closer on desktop) */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1871,48 +1871,38 @@ export default function HomeV3() {
                 viewport={{ once: true }}
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
-                <div
-                  className="relative w-48 lg:w-56 bg-gradient-to-b from-slate-800 to-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-2 shadow-xl shadow-slate-900/50"
-                  style={{ aspectRatio: 1 / imgRatio }}  // precise height from actual image ratio
-                >
-                  {/* Make the phone screen a flex column so the image area is an exact pixel box */}
-                  <div className="w-full h-full bg-white rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden flex flex-col">
-                    {/* Status bar (fixed height) */}
-                    <div className="h-8 lg:h-12 flex items-center justify-between px-4 lg:px-6 text-xs font-medium text-slate-600 flex-shrink-0">
-                      <span>9:41</span>
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
-                        <div className="w-3 h-1 bg-slate-300 rounded-sm" />
-                        <div className="w-4 h-1 bg-green-500 rounded-sm" />
-                      </div>
-                    </div>
-
-                    {/* Exact screen area */}
-                    <div className="flex-1 overflow-hidden flex items-start justify-center">
-                      <img
-                        src={rewardsSystemScreenshot}
-                        alt="Tier Thresholds & Rewards Interface"
-                        className="w-full h-full object-contain"
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          if (img.naturalWidth && img.naturalHeight) {
-                            // height/width rounded to avoid subpixel ratios
-                            const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
-                            setImgRatio(r);
-                          }
-                        }}
-                        style={{
-                          imageRendering: 'auto',      // single hint to avoid conflicts
-                          backfaceVisibility: 'hidden',
-                          transform: 'translateZ(0)',  // GPU hint to keep edges crisp
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-1 lg:bottom-2 left-1/2 transform -translate-x-1/2 w-24 lg:w-32 h-1 bg-white/30 rounded-full"></div>
+                <div className="relative w-48 lg:w-56">
+                  <img
+                    src={rewardsSystemScreenshot}
+                    alt="Tier Thresholds & Rewards Interface"
+                    className="w-full h-auto rounded-[28px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50"
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      if (img.naturalWidth && img.naturalHeight) {
+                        // height/width rounded to avoid subpixel ratios
+                        const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
+                        setImgRatio(r);
+                      }
+                    }}
+                    style={{
+                      imageRendering: 'auto',      // single hint to avoid conflicts
+                      backfaceVisibility: 'hidden',
+                      transform: 'translateZ(0)',  // GPU hint to keep edges crisp
+                    }}
+                  />
+                  
+                  {/* Premium gloss overlay */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  bg-gradient-to-tr from-transparent via-white/5 to-white/20 
+                                  pointer-events-none"></div>
+                  
+                  {/* Subtle blue glow effect */}
+                  <div className="absolute inset-0 rounded-[28px] 
+                                  [box-shadow:0_0_40px_rgba(59,130,246,0.1)]
+                                  pointer-events-none"></div>
                 </div>
               </motion.div>
             </div>
