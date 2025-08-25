@@ -71,12 +71,12 @@ export default function HeroSplit() {
           {/* Mobile: Stacked layout with proper copy structure */}
           <div className="lg:hidden relative px-4 pt-2 pb-36 min-h-[520px]">
             {/* Copy top-left (same copy, not all caps) */}
-            <div className="max-w-[28rem] text-left space-y-4 relative z-10">
-              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(2rem,7vw,5rem)]">
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 whitespace-nowrap">
+            <div className="max-w-[22rem] text-left space-y-4 relative z-10">
+              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(1.75rem,6vw,4.5rem)]">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                   Learn Real Finance
                 </span>
-                <span className="block text-slate-900 mt-1 whitespace-nowrap">
+                <span className="block text-slate-900 mt-1">
                   Earn Real Cash
                 </span>
               </h1>
