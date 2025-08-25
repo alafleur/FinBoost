@@ -6,66 +6,8 @@ import step4_s608 from '../assets/screenshots/step4_s608.png';
 
 export default function HeroSplit() {
   return (
-    <section className="bg-white relative overflow-hidden">
-      {/* Sophisticated multi-layer gradient backdrop */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Desktop gradients */}
-        <div className="hidden lg:block absolute inset-0">
-          {/* Primary spotlight - focused on phone */}
-          <div className="absolute inset-0" 
-               style={{
-                 background: 'radial-gradient(ellipse 700px 550px at 50% 42%, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.08) 25%, rgba(147, 51, 234, 0.06) 50%, transparent 75%)'
-               }}>
-          </div>
-          
-          {/* Secondary ambient layer - larger, softer */}
-          <div className="absolute inset-0" 
-               style={{
-                 background: 'radial-gradient(ellipse 1200px 800px at 48% 45%, rgba(59, 130, 246, 0.04) 0%, rgba(147, 51, 234, 0.03) 40%, transparent 70%)'
-               }}>
-          </div>
-          
-          {/* Subtle directional accent */}
-          <div className="absolute inset-0" 
-               style={{
-                 background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, transparent 30%, transparent 70%, rgba(147, 51, 234, 0.02) 100%)'
-               }}>
-          </div>
-        </div>
-        
-        {/* Mobile gradients */}
-        <div className="lg:hidden absolute inset-0">
-          {/* Primary spotlight - follows angled phone position */}
-          <div className="absolute inset-0"
-               style={{
-                 background: 'radial-gradient(ellipse 550px 450px at 82% 72%, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.08) 25%, rgba(147, 51, 234, 0.06) 50%, transparent 75%)'
-               }}>
-          </div>
-          
-          {/* Secondary ambient layer */}
-          <div className="absolute inset-0"
-               style={{
-                 background: 'radial-gradient(ellipse 800px 600px at 80% 75%, rgba(59, 130, 246, 0.04) 0%, rgba(147, 51, 234, 0.03) 40%, transparent 70%)'
-               }}>
-          </div>
-          
-          {/* Subtle top-left counter-balance */}
-          <div className="absolute inset-0"
-               style={{
-                 background: 'radial-gradient(ellipse 400px 300px at 20% 25%, rgba(99, 102, 241, 0.03) 0%, transparent 60%)'
-               }}>
-          </div>
-        </div>
-        
-        {/* Subtle texture overlay for premium feel */}
-        <div className="absolute inset-0 opacity-[0.015]"
-             style={{
-               backgroundImage: `radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.3) 1px, transparent 0)`,
-               backgroundSize: '32px 32px'
-             }}>
-        </div>
-      </div>
-      <div className="mx-auto max-w-7xl px-6 relative z-10">
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
 
           {/* Desktop: Three-column split layout */}
