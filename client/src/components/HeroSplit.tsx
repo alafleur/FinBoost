@@ -91,7 +91,7 @@ export default function HeroSplit() {
             {/* Stacked headlines at top */}
             <div className="text-center mb-8">
               <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(2.2rem,7vw,3.5rem)]">
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 whitespace-nowrap">
                   Learn Real Finance
                 </span>
                 <span className="block text-slate-900 mt-1">
