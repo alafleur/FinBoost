@@ -1,0 +1,60 @@
+Yes—**please proceed to STEP 3.** Here’s the exact checklist Replit can run to prove webhook auth is enforced.
+
+# STEP 3 — Webhook auth enforcement verification
+
+## What to verify
+
+That your webhook route **rejects bad Basic Auth** and **accepts the correct one**.
+
+## Do this
+
+1. **Negative test (should fail)**
+
+   * Postmark → *Default Transactional Stream* → **Webhooks → Edit** your webhook.
+   * In **Basic auth credentials**, temporarily change the **Password** (e.g., append `-bad`).
+   * Click **Send test** (Delivery).
+   * **Expected:** Postmark shows **401/403** (not 200).
+     *Server logs should show the request was rejected for bad auth.*
+
+2. **Positive test (should pass)**
+
+   * Revert the password in Postmark to the **correct** value.
+   * Click **Send test** again.
+   * **Expected:** **200 OK** and your handler runs normally.
+
+3. **Optional curl pen-test**
+
+   * With **wrong** creds:
+
+     ```bash
+     curl -i -X POST https://getfinboost.com/api/webhooks/postmark \
+       -H "Authorization: Basic $(printf 'postmark:WRONG' | base64)" \
+       -H "Content-Type: application/json" -d '{}'
+     ```
+
+     Expect **401/403**.
+   * With **correct** creds (replace `PASSWORD`):
+
+     ```bash
+     curl -i -X POST https://getfinboost.com/api/webhooks/postmark \
+       -H "Authorization: Basic $(printf 'postmark:PASSWORD' | base64)" \
+       -H "Content-Type: application/json" -d '{}'
+     ```
+
+     Expect **200**.
+
+## Acceptance criteria
+
+* Bad credentials → **401/403** from your server and **Webhook failed** in Postmark test.
+* Correct credentials → **200** and **Webhook delivered** in Postmark test.
+* Env vars are set and used: `POSTMARK_WEBHOOK_BASIC_USER`, `POSTMARK_WEBHOOK_BASIC_PASS`.
+* Auth check runs **before** any event processing.
+
+> If the negative test returns **200**, add/enable a Basic Auth middleware in the webhook route (constant-time compare). After that, repeat the tests.
+
+---
+
+### After STEP 3 passes
+
+Move to **STEP 4 — Template smoke tests**:
+Trigger *verify-email*, *password reset*, *payout processed*, *AMOE receipt* to a real inbox; confirm **Delivered** on **MessageStream: outbound** in Postmark Activity.

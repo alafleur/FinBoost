@@ -1,7 +1,35 @@
-import type { Express, Request, Response } from 'express';
+import type { Express, Request, Response, NextFunction } from 'express';
 import express from 'express';
 import crypto from 'crypto';
 import { recordEmailEvent, upsertSuppression } from '../services/email/suppressions.js';
+
+/** Check HTTP Basic Auth with direct comparison (simplified for debugging). */
+function checkBasicAuth(req: Request, res: Response, next: NextFunction) {
+  const header = req.headers.authorization || "";
+  
+  if (!header.startsWith("Basic ")) {
+    return res.sendStatus(401);
+  }
+  
+  try {
+    const credentials = Buffer.from(header.split(" ")[1], "base64").toString("utf8");
+    const okU = process.env.POSTMARK_WEBHOOK_BASIC_USER || "";
+    const okP = process.env.POSTMARK_WEBHOOK_BASIC_PASS || "";
+    const expectedCredentials = `${okU}:${okP}`;
+    
+    // Direct string comparison for now (we can add timing-safe later)
+    if (credentials === expectedCredentials) {
+      console.log('[WEBHOOK AUTH] ✅ Authentication successful');
+      return next();
+    } else {
+      console.log('[WEBHOOK AUTH] ❌ Authentication failed');
+      return res.sendStatus(401);
+    }
+  } catch (error) {
+    console.error('[WEBHOOK AUTH] Error parsing auth:', error);
+    return res.sendStatus(401);
+  }
+}
 
 /** Verify Postmark signature if POSTMARK_WEBHOOK_SECRET is set. */
 function verifySignature(req: Request, raw: string): boolean {
@@ -25,6 +53,8 @@ function verifySignature(req: Request, raw: string): boolean {
  */
 export function registerPostmarkWebhook(app: Express) {
   app.post('/api/webhooks/postmark',
+    // Check Basic Auth FIRST (before processing)
+    checkBasicAuth,
     // Use raw body for signature validation
     express.raw({ type: 'application/json' }),
     async (req: Request, res: Response) => {
