@@ -87,7 +87,7 @@ export default function HeroSplit() {
                 </span>
                 <span
                   className="block text-slate-900 mt-1
-                             text-[clamp(1.6rem,6.2vw,2.25rem)] max-w-[20ch] mx-auto"
+                             text-[clamp(1.9rem,7.2vw,2.6rem)] max-w-[20ch] mx-auto"
                 >
                   Earn Real Cash
                 </span>
@@ -99,7 +99,8 @@ export default function HeroSplit() {
               <div className="relative pointer-events-none lg:rotate-[8deg]">
                 <img
                   className="rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50
-                             w-[240px] min-[390px]:w-[304px] h-auto"
+                             w-[240px] min-[390px]:w-[304px] h-auto
+                             [image-rendering:crisp-edges]"
                   srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
                   sizes="(max-width: 389px) 240px, 304px"
                   src={step4_m240}
