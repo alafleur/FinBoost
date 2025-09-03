@@ -1,0 +1,132 @@
+Delivered-To: support@getfinboost.com
+Received: by 2002:ab4:a141:0:b0:2a5:a524:2322 with SMTP id dn1csp2788852ecb;
+        Wed, 3 Sep 2025 12:36:26 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFsLi9ZRD7G6Or1Zg4I2ry7fizteYrtRORoubvf/mmW6jWldwij45rxkK9HmGYDY2Al55fy
+X-Received: by 2002:a05:6602:388e:b0:887:1b58:4e69 with SMTP id ca18e2360f4ac-8871f437e11mr3353940539f.8.1756928186567;
+        Wed, 03 Sep 2025 12:36:26 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1756928186; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CEC0vIDD115Rt5VXHyVyjPGaprmLHVWLAt57/sKP7z7U21+G9LBav67JxiHgt0Rh8L
+         2pmrHE2zBRDNJ7ygW0LwJ7Bbjr33WgZadR62S//guINPnksqiBB07GxqVV8JoERQ8xNS
+         2i1ZOr0Rk6sSrTErYVh1j5foupe07fGgokgu18w56phmuNmC0FvMK9bb8dq5h+5kddLu
+         xoHIDjdNsMB7Gf8g7twRhFWOiKOUZkWT6ImagZYRkIdp0wfOCsAiw7mQUfCDkzJj/mFh
+         eLXUCrIaroGIHX8aN6qusgyqqqy1XmSWDypzyXd4VzmHFiuFd09E76Sv+0SpC9udxtom
+         Wwsw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:mime-version:feedback-id:to:reply-to
+         :message-id:subject:date:from:dkim-signature:dkim-signature;
+        bh=aftjfjyNjuPRRN0IPAnYM/BeNkrs6JV9wslgZqQjQ8I=;
+        fh=ZRt8U/zCxmE48tXzw9D13CPUoVf5t7WBR+MA1UXBljU=;
+        b=FI2j00vjxNxctoe42C3xjAfVpHMzsTilFTFJ1e13QKPfACRa+TixWN8Apg2izhDB6b
+         MRTKL+8e22mMWSXDGIvZISCS0KKpJcdHaWYuAU/3FD5dNo62kH8x5gqAtD5IAiU4JZ8e
+         iQvbHk2qFueWrsi3DBqFuSbB/FGeYeUaHl5zFEyzPol9VhYvH9RvVFeDNDh9arTUo096
+         xyyAVYC25xzqtBWR3q2GokjUvELtwOu4WPnMTR721S1I/ylK4sYvNiat6n2u7t7Eif4e
+         TNFHXvjGJ3Q1sU5AwOW3axs3m9609XVcDCqIvbtJyiJXMrXF8yDHc7RFOJ2d9b9hfeYB
+         o/fg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@pm.mtasv.net header.s=pm20250324 header.b=N8Unnk6q;
+       dkim=pass header.i=@txn.getfinboost.com header.s=20250818021120pm header.b=bIFRtRr3;
+       spf=pass (google.com: domain of pm_bounces@pm-bounces.txn.getfinboost.com designates 50.31.156.115 as permitted sender) smtp.mailfrom=pm_bounces@pm-bounces.txn.getfinboost.com
+Return-Path: <pm_bounces@pm-bounces.txn.getfinboost.com>
+Received: from sc-ord-mta115.mtasv.net (sc-ord-mta115.mtasv.net. [50.31.156.115])
+        by mx.google.com with ESMTPS id ca18e2360f4ac-8871e4065fdsi1413051739f.168.2025.09.03.12.36.26
+        for <support@getfinboost.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 03 Sep 2025 12:36:26 -0700 (PDT)
+Received-SPF: pass (google.com: domain of pm_bounces@pm-bounces.txn.getfinboost.com designates 50.31.156.115 as permitted sender) client-ip=50.31.156.115;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@pm.mtasv.net header.s=pm20250324 header.b=N8Unnk6q;
+       dkim=pass header.i=@txn.getfinboost.com header.s=20250818021120pm header.b=bIFRtRr3;
+       spf=pass (google.com: domain of pm_bounces@pm-bounces.txn.getfinboost.com designates 50.31.156.115 as permitted sender) smtp.mailfrom=pm_bounces@pm-bounces.txn.getfinboost.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; s=pm20250324; d=pm.mtasv.net;
+ h=From:Date:Subject:Message-Id:Reply-To:To:MIME-Version:Content-Type:
+ Content-Transfer-Encoding:Date:From:Message-ID:Reply-To:Sender:Subject:To:CC;
+ t=1756928186; x=1757014586;
+ bh=aftjfjyNjuPRRN0IPAnYM/BeNkrs6JV9wslgZqQjQ8I=;
+ b=N8Unnk6q8N8C2YqtejkywQzh8QOX4hPBm+ZZguikI2O0wOyfs6XMOMvacNZNa/RTZO1jXnxcIhXj
+   7wMIbRULT+mAWZ696UO3fr77CbPECS0dq4gUSUlbcNxsrEHLhrVYPTqJEzKILYR2xuC4KqOBiwvk
+   qa00bmkPS7GXHrPSC6EHO56WjcJSrAB0sOrkusCRpwgNdD6JkHpX8dxGAu9pomjBHf7wQcEX7iGa
+   2FxG9eoIdlF1LbtIqyo9S2zVuvqX9qDX0ZD7aWP8T4XUcj1g9kirKNHLfoeGCUhrBzlP2UCtzQ+L
+   +phr8H09aaLHEBLzgSV7PpW7hUAMfi/DycFpBg==
+Received: by sc-ord-mta115.mtasv.net id hn2cbk3b84k7 for <support@getfinboost.com>; Wed, 3 Sep 2025 15:36:26 -0400 (envelope-from <pm_bounces@pm-bounces.txn.getfinboost.com>)
+X-PM-IP: 50.31.156.115
+X-IADB-IP: 50.31.156.115
+X-IADB-IP-REVERSE: 115.156.31.50
+DKIM-Signature: v=1; a=rsa-sha256; d=txn.getfinboost.com; s=20250818021120pm;
+	c=relaxed/relaxed; i=no-reply@txn.getfinboost.com; t=1756928186;
+	x=1757100986;
+	h=date:date:from:from:message-id:reply-to:reply-to:sender:subject:subject:to:
+	to:cc:feedback-id:mime-version:content-type:content-transfer-encoding;
+	bh=aftjfjyNjuPRRN0IPAnYM/BeNkrs6JV9wslgZqQjQ8I=;
+	b=bIFRtRr3gjZykhwTLxB+ZcN1ZrpIaGmDPgdBjMpqIXUUjDx+zeJCRkuRy6DBa/5p+BnlKrgqlvW
+	jNeCMlzzgzwVkhqzcwBSWlVXhn3y+DF0OoGgefcyFk8i9o110iHMykVklc0/B3q63OEatF3XPKyEi
+	jWp71on7i+2S4mKSJxw=
+From: FinBoost <no-reply@txn.getfinboost.com>
+Date: Wed, 03 Sep 2025 19:36:25 +0000
+Subject: Verify your email for FinBoost
+Message-Id: <4a1bfcec-f84c-4d59-9d5d-8246c13ae96f@mtasv.net>
+Reply-To: support@getfinboost.com
+To: support@getfinboost.com
+X-PM-Message-Stream: outbound
+Feedback-ID: s16694400-_:s16694400:a445252:postmark
+X-Complaints-To: abuse@postmarkapp.com
+X-PM-Message-Id: 4a1bfcec-f84c-4d59-9d5d-8246c13ae96f
+X-PM-RCPT: |bTB8NDQ1MjUyfDE2Njk0NDAwfHN1cHBvcnRAZ2V0ZmluYm9vc3QuY29t|
+X-PM-Message-Options: v1;1.QMbM2FY0f6HaTV3A3cbUyg.KHpvp4nzgURzGNqr5rqycPVuCrjU0XAkWz7ZApgHr9NRxBC5_eMe37BJ3muzDogdT275TRR3wQgaXTLXQVGXZilCbeRyWr9-2u8g7VXU2g0Kt2bAtKFABy8iDgtR_t7SE_vjInOu-1xXU32IG8_Hmt4kk7PTwuSWGg14jVOx_rGJ29jhKgWOhyvDH_NrveJR
+MIME-Version: 1.0
+X-PM-MTA-Pool: transactional-1
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset=3D"utf-8" />
+    <meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D=
+1" />
+    <title></title>
+    <style>
+      body { margin:0; padding:0; background:#f6f7fb; font-family: system-u=
+i, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#11=
+1827; }
+      .container { max-width:640px; margin:0 auto; padding:24px; }
+      .card { background:#ffffff; border-radius:16px; padding:24px; box-sha=
+dow: 0 1px 3px rgba(0,0,0,0.06); }
+      .btn { display:inline-block; padding:12px 16px; border-radius:10px; b=
+ackground:#111827; color:#ffffff; text-decoration:none; }
+      .muted { color:#6b7280; font-size:12px; line-height:18px; }
+      .h1 { font-size:20px; font-weight:700; margin:0 0 8px; }
+      .p { font-size:14px; line-height:22px; margin:0 0 12px; }
+      .footer { text-align:center; color:#6b7280; font-size:12px; margin-to=
+p:16px; }
+      .logo { font-weight:800; letter-spacing:0.5px }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "=
+Liberation Mono", monospace; background:#f3f4f6; padding:8px 12px; border-r=
+adius:8px; display:inline-block; }
+    </style>
+  </head>
+  <body>
+    <div class=3D"container">
+      <div class=3D"card">
+        <div class=3D"logo">FinBoost</div>
+       =20
+<div class=3D"h1">Verify your email</div>
+<p class=3D"p">Hi Test User, welcome to FinBoost!</p>
+<p class=3D"p">Click the button below to verify your email address and acti=
+vate your account:</p>
+<p class=3D"p"><a class=3D"btn" href=3D"https://getfinboost.com/verify?toke=
+n=3Dtest123">Verify Email Address</a></p>
+<p class=3D"p">Or paste this link in your browser:</p>
+<p class=3D"p"><span class=3D"code">https://getfinboost.com/verify?token=3D=
+test123</span></p>
+<p class=3D"muted">If you didn't create an account, you can safely ignore t=
+his email.</p>
+      </div>
+      <div class=3D"footer">
+         =E2=80=A2 <a href=3D"" style=3D"color:#6b7280; text-decoration:und=
+erline"></a>
+      </div>
+    </div>
+  </body>
+</html>
