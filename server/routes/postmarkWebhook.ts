@@ -3,32 +3,20 @@ import express from 'express';
 import crypto from 'crypto';
 import { recordEmailEvent, upsertSuppression } from '../services/email/suppressions.js';
 
-/** Check HTTP Basic Auth with direct comparison (simplified for debugging). */
+/** Check HTTP Basic Auth with constant-time comparison. */
 function checkBasicAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || "";
+  if (!header.startsWith("Basic ")) return res.sendStatus(401);
   
-  if (!header.startsWith("Basic ")) {
-    return res.sendStatus(401);
-  }
+  const [user, pass] = Buffer.from(header.split(" ")[1], "base64").toString("utf8").split(":");
+  const okU = process.env.POSTMARK_WEBHOOK_BASIC_USER || "";
+  const okP = process.env.POSTMARK_WEBHOOK_BASIC_PASS || "";
   
-  try {
-    const credentials = Buffer.from(header.split(" ")[1], "base64").toString("utf8");
-    const okU = process.env.POSTMARK_WEBHOOK_BASIC_USER || "";
-    const okP = process.env.POSTMARK_WEBHOOK_BASIC_PASS || "";
-    const expectedCredentials = `${okU}:${okP}`;
-    
-    // Direct string comparison for now (we can add timing-safe later)
-    if (credentials === expectedCredentials) {
-      console.log('[WEBHOOK AUTH] ✅ Authentication successful');
-      return next();
-    } else {
-      console.log('[WEBHOOK AUTH] ❌ Authentication failed');
-      return res.sendStatus(401);
-    }
-  } catch (error) {
-    console.error('[WEBHOOK AUTH] Error parsing auth:', error);
-    return res.sendStatus(401);
-  }
+  // Constant-time comparison to prevent timing attacks
+  const uOK = user.length === okU.length && crypto.timingSafeEqual(Buffer.from(user), Buffer.from(okU));
+  const pOK = pass.length === okP.length && crypto.timingSafeEqual(Buffer.from(pass), Buffer.from(okP));
+  
+  return uOK && pOK ? next() : res.sendStatus(401);
 }
 
 /** Verify Postmark signature if POSTMARK_WEBHOOK_SECRET is set. */
