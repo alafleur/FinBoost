@@ -17,7 +17,7 @@ const TEMPLATE_STREAM_HINT: Partial<Record<TemplateKey, MessageStream>> = {
   'verify-email': 'transactional',
   'password-reset': 'transactional',
   'payout-processed': 'transactional',
-  'amoe-receipt': 'broadcast',
+  'amoe-receipt': 'transactional',
 };
 
 function env(name: string, fallback?: string) {

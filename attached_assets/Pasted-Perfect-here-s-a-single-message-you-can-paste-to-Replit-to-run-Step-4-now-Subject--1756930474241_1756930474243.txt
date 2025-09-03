@@ -1,0 +1,58 @@
+Perfect—here’s a single message you can paste to Replit to run **Step 4** now.
+
+---
+
+**Subject:** Step 4 — Transactional template smoke tests (verify, reset, payout, AMOE)
+
+Please trigger the following **transactional** emails via our EmailService (no UI flows) and send to both test inboxes:
+
+**Recipients**
+
+* `andrew@getfinboost.com`
+* `ac.lafleur@gmail.com`
+
+**Templates (all on MessageStream = `outbound`)**
+
+1. **verify-email** — 1 send per recipient
+
+   * Use prod base URL in the link (e.g., `https://getfinboost.com/verify?token=TEST_TOKEN`)
+2. **password-reset** — 1 send per recipient
+
+   * Link example: `https://getfinboost.com/reset?token=TEST_TOKEN`
+3. **payout-processed** — 1 send per recipient (safe **test** payload)
+
+   * Example variables:
+
+     ```json
+     { "amount":"$12.34", "currency":"USD", "cycleStart":"2025-09-15", "cycleEnd":"2025-09-22", "payoutRef":"TEST-PAYOUT-001" }
+     ```
+4. **amoe-receipt** — 1 send per recipient (safe **test** payload)
+
+   * Example variables:
+
+     ```json
+     { "entryId":"AMOE-TEST-001", "submittedAt":"2025-09-03T15:00:00Z" }
+     ```
+
+**Headers / From**
+
+* `From: "FinBoost Support" <support@getfinboost.com>`
+* `Reply-To: support@getfinboost.com`
+* Ensure `MessageStream` is explicitly passed as `process.env.POSTMARK_MESSAGE_STREAM_TRANSACTIONAL` (should be `outbound`).
+
+**Do NOT**
+
+* Do not use any suppressed/test domains (e.g., `admin@…`, `@txn.getfinboost.com`, `.test` TLD).
+* Do not use the Broadcast stream.
+
+**What to return**
+
+* A small table (or list) with: **Template**, **Recipient**, **Postmark Message ID**, **Status** (Delivered/Bounced), **Webhook result** (HTTP 200).
+* Confirm Activity shows **Delivered**, **Stream = outbound**, and DKIM/Return-Path authenticated.
+* Confirm webhooks for each send show **200 OK** (Basic Auth is enforced).
+
+**Note**
+
+* I will do two true end-to-end checks separately (signup→verify and forgot→reset) after these land.
+
+Thanks!
