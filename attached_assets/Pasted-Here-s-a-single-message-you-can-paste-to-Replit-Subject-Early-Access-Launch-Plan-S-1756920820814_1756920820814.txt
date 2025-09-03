@@ -1,0 +1,63 @@
+Here’s a single message you can paste to Replit:
+
+---
+
+**Subject:** Early-Access Launch Plan — Signups → First Cycle Timing (Finalized Guidance)
+
+Team — here’s the product direction for launch timing and early-access UX. **No code changes yet**; this is the shared plan and handles to prepare for.
+
+### Definitions
+
+* **Cycle length:** 7 days.
+* **TCS (Time from Signup → Cycle Start):** How long a new user waits before their first 7-day cycle begins.
+* **TFD (Time from Signup → First Draw):** `TCS + 7 days` (the draw occurs at the end of the user’s first cycle).
+
+### Guardrails
+
+* **TCS target:** **0–3 days** ideal; **≤7 days** acceptable.
+* **TFD implication:** **7–10 days** ideal; **≤14 days** acceptable.
+* If TCS for a meaningful share of new users would exceed 7 days, we’ll adjust scheduling (see below).
+
+### Scheduling Approach (during ramp → steady state)
+
+1. **Ramp phase (recommended):** Start a new cohort **every 3–4 days** to keep TCS ≤3–4 days for most signups.
+2. **Steady state:** Transition to a **fixed weekly start** (e.g., **Mon 00:00 ET**) once volume is stable.
+3. **Fallback (if growth lags):** Use a **hybrid trigger for Cycle 1 start** — “**on DATE or when we reach N members, whichever comes first**,” with a **guaranteed prize floor** for that cycle. (This hybrid is about **cycle start**, not the draw.)
+
+### Access & Gating
+
+* **Open access now:** Users can register, log in, complete lessons, and **bank Tickets** immediately.
+* **Gate payouts/draws only:** Drawings and cash disbursements remain gated until the user’s cycle completes.
+* **No hard waitlist.** If needed, use a soft “Early Access Preview” (dashboard visible, lessons enabled, Tickets accrue).
+
+### Messaging (use “Tickets,” not “points”)
+
+* Global copy:
+
+  * “**Tickets bank now. Your first cycle starts on *DATE*. Your first drawing occurs 7 days after your cycle starts.**”
+  * If we use a hybrid start: “**Cycle 1 begins on *DATE* or at *N* members (whichever comes first)** — **prize floor: *\$X***.”
+* Rewards/Dashboard hero should show **countdown to cycle start** (for that user), **member progress** (if hybrid), and **pool floor**.
+* Compliance: “**No purchase necessary. 18+. Odds vary by number of Tickets earned. AMOE applies.**”
+
+### Minimal product handles to plan for (flags/state; no implementation requested yet)
+
+* `earlyAccess: boolean`
+* `cycleStartSchedule: 'every_3d' | 'weekly_mon' | 'hybrid'`
+* `firstCycleStartDate: ISO` *(if hybrid)*
+* `memberGoalForStart: number` *(if hybrid)*
+* `guaranteedPrizeFloor: number`
+* `ticketsBankingEnabled: true`
+* `referralsEnabled: true`
+
+### Metrics to monitor at launch
+
+* **TCS distribution** (median & 80th percentile).
+* **Time-to-first-Ticket** (<5 min target).
+* Lesson completion (D0/D7), referral send→convert, DAU/WAU, and % of users who view/acknowledge cycle start info.
+
+### Decisions we will confirm shortly
+
+* The initial **DATE**, **N** (if hybrid), and ***\$ floor***.
+* Exact copy blocks for the Rewards hero and Dashboard top card.
+
+That’s the plan—please align any upcoming work and comms to this framing.
