@@ -39,7 +39,7 @@ export default function WelcomeModal({
             
             <div className="flex flex-wrap justify-center gap-2">
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                💰 Monthly Cash Prizes
+                💰 Weekly Cash Prizes
               </Badge>
               <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                 📚 Expert Education
@@ -52,13 +52,9 @@ export default function WelcomeModal({
 
           {/* Quick Stats */}
           <div className="bg-white/80 rounded-lg p-4 border border-gray-200">
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-1 gap-4 text-center">
               <div>
-                <div className="text-lg font-bold text-gray-900">$12,500+</div>
-                <div className="text-sm text-gray-600">Paid to Members</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-gray-900">2 Minutes</div>
+                <div className="text-lg font-bold text-gray-900">2 Minute</div>
                 <div className="text-sm text-gray-600">Quick Setup</div>
               </div>
             </div>
@@ -87,7 +83,7 @@ export default function WelcomeModal({
           {/* Trust Signal */}
           <div className="text-center">
             <p className="text-xs text-gray-500">
-              Join 3,000+ members already earning while learning
+              Start earning while learning today
             </p>
           </div>
         </div>
