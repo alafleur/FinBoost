@@ -1,0 +1,86 @@
+I can’t interface with Replit directly, but here’s a single message you can paste to them so they finish this cleanly.
+
+---
+
+**Subject:** Postmark: finalization checklist (FinBoost)
+
+**Status (as of now)**
+
+* Sender/domain: `support@getfinboost.com` ✅ (DKIM + Return-Path verified)
+* Streams: **Transactional** = `outbound`, **Broadcast** exists ✅
+* Server token: set & working (test mail delivered) ✅
+* Webhook: `https://getfinboost.com/api/webhooks/postmark` with **Delivery**, **Bounce**, **Spam Complaint**; **Basic Auth** enabled; test returns **200** ✅
+
+**Please complete/confirm these items**
+
+1. **Default “From/Reply-To” in code**
+
+   * Ensure all transactional sends use:
+
+     * `From: "FinBoost Support" <support@getfinboost.com>`
+     * `Reply-To: support@getfinboost.com`
+   * Pass the stream on every send:
+
+     ```ts
+     MessageStream: process.env.POSTMARK_MESSAGE_STREAM_TRANSACTIONAL // "outbound"
+     ```
+
+2. **Remove old test addresses**
+
+   * Replace any `admin@getfinboost.com` or `@txn.getfinboost.com` usages in code/config.
+   * (Andrew has suppressed those in Postmark.)
+
+3. **Webhook auth is actually enforced**
+
+   * The route is `POST /api/webhooks/postmark`.
+   * Verify we reject bad creds:
+
+     * Temporarily change the Postmark webhook **Basic Auth password** to something wrong → “Send test” should return **401**.
+     * Change it back → “Send test” returns **200**.
+   * If needed, use this tiny middleware:
+
+     ```ts
+     import crypto from "crypto";
+     import { Request, Response, NextFunction } from "express";
+
+     function checkBasicAuth(req: Request, res: Response, next: NextFunction) {
+       const header = req.headers.authorization || "";
+       if (!header.startsWith("Basic ")) return res.sendStatus(401);
+       const [user, pass] = Buffer.from(header.split(" ")[1], "base64").toString("utf8").split(":");
+       const okU = process.env.POSTMARK_WEBHOOK_BASIC_USER || "";
+       const okP = process.env.POSTMARK_WEBHOOK_BASIC_PASS || "";
+       const uOK = user.length === okU.length && crypto.timingSafeEqual(Buffer.from(user), Buffer.from(okU));
+       const pOK = pass.length === okP.length && crypto.timingSafeEqual(Buffer.from(pass), Buffer.from(okP));
+       return uOK && pOK ? next() : res.sendStatus(401);
+     }
+     // app.post("/api/webhooks/postmark", checkBasicAuth, handler)
+     ```
+
+4. **Template smoke tests (end-to-end)**
+
+   * Trigger each flow to a real inbox and confirm **Delivered** on `outbound`:
+
+     * verify email
+     * password reset
+     * payout processed
+     * AMOE receipt
+
+5. **Bounce handling (nice to have)**
+
+   * In the webhook handler, on **HardBounce** or **SpamComplaint**, mark that email suppressed/invalid in our DB so we don’t retry in-app.
+
+**Acceptance criteria**
+
+* Test sends land in inbox with **From/Reply-To** = `support@getfinboost.com`.
+* Postmark Activity shows **Delivered** on **MessageStream = outbound**.
+* Webhook deliveries show **200 OK**; negative test with wrong Basic Auth returns **401**.
+* No new sends to `admin@…` or `@txn…`.
+
+**FYI for Andrew (outside of Replit)**
+
+* Add a DMARC record when ready:
+  `_dmarc.getfinboost.com TXT "v=DMARC1; p=none; rua=mailto:dmarc@getfinboost.com; fo=1"`
+
+---
+
+If they hit a snag on any step, send me the exact error (or the send/webhook log snippet) and I’ll diagnose it immediately.
