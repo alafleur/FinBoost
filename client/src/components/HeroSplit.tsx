@@ -87,7 +87,7 @@ export default function HeroSplit() {
           </div>
 
           {/* Mobile: Dual-corner hero with pixel-perfect phone */}
-          <div className="lg:hidden relative min-h-[620px] px-4 pt-6 pb-8 overflow-hidden">
+          <div className="lg:hidden relative min-h-[500px] px-4 pt-6 pb-8 overflow-hidden">
             {/* Top-left primary headline */}
             <div className="absolute left-4 top-6 z-20">
               <h1 className="font-extrabold tracking-tight leading-[1.06] text-[clamp(1.75rem,6.6vw,2.6rem)] max-w-[16ch]">
@@ -98,7 +98,7 @@ export default function HeroSplit() {
             </div>
 
             {/* Phone image (bridging element) */}
-            <div className="absolute bottom-4 right-3 z-10 pointer-events-none rotate-[8deg]">
+            <div className="absolute bottom-8 right-4 z-10 pointer-events-none rotate-[8deg]">
               {/* NOTE: Exact widths to prevent resampling (and thus blur) */}
               <img
                 className="rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50
@@ -122,7 +122,7 @@ export default function HeroSplit() {
             </div>
 
             {/* Bottom-right secondary headline (kept readable above phone) */}
-            <div className="absolute right-4 bottom-[calc(140px+1rem)] min-[390px]:bottom-[calc(180px+1rem)] z-20 text-right">
+            <div className="absolute right-4 bottom-[calc(120px+1rem)] min-[390px]:bottom-[calc(160px+1rem)] z-20 text-right">
               <h2 className="font-extrabold tracking-tight leading-[1.06] text-[clamp(1.5rem,5.6vw,2.25rem)] text-slate-900">
                 Earn Real Cash
               </h2>
