@@ -67,7 +67,12 @@ export class EmailValidationService {
     /^placeholder@/i, /^example@/i, /^dummy@/i, /^fake@/i,
     /^invalid@/i, /^temp@/i, /^temporary@/i, /^sample@/i,
     /^demo@/i, /^admin@example\./i, /^user@example\./i,
-    /^test\+.*@/i, /^.*\+test@/i
+    /^test\+.*@/i, /^.*\+test@/i,
+    // Block problematic test domains (STEP 2: Postmark finalization)
+    /^admin@getfinboost\.com$/i,
+    /@txn\.getfinboost\.com$/i,
+    /^bounced\.production@test\.com$/i,
+    /^.*@.*\.test$/i  // Block all .test domains
   ];
 
   private static readonly SECURITY_RISK_PATTERNS = [
@@ -338,7 +343,7 @@ export class EmailValidationService {
       if (pattern.test(normalizedEmail)) {
         return {
           isValid: false,
-          errorCode: 'EMAIL_PLACEHOLDER_DETECTED',
+          errorCode: 'EMAIL_BLOCKED_TEST_ADDRESS',
           errorMessage: 'Email appears to be a placeholder or test email',
           severity: 'error'
         };
