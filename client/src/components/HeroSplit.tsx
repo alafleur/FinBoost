@@ -90,7 +90,7 @@ export default function HeroSplit() {
           <div className="lg:hidden px-4 pt-2 pb-8">
             {/* Stacked headlines at top */}
             <div className="text-center mb-8">
-              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(1.75rem,6vw,2.8rem)]">
+              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(2.2rem,7vw,3.5rem)]">
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                   Learn Real Finance
                 </span>
