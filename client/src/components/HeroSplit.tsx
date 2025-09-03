@@ -86,46 +86,44 @@ export default function HeroSplit() {
             </div>
           </div>
 
-          {/* Mobile: Dual-corner hero with pixel-perfect phone */}
-          <div className="lg:hidden relative min-h-[500px] px-4 pt-6 pb-8 overflow-hidden">
-            {/* Top-left primary headline */}
-            <div className="absolute left-4 top-6 z-20">
-              <h1 className="font-extrabold tracking-tight leading-[1.06] text-[clamp(1.75rem,6.6vw,2.6rem)] max-w-[16ch]">
+          {/* Mobile: Stacked headlines with phone below */}
+          <div className="lg:hidden px-4 pt-2 pb-8">
+            {/* Stacked headlines at top */}
+            <div className="text-center mb-8">
+              <h1 className="font-extrabold tracking-tight leading-[1.05] text-[clamp(1.75rem,6vw,2.8rem)]">
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
                   Learn Real Finance
+                </span>
+                <span className="block text-slate-900 mt-1">
+                  Earn Real Cash
                 </span>
               </h1>
             </div>
 
-            {/* Phone image (bridging element) */}
-            <div className="absolute bottom-8 right-4 z-10 pointer-events-none rotate-[8deg]">
-              {/* NOTE: Exact widths to prevent resampling (and thus blur) */}
-              <img
-                className="rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50
-                           w-[240px] min-[390px]:w-[304px] h-auto"
-                srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
-                sizes="(max-width: 389px) 240px, 304px"
-                src={step4_m240}
-                alt="FinBoost winner notification - $325 cash reward"
-                loading="eager"
-                width={240}
-                height={431}
-                fetchPriority="high"
-                decoding="async"
-              />
-              {/* Subtle gloss overlay */}
-              <div
-                className="absolute inset-0 rounded-[24px]
-                           bg-gradient-to-tr from-transparent via-white/5 to-white/20"
-                aria-hidden="true"
-              />
-            </div>
-
-            {/* Bottom-right secondary headline (kept readable above phone) */}
-            <div className="absolute right-4 bottom-[calc(120px+1rem)] min-[390px]:bottom-[calc(160px+1rem)] z-20 text-right">
-              <h2 className="font-extrabold tracking-tight leading-[1.06] text-[clamp(1.5rem,5.6vw,2.25rem)] text-slate-900">
-                Earn Real Cash
-              </h2>
+            {/* Phone screenshot centered below */}
+            <div className="flex justify-center">
+              <div className="rotate-[8deg] pointer-events-none">
+                {/* NOTE: Exact widths to prevent resampling (and thus blur) */}
+                <img
+                  className="rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50
+                             w-[240px] min-[390px]:w-[304px] h-auto"
+                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                  sizes="(max-width: 389px) 240px, 304px"
+                  src={step4_m240}
+                  alt="FinBoost winner notification - $325 cash reward"
+                  loading="eager"
+                  width={240}
+                  height={431}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                {/* Subtle gloss overlay */}
+                <div
+                  className="absolute inset-0 rounded-[24px]
+                             bg-gradient-to-tr from-transparent via-white/5 to-white/20"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
 
