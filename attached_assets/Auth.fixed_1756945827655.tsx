@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,18 +158,6 @@ export default function Auth() {
         }
       }
     );
-  };
-
-  const handleGoogleSignIn = () => {
-    if ((window as any).google && isGoogleLoaded) {
-      (window as any).google.accounts.id.prompt();
-    } else {
-      toast({
-        title: "Google Sign-In not ready",
-        description: "Please try again in a moment.",
-        variant: "destructive",
-      });
-    }
   };
 
   const onRegister = async (data: RegisterForm) => {
