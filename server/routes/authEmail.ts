@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import { db } from '../db.js';
 import { eq, and, or } from 'drizzle-orm';
@@ -64,13 +65,47 @@ router.get('/verify', async (req, res) => {
     if (row.isUsed) return res.status(400).json({ success: false, message: 'token already used' });
     if (new Date(row.expiresAt).getTime() < now().getTime()) return res.status(400).json({ success: false, message: 'token expired' });
 
+    // Mark email as verified
     await db.update(users).set({ emailVerified: true, verifiedAt: new Date() }).where(eq(users.id, row.userId));
     await db.update(emailVerificationTokens).set({ isUsed: true, usedAt: new Date(), token: tokenHash }).where(eq(emailVerificationTokens.id, row.id));
 
-    return res.json({ success: true, message: 'Email verified' });
+    // Check if auto-login is enabled (default to true in development)
+    const autoLoginEnabled = process.env.AUTO_LOGIN_AFTER_VERIFY === 'true' || 
+                             process.env.NODE_ENV === 'development';
+    const appUrl = process.env.APP_URL || (process.env.NODE_ENV === 'development' 
+      ? `http://localhost:${process.env.PORT || 5000}`
+      : 'https://getfinboost.com');
+
+    if (autoLoginEnabled) {
+      try {
+        // Get the user to create the JWT token
+        const [user] = await db.select().from(users).where(eq(users.id, row.userId)).limit(1);
+        if (user) {
+          // Generate JWT token (same as login)
+          const authToken = jwt.sign(
+            { userId: user.id },
+            'finboost-secret-key-2024',
+            { expiresIn: '24h' }
+          );
+
+          // Redirect to dashboard with the auth token as a URL parameter
+          // The frontend will pick this up and store it in localStorage
+          return res.redirect(302, `${appUrl}/dashboard?authToken=${encodeURIComponent(authToken)}&verified=true`);
+        }
+      } catch (authErr: any) {
+        console.error('[verify] auto-login failed', authErr);
+        // Fall back to manual login flow
+      }
+    }
+
+    // Fallback: redirect to auth page with verified=true
+    return res.redirect(302, `${appUrl}/auth?verified=true`);
   } catch (err: any) {
     console.error('[verify] error', err);
-    return res.status(500).json({ success: false, message: 'Verification failed', detail: String(err?.message || err) });
+    const appUrl = process.env.APP_URL || (process.env.NODE_ENV === 'development' 
+      ? `http://localhost:${process.env.PORT || 5000}`
+      : 'https://getfinboost.com');
+    return res.redirect(302, `${appUrl}/auth?verify=failed`);
   }
 });
 

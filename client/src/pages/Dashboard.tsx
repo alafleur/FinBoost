@@ -251,6 +251,29 @@ export default function Dashboard() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Check for authToken in URL (auto-login after email verification)
+        const urlParams = new URLSearchParams(window.location.search);
+        const authTokenFromUrl = urlParams.get('authToken');
+        const isVerified = urlParams.get('verified');
+        
+        if (authTokenFromUrl) {
+          // Store the token and clean up the URL
+          localStorage.setItem('token', authTokenFromUrl);
+          
+          // Remove the token from URL for security
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('authToken');
+          window.history.replaceState({}, '', newUrl.toString());
+          
+          // Show success message if coming from email verification
+          if (isVerified === 'true') {
+            toast({
+              title: "Email Verified!",
+              description: "Welcome to FinBoost! Your email has been verified and you're now logged in.",
+            });
+          }
+        }
+
         const token = localStorage.getItem('token');
         if (!token) {
           console.log('No authentication token found, redirecting to login');

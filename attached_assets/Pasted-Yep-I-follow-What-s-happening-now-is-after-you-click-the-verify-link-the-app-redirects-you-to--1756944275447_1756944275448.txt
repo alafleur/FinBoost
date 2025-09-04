@@ -1,0 +1,59 @@
+Yep, I follow. What’s happening now is: **after you click the verify link, the app redirects you to `/auth` (login)** instead of **creating a session and dropping you on the dashboard**.
+
+Here’s exactly what to ask Replit to do so verification → **auto-login → dashboard**.
+
+---
+
+## Message to Replit (copy/paste)
+
+**Goal:** After a user clicks the email verification link, **auto-authenticate them and 302 to the dashboard** (no extra login step).
+
+**Plan (feature-flagged):**
+
+* Add `AUTO_LOGIN_AFTER_VERIFY=true` (env/flag).
+* In the **verify-email** handler (the route the link hits), after we mark the user verified:
+
+  1. **Create a session** for that user (or issue a JWT) and set the **HTTP-only secure cookie**.
+  2. **Redirect 302 → `${APP_URL}/app`** (or whatever our dashboard route is, e.g. `/app/dashboard`).
+  3. If session creation fails, fall back to `/auth?verified=1` with a toast “Email verified — please sign in.”
+
+**Minimal patch (Express/TS, adjust to our auth utils):**
+
+```ts
+// verifyEmail.ts (or wherever the verify endpoint is)
+import { createSession } from "../auth/session"; // use our real helper
+import { setAuthCookie } from "../auth/cookies";  // use our real helper
+
+router.get("/verify", async (req, res) => {
+  const { token } = req.query as { token: string };
+  const appUrl = process.env.APP_URL || "https://getfinboost.com";
+  try {
+    const user = await verifyEmailTokenAndMarkVerified(token); // existing logic (single-use, expires)
+    if (process.env.AUTO_LOGIN_AFTER_VERIFY === "true") {
+      const session = await createSession(user.id); // or sign a JWT
+      setAuthCookie(res, session); // httpOnly, secure, sameSite=Lax/None
+      return res.redirect(302, `${appUrl}/app`);
+    }
+    return res.redirect(302, `${appUrl}/auth?verified=1`);
+  } catch (err) {
+    return res.redirect(302, `${appUrl}/auth?verify=failed`);
+  }
+});
+```
+
+**Security notes (unchanged, just confirm):**
+
+* Verification token is **single-use** and **short-lived**.
+* On successful redemption, **invalidate** the token.
+* Cookie: `Secure`, `HttpOnly`, `SameSite=Lax` (or `None` if cross-site), with a sensible TTL.
+
+**QA checklist to run:**
+
+1. New signup → receive verify email → click link.
+2. Expected: lands **logged in** on `/app` (not `/auth`), refresh persists session.
+3. Second click on the same link: harmless “already verified” flow and still logged in.
+4. Expired/invalid token: redirect to `/auth?verify=failed`.
+
+---
+
+If you’d rather **not** auto-login, an alternate is: keep current behavior but redirect to `/auth?verified=1` with a clear success banner + button to “Continue to Dashboard.” But per your note, we’ll implement **auto-login to dashboard**.
