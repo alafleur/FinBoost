@@ -169,8 +169,13 @@ export default function Dashboard() {
     const hasSeenWelcome = onboardingStorage.hasSeenWelcome();
     const hasTourCompleted = onboardingStorage.hasTourCompleted();
     
-    // Show welcome modal for first-time users
-    if (!hasSeenWelcome) {
+    // Check for new user onboarding triggers
+    const url = new URL(window.location.href);
+    const fromQuery = url.searchParams.get("onboard") === "1";
+    const fromFlag = localStorage.getItem("fb.onboard.start") === "1";
+    
+    // Show welcome modal for first-time users OR new registrations
+    if (!hasSeenWelcome || (fromQuery || fromFlag)) {
       setShowWelcomeModal(true);
     }
     
@@ -185,22 +190,79 @@ export default function Dashboard() {
   const handleWelcomeStart = () => {
     setShowWelcomeModal(false);
     onboardingStorage.setWelcomeSeen();
+    
+    // Clean up onboarding triggers
+    localStorage.removeItem("fb.onboard.start");
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("onboard")) {
+      url.searchParams.delete("onboard");
+      window.history.replaceState({}, '', url.toString());
+    }
+    
     setShowTour(true);
   };
 
   const handleWelcomeSkip = () => {
     setShowWelcomeModal(false);
     onboardingStorage.setWelcomeSeen();
+    
+    // Clean up onboarding triggers
+    localStorage.removeItem("fb.onboard.start");
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("onboard")) {
+      url.searchParams.delete("onboard");
+      window.history.replaceState({}, '', url.toString());
+    }
+    
+    // Mark tour as seen for per-user tracking
+    const userId = user?.id || user?.email || "anon";
+    const seenKey = `fb.tour.seen:${userId}`;
+    localStorage.setItem(seenKey, "1");
+    
+    // Optionally POST to server (no-op if endpoint doesn't exist)
+    fetch("/api/users/me/seen-tour", { method: "POST" }).catch(() => {});
   };
 
   const handleTourComplete = () => {
     setShowTour(false);
     onboardingStorage.setTourCompleted();
+    
+    // Clean up onboarding triggers
+    localStorage.removeItem("fb.onboard.start");
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("onboard")) {
+      url.searchParams.delete("onboard");
+      window.history.replaceState({}, '', url.toString());
+    }
+    
+    // Mark tour as seen for per-user tracking
+    const userId = user?.id || user?.email || "anon";
+    const seenKey = `fb.tour.seen:${userId}`;
+    localStorage.setItem(seenKey, "1");
+    
+    // Optionally POST to server (no-op if endpoint doesn't exist)
+    fetch("/api/users/me/seen-tour", { method: "POST" }).catch(() => {});
   };
 
   const handleTourSkip = () => {
     setShowTour(false);
     onboardingStorage.setTourCompleted();
+    
+    // Clean up onboarding triggers
+    localStorage.removeItem("fb.onboard.start");
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("onboard")) {
+      url.searchParams.delete("onboard");
+      window.history.replaceState({}, '', url.toString());
+    }
+    
+    // Mark tour as seen for per-user tracking
+    const userId = user?.id || user?.email || "anon";
+    const seenKey = `fb.tour.seen:${userId}`;
+    localStorage.setItem(seenKey, "1");
+    
+    // Optionally POST to server (no-op if endpoint doesn't exist)
+    fetch("/api/users/me/seen-tour", { method: "POST" }).catch(() => {});
   };
 
   const handleTaskComplete = (task: keyof typeof onboardingProgress) => {

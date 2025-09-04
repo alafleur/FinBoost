@@ -1,0 +1,54 @@
+Awesome—thanks for the clear notes. You’re right: the fix we shipped for *signup → auto-login → dashboard* worked, but the onboarding tour wasn’t being triggered. I’ve shipped a small, **safe, client-only patch** that:
+
+* Flags **new registrations** so the dashboard knows to start onboarding.
+* Shows your **WelcomeModal** to new users, then runs a **guided tour** (using `react-joyride`).
+* Falls back to a **localStorage flag per user** (e.g., `fb.tour.seen:<userId>`) so returning users don’t see the tour again.
+* Optionally POSTs to `/api/users/me/seen-tour` (no-op if your backend doesn’t implement it yet).
+
+Below are **ready-to-drop-in files** (full files, not diffs). Replace your existing files in the same paths. I also bundled a zip for convenience.
+
+**Download (zip of all files):**
+[finboost-onboarding-patch.zip](sandbox:/mnt/data/finboost-onboarding/finboost-onboarding-patch.zip)
+
+Or grab individual files:
+
+* `client/src/pages/Auth.tsx` — adds `fb.onboard.start` flag and redirects to `/dashboard?onboard=1` after new registration.
+  [Download](sandbox:/mnt/data/finboost-onboarding/client/src/pages/Auth.tsx)
+
+* `client/src/pages/Dashboard.tsx` — shows **WelcomeModal**, then runs **Joyride** steps; respects `?onboard=1` and `fb.onboard.start`.
+  [Download](sandbox:/mnt/data/finboost-onboarding/client/src/pages/Dashboard.tsx)
+
+* `client/src/components/onboarding/WelcomeModal.tsx` — your existing modal (unchanged except path).
+  [Download](sandbox:/mnt/data/finboost-onboarding/client/src/components/onboarding/WelcomeModal.tsx) &#x20;
+
+* `client/src/components/onboarding/types.ts` — props type for the modal.
+  [Download](sandbox:/mnt/data/finboost-onboarding/client/src/components/onboarding/types.ts)
+
+* `client/src/components/onboarding/tourSteps.ts` — Joyride steps with sensible selectors and fallbacks.
+  [Download](sandbox:/mnt/data/finboost-onboarding/client/src/components/onboarding/tourSteps.ts)
+
+### What changed (quick)
+
+* **Auth.tsx**
+
+  * After a successful register (or register→login chain), we do:
+
+    * `localStorage.setItem('fb.onboard.start', '1')`
+    * Redirect to `DASHBOARD_ROUTE + '?onboard=1'`
+* **Dashboard.tsx**
+
+  * Reads `?onboard=1` OR `fb.onboard.start` AND checks per-user seen flag `fb.tour.seen:<id>`.
+  * Shows `<WelcomeModal />`, then runs Joyride (`tourSteps`) on “Start tour”.
+  * On finish/skip: sets the per-user seen flag and (optionally) POSTs to `/api/users/me/seen-tour`.
+
+### Notes / assumptions
+
+* The tour uses `react-joyride`. If it’s not in your deps, install it once:
+
+  ```bash
+  npm i react-joyride
+  ```
+* The tour step selectors are defensive: if `#nav-dashboard` isn’t found, it falls back to `#dashboard-root` or `body` to avoid breaking.
+* If later you want the server to mark users as “hasSeenTour”, you can return that in `/api/auth/me` and the dashboard will respect it automatically.
+
+If you want me to also add the tiny server handler for `POST /api/users/me/seen-tour` (to flip a `hasSeenTour` flag), say the word and I’ll ship that as a drop-in too.
