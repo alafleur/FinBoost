@@ -950,7 +950,7 @@ export default function HomeV3() {
                       alt={screenshots[activeScreenshot].alt}
                       mobile={screenshots[activeScreenshot].mobile}
                       desktop={screenshots[activeScreenshot].desktop}
-                      className="md:rotate-[8deg]"
+                      className=""
                       priority={activeScreenshot === 0}
                     />
                   </motion.div>

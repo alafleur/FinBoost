@@ -1,0 +1,89 @@
+Short answer: yes—two concrete things will materially reduce the blur you’re seeing:
+
+1. ship @3x screenshots (you currently only supply 1x/2x), and
+2. drop the desktop rotation (or make it toggleable) because transforms always soften edges a bit.
+
+Here’s why and exactly what to do next.
+
+# What’s still causing blur
+
+* Your `DeviceScreenshot` only serves **1x and 2x** images in `srcSet`. On many phones (iPhone/Android flagships) **DPR = 3**, so the browser upscales your 2x asset — instant softness. You can see the current 1x/2x-only setup in the component (`srcSet=${mobile.x1} 1x, ${mobile.x2} 2x`).&#x20;
+* On desktop you still apply a rotation: `className="md:rotate-[8deg]"`. Any transform (rotate/scale) forces interpolation and will blur edges, even with perfect assets.&#x20;
+
+# Recommended fix (minimal + robust)
+
+## A) Add @3x assets
+
+Export **pixel-perfect @3x** PNGs that match your CSS widths:
+
+* Mobile (CSS 240×431): export **720×1293** (`*_m720.png`)
+* Desktop (CSS 304×547): export **912×1641** (`*_s912.png`)
+
+> Keep the same cropping/safe areas as your 1x/2x; just 3× the pixels.
+
+## B) Drop-in component that supports 3× (backward compatible)
+
+I made you a replacement component that accepts optional `x3` and gracefully falls back if it’s missing. You can use it **right now** and add the new images when ready:
+
+**Download:** [DeviceScreenshot.3x.tsx](sandbox:/mnt/data/DeviceScreenshot.3x.tsx)
+
+Replace your current `DeviceScreenshot.tsx` with that file (or rename it to `DeviceScreenshot.tsx`). It builds the `srcSet` as `1x, 2x, 3x` automatically when you provide `x3`.
+
+(Your current component only includes 1x/2x; see the older version here. )
+
+## C) Wire it up (usage stays almost identical)
+
+1. Import your new 3× assets (names are examples):
+
+```ts
+import step1_m720 from "@/assets/screenshots/step1_m720.png";
+import step1_s912 from "@/assets/screenshots/step1_s912.png";
+```
+
+2. Pass them to the component (others unchanged):
+
+```tsx
+<DeviceScreenshot
+  alt={screenshots[activeScreenshot].alt}
+  mobile={{ x1: step1_m240, x2: step1_m480, x3: step1_m720, width: 240, height: 431 }}
+  desktop={{ x1: step1_s304, x2: step1_s608, x3: step1_s912, width: 304, height: 547 }}
+  className="md:rotate-[8deg]"  // see note below
+  priority={activeScreenshot === 0}
+/>
+```
+
+## D) (Optional but impactful) Kill the rotation on desktop
+
+For absolute crispness, remove the rotation:
+
+```tsx
+className=""
+```
+
+Right now it’s set to `md:rotate-[8deg]` in your page code.&#x20;
+If you love the look, consider **reducing** it (e.g., `md:rotate-[3deg]`) or only using rotation in non-critical sections.
+
+# Double-check the rest (you’re otherwise set up correctly)
+
+* The component’s `sizes="(min-width: 768px) 304px, 240px"` matches your fixed CSS widths `w-[240px] md:w-[304px]`, so the browser knows exactly which asset to pick. Your current version already sets those widths.&#x20;
+* The screenshot is wrapped with shadows/gloss (pure compositing), which generally won’t blur the bitmap itself. The big offenders are **missing @3x** and **rotation**.
+
+# Quick way to prove it locally
+
+Open DevTools → Elements, click the image and check:
+
+* **Rendered width** in CSS: 240 px (mobile) / 304 px (desktop)
+* **Natural width** attribute the browser chose:
+
+  * On DPR=3 phones you want **720 px** (mobile) or **912 px** (desktop) after you add @3x.
+  * If you still see 480 or 608 on DPR=3, that’s why it looks soft.
+
+---
+
+If you want, I can also prep a tiny PR that:
+
+* adds the `x3` imports,
+* updates `DeviceScreenshot.tsx` (the file above), and
+* temporarily removes the desktop rotate so you can A/B the crispness side-by-side.
+
+But the headline: **ship @3x + drop/trim rotation** and the blur will disappear.
