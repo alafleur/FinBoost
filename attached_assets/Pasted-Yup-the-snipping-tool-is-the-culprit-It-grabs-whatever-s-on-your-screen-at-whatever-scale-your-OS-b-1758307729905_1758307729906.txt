@@ -1,0 +1,64 @@
+Yup—the snipping tool is the culprit. It grabs whatever’s on your screen at whatever scale your OS/browser happens to be using, so the pixels rarely line up with the exact sizes we need. Here’s how to capture **pixel-perfect @1x/@2x/@3x screenshots** in a repeatable way.
+
+# Fastest (manual) — Chrome DevTools (do this)
+
+**Goal sizes**
+
+* Mobile CSS render: **240×431** → export **@1x 240×431**, **@2x 480×862**, **@3x 720×1293**
+* Desktop CSS render: **304×547** → export **@1x 304×547**, **@2x 608×1094**, **@3x 912×1641**
+
+**Steps**
+
+1. Open your app page to the exact screen you want (e.g., Rewards tab).
+   Tip: hide toasts/tooltips; set the UI exactly as you want in the hero.
+2. **Open DevTools** → toggle **Device Toolbar** (Ctrl/Cmd+Shift+M).
+3. Set **Device = Responsive**.
+4. Set **Width**/**Height** to:
+
+   * Mobile: **240 × 431**
+   * Desktop: **304 × 547**
+5. Set **DPR (Device Pixel Ratio)** to:
+
+   * For @1x shot: **1**
+   * For @2x shot: **2**
+   * For @3x shot: **3**
+     (Use the little dropdown that shows 1x/2x/3x next to the device toolbar.)
+6. Make sure **browser zoom is 100%** (View → Actual Size).
+7. In the device toolbar’s 3-dot menu, click **Capture screenshot**.
+
+   * This captures the **viewport** at **DPR × CSS size**.
+8. Verify the file dimensions:
+
+   * Mobile @3x should be **720×1293**
+   * Desktop @3x should be **912×1641**
+9. Save as **PNG** (don’t re-compress), and name like:
+
+   * `step1_m240.png`, `step1_m480.png`, `step1_m720.png`
+   * `step1_s304.png`, `step1_s608.png`, `step1_s912.png`
+
+**Important:** keep **“Show device frame” OFF** in DevTools so you capture only the app content, not a fake phone bezel.
+
+# Repeatable (automated) — optional
+
+If you want one-click reproducibility, use a tiny **Puppeteer** script that:
+
+* sets `viewport: { width: 240, height: 431, deviceScaleFactor: 3 }`,
+* navigates to the page/state you want (you can use a query like `?screenshotMode=1` to hide animations),
+* screenshots a selector (e.g., `#root` or a wrapper).
+
+# Should I remove the angle?
+
+If you want **absolute crispness**, **yes**—don’t rotate the image. Any rotation (`rotate-[…]`) forces interpolation and softens edges. If you love the aesthetic, consider:
+
+* only rotating the **phone frame**/card, **not** the bitmap, or
+* reducing to **2–3°** and keeping the bitmap upright.
+
+# Will new screenshots help?
+
+100%. If you follow the steps above and export **@3x** along with 1×/2×, your hero will be sharp even on DPR=3 phones. The combo that fixes the blur is:
+
+* **exact CSS sizes** (we already lock 240/304 in code),
+* **@3x sources** in `srcSet`,
+* **no (or minimal) rotation**.
+
+If you send me the new **720×1293** and **912×1641** PNGs for one screen, I can wire them into your code as an example so you can compare before/after instantly.
