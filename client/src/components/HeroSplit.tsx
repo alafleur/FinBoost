@@ -1,6 +1,7 @@
 import React from "react";
-import step4_m240 from "../assets/screenshots/step4_m240.png";
-import step4_m480 from "../assets/screenshots/step4_m480.png";
+import step4_m240 from "../assets/screenshots/step4_m240_new.png";
+import step4_m480 from "../assets/screenshots/step4_m480_new.png";
+import step4_m720 from "../assets/screenshots/step4_m720_new.png";
 import step4_s304 from "../assets/screenshots/step4_s304.png";
 import step4_s608 from "../assets/screenshots/step4_s608.png";
 
@@ -44,7 +45,7 @@ export default function HeroSplit() {
                   className="w-auto h-[320px] xl:h-[360px] 2xl:h-[400px]
                              rounded-[28px] shadow-xl shadow-slate-900/15
                              ring-1 ring-gray-200/50"
-                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_m720} 720w, ${step4_s304} 304w, ${step4_s608} 608w`}
                   sizes="304px"
                   src={step4_s304}
                   alt="FinBoost winner notification - $325 cash reward"
@@ -101,7 +102,7 @@ export default function HeroSplit() {
                   className="rounded-[24px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50
                              w-[240px] min-[390px]:w-[304px] h-auto
                              [image-rendering:crisp-edges]"
-                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_s304} 304w, ${step4_s608} 608w`}
+                  srcSet={`${step4_m240} 240w, ${step4_m480} 480w, ${step4_m720} 720w, ${step4_s304} 304w, ${step4_s608} 608w`}
                   sizes="(max-width: 389px) 240px, 304px"
                   src={step4_m240}
                   alt="FinBoost winner notification - $325 cash reward"
