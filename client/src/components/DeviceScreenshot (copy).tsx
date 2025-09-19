@@ -1,36 +1,38 @@
 import React from "react";
 
 /**
- * DeviceScreenshot (density descriptors edition)
- * Use when your @1x/@2x/@3x images are the correct aspect ratio
- * but their pixel widths might not match 240/480/720 exactly.
+ * DeviceScreenshot v2
+ * - Width descriptors (240w/480w/720w, 304w/608w)
+ * - Explicit sizes so the browser picks the correct asset
+ * - Locks CSS width to 240px (mobile) / 304px (md+)
+ * - No transforms on the bitmap; bezel drawn outside
  */
 
 export type Variant = {
-  x1: string;   // 1x asset
-  x2: string;   // 2x asset
-  x3?: string;  // 3x asset
+  x1: string;   // 1x asset (e.g., 240×431 or 304×547)
+  x2: string;   // 2x asset (e.g., 480×862 or 608×1094)
+  x3?: string;  // 3x asset (e.g., 720×1293)
   width: number;
   height: number;
 };
 
 type Props = {
   alt: string;
-  mobile: Variant;   // renders 240px wide on mobile
-  desktop: Variant;  // renders 304px wide on md+
+  mobile: Variant;   // base 240×431
+  desktop: Variant;  // base 304×547
   className?: string;
   priority?: boolean;
   showFrame?: boolean;
   frameClassName?: string;
 };
 
-function buildDensitySet(v: Variant) {
-  const parts = [`${v.x1} 1x`, `${v.x2} 2x`];
-  if (v.x3) parts.push(`${v.x3} 3x`);
+function buildWidthSet(v: Variant) {
+  const parts = [`${v.x1} ${v.width}w`, `${v.x2} ${v.width * 2}w`];
+  if (v.x3) parts.push(`${v.x3} ${v.width * 3}w`);
   return parts.join(", ");
 }
 
-export default function DeviceScreenshotDensity({
+export default function DeviceScreenshot({
   alt,
   mobile,
   desktop,
@@ -42,7 +44,8 @@ export default function DeviceScreenshotDensity({
   const imgEl = (
     <img
       src={mobile.x1}
-      srcSet={buildDensitySet(mobile)}
+      srcSet={buildWidthSet(mobile)}
+      sizes="(min-width: 768px) 304px, 240px"
       width={mobile.width}
       height={mobile.height}
       alt={alt}
@@ -57,7 +60,7 @@ export default function DeviceScreenshotDensity({
 
   return (
     <picture className={className}>
-      <source media="(min-width: 768px)" srcSet={buildDensitySet(desktop)} />
+      <source media="(min-width: 768px)" srcSet={buildWidthSet(desktop)} sizes="304px" />
       {showFrame ? (
         <span className={`inline-flex ${frameClassName}`} aria-hidden="true">
           <span className="rounded-[1.9rem] overflow-hidden">{imgEl}</span>
