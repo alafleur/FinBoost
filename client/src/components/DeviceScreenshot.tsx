@@ -61,7 +61,7 @@ export default function DeviceScreenshot({ alt, mobile, desktop, className, prio
         decoding={priority ? "sync" : "async"}
         loading={priority ? "eager" : "lazy"}
         {...(priority && { fetchPriority: "high" })}
-        className="block w-[240px] md:w-[304px] h-auto select-none pointer-events-none will-change-transform"
+        className="block w-[240px] md:w-[304px] h-auto select-none pointer-events-none"
         draggable={false}
       />
     </picture>

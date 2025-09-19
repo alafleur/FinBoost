@@ -1,0 +1,161 @@
+You’re close. Replit did wire the new mobile images, but two things are still softening the hero:
+
+1. There’s still **rotation** on desktop (and a latent rotate utility on mobile’s wrapper), which forces antialiased resampling.&#x20;
+2. There’s a **gloss overlay + ring/shadow** stack over the screenshot that softens edges.&#x20;
+
+Your `DeviceScreenshot` already notes that rotation introduces interpolation; let’s follow that advice and also remove the extra effects.&#x20;
+
+---
+
+# What to ask Replit to do (minimal changes)
+
+**A. Remove all rotation on the phone image**
+
+* In `HeroSplit.tsx` delete `rotate-[8deg]` and `lg:rotate-[8deg]` on the phone containers (both desktop and mobile blocks).
+  *Why:* any transform (even small) forces antialiasing and softens the bitmap.
+
+**B. Remove the softening layers**
+
+* Remove `shadow-*`, `ring-*`, and the two absolute gloss/glow overlays that sit above the `<img>` in both desktop and mobile hero.
+  *Why:* these semi-transparent layers reduce perceived sharpness.
+
+**C. Don’t force “crisp-edges”**
+
+* In the mobile `<img>` remove `[image-rendering:crisp-edges]`. It can cause odd pixel snapping on some browsers. Let the browser use the native sampling with a correct 1×/2×/3× `srcSet`.
+
+**D. Keep exact widths and your 1×/2×/3× assets**
+
+* Keep `w-[240px]` (mobile) and `min-[390px]:w-[304px]` / `md:w-[304px]` and keep the `srcSet` entries that match those sizes.
+
+That alone typically yields the biggest clarity jump.
+
+---
+
+# Or, drop-in replacement file (no angle, no gloss/shadow)
+
+**Replace `HeroSplit.tsx` with this version** (copy/paste):
+
+```tsx
+import React from "react";
+import DeviceScreenshot from "../components/DeviceScreenshot";
+
+import step4_m240 from "../assets/screenshots/step4_m240_new.png";
+import step4_m480 from "../assets/screenshots/step4_m480_new.png";
+import step4_m720 from "../assets/screenshots/step4_m720_new.png";
+import step4_s304 from "../assets/screenshots/step4_s304.png";
+import step4_s608 from "../assets/screenshots/step4_s608.png";
+
+export default function HeroSplit() {
+  return (
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="pt-24 md:pt-28 lg:pt-32 pb-8 md:pb-10">
+
+          {/* Desktop: straight phone, no effects */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 items-center">
+            <div className="text-right">
+              <h1
+                className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch] ml-auto
+                           text-5xl xl:text-6xl 2xl:text-7xl
+                           text-transparent bg-clip-text
+                           bg-gradient-to-r from-blue-600 to-purple-600"
+              >
+                Learn<br />Real<br />Finance
+              </h1>
+            </div>
+
+            <div className="flex justify-center self-center">
+              <DeviceScreenshot
+                alt="FinBoost winner notification - $325 cash reward"
+                mobile={{ x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 }}
+                desktop={{ x1: step4_s304, x2: step4_s608, width: 304, height: 547 }}
+                className=""   // no rotation
+                priority
+              />
+            </div>
+
+            <div className="text-left">
+              <h2
+                className="font-extrabold tracking-tight leading-[1.02] max-w-[13ch]
+                           text-5xl xl:text-6xl 2xl:text-7xl text-slate-900"
+              >
+                Earn<br />Real<br />Cash
+              </h2>
+            </div>
+          </div>
+
+          {/* Mobile: stacked headlines + straight phone, no effects */}
+          <div className="lg:hidden px-4 pt-2 pb-8">
+            <div className="text-center mb-6">
+              <h1 className="font-extrabold tracking-tight leading-[1.06]">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600
+                                 text-[clamp(1.9rem,7.2vw,2.6rem)] max-w-[20ch] mx-auto">
+                  Learn Real Finance
+                </span>
+                <span className="block text-slate-900 mt-1
+                                 text-[clamp(1.9rem,7.2vw,2.6rem)] max-w-[20ch] mx-auto">
+                  Earn Real Cash
+                </span>
+              </h1>
+            </div>
+
+            <div className="flex justify-center">
+              <DeviceScreenshot
+                alt="FinBoost winner notification - $325 cash reward"
+                mobile={{ x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 }}
+                desktop={{ x1: step4_s304, x2: step4_s608, width: 304, height: 547 }}
+                className=""   // no rotation
+                priority
+              />
+            </div>
+          </div>
+
+          <p className="mx-auto mt-6 md:mt-8 max-w-3xl text-center text-lg leading-relaxed text-slate-600">
+            Complete financial lessons and real-world actions to earn{" "}
+            <span className="font-semibold text-slate-800">tickets</span> for weekly cash drawings — free to join.
+          </p>
+
+          <div className="mt-6 flex justify-center">
+            <a
+              href="/auth?mode=signup"
+              className="inline-flex h-12 items-center justify-center rounded-lg px-8
+                         font-semibold text-white shadow-sm
+                         bg-gradient-to-r from-blue-600 to-purple-600
+                         hover:from-blue-700 hover:to-purple-700
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                         transition-all duration-200"
+              aria-label="Join early access with FinBoost"
+            >
+              Join Early Access
+            </a>
+          </div>
+
+          <p className="mt-4 text-center text-sm text-slate-500 max-w-2xl mx-auto">
+            No purchase necessary. 18+. Odds vary by number of tickets earned.{" "}
+            <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+**Optional (micro-tweak):** In `DeviceScreenshot.tsx`, you can simplify the `<img>` classes to remove any compositor hints:
+
+```diff
+- className="block w-[240px] md:w-[304px] h-auto select-none pointer-events-none will-change-transform"
++ className="block w-[240px] md:w-[304px] h-auto select-none pointer-events-none"
+```
+
+Your current `DeviceScreenshot` already documents that rotation causes blur and supports 3× assets—so removing rotation + overlays and keeping the exact fixed widths will give you the sharpest possible result without changing your asset pipeline.&#x20;
+
+---
+
+### Why this helps (quick)
+
+* No transforms → no antialiasing → **crisper edges**
+* No semi-transparent overlays → **no softening veil**
+* Exact 1×/2×/3× assets at exact CSS widths → **no browser resampling**
+
+If you prefer to keep the angled look on desktop later, you can restore the `rotate-[8deg]` only on `lg:` and accept a tiny sharpness trade-off there while keeping mobile perfectly crisp.
