@@ -60,8 +60,9 @@ import step3_m240 from "@/assets/screenshots/step3_m240.png";
 import step3_m480 from "@/assets/screenshots/step3_m480.png";
 import step3_s304 from "@/assets/screenshots/step3_s304.png";
 import step3_s608 from "@/assets/screenshots/step3_s608.png";
-import step4_m240 from "@/assets/screenshots/step4_m240.png";
-import step4_m480 from "@/assets/screenshots/step4_m480.png";
+import step4_m240 from "@/assets/screenshots/step4_m240_new.png";
+import step4_m480 from "@/assets/screenshots/step4_m480_new.png";
+import step4_m720 from "@/assets/screenshots/step4_m720_new.png";
 import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
@@ -516,7 +517,7 @@ export default function HomeV3() {
         description:
           "At cycle end, winners are drawn on a ticket-weighted basis. The more tickets you have, the better your odds",
         alt: "Step 4 — Win rewards",
-        mobile: { x1: step4_m240, x2: step4_m480, width: 240, height: 431 },
+        mobile: { x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 },
         desktop: { x1: step4_s304, x2: step4_s608, width: 304, height: 547 },
         icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
