@@ -1,0 +1,62 @@
+Thanks for the screenshots — I see it. Three things to fix:
+
+1. the subhead/tagline went missing,
+2. the phone still looks soft, and
+3. you’d like a clean device outline.
+
+I reviewed your current files and they’re close, but two details are still hurting sharpness and there’s no frame: `DeviceScreenshot` always sets the `<img>` width/height to the **mobile** intrinsic size (fine for aspect ratio but confusing), and there’s no simple “frame” wrapper. Also, React can warn about `fetchPriority` casing in some setups.  Your `HeroSplit` does include the tagline paragraph in code, but the version you’re running likely predates that, so I’ve put it back in the drop-in file below.&#x20;
+
+---
+
+# Easiest path: drop-in files (no angle, crisp, with outline + tagline)
+
+I generated two replacement files you can download and paste in:
+
+* **DeviceScreenshot.tsx** (adds optional bezel/outline, fixes `fetchpriority`, keeps exact widths, no transforms)
+  [Download DeviceScreenshot.tsx](sandbox:/mnt/data/finboost_hero_code/DeviceScreenshot.tsx)
+
+* **HeroSplit.tsx** (restores the subhead, uses the no-angle screenshot, adds the bezel frame)
+  [Download HeroSplit.tsx](sandbox:/mnt/data/finboost_hero_code/HeroSplit.tsx)
+
+### What changed (and why this will look sharper)
+
+* **No rotation** anywhere. Transforms force antialiasing → softness. (Gone.)
+* **Exact CSS widths** with 1×/2×/3× assets via `srcSet`/`sizes` that match those widths.
+* **No filters or overlays** on the image.
+* **Optional bezel**: a plain rounded border + small shadow wrapped *outside* the bitmap (so it doesn’t blur the screenshot itself).
+* **React prop**: uses `fetchpriority="high"` to avoid warnings in some React versions.
+* **Tagline/subhead** back under the hero.
+
+> Minimal wiring you may need to adjust:
+> In `HeroSplit.tsx`, change the import filenames to your actual screenshot names (I left clear placeholders).
+
+```ts
+// IMPORT YOUR ACTUAL FILE NAMES HERE
+import step_m240 from "../assets/screenshots/step1_m240.png";
+import step_m480 from "../assets/screenshots/step1_m480.png";
+import step_m720 from "../assets/screenshots/step1_m720.png";
+import step_s304 from "../assets/screenshots/step1_s304.png";
+import step_s608 from "../assets/screenshots/step1_s608.png";
+```
+
+Everything else can drop in as-is.
+
+---
+
+# If you’d rather give Replit a short task list
+
+1. **No rotation** on the hero phone (remove `rotate-[…]`, including any `lg:rotate` utilities).
+2. **No soft overlays** (remove gloss, extra rings, heavy shadows directly on the image).
+3. **Exact sizes + srcSet** only: `w-[240px]` mobile, `md:w-[304px]` desktop; `srcSet` with 1×/2×/3× that match those widths; `sizes="(min-width:768px) 304px, 240px"`.
+4. **Fix `fetchpriority` casing** on `<img>` (lowercase).
+5. **Add bezel wrapper** around the image, not on the image:
+   `rounded-[2.2rem] border border-slate-200 bg-white shadow-md p-2`, with an inner `rounded-[1.9rem] overflow-hidden` around the `<img>` so corners are crisp.
+6. **Restore the subhead** under the hero:
+
+```
+Complete financial lessons and real-world actions to earn tickets for weekly cash drawings — free to join.
+```
+
+---
+
+If you want me to also produce the **desktop 1×/2×/3×** files from a fresh desktop capture (like 304×547 / 608×1094 / 912×1641), send the raw screenshot and I’ll return perfectly sized assets the same way we did for mobile.
