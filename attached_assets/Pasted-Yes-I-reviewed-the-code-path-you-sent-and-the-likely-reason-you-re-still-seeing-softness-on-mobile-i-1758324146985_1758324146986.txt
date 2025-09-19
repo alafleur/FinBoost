@@ -1,0 +1,45 @@
+Yes—I reviewed the code path you sent and the likely reason you’re still seeing softness on mobile is **how the browser is picking the asset**, not the assets themselves. Two changes usually fix this immediately:
+
+1. Use **width descriptors** (`240w, 480w, 720w`) instead of `1x/2x/3x`. This removes any ambiguity (especially on Safari) and forces the correct bitmap at the fixed CSS width.
+2. Lock the **rendered CSS width** to exactly `240px` on mobile / `304px` on desktop so nothing is being scaled.
+
+I packaged both into a drop-in replacement for your `DeviceScreenshot.tsx`. It keeps your frame/border and avoids any transforms that could soften pixels.
+
+### ✅ Fixed file
+
+**DeviceScreenshot.tsx (v2 — width descriptors + strict sizes)**
+[Download](sandbox:/mnt/data/finboost_hero_fix_widthset/DeviceScreenshot.tsx)
+
+What it does:
+
+* Uses width descriptors: `240w/480w/720w` (mobile) and `304w/608w` (desktop).
+* Sets `sizes="(min-width: 768px) 304px, 240px"`.
+* Hard sets `className="block w-[240px] md:w-[304px] h-auto"`.
+* Keeps your bezel outside the image (`frameClassName`) so the bitmap is never transformed.
+* Uses `fetchpriority="high"` correctly (lowercase) when `priority` is true.
+
+### How to wire it (Replit instructions)
+
+1. **Replace** your current `client/src/components/DeviceScreenshot.tsx` with the file above.
+2. Ensure your hero uses the same props you already have, e.g.:
+
+```tsx
+<DeviceScreenshot
+  alt="FinBoost — Rewards screen"
+  mobile={{ x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 }}
+  desktop={{ x1: step4_s304, x2: step4_s608, width: 304, height: 547 }}
+  showFrame
+  frameClassName="rounded-[2.2rem] border border-slate-200 bg-white p-2"
+  priority
+/>
+```
+
+*(Leave your `HeroSplit.tsx` as-is if you’re using the version where I moved the desktop tagline under “Earn Real Cash” so it shows above the fold.)*
+
+### Quick verification (2-minute check)
+
+1. Open Chrome DevTools on a real phone or emulated device (DPR=3).
+2. **Elements → select the `<img>`** → Computed width should be **240px** on mobile.
+3. **Network → filter by the screenshot filename** → the loaded file should be **720×1293** (the 3× mobile image).
+
+If those two are true, it will be tack-sharp. If it still isn’t, tell me the **Computed width** and **which file** the Network tab shows; I’ll pinpoint the remaining constraint.
