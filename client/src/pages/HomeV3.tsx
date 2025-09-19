@@ -45,14 +45,7 @@ import {
   Smartphone,
 } from "lucide-react";
 
-// Import high-resolution app screenshots for crisp display
-// Original fallback screenshots (341×612)
-import step1Screenshot from "@assets/Step 1 Learn & Complete Lessons_v1_1755745601876.png";
-import step2Screenshot from "@assets/Step 2 Take Financial Actions_v1_1755745601875.png";
-import step3Screenshot from "@assets/Step 3 Climb the Leaderboard_v1_1755745601874.png";
-import step4Screenshot from "@assets/Step 4 Win Real Cash Rewards_v1_1755745601873.png";
-
-// Pixel-perfect screenshots for zero blur rendering
+// Import pixel-perfect screenshots for zero blur rendering
 // Mobile: 240×431 (1×), 480×862 (2×)
 // Desktop: 304×547 (1×), 608×1094 (2×)
 import step1_m240 from "@/assets/screenshots/step1_m240.png";
@@ -75,6 +68,7 @@ import step4_s608 from "@/assets/screenshots/step4_s608.png";
 // Hero Components
 import HeroSplit from "@/components/HeroSplit";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
+import DeviceScreenshot, { type Variant } from "@/components/DeviceScreenshot";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 
 /**
@@ -473,52 +467,57 @@ export default function HomeV3() {
   // Default to your previous frame ratio (320×600 → 600/320)
   const [imgRatio, setImgRatio] = useState(600 / 320); // height / width
 
-  // How It Works step-by-step process data with high-resolution app screenshots
-  const screenshots = useMemo(
+  // How It Works step-by-step process data with pixel-perfect screenshots
+  type Screenshot = {
+    id: string;
+    title: string;
+    description: string;
+    alt: string;
+    mobile: Variant;
+    desktop: Variant;
+    icon: JSX.Element;
+  };
+
+  const screenshots: Screenshot[] = useMemo(
     () => [
       {
+        id: "step1",
         title: "Step 1: Learn & Complete Lessons",
         description:
           "Complete easily digestible lessons and quizzes to earn pool tickets and build your knowledge",
-        screenshotPath: step1Screenshot,  // 341×612 fallback
-        // Pixel-perfect assets for zero blur
-        m240: step1_m240,  // 240×431 mobile 1×
-        m480: step1_m480,  // 480×862 mobile 2×
-        s304: step1_s304,  // 304×547 desktop 1×
-        s608: step1_s608,  // 608×1094 desktop 2×
+        alt: "Step 1 — Learn & earn",
+        mobile: { x1: step1_m240, x2: step1_m480, width: 240, height: 431 },
+        desktop: { x1: step1_s304, x2: step1_s608, width: 304, height: 547 },
         icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
+        id: "step2", 
         title: "Step 2: Take Financial Actions",
         description:
           "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more tickets",
-        screenshotPath: step2Screenshot,
-        m240: step2_m240,
-        m480: step2_m480,
-        s304: step2_s304,
-        s608: step2_s608,
+        alt: "Step 2 — Take action",
+        mobile: { x1: step2_m240, x2: step2_m480, width: 240, height: 431 },
+        desktop: { x1: step2_s304, x2: step2_s608, width: 304, height: 547 },
         icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
-        title: "Step 3: Climb the Leaderboard",
+        id: "step3",
+        title: "Step 3: Climb the Leaderboard", 
         description:
           "Your number of tickets determines your tier placement. Higher tiers get larger shares of the total rewards pool",
-        screenshotPath: step3Screenshot,
-        m240: step3_m240,
-        m480: step3_m480,
-        s304: step3_s304,
-        s608: step3_s608,
+        alt: "Step 3 — Climb leaderboard",
+        mobile: { x1: step3_m240, x2: step3_m480, width: 240, height: 431 },
+        desktop: { x1: step3_s304, x2: step3_s608, width: 304, height: 547 },
         icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
       {
+        id: "step4",
         title: "Step 4: Win Real Cash Rewards",
         description:
           "At cycle end, winners are drawn on a ticket-weighted basis. The more tickets you have, the better your odds",
-        screenshotPath: step4Screenshot,
-        m240: step4_m240,
-        m480: step4_m480,
-        s304: step4_s304,
-        s608: step4_s608,
+        alt: "Step 4 — Win rewards",
+        mobile: { x1: step4_m240, x2: step4_m480, width: 240, height: 431 },
+        desktop: { x1: step4_s304, x2: step4_s608, width: 304, height: 547 },
         icon: <Sparkles className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
     ],
@@ -941,18 +940,20 @@ export default function HomeV3() {
               >
                 {/* Frameless screenshot with shadow/glow (same styling as hero section) */}
                 <div className="relative">
-                  <motion.img
-                    src={screenshots[activeScreenshot].screenshotPath}
-                    alt={screenshots[activeScreenshot].title}
-                    className="w-64 h-auto rounded-[28px] shadow-xl shadow-slate-900/15
-                               ring-1 ring-gray-200/50"
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.35 }}
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                  />
+                    className="rounded-[28px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50 overflow-hidden"
+                  >
+                    <DeviceScreenshot
+                      alt={screenshots[activeScreenshot].alt}
+                      mobile={screenshots[activeScreenshot].mobile}
+                      desktop={screenshots[activeScreenshot].desktop}
+                      className="md:rotate-[8deg]"
+                      priority={activeScreenshot === 0}
+                    />
+                  </motion.div>
                   
                   {/* Premium gloss overlay (same as hero) */}
                   <div className="absolute inset-0 rounded-[28px] 
