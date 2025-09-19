@@ -1,0 +1,48 @@
+Good catch — I found the culprit causing the lingering blur in your new component.
+
+# What’s wrong
+
+Your `DeviceScreenshot` locks the rendered width via an **inline style**:
+
+* `style={{ width: mobile.width, height: "auto" }}`
+  Inline styles override Tailwind classes, so `md:w-[304px]` never takes effect. That means on desktop you’re serving the 304px/608px sources but **displaying at 240px**, forcing an unnecessary downscale → softness. You can see the inline width at these lines:  and the `w-[240px] md:w-[304px]` classes that get overridden here: .
+
+Separately, in `HomeV3` you’re rotating the screenshot on ≥md (`className="md:rotate-[8deg]"`). Rotation inherently introduces a bit of interpolation softness — that’s expected, and you already scoped it to desktop only. Usage is here: .
+
+# Fix
+
+Remove the inline width and let Tailwind control the exact pixel widths. I’ve prepped a corrected, drop-in replacement:
+
+**Download:** [DeviceScreenshot.tsx (fixed)](sandbox:/mnt/data/DeviceScreenshot.fixed.tsx)
+
+> Replace your file at `client/src/components/DeviceScreenshot.tsx` with the download above.
+
+What changed:
+
+* Removed the inline `style={{ width: ... }}` so `w-[240px] md:w-[304px]` actually takes effect.
+* Left your `srcSet` + `sizes` logic intact (it’s correct).
+* Kept `width`/`height` attributes on the `<img>` to preserve aspect ratio and reduce CLS.
+
+# Quick verify (60 seconds)
+
+1. **Mobile viewport (<768px):**
+
+   * Inspect the `<img>` and confirm **computed width = 240px**.
+   * Network → see `*_m240.png` (1×) or `*_m480.png` (2× DPR) being used.
+
+2. **Desktop viewport (≥768px):**
+
+   * Confirm **computed width = 304px**.
+   * Network → see `*_s304.png` (1×) or `*_s608.png` (2× DPR) being used.
+
+3. **Crispness A/B:**
+
+   * Temporarily remove `md:rotate-[8deg]` in `HomeV3` to see the absolute crisp baseline.
+   * If crisp w/o rotation but slightly soft with rotation → that’s normal transform interpolation (and expected).
+
+# Notes from your code
+
+* `DeviceScreenshot` usage and wrapper are wired correctly in `HomeV3` (rounded container, no scale transforms). See the usage block here: .
+* Your imports for the pixel-perfect variants (m240/m480 + s304/s608) look solid: .
+
+If you still see blur after this fix, the remaining softness will almost certainly be the desktop rotation. You can decide whether the aesthetic is worth the minor trade-off — but with the inline width removed, you’ll be at true pixel-match at both breakpoints.
