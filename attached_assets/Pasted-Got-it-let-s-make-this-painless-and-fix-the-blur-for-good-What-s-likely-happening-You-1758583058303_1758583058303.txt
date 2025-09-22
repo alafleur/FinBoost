@@ -1,0 +1,80 @@
+Got it — let’s make this painless and fix the blur for good.
+
+### What’s likely happening
+
+* Your `HeroSplit` is still importing a different component name than the one we exported (name mismatch can make bundlers fall back to an older build).
+* Even tiny transform/scale on any parent can force resampling.
+* If the PNGs aren’t **exactly** 240/480/720 px wide, width-descriptor logic breaks. The simplest fix is to use density descriptors and remove the `<picture>` source switching so the browser just picks @1x/@2x/@3x by DPR.
+
+---
+
+## Do this (copy/paste to Replit)
+
+**1) Replace the component with the minimal, “can’t-blur” version**
+
+Download and put this file at:
+`client/src/components/DeviceScreenshot.tsx`
+
+* [Download DeviceScreenshot.tsx (simple, density)](sandbox:/mnt/data/finboost_hero_simple/DeviceScreenshot.tsx)
+
+This version:
+
+* Exports **`default function DeviceScreenshot`** (so your existing `import DeviceScreenshot …` stays correct).
+* Uses **density descriptors** (`1x, 2x, 3x`) which don’t rely on perfect pixel widths.
+* Locks the render width to **240px** on mobile and **304px** on md+.
+* No `<picture>` switching and **no transforms** on the bitmap.
+
+**2) Update `HeroSplit.tsx` import (if needed)**
+
+```ts
+import DeviceScreenshot from "@/components/DeviceScreenshot";
+```
+
+**3) Use it like this**
+
+```tsx
+<DeviceScreenshot
+  alt="FinBoost — Rewards screen"
+  mobile={{
+    x1: step4_m240_new, // 1x
+    x2: step4_m480_new, // 2x
+    x3: step4_m720_new, // 3x
+    width: 240,
+    height: 431,
+  }}
+  showFrame
+  className="mx-auto md:mx-0"
+/>
+```
+
+**4) Kill any transforms on parents**
+Search the hero container and **remove/avoid**: `rotate-*`, `scale-*`, `translate-*`, `skew-*`, `filter-*`, `backdrop-*`, or opacity animations that might composite the layer. Keep the frame; just don’t rotate/scale the screenshot.
+
+**5) Sanity checks (takes 30 seconds)**
+
+* Set browser zoom to **100%**.
+* In DevTools **Elements**, select the `<img>`:
+
+  * Computed width = **240px** on mobile
+* In **Console**:
+
+  ```js
+  document.querySelector('.hero-shot img').currentSrc
+  ```
+
+  On a DPR=3 device you should see the **720** asset.
+* Open each file in a tab and confirm pixel sizes (ideal but not required with density descriptors):
+
+  * `step4_m240_new.png` = **240×431**
+  * `step4_m480_new.png` = **480×862**
+  * `step4_m720_new.png` = **720×1293**
+
+---
+
+### Bonus: tiny read-me for Replit
+
+If you want to send them the step list and example usage, this text file includes it:
+
+* [README.txt](sandbox:/mnt/data/finboost_hero_simple/README.txt)
+
+Once this is in, if it’s still fuzzy, the culprit is 99% the **source PNGs** themselves (soft capture). In that case, re-grab the 3 screenshots at high pixel density, but with the simple density component above you should already see a clear improvement.

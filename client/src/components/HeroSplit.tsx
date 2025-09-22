@@ -30,11 +30,15 @@ export default function HeroSplit() {
             <div className="flex justify-center self-center">
               <DeviceScreenshot
                 alt="FinBoost — Rewards screen"
-                mobile={{ x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 }}
-                desktop={{ x1: step4_s304, x2: step4_s608, width: 304, height: 547 }}
-                className=""               // NO ROTATION
-                showFrame                  // clean bezel outline
-                frameClassName="rounded-[2.2rem] border border-slate-200 bg-white p-2" // no shadow; add 'shadow-sm' if wanted
+                mobile={{
+                  x1: step4_m240,
+                  x2: step4_m480,
+                  x3: step4_m720,
+                  width: 240,
+                  height: 431
+                }}
+                showFrame
+                className=""
                 priority
               />
             </div>
@@ -67,11 +71,15 @@ export default function HeroSplit() {
             <div className="flex justify-center">
               <DeviceScreenshot
                 alt="FinBoost — Rewards screen"
-                mobile={{ x1: step4_m240, x2: step4_m480, x3: step4_m720, width: 240, height: 431 }}
-                desktop={{ x1: step4_s304, x2: step4_s608, width: 304, height: 547 }}
-                className=""               // NO ROTATION
+                mobile={{
+                  x1: step4_m240,
+                  x2: step4_m480,
+                  x3: step4_m720,
+                  width: 240,
+                  height: 431
+                }}
                 showFrame
-                frameClassName="rounded-[2.2rem] border border-slate-200 bg-white p-2"
+                className=""
                 priority
               />
             </div>

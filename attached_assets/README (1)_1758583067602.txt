@@ -1,0 +1,29 @@
+
+Paste instructions for Replit
+
+1) Save the attached file as:
+   client/src/components/DeviceScreenshot.tsx
+   (It exports default `DeviceScreenshot`, so existing imports stay the same.)
+
+2) Usage (example in HeroSplit.tsx):
+   <DeviceScreenshot
+     alt="FinBoost — Rewards screen"
+     mobile={{
+       x1: step4_m240_new,
+       x2: step4_m480_new,
+       x3: step4_m720_new,
+       width: 240,
+       height: 431
+     }}
+     showFrame
+     className="mx-auto md:mx-0"
+   />
+
+3) Make sure no parent of this component applies transforms:
+   remove rotate-*, scale-*, translate-*, skew-*, filter/backdrop-filter.
+
+4) Verify quickly:
+   - Browser zoom 100%.
+   - In DevTools console run:
+       document.querySelector('.hero-shot img').currentSrc
+     On DPR≥3 you should see the 720 asset in the URL.
