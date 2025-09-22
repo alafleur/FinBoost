@@ -1,0 +1,147 @@
+Thanks for the files—here’s what I checked and what I’ve changed so the hero phone looks crisp on **every screen** (including desktop preview emulators that often run at DPR=1).
+
+# What’s still causing the blur
+
+1. **Your code is correct for real phones**, but desktop DevTools often run at DPR=1, so the browser picks the 1× (240 px) asset and you *perceive* softness. The component currently chooses the asset by **device-pixel-ratio** (1×/2×/3×).&#x20;
+
+2. The hero is importing `DeviceScreenshot` and using the DPR mode (default), which is fine on an actual iPhone/Android, but not great for laptop previews.&#x20;
+
+# Quick, reliable fix (forces the sharp file everywhere)
+
+I added a tiny switch to the component so you can **force the 3× image** regardless of DPR. That makes it look crisp even in desktop emulators and on low-DPR monitors. It’s one hero image, so the extra bytes are negligible.
+
+### What’s new
+
+* `mode?: "dpr" | "force2x" | "force3x"` prop (defaults to `"dpr"`).
+* When `mode="force3x"`, the component serves the 3× file directly (no `srcSet` dance).
+* No transforms; we keep exact CSS width to avoid resampling.
+
+### Drop-in replacement files
+
+I generated updated files you can download:
+
+* **DeviceScreenshot.tsx** – with the `mode` prop and “force high-res” option
+  [Download](sandbox:/mnt/data/finboost_fix2/DeviceScreenshot.tsx)
+* **HeroSplit.example.tsx** – shows exactly how to call it with `mode="force3x"` (you’ll paste the relevant lines into your real `HeroSplit.tsx`)
+  [Download](sandbox:/mnt/data/finboost_fix2/HeroSplit.example.tsx)
+
+# Exactly what to change (if you prefer to patch manually)
+
+### 1) Replace your component with this version
+
+(contains only the relevant bits; full file is in the download)
+
+```tsx
+// DeviceScreenshot.tsx
+type Variant = { x1: string; x2: string; x3?: string; width: number; height: number };
+type Props = {
+  alt: string;
+  mobile: Variant;
+  className?: string;
+  priority?: boolean;
+  showFrame?: boolean;
+  frameClassName?: string;
+  mode?: "dpr" | "force2x" | "force3x"; // NEW
+};
+
+function densitySet(v: Variant) {
+  const out = [`${v.x1} 1x`, `${v.x2} 2x`];
+  if (v.x3) out.push(`${v.x3} 3x`);
+  return out.join(", ");
+}
+
+export default function DeviceScreenshot({
+  alt, mobile, className = "", priority = true,
+  showFrame = true,
+  frameClassName = "rounded-[2rem] border border-slate-200 bg-white p-2 shadow-sm",
+  mode = "dpr",
+}: Props) {
+  const useForce2x = mode === "force2x";
+  const useForce3x = mode === "force3x" && !!mobile.x3;
+
+  const imgProps: React.ImgHTMLAttributes<HTMLImageElement> = {
+    width: mobile.width,
+    height: mobile.height,
+    alt,
+    decoding: priority ? "sync" : "async",
+    loading: priority ? "eager" : "lazy",
+    draggable: false,
+    className: "block w-[240px] md:w-[304px] h-auto select-none pointer-events-none",
+    style: { transform: "none", imageRendering: "auto" },
+    // @ts-ignore
+    ...(priority ? { fetchpriority: "high" } : {}),
+  };
+
+  if (useForce3x)      imgProps.src = mobile.x3!;
+  else if (useForce2x) imgProps.src = mobile.x2;
+  else { imgProps.src = mobile.x1; imgProps.srcSet = densitySet(mobile); }
+
+  const img = <img {...imgProps} />;
+
+  return (
+    <div className={(className ? className + " " : "") + "hero-shot inline-flex items-center justify-center"}>
+      {showFrame ? (
+        <span className={frameClassName} aria-hidden="true">
+          <span className="rounded-[1.8rem] overflow-hidden block">{img}</span>
+        </span>
+      ) : img}
+    </div>
+  );
+}
+```
+
+### 2) Use the new prop in your hero
+
+In `HeroSplit.tsx` (the mobile block where you render the screenshot), pass `mode="force3x"`:
+
+```tsx
+<DeviceScreenshot
+  alt="FinBoost — Rewards screen"
+  mobile={{
+    x1: step4_m240_new, // 240×431
+    x2: step4_m480_new, // 480×862
+    x3: step4_m720_new, // 720×1293
+    width: 240,
+    height: 431,
+  }}
+  showFrame
+  priority
+  mode="force3x"   // <-- force crisp everywhere
+/>
+```
+
+This keeps the **CSS width at 240 px** (no layout changes) while always feeding the **720 px** asset to the browser, so there’s **zero upscaling** and no emulator/DPR surprises.
+
+# Sanity checks to confirm it’s fixed
+
+1. Open DevTools Console on the hero and run:
+
+   ```js
+   document.querySelector(".hero-shot img")?.currentSrc
+   ```
+
+   You should see it end with `step4_m720_new.png`.
+
+2. Click the filename in Network → **Response** → “Dimensions” should show **720 × 1293**.
+
+3. Make sure **Chrome zoom = 100%**.
+
+# If you still see blur on real phones
+
+* Re-capture the source at **DPR 3** and **720×1293** (you already did this for `step4_m720_new.png`).
+* Avoid any CSS transforms on the containing stack (you currently don’t have any in the hero usage, which is good).&#x20;
+
+---
+
+### Bonus: tagline visibility on desktop
+
+Your current hero uses generous spacing; if the tagline drops below the fold on some laptops, reduce top padding and slightly tighten the headline:
+
+* change `pt-24 md:pt-28 lg:pt-32` → `pt-16 md:pt-20 lg:pt-24`
+* (optional) decrease the headline clamp max by \~0.2rem.
+
+This keeps the headline + subhead + phone in view above the fold more often without redesigning the layout.
+
+---
+
+If you want me to also bake in a **“width-descriptor”** version (for truly surgical selection by width) or add a **320/640/960** set for an even larger mobile image, say the word and I’ll ship those variants too.
