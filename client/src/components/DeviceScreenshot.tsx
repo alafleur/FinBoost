@@ -1,19 +1,11 @@
 import React from "react";
 
-/**
- * DeviceScreenshot (simple, density descriptors)
- * - Uses 1x/2x/3x (DPR-based) selection
- * - Locks render width to 240px (mobile) / 304px (md+)
- * - No <picture/>, no transforms on the bitmap
- * - Exported as default DeviceScreenshot (matches existing imports)
- */
-
 type Variant = {
-  x1: string; // 1x asset
-  x2: string; // 2x asset
-  x3?: string; // 3x asset
-  width: number;   // intrinsic width of 1x (e.g., 240)
-  height: number;  // intrinsic height of 1x (e.g., 431)
+  x1: string; // 1x
+  x2: string; // 2x
+  x3?: string; // 3x
+  width: number;
+  height: number;
 };
 
 type Props = {
@@ -23,6 +15,8 @@ type Props = {
   priority?: boolean;
   showFrame?: boolean;
   frameClassName?: string;
+  /** how to choose the asset */
+  mode?: "dpr" | "force2x" | "force3x";
 };
 
 function densitySet(v: Variant) {
@@ -38,30 +32,44 @@ export default function DeviceScreenshot({
   priority = true,
   showFrame = true,
   frameClassName = "rounded-[2rem] border border-slate-200 bg-white p-2 shadow-sm",
+  mode = "dpr",
 }: Props) {
-  const img = (
-    <img
-      src={mobile.x1}
-      srcSet={densitySet(mobile)}
-      width={mobile.width}
-      height={mobile.height}
-      alt={alt}
-      decoding={priority ? "sync" : "async"}
-      loading={priority ? "eager" : "lazy"}
-      {...(priority ? { /* @ts-ignore */ fetchpriority: "high" } : {})}
-      className="block w-[240px] md:w-[304px] h-auto select-none pointer-events-none"
-      draggable={false}
-      style={{ transform: "none", imageRendering: "auto" }}
-    />
-  );
+  // Decide source selection strategy
+  const useForce2x = mode === "force2x";
+  const useForce3x = mode === "force3x" && !!mobile.x3;
+
+  const imgProps: React.ImgHTMLAttributes<HTMLImageElement> = {
+    width: mobile.width,
+    height: mobile.height,
+    alt,
+    decoding: priority ? "sync" : "async",
+    loading: priority ? "eager" : "lazy",
+    draggable: false,
+    className:
+      "block w-[240px] md:w-[304px] h-auto select-none pointer-events-none",
+    style: { transform: "none", imageRendering: "auto" } as React.CSSProperties,
+    // @ts-ignore
+    ...(priority ? { fetchpriority: "high" } : {}),
+  };
+
+  if (useForce3x) {
+    imgProps.src = mobile.x3!;
+  } else if (useForce2x) {
+    imgProps.src = mobile.x2;
+  } else {
+    imgProps.src = mobile.x1;
+    imgProps.srcSet = densitySet(mobile);
+  }
+
+  const img = <img {...imgProps} />;
 
   return (
-    <div className={(className ? className + " " : "") + "hero-shot inline-flex items-center justify-center"}>
+    <div
+      className={(className ? className + " " : "") + "hero-shot inline-flex items-center justify-center"}
+    >
       {showFrame ? (
         <span className={frameClassName} aria-hidden="true">
-          <span className="rounded-[1.8rem] overflow-hidden block">
-            {img}
-          </span>
+          <span className="rounded-[1.8rem] overflow-hidden block">{img}</span>
         </span>
       ) : (
         img

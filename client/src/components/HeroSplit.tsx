@@ -40,6 +40,7 @@ export default function HeroSplit() {
                 showFrame
                 className=""
                 priority
+                mode="force3x"
               />
             </div>
 
@@ -81,6 +82,7 @@ export default function HeroSplit() {
                 showFrame
                 className=""
                 priority
+                mode="force3x"
               />
             </div>
           </div>
