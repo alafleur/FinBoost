@@ -74,6 +74,9 @@ import HeroSplit from "@/components/HeroSplit";
 import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import DeviceScreenshot, { type Variant } from "@/components/DeviceScreenshot";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
+import tiers_m240 from "@/assets/screenshots/tiers-m240.png";
+import tiers_m480 from "@/assets/screenshots/tiers-m480.png";
+import tiers_m720 from "@/assets/screenshots/tiers-m720.png";
 
 /**
  * Carousel state management interface
@@ -1878,26 +1881,19 @@ export default function HomeV3() {
                 className="flex justify-center mt-8 lg:mt-0 lg:ml-8"
               >
                 <div className="relative w-48 lg:w-56">
-                  <img
-                    src={rewardsSystemScreenshot}
+                  <DeviceScreenshot
                     alt="Tier Thresholds & Rewards Interface"
+                    mobile={{
+                      x1: tiers_m240,
+                      x2: tiers_m480,
+                      x3: tiers_m720,
+                      width: 240,
+                      height: 431
+                    }}
                     className="w-full h-auto rounded-[28px] shadow-xl shadow-slate-900/15 ring-1 ring-gray-200/50"
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      if (img.naturalWidth && img.naturalHeight) {
-                        // height/width rounded to avoid subpixel ratios
-                        const r = Math.round((img.naturalHeight / img.naturalWidth) * 10000) / 10000;
-                        setImgRatio(r);
-                      }
-                    }}
-                    style={{
-                      imageRendering: 'auto',      // single hint to avoid conflicts
-                      backfaceVisibility: 'hidden',
-                      transform: 'translateZ(0)',  // GPU hint to keep edges crisp
-                    }}
+                    priority={false}
+                    showFrame={false}
+                    mode="force3x"
                   />
                   
                   {/* Premium gloss overlay */}

@@ -1,0 +1,64 @@
+Awesome—here’s exactly how Replit should implement the **Tier Thresholds & Rewards** screenshot update, matching your project’s conventions.
+
+# Files to add (download & drop in)
+
+Put these in `client/src/assets/screenshots/`:
+
+**m-variants (preferred for your codebase)**
+
+* [tiers-m240.png](sandbox:/mnt/data/tiers-m240.png)
+* [tiers-m480.png](sandbox:/mnt/data/tiers-m480.png)
+* [tiers-m720.png](sandbox:/mnt/data/tiers-m720.png)
+
+(For completeness, I also generated density versions if you ever need them: [tiers@1x.png](sandbox:/mnt/data/tiers@1x.png) · [tiers@2x.png](sandbox:/mnt/data/tiers@2x.png) · [tiers@3x.png](sandbox:/mnt/data/tiers@3x.png).)
+
+> Cropping note: trimmed from the **bottom** to remove iOS home-bar space, same as the How-It-Works images.
+
+---
+
+# Code changes
+
+## 1) Import the assets (ES6 imports)
+
+In the component that renders the **Rewards System / Tier** screenshot (likely `HomeV3.tsx` near the Rewards section), add:
+
+```tsx
+import tiers_m240 from "@/assets/screenshots/tiers-m240.png";
+import tiers_m480 from "@/assets/screenshots/tiers-m480.png";
+import tiers_m720 from "@/assets/screenshots/tiers-m720.png";
+```
+
+## 2) Use your `DeviceScreenshot` component
+
+Replace the existing image for the tier card with `DeviceScreenshot`, providing the three sizes:
+
+```tsx
+<DeviceScreenshot
+  alt="Tier Thresholds & Rewards"
+  mobile={{
+    x1: tiers_m240, // 1x
+    x2: tiers_m480, // 2x
+    x3: tiers_m720, // 3x
+    width: 240,     // intrinsic width used for layout calc; keep consistent
+    height: 240 * 2.2, // adjust if you want a fixed aspect; optional
+  }}
+  className="rounded-2xl shadow-lg"
+  showFrame={false}
+/>
+```
+
+* If you already have a `<DeviceScreenshot>` in place, just swap in the three `x1/x2/x3` imports above—no other layout changes are required.
+* If the component expects explicit `width/height` to avoid layout shift, keep those; otherwise, your container CSS can govern sizing.
+
+---
+
+# QA checklist
+
+* **Sharpness:** Verify on a Retina display (MacBook/iPhone) that text edges look crisp—no blur.
+* **No CLS:** If you see layout shifts, set a stable container height or provide `width/height` in `DeviceScreenshot` as above.
+* **Lazy loading:** Keep images below the fold as non-priority (your component or container can pass `loading="lazy"` if supported).
+* **Consistent naming:** Ensure other screenshots in this section follow the same `m240/m480/m720` pattern for consistency.
+
+---
+
+If you paste the exact JSX snippet around your current Tier screenshot, I’ll return the **drop-in replacement** using your current classes and structure.
