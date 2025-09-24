@@ -71,7 +71,6 @@ import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
 // Hero Components
 import HeroSplit from "@/components/HeroSplit";
-import EarlyAccessGuarantee from "@/components/EarlyAccessGuarantee";
 import DeviceScreenshot, { type Variant } from "@/components/DeviceScreenshot";
 import rewardsSystemScreenshot from "@assets/Tiers 1_1755745601872.png";
 import tiers_m240 from "@/assets/screenshots/tiers-m240.png";
@@ -902,9 +901,6 @@ export default function HomeV3() {
 
       {/* New Hero: Learn Real Finance Tools + Earn Real Cash */}
       <HeroSplit />
-
-      {/* Early Access Guarantee Section */}
-      <EarlyAccessGuarantee />
 
       {/* App Preview - Interactive Phone Mockup */}
       <section
