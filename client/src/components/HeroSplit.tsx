@@ -38,6 +38,7 @@ export default function HeroSplit() {
                   height: 431
                 }}
                 showFrame
+                frameClassName="rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl"
                 className=""
                 priority
                 mode="force3x"
@@ -80,6 +81,7 @@ export default function HeroSplit() {
                   height: 431
                 }}
                 showFrame
+                frameClassName="rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl"
                 className=""
                 priority
                 mode="force3x"
