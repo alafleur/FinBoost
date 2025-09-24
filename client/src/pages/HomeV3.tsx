@@ -48,21 +48,24 @@ import {
 // Import pixel-perfect screenshots for zero blur rendering
 // Mobile: 240×431 (1×), 480×862 (2×)
 // Desktop: 304×547 (1×), 608×1094 (2×)
-import step1_m240 from "@/assets/screenshots/step1_m240.png";
-import step1_m480 from "@/assets/screenshots/step1_m480.png";
+import step1_m240 from "@/assets/screenshots/step1_m240_new.png";
+import step1_m480 from "@/assets/screenshots/step1_m480_new.png";
+import step1_m720 from "@/assets/screenshots/step1_m720_new.png";
 import step1_s304 from "@/assets/screenshots/step1_s304.png";  
 import step1_s608 from "@/assets/screenshots/step1_s608.png";
-import step2_m240 from "@/assets/screenshots/step2_m240.png";
-import step2_m480 from "@/assets/screenshots/step2_m480.png";
+import step2_m240 from "@/assets/screenshots/step2_m240_new.png";
+import step2_m480 from "@/assets/screenshots/step2_m480_new.png";
+import step2_m720 from "@/assets/screenshots/step2_m720_new.png";
 import step2_s304 from "@/assets/screenshots/step2_s304.png";
 import step2_s608 from "@/assets/screenshots/step2_s608.png";
-import step3_m240 from "@/assets/screenshots/step3_m240.png";
-import step3_m480 from "@/assets/screenshots/step3_m480.png";
+import step3_m240 from "@/assets/screenshots/step3_m240_new.png";
+import step3_m480 from "@/assets/screenshots/step3_m480_new.png";
+import step3_m720 from "@/assets/screenshots/step3_m720_new.png";
 import step3_s304 from "@/assets/screenshots/step3_s304.png";
 import step3_s608 from "@/assets/screenshots/step3_s608.png";
-import step4_m240 from "@/assets/screenshots/step4_m240_new.png";
-import step4_m480 from "@/assets/screenshots/step4_m480_new.png";
-import step4_m720 from "@/assets/screenshots/step4_m720_new.png";
+import step4_m240 from "@/assets/screenshots/step4_m240_newest.png";
+import step4_m480 from "@/assets/screenshots/step4_m480_newest.png";
+import step4_m720 from "@/assets/screenshots/step4_m720_newest.png";
 import step4_s304 from "@/assets/screenshots/step4_s304.png";
 import step4_s608 from "@/assets/screenshots/step4_s608.png";
 
@@ -487,7 +490,7 @@ export default function HomeV3() {
         description:
           "Complete easily digestible lessons and quizzes to earn pool tickets and build your knowledge",
         alt: "Step 1 — Learn & earn",
-        mobile: { x1: step1_m240, x2: step1_m480, width: 240, height: 431 },
+        mobile: { x1: step1_m240, x2: step1_m480, x3: step1_m720, width: 240, height: 431 },
         desktop: { x1: step1_s304, x2: step1_s608, width: 304, height: 547 },
         icon: <BookOpen className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
@@ -497,7 +500,7 @@ export default function HomeV3() {
         description:
           "Get rewarded for making sound financial decisions. Upload proof of debt payments to earn more tickets",
         alt: "Step 2 — Take action",
-        mobile: { x1: step2_m240, x2: step2_m480, width: 240, height: 431 },
+        mobile: { x1: step2_m240, x2: step2_m480, x3: step2_m720, width: 240, height: 431 },
         desktop: { x1: step2_s304, x2: step2_s608, width: 304, height: 547 },
         icon: <Upload className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
@@ -507,7 +510,7 @@ export default function HomeV3() {
         description:
           "Your number of tickets determines your tier placement. Higher tiers get larger shares of the total rewards pool",
         alt: "Step 3 — Climb leaderboard",
-        mobile: { x1: step3_m240, x2: step3_m480, width: 240, height: 431 },
+        mobile: { x1: step3_m240, x2: step3_m480, x3: step3_m720, width: 240, height: 431 },
         desktop: { x1: step3_s304, x2: step3_s608, width: 304, height: 547 },
         icon: <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />,
       },
@@ -953,6 +956,7 @@ export default function HomeV3() {
                       desktop={screenshots[activeScreenshot].desktop}
                       className=""
                       priority={activeScreenshot === 0}
+                      mode="force3x"
                     />
                   </motion.div>
                   

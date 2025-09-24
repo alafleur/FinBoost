@@ -1,0 +1,104 @@
+Great catch from Replit. Let’s align 100% with your **current codebase**:
+
+* **Location:** `client/src/assets/screenshots/` (ES6 imports)
+* **Component:** keep using **`DeviceScreenshot`**
+* **Naming:** follow **`m240/m480/m720`** (like the hero)
+
+I’ve already generated **all 12 files** in that naming convention (and bottom-trimmed). You can download and drop them into `client/src/assets/screenshots/`:
+
+### Step 1
+
+* [howitworks-step1-m240.png](sandbox:/mnt/data/howitworks-step1-m240.png)
+* [howitworks-step1-m480.png](sandbox:/mnt/data/howitworks-step1-m480.png)
+* [howitworks-step1-m720.png](sandbox:/mnt/data/howitworks-step1-m720.png)
+
+### Step 2
+
+* [howitworks-step2-m240.png](sandbox:/mnt/data/howitworks-step2-m240.png)
+* [howitworks-step2-m480.png](sandbox:/mnt/data/howitworks-step2-m480.png)
+* [howitworks-step2-m720.png](sandbox:/mnt/data/howitworks-step2-m720.png)
+
+### Step 3
+
+* [howitworks-step3-m240.png](sandbox:/mnt/data/howitworks-step3-m240.png)
+* [howitworks-step3-m480.png](sandbox:/mnt/data/howitworks-step3-m480.png)
+* [howitworks-step3-m720.png](sandbox:/mnt/data/howitworks-step3-m720.png)
+
+### Step 4
+
+* [howitworks-step4-m240.png](sandbox:/mnt/data/howitworks-step4-m240.png)
+* [howitworks-step4-m480.png](sandbox:/mnt/data/howitworks-step4-m480.png)
+* [howitworks-step4-m720.png](sandbox:/mnt/data/howitworks-step4-m720.png)
+
+---
+
+## Exact implementation (matches your setup)
+
+### 1) Import in `HomeV3.tsx` (the “How It Works” section)
+
+Replace the existing step image imports with these:
+
+```tsx
+// Step 1
+import step1_m240 from "@/assets/screenshots/howitworks-step1-m240.png";
+import step1_m480 from "@/assets/screenshots/howitworks-step1-m480.png";
+import step1_m720 from "@/assets/screenshots/howitworks-step1-m720.png";
+
+// Step 2
+import step2_m240 from "@/assets/screenshots/howitworks-step2-m240.png";
+import step2_m480 from "@/assets/screenshots/howitworks-step2-m480.png";
+import step2_m720 from "@/assets/screenshots/howitworks-step2-m720.png";
+
+// Step 3
+import step3_m240 from "@/assets/screenshots/howitworks-step3-m240.png";
+import step3_m480 from "@/assets/screenshots/howitworks-step3-m480.png";
+import step3_m720 from "@/assets/screenshots/howitworks-step3-m720.png";
+
+// Step 4
+import step4_m240 from "@/assets/screenshots/howitworks-step4-m240.png";
+import step4_m480 from "@/assets/screenshots/howitworks-step4-m480.png";
+import step4_m720 from "@/assets/screenshots/howitworks-step4-m720.png";
+```
+
+### 2) Use your `DeviceScreenshot` component
+
+Your `DeviceScreenshot` takes a `mobile` variant with `x1/x2/x3` plus `width/height`. Assuming the same interface as the hero:
+
+```tsx
+<DeviceScreenshot
+  alt="How it works — Step 1"
+  mobile={{
+    x1: step1_m240, // 1x
+    x2: step1_m480, // 2x
+    x3: step1_m720, // 3x
+    width: 240,
+    height: 240 * 2.2, // approximate; set to your actual aspect if you have it
+  }}
+  className="rounded-2xl shadow-lg"
+  showFrame={false}
+/>
+```
+
+Repeat for Steps 2–4 swapping the imports.
+If your `DeviceScreenshot` **expects exact intrinsic sizes**, ping me with the frame-less rendered height you want and I’ll set precise numbers. Otherwise, the intrinsic size will be overriden by your container CSS anyway.
+
+> Replit note about **line numbers** in `HomeV3.tsx` (51, 55, 59, 490, 500, 510):
+> Wherever those `<DeviceScreenshot>`s are defined for the 4 steps, just replace the `mobile` `x1/x2/x3` sources to the new imports above. No need to change layout.
+
+---
+
+## Why we’re not using `<img srcSet>` here
+
+You’ve already standardized on `DeviceScreenshot` + ES6 imports in `client/src/assets/screenshots/`. Sticking to that keeps code consistent with the hero, avoids public asset path assumptions, and keeps tree-shaking/caching optimal.
+
+---
+
+## Replit checklist
+
+* [ ] Add the 12 PNGs into `client/src/assets/screenshots/`.
+* [ ] Update imports + `DeviceScreenshot` calls in `HomeV3.tsx` (4 places).
+* [ ] Verify sharpness on Retina/HiDPI (look for crisp text/edges).
+* [ ] Confirm no CLS (your component likely sets width/height; if not, keep the container height steady with Tailwind classes).
+* [ ] Lighthouse: images should be lazy where off-screen (set `priority` only if above-the-fold).
+
+If you want me to paste the **exact JSX blocks** for those 4 spots using your existing classes, drop the current snippet around each step (10–15 lines around each `<DeviceScreenshot>`). I’ll slot in the final code verbatim.
