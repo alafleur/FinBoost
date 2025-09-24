@@ -1,0 +1,79 @@
+Perfect — I’ve created crisp, responsive assets for **How It Works (steps 1–4)** and trimmed **from the bottom** (not the top). I removed \~120px to get rid of the iOS home-bar/extra whitespace, then exported @1x/@2x/@3x.
+
+# Downloads
+
+Step 1
+
+* [howitworks-step1@1x.png](sandbox:/mnt/data/howitworks-step1@1x.png)
+* [howitworks-step1@2x.png](sandbox:/mnt/data/howitworks-step1@2x.png)
+* [howitworks-step1@3x.png](sandbox:/mnt/data/howitworks-step1@3x.png)
+
+Step 2
+
+* [howitworks-step2@1x.png](sandbox:/mnt/data/howitworks-step2@1x.png)
+* [howitworks-step2@2x.png](sandbox:/mnt/data/howitworks-step2@2x.png)
+* [howitworks-step2@3x.png](sandbox:/mnt/data/howitworks-step2@3x.png)
+
+Step 3
+
+* [howitworks-step3@1x.png](sandbox:/mnt/data/howitworks-step3@1x.png)
+* [howitworks-step3@2x.png](sandbox:/mnt/data/howitworks-step3@2x.png)
+* [howitworks-step3@3x.png](sandbox:/mnt/data/howitworks-step3@3x.png)
+
+Step 4
+
+* [howitworks-step4@1x.png](sandbox:/mnt/data/howitworks-step4@1x.png)
+* [howitworks-step4@2x.png](sandbox:/mnt/data/howitworks-step4@2x.png)
+* [howitworks-step4@3x.png](sandbox:/mnt/data/howitworks-step4@3x.png)
+
+If you want a different crop height, tell me and I’ll regenerate.
+
+---
+
+# Replit implementation (drop-in)
+
+1. **Add the files**
+   Place the 12 PNGs in your public assets folder (e.g., `/client/public/assets/howitworks/`), keeping the same filenames.
+
+2. **Update the component** (`HowItWorks.tsx` or wherever Steps 1–4 are rendered)
+
+Use `srcSet` + `sizes` so browsers auto-pick the right density:
+
+```tsx
+// example for Step 1
+<img
+  src="/assets/howitworks/howitworks-step1@1x.png"
+  srcSet="/assets/howitworks/howitworks-step1@1x.png 1x,
+          /assets/howitworks/howitworks-step1@2x.png 2x,
+          /assets/howitworks/howitworks-step1@3x.png 3x"
+  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 400px"
+  alt="How it works – Step 1"
+  className="rounded-2xl shadow-lg"
+  loading="lazy"
+/>
+```
+
+Repeat for steps 2–4, swapping the filename.
+
+3. **Optional: central helper**
+   If your How It Works cards are a map/array, a tiny helper keeps things tidy:
+
+```tsx
+const stepImg = (n: 1|2|3|4) => ({
+  src: `/assets/howitworks/howitworks-step${n}@1x.png`,
+  srcSet: `/assets/howitworks/howitworks-step${n}@1x.png 1x, /assets/howitworks/howitworks-step${n}@2x.png 2x, /assets/howitworks/howitworks-step${n}@3x.png 3x`,
+});
+```
+
+4. **Styling nits**
+
+* Keep images at a consistent **max-width \~400px** in the card to match your typography scale.
+* Ensure container has `overflow-hidden` + `rounded-2xl` so edges look crisp on light backgrounds.
+
+5. **QA checklist**
+
+* Verify retina sharpness on MacBook/iPhone (no blur at 2x/3x).
+* Confirm no layout shifts (CLS) — `width`/`height` attrs or a fixed container ratio can help if needed.
+* Lighthouse: ensure `loading="lazy"` is applied where off-screen.
+
+Want me to patch your `HowItWorks.tsx` exactly (using your current structure)? If you paste that component, I’ll drop in the precise code with your classes and paths.
