@@ -115,7 +115,7 @@ export default function FAQ() {
               href="/signup"
               className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
             >
-              Start Free
+              Join FinBoost
             </a>
           </div>
         </div>
