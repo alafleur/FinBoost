@@ -1092,17 +1092,60 @@ export default function HomeV3() {
 
                       {/* Step indicator */}
                       <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
-                          {screenshots.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                activeScreenshot === index
-                                  ? "bg-blue-600 w-6"
-                                  : "bg-slate-300"
-                              }`}
-                            />
-                          ))}
+                        <div className="flex items-center space-x-3">
+                          {/* Back Arrow */}
+                          <button
+                            onClick={() => {
+                              const prevIndex =
+                                activeScreenshot === 0
+                                  ? screenshots.length - 1
+                                  : activeScreenshot - 1;
+                              setActiveScreenshot(prevIndex);
+                            }}
+                            className={`p-1.5 rounded-full transition-all duration-200 ${
+                              activeScreenshot === 0
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                : "bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800"
+                            }`}
+                            disabled={activeScreenshot === 0}
+                            aria-label="Previous step"
+                          >
+                            <ChevronLeft className="w-3 h-3" />
+                          </button>
+                          
+                          {/* Dots */}
+                          <div className="flex space-x-2">
+                            {screenshots.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                  activeScreenshot === index
+                                    ? "bg-blue-600 w-6"
+                                    : "bg-slate-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Forward Arrow */}
+                          <button
+                            onClick={() => {
+                              const nextIndex =
+                                activeScreenshot === screenshots.length - 1
+                                  ? 0
+                                  : activeScreenshot + 1;
+                              setActiveScreenshot(nextIndex);
+                            }}
+                            className={`p-1.5 rounded-full transition-all duration-200 ${
+                              activeScreenshot === screenshots.length - 1
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                : "bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800"
+                            }`}
+                            disabled={activeScreenshot === screenshots.length - 1}
+                            aria-label="Next step"
+                          >
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
                         </div>
                         <span className="text-xs text-slate-500 font-medium">
                           {activeScreenshot + 1} of {screenshots.length}
