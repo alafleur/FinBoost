@@ -110,10 +110,6 @@ export default function HeroSplit() {
             </a>
           </div>
 
-          <p className="mt-4 text-center text-sm text-slate-500 max-w-2xl mx-auto">
-            No purchase necessary. 18+. Odds vary by number of tickets earned.{" "}
-            <a href="/terms" className="underline hover:text-slate-700">Terms apply</a>.
-          </p>
         </div>
       </div>
     </section>

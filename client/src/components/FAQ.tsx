@@ -120,6 +120,10 @@ export default function FAQ() {
           </div>
         </div>
 
+        {/* Legal */}
+        <p className="mt-6 text-center text-xs text-slate-500">
+          No purchase necessary. 18+. Odds vary by number of tickets. Terms apply.
+        </p>
       </div>
     </section>
   );
