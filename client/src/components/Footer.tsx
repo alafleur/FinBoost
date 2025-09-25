@@ -27,9 +27,9 @@ export default function Footer() {
           
           {/* Page Sections */}
           <div className="md:col-span-1">
-            <h3 className="font-heading font-semibold text-white mb-4">Page Sections</h3>
+            <h3 className="font-heading font-semibold text-white mb-4">Platform Overview</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#preview" className="hover:text-accent-light transition-colors duration-200">App Preview</a></li>
+              <li><a href="#preview" className="hover:text-accent-light transition-colors duration-200">Learn-to-Earn</a></li>
               <li><a href="#learn" className="hover:text-accent-light transition-colors duration-200">Financial Education</a></li>
               <li><a href="#trust" className="hover:text-accent-light transition-colors duration-200">Why FinBoost</a></li>
               <li><a href="#membership" className="hover:text-accent-light transition-colors duration-200">Membership Value</a></li>
@@ -48,7 +48,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-700 mt-12 pt-6 text-sm text-center">
-          <p>© {new Date().getFullYear()} FinBoost. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FinBoost Technologies Inc. All rights reserved.</p>
         </div>
       </div>
     </footer>
