@@ -108,9 +108,7 @@ export default function FAQ() {
         {/* Footer line + secondary CTA */}
         <div className="mt-10 text-center">
           <p className="text-sm text-slate-500">
-            Still have questions? <a href="/support" className="text-blue-600 hover:underline">Visit support</a>
-            {" "}or{" "}
-            <a href="mailto:support@finboost.app" className="text-blue-600 hover:underline">email us</a>.
+            Still have questions? Email us at <a href="mailto:support@getfinboost.com" className="text-blue-600 hover:underline">support@getfinboost.com</a>.
           </p>
           <div className="mt-4">
             <a
